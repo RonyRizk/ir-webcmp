@@ -1,14 +1,61 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <title>Stencil Component Starter</title>
-    <script type="module" src="/build/ir-webcmp.esm.js"></script>
-    <script nomodule src="/build/ir-webcmp.js"></script>
-    <style></style>
-  </head>
-  <body>
-    <ir-common></ir-common>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>Stencil Component Starter</title>
+  <script type="module" src="/build/ir-webcmp.esm.js"></script>
+  <script nomodule src="/build/ir-webcmp.js"></script>
+  <script src="assets/scripts/jquery.min.js"></script>
+  <script src="assets/scripts/daterangepicker/moment.min.js"></script>
+  <script src="assets/scripts/daterangepicker/daterangepicker.js"></script>
+  <script src="assets/scripts/toastr/toastr.min.js"></script>
+</head>
+
+<body>
+  <igloo-calendar currency-name="USD" propertyid="42" from_date="2023-10-11" to_date="2024-1-31" language="en"
+    baseurl="https://gateway.igloorooms.com/IR"></igloo-calendar>
+  <!-- <script src="assets/"></script> -->
+  <link rel="stylesheet" href="assets/scripts/toastr/toastr.css" type="text/css">
+
+  <link rel="stylesheet" href="assets/scripts/daterangepicker/daterangepicker.css">
+  <script>
+    const calendar = document.querySelector("igloo-calendar");
+
+    setTimeout(() => {
+      sessionStorage.removeItem('token');
+      // Theo
+      // calendar.propertyid="235";
+      // calendar.ticket = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTk2MjE1MDMsIkNMQUlNLTAxIjoibk1nM0NIWDYzVjA9IiwiQ0xBSU0tMDIiOiI5UStMQm93VTl6az0iLCJDTEFJTS0wMyI6Ilp3Tys5azJoTzUwPSIsIkNMQUlNLTA0Ijoiek5Gdzc1RThFVjdNMWt3aTdZNStMbFQ5dGF6VkRyOFl2aE5NWll3QytwND0ifQ.iKAxCG3kFTyHVhk7ugaSf0Rd-w2Ual69ocTyFq0IFXc";
+
+      // Demo
+      calendar.propertyid = "42";
+      calendar.ticket = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTk2MjA2OTYsIkNMQUlNLTAxIjoicktLMi9DY1dQQnM9IiwiQ0xBSU0tMDIiOiI5UStMQm93VTl6az0iLCJDTEFJTS0wMyI6Ilp3Tys5azJoTzUwPSIsIkNMQUlNLTA0Ijoiek5Gdzc1RThFVjdNMWt3aTdZNStMbFQ5dGF6VkRyOFl2aE5NWll3QytwND0ifQ.HlXEt6jMDOl9zG6qdBi12whhy3kaIRfJxBe2A_9UpkM";
+
+    }, 300)
+
+    // fetch("https://gateway.igloorooms.com/IR/Authenticate", {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({ username: "A35", password: "71081422" })
+    // }).then(response => {
+    //   if (!response.ok) {
+    //     throw new Error('Network response was not ok');
+    //   }
+    //   return response.json();
+    // })
+    //   .then(data => {
+
+    //     calendar.ticket = data.My_Result;
+    //   })
+    //   .catch(error => {
+    //     console.log('There was a problem with the fetch operation:', error.message);
+    //   });
+  </script>
+
+</body>
+
 </html>
