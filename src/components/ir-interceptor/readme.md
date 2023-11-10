@@ -9,8 +9,8 @@
 
 | Property           | Attribute | Description | Type                                                                        | Default                                                                                                               |
 | ------------------ | --------- | ----------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `defaultMessage`   | --        |             | `{ loadingMessage: string; successMessage: string; errorMessage: string; }` | `{     loadingMessage: 'Fetching Data',     successMessage: 'Success',     errorMessage: 'Something Went Wrong',   }` |
-| `handledEndpoints` | --        |             | `string[]`                                                                  | `['/Get_Exposed_Booking_Availability', '/Get_Aggregated_UnAssigned_Rooms', '/ReAllocate_Exposed_Room']`               |
+| `defaultMessage`   | --        |             | `{ loadingMessage: string; successMessage: string; errorMessage: string; }` | `{     loadingMessage: "Fetching Data",     successMessage: "Success",     errorMessage: "Something Went Wrong",   }` |
+| `handledEndpoints` | --        |             | `string[]`                                                                  | `[     "/Get_Exposed_Booking_Availability",     "/Get_Aggregated_UnAssigned_Rooms",   ]`                              |
 
 
 ## Dependencies

@@ -256,7 +256,7 @@ export class BookingService {
 
   public async bookUser(
     bookedByInfoData,
-    assign_units: boolean,
+    check_in: boolean,
     fromDate: Date,
     toDate: Date,
     guestData,
@@ -289,7 +289,8 @@ export class BookingService {
           guest = { ...guest, id: bookedByInfoData.id };
         }
         const body = {
-          assign_units,
+          assign_units: true,
+          check_in,
           booking: {
             booking_nbr: bookingNumber || "",
             from_date: fromDateStr,
@@ -322,7 +323,10 @@ export class BookingService {
                 cancelation: data.cancelation,
                 guarantee: data.guarantee,
               },
-              unit: { id: pr_id || data.roomId },
+              unit:
+                typeof pr_id === "undefined" && data.roomId === ""
+                  ? null
+                  : { id: pr_id || data.roomId },
               occupancy: {
                 adult_nbr: data.adultCount,
                 children_nbr: data.childrenCount,
@@ -350,7 +354,8 @@ export class BookingService {
             })),
           },
         };
-        console.log("haida lbody", body);
+        console.log("body", body);
+
         const { data } = await axios.post(
           `/DoReservation?Ticket=${token}`,
           body

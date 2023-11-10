@@ -102,6 +102,9 @@ export class IglBookProperty {
         ratePlanName: this.bookingData.RATE_PLAN,
         roomId: this.bookingData.PR_ID,
         guestName: this.bookingData.NAME,
+        cancelation: this.bookingData.cancelation,
+        guarantee: this.bookingData.guarantee,
+        adult_child_offering: this.bookingData.adult_child_offering,
       },
     };
   }
@@ -272,7 +275,12 @@ export class IglBookProperty {
 
     const opt = event.detail;
     if (opt.guestRefKey) {
-      this.guestData[opt.guestRefKey] = opt.data;
+      if (this.isEventType('BAR_BOOKING')) {
+        this.guestData[opt.guestRefKey] = {
+          ...opt.data,
+          roomId: this.bookingData.PR_ID,
+        };
+      } else this.guestData[opt.guestRefKey] = opt.data;
     }
   }
 
@@ -514,7 +522,7 @@ export class IglBookProperty {
     event.stopPropagation();
     switch (event.detail.key) {
       case 'save':
-        this.bookUser(true);
+        this.bookUser(false);
         break;
       case 'cancel':
         this.closeWindow();
@@ -556,8 +564,8 @@ export class IglBookProperty {
     window.location.reload();
   }
 
-  async bookUser(assign_units: boolean) {
-    this.setLoadingState(assign_units);
+  async bookUser(check_in: boolean) {
+    this.setLoadingState(check_in);
 
     try {
       if (['003', '002', '004'].includes(this.bookingData.STATUS_CODE)) {
@@ -566,10 +574,10 @@ export class IglBookProperty {
 
       const arrivalTime = this.isEventType('EDIT_BOOKING') ? this.getArrivalTimeForBooking() : '';
       const pr_id = this.isEventType('BAR_BOOKING') ? this.bookingData.PR_ID : undefined;
-      const booking_nbr = this.isEventType('EDIT_BOOKING') ? this.bookingData.ID : undefined;
+      const booking_nbr = this.isEventType('EDIT_BOOKING') ? this.bookingData.BOOKING_NUMBER : undefined;
       await this.bookingService.bookUser(
         this.bookedByInfoData,
-        assign_units,
+        check_in,
         this.bookingData.defaultDateRange.fromDate,
         this.bookingData.defaultDateRange.toDate,
         this.guestData,
@@ -582,6 +590,7 @@ export class IglBookProperty {
         arrivalTime,
         pr_id,
       );
+      window.location.reload();
       //console.log("booking data ", this.bookingData);
     } catch (error) {
       //  toastr.error(error);
@@ -628,6 +637,7 @@ export class IglBookProperty {
 
           {this.isPageTwo() && (
             <igl-pagetwo
+              selectedGuestData={this.guestData}
               countryNodeList={this.countryNodeList}
               isLoading={this.isLoading}
               selectedRooms={this.selectedRooms}
