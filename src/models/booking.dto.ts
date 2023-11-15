@@ -16,6 +16,8 @@ export interface Booking {
   total: number;
   is_editable: boolean;
   format: IFormat;
+  channel_booking_nbr: string | null;
+  is_direct: boolean;
 }
 export interface IFormat {
   from_date: string;
@@ -48,8 +50,14 @@ export interface Guest {
   last_name: string | null;
   mobile: string | null;
   subscribe_to_news_letter: boolean | null;
+  //cci: ICCI | null;
 }
-
+export interface ICCI {
+  nbr: string | number;
+  holder_name: string | number;
+  expiry_month: string | number;
+  expiry_year: string | number;
+}
 export interface Occupancy {
   adult_nbr: number;
   children_nbr: number;
@@ -81,22 +89,27 @@ export interface Room {
   to_date: string;
   total: number;
   identifier: string;
-  unit: string | number | null;
+  unit: string | number | IUnit | null;
 }
-
+export interface IUnit {
+  calendar_cell: null;
+  id: 2;
+  name: '402';
+}
 export interface Day {
   amount: number;
   date: string;
 }
 
 export interface RatePlan {
-  cancelation: null;
+  cancelation: string | null;
   guarantee: null;
   id: number;
   name: string;
   rate_restrictions: null;
   variations: null;
   selected_variation: IVariations;
+  is_non_refundable: boolean;
 }
 export interface IVariations {
   adult_child_offering: string;

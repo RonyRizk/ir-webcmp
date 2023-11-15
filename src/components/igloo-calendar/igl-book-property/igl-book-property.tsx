@@ -1,9 +1,10 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h, Listen } from '@stencil/core';
 import { BookingService } from '../../../services/booking.service';
 import { dateToFormattedString, getReleaseHoursString } from '../../../utils/utils';
-import { IEntries } from '../../../models/IBooking';
+import { IEntries, RoomBlockDetails, RoomBookingDetails } from '../../../models/IBooking';
 import { IPageTwoDataUpdateProps, PageTwoButtonsTypes } from '../../../models/models';
 import { EventsService } from '../../../services/events.service';
+import { transformNewBLockedRooms, transformNewBooking } from '../../../utils/booking';
 
 @Component({
   tag: 'igl-book-property',
@@ -14,9 +15,9 @@ export class IglBookProperty {
   @Prop() propertyid: number;
   @Prop() language: string;
   @Prop() countryNodeList;
+  @Prop() showPaymentDetails: boolean = false;
   @Prop() currency: { id: number; code: string };
   @Prop({ reflect: true, mutable: true }) bookingData: { [key: string]: any };
-  @Event() closeBookingWindow: EventEmitter<{ [key: string]: any }>;
   @State() sourceOption: { code: string; description: string } = {
     code: '',
     description: '',
@@ -28,6 +29,9 @@ export class IglBookProperty {
   @State() isConvertedBooking: boolean;
   @State() dateRangeData: { [key: string]: any };
   @State() selectedUnits: { [key: string]: any } = {};
+  @Event() closeBookingWindow: EventEmitter<{ [key: string]: any }>;
+  @Event() bookingCreated: EventEmitter<RoomBookingDetails[]>;
+  @Event() blockedCreated: EventEmitter<RoomBlockDetails>;
   private PAGE_ZERO: string = 'page_zero';
   private PAGE_ONE: string = 'page_one';
   private PAGE_TWO: string = 'page_two';
@@ -43,7 +47,16 @@ export class IglBookProperty {
   private bedPreferenceType: IEntries[] = [];
   private bookingService: BookingService = new BookingService();
   private eventsService = new EventsService();
-
+  componentDidLoad() {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        this.closeWindow();
+      }
+    });
+  }
+  disconnectedCallback() {
+    document.removeEventListener('keydown', () => {});
+  }
   async componentWillLoad() {
     if (!this.bookingData.defaultDateRange) {
       return;
@@ -119,6 +132,7 @@ export class IglBookProperty {
         roomsInfo: data.roomtypes,
       };
       this.message = data.tax_statement;
+      console.log(data);
     } catch (error) {
       // toastr.error(error);
     }
@@ -551,7 +565,7 @@ export class IglBookProperty {
   }
   async handleBlockDate() {
     const releaseData = getReleaseHoursString(+this.blockDatesData.RELEASE_AFTER_HOURS);
-    await this.bookingService.blockUnit({
+    const result = await this.bookingService.blockUnit({
       from_date: dateToFormattedString(this.bookingData.defaultDateRange.fromDate),
       to_date: dateToFormattedString(this.bookingData.defaultDateRange.toDate),
       NOTES: this.blockDatesData.OPTIONAL_REASON || '',
@@ -560,8 +574,10 @@ export class IglBookProperty {
       DESCRIPTION: this.blockDatesData.RELEASE_AFTER_HOURS || '',
       ...releaseData,
     });
+    const blockedUnit = await transformNewBLockedRooms(result);
+    this.blockedCreated.emit(blockedUnit);
     this.closeWindow();
-    window.location.reload();
+    //window.location.reload();
   }
 
   async bookUser(check_in: boolean) {
@@ -575,7 +591,7 @@ export class IglBookProperty {
       const arrivalTime = this.isEventType('EDIT_BOOKING') ? this.getArrivalTimeForBooking() : '';
       const pr_id = this.isEventType('BAR_BOOKING') ? this.bookingData.PR_ID : undefined;
       const booking_nbr = this.isEventType('EDIT_BOOKING') ? this.bookingData.BOOKING_NUMBER : undefined;
-      await this.bookingService.bookUser(
+      const result = await this.bookingService.bookUser(
         this.bookedByInfoData,
         check_in,
         this.bookingData.defaultDateRange.fromDate,
@@ -590,7 +606,11 @@ export class IglBookProperty {
         arrivalTime,
         pr_id,
       );
-      window.location.reload();
+      if (check_in) {
+        const newBookings: RoomBookingDetails[] = transformNewBooking(result);
+        this.bookingCreated.emit(newBookings);
+      }
+      //window.location.reload();
       //console.log("booking data ", this.bookingData);
     } catch (error) {
       //  toastr.error(error);
@@ -637,6 +657,7 @@ export class IglBookProperty {
 
           {this.isPageTwo() && (
             <igl-pagetwo
+              showPaymentDetails={this.showPaymentDetails}
               selectedGuestData={this.guestData}
               countryNodeList={this.countryNodeList}
               isLoading={this.isLoading}
