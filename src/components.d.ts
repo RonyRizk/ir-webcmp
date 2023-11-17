@@ -31,6 +31,7 @@ export namespace Components {
         "entryHour": number;
         "entryMinute": number;
         "fromDate": string;
+        "isEventHover": boolean;
         "toDate": string;
     }
     interface IglBookProperty {
@@ -85,6 +86,8 @@ export namespace Components {
     }
     interface IglCalHeader {
         "calendarData": { [key: string]: any };
+        "propertyid": number;
+        "to_date": string;
         "today": String;
     }
     interface IglDateRange {
@@ -908,6 +911,7 @@ declare namespace LocalJSX {
         "entryHour"?: number;
         "entryMinute"?: number;
         "fromDate"?: string;
+        "isEventHover"?: boolean;
         "onDataUpdateEvent"?: (event: IglBlockDatesViewCustomEvent<{ [key: string]: any }>) => void;
         "toDate"?: string;
     }
@@ -985,6 +989,8 @@ declare namespace LocalJSX {
     [key: string]: any;
   }>) => void;
         "onOptionEvent"?: (event: IglCalHeaderCustomEvent<{ [key: string]: any }>) => void;
+        "propertyid"?: number;
+        "to_date"?: string;
         "today"?: String;
     }
     interface IglDateRange {

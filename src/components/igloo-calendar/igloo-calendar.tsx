@@ -1,12 +1,13 @@
 import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
-import { computeEndDate, convertDMYToISO, formatLegendColors } from '../../utils/utils';
+import { computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors } from '../../utils/utils';
 
 import axios from 'axios';
 import { EventsService } from '../../services/events.service';
 import { ICountry, RoomBlockDetails, RoomBookingDetails } from '../../models/IBooking';
 import moment from 'moment';
+import { ToBeAssignedService } from '../../services/toBeAssigned.service';
 
 @Component({
   tag: 'igloo-calendar',
@@ -42,6 +43,7 @@ export class IglooCalendar {
   private today: String = '';
   private roomService: RoomService = new RoomService();
   private eventsService = new EventsService();
+  private toBeAssignedService = new ToBeAssignedService();
   @Watch('ticket')
   async ticketChanged() {
     sessionStorage.setItem('token', JSON.stringify(this.ticket));
@@ -65,6 +67,9 @@ export class IglooCalendar {
           this.calendarData.currency = roomResp['My_Result'].currency;
           this.calendarData.legendData = this.getLegendData(roomResp);
           this.calendarData.is_vacation_rental = roomResp['My_Result'].is_vacation_rental;
+          if (!this.calendarData.is_vacation_rental) {
+            this.calendarData.unassignedDates = await this.toBeAssignedService.getUnassignedDates(this.propertyid, dateToFormattedString(new Date()), this.to_date);
+          }
           this.calendarData.startingDate = new Date(bookingResp.My_Params_Get_Rooming_Data.FROM).getTime();
           this.calendarData.endingDate = new Date(bookingResp.My_Params_Get_Rooming_Data.TO).getTime();
           this.calendarData.formattedLegendData = formatLegendColors(this.calendarData.legendData);
@@ -464,7 +469,13 @@ export class IglooCalendar {
               ) : null,
               <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
                 <div id="calendarContainer">
-                  <igl-cal-header today={this.today} calendarData={this.calendarData} onOptionEvent={evt => this.onOptionSelect(evt)}></igl-cal-header>
+                  <igl-cal-header
+                    to_date={this.to_date}
+                    propertyid={this.propertyid}
+                    today={this.today}
+                    calendarData={this.calendarData}
+                    onOptionEvent={evt => this.onOptionSelect(evt)}
+                  ></igl-cal-header>
                   <igl-cal-body
                     countryNodeList={this.countryNodeList}
                     currency={this.calendarData.currency}
