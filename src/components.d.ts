@@ -921,7 +921,7 @@ declare namespace LocalJSX {
         "currency"?: { id: number; code: string };
         "language"?: string;
         "onBlockedCreated"?: (event: IglBookPropertyCustomEvent<RoomBlockDetails>) => void;
-        "onBookingCreated"?: (event: IglBookPropertyCustomEvent<RoomBookingDetails[]>) => void;
+        "onBookingCreated"?: (event: IglBookPropertyCustomEvent<{ pool?: string; data: RoomBookingDetails[] }>) => void;
         "onCloseBookingWindow"?: (event: IglBookPropertyCustomEvent<{ [key: string]: any }>) => void;
         "propertyid"?: number;
         "showPaymentDetails"?: boolean;
@@ -942,6 +942,7 @@ declare namespace LocalJSX {
         "countryNodeList"?: ICountry[];
         "currency"?: any;
         "is_vacation_rental"?: boolean;
+        "onBookingCreated"?: (event: IglBookingEventHoverCustomEvent<{ pool?: string; data: any[] }>) => void;
         "onDeleteButton"?: (event: IglBookingEventHoverCustomEvent<string>) => void;
         "onHideBubbleInfo"?: (event: IglBookingEventHoverCustomEvent<any>) => void;
         "onShowBookingPopup"?: (event: IglBookingEventHoverCustomEvent<any>) => void;
@@ -971,6 +972,7 @@ declare namespace LocalJSX {
         "countryNodeList"?: any;
         "currency"?: any;
         "isScrollViewDragging"?: boolean;
+        "onAddBookingDatasEvent"?: (event: IglCalBodyCustomEvent<any[]>) => void;
         "onScrollPageToRoom"?: (event: IglCalBodyCustomEvent<any>) => void;
         "onShowBookingPopup"?: (event: IglCalBodyCustomEvent<any>) => void;
         "today"?: String;
