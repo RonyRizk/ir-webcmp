@@ -89,6 +89,7 @@ export namespace Components {
         "propertyid": number;
         "to_date": string;
         "today": String;
+        "unassignedDates": {};
     }
     interface IglDateRange {
         "defaultData": { [key: string]: any };
@@ -279,7 +280,7 @@ export namespace Components {
         "value": any;
     }
     interface IrInterceptor {
-        "defaultMessage": { loadingMessage: string; successMessage: string; errorMessage: string; };
+        "defaultMessage": { loadingMessage: string; errorMessage: string; };
         "handledEndpoints": string[];
     }
     interface IrLabel {
@@ -994,6 +995,7 @@ declare namespace LocalJSX {
         "propertyid"?: number;
         "to_date"?: string;
         "today"?: String;
+        "unassignedDates"?: {};
     }
     interface IglDateRange {
         "defaultData"?: { [key: string]: any };
@@ -1230,7 +1232,7 @@ declare namespace LocalJSX {
         "value"?: any;
     }
     interface IrInterceptor {
-        "defaultMessage"?: { loadingMessage: string; successMessage: string; errorMessage: string; };
+        "defaultMessage"?: { loadingMessage: string; errorMessage: string; };
         "handledEndpoints"?: string[];
     }
     interface IrLabel {

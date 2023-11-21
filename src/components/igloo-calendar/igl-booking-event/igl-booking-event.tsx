@@ -30,6 +30,7 @@ export class IglBookingEvent {
   private showInfoPopup: boolean = false;
   private bubbleInfoTopSide: boolean = false;
   private eventsService = new EventsService();
+  private isStreatch = false;
   /* Resize props */
   resizeSide: string = '';
   isDragging: boolean = false;
@@ -108,22 +109,18 @@ export class IglBookingEvent {
           this.showEventInfo(true);
         } else {
           const { pool, from_date, to_date, toRoomId } = event.detail as any;
-
-          if (this.checkIfSlotOccupied(toRoomId, from_date, to_date)) {
-            this.element.style.top = `${this.dragInitPos.top}px`;
-            this.element.style.left = `${this.dragInitPos.left}px`;
-
-            this.dragEndPos = {
-              ...this.dragInitPos,
-              id: this.getBookingId(),
-              fromRoomId: this.getBookedRoomId(),
-            };
-
-            this.dragOverEventData.emit({ id: 'DRAG_OVER_END', data: this.dragEndPos });
+          if (pool) {
+            this.eventsService.reallocateEvent(pool, toRoomId, from_date, to_date).catch(() => {
+              if (this.isStreatch) {
+                this.element.style.left = `${this.initialLeft}px`;
+                this.element.style.width = `${this.initialWidth}px`;
+              } else {
+                this.element.style.top = `${this.dragInitPos.top}px`;
+                this.element.style.left = `${this.dragInitPos.left}px`;
+                this;
+              }
+            });
           }
-
-          const result = await this.eventsService.reallocateEvent(pool, toRoomId, from_date, to_date);
-          this.bookingEvent.POOL = result.My_Result.POOL;
         }
       }
 
@@ -131,7 +128,9 @@ export class IglBookingEvent {
         this.onMoveUpdateBooking(event.detail);
         this.renderAgain();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log('something went wrong');
+    }
   }
   checkIfSlotOccupied(toRoomId, from_date, to_date) {
     const fromTime = new Date(from_date).getTime();
@@ -281,7 +280,7 @@ export class IglBookingEvent {
     this.isDragging = true;
 
     this.showEventInfo(false); // Hide bubble;
-
+    this.isStreatch = side !== 'move';
     if (side === 'move') {
       this.initialX = event.clientX || event.touches[0].clientX;
       this.initialY = event.clientY || event.touches[0].clientY;
@@ -391,7 +390,7 @@ export class IglBookingEvent {
         let numberOfDays = Math.round(this.finalWidth / this.dayWidth);
         let initialStayDays = this.getStayDays();
         if (initialStayDays != numberOfDays) {
-          this.setStayDays(numberOfDays);
+          //this.setStayDays(numberOfDays);
           if (this.resizeSide == 'leftSide') {
             this.element.style.left = `${this.initialLeft + (initialStayDays - numberOfDays) * this.dayWidth}px`;
             // set FROM_DATE = TO_DATE - numberOfDays
@@ -406,7 +405,7 @@ export class IglBookingEvent {
               x: +this.element.style.left.replace('px', ''),
               y: +this.element.style.top.replace('px', ''),
               pool: this.bookingEvent.POOL,
-              nbOfDays: this.bookingEvent.NO_OF_DAYS,
+              nbOfDays: numberOfDays,
             },
           });
           this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace}px`;
