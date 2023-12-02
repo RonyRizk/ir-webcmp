@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import axios from 'axios';
 import { EventsService } from '../../services/events.service';
 import { ICountry, RoomBlockDetails, RoomBookingDetails, bookingReasons } from '../../models/IBooking';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '../../services/toBeAssigned.service';
 import { transformNewBLockedRooms, transformNewBooking } from '../../utils/booking';
 
@@ -17,7 +17,7 @@ import { transformNewBLockedRooms, transformNewBooking } from '../../utils/booki
 })
 export class IglooCalendar {
   @Prop() propertyid: number;
-  @Prop() from_date: string;
+  @Prop({ mutable: true }) from_date: string;
   @Prop() to_date: string;
   @Prop() language: string;
   @Prop() baseurl: string;
@@ -70,7 +70,8 @@ export class IglooCalendar {
         this.bookingService.getCalendarData(this.propertyid, this.from_date, this.to_date).then(async bookingResp => {
           this.countryNodeList = await this.bookingService.getCountries(this.language);
           this.calendarData.currency = roomResp['My_Result'].currency;
-          this.calendarData.allowedBookingSources=roomResp['My_Result'].allowed_booking_sources
+          this.calendarData.allowedBookingSources = roomResp['My_Result'].allowed_booking_sources;
+          this.calendarData.adultChildConstraints = roomResp['My_Result'].adult_child_constraints;
           this.calendarData.legendData = this.getLegendData(roomResp);
           this.calendarData.is_vacation_rental = roomResp['My_Result'].is_vacation_rental;
           this.calendarData.startingDate = new Date(bookingResp.My_Params_Get_Rooming_Data.FROM).getTime();
@@ -211,33 +212,8 @@ export class IglooCalendar {
   getLocalizedMonth(date, locale = 'default') {
     return date.toLocaleString(locale, { month: 'short' }) + ' ' + date.getFullYear();
   }
-
   getDateStr(date, locale = 'default') {
     return date.getDate() + ' ' + date.toLocaleString(locale, { month: 'short' }) + ' ' + date.getFullYear();
-  }
-  async addNextTwoMonthsToCalendar() {
-    const nextTwoMonths = addTwoMonthToDate(new Date(this.calendarData.endingDate));
-    const nextDay = getNextDay(new Date(this.calendarData.endingDate));
-    const results = await this.bookingService.getCalendarData(this.propertyid, nextDay, nextTwoMonths);
-    this.calendarData.endingDate = new Date(nextTwoMonths).getTime();
-    const newBookings = results.myBookings || [];
-    this.updateBookingEventsDateRange(newBookings);
-    this.days = [...this.days, ...results.days];
-    if (this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].monthName === results.months[0].monthName) {
-      this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].daysCount =
-        this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].daysCount + results.months[0].daysCount;
-    }
-    let newMonths = [...results.months];
-    newMonths.shift();
-    this.calendarData = {
-      ...this.calendarData,
-      days: this.days,
-      monthsInfo: [...this.calendarData.monthsInfo, ...newMonths],
-      bookingEvents: [...this.calendarData.bookingEvents, ...newBookings],
-    };
-    const data = await this.toBeAssignedService.getUnassignedDates(this.propertyid, nextDay, nextTwoMonths);
-    this.unassignedDates = { ...this.unassignedDates, ...data };
-    this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
   }
   scrollToElement(goToDate) {
     this.scrollContainer = this.scrollContainer || this.element.querySelector('.calendarScrollContainer');
@@ -329,7 +305,6 @@ export class IglooCalendar {
     // console.log("rendering...")
     return this.calendarData && this.calendarData.days && this.calendarData.days.length;
   }
-
   onOptionSelect(event: CustomEvent<{ [key: string]: any }>) {
     const opt: { [key: string]: any } = event.detail;
     const calendarElement = this.element.querySelector('#iglooCalendar');
@@ -351,8 +326,12 @@ export class IglooCalendar {
         this.showToBeAssigned = false;
         break;
       case 'calendar':
-        let dt = new Date(opt.data);
-        this.scrollToElement(dt.getDate() + '_' + (dt.getMonth() + 1) + '_' + dt.getFullYear());
+        if (opt.data.start !== undefined && opt.data.end !== undefined) {
+          this.handleDateSearch(opt.data);
+        } else {
+          let dt = new Date(opt.data);
+          this.scrollToElement(dt.getDate() + '_' + (dt.getMonth() + 1) + '_' + dt.getFullYear());
+        }
         break;
       case 'search':
         break;
@@ -365,6 +344,61 @@ export class IglooCalendar {
       case 'closeSideMenu':
         this.closeSideMenu();
         break;
+    }
+  }
+
+  async addDatesToCalendar(fromDate: string, toDate: string) {
+    const results = await this.bookingService.getCalendarData(this.propertyid, fromDate, toDate);
+    const newBookings = results.myBookings || [];
+    this.updateBookingEventsDateRange(newBookings);
+    if (new Date(fromDate).getTime() < new Date(this.calendarData.startingDate).getTime()) {
+      this.calendarData.startingDate = new Date(fromDate).getTime();
+      this.days = [...results.days, ...this.days];
+      let newMonths = [...results.months];
+      if (this.calendarData.monthsInfo[0].monthName === results.months[results.months.length - 1].monthName) {
+        this.calendarData.monthsInfo[0].daysCount = this.calendarData.monthsInfo[0].daysCount + results.months[results.months.length - 1].daysCount;
+        newMonths.pop();
+      }
+      this.calendarData = {
+        ...this.calendarData,
+        days: this.days,
+        monthsInfo: [...newMonths, ...this.calendarData.monthsInfo],
+        bookingEvents: [...this.calendarData.bookingEvents, ...newBookings],
+      };
+    } else {
+      this.calendarData.endingDate = new Date(toDate).getTime();
+      let newMonths = [...results.months];
+      this.days = [...this.days, ...results.days];
+      if (this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].monthName === results.months[0].monthName) {
+        this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].daysCount =
+          this.calendarData.monthsInfo[this.calendarData.monthsInfo.length - 1].daysCount + results.months[0].daysCount;
+        newMonths.shift();
+      }
+      this.calendarData = {
+        ...this.calendarData,
+        days: this.days,
+        monthsInfo: [...this.calendarData.monthsInfo, ...newMonths],
+        bookingEvents: [...this.calendarData.bookingEvents, ...newBookings],
+      };
+    }
+    const data = await this.toBeAssignedService.getUnassignedDates(this.propertyid, fromDate, toDate);
+    this.unassignedDates = { ...this.unassignedDates, ...data };
+    this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
+  }
+  async handleDateSearch(dates: { start: Moment; end: Moment }) {
+    const startDate = moment(dates.start).toDate();
+    const defaultFromDate = moment(this.from_date).toDate();
+    const endDate = dates.end.toDate();
+    const defaultToDate = this.calendarData.endingDate;
+    if (startDate.getTime() < new Date(this.from_date).getTime()) {
+      await this.addDatesToCalendar(moment(startDate).format('YYYY-MM-DD'), moment(this.from_date).add(-1, 'days').format('YYYY-MM-DD'));
+      this.scrollToElement(this.transformDateForScroll(startDate));
+    } else if (startDate.getTime() > defaultFromDate.getTime() && startDate.getTime() < defaultToDate && endDate.getTime() < defaultToDate) {
+      this.scrollToElement(this.transformDateForScroll(startDate));
+    } else if (startDate.getTime() > defaultToDate) {
+      const nextDay = getNextDay(new Date(this.calendarData.endingDate));
+      await this.addDatesToCalendar(nextDay, moment(endDate).add(30, 'days').format('YYYY-MM-DD'));
+      this.scrollToElement(this.transformDateForScroll(startDate));
     }
   }
 
@@ -428,7 +462,10 @@ export class IglooCalendar {
         if (cells.indexOf(monthContainer) === cells.length - 1) {
           if (monthRect.x + monthRect.width <= rightX && !this.reachedEndOfCalendar) {
             this.reachedEndOfCalendar = true;
-            await this.addNextTwoMonthsToCalendar();
+            //await this.addNextTwoMonthsToCalendar();
+            const nextTwoMonths = addTwoMonthToDate(new Date(this.calendarData.endingDate));
+            const nextDay = getNextDay(new Date(this.calendarData.endingDate));
+            await this.addDatesToCalendar(nextDay, nextTwoMonths);
             this.reachedEndOfCalendar = false;
           }
         }
@@ -548,6 +585,7 @@ export class IglooCalendar {
   render() {
     return (
       <Host>
+        <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
         <ir-common></ir-common>
         <div id="iglooCalendar" class="igl-calendar">
@@ -595,6 +633,7 @@ export class IglooCalendar {
         {this.bookingItem && (
           <igl-book-property
             allowedBookingSources={this.calendarData.allowedBookingSources}
+            adultChildConstraints={this.calendarData.adultChildConstraints}
             showPaymentDetails={this.showPaymentDetails}
             countryNodeList={this.countryNodeList}
             currency={this.calendarData.currency}

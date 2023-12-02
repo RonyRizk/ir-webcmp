@@ -12,7 +12,7 @@
 | `bookingType`     | `booking-type`    |             | `string`                  | `'PLUS_BOOKING'` |
 | `currency`        | `currency`        |             | `any`                     | `undefined`      |
 | `dateDifference`  | `date-difference` |             | `number`                  | `undefined`      |
-| `defaultData`     | --                |             | `{ [key: string]: any; }` | `undefined`      |
+| `defaultData`     | --                |             | `Map<string, any>`        | `undefined`      |
 | `ratePricingMode` | --                |             | `any[]`                   | `[]`             |
 | `roomTypeData`    | --                |             | `{ [key: string]: any; }` | `undefined`      |
 
@@ -28,7 +28,7 @@
 
 ### Used by
 
- - [igl-book-property](../igl-book-property)
+ - [igl-booking-overview-page](../igl-book-property/igl-booking-overview-page)
 
 ### Depends on
 
@@ -39,7 +39,7 @@
 graph TD;
   igl-booking-rooms --> igl-booking-room-rate-plan
   igl-booking-room-rate-plan --> ir-tooltip
-  igl-book-property --> igl-booking-rooms
+  igl-booking-overview-page --> igl-booking-rooms
   style igl-booking-rooms fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
