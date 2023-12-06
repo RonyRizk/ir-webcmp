@@ -54,6 +54,7 @@ export namespace Components {
     }
     interface IglBookPropertyHeader {
         "adultChildConstraints": TAdultChildConstraints;
+        "adultChildCount": { adult: number; child: number };
         "bookingData": any;
         "bookingDataDefaultDateRange": { [key: string]: any };
         "message": string;
@@ -78,8 +79,8 @@ export namespace Components {
     }
     interface IglBookingOverviewPage {
         "adultChildConstraints": TAdultChildConstraints;
+        "adultChildCount": { adult: number; child: number };
         "bookingData": any;
-        "bookingDataDefaultDateRange": any;
         "currency": any;
         "dateRangeData": any;
         "eventType": string;
@@ -95,6 +96,7 @@ export namespace Components {
         "dateDifference": number;
         "defaultData": { [key: string]: any };
         "fullyBlocked": boolean;
+        "index": number;
         "ratePlanData": { [key: string]: any };
         "ratePricingMode": any[];
         "totalAvailableRooms": number;
@@ -1020,13 +1022,13 @@ declare namespace LocalJSX {
     }
     interface IglBookPropertyHeader {
         "adultChildConstraints"?: TAdultChildConstraints;
+        "adultChildCount"?: { adult: number; child: number };
         "bookingData"?: any;
         "bookingDataDefaultDateRange"?: { [key: string]: any };
         "message"?: string;
         "onAdultChild"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onButtonClicked"?: (event: IglBookPropertyHeaderCustomEvent<{ key: TPropertyButtonsTypes }>) => void;
         "onCheckClicked"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
-        "onDateRangeSelectChange"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onSourceDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
         "onSplitBookingDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "showSplitBookingOption"?: boolean;
@@ -1057,13 +1059,12 @@ declare namespace LocalJSX {
     }
     interface IglBookingOverviewPage {
         "adultChildConstraints"?: TAdultChildConstraints;
+        "adultChildCount"?: { adult: number; child: number };
         "bookingData"?: any;
-        "bookingDataDefaultDateRange"?: any;
         "currency"?: any;
         "dateRangeData"?: any;
         "eventType"?: string;
         "message"?: string;
-        "onDateRangeSelect"?: (event: IglBookingOverviewPageCustomEvent<any>) => void;
         "onRoomsDataUpdate"?: (event: IglBookingOverviewPageCustomEvent<any>) => void;
         "ratePricingMode"?: any;
         "selectedRooms"?: Map<string, Map<string, any>>;
@@ -1076,6 +1077,7 @@ declare namespace LocalJSX {
         "dateDifference"?: number;
         "defaultData"?: { [key: string]: any };
         "fullyBlocked"?: boolean;
+        "index"?: number;
         "onDataUpdateEvent"?: (event: IglBookingRoomRatePlanCustomEvent<{ [key: string]: any }>) => void;
         "onGotoSplitPageTwoEvent"?: (event: IglBookingRoomRatePlanCustomEvent<{ [key: string]: any }>) => void;
         "ratePlanData"?: { [key: string]: any };
