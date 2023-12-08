@@ -185,6 +185,7 @@ export class IglCalHeader {
               {/* <input  type="date" onChange={this.handleDateSelect.bind(this)} title="" /> */}
               <ir-date-picker
                 autoApply
+                singleDatePicker
                 onDateChanged={evt => {
                   console.log('evt', evt);
                   this.handleDateSelect(evt);
@@ -200,7 +201,7 @@ export class IglCalHeader {
               onClick={() => this.handleOptionEvent('add', this.getNewBookingModel())}
               data-toggle="tooltip"
               data-placement="bottom"
-              title="Create new booking"
+              title="Create New Booking"
             >
               <i class="la la-plus"></i>
             </div>

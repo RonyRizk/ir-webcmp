@@ -7,22 +7,23 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 import { ICountry, RoomBlockDetails, RoomBookingDetails } from "./models/IBooking";
+import { IToast, TPositions } from "./components/ir-toast/toast";
 import { IPageTwoDataUpdateProps } from "./models/models";
 import { checkboxes, guestInfo, selectOption } from "./common/models";
 import { ChannelManager, RoomType } from "./sample/channel/data";
 import { Guest, Room } from "./models/booking.dto";
-import { IToast, TPositions } from "./components/ir-toast/toast";
 export { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 export { ICountry, RoomBlockDetails, RoomBookingDetails } from "./models/IBooking";
+export { IToast, TPositions } from "./components/ir-toast/toast";
 export { IPageTwoDataUpdateProps } from "./models/models";
 export { checkboxes, guestInfo, selectOption } from "./common/models";
 export { ChannelManager, RoomType } from "./sample/channel/data";
 export { Guest, Room } from "./models/booking.dto";
-export { IToast, TPositions } from "./components/ir-toast/toast";
 export namespace Components {
     interface IglApplicationInfo {
         "bedPreferenceType": any[];
         "bookingType": string;
+        "currency": any;
         "guestInfo": { [key: string]: any };
         "guestRefKey": string;
         "index": number;
@@ -139,10 +140,12 @@ export namespace Components {
         "bookedByInfoData": { [key: string]: any };
         "bookingData": { [key: string]: any };
         "countryNodeList": any;
+        "currency": any;
         "dateRangeData": { [key: string]: any };
         "isEditOrAddRoomEvent": boolean;
         "isLoading": string;
         "language": string;
+        "propertyId": number;
         "selectedGuestData": any;
         "selectedRooms": Map<string, Map<string, any>>;
         "showPaymentDetails": boolean;
@@ -152,6 +155,7 @@ export namespace Components {
         "countryNodeList": ICountry[];
         "defaultData": { [key: string]: any };
         "language": string;
+        "propertyId": number;
         "showPaymentDetails": boolean;
     }
     interface IglTbaBookingView {
@@ -187,6 +191,17 @@ export namespace Components {
         "propertyid": number;
         "ticket": string;
         "to_date": string;
+    }
+    interface IrAutocomplete {
+        "disabled": boolean;
+        "duration": number;
+        "inputId": string;
+        "name": string;
+        "placeholder": string;
+        "propertyId": number;
+        "required": boolean;
+        "type": 'email' | 'text' | 'password' | 'number' | 'search';
+        "value": string;
     }
     interface IrBookingDetails {
         "baseurl": string;
@@ -267,6 +282,7 @@ export namespace Components {
         "monthNames": string[];
         "opens": 'left' | 'right' | 'center';
         "separator": string;
+        "singleDatePicker": boolean;
         "toDate": Date;
         "toLabel": string;
         "weekLabel": string;
@@ -539,6 +555,10 @@ export interface IglooCalendarCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglooCalendarElement;
 }
+export interface IrAutocompleteCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrAutocompleteElement;
+}
 export interface IrBookingDetailsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrBookingDetailsElement;
@@ -754,6 +774,12 @@ declare global {
         prototype: HTMLIglooCalendarElement;
         new (): HTMLIglooCalendarElement;
     };
+    interface HTMLIrAutocompleteElement extends Components.IrAutocomplete, HTMLStencilElement {
+    }
+    var HTMLIrAutocompleteElement: {
+        prototype: HTMLIrAutocompleteElement;
+        new (): HTMLIrAutocompleteElement;
+    };
     interface HTMLIrBookingDetailsElement extends Components.IrBookingDetails, HTMLStencilElement {
     }
     var HTMLIrBookingDetailsElement: {
@@ -950,6 +976,7 @@ declare global {
         "igl-tba-category-view": HTMLIglTbaCategoryViewElement;
         "igl-to-be-assigned": HTMLIglToBeAssignedElement;
         "igloo-calendar": HTMLIglooCalendarElement;
+        "ir-autocomplete": HTMLIrAutocompleteElement;
         "ir-booking-details": HTMLIrBookingDetailsElement;
         "ir-button": HTMLIrButtonElement;
         "ir-channel-manager": HTMLIrChannelManagerElement;
@@ -985,6 +1012,7 @@ declare namespace LocalJSX {
     interface IglApplicationInfo {
         "bedPreferenceType"?: any[];
         "bookingType"?: string;
+        "currency"?: any;
         "guestInfo"?: { [key: string]: any };
         "guestRefKey"?: string;
         "index"?: number;
@@ -1031,6 +1059,7 @@ declare namespace LocalJSX {
         "onCheckClicked"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onSourceDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
         "onSplitBookingDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
+        "onToast"?: (event: IglBookPropertyHeaderCustomEvent<IToast>) => void;
         "showSplitBookingOption"?: boolean;
         "sourceOptions"?: TSourceOptions[];
         "splitBookingId"?: any;
@@ -1136,6 +1165,7 @@ declare namespace LocalJSX {
         "bookedByInfoData"?: { [key: string]: any };
         "bookingData"?: { [key: string]: any };
         "countryNodeList"?: any;
+        "currency"?: any;
         "dateRangeData"?: { [key: string]: any };
         "isEditOrAddRoomEvent"?: boolean;
         "isLoading"?: string;
@@ -1145,6 +1175,7 @@ declare namespace LocalJSX {
     data?: CustomEvent;
   }>) => void;
         "onDataUpdateEvent"?: (event: IglPagetwoCustomEvent<IPageTwoDataUpdateProps>) => void;
+        "propertyId"?: number;
         "selectedGuestData"?: any;
         "selectedRooms"?: Map<string, Map<string, any>>;
         "showPaymentDetails"?: boolean;
@@ -1155,6 +1186,7 @@ declare namespace LocalJSX {
         "defaultData"?: { [key: string]: any };
         "language"?: string;
         "onDataUpdateEvent"?: (event: IglPropertyBookedByCustomEvent<{ [key: string]: any }>) => void;
+        "propertyId"?: number;
         "showPaymentDetails"?: boolean;
     }
     interface IglTbaBookingView {
@@ -1197,11 +1229,24 @@ declare namespace LocalJSX {
         "from_date"?: string;
         "language"?: string;
         "loadingMessage"?: string;
+        "onCalculateUnassignedDates"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onDragOverHighlightElement"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onMoveBookingTo"?: (event: IglooCalendarCustomEvent<any>) => void;
         "propertyid"?: number;
         "ticket"?: string;
         "to_date"?: string;
+    }
+    interface IrAutocomplete {
+        "disabled"?: boolean;
+        "duration"?: number;
+        "inputId"?: string;
+        "name"?: string;
+        "onComboboxValue"?: (event: IrAutocompleteCustomEvent<{ key: string; data: unknown }>) => void;
+        "placeholder"?: string;
+        "propertyId"?: number;
+        "required"?: boolean;
+        "type"?: 'email' | 'text' | 'password' | 'number' | 'search';
+        "value"?: string;
     }
     interface IrBookingDetails {
         "baseurl"?: string;
@@ -1301,6 +1346,7 @@ declare namespace LocalJSX {
   }>) => void;
         "opens"?: 'left' | 'right' | 'center';
         "separator"?: string;
+        "singleDatePicker"?: boolean;
         "toDate"?: Date;
         "toLabel"?: string;
         "weekLabel"?: string;
@@ -1528,6 +1574,7 @@ declare namespace LocalJSX {
         "igl-tba-category-view": IglTbaCategoryView;
         "igl-to-be-assigned": IglToBeAssigned;
         "igloo-calendar": IglooCalendar;
+        "ir-autocomplete": IrAutocomplete;
         "ir-booking-details": IrBookingDetails;
         "ir-button": IrButton;
         "ir-channel-manager": IrChannelManager;
@@ -1584,6 +1631,7 @@ declare module "@stencil/core" {
             "igl-tba-category-view": LocalJSX.IglTbaCategoryView & JSXBase.HTMLAttributes<HTMLIglTbaCategoryViewElement>;
             "igl-to-be-assigned": LocalJSX.IglToBeAssigned & JSXBase.HTMLAttributes<HTMLIglToBeAssignedElement>;
             "igloo-calendar": LocalJSX.IglooCalendar & JSXBase.HTMLAttributes<HTMLIglooCalendarElement>;
+            "ir-autocomplete": LocalJSX.IrAutocomplete & JSXBase.HTMLAttributes<HTMLIrAutocompleteElement>;
             "ir-booking-details": LocalJSX.IrBookingDetails & JSXBase.HTMLAttributes<HTMLIrBookingDetailsElement>;
             "ir-button": LocalJSX.IrButton & JSXBase.HTMLAttributes<HTMLIrButtonElement>;
             "ir-channel-manager": LocalJSX.IrChannelManager & JSXBase.HTMLAttributes<HTMLIrChannelManagerElement>;

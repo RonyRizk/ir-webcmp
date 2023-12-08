@@ -14,6 +14,7 @@ export class IglPropertyBookedBy {
   @Prop() defaultData: { [key: string]: any };
   @Event() dataUpdateEvent: EventEmitter<{ [key: string]: any }>;
   @Prop() countryNodeList: ICountry[] = [];
+  @Prop() propertyId: number;
   private bookingService: BookingService = new BookingService();
   private arrivalTimeList: IEntries[] = [];
   private expiryMonths: string[] = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
@@ -31,7 +32,7 @@ export class IglPropertyBookedBy {
       code: '',
       description: '',
     },
-    emailGuest: false,
+    emailGuest: true,
     message: '',
     cardNumber: '',
     cardHolderName: '',
@@ -44,6 +45,7 @@ export class IglPropertyBookedBy {
     this.initializeExpiryYears();
     this.initializeDateData();
     this.populateBookedByData();
+    console.log("default data",this.defaultData)
   }
 
   private initializeExpiryYears() {
@@ -52,9 +54,9 @@ export class IglPropertyBookedBy {
   }
   private async assignCountryCode() {
     const country = await this.bookingService.getUserDefaultCountry();
-    console.log(country);
+    
     const countryId = country['COUNTRY_ID'];
-    console.log(countryId);
+    
     this.bookedByData = { ...this.bookedByData, isdCode: countryId.toString(), countryId };
   }
   private initializeDateData() {
@@ -64,7 +66,7 @@ export class IglPropertyBookedBy {
   }
 
   private populateBookedByData() {
-    this.bookedByData = this.defaultData ? { ...this.defaultData } : {};
+    this.bookedByData = this.defaultData ? {...this.bookedByData, ...this.defaultData } : {};
     this.arrivalTimeList = this.defaultData?.arrivalTime || [];
 
     if (!this.bookedByData.expiryMonth) {
@@ -161,6 +163,36 @@ export class IglPropertyBookedBy {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailPattern.test(emailId);
   }
+  handleComboboxChange(e: CustomEvent) {
+    const { key, data } = e.detail;
+    console.log(key, data);
+    switch (key) {
+      case 'blur':
+        if (data !== '') {
+          this.bookedByData.email = data;
+          this.checkUser();
+        }
+        break;
+      case 'select':
+        this.bookedByData.email = data.email;
+        this.bookedByData = {
+          ...this.bookedByData,
+          id: data.id,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          contactNumber: data.mobile,
+          countryId: data.country_id,
+          isdCode: data.country_id.toString(),
+        };
+        this.dataUpdateEvent.emit({
+          key: 'bookedByInfoUpdated',
+          data: { ...this.bookedByData },
+        });
+        break;
+      default:
+        break;
+    }
+  }
 
   render() {
     return (
@@ -169,7 +201,7 @@ export class IglPropertyBookedBy {
           <div class="form-group row text-left align-items-center">
             <label class="p-0 m-0 label-control mr-1 font-weight-bold">Booked by</label>
             <div class="bookedByEmailContainer">
-              <input
+              {/* <input
                 id={v4()}
                 type="email"
                 class="form-control"
@@ -179,7 +211,15 @@ export class IglPropertyBookedBy {
                 onInput={event => this.handleEmailInput('email', event)}
                 required
                 onBlur={() => this.checkUser()}
-              />
+              /> */}
+              <ir-autocomplete
+                onComboboxValue={this.handleComboboxChange.bind(this)}
+                propertyId={this.propertyId}
+                type="email"
+                value={this.bookedByData.email}
+                required
+                placeholder="Email address"
+              ></ir-autocomplete>
             </div>
           </div>
         </div>
@@ -234,7 +274,7 @@ export class IglPropertyBookedBy {
               <div class="form-group row p-0 align-items-center">
                 <label class="p-0 m-0">Mobile phone</label>
                 <div class="p-0 m-0 pr-1 row controlContainer">
-                  <div class="col-3 p-0 m-0">
+                  <div class="col-4 p-0 m-0">
                     <select class="form-control input-sm pr-0" id={v4()} onChange={event => this.handleDataChange('isdCode', event)}>
                       <option value="" selected={this.bookedByData.isdCode === ''}>
                         ISD
@@ -246,7 +286,7 @@ export class IglPropertyBookedBy {
                       ))}
                     </select>
                   </div>
-                  <div class="col-9 p-0 m-0">
+                  <div class="col-8 p-0 m-0">
                     <input
                       class="form-control"
                       type="tel"
@@ -275,21 +315,15 @@ export class IglPropertyBookedBy {
                 </div>
               </div>
 
-              <div class="form-group row p-0 align-items-center">
-                <label class="p-0 m-0">Email the guest</label>
-                <div class="p-0 m-0 pr-1 controlContainer checkBoxContainer">
-                  <input class="form-control" type="checkbox" checked={this.bookedByData.emailGuest} id={v4()} onChange={event => this.handleDataChange('emailGuest', event)} />
-                </div>
-              </div>
             </div>
             <div class="col-md-6 p-0">
-              <div class="form-group row p-0 align-items-center">
+              <div class=" row p-0 align-items-center mb-1">
                 <label class="p-0 m-0">Any message for us?</label>
-                <div class="p-0 m-0 pr-1 controlContainer">
+                <div class="p-0 m-0 pr-1 controlContainer ">
                   <textarea
                     id={v4()}
                     rows={4}
-                    class="form-control"
+                    class="form-control "
                     name="message"
                     value={this.bookedByData.message}
                     onInput={event => this.handleDataChange('message', event)}
@@ -351,6 +385,12 @@ export class IglPropertyBookedBy {
                   </div>
                 </Fragment>
               )}
+              <div class="form-group row p-0 align-items-center">
+                <label class="p-0 m-0">Email the guest</label>
+                <div class="p-0 m-0 pr-1 controlContainer checkBoxContainer">
+                  <input class="form-control" type="checkbox" checked={this.bookedByData.emailGuest} id={v4()} onChange={event => this.handleDataChange('emailGuest', event)} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

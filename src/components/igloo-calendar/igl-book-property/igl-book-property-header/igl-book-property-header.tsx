@@ -1,5 +1,6 @@
 import { Component, Host, Prop, h, Event, EventEmitter } from '@stencil/core';
 import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOptions } from '../../../../models/igl-book-property';
+import { IToast } from '../../../ir-toast/toast';
 
 @Component({
   tag: 'igl-book-property-header',
@@ -7,20 +8,21 @@ import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOp
   scoped: true,
 })
 export class IglBookPropertyHeader {
-  @Prop({ reflect: true }) splitBookingId: any = '';
-  @Prop({ reflect: true }) bookingData: any = '';
-  @Prop({ reflect: true }) sourceOptions: TSourceOptions[] = [];
-  @Prop({ reflect: true }) message: string;
-  @Prop({ reflect: true, mutable: true }) bookingDataDefaultDateRange: { [key: string]: any };
-  @Prop({ reflect: true }) showSplitBookingOption: boolean = false;
-  @Prop({ reflect: true }) adultChildConstraints: TAdultChildConstraints;
-  @Prop({ reflect: true }) splitBookings: any[];
+  @Prop() splitBookingId: any = '';
+  @Prop() bookingData: any = '';
+  @Prop() sourceOptions: TSourceOptions[] = [];
+  @Prop() message: string;
+  @Prop() bookingDataDefaultDateRange: { [key: string]: any };
+  @Prop() showSplitBookingOption: boolean = false;
+  @Prop() adultChildConstraints: TAdultChildConstraints;
+  @Prop() splitBookings: any[];
   @Prop() adultChildCount: { adult: number; child: number };
   @Event() splitBookingDropDownChange: EventEmitter<any>;
   @Event() sourceDropDownChange: EventEmitter<string>;
   @Event() adultChild: EventEmitter<any>;
   @Event() checkClicked: EventEmitter<any>;
   @Event() buttonClicked: EventEmitter<{ key: TPropertyButtonsTypes }>;
+  @Event() toast: EventEmitter<IToast>;
   private sourceOption: TSourceOption = {
     code: '',
     description: '',
@@ -54,15 +56,20 @@ export class IglBookPropertyHeader {
   }
   getSourceNode() {
     return (
-      <fieldset class="form-group col-12 text-left">
+      <fieldset class="col-12 text-left">
         <label class="h5">Source </label>
         <div class="btn-group ml-1">
           <select class="form-control input-sm" id="xSmallSelect" onChange={evt => this.sourceDropDownChange.emit((evt.target as HTMLSelectElement).value)}>
-            {this.sourceOptions.map(option => (
-              <option value={option.id} selected={this.sourceOption.code === option.id}>
-                {option.value}
-              </option>
-            ))}
+            {this.sourceOptions.map(option => {
+              if (option.type === 'LABEL') {
+                return <optgroup label={option.value}></optgroup>;
+              }
+              return (
+                <option value={option.id} selected={this.sourceOption.code === option.id}>
+                  {option.value}
+                </option>
+              );
+            })}
           </select>
         </div>
       </fieldset>
@@ -91,7 +98,7 @@ export class IglBookPropertyHeader {
         <fieldset>
           <div class="btn-group ml-1">
             <select class="form-control input-sm" id="xAdultSmallSelect" onChange={evt => this.handleAdultChildChange('adult', evt)}>
-              <option value={''}>Ad...</option>
+              <option value="">Ad..</option>
               {Array.from(Array(this.adultChildConstraints.adult_max_nbr), (_, i) => i + 1).map(option => (
                 <option value={option}>{option}</option>
               ))}
@@ -110,13 +117,19 @@ export class IglBookPropertyHeader {
             </div>
           </fieldset>
         )}
-        <button disabled={this.adultChildCount.adult === 0} class={'btn btn-primary ml-2 '} onClick={() => this.buttonClicked.emit({ key: 'check' })}>
+        <button class={'btn btn-primary btn-sm ml-2 '} onClick={() => this.handleButtonClicked()}>
           Check
         </button>
       </div>
     );
   }
-
+  handleButtonClicked() {
+    if (this.adultChildCount.adult === 0) {
+      this.toast.emit({ type: 'error', title: 'Please select the number of guests', description: '', position: 'top-right' });
+    } else {
+      this.buttonClicked.emit({ key: 'check' });
+    }
+  }
   isEventType(key: string) {
     return this.bookingData.event_type === key;
   }
@@ -126,7 +139,7 @@ export class IglBookPropertyHeader {
       <Host>
         {this.showSplitBookingOption ? this.getSplitBookingList() : this.isEventType('EDIT_BOOKING') || this.isEventType('ADD_ROOM') ? null : this.getSourceNode()}
         <div class={'d-md-flex align-items-center'}>
-          <fieldset class="form-group row">
+          <fieldset class="form-group row mt-1 mt-md-0  ">
             <igl-date-range disabled={this.isEventType('BAR_BOOKING')} defaultData={this.bookingDataDefaultDateRange}></igl-date-range>
           </fieldset>
           {!this.isEventType('EDIT_BOOKING') && this.getAdultChildConstraints()}

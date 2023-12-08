@@ -28,7 +28,7 @@ export class IglooCalendar {
   @Event({ bubbles: true, composed: true })
   dragOverHighlightElement: EventEmitter;
   @Event({ bubbles: true, composed: true }) moveBookingTo: EventEmitter;
-
+  @Event() calculateUnassignedDates: EventEmitter;
   @State() calendarData: { [key: string]: any } = new Object();
   @State() days: { [key: string]: any }[] = new Array();
   @State() scrollViewDragging: boolean = false;
@@ -104,7 +104,7 @@ export class IglooCalendar {
               const { REASON, KEY, PAYLOAD }: { REASON: bookingReasons; KEY: any; PAYLOAD: any } = msgAsObject;
               if (KEY.toString() === this.propertyid.toString()) {
                 let result: any;
-                if (REASON === 'DELETE_CALENDAR_POOL') {
+                if (REASON === 'DELETE_CALENDAR_POOL' || REASON === 'GET_UNASSIGNED_DATES') {
                   result = PAYLOAD;
                 } else {
                   result = JSON.parse(PAYLOAD);
@@ -124,6 +124,31 @@ export class IglooCalendar {
                     ...this.calendarData,
                     bookingEvents: this.calendarData.bookingEvents.filter(e => e.POOL !== result),
                   };
+                } else if (REASON === 'GET_UNASSIGNED_DATES') {
+                  function parseDateRange(str: string): Record<string, string> {
+                    const result: Record<string, string> = {};
+                    const pairs = str.split('|');
+
+                    pairs.forEach(pair => {
+                      const res = pair.split(':');
+                      result[res[0]] = res[1];
+                    });
+                    return result;
+                  }
+                  const parsedResult = parseDateRange(result);
+                  if (
+                    !this.calendarData.is_vacation_rental &&
+                    new Date(parsedResult.FROM_DATE).getTime() >= this.calendarData.startingDate &&
+                    new Date(parsedResult.TO_DATE).getTime() <= this.calendarData.endingDate
+                  ) {
+                    const data = await this.toBeAssignedService.getUnassignedDates(
+                      this.propertyid,
+                      dateToFormattedString(new Date(parsedResult.FROM_DATE)),
+                      dateToFormattedString(new Date(parsedResult.TO_DATE)),
+                    );
+                    this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
+                    this.unassignedDates = data;
+                  }
                 } else {
                   return;
                 }
@@ -293,7 +318,7 @@ export class IglooCalendar {
     event.stopImmediatePropagation();
     let bookings = [...this.calendarData.bookingEvents];
     bookings = bookings.filter(bookingEvent => bookingEvent.ID !== 'NEW_TEMP_EVENT');
-    bookings.push(...event.detail);
+    bookings.push(...event.detail.filter(ev => ev.STATUS === 'PENDING-CONFIRMATION'));
     this.updateBookingEventsDateRange(event.detail);
     this.calendarData = {
       ...this.calendarData,
@@ -382,8 +407,8 @@ export class IglooCalendar {
       };
     }
     const data = await this.toBeAssignedService.getUnassignedDates(this.propertyid, fromDate, toDate);
-    this.unassignedDates = { ...this.unassignedDates, ...data };
     this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
+    this.unassignedDates = { ...data };
   }
   async handleDateSearch(dates: { start: Moment; end: Moment }) {
     const startDate = moment(dates.start).toDate();
@@ -391,13 +416,13 @@ export class IglooCalendar {
     const endDate = dates.end.toDate();
     const defaultToDate = this.calendarData.endingDate;
     if (startDate.getTime() < new Date(this.from_date).getTime()) {
-      await this.addDatesToCalendar(moment(startDate).format('YYYY-MM-DD'), moment(this.from_date).add(-1, 'days').format('YYYY-MM-DD'));
+      await this.addDatesToCalendar(moment(startDate).add(-1, 'days').format('YYYY-MM-DD'), moment(this.from_date).add(-1, 'days').format('YYYY-MM-DD'));
       this.scrollToElement(this.transformDateForScroll(startDate));
     } else if (startDate.getTime() > defaultFromDate.getTime() && startDate.getTime() < defaultToDate && endDate.getTime() < defaultToDate) {
       this.scrollToElement(this.transformDateForScroll(startDate));
     } else if (startDate.getTime() > defaultToDate) {
       const nextDay = getNextDay(new Date(this.calendarData.endingDate));
-      await this.addDatesToCalendar(nextDay, moment(endDate).add(30, 'days').format('YYYY-MM-DD'));
+      await this.addDatesToCalendar(nextDay, moment(endDate).add(2, 'months').format('YYYY-MM-DD'));
       this.scrollToElement(this.transformDateForScroll(startDate));
     }
   }

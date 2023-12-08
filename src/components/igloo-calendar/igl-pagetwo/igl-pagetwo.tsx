@@ -1,6 +1,7 @@
 import { Component, Prop, h, Event, EventEmitter, Host, State } from '@stencil/core';
 import { IPageTwoDataUpdateProps } from '../../../models/models';
 import { TPropertyButtonsTypes } from '../../../models/igl-book-property';
+import { formatDate, getCurrencySymbol } from '../../../utils/utils';
 @Component({
   tag: 'igl-pagetwo',
   styleUrl: 'igl-pagetwo.css',
@@ -8,12 +9,14 @@ import { TPropertyButtonsTypes } from '../../../models/igl-book-property';
 })
 export class IglPagetwo {
   @Prop() showPaymentDetails: boolean;
+  @Prop() currency;
   @Prop({ reflect: true }) isEditOrAddRoomEvent: boolean;
   @Prop() dateRangeData: { [key: string]: any };
   @Prop() bookingData: { [key: string]: any };
   @Prop() showSplitBookingOption: boolean;
   @Prop() language: string;
   @Prop() bookedByInfoData: { [key: string]: any };
+  @Prop() propertyId: number;
   @Prop() bedPreferenceType: any;
   @Prop() selectedRooms: Map<string, Map<string, any>>;
   @Prop({ reflect: true }) isLoading: string;
@@ -134,18 +137,21 @@ export class IglPagetwo {
         <div class="row">
           <div class="col-6 text-left p-0">
             <span class="mr-1 font-weight-bold font-medium-1">
-              {this.dateRangeData.fromDateStr} - {this.dateRangeData.toDateStr}
+              {formatDate(this.dateRangeData.fromDateStr)} - {formatDate(this.dateRangeData.toDateStr)}
             </span>
-            {this.dateRangeData.dateDifference} nights
+            {this.dateRangeData.dateDifference} {+this.dateRangeData.dateDifference > 1 ? 'nights' : 'night'}
           </div>
-          <div class="col-6 text-right">
-            Total price <span class="font-weight-bold font-medium-1">{'$' + this.bookingData.TOTAL_PRICE || '$0.00'}</span>
-          </div>
+          {this.guestData.length > 1 && (
+            <div class="col-6 text-right">
+              Total price <span class="font-weight-bold font-medium-1">{getCurrencySymbol(this.currency.code) + this.bookingData.TOTAL_PRICE || '$0.00'}</span>
+            </div>
+          )}
         </div>
 
         {this.guestData.map((roomInfo, index) => {
           return (
             <igl-application-info
+              currency={this.currency}
               bedPreferenceType={this.bedPreferenceType}
               index={index}
               selectedUnits={this.selectedUnits[`c_${roomInfo.roomCategoryId}`]}
@@ -160,6 +166,7 @@ export class IglPagetwo {
 
         {this.isEditOrAddRoomEvent || this.showSplitBookingOption ? null : (
           <igl-property-booked-by
+            propertyId={this.propertyId}
             countryNodeList={this.countryNodeList}
             language={this.language}
             showPaymentDetails={this.showPaymentDetails}
