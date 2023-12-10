@@ -1,4 +1,4 @@
-import { Component, Host, Prop, h, State, Event, EventEmitter, Watch } from '@stencil/core';
+import { Component, Host, Prop, h, State, Event, EventEmitter, Watch, Fragment } from '@stencil/core';
 import { v4 } from 'uuid';
 import { getCurrencySymbol } from '../../../utils/utils';
 @Component({
@@ -191,8 +191,8 @@ export class IglBookingRoomRatePlan {
             <ir-tooltip message={this.ratePlanData.cancelation + this.ratePlanData.guarantee}></ir-tooltip>
           </div>
 
-          <div class={'d-md-flex justify-content-md-end align-items-md-center pr-0  flex-fill rateplan-container'}>
-            <div class="mt-1 mt-lg-0 flex-fill max-w-300  ">
+          <div class={'d-md-flex justify-content-md-end  align-items-md-center  flex-fill rateplan-container'}>
+            <div class="mt-1 mt-lg-0 flex-fill max-w-300">
               <fieldset class="position-relative">
                 <select disabled={this.disableForm()} class="form-control  input-sm" id={v4()} onChange={evt => this.handleDataChange('adult_child_offering', evt)}>
                   {this.ratePlanData.variations.map(variation => (
@@ -209,7 +209,7 @@ export class IglBookingRoomRatePlan {
                   <input
                     disabled={this.disableForm()}
                     type="text"
-                    class="form-control input-sm rate-input py-0 m-0"
+                    class="form-control input-sm rate-input py-0 m-0 rounded-0 rateInputBorder"
                     value={this.renderRate()}
                     id={v4()}
                     placeholder="Rate"
@@ -217,8 +217,13 @@ export class IglBookingRoomRatePlan {
                   />
                   <span class="currency">{getCurrencySymbol(this.currency.code)}</span>
                 </fieldset>
-                <fieldset class="position-relative m-0 total-nights-container p-0">
-                  <select disabled={this.disableForm()} class="form-control input-sm m-0  py-0" id={v4()} onChange={evt => this.handleDataChange('rateType', evt)}>
+                <fieldset class="position-relative m-0 total-nights-container p-0 ">
+                  <select
+                    disabled={this.disableForm()}
+                    class="form-control input-sm m-0 nightBorder rounded-0  py-0"
+                    id={v4()}
+                    onChange={evt => this.handleDataChange('rateType', evt)}
+                  >
                     {this.ratePricingMode.map(data => (
                       <option value={data.CODE_NAME} selected={this.selectedData.rateType === +data.CODE_NAME}>
                         {data.CODE_VALUE_EN}
@@ -249,18 +254,28 @@ export class IglBookingRoomRatePlan {
             </div>
 
             {this.bookingType === 'EDIT_BOOKING' ? (
-              <div class=" m-0 p-0  mt-lg-0  ml-md-1 mt-md-1">
-                <fieldset class="position-relative">
-                  <input
-                    disabled={this.disableForm()}
-                    type="radio"
-                    name="ratePlanGroup"
-                    value="1"
-                    onChange={evt => this.handleDataChange('totalRooms', evt)}
-                    checked={this.selectedData.totalRooms === 1}
-                  />
-                </fieldset>
-              </div>
+              <Fragment>
+                <div class=" m-0 p-0  mt-lg-0  ml-md-1 mt-md-1 d-none d-md-block">
+                  <fieldset class="position-relative">
+                    <input
+                      disabled={this.disableForm()}
+                      type="radio"
+                      name="ratePlanGroup"
+                      value="1"
+                      onChange={evt => this.handleDataChange('totalRooms', evt)}
+                      checked={this.selectedData.totalRooms === 1}
+                    />
+                  </fieldset>
+                </div>
+                <button
+                  disabled={this.selectedData.rate === 0 || this.disableForm()}
+                  type="button"
+                  class="btn btn-primary booking-btn mt-lg-0 btn-sm ml-md-1  mt-1 d-md-none "
+                  onClick={() => this.bookProperty()}
+                >
+                  {this.selectedData.totalRooms === 1 ? 'Current' : 'Select'}
+                </button>
+              </Fragment>
             ) : null}
 
             {this.bookingType === 'BAR_BOOKING' || this.bookingType === 'SPLIT_BOOKING' ? (

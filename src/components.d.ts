@@ -1242,6 +1242,7 @@ declare namespace LocalJSX {
         "inputId"?: string;
         "name"?: string;
         "onComboboxValue"?: (event: IrAutocompleteCustomEvent<{ key: string; data: unknown }>) => void;
+        "onInputCleared"?: (event: IrAutocompleteCustomEvent<null>) => void;
         "placeholder"?: string;
         "propertyId"?: number;
         "required"?: boolean;

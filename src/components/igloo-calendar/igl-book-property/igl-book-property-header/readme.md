@@ -22,14 +22,13 @@
 
 ## Events
 
-| Event                        | Description | Type                                                                                                 |
-| ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `adultChild`                 |             | `CustomEvent<any>`                                                                                   |
-| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>`                                                       |
-| `checkClicked`               |             | `CustomEvent<any>`                                                                                   |
-| `sourceDropDownChange`       |             | `CustomEvent<string>`                                                                                |
-| `splitBookingDropDownChange` |             | `CustomEvent<any>`                                                                                   |
-| `toast`                      |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event                        | Description | Type                                           |
+| ---------------------------- | ----------- | ---------------------------------------------- |
+| `adultChild`                 |             | `CustomEvent<any>`                             |
+| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>` |
+| `checkClicked`               |             | `CustomEvent<any>`                             |
+| `sourceDropDownChange`       |             | `CustomEvent<string>`                          |
+| `splitBookingDropDownChange` |             | `CustomEvent<any>`                             |
 
 
 ## Dependencies

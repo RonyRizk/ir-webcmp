@@ -13,6 +13,7 @@
 
 .card-title {
   border-bottom: 1px solid #e4e5ec;
+  width: 100%;
 }
 
 .scrollContent {
@@ -34,7 +35,12 @@
   height: calc(100% - 79px);
   overflow: auto;
 }
-
+.gap-30 {
+  gap: 30px;
+}
+.block-date {
+  width: 100%;
+}
 .sideWindow {
   /* display: grid; */
   position: absolute;
@@ -43,6 +49,11 @@
   height: 100%;
   background-color: #ffffff;
   width: 100vw;
+  overflow-y: auto;
+}
+.card {
+  top: 0;
+  z-index: 1000;
 }
 
 .close {
@@ -76,13 +87,28 @@ button:not(:disabled),
   padding: 0 0 0 15px;
   margin: 0;
 }
-@media only screen and   (min-width: 1200px) { 
-  .sideWindow{
+@media only screen and (min-width: 1200px) {
+  .sideWindow {
     max-width: 70%;
   }
 }
-@media only screen and   (min-width: 2000px) { 
-  .sideWindow{
+@media only screen and (min-width: 2000px) {
+  .sideWindow {
     max-width: 40%;
+  }
+}
+@media only screen and   (min-width: 768px) and (max-width:1200px){ 
+  .sideWindow{
+    max-width: 90%;
+  }
+}
+@media only screen and   (min-width: 600px) and (max-width:768px){ 
+  .sideWindow{
+    max-width: 75%;
+  }
+}
+@media only screen and (min-width: 641px) {
+  .block-date {
+    max-width: 450px;
   }
 }

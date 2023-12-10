@@ -60,3 +60,12 @@
 .total-nights-container{
   width: max-content;
 }
+.rateInputBorder{
+  border-top-left-radius: 3px !important;
+  border-bottom-left-radius: 3px !important;
+}
+.nightBorder{
+  border-left-width: 0;
+  border-top-right-radius: 3px !important;
+  border-bottom-right-radius: 3px !important;
+}
