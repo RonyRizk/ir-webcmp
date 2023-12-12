@@ -13,7 +13,10 @@
 | `adultChildCount`             | --                          |             | `{ adult: number; child: number; }`                                        | `undefined` |
 | `bookingData`                 | `booking-data`              |             | `any`                                                                      | `''`        |
 | `bookingDataDefaultDateRange` | --                          |             | `{ [key: string]: any; }`                                                  | `undefined` |
+| `dateRangeData`               | `date-range-data`           |             | `any`                                                                      | `undefined` |
+| `defaultDaterange`            | --                          |             | `{ from_date: string; to_date: string; }`                                  | `undefined` |
 | `message`                     | `message`                   |             | `string`                                                                   | `undefined` |
+| `minDate`                     | `min-date`                  |             | `string`                                                                   | `undefined` |
 | `showSplitBookingOption`      | `show-split-booking-option` |             | `boolean`                                                                  | `false`     |
 | `sourceOptions`               | --                          |             | `TSourceOptions[]`                                                         | `[]`        |
 | `splitBookingId`              | `split-booking-id`          |             | `any`                                                                      | `''`        |
@@ -22,13 +25,14 @@
 
 ## Events
 
-| Event                        | Description | Type                                           |
-| ---------------------------- | ----------- | ---------------------------------------------- |
-| `adultChild`                 |             | `CustomEvent<any>`                             |
-| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>` |
-| `checkClicked`               |             | `CustomEvent<any>`                             |
-| `sourceDropDownChange`       |             | `CustomEvent<string>`                          |
-| `splitBookingDropDownChange` |             | `CustomEvent<any>`                             |
+| Event                        | Description | Type                                                                                                 |
+| ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `adultChild`                 |             | `CustomEvent<any>`                                                                                   |
+| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>`                                                       |
+| `checkClicked`               |             | `CustomEvent<any>`                                                                                   |
+| `sourceDropDownChange`       |             | `CustomEvent<string>`                                                                                |
+| `splitBookingDropDownChange` |             | `CustomEvent<any>`                                                                                   |
+| `toast`                      |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
 ## Dependencies

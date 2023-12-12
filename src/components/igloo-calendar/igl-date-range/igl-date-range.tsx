@@ -1,4 +1,5 @@
 import { Component, Host, h, State, Event, EventEmitter, Prop } from '@stencil/core';
+import { IToast } from '../../ir-toast/toast';
 
 @Component({
   tag: 'igl-date-range',
@@ -8,8 +9,10 @@ import { Component, Host, h, State, Event, EventEmitter, Prop } from '@stencil/c
 export class IglDateRange {
   @Prop() defaultData: { [key: string]: any };
   @Prop({ reflect: true }) disabled: boolean = false;
+  @Prop() minDate: string;
   @Event() dateSelectEvent: EventEmitter<{ [key: string]: any }>;
   @State() renderAgain: boolean = false;
+  @Event() toast: EventEmitter<IToast>;
 
   private totalNights: number = 0;
   private fromDate: Date;
@@ -61,17 +64,19 @@ export class IglDateRange {
     this.dateSelectEvent.emit({ key, data });
   }
   handleDateChange(evt) {
-    const { start, end } = evt.detail;
-    this.fromDate = start.toDate();
-    this.toDate = end.toDate();
-    this.calculateTotalNights();
-    this.handleDateSelectEvent('selectedDateRange', {
-      fromDate: this.fromDate.getTime(),
-      toDate: this.toDate.getTime(),
-      fromDateStr: start.format('DD MMM YYYY'),
-      toDateStr: end.format('DD MMM YYYY'),
-      dateDifference: this.totalNights,
-    });
+    const { start, end } = evt.detail;   
+      this.fromDate = start.toDate();
+      this.toDate = end.toDate();
+      this.calculateTotalNights();
+
+      this.handleDateSelectEvent('selectedDateRange', {
+        fromDate: this.fromDate.getTime(),
+        toDate: this.toDate.getTime(),
+        fromDateStr: start.format('DD MMM YYYY'),
+        toDateStr: end.format('DD MMM YYYY'),
+        dateDifference: this.totalNights,
+      });
+    
     this.renderAgain = !this.renderAgain;
   }
   render() {
@@ -79,20 +84,21 @@ export class IglDateRange {
       <Host>
         <div class="calendarPickerContainer ml-0 d-flex flex-column flex-lg-row align-items-lg-center ">
           <h5 class="mt-0 mb-1 mb-lg-0 mr-lg-1 text-left">Dates</h5>
-          <div class={"d-flex align-items-center mr-lg-1"}>
-          <div class="iglRangePicker">
-            <ir-date-picker
-              class={'date-range-input'}
-              disabled={this.disabled}
-              fromDate={this.fromDate}
-              toDate={this.toDate}
-              autoApply
-              onDateChanged={evt => {
-                this.handleDateChange(evt);
-              }}
-            ></ir-date-picker>
-          </div>
-          {this.totalNights ? <span class="iglRangeNights">{this.totalNights + (this.totalNights > 1 ? ' nights' : ' night')}</span> : ''}
+          <div class={'d-flex align-items-center mr-lg-1'}>
+            <div class="iglRangePicker">
+              <ir-date-picker
+                class={'date-range-input'}
+                disabled={this.disabled}
+                fromDate={this.fromDate}
+                toDate={this.toDate}
+                minDate={this.minDate}
+                autoApply
+                onDateChanged={evt => {
+                  this.handleDateChange(evt);
+                }}
+              ></ir-date-picker>
+            </div>
+            {this.totalNights ? <span class="iglRangeNights">{this.totalNights + (this.totalNights > 1 ? ' nights' : ' night')}</span> : ''}
           </div>
         </div>
       </Host>

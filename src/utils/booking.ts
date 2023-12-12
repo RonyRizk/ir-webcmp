@@ -58,14 +58,24 @@ async function getStayStatus() {
     console.log(error);
   }
 }
+function renderBlock003Date(date, hour, minute) {
+  const dt = new Date(date);
+  dt.setHours(hour);
+  dt.setMinutes(minute);
+  return `Blocked till ${moment(dt).format('MMM DD, HH:mm')}`;
+}
 function getDefaultData(cell: CellType, stayStatus: { code: string; value: string }[]): any {
   if (['003', '002', '004'].includes(cell.STAY_STATUS_CODE)) {
-    //console.log('blocked cells', cell);
     return {
       ID: cell.POOL,
       NOTES: '',
       BALANCE: '',
-      NAME: cell.My_Block_Info.NOTES !== '' ? cell.My_Block_Info.NOTES : stayStatus.find(st => st.code === cell.STAY_STATUS_CODE).value || '',
+      NAME:
+        cell.My_Block_Info.NOTES !== ''
+          ? cell.My_Block_Info.NOTES
+          : cell.STAY_STATUS_CODE === '003'
+          ? renderBlock003Date(cell.My_Block_Info.BLOCKED_TILL_DATE, cell.My_Block_Info.BLOCKED_TILL_HOUR, cell.My_Block_Info.BLOCKED_TILL_MINUTE)
+          : stayStatus.find(st => st.code === cell.STAY_STATUS_CODE).value || '',
       RELEASE_AFTER_HOURS: cell.My_Block_Info.DESCRIPTION,
       PR_ID: cell.My_Block_Info.pr_id,
       ENTRY_DATE: cell.My_Block_Info.BLOCKED_TILL_DATE,
@@ -89,35 +99,38 @@ function getDefaultData(cell: CellType, stayStatus: { code: string; value: strin
     TO_DATE: cell.DATE,
     FROM_DATE: cell.DATE,
     NO_OF_DAYS: 1,
-    IS_EDITABLE: cell.booking.is_editable,
     STATUS: status[cell.STAY_STATUS_CODE],
     NAME: formatName(cell.room.guest.first_name, cell.room.guest.last_name),
-    PHONE: cell.booking.guest.mobile ?? '',
-    ENTRY_DATE: cell.booking.booked_on.date,
-    RATE: cell.room.total,
-    RATE_PLAN: cell.room.rateplan.name,
-    SPLIT_BOOKING: false,
-    RATE_PLAN_ID: cell.room.rateplan.id,
     IDENTIFIER: cell.room.identifier,
-    RATE_TYPE: 1,
-    ADULTS_COUNT: cell.room.occupancy.adult_nbr,
-    CHILDREN_COUNT: cell.room.occupancy.children_nbr,
     PR_ID: cell.pr_id,
     POOL: cell.POOL,
-    channel_booking_nbr: cell.booking.channel_booking_nbr,
-    origin: cell.booking.origin,
-    is_direct: cell.booking.is_direct,
-    GUEST: cell.booking.guest,
     BOOKING_NUMBER: cell.booking.booking_nbr,
-    cancelation: cell.room.rateplan.cancelation,
-    guarantee: cell.room.rateplan.guarantee,
-    TOTAL_PRICE: cell.room.total,
-    COUNTRY: cell.booking.guest.country_id,
-    FROM_DATE_STR: cell.booking.format.from_date,
-    TO_DATE_STR: cell.booking.format.to_date,
-    adult_child_offering: cell.room.rateplan.selected_variation.adult_child_offering,
-    NOTES: cell.booking.remark,
-    SOURCE: { code: cell.booking.source.code, description: cell.booking.source.description, tag: cell.booking.source.tag },
+    ///from here
+    //ENTRY_DATE: cell.booking.booked_on.date,
+    // IS_EDITABLE: cell.booking.is_editable,
+    // ARRIVAL: cell.booking.arrival,
+    // PHONE: cell.booking.guest.mobile ?? '',
+    // RATE: cell.room.total,
+    // RATE_PLAN: cell.room.rateplan.name,
+    // SPLIT_BOOKING: false,
+    // RATE_PLAN_ID: cell.room.rateplan.id,
+    // RATE_TYPE: 1,
+    // ADULTS_COUNT: cell.room.occupancy.adult_nbr,
+    // CHILDREN_COUNT: cell.room.occupancy.children_nbr,
+    // channel_booking_nbr: cell.booking.channel_booking_nbr,
+    // origin: cell.booking.origin,
+    // is_direct: cell.booking.is_direct,
+    // GUEST: cell.booking.guest,
+    // ROOMS: cell.booking.rooms,
+    // cancelation: cell.room.rateplan.cancelation,
+    // guarantee: cell.room.rateplan.guarantee,
+    // TOTAL_PRICE: cell.room.total,
+    // COUNTRY: cell.booking.guest.country_id,
+    // FROM_DATE_STR: cell.booking.format.from_date,
+    // TO_DATE_STR: cell.booking.format.to_date,
+    // adult_child_offering: cell.room.rateplan.selected_variation.adult_child_offering,
+    // NOTES: cell.booking.remark,
+    // SOURCE: { code: cell.booking.source.code, description: cell.booking.source.description, tag: cell.booking.source.tag },
   };
 }
 
@@ -154,6 +167,7 @@ export function transformNewBooking(data: any): RoomBookingDetails[] {
       TO_DATE: room.to_date,
       FROM_DATE: room.from_date,
       NO_OF_DAYS: room.days.length,
+      ARRIVAL: data.arrival,
       IS_EDITABLE: true,
       STATUS: status['001'],
       NAME: formatName(room.guest.first_name, room.guest.last_name),
@@ -170,6 +184,7 @@ export function transformNewBooking(data: any): RoomBookingDetails[] {
       PR_ID: +room.unit.id,
       POOL: room['assigned_units_pool'],
       GUEST: data.guest,
+      ROOMS: data.rooms,
       BOOKING_NUMBER: data.booking_nbr,
       cancelation: room.rateplan.cancelation,
       guarantee: room.rateplan.guarantee,
@@ -195,7 +210,12 @@ export async function transformNewBLockedRooms(data: any): Promise<RoomBlockDeta
     ID: data.POOL,
     NOTES: '',
     BALANCE: '',
-    NAME: data.NOTES !== '' ? data.NOTES : stayStatus.find(st => st.code === data.STAY_STATUS_CODE).value || '',
+    NAME:
+      data.NOTES !== ''
+        ? data.NOTES
+        : data.STAY_STATUS_CODE === '003'
+        ? renderBlock003Date(data.BLOCKED_TILL_DATE, data.BLOCKED_TILL_HOUR, data.BLOCKED_TILL_MINUTE)
+        : stayStatus.find(st => st.code === data.STAY_STATUS_CODE).value || '',
     RELEASE_AFTER_HOURS: data.DESCRIPTION,
     PR_ID: data.pr_id,
     ENTRY_DATE: data.BLOCKED_TILL_DATE,

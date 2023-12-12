@@ -14,6 +14,7 @@ export class IglBookingOverviewPage {
   @Prop() adultChildConstraints: TAdultChildConstraints;
   @Prop() ratePricingMode: any;
   @Prop() dateRangeData: any;
+  @Prop() defaultDaterange:{from_date:string,to_date:string};
   @Prop() selectedRooms: Map<string, Map<string, any>>;
   @Prop() adultChildCount: { adult: number; child: number };
   @Prop() sourceOptions: TSourceOptions[];
@@ -25,9 +26,13 @@ export class IglBookingOverviewPage {
     return event === this.eventType;
   }
   render() {
+    //console.log(this.bookingData);
     return (
       <Host>
         <igl-book-property-header
+        defaultDaterange={this.defaultDaterange}
+         dateRangeData={this.dateRangeData}
+          minDate={this.isEventType('ADD_ROOM') ? this.bookingData.FROM_DATE : undefined}
           adultChildCount={this.adultChildCount}
           splitBookingId={this.showSplitBookingOption}
           bookingData={this.bookingData}

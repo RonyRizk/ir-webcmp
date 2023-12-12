@@ -1,5 +1,4 @@
 import { Component, Host, Listen, Prop, State, h, Event, EventEmitter } from '@stencil/core';
-import { getCurrencySymbol } from '../../../utils/utils';
 
 @Component({
   tag: 'igl-cal-body',
@@ -13,9 +12,11 @@ export class IglCalBody {
   @Prop() calendarData: { [key: string]: any };
   @Prop() today: String;
   @Prop() currency;
+  @Prop() language: string;
   @Prop() countryNodeList;
   @State() dragOverElement: string = '';
   @State() renderAgain: boolean = false;
+
   @Event() addBookingDatasEvent: EventEmitter<any[]>;
   private selectedRooms: { [key: string]: any } = {};
   private fromRoomId: number = -1;
@@ -237,19 +238,21 @@ export class IglCalBody {
   }
 
   getGeneralCategoryDayColumns(addClass: string, isCategory: boolean = false, index: number) {
-    return this.calendarData.days.map(dayInfo => (
-      <div class={`cellData pl-0 categoryPriceColumn ${addClass + '_' + dayInfo.day} ${dayInfo.day === this.today ? 'currentDay' : ''}`}>
-        {isCategory ? (
-          <span>
-            {dayInfo.rate[index].inventory}
-            <br />
-            {dayInfo.rate[index].rate && <u>{getCurrencySymbol(this.currency.code)} {dayInfo.rate[index].rate}</u>}
-          </span>
-        ) : (
-          ''
-        )}
-      </div>
-    ));
+    return this.calendarData.days.map(dayInfo => {
+      return (
+        <div class={`cellData pl-0 categoryPriceColumn ${addClass + '_' + dayInfo.day} ${dayInfo.day === this.today ? 'currentDay' : ''}`}>
+          {isCategory ? (
+            <span>
+              {dayInfo.rate[index].exposed_inventory.total}
+              <br />
+              {dayInfo.rate[index].exposed_inventory.offline}
+            </span>
+          ) : (
+            ''
+          )}
+        </div>
+      );
+    });
   }
 
   getGeneralRoomDayColumns(roomId: string, roomCategory) {
@@ -318,6 +321,7 @@ export class IglCalBody {
           <div class="bookingEventsContainer preventPageScroll">
             {this.getBookingData()?.map(bookingEvent => (
               <igl-booking-event
+                language={this.language}
                 is_vacation_rental={this.calendarData.is_vacation_rental}
                 countryNodeList={this.countryNodeList}
                 currency={this.currency}

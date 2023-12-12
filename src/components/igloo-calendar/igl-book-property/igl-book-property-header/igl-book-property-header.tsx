@@ -1,6 +1,7 @@
 import { Component, Host, Prop, h, Event, EventEmitter } from '@stencil/core';
 import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOptions } from '../../../../models/igl-book-property';
 import { IToast } from '../../../ir-toast/toast';
+import moment from 'moment';
 
 @Component({
   tag: 'igl-book-property-header',
@@ -10,6 +11,7 @@ import { IToast } from '../../../ir-toast/toast';
 export class IglBookPropertyHeader {
   @Prop() splitBookingId: any = '';
   @Prop() bookingData: any = '';
+  @Prop() minDate: string;
   @Prop() sourceOptions: TSourceOptions[] = [];
   @Prop() message: string;
   @Prop() bookingDataDefaultDateRange: { [key: string]: any };
@@ -17,6 +19,8 @@ export class IglBookPropertyHeader {
   @Prop() adultChildConstraints: TAdultChildConstraints;
   @Prop() splitBookings: any[];
   @Prop() adultChildCount: { adult: number; child: number };
+  @Prop() dateRangeData: any;
+  @Prop() defaultDaterange: { from_date: string; to_date: string };
   @Event() splitBookingDropDownChange: EventEmitter<any>;
   @Event() sourceDropDownChange: EventEmitter<string>;
   @Event() adultChild: EventEmitter<any>;
@@ -33,7 +37,7 @@ export class IglBookPropertyHeader {
   }
   getSelectedSplitBookingName(bookingId) {
     let splitBooking = this.splitBookings.find(booking => booking.ID === bookingId);
-    return splitBooking.ID + ' ' + splitBooking.NAME;
+    return splitBooking.BOOKING_NUMBER + ' ' + splitBooking.NAME;
   }
   getSplitBookingList() {
     return (
@@ -45,7 +49,7 @@ export class IglBookPropertyHeader {
               Select
             </option>
             {this.splitBookings.map(option => (
-              <option value={option.ID} selected={this.splitBookingId === option.ID}>
+              <option value={option.BOOKING_NUMBER} selected={this.splitBookingId === option.BOOKING_NUMBER}>
                 {this.getSelectedSplitBookingName(option.ID)}
               </option>
             ))}
@@ -94,41 +98,47 @@ export class IglBookPropertyHeader {
 
   getAdultChildConstraints() {
     return (
-      
-      <div class={"mt-1 d-flex flex-column text-left"}>
-         <label class="h5 d-lg-none">Number of Guests </label>
+      <div class={'mt-1 d-flex flex-column text-left'}>
+        <label class="h5 d-lg-none">Number of Guests </label>
         <div class="form-group  text-left d-flex align-items-center justify-content-between justify-content-sm-start">
-        <fieldset>
-          <div class="btn-group ">
-            <select class="form-control input-sm" id="xAdultSmallSelect" onChange={evt => this.handleAdultChildChange('adult', evt)}>
-              <option value="">Ad..</option>
-              {Array.from(Array(this.adultChildConstraints.adult_max_nbr), (_, i) => i + 1).map(option => (
-                <option value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        </fieldset>
-        {this.adultChildConstraints.child_max_nbr > 0 && (
-          <fieldset class={'ml-1'}>
-            <div class="btn-group ml-1">
-              <select class="form-control input-sm" id="xChildrenSmallSelect" onChange={evt => this.handleAdultChildChange('child', evt)}>
-                <option value={''}>{`Ch... < ${this.adultChildConstraints.child_max_age} years`}</option>
-                {Array.from(Array(this.adultChildConstraints.child_max_nbr), (_, i) => i + 1).map(option => (
+          <fieldset>
+            <div class="btn-group ">
+              <select class="form-control input-sm" id="xAdultSmallSelect" onChange={evt => this.handleAdultChildChange('adult', evt)}>
+                <option value="">Ad..</option>
+                {Array.from(Array(this.adultChildConstraints.adult_max_nbr), (_, i) => i + 1).map(option => (
                   <option value={option}>{option}</option>
                 ))}
               </select>
             </div>
           </fieldset>
-        )}
-        <button class={'btn btn-primary btn-sm ml-2 '} onClick={() => this.handleButtonClicked()}>
-          Check
-        </button>
-      </div>
+          {this.adultChildConstraints.child_max_nbr > 0 && (
+            <fieldset class={'ml-1'}>
+              <div class="btn-group ml-1">
+                <select class="form-control input-sm" id="xChildrenSmallSelect" onChange={evt => this.handleAdultChildChange('child', evt)}>
+                  <option value={''}>{`Ch... < ${this.adultChildConstraints.child_max_age} years`}</option>
+                  {Array.from(Array(this.adultChildConstraints.child_max_nbr), (_, i) => i + 1).map(option => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+            </fieldset>
+          )}
+          <button class={'btn btn-primary btn-sm ml-2 '} onClick={() => this.handleButtonClicked()}>
+            Check
+          </button>
+        </div>
       </div>
     );
   }
   handleButtonClicked() {
-    if (this.adultChildCount.adult === 0) {
+    if (this.minDate && new Date(this.dateRangeData.fromDate).getTime() > new Date(this.defaultDaterange.to_date).getTime()) {
+      this.toast.emit({
+        type: 'error',
+        title: `Check-in date should be max ${moment(new Date(this.defaultDaterange.to_date)).format('ddd, DD MMM YYYY')} `,
+        description: '',
+        position: 'top-right',
+      });
+    } else if (this.adultChildCount.adult === 0) {
       this.toast.emit({ type: 'error', title: 'Please select the number of guests', description: '', position: 'top-right' });
     } else {
       this.buttonClicked.emit({ key: 'check' });
@@ -144,7 +154,7 @@ export class IglBookPropertyHeader {
         {this.showSplitBookingOption ? this.getSplitBookingList() : this.isEventType('EDIT_BOOKING') || this.isEventType('ADD_ROOM') ? null : this.getSourceNode()}
         <div class={'d-lg-flex align-items-center'}>
           <fieldset class=" mt-1 mt-lg-0  ">
-            <igl-date-range disabled={this.isEventType('BAR_BOOKING')} defaultData={this.bookingDataDefaultDateRange}></igl-date-range>
+            <igl-date-range minDate={this.minDate} disabled={this.isEventType('BAR_BOOKING')} defaultData={this.bookingDataDefaultDateRange}></igl-date-range>
           </fieldset>
           {!this.isEventType('EDIT_BOOKING') && this.getAdultChildConstraints()}
         </div>

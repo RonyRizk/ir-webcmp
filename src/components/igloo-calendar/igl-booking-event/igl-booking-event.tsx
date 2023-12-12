@@ -1,5 +1,7 @@
 import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
 import { EventsService } from '../../../services/events.service';
+import { BookingService } from '../../../services/booking.service';
+import { transformNewBooking } from '../../../utils/booking';
 
 @Component({
   tag: 'igl-booking-event',
@@ -10,12 +12,13 @@ export class IglBookingEvent {
   @Element() private element: HTMLElement;
   @Prop() currency;
   @Prop() is_vacation_rental: boolean = false;
+  @Prop() language: string;
   @Event({ bubbles: true, composed: true }) hideBubbleInfo: EventEmitter;
 
   @Event() updateEventData: EventEmitter;
   @Event() dragOverEventData: EventEmitter;
 
-  @Prop() bookingEvent: { [key: string]: any };
+  @Prop({ mutable: true }) bookingEvent: { [key: string]: any };
   @Prop() allBookingEvents: { [key: string]: any } = [];
   @Prop() countryNodeList;
 
@@ -29,8 +32,10 @@ export class IglBookingEvent {
   /* show bubble */
   private showInfoPopup: boolean = false;
   private bubbleInfoTopSide: boolean = false;
-  private eventsService = new EventsService();
   private isStreatch = false;
+  /*Services */
+  private eventsService = new EventsService();
+  private bookingService = new BookingService();
   /* Resize props */
   resizeSide: string = '';
   isDragging: boolean = false;
@@ -56,12 +61,25 @@ export class IglBookingEvent {
     window.addEventListener('click', this.handleClickOutsideBind);
   }
 
+  async fetchAndAssignBookingData() {
+    if (this.bookingEvent.STATUS === 'IN-HOUSE') {
+      const data = await this.bookingService.getExoposedBooking(this.bookingEvent.BOOKING_NUMBER, 'en');
+      this.bookingEvent = { ...this.bookingEvent, ...transformNewBooking(data).filter(d => d.ID === this.bookingEvent.ID)[0] };
+      this.showEventInfo(true);
+    }
+  }
   componentDidLoad() {
     if (this.isNewEvent()) {
       if (!this.bookingEvent.hideBubble) {
         /* auto matically open the popup, calling the method shows bubble either top or bottom based on available space. */
-        setTimeout(() => {
-          this.showEventInfo(true);
+        setTimeout(async () => {
+          if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
+            this.showEventInfo(true);
+          } else if (this.bookingEvent.STATUS === 'IN-HOUSE') {
+            await this.fetchAndAssignBookingData();
+          } else {
+            this.showEventInfo(true);
+          }
           this.renderAgain();
         }, 1);
       }
@@ -102,11 +120,19 @@ export class IglBookingEvent {
         event.detail.moveToDay = this.bookingEvent.FROM_DATE;
         event.detail.toRoomId = event.detail.fromRoomId;
         if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5) {
-          this.showEventInfo(true);
+          if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
+            this.showEventInfo(true);
+          } else if (this.bookingEvent.STATUS === 'IN-HOUSE') {
+            await this.fetchAndAssignBookingData();
+          }
         }
       } else {
         if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5) {
-          this.showEventInfo(true);
+          if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
+            this.showEventInfo(true);
+          } else if (this.bookingEvent.STATUS === 'IN-HOUSE') {
+            await this.fetchAndAssignBookingData();
+          }
         } else {
           const { pool, from_date, to_date, toRoomId } = event.detail as any;
           if (pool) {

@@ -14,6 +14,7 @@
 | `bookingData`            | `booking-data`              |             | `any`                                                                      | `undefined` |
 | `currency`               | `currency`                  |             | `any`                                                                      | `undefined` |
 | `dateRangeData`          | `date-range-data`           |             | `any`                                                                      | `undefined` |
+| `defaultDaterange`       | --                          |             | `{ from_date: string; to_date: string; }`                                  | `undefined` |
 | `eventType`              | `event-type`                |             | `string`                                                                   | `undefined` |
 | `message`                | `message`                   |             | `string`                                                                   | `undefined` |
 | `ratePricingMode`        | `rate-pricing-mode`         |             | `any`                                                                      | `undefined` |
