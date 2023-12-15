@@ -1,6 +1,7 @@
-import { Component, Host, h, Prop, Event, EventEmitter, State, Listen, Fragment } from '@stencil/core';
+import { Component, Host, h, Prop, Event, EventEmitter, State, Listen, Fragment, Watch } from '@stencil/core';
 import { ToBeAssignedService } from '../../../services/toBeAssigned.service';
 import { dateToFormattedString } from '../../../utils/utils';
+import moment from 'moment';
 //import { updateCategories } from '../../../utils/events.utils';
 
 @Component({
@@ -9,6 +10,7 @@ import { dateToFormattedString } from '../../../utils/utils';
   scoped: true,
 })
 export class IglToBeAssigned {
+  @Prop() unassignedDatesProp: any;
   @Prop() propertyid: number;
   @Prop() from_date: string;
   @Prop() to_date: string;
@@ -35,6 +37,64 @@ export class IglToBeAssigned {
   componentWillLoad() {
     this.reArrangeData();
   }
+  @Watch('unassignedDatesProp')
+  handleUnassignedDatesToBeAssignedChange(newValue: any) {
+    const { fromDate, toDate, data } = newValue;
+    let dt = new Date(fromDate);
+    dt.setHours(0);
+    dt.setMinutes(0);
+    dt.setSeconds(0);
+    let endDate = dt.getTime();
+    while (endDate <= new Date(toDate).getTime()) {
+      if (data && !data[endDate] && this.unassignedDates.hasOwnProperty(endDate)) {
+        delete this.unassignedDates[endDate];
+      } else if (data && data[endDate]) {
+        this.unassignedDates[endDate] = data[endDate];
+      }
+      endDate = moment(endDate).add(1, 'days').toDate().getTime();
+    }
+    this.data = { ...this.unassignedDates };
+    this.orderedDatesList = Object.keys(this.data).sort((a, b) => parseInt(a) - parseInt(b));
+
+    if (this.orderedDatesList.length) {
+      if (!this.data.hasOwnProperty(this.selectedDate)) {
+        this.selectedDate = this.orderedDatesList.length ? this.orderedDatesList[0] : null;
+      }
+      this.showForDate(this.selectedDate, false);
+      this.renderView();
+    } else {
+      this.selectedDate = null;
+    }
+  }
+  handleAssignUnit(event: CustomEvent<{ [key: string]: any }>) {
+    const opt: { [key: string]: any } = event.detail;
+    const data = opt.data;
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+
+    if (opt.key === 'assignUnit') {
+      if (Object.keys(this.data[data.selectedDate].categories).length === 1) {
+        this.isLoading = true;
+      }
+      this.data[data.selectedDate].categories[data.RT_ID] = this.data[data.selectedDate].categories[data.RT_ID].filter(eventData => eventData.ID != data.assignEvent.ID);
+      this.calendarData = data.calendarData;
+      // this.calendarData.bookingEvents.push(data.assignEvent);
+
+      // if (!this.data[data.selectedDate].categories[data.RT_ID].length) {
+      //   delete this.data[data.selectedDate].categories[data.RT_ID];
+
+      //   if (!Object.keys(this.data[data.selectedDate].categories).length) {
+      //     delete this.data[data.selectedDate];
+      //     //this.orderedDatesList = this.orderedDatesList.filter(dateStamp => dateStamp != data.selectedDate);
+      //     //this.selectedDate = this.orderedDatesList.length ? this.orderedDatesList[0] : null;
+      //   }
+      // }
+      this.renderView();
+
+      // this.reduceAvailableUnitEvent.emit({key: "reduceAvailableDays", data: {selectedDate: data.selectedDate}});
+    }
+  }
+
   async updateCategories(key, calendarData) {
     try {
       let categorisedRooms = {};
@@ -103,9 +163,11 @@ export class IglToBeAssigned {
     this.renderView();
   }
 
-  async showForDate(dateStamp) {
+  async showForDate(dateStamp, withLoading = true) {
     try {
-      this.isLoading = true;
+      if (withLoading) {
+        this.isLoading = true;
+      }
       if (this.showDatesList) {
         this.showUnassignedDate();
       }
@@ -120,6 +182,7 @@ export class IglToBeAssigned {
       }
       this.isLoading = false;
       this.selectedDate = dateStamp;
+      this.renderView();
     } catch (error) {
       // toastr.error(error);
     }
@@ -172,57 +235,7 @@ export class IglToBeAssigned {
       return null;
     }
   }
-  async handleAssignUnit(event) {
-    event.stopImmediatePropagation();
-    if (event.detail.key !== 'assignUnit') return;
-    const assignmentDetails = event.detail.data;
-    const { selectedDate, RT_ID } = assignmentDetails;
-    const categories = this.data[selectedDate].categories;
 
-    this.removeEventFromCategory(assignmentDetails);
-    this.checkAndCleanEmptyCategories(assignmentDetails);
-    if (!categories[RT_ID]) {
-      this.renderView();
-    } else {
-      await this.updateSelectedDateCategories(assignmentDetails.selectedDate);
-      this.renderView();
-    }
-    this.emitUnitReductionEvent(assignmentDetails.selectedDate);
-  }
-
-  removeEventFromCategory(assignmentDetails) {
-    const { selectedDate, RT_ID, assignEvent } = assignmentDetails;
-    const categories = this.data[selectedDate].categories;
-    if (categories[RT_ID]) {
-      categories[RT_ID] = categories[RT_ID].filter(event => event.ID != assignEvent.ID);
-    }
-  }
-  emitUnitReductionEvent(selectedDate) {
-    this.reduceAvailableUnitEvent.emit({
-      key: 'reduceAvailableDays',
-      data: { selectedDate },
-    });
-  }
-
-  async updateSelectedDateCategories(selectedDate) {
-    if (selectedDate !== null) {
-      await this.updateCategories(selectedDate, this.calendarData);
-    }
-  }
-
-  checkAndCleanEmptyCategories(assignmentDetails) {
-    const { selectedDate, RT_ID } = assignmentDetails;
-    const categories = this.data[selectedDate].categories;
-
-    if (!categories[RT_ID]) {
-      delete categories[RT_ID];
-      if (!Object.keys(categories).length) {
-        delete this.data[selectedDate];
-        this.orderedDatesList = this.orderedDatesList.filter(date => date != selectedDate);
-        this.selectedDate = this.orderedDatesList.length ? this.orderedDatesList[0] : null;
-      }
-    }
-  }
   renderView() {
     this.renderAgain = !this.renderAgain;
   }
@@ -238,7 +251,9 @@ export class IglToBeAssigned {
                 <i class="ft-chevrons-left"></i>
               </div>
               <hr />
-              {this.isLoading ? (
+              {Object.keys(this.data).length === 0 ? (
+                <p>All Bookings Are Assigned</p>
+              ) : this.isLoading ? (
                 <p>{this.loadingMessage}</p>
               ) : (
                 <Fragment>

@@ -15,6 +15,7 @@
 | `defaultData`         | --                      |             | `{ [key: string]: any; }` | `undefined`      |
 | `fullyBlocked`        | `fully-blocked`         |             | `boolean`                 | `undefined`      |
 | `index`               | `index`                 |             | `number`                  | `undefined`      |
+| `isBookDisabled`      | `is-book-disabled`      |             | `boolean`                 | `false`          |
 | `ratePlanData`        | --                      |             | `{ [key: string]: any; }` | `undefined`      |
 | `ratePricingMode`     | --                      |             | `any[]`                   | `[]`             |
 | `totalAvailableRooms` | `total-available-rooms` |             | `number`                  | `undefined`      |

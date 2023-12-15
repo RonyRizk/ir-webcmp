@@ -56,12 +56,14 @@ export namespace Components {
     interface IglBookPropertyHeader {
         "adultChildConstraints": TAdultChildConstraints;
         "adultChildCount": { adult: number; child: number };
+        "bookedByInfoData": any;
         "bookingData": any;
         "bookingDataDefaultDateRange": { [key: string]: any };
         "dateRangeData": any;
         "defaultDaterange": { from_date: string; to_date: string };
         "message": string;
         "minDate": string;
+        "propertyId": number;
         "showSplitBookingOption": boolean;
         "sourceOptions": TSourceOptions[];
         "splitBookingId": any;
@@ -85,12 +87,14 @@ export namespace Components {
     interface IglBookingOverviewPage {
         "adultChildConstraints": TAdultChildConstraints;
         "adultChildCount": { adult: number; child: number };
+        "bookedByInfoData": any;
         "bookingData": any;
         "currency": any;
         "dateRangeData": any;
-        "defaultDaterange": {from_date:string,to_date:string};
+        "defaultDaterange": { from_date: string; to_date: string };
         "eventType": string;
         "message": string;
+        "propertyId": number;
         "ratePricingMode": any;
         "selectedRooms": Map<string, Map<string, any>>;
         "showSplitBookingOption": boolean;
@@ -103,6 +107,7 @@ export namespace Components {
         "defaultData": { [key: string]: any };
         "fullyBlocked": boolean;
         "index": number;
+        "isBookDisabled": boolean;
         "ratePlanData": { [key: string]: any };
         "ratePricingMode": any[];
         "totalAvailableRooms": number;
@@ -112,6 +117,7 @@ export namespace Components {
         "currency": any;
         "dateDifference": number;
         "defaultData": Map<string, any>;
+        "isBookDisabled": boolean;
         "ratePricingMode": any[];
         "roomTypeData": { [key: string]: any };
     }
@@ -132,7 +138,7 @@ export namespace Components {
         "propertyid": number;
         "to_date": string;
         "today": String;
-        "unassignedDates": {};
+        "unassignedDates": any;
     }
     interface IglDateRange {
         "defaultData": { [key: string]: any };
@@ -188,6 +194,7 @@ export namespace Components {
         "loadingMessage": string;
         "propertyid": number;
         "to_date": string;
+        "unassignedDatesProp": any;
     }
     interface IglooCalendar {
         "baseurl": string;
@@ -202,11 +209,14 @@ export namespace Components {
     interface IrAutocomplete {
         "disabled": boolean;
         "duration": number;
+        "from_date": string;
         "inputId": string;
+        "isSplitBooking": boolean;
         "name": string;
         "placeholder": string;
         "propertyId": number;
         "required": boolean;
+        "to_date": string;
         "type": 'email' | 'text' | 'password' | 'number' | 'search';
         "value": string;
     }
@@ -1059,6 +1069,7 @@ declare namespace LocalJSX {
     interface IglBookPropertyHeader {
         "adultChildConstraints"?: TAdultChildConstraints;
         "adultChildCount"?: { adult: number; child: number };
+        "bookedByInfoData"?: any;
         "bookingData"?: any;
         "bookingDataDefaultDateRange"?: { [key: string]: any };
         "dateRangeData"?: any;
@@ -1069,8 +1080,10 @@ declare namespace LocalJSX {
         "onButtonClicked"?: (event: IglBookPropertyHeaderCustomEvent<{ key: TPropertyButtonsTypes }>) => void;
         "onCheckClicked"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onSourceDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
+        "onSpiltBookingSelected"?: (event: IglBookPropertyHeaderCustomEvent<{ key: string; data: unknown }>) => void;
         "onSplitBookingDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onToast"?: (event: IglBookPropertyHeaderCustomEvent<IToast>) => void;
+        "propertyId"?: number;
         "showSplitBookingOption"?: boolean;
         "sourceOptions"?: TSourceOptions[];
         "splitBookingId"?: any;
@@ -1101,13 +1114,15 @@ declare namespace LocalJSX {
     interface IglBookingOverviewPage {
         "adultChildConstraints"?: TAdultChildConstraints;
         "adultChildCount"?: { adult: number; child: number };
+        "bookedByInfoData"?: any;
         "bookingData"?: any;
         "currency"?: any;
         "dateRangeData"?: any;
-        "defaultDaterange"?: {from_date:string,to_date:string};
+        "defaultDaterange"?: { from_date: string; to_date: string };
         "eventType"?: string;
         "message"?: string;
         "onRoomsDataUpdate"?: (event: IglBookingOverviewPageCustomEvent<any>) => void;
+        "propertyId"?: number;
         "ratePricingMode"?: any;
         "selectedRooms"?: Map<string, Map<string, any>>;
         "showSplitBookingOption"?: boolean;
@@ -1120,6 +1135,7 @@ declare namespace LocalJSX {
         "defaultData"?: { [key: string]: any };
         "fullyBlocked"?: boolean;
         "index"?: number;
+        "isBookDisabled"?: boolean;
         "onDataUpdateEvent"?: (event: IglBookingRoomRatePlanCustomEvent<{ [key: string]: any }>) => void;
         "onGotoSplitPageTwoEvent"?: (event: IglBookingRoomRatePlanCustomEvent<{ [key: string]: any }>) => void;
         "ratePlanData"?: { [key: string]: any };
@@ -1131,6 +1147,7 @@ declare namespace LocalJSX {
         "currency"?: any;
         "dateDifference"?: number;
         "defaultData"?: Map<string, any>;
+        "isBookDisabled"?: boolean;
         "onDataUpdateEvent"?: (event: IglBookingRoomsCustomEvent<{ [key: string]: any }>) => void;
         "ratePricingMode"?: any[];
         "roomTypeData"?: { [key: string]: any };
@@ -1163,7 +1180,7 @@ declare namespace LocalJSX {
         "propertyid"?: number;
         "to_date"?: string;
         "today"?: String;
-        "unassignedDates"?: {};
+        "unassignedDates"?: any;
     }
     interface IglDateRange {
         "defaultData"?: { [key: string]: any };
@@ -1238,6 +1255,7 @@ declare namespace LocalJSX {
         "onShowBookingPopup"?: (event: IglToBeAssignedCustomEvent<any>) => void;
         "propertyid"?: number;
         "to_date"?: string;
+        "unassignedDatesProp"?: any;
     }
     interface IglooCalendar {
         "baseurl"?: string;
@@ -1248,6 +1266,7 @@ declare namespace LocalJSX {
         "onCalculateUnassignedDates"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onDragOverHighlightElement"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onMoveBookingTo"?: (event: IglooCalendarCustomEvent<any>) => void;
+        "onReduceAvailableUnitEvent"?: (event: IglooCalendarCustomEvent<{ fromDate: string; toDate: string }>) => void;
         "propertyid"?: number;
         "ticket"?: string;
         "to_date"?: string;
@@ -1255,13 +1274,16 @@ declare namespace LocalJSX {
     interface IrAutocomplete {
         "disabled"?: boolean;
         "duration"?: number;
+        "from_date"?: string;
         "inputId"?: string;
+        "isSplitBooking"?: boolean;
         "name"?: string;
         "onComboboxValue"?: (event: IrAutocompleteCustomEvent<{ key: string; data: unknown }>) => void;
         "onInputCleared"?: (event: IrAutocompleteCustomEvent<null>) => void;
         "placeholder"?: string;
         "propertyId"?: number;
         "required"?: boolean;
+        "to_date"?: string;
         "type"?: 'email' | 'text' | 'password' | 'number' | 'search';
         "value"?: string;
     }
