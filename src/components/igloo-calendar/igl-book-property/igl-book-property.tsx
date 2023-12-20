@@ -7,6 +7,8 @@ import { transformNewBLockedRooms } from '../../../utils/booking';
 import { IglBookPropertyService } from './igl-book-property.service';
 import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOptions } from '../../../models/igl-book-property';
 import { EventsService } from '../../../services/events.service';
+import { Unsubscribe } from '@reduxjs/toolkit';
+import { store } from '../../../redux/store';
 
 @Component({
   tag: 'igl-book-property',
@@ -16,7 +18,7 @@ import { EventsService } from '../../../services/events.service';
 export class IglBookProperty {
   @Prop() propertyid: number;
   @Prop() allowedBookingSources: any;
-
+  @State() defaultTexts;
   @Prop() language: string;
   @Prop() countryNodeList;
   @Prop() showPaymentDetails: boolean = false;
@@ -46,7 +48,7 @@ export class IglBookProperty {
   private bookPropertyService = new IglBookPropertyService();
   private eventsService = new EventsService();
   private defaultDateRange: { from_date: string; to_date: string };
-
+  private unsubscribe: Unsubscribe;
   @Event() closeBookingWindow: EventEmitter<{ [key: string]: any }>;
   @Event() bookingCreated: EventEmitter<{ pool?: string; data: RoomBookingDetails[] }>;
   @Event() blockedCreated: EventEmitter<RoomBlockDetails>;
@@ -60,6 +62,7 @@ export class IglBookProperty {
   }
   disconnectedCallback() {
     document.removeEventListener('keydown', this.handleKeyDown);
+    this.unsubscribe();
   }
   @Listen('inputCleared')
   clearBooking(e: CustomEvent) {
@@ -67,6 +70,7 @@ export class IglBookProperty {
       e.stopImmediatePropagation();
       e.stopPropagation();
       this.bookedByInfoData = {};
+      this.bookPropertyService.resetRoomsInfoAndMessage(this);
       this.renderPage();
     }
   }
@@ -76,32 +80,17 @@ export class IglBookProperty {
     e.stopImmediatePropagation();
     e.stopPropagation;
     const { key, data } = e.detail;
-    console.log(data);
+    console.log(data, key);
     if (key === 'select') {
       const res = await this.bookingService.getExoposedBooking((data as any).booking_nbr, this.language);
-      this.bookedByInfoData = {
-        id: res.guest.id,
-        email: res.guest.email,
-        firstName: res.guest.first_name,
-        lastName: res.guest.last_name,
-        countryId: res.guest.country_id,
-        isdCode: res.guest.country_id.toString(),
-        contactNumber: res.guest.mobile,
-        selectedArrivalTime: res.arrival,
-        emailGuest: res.guest.subscribe_to_news_letter,
-        message: res.remark,
-        cardNumber: '',
-        cardHolderName: '',
-        expiryMonth: '',
-        expiryYear: '',
-        bookingNumber: res.booking_nbr,
-        rooms: res.rooms,
-        from_date: res.from_date,
-        to_date: res.to_date,
-      };
+      this.bookPropertyService.setBookingInfoFromAutoComplete(this, res);
       this.sourceOption = res.source;
       this.renderPage();
-      // console.log(res);
+    } else if (key === 'blur' && data !== '') {
+      const res = await this.bookingService.getExoposedBooking(data as string, this.language);
+      this.bookPropertyService.setBookingInfoFromAutoComplete(this, res);
+      this.sourceOption = res.source;
+      this.renderPage();
     }
   }
   async componentWillLoad() {
@@ -126,7 +115,7 @@ export class IglBookProperty {
         this.bookPropertyService.setEditingRoomInfo(this.defaultData, this.selectedUnits);
       }
       if (!this.isEventType('BAR_BOOKING')) {
-        this.defaultData.roomsInfo = [];
+        this.bookPropertyService.resetRoomsInfoAndMessage(this);
       }
 
       if (this.defaultData.event_type === 'SPLIT_BOOKING') {
@@ -137,9 +126,15 @@ export class IglBookProperty {
       } else {
         this.page = 'page_one';
       }
+      this.updateFromStore();
+      this.unsubscribe = store.subscribe(() => this.updateFromStore());
     } catch (error) {
       console.error('Error fetching setup entries:', error);
     }
+  }
+  updateFromStore() {
+    const state = store.getState();
+    this.defaultTexts = state.languages;
   }
 
   async fetchSetupEntries() {
@@ -171,9 +166,8 @@ export class IglBookProperty {
   }
   @Listen('adultChild')
   handleAdultChildChange(event: CustomEvent) {
-    if (this.isEventType('ADD_ROOM')) {
-      this.defaultData.roomsInfo = [];
-      this.message = '';
+    if (this.isEventType('ADD_ROOM') || this.isEventType('SPLIT_BOOKING')) {
+      this.bookPropertyService.resetRoomsInfoAndMessage(this);
     }
     this.adultChildCount = { ...event.detail };
   }
@@ -217,7 +211,7 @@ export class IglBookProperty {
     const opt: { [key: string]: any } = event.detail;
     if (opt.key === 'selectedDateRange') {
       this.dateRangeData = opt.data;
-      if (this.isEventType('ADD_ROOM')) {
+      if (this.isEventType('ADD_ROOM') || this.isEventType('SPLIT_BOOKING')) {
         this.defaultData.roomsInfo = [];
         this.message = '';
       } else if (this.adultChildCount.adult !== 0) {
@@ -294,11 +288,11 @@ export class IglBookProperty {
         ></igl-block-dates-view>
         <div class="p-0 mb-1 mt-2 gap-30 d-flex align-items-center justify-content-between">
           <button class="btn btn-secondary flex-fill" onClick={() => this.closeWindow()}>
-            Cancel
+            {this.defaultTexts.entries.Lcz_Cancel}
           </button>
 
           <button class="btn btn-primary flex-fill" onClick={() => this.handleBlockDate()}>
-            Block dates
+            {this.defaultTexts.entries.Lcz_Blockdates}
           </button>
         </div>
       </Fragment>
@@ -399,7 +393,13 @@ export class IglBookProperty {
     }, 100);
   }
   onRoomDataUpdate(event: CustomEvent) {
-    const units = this.bookPropertyService.onDataRoomUpdate(event, this.selectedUnits, this.isEventType('EDIT_BOOKING'), this.defaultData.NAME);
+    const units = this.bookPropertyService.onDataRoomUpdate(
+      event,
+      this.selectedUnits,
+      this.isEventType('EDIT_BOOKING'),
+      this.isEventType('EDIT_BOOKING') || this.isEventType('SPLIT_BOOKING') || this.isEventType('BAR_BOOKING'),
+      this.defaultData.NAME,
+    );
     this.selectedUnits = new Map(units);
     this.renderPage();
   }

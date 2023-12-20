@@ -7,11 +7,12 @@
 
 ## Properties
 
-| Property      | Attribute  | Description | Type                      | Default     |
-| ------------- | ---------- | ----------- | ------------------------- | ----------- |
-| `defaultData` | --         |             | `{ [key: string]: any; }` | `undefined` |
-| `disabled`    | `disabled` |             | `boolean`                 | `false`     |
-| `minDate`     | `min-date` |             | `string`                  | `undefined` |
+| Property      | Attribute    | Description | Type                      | Default     |
+| ------------- | ------------ | ----------- | ------------------------- | ----------- |
+| `dateLabel`   | `date-label` |             | `any`                     | `undefined` |
+| `defaultData` | --           |             | `{ [key: string]: any; }` | `undefined` |
+| `disabled`    | `disabled`   |             | `boolean`                 | `false`     |
+| `minDate`     | `min-date`   |             | `string`                  | `undefined` |
 
 
 ## Events

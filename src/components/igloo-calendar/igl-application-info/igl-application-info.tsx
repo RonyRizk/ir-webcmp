@@ -2,6 +2,7 @@ import { Component, Host, h, Prop, Event, EventEmitter, Watch, State } from '@st
 import { v4 } from 'uuid';
 import { getCurrencySymbol } from '../../../utils/utils';
 
+
 @Component({
   tag: 'igl-application-info',
   styleUrl: 'igl-application-info.css',
@@ -10,6 +11,7 @@ import { getCurrencySymbol } from '../../../utils/utils';
 export class IglApplicationInfo {
   @Prop() guestInfo: { [key: string]: any };
   @Prop() currency;
+  @Prop() defaultTexts: any;
   @Prop({ reflect: true, mutable: true }) roomsList: { [key: string]: any }[] = [];
   @Prop() guestRefKey: string;
   @Prop() bedPreferenceType = [];
@@ -24,6 +26,7 @@ export class IglApplicationInfo {
     this.guestData = this.guestInfo ? { ...this.guestInfo } : {};
     this.updateRoomList();
   }
+  
   @Watch('selectedUnits')
   async handleSelctedUnits() {
     this.updateRoomList();
@@ -80,7 +83,7 @@ export class IglApplicationInfo {
                 id={v4()}
                 type="email"
                 class="form-control"
-                placeholder="Guest first name & last name"
+                placeholder={this.defaultTexts.entries.Lcz_GuestFirstnameAndLastname}
                 name="guestName"
                 onInput={event => this.handleGuestNameChange(event)}
                 required
@@ -91,7 +94,7 @@ export class IglApplicationInfo {
               <div class="mr-1 p-0 flex-fill">
                 <select class="form-control input-sm pr-0" id={v4()} onChange={event => this.handleDataChange('roomId', (event.target as HTMLInputElement).value)}>
                   <option value="" selected={this.guestData.roomId === ''}>
-                    Assign units
+                    {this.defaultTexts.entries.Lcz_Assignunits}
                   </option>
                   {this.filterdRoomList.map(room => (
                     <option value={room.id} selected={+this.guestData.roomId === room.id}>
@@ -105,7 +108,7 @@ export class IglApplicationInfo {
             <div class="mr-1 flex-fill">
               <select class="form-control input-sm" id={v4()} onChange={event => this.handleDataChange('preference', (event.target as HTMLInputElement).value)}>
                 <option value="" selected={this.guestData.preference === ''}>
-                  No preference
+                  {this.defaultTexts.entries.Lcz_NoPreference}
                 </option>
                 {this.bedPreferenceType.map(data => (
                   <option value={data.CODE_NAME} selected={this.guestData.preference === data.CODE_NAME}>

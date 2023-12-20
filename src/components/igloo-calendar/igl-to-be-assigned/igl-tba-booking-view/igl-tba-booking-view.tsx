@@ -1,6 +1,8 @@
 import { Component, Host, Prop, h, Event, EventEmitter, Listen, State } from '@stencil/core';
 import { ToBeAssignedService } from '../../../../services/toBeAssigned.service';
 import { v4 } from 'uuid';
+import { Unsubscribe } from '@reduxjs/toolkit';
+import { store } from '../../../../redux/store';
 
 @Component({
   tag: 'igl-tba-booking-view',
@@ -16,6 +18,7 @@ export class IglTbaBookingView {
   @Event() assignRoomEvent: EventEmitter<{ [key: string]: any }>;
   @Prop() calendarData: { [key: string]: any };
   @Prop() selectedDate;
+  @State() defaultTexts:any;
   @Prop() eventData: { [key: string]: any } = {};
   @Prop() categoriesData: { [key: string]: any } = {};
   @Prop() categoryId;
@@ -27,6 +30,8 @@ export class IglTbaBookingView {
   private highlightSection: boolean = false;
   private allRoomsList: { [key: string]: any }[] = [];
   private toBeAssignedService = new ToBeAssignedService();
+  private unsubscribe:Unsubscribe;
+
   onSelectRoom(evt) {
     if (evt.stopImmediatePropagation) {
       evt.stopImmediatePropagation();
@@ -57,6 +62,15 @@ export class IglTbaBookingView {
         this.handleHighlightAvailability();
       }, 100);
     }
+    this.updateFromStore()
+    this.unsubscribe=store.subscribe(()=>this.updateFromStore())
+  }
+  updateFromStore() {
+    const state = store.getState();
+    this.defaultTexts = state.languages;
+  }
+  disconnectedCallback(){
+    this.unsubscribe()
   }
 
   async handleAssignUnit(event) {
@@ -174,7 +188,7 @@ export class IglTbaBookingView {
             <div class="d-inline-block p-0 selectContainer">
               <select class="form-control input-sm" id={v4()} onChange={evt => this.onSelectRoom(evt)}>
                 <option value="" selected={this.selectedRoom == -1}>
-                  Assign unit
+                {this.defaultTexts.entries.Lcz_AssignUnit}
                 </option>
                 {this.allRoomsList.map(room => (
                   <option value={room.id} selected={this.selectedRoom == room.id}>
@@ -189,7 +203,7 @@ export class IglTbaBookingView {
                   X
                 </button>
                 <button type="button" class="btn btn-primary btn-sm" onClick={evt => this.handleAssignUnit(evt)} disabled={this.selectedRoom === -1}>
-                  Assign
+                {this.defaultTexts.entries.Lcz_Assign}
                 </button>
               </div>
             ) : null}

@@ -2,6 +2,8 @@ import { Component, Prop, h, Event, EventEmitter, Host, State } from '@stencil/c
 import { IPageTwoDataUpdateProps } from '../../../models/models';
 import { TPropertyButtonsTypes } from '../../../models/igl-book-property';
 import { formatDate, getCurrencySymbol } from '../../../utils/utils';
+import { Unsubscribe } from '@reduxjs/toolkit';
+import { store } from '../../../redux/store';
 @Component({
   tag: 'igl-pagetwo',
   styleUrl: 'igl-pagetwo.css',
@@ -10,6 +12,7 @@ import { formatDate, getCurrencySymbol } from '../../../utils/utils';
 export class IglPagetwo {
   @Prop() showPaymentDetails: boolean;
   @Prop() currency;
+  @State() defaultTexts:any;
   @Prop({ reflect: true }) isEditOrAddRoomEvent: boolean;
   @Prop() dateRangeData: { [key: string]: any };
   @Prop() bookingData: { [key: string]: any };
@@ -31,10 +34,20 @@ export class IglPagetwo {
   @State() guestData: any;
 
   @State() selectedUnits: { [key: string]: any } = {};
+  private unsubscribe:Unsubscribe;
 
   componentWillLoad() {
     this.initializeGuestData();
+    this.updateFromStore()
+    this.unsubscribe=store.subscribe(()=>this.updateFromStore())
     this.selectedBookedByData = this.bookedByInfoData;
+  }
+  updateFromStore() {
+    const state = store.getState();
+    this.defaultTexts = state.languages;
+  }
+  disconnectedCallback(){
+    this.unsubscribe()
   }
   initializeGuestData() {
     let total = 0;
@@ -146,11 +159,11 @@ export class IglPagetwo {
             <span class="mr-1 font-weight-bold font-medium-1">
               {formatDate(this.dateRangeData.fromDateStr)} - {formatDate(this.dateRangeData.toDateStr)}
             </span>
-            {this.dateRangeData.dateDifference} {+this.dateRangeData.dateDifference > 1 ? 'nights' : 'night'}
+            {this.dateRangeData.dateDifference} {+this.dateRangeData.dateDifference > 1 ? ` ${this.defaultTexts.entries.Lcz_Nights}` : ` ${this.defaultTexts.entries.Lcz_Night}`}
           </div>
           {this.guestData.length > 1 && (
             <div class="mt-1 mt-md-0 text-right">
-              Total price <span class="font-weight-bold font-medium-1">{getCurrencySymbol(this.currency.code) + this.bookingData.TOTAL_PRICE || '$0.00'}</span>
+              {this.defaultTexts.entries.Lcz_TotalPrice} <span class="font-weight-bold font-medium-1">{getCurrencySymbol(this.currency.code) + this.bookingData.TOTAL_PRICE || '$0.00'}</span>
             </div>
           )}
         </div>
@@ -158,6 +171,7 @@ export class IglPagetwo {
         {this.guestData.map((roomInfo, index) => {
           return (
             <igl-application-info
+            defaultTexts={this.defaultTexts}
               currency={this.currency}
               bedPreferenceType={this.bedPreferenceType}
               index={index}
@@ -173,6 +187,7 @@ export class IglPagetwo {
 
         {this.isEditOrAddRoomEvent || this.showSplitBookingOption ? null : (
           <igl-property-booked-by
+          defaultTexts={this.defaultTexts}
             propertyId={this.propertyId}
             countryNodeList={this.countryNodeList}
             language={this.language}
@@ -192,7 +207,7 @@ export class IglPagetwo {
           <div class="d-flex p-0 mb-1 mt-2">
             <div class="flex-fill mr-2">
               <button type="button" class="btn btn-secondary full-width" onClick={() => this.buttonClicked.emit({ key: 'cancel' })}>
-                Cancel
+              {this.defaultTexts.entries.Lcz_Cancel}
               </button>
             </div>
             <div class="flex-fill">
@@ -203,7 +218,7 @@ export class IglPagetwo {
                 onClick={() => this.buttonClicked.emit({ key: 'save' })}
               >
                 {this.isLoading === 'save' && <i class="la la-circle-o-notch spinner mx-1"></i>}
-                Save
+                {this.defaultTexts.entries.Lcz_Save}
               </button>
             </div>
           </div>
@@ -211,13 +226,13 @@ export class IglPagetwo {
           <div class="d-flex flex-column flex-md-row p-0 mb-1 mt-2 justify-content-md-between align-items-md-center">
             <div class="flex-fill mr-md-1">
               <button type="button" class="btn btn-secondary full-width" onClick={() => this.buttonClicked.emit({ key: 'back' })}>
-                <span class={'d-none d-md-inline-flex'}> &lt;&lt;</span> Back
+                <span class={'d-none d-md-inline-flex'}> &lt;&lt;</span> {this.defaultTexts.entries.Lcz_Back}
               </button>
             </div>
             <div class="mt-1 mt-md-0 flex-fill mr-md-1">
               <button disabled={this.isButtonDisabled('book')} type="button" class="btn btn-primary full-width" onClick={() => this.buttonClicked.emit({ key: 'book' })}>
                 {this.isLoading === 'book' && <i class="la la-circle-o-notch spinner mx-1"></i>}
-                Book
+                {this.defaultTexts.entries.Lcz_Book}
               </button>
             </div>
             <div class="mt-1 mt-md-0 flex-fill">
@@ -228,7 +243,7 @@ export class IglPagetwo {
                 onClick={() => this.buttonClicked.emit({ key: 'bookAndCheckIn' })}
               >
                 {this.isLoading === 'bookAndCheckIn' && <i class="la la-circle-o-notch spinner mx-1"></i>}
-                Book & check in
+                {this.defaultTexts.entries.Lcz_BookAndChekcIn}
               </button>
             </div>
           </div>

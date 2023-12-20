@@ -25,10 +25,11 @@
 
 ## Events
 
-| Event           | Description | Type                                           |
-| --------------- | ----------- | ---------------------------------------------- |
-| `comboboxValue` |             | `CustomEvent<{ key: string; data: unknown; }>` |
-| `inputCleared`  |             | `CustomEvent<null>`                            |
+| Event           | Description | Type                                                                                                 |
+| --------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `comboboxValue` |             | `CustomEvent<{ key: string; data: unknown; }>`                                                       |
+| `inputCleared`  |             | `CustomEvent<null>`                                                                                  |
+| `toast`         |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
 ## Dependencies
