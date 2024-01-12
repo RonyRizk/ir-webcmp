@@ -7,19 +7,21 @@
 
 ## Properties
 
-| Property                 | Attribute | Description | Type             | Default |
-| ------------------------ | --------- | ----------- | ---------------- | ------- |
-| `data`                   | --        |             | `Guest`          | `null`  |
-| `setupDataCountries`     | --        |             | `selectOption[]` | `null`  |
-| `setupDataCountriesCode` | --        |             | `selectOption[]` | `null`  |
+| Property                 | Attribute       | Description | Type             | Default     |
+| ------------------------ | --------------- | ----------- | ---------------- | ----------- |
+| `booking_nbr`            | `booking_nbr`   |             | `string`         | `undefined` |
+| `defaultTexts`           | `default-texts` |             | `Languages`      | `undefined` |
+| `email`                  | `email`         |             | `string`         | `undefined` |
+| `language`               | `language`      |             | `string`         | `undefined` |
+| `setupDataCountries`     | --              |             | `selectOption[]` | `null`      |
+| `setupDataCountriesCode` | --              |             | `selectOption[]` | `null`      |
 
 
 ## Events
 
-| Event          | Description | Type                     |
-| -------------- | ----------- | ------------------------ |
-| `getSetupData` |             | `CustomEvent<any>`       |
-| `submitForm`   |             | `CustomEvent<guestInfo>` |
+| Event          | Description | Type                |
+| -------------- | ----------- | ------------------- |
+| `closeSideBar` |             | `CustomEvent<null>` |
 
 
 ## Dependencies
@@ -30,17 +32,15 @@
 
 ### Depends on
 
-- [ir-select](../ir-select)
 - [ir-input-text](../ir-input-text)
-- [ir-checkbox](../ir-checkbox)
+- [ir-select](../ir-select)
 - [ir-button](../ir-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-guest-info --> ir-select
   ir-guest-info --> ir-input-text
-  ir-guest-info --> ir-checkbox
+  ir-guest-info --> ir-select
   ir-guest-info --> ir-button
   ir-booking-details --> ir-guest-info
   style ir-guest-info fill:#f9f,stroke:#333,stroke-width:4px

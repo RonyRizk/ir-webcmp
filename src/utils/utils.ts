@@ -2,17 +2,12 @@ import moment from 'moment';
 import IBooking, { ICountry, PhysicalRoomType } from '../models/IBooking';
 
 export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string): string {
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-
-  const [_, day] = dayWithWeekday.split(' ');
-  const [month, year] = monthWithYear.split(' ');
-
-  const monthIndex = months.indexOf(month);
-  if (monthIndex !== -1) {
-    return `${day}_${monthIndex + 1}_${year}`;
-  } else {
-    throw new Error('Invalid Month');
+  const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
+  const date = moment(dateStr, 'DD MMM YYYY');
+  if (!date.isValid()) {
+    throw new Error('Invalid Date');
   }
+  return date.format('D_M_YYYY');
 }
 
 export function convertDateToTime(dayWithWeekday: string, monthWithYear: string): number {
@@ -78,13 +73,15 @@ export function formatLegendColors(legendData) {
     'NOTES': { id: 8, clsName: 'NOTES' },
     'OUTSTANDING-BALANCE': { id: 9, clsName: 'OUTSTANDING_BALANCE' },
   };
-
   legendData.forEach(legend => {
     formattedLegendData[legend.id] = legend;
     formattedLegendData.statusId = statusId; // NOTE: This will overwrite the 'statusId' property with every iteration.
   });
 
   return formattedLegendData;
+}
+export function isBlockUnit(status_code: any) {
+  return ['003', '002', '004'].includes(status_code);
 }
 export function getCurrencySymbol(currencyCode) {
   const formatter = new Intl.NumberFormat(undefined, {
@@ -129,4 +126,19 @@ export function formatDate(dateString, option = 'DD MMM YYYY') {
 }
 export function getNextDay(date: Date) {
   return moment(date).add(1, 'days').format('YYYY-MM-DD');
+}
+
+export function convertDatePrice(date: string) {
+  return moment(date, 'YYYY-MM-DD').format('DD/MM ddd');
+}
+export function getDaysArray(date1: string, date2: string) {
+  let dates = [];
+  let start = moment.min(moment(date1).add(1, 'days'), moment(date2));
+  let end = moment.max(moment(date1), moment(date2));
+  while (start < end) {
+    dates.push(start.format('YYYY-MM-DD'));
+    start = start.clone().add(1, 'days');
+  }
+
+  return dates;
 }

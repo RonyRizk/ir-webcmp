@@ -4,7 +4,7 @@ import { BookingDetails, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthTyp
 
 import { convertDateToCustomFormat, convertDateToTime, dateToFormattedString } from '../utils/utils';
 import { getMyBookings } from '../utils/booking';
-import { Booking, Day } from '../models/booking.dto';
+import { Booking, Day, Guest } from '../models/booking.dto';
 
 export class BookingService {
   public async getCalendarData(propertyid: number, from_date: string, to_date: string): Promise<{ [key: string]: any }> {
@@ -55,6 +55,36 @@ export class BookingService {
       }
     } catch (error) {
       console.error(error);
+    }
+  }
+  public async fetchGuest(email: string): Promise<Guest> {
+    try {
+      const token = JSON.parse(sessionStorage.getItem('token'));
+      if (token !== null) {
+        const { data } = await axios.post(`/Get_Exposed_Guest?Ticket=${token}`, { email });
+        if (data.ExceptionMsg !== '') {
+          throw new Error(data.ExceptionMsg);
+        }
+        return data.My_Result;
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  }
+  public async editExposedGuest(guest: Guest, book_nbr: string): Promise<any> {
+    try {
+      const token = JSON.parse(sessionStorage.getItem('token'));
+      if (token !== null) {
+        const { data } = await axios.post(`/Edit_Exposed_Guest?Ticket=${token}`, { ...guest, book_nbr });
+        if (data.ExceptionMsg !== '') {
+          throw new Error(data.ExceptionMsg);
+        }
+        return data.My_Result;
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
     }
   }
   public async getBookingAvailability(
@@ -201,7 +231,7 @@ export class BookingService {
       throw new Error(error);
     }
   }
-  public async getExoposedBooking(booking_nbr: string, language: string): Promise<Booking> {
+  public async getExposedBooking(booking_nbr: string, language: string): Promise<Booking> {
     try {
       const token = JSON.parse(sessionStorage.getItem('token'));
       if (token) {
@@ -270,6 +300,25 @@ export class BookingService {
           property_id,
           from_date,
           to_date,
+        });
+        if (data.ExceptionMsg !== '') {
+          throw new Error(data.ExceptionMsg);
+        }
+        return data['My_Result'];
+      } else {
+        throw new Error("Token doesn't exist");
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
+  }
+  public async getPCICardInfoURL(BOOK_NBR: string) {
+    try {
+      const token = JSON.parse(sessionStorage.getItem('token'));
+      if (token) {
+        const { data } = await axios.post(`/Get_PCI_Card_Info_URL?Ticket=${token}`, {
+          BOOK_NBR,
         });
         if (data.ExceptionMsg !== '') {
           throw new Error(data.ExceptionMsg);

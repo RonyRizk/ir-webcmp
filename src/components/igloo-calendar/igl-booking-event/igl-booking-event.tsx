@@ -1,7 +1,13 @@
-import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
-import { EventsService } from '../../../services/events.service';
-import { BookingService } from '../../../services/booking.service';
-import { transformNewBooking } from '../../../utils/booking';
+import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, h } from '@stencil/core';
+import { BookingService } from '@/services/booking.service';
+import { transformNewBooking } from '@/utils/booking';
+import { isBlockUnit } from '@/utils/utils';
+import { IReallocationPayload, IRoomNightsData } from '@/models/property-types';
+import { store } from '@/redux/store';
+import moment from 'moment';
+import { IToast } from '@components/ir-toast/toast';
+import { Languages } from '@/components';
+import { Unsubscribe } from '@reduxjs/toolkit';
 
 @Component({
   tag: 'igl-booking-event',
@@ -10,31 +16,41 @@ import { transformNewBooking } from '../../../utils/booking';
 })
 export class IglBookingEvent {
   @Element() private element: HTMLElement;
+
   @Prop() currency;
   @Prop() is_vacation_rental: boolean = false;
   @Prop() language: string;
-  @Event({ bubbles: true, composed: true }) hideBubbleInfo: EventEmitter;
-
-  @Event() updateEventData: EventEmitter;
-  @Event() dragOverEventData: EventEmitter;
-
   @Prop({ mutable: true }) bookingEvent: { [key: string]: any };
   @Prop() allBookingEvents: { [key: string]: any } = [];
   @Prop() countryNodeList;
 
+  @Event({ bubbles: true, composed: true }) hideBubbleInfo: EventEmitter;
+  @Event() updateEventData: EventEmitter;
+  @Event() dragOverEventData: EventEmitter;
+  @Event() showRoomNightsDialog: EventEmitter<IRoomNightsData>;
+  @Event() showDialog: EventEmitter<IReallocationPayload>;
+  @Event() resetStreachedBooking: EventEmitter<string>;
+  @Event() toast: EventEmitter<IToast>;
+
   @State() renderElement: boolean = false;
   @State() position: { [key: string]: any };
+  @State() defaultText: Languages;
+  @State() isShrinking: boolean | null = null;
+
+  private unsubscribe: Unsubscribe;
 
   dayWidth: number = 0;
   eventSpace: number = 8;
+
   vertSpace: number = 10;
 
   /* show bubble */
   private showInfoPopup: boolean = false;
   private bubbleInfoTopSide: boolean = false;
   private isStreatch = false;
+  private isBlockedUnit: boolean;
   /*Services */
-  private eventsService = new EventsService();
+  // private eventsService = new EventsService();
   private bookingService = new BookingService();
   /* Resize props */
   resizeSide: string = '';
@@ -52,19 +68,27 @@ export class IglBookingEvent {
   isTouchStart: boolean;
   moveDiffereneX: number;
   moveDiffereneY: number;
+  private animationFrameId: number | null = null;
 
   handleMouseMoveBind = this.handleMouseMove.bind(this);
   handleMouseUpBind = this.handleMouseUp.bind(this);
   handleClickOutsideBind = this.handleClickOutside.bind(this);
 
   componentWillLoad() {
+    this.updateFromStore();
+    this.unsubscribe = store.subscribe(() => this.updateFromStore());
+    this.isBlockedUnit = isBlockUnit(this.bookingEvent.STATUS_CODE);
     window.addEventListener('click', this.handleClickOutsideBind);
+  }
+  updateFromStore() {
+    const state = store.getState();
+    this.defaultText = state.languages;
   }
 
   async fetchAndAssignBookingData() {
     try {
       if (this.bookingEvent.STATUS === 'IN-HOUSE') {
-        const data = await this.bookingService.getExoposedBooking(this.bookingEvent.BOOKING_NUMBER, 'en');
+        const data = await this.bookingService.getExposedBooking(this.bookingEvent.BOOKING_NUMBER, 'en');
         let dataForTransformation = data.rooms.filter(d => d['assigned_units_pool'] === this.bookingEvent.ID);
         data.rooms = dataForTransformation;
         this.bookingEvent = { ...this.bookingEvent, ...transformNewBooking(data)[0] };
@@ -94,6 +118,10 @@ export class IglBookingEvent {
 
   disconnectedCallback() {
     window.removeEventListener('click', this.handleClickOutsideBind);
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    this.unsubscribe();
   }
 
   @Listen('click', { target: 'window' })
@@ -123,60 +151,137 @@ export class IglBookingEvent {
       }
 
       if (event.detail.moveToDay === 'revert' || event.detail.toRoomId === 'revert') {
+        console.log('revert');
         event.detail.moveToDay = this.bookingEvent.FROM_DATE;
         event.detail.toRoomId = event.detail.fromRoomId;
-        if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5) {
-          if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
+        if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5 && !this.isStreatch) {
+          if (this.isBlockedUnit) {
             this.showEventInfo(true);
           } else if (this.bookingEvent.STATUS === 'IN-HOUSE') {
             await this.fetchAndAssignBookingData();
           }
         }
       } else {
-        if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5) {
-          if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
+        if (this.isTouchStart && this.moveDiffereneX <= 5 && this.moveDiffereneY <= 5 && !this.isStreatch) {
+          if (this.isBlockedUnit) {
             this.showEventInfo(true);
           } else if (this.bookingEvent.STATUS === 'IN-HOUSE') {
             await this.fetchAndAssignBookingData();
           }
         } else {
-          const { pool, from_date, to_date, toRoomId } = event.detail as any;
+          const { pool, to_date, from_date, toRoomId } = event.detail as any;
           if (pool) {
-            this.eventsService.reallocateEvent(pool, toRoomId, from_date, to_date).catch(() => {
-              if (this.isStreatch) {
-                this.element.style.left = `${this.initialLeft}px`;
-                this.element.style.width = `${this.initialWidth}px`;
-              } else {
-                this.element.style.top = `${this.dragInitPos.top}px`;
-                this.element.style.left = `${this.dragInitPos.left}px`;
-                this;
+            if (this.isShrinking || !this.isStreatch) {
+              const { description, status } = this.setModalDescription(toRoomId, from_date, to_date);
+              let hideConfirmButton = false;
+              if (status === '400') {
+                hideConfirmButton = true;
               }
-            });
+              this.showDialog.emit({ ...event.detail, description, title: '', hideConfirmButton });
+            } else {
+              if (this.checkIfSlotOccupied(toRoomId, from_date, to_date)) {
+                this.animationFrameId = requestAnimationFrame(() => {
+                  this.resetBookingToInitialPosition();
+                });
+                throw new Error('Overlapping Dates');
+              } else {
+                this.showRoomNightsDialog.emit({ bookingNumber: this.bookingEvent.BOOKING_NUMBER, identifier: this.bookingEvent.IDENTIFIER, to_date, pool, from_date });
+              }
+            }
+            this.isShrinking = null;
           }
         }
       }
-
-      if (event.detail.fromRoomId === this.getBookedRoomId()) {
-        this.onMoveUpdateBooking(event.detail);
-        this.renderAgain();
-      }
     } catch (error) {
+      this.toast.emit({
+        position: 'top-right',
+        title: error.message,
+        description: '',
+        type: 'error',
+      });
       console.log('something went wrong');
     }
   }
+  private setModalDescription(toRoomId: number, from_date, to_date): { status: '200' | '400'; description: string } {
+    const findRoomType = (roomId: number) => {
+      let roomType = this.bookingEvent.roomsInfo.filter(room => room.physicalrooms.some(r => r.id === +roomId));
+      if (roomType.length) {
+        return roomType[0].id;
+      }
+      return null;
+    };
+    if (!this.bookingEvent.is_direct) {
+      if (this.isShrinking) {
+        return {
+          description: `${this.defaultText.entries.Lcz_YouWillLoseFutureUpdates}.`,
+          status: '200',
+        };
+      } else {
+        if (
+          moment(from_date, 'YYYY-MM-DD').isSame(moment(this.bookingEvent.FROM_DATE, 'YYYY-MM-DD')) &&
+          moment(to_date, 'YYYY-MM-DD').isSame(moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD'))
+        ) {
+          const initialRT = findRoomType(this.bookingEvent.PR_ID);
+          const targetRT = findRoomType(toRoomId);
+          if (initialRT !== targetRT) {
+            return {
+              description: `${this.defaultText.entries.Lcz_YouWillLoseFutureUpdates} ${this.bookingEvent.origin.Label}. ${this.defaultText.entries.Lcz_SameRatesWillBeKept}`,
+              status: '200',
+            };
+          }
+          return { description: '', status: '400' };
+        }
+        return { description: this.defaultText.entries.Lcz_CannotChangeCHBookings, status: '400' };
+      }
+    } else {
+      if (!this.isShrinking) {
+        const initialRT = findRoomType(this.bookingEvent.PR_ID);
+        const targetRT = findRoomType(toRoomId);
+        if (initialRT === targetRT) {
+          console.log('same rt');
+          return { description: `${this.defaultText.entries.Lcz_AreYouSureWantToMoveAnotherUnit}?`, status: '200' };
+        } else {
+          return {
+            description: this.defaultText.entries.Lcz_SameRatesWillBeKept,
+            status: '200',
+          };
+        }
+      }
+      return { description: this.defaultText.entries.Lcz_BalanceWillBeCalculated, status: '200' };
+    }
+  }
+  private resetBookingToInitialPosition() {
+    if (this.isStreatch) {
+      this.element.style.left = `${this.initialLeft}px`;
+      this.element.style.width = `${this.initialWidth}px`;
+      this.isStreatch = false;
+      this.finalWidth = this.initialWidth;
+      this.isShrinking = null;
+    } else {
+      this.element.style.top = `${this.dragInitPos.top}px`;
+      this.element.style.left = `${this.dragInitPos.left}px`;
+    }
+  }
+  @Listen('revertBooking', { target: 'window' })
+  handleRevertBooking(event: CustomEvent<string>) {
+    if (this.bookingEvent.POOL === event.detail) {
+      this.resetBookingToInitialPosition();
+    }
+  }
   checkIfSlotOccupied(toRoomId, from_date, to_date) {
-    const fromTime = new Date(from_date).getTime();
-    const toTime = new Date(to_date).getTime();
-
+    const fromTime = moment(from_date, 'YYYY-MM-DD');
+    const toTime = moment(to_date, 'YYYY-MM-DD');
     const isOccupied = this.allBookingEvents.some(event => {
-      const eventFromTime = new Date(event.FROM_DATE).getTime();
-      const eventToTime = new Date(event.TO_DATE).getTime();
-
-      return event.PR_ID === +toRoomId && eventToTime > fromTime && eventFromTime < toTime;
+      if (event.POOL === this.bookingEvent.POOL) {
+        return false;
+      }
+      const eventFromTime = moment(event.FROM_DATE, 'YYYY-MM-DD');
+      const eventToTime = moment(event.TO_DATE, 'YYYY-MM-DD');
+      return event.PR_ID === +toRoomId && toTime.isSameOrAfter(eventFromTime) && fromTime.isBefore(eventToTime);
     });
-
     return isOccupied;
   }
+
   renderAgain() {
     this.renderElement = !this.renderElement;
   }
@@ -184,15 +289,6 @@ export class IglBookingEvent {
   getUniqueId() {
     return new Date().getTime();
   }
-
-  onMoveUpdateBooking(data) {
-    this.bookingEvent.PR_ID = data.toRoomId;
-    this.bookingEvent.FROM_DATE = data.moveToDay.split('_').reverse().join('/');
-    let tempDate = new Date(this.bookingEvent.FROM_DATE);
-    tempDate.setDate(tempDate.getDate() + this.getStayDays());
-    this.bookingEvent.TO_DATE = tempDate.getFullYear() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getDate();
-  }
-  /* End of Resize props */
 
   isSplitBooking() {
     return !!this.bookingEvent.SPLIT_BOOKING;
@@ -382,15 +478,37 @@ export class IglBookingEvent {
       } else {
         let newWidth = this.initialWidth;
         if (this.resizeSide == 'rightSide') {
+          if (distanceX > 0 && !this.bookingEvent.is_direct && !this.isBlockedUnit) {
+            return;
+          }
           newWidth = this.initialWidth + distanceX;
           newWidth = Math.min(newWidth, this.initialX + this.element.offsetWidth);
           newWidth = Math.max(this.dayWidth - this.eventSpace, newWidth);
           this.element.style.width = `${newWidth}px`;
+          this.isShrinking = distanceX < 0;
         } else if (this.resizeSide == 'leftSide') {
-          newWidth = Math.max(this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
-          let newLeft = this.initialLeft + (this.initialWidth - newWidth);
-          this.element.style.left = `${newLeft}px`;
-          this.element.style.width = `${newWidth}px`;
+          this.isShrinking = distanceX > 0;
+          if (distanceX < 0 && !this.bookingEvent.is_direct && !this.isBlockedUnit) {
+            return;
+          }
+          if (this.isBlockedUnit) {
+            newWidth = Math.max(this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
+            let newLeft = this.initialLeft + (this.initialWidth - newWidth);
+            this.element.style.left = `${newLeft}px`;
+            this.element.style.width = `${newWidth}px`;
+          } else {
+            if (distanceX > 0 && !this.bookingEvent.is_direct) {
+              newWidth = Math.max(this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
+              let newLeft = this.initialLeft + (this.initialWidth - newWidth);
+              this.element.style.left = `${newLeft}px`;
+              this.element.style.width = `${newWidth}px`;
+            } else {
+              newWidth = Math.max(this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
+              let newLeft = this.initialLeft + (this.initialWidth - newWidth);
+              this.element.style.left = `${newLeft}px`;
+              this.element.style.width = `${newWidth}px`;
+            }
+          }
         }
         this.finalWidth = newWidth;
       }
@@ -421,12 +539,15 @@ export class IglBookingEvent {
       } else {
         let numberOfDays = Math.round(this.finalWidth / this.dayWidth);
         let initialStayDays = this.getStayDays();
-        if (initialStayDays != numberOfDays) {
+        if (initialStayDays != numberOfDays && !isNaN(numberOfDays)) {
           //this.setStayDays(numberOfDays);
           if (this.resizeSide == 'leftSide') {
             this.element.style.left = `${this.initialLeft + (initialStayDays - numberOfDays) * this.dayWidth}px`;
             // set FROM_DATE = TO_DATE - numberOfDays
           } else {
+            if (numberOfDays < initialStayDays) {
+              this.isShrinking = true;
+            }
             // set TO_DATE = FROM_DATE + numberOfDays
           }
           this.dragOverEventData.emit({
@@ -440,6 +561,7 @@ export class IglBookingEvent {
               nbOfDays: numberOfDays,
             },
           });
+
           this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace}px`;
         } else {
           this.element.style.left = `${this.initialLeft}px`;
@@ -450,6 +572,7 @@ export class IglBookingEvent {
       console.log('still mouse up listening...');
     }
     this.isDragging = false;
+
     document.removeEventListener('mousemove', this.handleMouseMoveBind);
     document.removeEventListener('touchmove', this.handleMouseMoveBind);
     document.removeEventListener('pointermove', this.handleMouseMoveBind);
@@ -520,16 +643,20 @@ export class IglBookingEvent {
         <div class="bookingEventTitle" onTouchStart={event => this.startDragging(event, 'move')} onMouseDown={event => this.startDragging(event, 'move')}>
           {this.getBookedBy()}
         </div>
-        <div
-          class="bookingEventDragHandle leftSide"
-          onTouchStart={event => this.startDragging(event, 'leftSide')}
-          onMouseDown={event => this.startDragging(event, 'leftSide')}
-        ></div>
-        <div
-          class="bookingEventDragHandle rightSide"
-          onTouchStart={event => this.startDragging(event, 'rightSide')}
-          onMouseDown={event => this.startDragging(event, 'rightSide')}
-        ></div>
+
+        <Fragment>
+          <div
+            class="bookingEventDragHandle leftSide"
+            onTouchStart={event => this.startDragging(event, 'leftSide')}
+            onMouseDown={event => this.startDragging(event, 'leftSide')}
+          ></div>
+          <div
+            class="bookingEventDragHandle rightSide"
+            onTouchStart={event => this.startDragging(event, 'rightSide')}
+            onMouseDown={event => this.startDragging(event, 'rightSide')}
+          ></div>
+        </Fragment>
+
         {this.showInfoPopup ? (
           <igl-booking-event-hover
             is_vacation_rental={this.is_vacation_rental}

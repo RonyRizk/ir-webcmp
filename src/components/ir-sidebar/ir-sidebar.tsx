@@ -1,4 +1,4 @@
-import { Component, Prop, h, Method, Event, EventEmitter } from '@stencil/core';
+import { Component, Prop, h, Method, Event, EventEmitter, Watch } from '@stencil/core';
 
 @Component({
   tag: 'ir-sidebar',
@@ -7,23 +7,45 @@ import { Component, Prop, h, Method, Event, EventEmitter } from '@stencil/core';
 export class IrSidebar {
   @Prop() name: string;
   @Prop() side: 'right' | 'left' = 'right';
-
+  @Prop() showCloseButton: boolean = true;
   @Prop({ mutable: true, reflect: true }) open: boolean = false;
-
+  @Prop() sidebarStyles: Partial<CSSStyleDeclaration>;
   @Event({ bubbles: true, composed: true }) irSidebarToggle: EventEmitter;
+
+  private sidebarRef: HTMLDivElement;
+
+  applyStyles() {
+    for (const property in this.sidebarStyles) {
+      if (this.sidebarStyles.hasOwnProperty(property)) {
+        this.sidebarRef.style[property] = this.sidebarStyles[property];
+      }
+    }
+  }
+  @Watch('sidebarStyles')
+  handleSidebarStylesChange() {
+    this.applyStyles();
+  }
+  componentWillLoad() {
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
 
   componentDidLoad() {
     // If esc key is pressed, close the modal
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        this.toggleSidebar();
-      }
-    });
+    this.applyStyles();
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  private handleKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      return this.toggleSidebar();
+    } else {
+      return;
+    }
   }
 
   // Unsubscribe to the event when the component is removed from the DOM
   disconnectedCallback() {
-    document.removeEventListener('keydown', () => {});
+    document.removeEventListener('keydown', this.handleKeyDown);
   }
 
   @Method()
@@ -46,15 +68,17 @@ export class IrSidebar {
           this.toggleSidebar();
         }}
       ></div>,
-      <div class={`sidebar-${this.side} ${className}`}>
-        <a
-          class="close"
-          onClick={() => {
-            this.toggleSidebar();
-          }}
-        >
-          <ir-icon icon="ft-x"></ir-icon>
-        </a>
+      <div ref={el => (this.sidebarRef = el)} class={`sidebar-${this.side} ${className}`}>
+        {this.showCloseButton && (
+          <a
+            class="close"
+            onClick={() => {
+              this.toggleSidebar();
+            }}
+          >
+            <ir-icon icon="ft-x"></ir-icon>
+          </a>
+        )}
         <slot />
       </div>,
     ];

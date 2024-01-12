@@ -7,19 +7,20 @@
 
 ## Properties
 
-| Property                  | Attribute                   | Description | Type     | Default     |
-| ------------------------- | --------------------------- | ----------- | -------- | ----------- |
-| `item`                    | `item`                      |             | `any`    | `undefined` |
-| `paymentDetailsUrl`       | `payment-details-url`       |             | `string` | `''`        |
-| `paymentExceptionMessage` | `payment-exception-message` |             | `string` | `''`        |
+| Property                  | Attribute                   | Description | Type        | Default     |
+| ------------------------- | --------------------------- | ----------- | ----------- | ----------- |
+| `bookingDetails`          | `booking-details`           |             | `Booking`   | `undefined` |
+| `defaultTexts`            | `default-texts`             |             | `Languages` | `undefined` |
+| `item`                    | `item`                      |             | `any`       | `undefined` |
+| `paymentExceptionMessage` | `payment-exception-message` |             | `string`    | `''`        |
 
 
 ## Events
 
-| Event                     | Description | Type               |
-| ------------------------- | ----------- | ------------------ |
-| `creditCardPressHandler`  |             | `CustomEvent<any>` |
-| `handlePaymentItemChange` |             | `CustomEvent<any>` |
+| Event                    | Description | Type                |
+| ------------------------ | ----------- | ------------------- |
+| `creditCardPressHandler` |             | `CustomEvent<any>`  |
+| `resetBookingData`       |             | `CustomEvent<null>` |
 
 
 ## Dependencies
@@ -30,12 +31,14 @@
 
 ### Depends on
 
+- [ir-date-picker](../../ir-date-picker)
 - [ir-icon](../../ir-icon)
 - [ir-modal](../../ir-modal)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-payment-details --> ir-date-picker
   ir-payment-details --> ir-icon
   ir-payment-details --> ir-modal
   ir-modal --> ir-icon

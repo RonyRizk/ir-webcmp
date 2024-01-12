@@ -26,6 +26,7 @@
 | `blockedCreated`     |             | `CustomEvent<RoomBlockDetails>`                               |
 | `bookingCreated`     |             | `CustomEvent<{ pool?: string; data: RoomBookingDetails[]; }>` |
 | `closeBookingWindow` |             | `CustomEvent<{ [key: string]: any; }>`                        |
+| `resetBookingData`   |             | `CustomEvent<null>`                                           |
 
 
 ## Dependencies
@@ -33,6 +34,7 @@
 ### Used by
 
  - [igloo-calendar](..)
+ - [ir-booking-details](../../ir-booking-details)
 
 ### Depends on
 
@@ -59,6 +61,7 @@ graph TD;
   igl-application-info --> ir-tooltip
   igl-property-booked-by --> ir-autocomplete
   igloo-calendar --> igl-book-property
+  ir-booking-details --> igl-book-property
   style igl-book-property fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
