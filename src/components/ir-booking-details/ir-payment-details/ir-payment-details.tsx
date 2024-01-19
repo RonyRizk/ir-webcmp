@@ -66,8 +66,22 @@ export class IrPaymentDetails {
       console.log(error);
     }
   }
-  handlePaymentInputChange(key: keyof IPayment, value: any) {
-    this.itemToBeAdded = { ...this.itemToBeAdded, [key]: value };
+  handlePaymentInputChange(key: keyof IPayment, value: any, event?: InputEvent) {
+    if (key === 'amount') {
+      if (!isNaN(value)) {
+        this.itemToBeAdded = { ...this.itemToBeAdded, [key]: value };
+      } else {
+        let inputElement = event.target as HTMLInputElement;
+        let inputValue = inputElement.value;
+        inputValue = inputValue.replace(/[^0-9]/g, '');
+        inputElement.value = inputValue;
+        if (inputValue === '') {
+          this.itemToBeAdded = { ...this.itemToBeAdded, [key]: 0 };
+        }
+      }
+    } else {
+      this.itemToBeAdded = { ...this.itemToBeAdded, [key]: value };
+    }
   }
   async handleConfirmModal(e: CustomEvent) {
     e.stopImmediatePropagation();
@@ -101,17 +115,23 @@ export class IrPaymentDetails {
             {rowMode === 'normal' ? (
               <span class="sm-padding-left">{_formatDate(item.date)}</span>
             ) : (
-              <ir-date-picker singleDatePicker autoApply onDateChanged={this.handleDateChange.bind(this)}></ir-date-picker>
+              <ir-date-picker
+                minDate={moment().add(-2, 'months').startOf('month').format('YYYY-MM-DD')}
+                singleDatePicker
+                autoApply
+                onDateChanged={this.handleDateChange.bind(this)}
+              ></ir-date-picker>
             )}
           </td>
           <td class={'border border-light border-bottom-0 text-center '}>
             {rowMode === 'normal' ? (
-              <span class="sm-padding-right">${item.amount}</span>
+              <span class="sm-padding-right">${Number(item.amount).toFixed(2)}</span>
             ) : (
               <input
                 class="border-0  form-control py-0 m-0 w-100"
-                onInput={event => this.handlePaymentInputChange('amount', +(event.target as HTMLInputElement).value)}
-                type="number"
+                value={this.itemToBeAdded.amount === 0 ? '' : Number(this.itemToBeAdded.amount).toFixed(2)}
+                onInput={event => this.handlePaymentInputChange('amount', +(event.target as HTMLInputElement).value, event)}
+                type="text"
               ></input>
             )}
           </td>

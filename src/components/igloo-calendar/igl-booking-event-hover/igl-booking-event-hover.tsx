@@ -4,6 +4,7 @@ import { ICountry } from '../../../models/IBooking';
 import { EventsService } from '../../../services/events.service';
 import { Unsubscribe } from '@reduxjs/toolkit';
 import { store } from '../../../redux/store';
+import moment from 'moment';
 //import { transformNewBLockedRooms } from '../../../utils/booking';
 
 @Component({
@@ -329,7 +330,7 @@ export class IglBookingEventHover {
         <div class="row p-0 m-0">
           <div class="pl-0 pr-0 col-12">
             <span class="font-weight-bold">{this.defaultTexts.entries.Lcz_In}: </span>
-            {formatDate(this.bookingEvent.FROM_DATE, 'YYYY-MM-DD')}- <span class="font-weight-bold">{this.defaultTexts.entries.Lcz_Out} </span>
+            {formatDate(this.bookingEvent.FROM_DATE, 'YYYY-MM-DD')} - <span class="font-weight-bold">{this.defaultTexts.entries.Lcz_Out}: </span>
             {formatDate(this.bookingEvent.TO_DATE, 'YYYY-MM-DD')}
           </div>
         </div>
@@ -489,8 +490,8 @@ export class IglBookingEventHover {
           entryHour={this.bookingEvent.ENTRY_HOUR}
           entryMinute={this.bookingEvent.ENTRY_MINUTE}
           defaultData={this.bookingEvent}
-          fromDate={this.getCheckInDate()}
-          toDate={this.getCheckOutDate()}
+          fromDate={moment(this.bookingEvent.FROM_DATE,"YYYY-MM-DD").format("DD MM YYYY")}
+          toDate={moment(this.bookingEvent.TO_DATE,"YYYY-MM-DD").format("DD MM YYYY")}
           entryDate={this.getEntryDate()}
           onDataUpdateEvent={event => this.handleBlockDateUpdate(event)}
         ></igl-block-dates-view>

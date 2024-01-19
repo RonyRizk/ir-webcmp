@@ -9,8 +9,8 @@
 
 | Property                  | Attribute                   | Description | Type        | Default     |
 | ------------------------- | --------------------------- | ----------- | ----------- | ----------- |
-| `bookingDetails`          | `booking-details`           |             | `Booking`   | `undefined` |
-| `defaultTexts`            | `default-texts`             |             | `Languages` | `undefined` |
+| `bookingDetails`          | --                          |             | `Booking`   | `undefined` |
+| `defaultTexts`            | --                          |             | `Languages` | `undefined` |
 | `item`                    | `item`                      |             | `any`       | `undefined` |
 | `paymentExceptionMessage` | `payment-exception-message` |             | `string`    | `''`        |
 
