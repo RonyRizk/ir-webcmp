@@ -120,10 +120,22 @@ export class IglCalBody {
     return 'room_' + roomId + '_' + selectedDay.currentDate;
   }
 
+  // getSplitBookingEvents(newEvent) {
+  //   return this.getBookingData().some(bookingEvent => !['003', '002', '004'].includes(bookingEvent.STATUS_CODE) && newEvent.FROM_DATE === bookingEvent.FROM_DATE);
+  // }
   getSplitBookingEvents(newEvent) {
-    return this.getBookingData().some(bookingEvent => !['003', '002', '004'].includes(bookingEvent.STATUS_CODE) && newEvent.FROM_DATE === bookingEvent.FROM_DATE);
+    console.log(newEvent.FROM_DATE);
+    return this.getBookingData().some(bookingEvent => {
+      if (!['003', '002', '004'].includes(bookingEvent.STATUS_CODE)) {
+        if (
+          new Date(newEvent.FROM_DATE).getTime() >= new Date(bookingEvent.FROM_DATE).getTime() &&
+          new Date(newEvent.FROM_DATE).getTime() <= new Date(bookingEvent.TO_DATE).getTime()
+        ) {
+          return bookingEvent;
+        }
+      }
+    });
   }
-
   @Listen('closeBookingWindow', { target: 'window' })
   closeWindow() {
     let ind = this.getBookingData().findIndex(ev => ev.ID === 'NEW_TEMP_EVENT');
@@ -253,9 +265,9 @@ export class IglCalBody {
   getGeneralCategoryDayColumns(addClass: string, isCategory: boolean = false, index: number) {
     return this.calendarData.days.map(dayInfo => {
       return (
-        <div class={`cellData pl-0 categoryPriceColumn ${addClass + '_' + dayInfo.day} ${dayInfo.day === this.today ? 'currentDay' : ''}`}>
+        <div class={`cellData pl-0 font-weight-bold categoryPriceColumn ${addClass + '_' + dayInfo.day} ${dayInfo.day === this.today ? 'currentDay' : ''}`}>
           {isCategory ? (
-            <span>
+            <span class={'categoryName'}>
               {dayInfo.rate[index].exposed_inventory.total}
               {/* <br />
               {dayInfo.rate[index].exposed_inventory.offline} */}

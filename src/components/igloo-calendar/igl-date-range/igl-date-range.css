@@ -9,20 +9,24 @@
 
 .date-range-input {
   margin: 0;
-  padding: 0rem 1rem;
-  box-sizing: border-box;
+  padding: 0;
+  display: flex;
+  flex: 1;
 }
-
+.iglRangePicker[data-state='disabled'] {
+  border: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
 .iglRangePicker {
   margin: 0;
   border: 1px solid #379ff2;
-  border-radius: 6px;
-  margin-right: 5px;
   box-sizing: border-box;
-  padding: 0.5rem 0;
+  width: 200px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
 }
 .calendarPickerContainer {
   display: flex;
 }
-
-
