@@ -10,13 +10,9 @@ import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '../../services/toBeAssigned.service';
 import { calculateDaysBetweenDates, transformNewBLockedRooms, transformNewBooking } from '../../utils/booking';
 import { IReallocationPayload, IRoomNightsData, IRoomNightsDataEventPayload } from '../../models/property-types';
-// import { store } from '../../redux/store';
-// import { addCalendarData } from '../../redux/features/calendarData';
-// import { CalendarDataDetails } from '../../models/calendarData';
 import { TIglBookPropertyPayload } from '../../models/igl-book-property';
-import { Languages } from '@/components';
-import { store } from '@/redux/store';
-import { addLanguages } from '@/redux/features/languages';
+import calendar_dates from '@/stores/calendar-dates.store';
+import locales from '@/stores/locales.store';
 
 @Component({
   tag: 'igloo-calendar',
@@ -48,7 +44,7 @@ export class IglooCalendar {
   @State() roomNightsData: IRoomNightsData | null = null;
   @State() renderAgain = false;
   @State() showBookProperty: boolean = false;
-
+  @State() totalAvailabilityQueue: { room_type_id: number; date: string; availability: number }[] = [];
   @Event({ bubbles: true, composed: true })
   dragOverHighlightElement: EventEmitter;
   @Event({ bubbles: true, composed: true }) moveBookingTo: EventEmitter;
@@ -67,13 +63,12 @@ export class IglooCalendar {
   private toBeAssignedService = new ToBeAssignedService();
   private socket: Socket;
   private reachedEndOfCalendar = false;
-  private defaultTexts: Languages;
-
   @Watch('ticket')
   ticketChanged() {
     sessionStorage.setItem('token', JSON.stringify(this.ticket));
     this.initializeApp();
   }
+  private availabilityTimeout;
 
   componentWillLoad() {
     if (this.baseurl) {
@@ -98,15 +93,16 @@ export class IglooCalendar {
   }
   async initializeApp() {
     try {
-      const [defaultTexts, roomResp, bookingResp, countryNodeList] = await Promise.all([
+      const [defaultLocales, roomResp, bookingResp, countryNodeList] = await Promise.all([
         this.roomService.fetchLanguage(this.language),
         this.roomService.fetchData(this.propertyid, this.language),
         this.bookingService.getCalendarData(this.propertyid, this.from_date, this.to_date),
         this.bookingService.getCountries(this.language),
       ]);
-      this.defaultTexts = defaultTexts as Languages;
-      console.log('languages', this.defaultTexts);
-      store.dispatch(addLanguages({ ...defaultTexts } as Languages));
+      locales.entries = defaultLocales.entries;
+      locales.direction = defaultLocales.direction;
+      calendar_dates.days = bookingResp.days;
+      calendar_dates.months = bookingResp.months;
       this.setRoomsData(roomResp);
       this.countryNodeList = countryNodeList;
       this.setUpCalendarData(roomResp, bookingResp);
@@ -190,6 +186,15 @@ export class IglooCalendar {
                   });
                 }
               }
+            } else if (REASON === 'UPDATE_CALENDAR_AVAILABILITY') {
+              this.totalAvailabilityQueue.push(result);
+              if (this.totalAvailabilityQueue.length > 0) {
+                clearTimeout(this.availabilityTimeout);
+              }
+              this.availabilityTimeout = setTimeout(() => {
+                this.updateTotalAvailability();
+              }, 2000);
+              console.log(result);
             } else {
               return;
             }
@@ -199,6 +204,27 @@ export class IglooCalendar {
     } catch (error) {
       console.log('Initializing Calendar Error', error);
     }
+  }
+
+  private updateTotalAvailability() {
+    let days = [...calendar_dates.days];
+    this.totalAvailabilityQueue.forEach(queue => {
+      let selectedDate = new Date(queue.date);
+      selectedDate.setMilliseconds(0);
+      selectedDate.setSeconds(0);
+      selectedDate.setMinutes(0);
+      selectedDate.setHours(0);
+      //find the selected day
+      const index = days.findIndex(day => day.currentDate === selectedDate.getTime());
+      if (index > 0) {
+        //find room_type_id
+        const room_type_index = days[index].rate.findIndex(room => room.id === queue.room_type_id);
+        if (room_type_index > 0) {
+          days[index].rate[room_type_index].exposed_inventory.rts = queue.availability;
+        }
+      }
+    });
+    calendar_dates.days = [...days];
   }
   componentDidLoad() {
     this.scrollToElement(this.today);
@@ -409,6 +435,7 @@ export class IglooCalendar {
         }
         return true;
       });
+      calendar_dates.days = this.days as any;
       this.calendarData = {
         ...this.calendarData,
         days: this.days,
@@ -437,6 +464,8 @@ export class IglooCalendar {
         }
         return true;
       });
+      calendar_dates.days = this.days as any;
+      //calendar_dates.months = bookingResp.months;
       this.calendarData = {
         ...this.calendarData,
         days: this.days,
@@ -710,12 +739,7 @@ export class IglooCalendar {
                 ></igl-to-be-assigned>
               ) : null,
               this.showLegend ? (
-                <igl-legends
-                  defaultTexts={this.defaultTexts}
-                  class="legendContainer"
-                  legendData={this.calendarData.legendData}
-                  onOptionEvent={evt => this.onOptionSelect(evt)}
-                ></igl-legends>
+                <igl-legends class="legendContainer" legendData={this.calendarData.legendData} onOptionEvent={evt => this.onOptionSelect(evt)}></igl-legends>
               ) : null,
               <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
                 <div id="calendarContainer">
@@ -790,8 +814,8 @@ export class IglooCalendar {
         <ir-modal
           modalTitle={''}
           rightBtnActive={this.dialogData ? !this.dialogData.hideConfirmButton : true}
-          leftBtnText={this.defaultTexts?.entries.Lcz_Cancel}
-          rightBtnText={this.defaultTexts?.entries.Lcz_Confirm}
+          leftBtnText={locales?.entries?.Lcz_Cancel}
+          rightBtnText={locales?.entries?.Lcz_Confirm}
           modalBody={this.dialogData ? this.dialogData.description : ''}
           onConfirmModal={this.handleModalConfirm.bind(this)}
           onCancelModal={this.handleModalCancel.bind(this)}
