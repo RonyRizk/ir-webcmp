@@ -1,14 +1,14 @@
 import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
-import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay } from '../../utils/utils';
+import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '../../utils/utils';
 import io, { Socket } from 'socket.io-client';
 import axios from 'axios';
 import { EventsService } from '../../services/events.service';
 import { ICountry, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '../../models/IBooking';
 import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '../../services/toBeAssigned.service';
-import { calculateDaysBetweenDates, transformNewBLockedRooms, transformNewBooking } from '../../utils/booking';
+import { bookingStatus, calculateDaysBetweenDates, transformNewBLockedRooms, transformNewBooking } from '../../utils/booking';
 import { IReallocationPayload, IRoomNightsData, IRoomNightsDataEventPayload } from '../../models/property-types';
 import { TIglBookPropertyPayload } from '../../models/igl-book-property';
 import calendar_dates from '@/stores/calendar-dates.store';
@@ -94,14 +94,12 @@ export class IglooCalendar {
   }
   async initializeApp() {
     try {
-      const [defaultLocales, roomResp, bookingResp, countryNodeList] = await Promise.all([
+      const [_, roomResp, bookingResp, countryNodeList] = await Promise.all([
         this.roomService.fetchLanguage(this.language),
         this.roomService.fetchData(this.propertyid, this.language),
         this.bookingService.getCalendarData(this.propertyid, this.from_date, this.to_date),
         this.bookingService.getCountries(this.language),
       ]);
-      locales.entries = defaultLocales.entries;
-      locales.direction = defaultLocales.direction;
       calendar_dates.days = bookingResp.days;
       calendar_dates.months = bookingResp.months;
       this.setRoomsData(roomResp);
@@ -196,6 +194,18 @@ export class IglooCalendar {
                 this.updateTotalAvailability();
               }, 1000);
               console.log(result);
+            } else if (REASON === 'NO_DUE_AMOUNT') {
+              this.calendarData = {
+                ...this.calendarData,
+                bookingEvents: [
+                  ...this.calendarData.bookingEvents.map(event => {
+                    if (result.pools.includes(event.ID)) {
+                      return { ...event, BALANCE: 0 };
+                    }
+                    return event;
+                  }),
+                ],
+              };
             } else {
               return;
             }
@@ -259,6 +269,20 @@ export class IglooCalendar {
 
       bookingEvent.defaultDateRange.dateDifference = bookingEvent.NO_OF_DAYS;
       bookingEvent.roomsInfo = [...this.calendarData.roomsInfo];
+      if (!isBlockUnit(bookingEvent.STAY_STATUS_CODE)) {
+        const now = moment();
+        const toDate = moment(bookingEvent.TO_DATE, 'YYYY-MM-DD');
+        const fromDate = moment(bookingEvent.FROM_DATE, 'YYYY-MM-DD');
+        if (fromDate.isSame(now, 'day') && now.hour() >= 12) {
+          bookingEvent.STATUS = bookingStatus['000'];
+        } else if (now.isAfter(fromDate, 'day') && now.isBefore(toDate, 'day')) {
+          bookingEvent.STATUS = bookingStatus['000'];
+        } else if (toDate.isSame(now, 'day') && now.hour() < 12) {
+          bookingEvent.STATUS = bookingStatus['000'];
+        } else if ((toDate.isSame(now, 'day') && now.hour() >= 12) || toDate.isBefore(now, 'day')) {
+          bookingEvent.STATUS = bookingStatus['003'];
+        }
+      }
     });
   }
   setRoomsData(roomServiceResp) {

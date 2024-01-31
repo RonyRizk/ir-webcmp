@@ -8,6 +8,7 @@ import { BookingService } from '../../services/booking.service';
 import { TIglBookPropertyPayload } from '../../models/igl-book-property';
 import { RoomService } from '../../services/room.service';
 import locales, { ILocale } from '@/stores/locales.store';
+import { IToast } from '../ir-toast/toast';
 
 @Component({
   tag: 'ir-booking-details',
@@ -77,6 +78,7 @@ export class IrBookingDetails {
   @Event() handleRoomDelete: EventEmitter;
   // Payment Event
   @Event() handleAddPayment: EventEmitter;
+  @Event() toast: EventEmitter<IToast>;
   private bookingService = new BookingService();
   private roomService = new RoomService();
   componentDidLoad() {
@@ -138,11 +140,10 @@ export class IrBookingDetails {
     const target = e.target;
     switch (target.id) {
       case 'print':
-        window.location.href = `https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=B&TK=${this.ticket}`;
+        window.open(`https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=B&TK=${this.ticket}`);
         return;
       case 'receipt':
-        window.location.href = `https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=I&TK=${this.ticket}`;
-
+        window.open(`https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=I&TK=${this.ticket}`);
         return;
       case 'book-delete':
         this.handleDeleteClick.emit();
@@ -236,7 +237,7 @@ export class IrBookingDetails {
   }
 
   async updateStatus() {
-    if (this.tempStatus !== 'Select') {
+    if (this.tempStatus !== 'Select' && this.tempStatus !== null) {
       try {
         await axios.post(`/Change_Exposed_Booking_Status?Ticket=${this.ticket}`, {
           book_nbr: this.bookingNumber,
@@ -245,6 +246,13 @@ export class IrBookingDetails {
       } catch (error) {
         console.log(error);
       }
+    } else {
+      this.toast.emit({
+        type: 'error',
+        description: '',
+        title: locales.entries.Lcz_SelectStatus,
+        position: 'top-right',
+      });
     }
   }
   @Listen('editInitiated')
@@ -323,9 +331,9 @@ export class IrBookingDetails {
           </div>
         </div>
       </div>,
-      <div class="fluid-container m-1 text-left">
+      <div class="fluid-container p-1 text-left mx-0">
         <div class="row m-0">
-          <div class="col-lg-5 col-md-12 pl-0 pr-lg-1 p-0">
+          <div class="col-12 p-0 mx-0 pr-lg-1 col-lg-6">
             <div class="card">
               <div class="p-1">
                 {this.bookingData.property.name || ''}
@@ -354,7 +362,7 @@ export class IrBookingDetails {
               })`}
               {this.hasRoomAdd && <ir-icon id="room-add" icon="ft-plus h3 color-ir-dark-blue-hover pointer"></ir-icon>}
             </div>
-            <div class="card">
+            <div class="card p-0 mx-0">
               {this.bookingData.rooms.map((room: Room, index: number) => {
                 const mealCodeName = room.rateplan.name;
                 const myRoomTypeFoodCat = room.roomtype.name;
@@ -382,7 +390,7 @@ export class IrBookingDetails {
               })}
             </div>
           </div>
-          <div class="col-lg-7 col-md-12 pr-0 pl-0 pl-md-1">
+          <div class="col-12 p-0 m-0 pl-lg-1 col-lg-6">
             <ir-payment-details
               defaultTexts={this.defaultTexts}
               bookingDetails={this.bookingData}
