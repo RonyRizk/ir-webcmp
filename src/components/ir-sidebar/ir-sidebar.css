@@ -1,8 +1,5 @@
-:host {
-  overflow-x: hidden;
-}
 .backdrop {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -21,7 +18,7 @@
 }
 
 .sidebar-right {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: -100%;
   bottom: 0;
@@ -31,7 +28,6 @@
   transition: all 0.5s;
   z-index: 100;
   overflow-y: hidden;
-  overflow-x: hidden;
   color: var(--sidebar-color, #000);
   background-color: var(--sidebar-backgound, #fff);
   padding: 0.5rem;
@@ -42,10 +38,9 @@
 }
 
 .sidebar-left {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: -100%;
-  overflow-x: hidden;
   bottom: 0;
   width: var(--sidebar-width, 30rem);
   max-width: 100%;
