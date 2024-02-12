@@ -277,10 +277,7 @@ export class IrPickup {
               ></ir-select>
               <div class={'d-flex flex-column flex-md-row'}>
                 <ir-select
-<<<<<<< HEAD
-=======
                   labelBorder="light"
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
                   selectContainerStyle="mb-1"
                   onSelectChange={this.handleVehicleQuantityChange.bind(this)}
                   selectStyles={this.cause === 'number_of_vehicles' ? 'border-danger' : ''}
@@ -311,11 +308,7 @@ export class IrPickup {
             <ir-button
               onClick={() => this.closeModal.emit(null)}
               btn_styles="justify-content-center"
-<<<<<<< HEAD
-              class={`mb-1 mb-sm-0 flex-fill  ${this.pickupData.location ? 'mr-sm-1' : ''}`}
-=======
               class={`mb-1 mb-sm-0 flex-fill  ${this.defaultPickupData || this.pickupData.location !== -1 ? 'mr-sm-1' : ''}`}
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
               icon=""
               text={locales.entries.Lcz_Cancel}
               btn_color="secondary"

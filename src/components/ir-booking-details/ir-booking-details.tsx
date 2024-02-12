@@ -275,38 +275,23 @@ export class IrBookingDetails {
     }
 
     return [
-<<<<<<< HEAD
-      <div class="fluid-container pt-1 mr-2 ml-2">
-        <div class="row">
-          <div class="col-lg-7 col-md-12 d-flex justify-content-start align-items-end ">
-            <div class="font-size-large sm-padding-right ">{`${this.defaultTexts.entries.Lcz_Booking}#${this.bookingNumber}`}</div>
-=======
       <div class="fluid-container p-1">
         <div class="d-flex flex-column p-0 mx-0 flex-lg-row align-items-md-center justify-content-between mt-1">
           <div class="m-0 p-0 mb-1 mb-lg-0 mt-md-0  d-flex justify-content-start align-items-end">
             <p class="font-size-large m-0 p-0">{`${this.defaultTexts.entries.Lcz_Booking}#${this.bookingNumber}`}</p>
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
             <p class="m-0 p-0">
               {/* format date */}@ {_formatDate(this.bookingData.booked_on.date)} {/* format time */}
               {_formatTime(this.bookingData.booked_on.hour.toString(), +' ' + this.bookingData.booked_on.minute.toString())}
             </p>
           </div>
 
-<<<<<<< HEAD
-          <div class="col-lg-5 col-md-12 mt-1 mt-lg-0 d-flex justify-content-end align-items-center">
-=======
           <div class="d-flex justify-content-end align-items-center">
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
             <span class={`confirmed btn-sm m-0 mr-2 ${confirmationBG}`}>{this.bookingData.status.description}</span>
             {this.bookingData.allowed_actions.length > 0 && (
               <Fragment>
                 <ir-select
                   selectContainerStyle="h-28"
-<<<<<<< HEAD
-                  selectStyles="d-flex align-items-center"
-=======
                   selectStyles="d-flex align-items-center h-28"
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
                   firstOption={locales.entries.Lcz_Select}
                   id="update-status"
                   size="sm"
@@ -318,10 +303,6 @@ export class IrBookingDetails {
                 <ir-button btn_styles="h-28" isLoading={this.isUpdateClicked} btn_disabled={this.isUpdateClicked} id="update-status-btn" size="sm" text="Update"></ir-button>
               </Fragment>
             )}
-<<<<<<< HEAD
-            {this.hasReceipt && <ir-icon id="receipt" icon="ft-file-text h1 color-ir-dark-blue-hover m-0 ml-1 pointer"></ir-icon>}
-            {this.hasPrint && <ir-icon id="print" icon="ft-printer h1 color-ir-dark-blue-hover m-0 ml-1  pointer"></ir-icon>}
-=======
             {this.hasReceipt && (
               <ir-icon id="receipt" class="mx-1">
                 <svg slot="icon" xmlns="http://www.w3.org/2000/svg" stroke="#104064" height="24" width="19" viewBox="0 0 384 512">
@@ -342,7 +323,6 @@ export class IrBookingDetails {
                 </svg>
               </ir-icon>
             )}
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
             {this.hasDelete && <ir-icon id="book-delete" icon="ft-trash-2 h1 danger m-0 ml-1 pointer"></ir-icon>}
             {this.hasMenu && <ir-icon id="menu" icon="ft-list h1 color-ir-dark-blue-hover m-0 ml-1 pointer"></ir-icon>}
           </div>
@@ -370,11 +350,7 @@ export class IrBookingDetails {
                 <ir-label label={`${this.defaultTexts.entries.Lcz_Note}:`} value={this.bookingData.remark}></ir-label>
               </div>
             </div>
-<<<<<<< HEAD
-            <p class="font-size-large d-flex justify-content-between align-items-center ml-1 mb-1">
-=======
             <p class="font-size-large d-flex justify-content-between align-items-center mb-1">
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
               {`${_formatDate(this.bookingData.from_date)} - ${_formatDate(this.bookingData.to_date)} (${this._calculateNights(
                 this.bookingData.from_date,
                 this.bookingData.to_date,
@@ -398,8 +374,8 @@ export class IrBookingDetails {
                     myRoomTypeFoodCat={myRoomTypeFoodCat}
                     mealCodeName={mealCodeName}
                     currency={this.bookingData.currency.code}
-                    hasRoomEdit={this.hasRoomEdit}
-                    hasRoomDelete={this.hasRoomDelete}
+                    hasRoomEdit={this.hasRoomEdit && this.bookingData.is_direct}
+                    hasRoomDelete={this.hasRoomDelete && this.bookingData.is_direct}
                     hasCheckIn={this.hasCheckIn}
                     hasCheckOut={this.hasCheckOut}
                     bookingEvent={this.bookingData}
@@ -412,13 +388,9 @@ export class IrBookingDetails {
                 ];
               })}
             </div>
-            {calendar_data.pickup_service.is_enabled && (
+            {calendar_data.pickup_service.is_enabled && this.bookingData.is_direct && (
               <div class="mb-1">
                 <div class={'d-flex w-100 mb-1 align-items-center justify-content-between'}>
-<<<<<<< HEAD
-                  <p class={'font-size-large ml-1 p-0 m-0 '}>{locales.entries.Lcz_Pickup}</p>
-                  <ir-icon id="pickup" icon="ft-edit color-ir-dark-blue-hover h4 pointer"></ir-icon>
-=======
                   <p class={'font-size-large p-0 m-0 '}>{locales.entries.Lcz_Pickup}</p>
                   <ir-icon class="pointer mr-1" id="pickup">
                     <svg slot="icon" xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 512 512">
@@ -428,21 +400,10 @@ export class IrBookingDetails {
                       />
                     </svg>
                   </ir-icon>
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
                 </div>
                 {this.bookingData.pickup_info && (
                   <div class={'card'}>
                     <div class={'p-1'}>
-<<<<<<< HEAD
-                      <div class={'d-flex align-items-center'}>
-                        <p class={'font-weight-bold mr-1'}>
-                          {locales.entries.Lcz_Date}: <span class={'font-weight-normal'}>{moment(this.bookingData.pickup_info.date, 'YYYY-MM-DD').format('ddd, DD MM YYYY')}</span>
-                        </p>
-                        <p class={'font-weight-bold flex-fill'}>
-                          {locales.entries.Lcz_Time}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.hour}:${this.bookingData.pickup_info.minute}`}</span>
-                        </p>
-                        <p class={'font-weight-bold '}>
-=======
                       <div class={'d-flex align-items-center py-0 my-0 pickup-margin'}>
                         <p class={'font-weight-bold mr-1 py-0 my-0'}>
                           {locales.entries.Lcz_Date}: <span class={'font-weight-normal'}>{moment(this.bookingData.pickup_info.date, 'YYYY-MM-DD').format('ddd, DD MM YYYY')}</span>
@@ -451,7 +412,6 @@ export class IrBookingDetails {
                           {locales.entries.Lcz_Time}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.hour}:${this.bookingData.pickup_info.minute}`}</span>
                         </p>
                         <p class={'font-weight-bold py-0 my-0'}>
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
                           {locales.entries.Lcz_DueUponBooking}:{' '}
                           <span class={'font-weight-normal'}>
                             {this.bookingData.pickup_info.currency.symbol}
@@ -459,16 +419,6 @@ export class IrBookingDetails {
                           </span>
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <p class={'font-weight-bold '}>
-                        {locales.entries.Lcz_FlightDetails}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.details}`}</span>
-                      </p>
-                      <p class={''}>{`${this.bookingData.pickup_info.selected_option.vehicle.description}`}</p>
-                      <p class={'font-weight-bold '}>
-                        {locales.entries.Lcz_NbrOfVehicles}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.nbr_of_units}`}</span>
-                      </p>
-                      <p class={'small'}>
-=======
                       <p class={'font-weight-bold py-0 my-0'}>
                         {locales.entries.Lcz_FlightDetails}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.details}`}</span>
                       </p>
@@ -477,7 +427,6 @@ export class IrBookingDetails {
                         {locales.entries.Lcz_NbrOfVehicles}:<span class={'font-weight-normal'}> {`${this.bookingData.pickup_info.nbr_of_units}`}</span>
                       </p>
                       <p class={'small py-0 my-0 pickup-margin'}>
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
                         {calendar_data.pickup_service.pickup_instruction.description}
                         {calendar_data.pickup_service.pickup_cancelation_prepayment.description}
                       </p>
@@ -501,7 +450,7 @@ export class IrBookingDetails {
           e.stopPropagation();
           this.sidebarState = null;
         }}
-        showCloseButton={this.sidebarState === 'pickup' ? false : true}
+        showCloseButton={false}
       >
         {this.sidebarState === 'guest' && (
           <ir-guest-info

@@ -13,11 +13,7 @@
   padding-bottom: 0 !important ;
 }
 .h-28 {
-<<<<<<< HEAD
-  height: 28px;
-=======
   height: 2rem;
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
 }
 .bg-ir-red {
   background: #ff4961;
@@ -30,12 +26,9 @@
   height: 28px;
   padding-top: 0 !important;
   padding-bottom: 0 !important ;
-<<<<<<< HEAD
-=======
 }
 .pickup-margin {
   margin-bottom: 7px !important;
->>>>>>> 66f786b (PMS - Get Rid of FontAwesom.csS)
 }
 
 .pointer {
