@@ -274,10 +274,12 @@ export class IrBookingDetails {
       </Fragment>,
       <div class="fluid-container p-1">
         <div class="d-flex flex-column p-0 mx-0 flex-lg-row align-items-md-center justify-content-between mt-1">
-          <div class="m-0 p-0 mb-1 mb-lg-0 mt-md-0  d-flex justify-content-start align-items-end">
+          <div class="m-0 p-0 mb-1 mb-lg-0 mt-md-0  d-flex justify-content-start align-items-center">
             <p class="font-size-large m-0 p-0">{`${this.defaultTexts.entries.Lcz_Booking}#${this.bookingNumber}`}</p>
-            <p class="m-0 p-0 header-date">
-              {!this.bookingData.is_direct ? this.bookingData.channel_booking_nbr : ''} {_formatDate(this.bookingData.booked_on.date)} {/* format time */}
+            <p class="m-0 p-0 ">
+              <span class="mx-1 m-0">
+                {!this.bookingData.is_direct ? this.bookingData.channel_booking_nbr : ''} {_formatDate(this.bookingData.booked_on.date)} {/* format time */}
+              </span>
               {_formatTime(this.bookingData.booked_on.hour.toString(), +' ' + this.bookingData.booked_on.minute.toString())}
             </p>
           </div>
@@ -329,7 +331,16 @@ export class IrBookingDetails {
               </ir-icon>
             )}
             {this.hasDelete && <ir-icon id="book-delete" icon="ft-trash-2 h1 danger m-0 ml-1 pointer"></ir-icon>}
-            {this.hasMenu && <ir-icon id="menu" icon="ft-list h1 color-ir-dark-blue-hover m-0 ml-1 pointer"></ir-icon>}
+            {this.hasMenu && (
+              <ir-icon id="menu" class="m-0 ml-1 pointer">
+                <svg slot="icon" height={24} width={24} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                  <path
+                    fill="#104064"
+                    d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"
+                  />
+                </svg>
+              </ir-icon>
+            )}
           </div>
         </div>
       </div>,
