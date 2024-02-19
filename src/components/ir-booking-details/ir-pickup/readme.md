@@ -30,7 +30,6 @@
 
 ### Depends on
 
-- [ir-icon](../../ir-icon)
 - [ir-select](../../ir-select)
 - [ir-date-picker](../../ir-date-picker)
 - [ir-input-text](../../ir-input-text)
@@ -39,7 +38,6 @@
 ### Graph
 ```mermaid
 graph TD;
-  ir-pickup --> ir-icon
   ir-pickup --> ir-select
   ir-pickup --> ir-date-picker
   ir-pickup --> ir-input-text

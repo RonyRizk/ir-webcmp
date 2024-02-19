@@ -1,5 +1,5 @@
 import { RoomService } from '@/services/room.service';
-import channels_data from '@/stores/channel.store';
+import channels_data, { resetStore } from '@/stores/channel.store';
 import locales from '@/stores/locales.store';
 import { Component, Host, Prop, Watch, h, Element, State } from '@stencil/core';
 import axios from 'axios';
@@ -78,7 +78,7 @@ export class IrChannel {
                     </th>
                     <th scope="row">{channel.channel.name}</th>
                     <td>
-                      <input data-switchery="true" type="checkbox" class="" checked={channel.is_active} />
+                      <ir-switch checked={channel.is_active}></ir-switch>
                     </td>
                     <th>
                       <div class="btn-group">
@@ -92,14 +92,20 @@ export class IrChannel {
                           </svg>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right">
-                          <button class="dropdown-item" type="button">
-                            Action
+                          <button class="dropdown-item border-bottom border-light" type="button">
+                            Edit
+                          </button>
+                          <button class="dropdown-item border-bottom border-light" type="button">
+                            View logs
+                          </button>
+                          <button class="dropdown-item border-bottom border-light" type="button">
+                            Full Sync
+                          </button>
+                          <button class="dropdown-item border-bottom border-light" type="button">
+                            Pull Future Reservations
                           </button>
                           <button class="dropdown-item" type="button">
-                            Another action
-                          </button>
-                          <button class="dropdown-item" type="button">
-                            Something else here
+                            Remove
                           </button>
                         </div>
                       </div>
@@ -116,11 +122,20 @@ export class IrChannel {
             e.stopImmediatePropagation();
             e.stopPropagation();
             this.channel_status = null;
+            resetStore();
           }}
           open={this.channel_status !== null}
         >
-          {this.channel_status && <ir-channel-editor onCloseSideBar={() => (this.channel_status = null)}></ir-channel-editor>}
+          {this.channel_status && (
+            <ir-channel-editor
+              onCloseSideBar={() => {
+                this.channel_status = null;
+                resetStore();
+              }}
+            ></ir-channel-editor>
+          )}
         </ir-sidebar>
+        <ir-modal></ir-modal>
       </Host>
     );
   }

@@ -54,6 +54,7 @@ graph TD;
   ir-list-item --> ir-icon
   ir-list-item --> ir-modal
   ir-dropdown --> ir-icon
+  ir-modal --> ir-icon
   ir-modal --> ir-button
   ir-sidebar --> ir-icon
   ir-general-settings --> ir-select
