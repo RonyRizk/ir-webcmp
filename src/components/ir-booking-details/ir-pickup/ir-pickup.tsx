@@ -90,6 +90,9 @@ export class IrPickup {
   }
   initializeInputMask() {
     const input = this.el.querySelector('#pickup-time');
+    // if (this.pickupData) {
+    //   (input as HTMLInputElement).value = this.pickupData.arrival_time;
+    // }
     if (input) {
       Inputmask('Hh:mm', {
         placeholder: 'HH:mm',
@@ -114,10 +117,10 @@ export class IrPickup {
         oncomplete: () => {
           this.updatePickupData('arrival_time', (input as any).value);
         },
-        oncleared: function () {
+        oncleared: () => {
           this.updatePickupData('arrival_time', '');
         },
-        onincomplete: function () {
+        onincomplete: () => {
           this.updatePickupData('arrival_time', (input as any).value);
         },
       }).mask(input as HTMLElement);
@@ -140,6 +143,11 @@ export class IrPickup {
         })
         .toFixed(2),
     };
+  }
+  componentDidLoad() {
+    if (this.defaultPickupData) {
+      this.initializeInputMask();
+    }
   }
   handleVehicleTypeChange(e: CustomEvent) {
     if (e.detail === '') {
@@ -258,8 +266,8 @@ export class IrPickup {
                     </div>
 
                     <input
-                      value={this.pickupData.arrival_time}
                       type="text"
+                      value={this.pickupData.arrival_time}
                       id="pickup-time"
                       class={`form-control col-8 col-sm-4 ${this.cause === 'arrival_time' && 'border-danger'}`}
                     />

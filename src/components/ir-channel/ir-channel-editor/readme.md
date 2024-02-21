@@ -14,10 +14,9 @@
 
 ## Events
 
-| Event                 | Description | Type                |
-| --------------------- | ----------- | ------------------- |
-| `closeSideBar`        |             | `CustomEvent<null>` |
-| `saveChannelFinished` |             | `CustomEvent<null>` |
+| Event          | Description | Type                |
+| -------------- | ----------- | ------------------- |
+| `closeSideBar` |             | `CustomEvent<null>` |
 
 
 ## Dependencies
