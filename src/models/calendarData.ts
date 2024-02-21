@@ -18,6 +18,8 @@ export interface CalendarDataDetails {
   allowed_payment_methods: IAllowedPaymentMethods[];
   pickup_service: IPickupService;
   is_frontdesk_enabled: boolean;
+  id: number;
+  name: string;
 }
 export interface ITaxes {
   is_exlusive: boolean;
@@ -32,7 +34,7 @@ export interface IChannel {
   title: string;
 }
 export interface IExposedChannel {
-  id: number;
+  id: number | string;
   name: string;
   properties: IChannelProperty[];
   property?: IChannelProperty;
@@ -54,7 +56,7 @@ export interface IChannelRatePlans {
 export interface IMap {
   channel_id: string;
   ir_id: string;
-  type: 'room_type' | 'rate_plan';
+  type: 'room_type' | 'rate_plan' | 'property';
 }
 export interface IPickupCurrency extends ICurrency {
   symbol: string;

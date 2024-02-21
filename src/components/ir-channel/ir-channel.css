@@ -21,3 +21,34 @@
 .dropdown-divider {
   border-color: #e4e5ec;
 }
+.dropdown-item {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6b6f82;
+}
+.dropdown-item svg path {
+  fill: #6b6f82;
+}
+.danger {
+  color: var(--red);
+}
+.danger svg path {
+  fill: var(--red);
+}
+
+.table thead tr {
+  height: 50px !important;
+}
+.table-container {
+  border-radius: 30px;
+}
+.table thead {
+  background: #fafafa;
+  border-top-width: 0;
+}
+.actions-theader {
+  width: 35% !important;
+  text-align: end;
+}

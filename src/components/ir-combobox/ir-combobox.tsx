@@ -14,6 +14,7 @@ export class IrCombobox {
   @Prop() value: string;
   @Prop() disabled: boolean = false;
   @Prop() autoFocus: boolean = false;
+  @Prop() input_id: string = '';
 
   @State() selectedIndex: number = -1;
   @State() isComboBoxVisible: boolean = false;
@@ -60,12 +61,12 @@ export class IrCombobox {
           this.selectedIndex = (this.selectedIndex + 1) % dataSize;
           this.adjustScrollPosition(itemHeight);
           break;
-        case 'Enter':
-        case ' ':
-        case 'ArrowRight':
-          event.preventDefault();
-          this.selectItem(this.selectedIndex);
-          break;
+        // case 'Enter':
+        // case ' ':
+        // case 'ArrowRight':
+        //   event.preventDefault();
+        //   this.selectItem(this.selectedIndex);
+        //   break;
         case 'Escape':
           this.inputRef?.blur();
           this.isComboBoxVisible = false;
@@ -192,8 +193,6 @@ export class IrCombobox {
       this.isComboBoxVisible = false;
       this.inputRef?.blur();
       event.preventDefault();
-    } else {
-      return;
     }
   }
   renderDropdown() {
@@ -219,10 +218,20 @@ export class IrCombobox {
       </ul>
     );
   }
+  handleSubmit(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('object');
+    if (!this.filteredData.length) {
+      return;
+    }
+    this.selectItem(this.selectedIndex === -1 ? 0 : this.selectedIndex);
+  }
   render() {
     return (
-      <fieldset class="m-0 p-0">
+      <form onSubmit={this.handleSubmit.bind(this)} class="m-0 p-0">
         <input
+          id={this.input_id}
           ref={el => (this.inputRef = el)}
           type="text"
           disabled={this.disabled}
@@ -236,7 +245,7 @@ export class IrCombobox {
           autoFocus={this.autoFocus}
         />
         {this.renderDropdown()}
-      </fieldset>
+      </form>
     );
   }
 }
