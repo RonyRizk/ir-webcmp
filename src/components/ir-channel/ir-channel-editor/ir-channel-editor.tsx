@@ -1,8 +1,7 @@
-import calendar_data from '@/stores/calendar-data';
-import channels_data, { onChannelChange } from '@/stores/channel.store';
+import { ChannelService } from '@/services/channel.service';
+import { onChannelChange } from '@/stores/channel.store';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
-import axios from 'axios';
 
 @Component({
   tag: 'ir-channel-editor',
@@ -16,11 +15,11 @@ export class IrChannelEditor {
   @State() headerTitles = [
     {
       id: 'general_settings',
-      name: 'General Settings',
+      name: locales.entries?.Lcz_GeneralSettings,
       disabled: false,
     },
-    { id: 'mapping', name: 'Mapping', disabled: true },
-    { id: 'channel_booking', name: 'Channel Booking', disabled: true },
+    { id: 'mapping', name: locales.entries?.Lcz_Mapping, disabled: true },
+    { id: 'channel_booking', name: locales.entries?.Lcz_ChannelBooking, disabled: true },
   ];
   @State() selectedRoomType = [];
 
@@ -70,23 +69,8 @@ export class IrChannelEditor {
   async saveConnectedChannel() {
     try {
       this.isLoading = true;
-      const body = {
-        // id: channels_data.selectedChannel.id,
-        id: -1,
-        title: channels_data.channel_settings.hotel_title,
-        is_active: false,
-        channel: { id: channels_data.selectedChannel.id, name: channels_data.selectedChannel.name },
-        property: { id: calendar_data.id, name: calendar_data.name },
-        map: channels_data.mappedChannels,
-        is_remove: false,
-      };
-      const token = JSON.parse(sessionStorage.getItem('token'));
-      if (!token) {
-        throw new Error('Invalid Token');
-      }
-      const { data } = await axios.post(`/Handle_Connected_Channel?Ticket=${token}`, body);
+      await new ChannelService().saveConnectedChannel(false);
       this.saveChannelFinished.emit();
-      console.log(data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -99,7 +83,7 @@ export class IrChannelEditor {
       <Host class=" d-flex flex-column h-100">
         <nav class="px-1 position-sticky sticky-top py-1 top-0 bg-white">
           <div class="d-flex align-items-center  justify-content-between">
-            <h3 class="text-left font-medium-2  py-0 my-0">{this.channel_status === 'create' ? 'Create Channel' : 'Edit Channel'}</h3>
+            <h3 class="text-left font-medium-2  py-0 my-0">{this.channel_status === 'create' ? locales.entries?.Lcz_CreateChannel : locales.entries?.Lcz_EditChannel}</h3>
             <ir-icon
               class={'m-0 p-0 close'}
               onIconClickHandler={() => {

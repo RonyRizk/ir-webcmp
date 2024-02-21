@@ -5,6 +5,7 @@ import { Component, Host, Prop, Watch, h, Element, State, Fragment, Listen } fro
 import axios from 'axios';
 import { actions } from './data';
 import { IModalCause } from './types';
+import { ChannelService } from '@/services/channel.service';
 @Component({
   tag: 'ir-channel',
   styleUrl: 'ir-channel.css',
@@ -23,6 +24,7 @@ export class IrChannel {
 
   private roomService = new RoomService();
   private irModalRef: HTMLIrModalElement;
+  private channelService = new ChannelService();
 
   componentWillLoad() {
     if (this.baseurl) {
@@ -50,10 +52,11 @@ export class IrChannel {
     try {
       const [, , , languageTexts] = await Promise.all([
         this.roomService.fetchData(this.propertyid, this.language),
-        this.roomService.getExposedChannels(),
-        this.roomService.getExposedConnectedChannels(this.propertyid),
-        this.roomService.fetchLanguage(this.language),
+        this.channelService.getExposedChannels(),
+        this.channelService.getExposedConnectedChannels(this.propertyid),
+        this.roomService.fetchLanguage(this.language, ['_CHANNEL_FRONT']),
       ]);
+      console.log(languageTexts);
       channels_data.property_id = this.propertyid;
       if (!locales.entries) {
         locales.entries = languageTexts.entries;
@@ -88,7 +91,7 @@ export class IrChannel {
         },
         cause: 'channel',
         main_color: 'primary',
-        message: '',
+        message: locales.entries?.Lcz_UnSavedChangesWillBeLost,
         title: '',
       };
       this.openModal();
@@ -113,7 +116,7 @@ export class IrChannel {
       <Host class="h-100 ">
         <section class="p-2 px-lg-5 py-0 h-100 d-flex flex-column">
           <div class="d-flex w-100 justify-content-between mb-2 align-items-center">
-            <h3 class="font-weight-bold m-0 p-0">iSWITCH</h3>
+            <h3 class="font-weight-bold m-0 p-0">{locales.entries?.Lcz_iSWITCH}</h3>
             <ir-button text={'Create channel'} size="sm" onClickHanlder={() => (this.channel_status = 'create')}>
               <svg slot="icon" stroke-width={3} width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -126,15 +129,15 @@ export class IrChannel {
             </ir-button>
           </div>
           <div class="card p-1 flex-fill m-0">
-            <table class="table table-hover">
+            <table class="table table-striped table-bordered no-footer dataTable">
               <thead>
                 <tr>
                   <th scope="col" class="text-left">
-                    Channel
+                    {locales.entries?.Lcz_Channel}
                   </th>
-                  <th scope="col">Status</th>
+                  <th scope="col">{locales.entries?.Lcz_Status}</th>
                   <th scope="col" class="actions-theader">
-                    Actions
+                    {locales.entries?.Lcz_Actions}
                   </th>
                 </tr>
               </thead>
@@ -151,7 +154,7 @@ export class IrChannel {
                       <div class="d-flex justify-content-end">
                         <div class="btn-group">
                           <button type="button" class="btn  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-1">Actions</span>
+                            <span class="mr-1"> {locales.entries?.Lcz_Actions}</span>
                             <svg class={'caret-icon'} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height={14} width={14}>
                               <path
                                 fill="var(--blue)"
