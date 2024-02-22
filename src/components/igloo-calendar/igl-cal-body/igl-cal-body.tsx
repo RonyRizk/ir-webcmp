@@ -17,6 +17,7 @@ export class IglCalBody {
   @Prop() countryNodeList;
   @State() dragOverElement: string = '';
   @State() renderAgain: boolean = false;
+  @Prop() toBeAssignedDate: string;
   @Event() addBookingDatasEvent: EventEmitter<any[]>;
 
   private selectedRooms: { [key: string]: any } = {};

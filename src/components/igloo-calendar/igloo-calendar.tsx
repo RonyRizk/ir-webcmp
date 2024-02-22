@@ -14,7 +14,7 @@ import { TIglBookPropertyPayload } from '../../models/igl-book-property';
 import calendar_dates from '@/stores/calendar-dates.store';
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
-import { addUnassingedDates, removeUnassignedDates } from '@/stores/unassigned_dates.store';
+import { addUnassingedDates, handleUnAssignedDatesChange, removeUnassignedDates } from '@/stores/unassigned_dates.store';
 
 @Component({
   tag: 'igloo-calendar',
@@ -54,6 +54,7 @@ export class IglooCalendar {
   @Event({ bubbles: true, composed: true })
   reduceAvailableUnitEvent: EventEmitter<{ fromDate: string; toDate: string }>;
   @Event({ bubbles: true }) revertBooking: EventEmitter;
+  @State() toBeAssignedDate: string;
 
   private bookingService: BookingService = new BookingService();
   private countryNodeList: ICountry[] = [];
@@ -65,21 +66,37 @@ export class IglooCalendar {
   private toBeAssignedService = new ToBeAssignedService();
   private socket: Socket;
   private reachedEndOfCalendar = false;
+
   @Watch('ticket')
   ticketChanged() {
-    sessionStorage.setItem('token', JSON.stringify(this.ticket));
+    calendar_data.token = this.ticket;
+    this.bookingService.setToken(this.ticket);
+    this.roomService.setToken(this.ticket);
+    this.eventsService.setToken(this.ticket);
+    this.toBeAssignedService.setToken(this.ticket);
     this.initializeApp();
   }
   private availabilityTimeout;
 
   componentWillLoad() {
+    console.info('without session storage');
     if (this.baseurl) {
       axios.defaults.baseURL = this.baseurl;
     }
-
     if (this.ticket !== '') {
+      calendar_data.token = this.ticket;
+      this.bookingService.setToken(this.ticket);
+      this.roomService.setToken(this.ticket);
+      this.eventsService.setToken(this.ticket);
+      this.toBeAssignedService.setToken(this.ticket);
       this.initializeApp();
     }
+    handleUnAssignedDatesChange('unassigned_dates', newValue => {
+      console.log(newValue, Object.keys(newValue));
+      if (Object.keys(newValue).length === 0 && this.toBeAssignedDate !== '') {
+        this.toBeAssignedDate = '';
+      }
+    });
   }
   setUpCalendarData(roomResp, bookingResp) {
     this.calendarData.currency = roomResp['My_Result'].currency;
@@ -441,8 +458,12 @@ export class IglooCalendar {
         if (opt.data.start !== undefined && opt.data.end !== undefined) {
           this.handleDateSearch(opt.data);
         } else {
+          //scroll to unassigned dates
           let dt = new Date(opt.data);
-          this.scrollToElement(dt.getDate() + '_' + (dt.getMonth() + 1) + '_' + dt.getFullYear());
+          dt.setDate(dt.getDate() + 1);
+          this.toBeAssignedDate = this.transformDateForScroll(dt);
+
+          // this.scrollToElement(dt.getDate() + '_' + (dt.getMonth() + 1) + '_' + dt.getFullYear());
         }
         break;
       case 'search':
@@ -454,13 +475,13 @@ export class IglooCalendar {
         } else {
           this.editBookingItem = opt.data;
         }
-
         break;
       case 'gotoToday':
         this.scrollToElement(this.today);
         break;
       case 'closeSideMenu':
         this.closeSideMenu();
+        this.toBeAssignedDate = '';
         this.showBookProperty = false;
         break;
     }
@@ -811,6 +832,7 @@ export class IglooCalendar {
                     countryNodeList={this.countryNodeList}
                     currency={this.calendarData.currency}
                     today={this.today}
+                    toBeAssignedDate={this.toBeAssignedDate}
                     isScrollViewDragging={this.scrollViewDragging}
                     calendarData={this.calendarData}
                   ></igl-cal-body>

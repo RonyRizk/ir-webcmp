@@ -8,6 +8,7 @@ import { IglBookPropertyService } from './igl-book-property.service';
 import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOptions } from '../../../models/igl-book-property';
 import { EventsService } from '../../../services/events.service';
 import locales from '@/stores/locales.store';
+import calendar_data from '@/stores/calendar-data';
 
 @Component({
   tag: 'igl-book-property',
@@ -96,6 +97,8 @@ export class IglBookProperty {
     }
   }
   async componentWillLoad() {
+    this.bookingService.setToken(calendar_data.token);
+    this.eventsService.setToken(calendar_data.token);
     this.defaultDateRange = { from_date: this.bookingData.FROM_DATE, to_date: this.bookingData.TO_DATE };
     this.handleKeyDown = this.handleKeyDown.bind(this);
     if (!this.bookingData.defaultDateRange) {
@@ -146,8 +149,9 @@ export class IglBookProperty {
     if (this.guestData.length === 0) {
       return true;
     }
+    console.log(this.guestData);
     for (const data of this.guestData) {
-      if (data.guestName === '' || data.preference === '' || data.preference === 0) {
+      if (data.guestName === '' || ((data.preference === '' || data.preference === 0) && data.is_bed_configuration_enabled)) {
         return true;
       }
     }
@@ -205,7 +209,7 @@ export class IglBookProperty {
   }
 
   setOtherProperties(res: any) {
-    this.ratePricingMode = res.ratePricingMode;
+    this.ratePricingMode = res?.ratePricingMode;
     this.bookedByInfoData.arrivalTime = res.arrivalTime;
     this.bedPreferenceType = res.bedPreferenceType;
   }

@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property         | Attribute        | Description | Type                 | Default |
-| ---------------- | ---------------- | ----------- | -------------------- | ------- |
-| `channel_status` | `channel_status` |             | `"create" \| "edit"` | `null`  |
+| Property         | Attribute        | Description | Type                 | Default     |
+| ---------------- | ---------------- | ----------- | -------------------- | ----------- |
+| `channel_status` | `channel_status` |             | `"create" \| "edit"` | `null`      |
+| `ticket`         | `ticket`         |             | `string`             | `undefined` |
 
 
 ## Events
