@@ -278,6 +278,7 @@ export namespace Components {
         "btn_block": boolean;
         "btn_color": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         "btn_disabled": boolean;
+        "btn_id": string;
         "btn_styles": string;
         "btn_type": string;
         "icon": string;
@@ -502,6 +503,10 @@ export namespace Components {
         "bookingNumber": string;
         "defaultPickupData": IBookingPickupInfo | null;
         "numberOfPersons": number;
+    }
+    interface IrPopover {
+        "irPopoverLeft": string;
+        "popoverTitle": string;
     }
     interface IrRoom {
         "bookingEvent": Booking1;
@@ -883,6 +888,7 @@ declare global {
         "buttonClicked": { key: TPropertyButtonsTypes };
         "toast": IToast;
         "spiltBookingSelected": { key: string; data: unknown };
+        "animateIrButton": string;
     }
     interface HTMLIglBookPropertyHeaderElement extends Components.IglBookPropertyHeader, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBookPropertyHeaderElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyHeaderElement, ev: IglBookPropertyHeaderCustomEvent<HTMLIglBookPropertyHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1648,6 +1654,12 @@ declare global {
         prototype: HTMLIrPickupElement;
         new (): HTMLIrPickupElement;
     };
+    interface HTMLIrPopoverElement extends Components.IrPopover, HTMLStencilElement {
+    }
+    var HTMLIrPopoverElement: {
+        prototype: HTMLIrPopoverElement;
+        new (): HTMLIrPopoverElement;
+    };
     interface HTMLIrRoomElementEventMap {
         "deleteFinished": string;
         "pressCheckIn": any;
@@ -1829,6 +1841,7 @@ declare global {
         "ir-modal": HTMLIrModalElement;
         "ir-payment-details": HTMLIrPaymentDetailsElement;
         "ir-pickup": HTMLIrPickupElement;
+        "ir-popover": HTMLIrPopoverElement;
         "ir-room": HTMLIrRoomElement;
         "ir-room-nights": HTMLIrRoomNightsElement;
         "ir-select": HTMLIrSelectElement;
@@ -1905,6 +1918,7 @@ declare namespace LocalJSX {
         "message"?: string;
         "minDate"?: string;
         "onAdultChild"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
+        "onAnimateIrButton"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
         "onButtonClicked"?: (event: IglBookPropertyHeaderCustomEvent<{ key: TPropertyButtonsTypes }>) => void;
         "onCheckClicked"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onSourceDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
@@ -2155,6 +2169,7 @@ declare namespace LocalJSX {
         "btn_block"?: boolean;
         "btn_color"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         "btn_disabled"?: boolean;
+        "btn_id"?: string;
         "btn_styles"?: string;
         "btn_type"?: string;
         "icon"?: string;
@@ -2413,6 +2428,10 @@ declare namespace LocalJSX {
         "onCloseModal"?: (event: IrPickupCustomEvent<null>) => void;
         "onResetBookingData"?: (event: IrPickupCustomEvent<null>) => void;
     }
+    interface IrPopover {
+        "irPopoverLeft"?: string;
+        "popoverTitle"?: string;
+    }
     interface IrRoom {
         "bookingEvent"?: Booking1;
         "bookingIndex"?: number;
@@ -2551,6 +2570,7 @@ declare namespace LocalJSX {
         "ir-modal": IrModal;
         "ir-payment-details": IrPaymentDetails;
         "ir-pickup": IrPickup;
+        "ir-popover": IrPopover;
         "ir-room": IrRoom;
         "ir-room-nights": IrRoomNights;
         "ir-select": IrSelect;
@@ -2618,6 +2638,7 @@ declare module "@stencil/core" {
             "ir-modal": LocalJSX.IrModal & JSXBase.HTMLAttributes<HTMLIrModalElement>;
             "ir-payment-details": LocalJSX.IrPaymentDetails & JSXBase.HTMLAttributes<HTMLIrPaymentDetailsElement>;
             "ir-pickup": LocalJSX.IrPickup & JSXBase.HTMLAttributes<HTMLIrPickupElement>;
+            "ir-popover": LocalJSX.IrPopover & JSXBase.HTMLAttributes<HTMLIrPopoverElement>;
             "ir-room": LocalJSX.IrRoom & JSXBase.HTMLAttributes<HTMLIrRoomElement>;
             "ir-room-nights": LocalJSX.IrRoomNights & JSXBase.HTMLAttributes<HTMLIrRoomNightsElement>;
             "ir-select": LocalJSX.IrSelect & JSXBase.HTMLAttributes<HTMLIrSelectElement>;
