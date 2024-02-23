@@ -69,6 +69,7 @@ graph TD;
   igl-to-be-assigned --> ir-icon
   igl-tba-category-view --> igl-tba-booking-view
   igl-cal-header --> ir-date-picker
+  igl-cal-body --> ir-popover
   igl-cal-body --> igl-booking-event
   igl-booking-event --> igl-booking-event-hover
   igl-booking-event-hover --> igl-block-dates-view
