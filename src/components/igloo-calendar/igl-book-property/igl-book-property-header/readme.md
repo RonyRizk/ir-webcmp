@@ -30,7 +30,6 @@
 | Event                        | Description | Type                                                                                                 |
 | ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
 | `adultChild`                 |             | `CustomEvent<any>`                                                                                   |
-| `animateIrButton`            |             | `CustomEvent<string>`                                                                                |
 | `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>`                                                       |
 | `checkClicked`               |             | `CustomEvent<any>`                                                                                   |
 | `sourceDropDownChange`       |             | `CustomEvent<string>`                                                                                |

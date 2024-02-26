@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property           | Attribute | Description | Type       | Default                                       |
-| ------------------ | --------- | ----------- | ---------- | --------------------------------------------- |
-| `handledEndpoints` | --        |             | `string[]` | `['/ReAllocate_Exposed_Room', '/Do_Payment']` |
+| Property           | Attribute | Description | Type                                                | Default                                                                                |
+| ------------------ | --------- | ----------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `defaultMessage`   | --        |             | `{ loadingMessage: string; errorMessage: string; }` | `{     loadingMessage: 'Fetching Data',     errorMessage: 'Something Went Wrong',   }` |
+| `handledEndpoints` | --        |             | `string[]`                                          | `['/ReAllocate_Exposed_Room']`                                                         |
 
 
 ## Events
