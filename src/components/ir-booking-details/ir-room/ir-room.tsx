@@ -223,9 +223,7 @@ export class IrRoom {
             </div>
           </div>
           <div class="d-flex align-items-center sm-mb-1">
-            <span class=" mr-1">
-              {_formatDate(this.item.from_date)} - {_formatDate(this.item.to_date)}
-            </span>
+            <ir-date-view class="mr-1" from_date={this.item.from_date} to_date={this.item.to_date} showDateDifference={false}></ir-date-view>
             {calendar_data.is_frontdesk_enabled && this.item.unit && <span class="light-blue-bg mr-2 ">{(this.item.unit as IUnit).name}</span>}
             {this.hasCheckIn && <ir-button id="checkin" icon="" class="mr-1" btn_color="info" size="sm" text="Check in"></ir-button>}
             {this.hasCheckOut && <ir-button id="checkout" icon="" btn_color="info" size="sm" text="Check out"></ir-button>}

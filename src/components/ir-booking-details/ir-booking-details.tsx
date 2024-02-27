@@ -188,13 +188,6 @@ export class IrBookingDetails {
     sidebar.open = true;
   }
 
-  _calculateNights(fromDate: string, toDate: string) {
-    // calculate the difference between the two dates
-    const diff = moment(toDate).diff(moment(fromDate), 'days');
-    // return the difference
-    return diff;
-  }
-
   async updateStatus() {
     if (this.tempStatus !== '' && this.tempStatus !== null) {
       try {
@@ -380,15 +373,8 @@ export class IrBookingDetails {
                 )}
               </div>
             </div>
-            <p class="font-size-large d-flex justify-content-between align-items-center mb-1">
-              {`${_formatDate(this.bookingData.from_date)} - ${_formatDate(this.bookingData.to_date)} (${this._calculateNights(
-                this.bookingData.from_date,
-                this.bookingData.to_date,
-              )} ${
-                this._calculateNights(this.bookingData.from_date, this.bookingData.to_date) > 1
-                  ? ` ${this.defaultTexts.entries.Lcz_Nights}`
-                  : ` ${this.defaultTexts.entries.Lcz_Night}`
-              })`}
+            <div class="font-size-large d-flex justify-content-between align-items-center mb-1">
+              <ir-date-view from_date={this.bookingData.from_date} to_date={this.bookingData.to_date}></ir-date-view>
               {this.hasRoomAdd && this.bookingData.is_direct && (
                 <ir-icon id="room-add">
                   <svg xmlns="http://www.w3.org/2000/svg" height="20" width="17.5" viewBox="0 0 448 512" slot="icon">
@@ -399,7 +385,7 @@ export class IrBookingDetails {
                   </svg>
                 </ir-icon>
               )}
-            </p>
+            </div>
             <div class="card p-0 mx-0">
               {this.bookingData.rooms.map((room: Room, index: number) => {
                 const mealCodeName = room.rateplan.name;
