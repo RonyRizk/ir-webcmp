@@ -7,9 +7,9 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { IglBookPropertyPayloadEditBooking, TAdultChildConstraints, TIglBookPropertyPayload, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 import { ICountry, RoomBlockDetails, RoomBookingDetails } from "./models/IBooking";
-import { IToast, TPositions } from "./components/ir-toast/toast";
+import { IToast } from "./components/ir-toast/toast";
+import { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
 import { IReallocationPayload, IRoomNightsData } from "./models/property-types";
-import { IToast as IToast1 } from "./components/ir-toast/toast";
 import { IPageTwoDataUpdateProps } from "./models/models";
 import { ChannelManager, RoomType } from "./sample/channel/data";
 import { checkboxes, selectOption } from "./common/models";
@@ -21,9 +21,9 @@ import { Booking as Booking1 } from "./models/booking.dto";
 import { IRoomNightsDataEventPayload } from "./models/property-types";
 export { IglBookPropertyPayloadEditBooking, TAdultChildConstraints, TIglBookPropertyPayload, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 export { ICountry, RoomBlockDetails, RoomBookingDetails } from "./models/IBooking";
-export { IToast, TPositions } from "./components/ir-toast/toast";
+export { IToast } from "./components/ir-toast/toast";
+export { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
 export { IReallocationPayload, IRoomNightsData } from "./models/property-types";
-export { IToast as IToast1 } from "./components/ir-toast/toast";
 export { IPageTwoDataUpdateProps } from "./models/models";
 export { ChannelManager, RoomType } from "./sample/channel/data";
 export { checkboxes, selectOption } from "./common/models";
@@ -158,17 +158,19 @@ export namespace Components {
         "calendarData": { [key: string]: any };
         "countryNodeList": any;
         "currency": any;
+        "highlightedDate": string;
         "isScrollViewDragging": boolean;
         "language": string;
-        "toBeAssignedDate": string;
         "today": String;
     }
     interface IglCalFooter {
         "calendarData": { [key: string]: any };
+        "highlightedDate": string;
         "today": String;
     }
     interface IglCalHeader {
         "calendarData": { [key: string]: any };
+        "highlightedDate": string;
         "propertyid": number;
         "to_date": string;
         "today": String;
@@ -555,6 +557,7 @@ export namespace Components {
         "selectContainerStyle": string;
         "selectStyle": boolean;
         "selectStyles": string;
+        "select_id": string;
         "selectedValue": any;
         "size": 'sm' | 'md' | 'lg';
         "submited": boolean;
@@ -840,6 +843,9 @@ declare global {
         "bookingCreated": { pool?: string; data: RoomBookingDetails[] };
         "blockedCreated": RoomBlockDetails;
         "resetBookingData": null;
+        "animateIrButton": string;
+        "animateIrSelect": string;
+        "toast": IToast;
     }
     interface HTMLIglBookPropertyElement extends Components.IglBookProperty, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBookPropertyElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyElement, ev: IglBookPropertyCustomEvent<HTMLIglBookPropertyElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -895,9 +901,10 @@ declare global {
         "adultChild": any;
         "checkClicked": any;
         "buttonClicked": { key: TPropertyButtonsTypes };
-        "toast": IToast;
+        "toast": IToast1;
         "spiltBookingSelected": { key: string; data: unknown };
         "animateIrButton": string;
+        "animateIrSelect": string;
     }
     interface HTMLIglBookPropertyHeaderElement extends Components.IglBookPropertyHeader, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBookPropertyHeaderElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyHeaderElement, ev: IglBookPropertyHeaderCustomEvent<HTMLIglBookPropertyHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1069,7 +1076,7 @@ declare global {
     };
     interface HTMLIglDateRangeElementEventMap {
         "dateSelectEvent": { [key: string]: any };
-        "toast": IToast;
+        "toast": IToast1;
     }
     interface HTMLIglDateRangeElement extends Components.IglDateRange, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglDateRangeElementEventMap>(type: K, listener: (this: HTMLIglDateRangeElement, ev: IglDateRangeCustomEvent<HTMLIglDateRangeElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1222,7 +1229,7 @@ declare global {
     interface HTMLIrAutocompleteElementEventMap {
         "comboboxValue": { key: string; data: unknown };
         "inputCleared": null;
-        "toast": IToast;
+        "toast": IToast1;
     }
     interface HTMLIrAutocompleteElement extends Components.IrAutocomplete, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrAutocompleteElementEventMap>(type: K, listener: (this: HTMLIrAutocompleteElement, ev: IrAutocompleteCustomEvent<HTMLIrAutocompleteElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1239,7 +1246,7 @@ declare global {
         new (): HTMLIrAutocompleteElement;
     };
     interface HTMLIrBookingDetailsElementEventMap {
-        "toast": IToast;
+        "toast": IToast1;
     }
     interface HTMLIrBookingDetailsElement extends Components.IrBookingDetails, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrBookingDetailsElementEventMap>(type: K, listener: (this: HTMLIrBookingDetailsElement, ev: IrBookingDetailsCustomEvent<HTMLIrBookingDetailsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1516,7 +1523,7 @@ declare global {
         new (): HTMLIrInputTextElement;
     };
     interface HTMLIrInterceptorElementEventMap {
-        "toast": IToast;
+        "toast": IToast1;
     }
     interface HTMLIrInterceptorElement extends Components.IrInterceptor, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrInterceptorElementEventMap>(type: K, listener: (this: HTMLIrInterceptorElement, ev: IrInterceptorCustomEvent<HTMLIrInterceptorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1909,10 +1916,13 @@ declare namespace LocalJSX {
         "countryNodeList"?: any;
         "currency"?: { id: number; code: string };
         "language"?: string;
+        "onAnimateIrButton"?: (event: IglBookPropertyCustomEvent<string>) => void;
+        "onAnimateIrSelect"?: (event: IglBookPropertyCustomEvent<string>) => void;
         "onBlockedCreated"?: (event: IglBookPropertyCustomEvent<RoomBlockDetails>) => void;
         "onBookingCreated"?: (event: IglBookPropertyCustomEvent<{ pool?: string; data: RoomBookingDetails[] }>) => void;
         "onCloseBookingWindow"?: (event: IglBookPropertyCustomEvent<{ [key: string]: any }>) => void;
         "onResetBookingData"?: (event: IglBookPropertyCustomEvent<null>) => void;
+        "onToast"?: (event: IglBookPropertyCustomEvent<IToast>) => void;
         "propertyid"?: number;
         "showPaymentDetails"?: boolean;
     }
@@ -1942,12 +1952,13 @@ declare namespace LocalJSX {
         "minDate"?: string;
         "onAdultChild"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onAnimateIrButton"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
+        "onAnimateIrSelect"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
         "onButtonClicked"?: (event: IglBookPropertyHeaderCustomEvent<{ key: TPropertyButtonsTypes }>) => void;
         "onCheckClicked"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
         "onSourceDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<string>) => void;
         "onSpiltBookingSelected"?: (event: IglBookPropertyHeaderCustomEvent<{ key: string; data: unknown }>) => void;
         "onSplitBookingDropDownChange"?: (event: IglBookPropertyHeaderCustomEvent<any>) => void;
-        "onToast"?: (event: IglBookPropertyHeaderCustomEvent<IToast>) => void;
+        "onToast"?: (event: IglBookPropertyHeaderCustomEvent<IToast1>) => void;
         "propertyId"?: number;
         "showSplitBookingOption"?: boolean;
         "sourceOptions"?: TSourceOptions[];
@@ -2033,21 +2044,23 @@ declare namespace LocalJSX {
         "calendarData"?: { [key: string]: any };
         "countryNodeList"?: any;
         "currency"?: any;
+        "highlightedDate"?: string;
         "isScrollViewDragging"?: boolean;
         "language"?: string;
         "onAddBookingDatasEvent"?: (event: IglCalBodyCustomEvent<any[]>) => void;
         "onScrollPageToRoom"?: (event: IglCalBodyCustomEvent<any>) => void;
         "onShowBookingPopup"?: (event: IglCalBodyCustomEvent<any>) => void;
-        "toBeAssignedDate"?: string;
         "today"?: String;
     }
     interface IglCalFooter {
         "calendarData"?: { [key: string]: any };
+        "highlightedDate"?: string;
         "onOptionEvent"?: (event: IglCalFooterCustomEvent<{ [key: string]: any }>) => void;
         "today"?: String;
     }
     interface IglCalHeader {
         "calendarData"?: { [key: string]: any };
+        "highlightedDate"?: string;
         "onGotoRoomEvent"?: (event: IglCalHeaderCustomEvent<{
     [key: string]: any;
   }>) => void;
@@ -2067,7 +2080,7 @@ declare namespace LocalJSX {
         "maxDate"?: string;
         "minDate"?: string;
         "onDateSelectEvent"?: (event: IglDateRangeCustomEvent<{ [key: string]: any }>) => void;
-        "onToast"?: (event: IglDateRangeCustomEvent<IToast>) => void;
+        "onToast"?: (event: IglDateRangeCustomEvent<IToast1>) => void;
     }
     interface IglLegends {
         "legendData"?: { [key: string]: any };
@@ -2162,7 +2175,7 @@ declare namespace LocalJSX {
         "name"?: string;
         "onComboboxValue"?: (event: IrAutocompleteCustomEvent<{ key: string; data: unknown }>) => void;
         "onInputCleared"?: (event: IrAutocompleteCustomEvent<null>) => void;
-        "onToast"?: (event: IrAutocompleteCustomEvent<IToast>) => void;
+        "onToast"?: (event: IrAutocompleteCustomEvent<IToast1>) => void;
         "placeholder"?: string;
         "propertyId"?: number;
         "required"?: boolean;
@@ -2184,7 +2197,7 @@ declare namespace LocalJSX {
         "hasRoomEdit"?: boolean;
         "is_from_front_desk"?: boolean;
         "language"?: string;
-        "onToast"?: (event: IrBookingDetailsCustomEvent<IToast>) => void;
+        "onToast"?: (event: IrBookingDetailsCustomEvent<IToast1>) => void;
         "propertyid"?: number;
         "ticket"?: string;
     }
@@ -2361,7 +2374,7 @@ declare namespace LocalJSX {
     }
     interface IrInterceptor {
         "handledEndpoints"?: string[];
-        "onToast"?: (event: IrInterceptorCustomEvent<IToast>) => void;
+        "onToast"?: (event: IrInterceptorCustomEvent<IToast1>) => void;
     }
     interface IrJquerySwitch {
         "baseClass"?: string;
@@ -2508,6 +2521,7 @@ declare namespace LocalJSX {
         "selectContainerStyle"?: string;
         "selectStyle"?: boolean;
         "selectStyles"?: string;
+        "select_id"?: string;
         "selectedValue"?: any;
         "size"?: 'sm' | 'md' | 'lg';
         "submited"?: boolean;

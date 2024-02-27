@@ -9,6 +9,7 @@ import { TAdultChildConstraints, TPropertyButtonsTypes, TSourceOption, TSourceOp
 import { EventsService } from '../../../services/events.service';
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
+import { IToast } from '@/components/ir-toast/toast';
 
 @Component({
   tag: 'igl-book-property',
@@ -39,6 +40,10 @@ export class IglBookProperty {
   @Event() bookingCreated: EventEmitter<{ pool?: string; data: RoomBookingDetails[] }>;
   @Event() blockedCreated: EventEmitter<RoomBlockDetails>;
   @Event() resetBookingData: EventEmitter<null>;
+
+  @Event({ bubbles: true, composed: true }) animateIrButton: EventEmitter<string>;
+  @Event({ bubbles: true, composed: true }) animateIrSelect: EventEmitter<string>;
+  @Event({ bubbles: true, composed: true }) toast: EventEmitter<IToast>;
 
   private initialRoomIds: { roomName: string; ratePlanId: number; roomId: string; roomTypeId: string } | null = null;
   private sourceOption: TSourceOption;
@@ -378,9 +383,28 @@ export class IglBookProperty {
       case 'next':
         event.stopImmediatePropagation();
         event.stopPropagation();
-        this.gotoPage('page_two');
+        if (!this.adultChildCount?.adult) {
+          this.animateIrSelect.emit('adult_child_select');
+          break;
+        }
+        if (this.selectedUnits.size > 0) {
+          this.gotoPage('page_two');
+          break;
+        } else {
+          if (this.defaultData?.roomsInfo.length === 0) {
+            this.animateIrButton.emit('check_availability');
+            break;
+          }
+        }
+        this.toast.emit({
+          type: 'error',
+          description: locales.entries.Lcz_SelectRatePlan,
+          title: locales.entries.Lcz_SelectRatePlan,
+        });
+        break;
       case 'check':
         this.initializeBookingAvailability(dateToFormattedString(new Date(this.dateRangeData.fromDate)), dateToFormattedString(new Date(this.dateRangeData.toDate)));
+        break;
       default:
         break;
     }
