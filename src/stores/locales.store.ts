@@ -1,8 +1,9 @@
 import { createStore } from '@stencil/store';
 export interface ILocale {
-  entries: (LocalizationStrings & LocalizationChannelFrontEntries) | null;
+  entries: TLocaleEntries;
   direction: 'ltr' | 'rtl';
 }
+export type TLocaleEntries = (LocalizationStrings & LocalizationChannelFrontEntries & BookingListingCodes) | null;
 export type LocalizationStrings = {
   Lcz_Adding: string;
   Lcz_AddingRoomNightsTo: string;
@@ -155,6 +156,42 @@ export type LocalizationStrings = {
   Lcz_Including: string;
   Lcz_SubTotal: string;
 };
+export type BookingListingCodes = {
+  Lcz_BookedOn: string;
+  Lcz_Booking: string;
+  Lcz_BookingNbr: string;
+  Lcz_BookingNbrGuestname: string;
+  Lcz_Bookings: string;
+  Lcz_BookingStatus: string;
+  Lcz_Cancel: string;
+  Lcz_Channels: string;
+  Lcz_DateOf: string;
+  Lcz_From: string;
+  Lcz_GuestSource: string;
+  Lcz_InOut: string;
+  Lcz_JustDelete: string;
+  Lcz_OK: string;
+  Lcz_Or: string;
+  Lcz_Price: string;
+  Lcz_Balance: string;
+  Lcz_RecoverAndDelete: string;
+  Lcz_Services: string;
+  Lcz_Status: string;
+  Lcz_SureYouWantToDeleteBookingNbr: string;
+  Lcz_Until: string;
+  Lcz_View: string;
+  Lcz_WantToRecoverAllotment: string;
+  Lcz_MarkBookingAsPaid: string;
+  Lcz_Dates: string;
+  Lcz_Confirm: string;
+  Lcz_P: string;
+  Lcz_Of: string;
+  Lcz_ExportToExcel: string;
+  Lcz_Erase: string;
+  Lcz_Search: string;
+  Lcz_PaymentStatus: string;
+};
+
 export type LocalizationChannelFrontEntries = {
   Lcz_Actions: string;
   Lcz_Cancel: string;
