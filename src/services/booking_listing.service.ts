@@ -30,9 +30,18 @@ export class BookingListingService extends Token {
     booking_listing.bookings = [...result];
     booking_listing.userSelection = {
       ...booking_listing.userSelection,
-      book_nbr: '',
-      name: '',
       total_count: header.total_count,
     };
+    booking_listing.download_url = header.exported_data_url;
+  }
+  public async removeExposedBooking(booking_nbr: string, is_to_revover: boolean) {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('Invalid token');
+    }
+    await axios.post(`/Remove_Exposed_Booking?Ticket=${token}`, {
+      booking_nbr,
+      is_to_revover,
+    });
   }
 }

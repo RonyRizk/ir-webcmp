@@ -7,14 +7,15 @@
 
 ## Properties
 
-| Property     | Attribute    | Description | Type     | Default     |
-| ------------ | ------------ | ----------- | -------- | ----------- |
-| `baseurl`    | `baseurl`    |             | `string` | `''`        |
-| `from_date`  | `from_date`  |             | `string` | `undefined` |
-| `language`   | `language`   |             | `string` | `''`        |
-| `propertyid` | `propertyid` |             | `number` | `undefined` |
-| `ticket`     | `ticket`     |             | `string` | `''`        |
-| `to_date`    | `to_date`    |             | `string` | `undefined` |
+| Property                    | Attribute                       | Description | Type      | Default     |
+| --------------------------- | ------------------------------- | ----------- | --------- | ----------- |
+| `baseurl`                   | `baseurl`                       |             | `string`  | `''`        |
+| `from_date`                 | `from_date`                     |             | `string`  | `undefined` |
+| `language`                  | `language`                      |             | `string`  | `''`        |
+| `propertyid`                | `propertyid`                    |             | `number`  | `undefined` |
+| `ticket`                    | `ticket`                        |             | `string`  | `''`        |
+| `to_date`                   | `to_date`                       |             | `string`  | `undefined` |
+| `withIrToastAndInterceptor` | `with-ir-toast-and-interceptor` |             | `boolean` | `true`      |
 
 
 ## Events
@@ -25,6 +26,10 @@
 
 
 ## Dependencies
+
+### Used by
+
+ - [ir-listing-header](../ir-booking-listing/ir-listing-header)
 
 ### Depends on
 
@@ -38,7 +43,6 @@ graph TD;
   igl-book-property-container --> ir-toast
   igl-book-property-container --> ir-interceptor
   igl-book-property-container --> igl-book-property
-  ir-interceptor --> ir-loading-screen
   igl-book-property --> igl-block-dates-view
   igl-book-property --> ir-icon
   igl-book-property --> igl-booking-overview-page
@@ -61,6 +65,7 @@ graph TD;
   igl-pagetwo --> ir-button
   igl-application-info --> ir-tooltip
   igl-property-booked-by --> ir-autocomplete
+  ir-listing-header --> igl-book-property-container
   style igl-book-property-container fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

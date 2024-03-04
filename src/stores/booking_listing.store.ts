@@ -7,6 +7,7 @@ export interface IBookingListingStore extends IExposedBookingsCriteria {
   token: string;
   userSelection: IUserListingSelection;
   bookings: Booking[];
+  download_url: string | null;
 }
 export interface IUserListingSelection {
   channel: string;
@@ -38,7 +39,7 @@ const initialState: IBookingListingStore = {
   userSelection: {
     from: moment().add(-7, 'days').format('YYYY-MM-DD'),
     to: moment().format('YYYY-MM-DD'),
-    channel: undefined,
+    channel: '',
     property_id: null,
     start_row: 0,
     end_row: 20,
@@ -54,6 +55,7 @@ const initialState: IBookingListingStore = {
     is_combined_view: false,
     is_to_export: false,
   },
+  download_url: null,
 };
 
 export const { state: booking_listing, onChange: onBookingListingChange } = createStore<IBookingListingStore>(initialState);
@@ -66,7 +68,10 @@ export function initializeUserSelection() {
     filter_type: booking_listing.types[0].id,
     book_nbr: '',
     name: '',
-    total_count: 0,
+    from: moment().add(-7, 'days').format('YYYY-MM-DD'),
+    to: moment().format('YYYY-MM-DD'),
+    start_row: 0,
+    end_row: 20,
   };
 }
 export function updateUserSelection(key: keyof IUserListingSelection, value: any) {

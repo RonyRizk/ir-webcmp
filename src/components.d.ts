@@ -11,12 +11,12 @@ import { IToast } from "./components/ir-toast/toast";
 import { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
 import { IReallocationPayload, IRoomNightsData } from "./models/property-types";
 import { IPageTwoDataUpdateProps } from "./models/models";
+import { Booking } from "./models/booking.dto";
 import { checkboxes, selectOption as selectOption1 } from "./common/models";
 import { ILocale as ILocale1, IToast as IToast2 } from "./components.d";
 import { selectOption } from "./common/models";
 import { ILocale } from "./stores/locales.store";
-import { Booking, IBookingPickupInfo, IOtaNotes } from "./models/booking.dto";
-import { Booking as Booking1 } from "./models/booking.dto";
+import { Booking as Booking1, IBookingPickupInfo, IOtaNotes } from "./models/booking.dto";
 import { IRoomNightsDataEventPayload } from "./models/property-types";
 export { IglBookPropertyPayloadEditBooking, TAdultChildConstraints, TIglBookPropertyPayload, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 export { ICountry, RoomBlockDetails, RoomBookingDetails } from "./models/IBooking";
@@ -24,12 +24,12 @@ export { IToast } from "./components/ir-toast/toast";
 export { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
 export { IReallocationPayload, IRoomNightsData } from "./models/property-types";
 export { IPageTwoDataUpdateProps } from "./models/models";
+export { Booking } from "./models/booking.dto";
 export { checkboxes, selectOption as selectOption1 } from "./common/models";
 export { ILocale as ILocale1, IToast as IToast2 } from "./components.d";
 export { selectOption } from "./common/models";
 export { ILocale } from "./stores/locales.store";
-export { Booking, IBookingPickupInfo, IOtaNotes } from "./models/booking.dto";
-export { Booking as Booking1 } from "./models/booking.dto";
+export { Booking as Booking1, IBookingPickupInfo, IOtaNotes } from "./models/booking.dto";
 export { IRoomNightsDataEventPayload } from "./models/property-types";
 export namespace Components {
     interface IglApplicationInfo {
@@ -71,6 +71,7 @@ export namespace Components {
         "propertyid": number;
         "ticket": string;
         "to_date": string;
+        "withIrToastAndInterceptor": boolean;
     }
     interface IglBookPropertyFooter {
         "disabled": boolean;
@@ -383,6 +384,12 @@ export namespace Components {
         "setupDataCountries": selectOption[];
         "setupDataCountriesCode": selectOption[];
     }
+    interface IrHousekeeping {
+        "baseurl": string;
+        "language": string;
+        "propertyid": number;
+        "ticket": string;
+    }
     interface IrIcon {
         "icon": string;
     }
@@ -429,9 +436,6 @@ export namespace Components {
         "modalTitle": string;
         "openModal": () => Promise<void>;
     }
-    interface IrLoader {
-        "size": string;
-    }
     interface IrLoadingScreen {
         "message": string;
     }
@@ -465,7 +469,7 @@ export namespace Components {
         "popoverTitle": string;
     }
     interface IrRoom {
-        "bookingEvent": Booking1;
+        "bookingEvent": Booking;
         "bookingIndex": number;
         "currency": string;
         "defaultTexts": ILocale;
@@ -540,7 +544,9 @@ export namespace Components {
         "position": TPositions;
     }
     interface IrTooltip {
+        "customSlot": boolean;
         "message": string;
+        "withHtml": boolean;
     }
     interface OtaLabel {
         "label": string;
@@ -732,459 +738,145 @@ export interface IrSwitchCustomEvent<T> extends CustomEvent<T> {
     target: HTMLIrSwitchElement;
 }
 declare global {
-    interface HTMLIglApplicationInfoElementEventMap {
-        "dataUpdateEvent": { [key: string]: any };
-    }
     interface HTMLIglApplicationInfoElement extends Components.IglApplicationInfo, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglApplicationInfoElementEventMap>(type: K, listener: (this: HTMLIglApplicationInfoElement, ev: IglApplicationInfoCustomEvent<HTMLIglApplicationInfoElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglApplicationInfoElementEventMap>(type: K, listener: (this: HTMLIglApplicationInfoElement, ev: IglApplicationInfoCustomEvent<HTMLIglApplicationInfoElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglApplicationInfoElement: {
         prototype: HTMLIglApplicationInfoElement;
         new (): HTMLIglApplicationInfoElement;
     };
-    interface HTMLIglBlockDatesViewElementEventMap {
-        "dataUpdateEvent": { [key: string]: any };
-    }
     interface HTMLIglBlockDatesViewElement extends Components.IglBlockDatesView, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBlockDatesViewElementEventMap>(type: K, listener: (this: HTMLIglBlockDatesViewElement, ev: IglBlockDatesViewCustomEvent<HTMLIglBlockDatesViewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBlockDatesViewElementEventMap>(type: K, listener: (this: HTMLIglBlockDatesViewElement, ev: IglBlockDatesViewCustomEvent<HTMLIglBlockDatesViewElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBlockDatesViewElement: {
         prototype: HTMLIglBlockDatesViewElement;
         new (): HTMLIglBlockDatesViewElement;
     };
-    interface HTMLIglBookPropertyElementEventMap {
-        "closeBookingWindow": { [key: string]: any };
-        "bookingCreated": { pool?: string; data: RoomBookingDetails[] };
-        "blockedCreated": RoomBlockDetails;
-        "resetBookingData": null;
-        "animateIrButton": string;
-        "animateIrSelect": string;
-        "toast": IToast;
-    }
     interface HTMLIglBookPropertyElement extends Components.IglBookProperty, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookPropertyElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyElement, ev: IglBookPropertyCustomEvent<HTMLIglBookPropertyElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookPropertyElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyElement, ev: IglBookPropertyCustomEvent<HTMLIglBookPropertyElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookPropertyElement: {
         prototype: HTMLIglBookPropertyElement;
         new (): HTMLIglBookPropertyElement;
     };
-    interface HTMLIglBookPropertyContainerElementEventMap {
-        "resetBookingData": null;
-    }
     interface HTMLIglBookPropertyContainerElement extends Components.IglBookPropertyContainer, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookPropertyContainerElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyContainerElement, ev: IglBookPropertyContainerCustomEvent<HTMLIglBookPropertyContainerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookPropertyContainerElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyContainerElement, ev: IglBookPropertyContainerCustomEvent<HTMLIglBookPropertyContainerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookPropertyContainerElement: {
         prototype: HTMLIglBookPropertyContainerElement;
         new (): HTMLIglBookPropertyContainerElement;
     };
-    interface HTMLIglBookPropertyFooterElementEventMap {
-        "buttonClicked": { key: TPropertyButtonsTypes };
-    }
     interface HTMLIglBookPropertyFooterElement extends Components.IglBookPropertyFooter, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookPropertyFooterElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyFooterElement, ev: IglBookPropertyFooterCustomEvent<HTMLIglBookPropertyFooterElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookPropertyFooterElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyFooterElement, ev: IglBookPropertyFooterCustomEvent<HTMLIglBookPropertyFooterElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookPropertyFooterElement: {
         prototype: HTMLIglBookPropertyFooterElement;
         new (): HTMLIglBookPropertyFooterElement;
     };
-    interface HTMLIglBookPropertyHeaderElementEventMap {
-        "splitBookingDropDownChange": any;
-        "sourceDropDownChange": string;
-        "adultChild": any;
-        "checkClicked": any;
-        "buttonClicked": { key: TPropertyButtonsTypes };
-        "toast": IToast1;
-        "spiltBookingSelected": { key: string; data: unknown };
-        "animateIrButton": string;
-        "animateIrSelect": string;
-    }
     interface HTMLIglBookPropertyHeaderElement extends Components.IglBookPropertyHeader, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookPropertyHeaderElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyHeaderElement, ev: IglBookPropertyHeaderCustomEvent<HTMLIglBookPropertyHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookPropertyHeaderElementEventMap>(type: K, listener: (this: HTMLIglBookPropertyHeaderElement, ev: IglBookPropertyHeaderCustomEvent<HTMLIglBookPropertyHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookPropertyHeaderElement: {
         prototype: HTMLIglBookPropertyHeaderElement;
         new (): HTMLIglBookPropertyHeaderElement;
     };
-    interface HTMLIglBookingEventElementEventMap {
-        "hideBubbleInfo": any;
-        "updateEventData": any;
-        "dragOverEventData": any;
-        "showRoomNightsDialog": IRoomNightsData;
-        "showDialog": IReallocationPayload;
-        "resetStreachedBooking": string;
-        "toast": IToast;
-    }
     interface HTMLIglBookingEventElement extends Components.IglBookingEvent, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookingEventElementEventMap>(type: K, listener: (this: HTMLIglBookingEventElement, ev: IglBookingEventCustomEvent<HTMLIglBookingEventElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookingEventElementEventMap>(type: K, listener: (this: HTMLIglBookingEventElement, ev: IglBookingEventCustomEvent<HTMLIglBookingEventElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookingEventElement: {
         prototype: HTMLIglBookingEventElement;
         new (): HTMLIglBookingEventElement;
     };
-    interface HTMLIglBookingEventHoverElementEventMap {
-        "showBookingPopup": any;
-        "hideBubbleInfo": any;
-        "deleteButton": string;
-        "bookingCreated": { pool?: string; data: any[] };
-    }
     interface HTMLIglBookingEventHoverElement extends Components.IglBookingEventHover, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookingEventHoverElementEventMap>(type: K, listener: (this: HTMLIglBookingEventHoverElement, ev: IglBookingEventHoverCustomEvent<HTMLIglBookingEventHoverElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookingEventHoverElementEventMap>(type: K, listener: (this: HTMLIglBookingEventHoverElement, ev: IglBookingEventHoverCustomEvent<HTMLIglBookingEventHoverElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookingEventHoverElement: {
         prototype: HTMLIglBookingEventHoverElement;
         new (): HTMLIglBookingEventHoverElement;
     };
-    interface HTMLIglBookingOverviewPageElementEventMap {
-        "roomsDataUpdate": any;
-    }
     interface HTMLIglBookingOverviewPageElement extends Components.IglBookingOverviewPage, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookingOverviewPageElementEventMap>(type: K, listener: (this: HTMLIglBookingOverviewPageElement, ev: IglBookingOverviewPageCustomEvent<HTMLIglBookingOverviewPageElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookingOverviewPageElementEventMap>(type: K, listener: (this: HTMLIglBookingOverviewPageElement, ev: IglBookingOverviewPageCustomEvent<HTMLIglBookingOverviewPageElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookingOverviewPageElement: {
         prototype: HTMLIglBookingOverviewPageElement;
         new (): HTMLIglBookingOverviewPageElement;
     };
-    interface HTMLIglBookingRoomRatePlanElementEventMap {
-        "dataUpdateEvent": { [key: string]: any };
-        "gotoSplitPageTwoEvent": { [key: string]: any };
-    }
     interface HTMLIglBookingRoomRatePlanElement extends Components.IglBookingRoomRatePlan, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookingRoomRatePlanElementEventMap>(type: K, listener: (this: HTMLIglBookingRoomRatePlanElement, ev: IglBookingRoomRatePlanCustomEvent<HTMLIglBookingRoomRatePlanElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookingRoomRatePlanElementEventMap>(type: K, listener: (this: HTMLIglBookingRoomRatePlanElement, ev: IglBookingRoomRatePlanCustomEvent<HTMLIglBookingRoomRatePlanElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookingRoomRatePlanElement: {
         prototype: HTMLIglBookingRoomRatePlanElement;
         new (): HTMLIglBookingRoomRatePlanElement;
     };
-    interface HTMLIglBookingRoomsElementEventMap {
-        "dataUpdateEvent": { [key: string]: any };
-    }
     interface HTMLIglBookingRoomsElement extends Components.IglBookingRooms, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglBookingRoomsElementEventMap>(type: K, listener: (this: HTMLIglBookingRoomsElement, ev: IglBookingRoomsCustomEvent<HTMLIglBookingRoomsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglBookingRoomsElementEventMap>(type: K, listener: (this: HTMLIglBookingRoomsElement, ev: IglBookingRoomsCustomEvent<HTMLIglBookingRoomsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglBookingRoomsElement: {
         prototype: HTMLIglBookingRoomsElement;
         new (): HTMLIglBookingRoomsElement;
     };
-    interface HTMLIglCalBodyElementEventMap {
-        "showBookingPopup": any;
-        "scrollPageToRoom": any;
-        "addBookingDatasEvent": any[];
-    }
     interface HTMLIglCalBodyElement extends Components.IglCalBody, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglCalBodyElementEventMap>(type: K, listener: (this: HTMLIglCalBodyElement, ev: IglCalBodyCustomEvent<HTMLIglCalBodyElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglCalBodyElementEventMap>(type: K, listener: (this: HTMLIglCalBodyElement, ev: IglCalBodyCustomEvent<HTMLIglCalBodyElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglCalBodyElement: {
         prototype: HTMLIglCalBodyElement;
         new (): HTMLIglCalBodyElement;
     };
-    interface HTMLIglCalFooterElementEventMap {
-        "optionEvent": { [key: string]: any };
-    }
     interface HTMLIglCalFooterElement extends Components.IglCalFooter, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglCalFooterElementEventMap>(type: K, listener: (this: HTMLIglCalFooterElement, ev: IglCalFooterCustomEvent<HTMLIglCalFooterElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglCalFooterElementEventMap>(type: K, listener: (this: HTMLIglCalFooterElement, ev: IglCalFooterCustomEvent<HTMLIglCalFooterElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglCalFooterElement: {
         prototype: HTMLIglCalFooterElement;
         new (): HTMLIglCalFooterElement;
     };
-    interface HTMLIglCalHeaderElementEventMap {
-        "optionEvent": { [key: string]: any };
-        "gotoRoomEvent": {
-    [key: string]: any;
-  };
-        "gotoToBeAssignedDate": {
-    [key: string]: any;
-  };
-    }
     interface HTMLIglCalHeaderElement extends Components.IglCalHeader, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglCalHeaderElementEventMap>(type: K, listener: (this: HTMLIglCalHeaderElement, ev: IglCalHeaderCustomEvent<HTMLIglCalHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglCalHeaderElementEventMap>(type: K, listener: (this: HTMLIglCalHeaderElement, ev: IglCalHeaderCustomEvent<HTMLIglCalHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglCalHeaderElement: {
         prototype: HTMLIglCalHeaderElement;
         new (): HTMLIglCalHeaderElement;
     };
-    interface HTMLIglDateRangeElementEventMap {
-        "dateSelectEvent": { [key: string]: any };
-        "toast": IToast1;
-    }
     interface HTMLIglDateRangeElement extends Components.IglDateRange, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglDateRangeElementEventMap>(type: K, listener: (this: HTMLIglDateRangeElement, ev: IglDateRangeCustomEvent<HTMLIglDateRangeElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglDateRangeElementEventMap>(type: K, listener: (this: HTMLIglDateRangeElement, ev: IglDateRangeCustomEvent<HTMLIglDateRangeElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglDateRangeElement: {
         prototype: HTMLIglDateRangeElement;
         new (): HTMLIglDateRangeElement;
     };
-    interface HTMLIglLegendsElementEventMap {
-        "optionEvent": { [key: string]: any };
-    }
     interface HTMLIglLegendsElement extends Components.IglLegends, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglLegendsElementEventMap>(type: K, listener: (this: HTMLIglLegendsElement, ev: IglLegendsCustomEvent<HTMLIglLegendsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglLegendsElementEventMap>(type: K, listener: (this: HTMLIglLegendsElement, ev: IglLegendsCustomEvent<HTMLIglLegendsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglLegendsElement: {
         prototype: HTMLIglLegendsElement;
         new (): HTMLIglLegendsElement;
     };
-    interface HTMLIglPagetwoElementEventMap {
-        "dataUpdateEvent": IPageTwoDataUpdateProps;
-        "buttonClicked": {
-    key: TPropertyButtonsTypes;
-    data?: CustomEvent;
-  };
-    }
     interface HTMLIglPagetwoElement extends Components.IglPagetwo, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglPagetwoElementEventMap>(type: K, listener: (this: HTMLIglPagetwoElement, ev: IglPagetwoCustomEvent<HTMLIglPagetwoElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglPagetwoElementEventMap>(type: K, listener: (this: HTMLIglPagetwoElement, ev: IglPagetwoCustomEvent<HTMLIglPagetwoElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglPagetwoElement: {
         prototype: HTMLIglPagetwoElement;
         new (): HTMLIglPagetwoElement;
     };
-    interface HTMLIglPropertyBookedByElementEventMap {
-        "dataUpdateEvent": { [key: string]: any };
-    }
     interface HTMLIglPropertyBookedByElement extends Components.IglPropertyBookedBy, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglPropertyBookedByElementEventMap>(type: K, listener: (this: HTMLIglPropertyBookedByElement, ev: IglPropertyBookedByCustomEvent<HTMLIglPropertyBookedByElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglPropertyBookedByElementEventMap>(type: K, listener: (this: HTMLIglPropertyBookedByElement, ev: IglPropertyBookedByCustomEvent<HTMLIglPropertyBookedByElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglPropertyBookedByElement: {
         prototype: HTMLIglPropertyBookedByElement;
         new (): HTMLIglPropertyBookedByElement;
     };
-    interface HTMLIglTbaBookingViewElementEventMap {
-        "highlightToBeAssignedBookingEvent": any;
-        "addToBeAssignedEvent": any;
-        "scrollPageToRoom": any;
-        "assignRoomEvent": { [key: string]: any };
-    }
     interface HTMLIglTbaBookingViewElement extends Components.IglTbaBookingView, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglTbaBookingViewElementEventMap>(type: K, listener: (this: HTMLIglTbaBookingViewElement, ev: IglTbaBookingViewCustomEvent<HTMLIglTbaBookingViewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglTbaBookingViewElementEventMap>(type: K, listener: (this: HTMLIglTbaBookingViewElement, ev: IglTbaBookingViewCustomEvent<HTMLIglTbaBookingViewElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglTbaBookingViewElement: {
         prototype: HTMLIglTbaBookingViewElement;
         new (): HTMLIglTbaBookingViewElement;
     };
-    interface HTMLIglTbaCategoryViewElementEventMap {
-        "assignUnitEvent": { [key: string]: any };
-    }
     interface HTMLIglTbaCategoryViewElement extends Components.IglTbaCategoryView, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglTbaCategoryViewElementEventMap>(type: K, listener: (this: HTMLIglTbaCategoryViewElement, ev: IglTbaCategoryViewCustomEvent<HTMLIglTbaCategoryViewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglTbaCategoryViewElementEventMap>(type: K, listener: (this: HTMLIglTbaCategoryViewElement, ev: IglTbaCategoryViewCustomEvent<HTMLIglTbaCategoryViewElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglTbaCategoryViewElement: {
         prototype: HTMLIglTbaCategoryViewElement;
         new (): HTMLIglTbaCategoryViewElement;
     };
-    interface HTMLIglToBeAssignedElementEventMap {
-        "optionEvent": { [key: string]: any };
-        "reduceAvailableUnitEvent": { [key: string]: any };
-        "showBookingPopup": any;
-        "addToBeAssignedEvent": any;
-        "highlightToBeAssignedBookingEvent": any;
-    }
     interface HTMLIglToBeAssignedElement extends Components.IglToBeAssigned, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglToBeAssignedElementEventMap>(type: K, listener: (this: HTMLIglToBeAssignedElement, ev: IglToBeAssignedCustomEvent<HTMLIglToBeAssignedElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglToBeAssignedElementEventMap>(type: K, listener: (this: HTMLIglToBeAssignedElement, ev: IglToBeAssignedCustomEvent<HTMLIglToBeAssignedElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglToBeAssignedElement: {
         prototype: HTMLIglToBeAssignedElement;
         new (): HTMLIglToBeAssignedElement;
     };
-    interface HTMLIglooCalendarElementEventMap {
-        "dragOverHighlightElement": any;
-        "moveBookingTo": any;
-        "calculateUnassignedDates": any;
-        "reduceAvailableUnitEvent": { fromDate: string; toDate: string };
-        "revertBooking": any;
-    }
     interface HTMLIglooCalendarElement extends Components.IglooCalendar, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglooCalendarElementEventMap>(type: K, listener: (this: HTMLIglooCalendarElement, ev: IglooCalendarCustomEvent<HTMLIglooCalendarElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglooCalendarElementEventMap>(type: K, listener: (this: HTMLIglooCalendarElement, ev: IglooCalendarCustomEvent<HTMLIglooCalendarElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIglooCalendarElement: {
         prototype: HTMLIglooCalendarElement;
         new (): HTMLIglooCalendarElement;
     };
-    interface HTMLIrAutocompleteElementEventMap {
-        "comboboxValue": { key: string; data: unknown };
-        "inputCleared": null;
-        "toast": IToast1;
-    }
     interface HTMLIrAutocompleteElement extends Components.IrAutocomplete, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrAutocompleteElementEventMap>(type: K, listener: (this: HTMLIrAutocompleteElement, ev: IrAutocompleteCustomEvent<HTMLIrAutocompleteElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrAutocompleteElementEventMap>(type: K, listener: (this: HTMLIrAutocompleteElement, ev: IrAutocompleteCustomEvent<HTMLIrAutocompleteElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrAutocompleteElement: {
         prototype: HTMLIrAutocompleteElement;
         new (): HTMLIrAutocompleteElement;
     };
-    interface HTMLIrBookingDetailsElementEventMap {
-        "toast": IToast1;
-    }
     interface HTMLIrBookingDetailsElement extends Components.IrBookingDetails, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrBookingDetailsElementEventMap>(type: K, listener: (this: HTMLIrBookingDetailsElement, ev: IrBookingDetailsCustomEvent<HTMLIrBookingDetailsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrBookingDetailsElementEventMap>(type: K, listener: (this: HTMLIrBookingDetailsElement, ev: IrBookingDetailsCustomEvent<HTMLIrBookingDetailsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrBookingDetailsElement: {
         prototype: HTMLIrBookingDetailsElement;
@@ -1196,18 +888,7 @@ declare global {
         prototype: HTMLIrBookingListingElement;
         new (): HTMLIrBookingListingElement;
     };
-    interface HTMLIrButtonElementEventMap {
-        "clickHanlder": any;
-    }
     interface HTMLIrButtonElement extends Components.IrButton, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrButtonElementEventMap>(type: K, listener: (this: HTMLIrButtonElement, ev: IrButtonCustomEvent<HTMLIrButtonElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrButtonElementEventMap>(type: K, listener: (this: HTMLIrButtonElement, ev: IrButtonCustomEvent<HTMLIrButtonElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrButtonElement: {
         prototype: HTMLIrButtonElement;
@@ -1219,19 +900,7 @@ declare global {
         prototype: HTMLIrChannelElement;
         new (): HTMLIrChannelElement;
     };
-    interface HTMLIrChannelEditorElementEventMap {
-        "saveChannelFinished": null;
-        "closeSideBar": null;
-    }
     interface HTMLIrChannelEditorElement extends Components.IrChannelEditor, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrChannelEditorElementEventMap>(type: K, listener: (this: HTMLIrChannelEditorElement, ev: IrChannelEditorCustomEvent<HTMLIrChannelEditorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrChannelEditorElementEventMap>(type: K, listener: (this: HTMLIrChannelEditorElement, ev: IrChannelEditorCustomEvent<HTMLIrChannelEditorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrChannelEditorElement: {
         prototype: HTMLIrChannelEditorElement;
@@ -1243,18 +912,7 @@ declare global {
         prototype: HTMLIrChannelGeneralElement;
         new (): HTMLIrChannelGeneralElement;
     };
-    interface HTMLIrChannelHeaderElementEventMap {
-        "tabChanged": string;
-    }
     interface HTMLIrChannelHeaderElement extends Components.IrChannelHeader, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrChannelHeaderElementEventMap>(type: K, listener: (this: HTMLIrChannelHeaderElement, ev: IrChannelHeaderCustomEvent<HTMLIrChannelHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrChannelHeaderElementEventMap>(type: K, listener: (this: HTMLIrChannelHeaderElement, ev: IrChannelHeaderCustomEvent<HTMLIrChannelHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrChannelHeaderElement: {
         prototype: HTMLIrChannelHeaderElement;
@@ -1266,54 +924,19 @@ declare global {
         prototype: HTMLIrChannelMappingElement;
         new (): HTMLIrChannelMappingElement;
     };
-    interface HTMLIrCheckboxElementEventMap {
-        "checkboxChange": { name: string; value: string; checked: boolean };
-    }
     interface HTMLIrCheckboxElement extends Components.IrCheckbox, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrCheckboxElementEventMap>(type: K, listener: (this: HTMLIrCheckboxElement, ev: IrCheckboxCustomEvent<HTMLIrCheckboxElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrCheckboxElementEventMap>(type: K, listener: (this: HTMLIrCheckboxElement, ev: IrCheckboxCustomEvent<HTMLIrCheckboxElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrCheckboxElement: {
         prototype: HTMLIrCheckboxElement;
         new (): HTMLIrCheckboxElement;
     };
-    interface HTMLIrCheckboxesElementEventMap {
-        "checkboxesChange": checkboxes[];
-    }
     interface HTMLIrCheckboxesElement extends Components.IrCheckboxes, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrCheckboxesElementEventMap>(type: K, listener: (this: HTMLIrCheckboxesElement, ev: IrCheckboxesCustomEvent<HTMLIrCheckboxesElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrCheckboxesElementEventMap>(type: K, listener: (this: HTMLIrCheckboxesElement, ev: IrCheckboxesCustomEvent<HTMLIrCheckboxesElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrCheckboxesElement: {
         prototype: HTMLIrCheckboxesElement;
         new (): HTMLIrCheckboxesElement;
     };
-    interface HTMLIrComboboxElementEventMap {
-        "comboboxValueChange": { key: string; data: unknown };
-        "inputCleared": null;
-        "toast": IToast;
-    }
     interface HTMLIrComboboxElement extends Components.IrCombobox, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrComboboxElementEventMap>(type: K, listener: (this: HTMLIrComboboxElement, ev: IrComboboxCustomEvent<HTMLIrComboboxElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrComboboxElementEventMap>(type: K, listener: (this: HTMLIrComboboxElement, ev: IrComboboxCustomEvent<HTMLIrComboboxElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrComboboxElement: {
         prototype: HTMLIrComboboxElement;
@@ -1325,21 +948,7 @@ declare global {
         prototype: HTMLIrCommonElement;
         new (): HTMLIrCommonElement;
     };
-    interface HTMLIrDatePickerElementEventMap {
-        "dateChanged": {
-    start: moment.Moment;
-    end: moment.Moment;
-  };
-    }
     interface HTMLIrDatePickerElement extends Components.IrDatePicker, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrDatePickerElementEventMap>(type: K, listener: (this: HTMLIrDatePickerElement, ev: IrDatePickerCustomEvent<HTMLIrDatePickerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrDatePickerElementEventMap>(type: K, listener: (this: HTMLIrDatePickerElement, ev: IrDatePickerCustomEvent<HTMLIrDatePickerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrDatePickerElement: {
         prototype: HTMLIrDatePickerElement;
@@ -1351,104 +960,43 @@ declare global {
         prototype: HTMLIrDateViewElement;
         new (): HTMLIrDateViewElement;
     };
-    interface HTMLIrDropdownElementEventMap {
-        "dropdownItemCLicked": { name: string; object: any };
-    }
     interface HTMLIrDropdownElement extends Components.IrDropdown, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrDropdownElementEventMap>(type: K, listener: (this: HTMLIrDropdownElement, ev: IrDropdownCustomEvent<HTMLIrDropdownElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrDropdownElementEventMap>(type: K, listener: (this: HTMLIrDropdownElement, ev: IrDropdownCustomEvent<HTMLIrDropdownElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrDropdownElement: {
         prototype: HTMLIrDropdownElement;
         new (): HTMLIrDropdownElement;
     };
-    interface HTMLIrGuestInfoElementEventMap {
-        "closeSideBar": null;
-        "resetBookingData": null;
-    }
     interface HTMLIrGuestInfoElement extends Components.IrGuestInfo, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrGuestInfoElementEventMap>(type: K, listener: (this: HTMLIrGuestInfoElement, ev: IrGuestInfoCustomEvent<HTMLIrGuestInfoElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrGuestInfoElementEventMap>(type: K, listener: (this: HTMLIrGuestInfoElement, ev: IrGuestInfoCustomEvent<HTMLIrGuestInfoElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrGuestInfoElement: {
         prototype: HTMLIrGuestInfoElement;
         new (): HTMLIrGuestInfoElement;
     };
-    interface HTMLIrIconElementEventMap {
-        "iconClickHandler": any;
+    interface HTMLIrHousekeepingElement extends Components.IrHousekeeping, HTMLStencilElement {
     }
+    var HTMLIrHousekeepingElement: {
+        prototype: HTMLIrHousekeepingElement;
+        new (): HTMLIrHousekeepingElement;
+    };
     interface HTMLIrIconElement extends Components.IrIcon, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrIconElementEventMap>(type: K, listener: (this: HTMLIrIconElement, ev: IrIconCustomEvent<HTMLIrIconElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrIconElementEventMap>(type: K, listener: (this: HTMLIrIconElement, ev: IrIconCustomEvent<HTMLIrIconElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrIconElement: {
         prototype: HTMLIrIconElement;
         new (): HTMLIrIconElement;
     };
-    interface HTMLIrInputTextElementEventMap {
-        "textChange": any;
-    }
     interface HTMLIrInputTextElement extends Components.IrInputText, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrInputTextElementEventMap>(type: K, listener: (this: HTMLIrInputTextElement, ev: IrInputTextCustomEvent<HTMLIrInputTextElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrInputTextElementEventMap>(type: K, listener: (this: HTMLIrInputTextElement, ev: IrInputTextCustomEvent<HTMLIrInputTextElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrInputTextElement: {
         prototype: HTMLIrInputTextElement;
         new (): HTMLIrInputTextElement;
     };
-    interface HTMLIrInterceptorElementEventMap {
-        "toast": IToast1;
-    }
     interface HTMLIrInterceptorElement extends Components.IrInterceptor, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrInterceptorElementEventMap>(type: K, listener: (this: HTMLIrInterceptorElement, ev: IrInterceptorCustomEvent<HTMLIrInterceptorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrInterceptorElementEventMap>(type: K, listener: (this: HTMLIrInterceptorElement, ev: IrInterceptorCustomEvent<HTMLIrInterceptorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrInterceptorElement: {
         prototype: HTMLIrInterceptorElement;
         new (): HTMLIrInterceptorElement;
     };
-    interface HTMLIrLabelElementEventMap {
-        "editSidebar": any;
-    }
     interface HTMLIrLabelElement extends Components.IrLabel, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrLabelElementEventMap>(type: K, listener: (this: HTMLIrLabelElement, ev: IrLabelCustomEvent<HTMLIrLabelElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrLabelElementEventMap>(type: K, listener: (this: HTMLIrLabelElement, ev: IrLabelCustomEvent<HTMLIrLabelElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrLabelElement: {
         prototype: HTMLIrLabelElement;
@@ -1460,29 +1008,11 @@ declare global {
         prototype: HTMLIrListingHeaderElement;
         new (): HTMLIrListingHeaderElement;
     };
-    interface HTMLIrListingModalElementEventMap {
-        "modalClosed": null;
-        "resetData": null;
-    }
     interface HTMLIrListingModalElement extends Components.IrListingModal, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrListingModalElementEventMap>(type: K, listener: (this: HTMLIrListingModalElement, ev: IrListingModalCustomEvent<HTMLIrListingModalElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrListingModalElementEventMap>(type: K, listener: (this: HTMLIrListingModalElement, ev: IrListingModalCustomEvent<HTMLIrListingModalElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrListingModalElement: {
         prototype: HTMLIrListingModalElement;
         new (): HTMLIrListingModalElement;
-    };
-    interface HTMLIrLoaderElement extends Components.IrLoader, HTMLStencilElement {
-    }
-    var HTMLIrLoaderElement: {
-        prototype: HTMLIrLoaderElement;
-        new (): HTMLIrLoaderElement;
     };
     interface HTMLIrLoadingScreenElement extends Components.IrLoadingScreen, HTMLStencilElement {
     }
@@ -1490,55 +1020,19 @@ declare global {
         prototype: HTMLIrLoadingScreenElement;
         new (): HTMLIrLoadingScreenElement;
     };
-    interface HTMLIrModalElementEventMap {
-        "confirmModal": any;
-        "cancelModal": any;
-    }
     interface HTMLIrModalElement extends Components.IrModal, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrModalElementEventMap>(type: K, listener: (this: HTMLIrModalElement, ev: IrModalCustomEvent<HTMLIrModalElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrModalElementEventMap>(type: K, listener: (this: HTMLIrModalElement, ev: IrModalCustomEvent<HTMLIrModalElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrModalElement: {
         prototype: HTMLIrModalElement;
         new (): HTMLIrModalElement;
     };
-    interface HTMLIrPaymentDetailsElementEventMap {
-        "resetBookingData": null;
-        "toast": IToast;
-    }
     interface HTMLIrPaymentDetailsElement extends Components.IrPaymentDetails, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrPaymentDetailsElementEventMap>(type: K, listener: (this: HTMLIrPaymentDetailsElement, ev: IrPaymentDetailsCustomEvent<HTMLIrPaymentDetailsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrPaymentDetailsElementEventMap>(type: K, listener: (this: HTMLIrPaymentDetailsElement, ev: IrPaymentDetailsCustomEvent<HTMLIrPaymentDetailsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrPaymentDetailsElement: {
         prototype: HTMLIrPaymentDetailsElement;
         new (): HTMLIrPaymentDetailsElement;
     };
-    interface HTMLIrPickupElementEventMap {
-        "closeModal": null;
-        "resetBookingData": null;
-    }
     interface HTMLIrPickupElement extends Components.IrPickup, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrPickupElementEventMap>(type: K, listener: (this: HTMLIrPickupElement, ev: IrPickupCustomEvent<HTMLIrPickupElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrPickupElementEventMap>(type: K, listener: (this: HTMLIrPickupElement, ev: IrPickupCustomEvent<HTMLIrPickupElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrPickupElement: {
         prototype: HTMLIrPickupElement;
@@ -1550,72 +1044,25 @@ declare global {
         prototype: HTMLIrPopoverElement;
         new (): HTMLIrPopoverElement;
     };
-    interface HTMLIrRoomElementEventMap {
-        "deleteFinished": string;
-        "pressCheckIn": any;
-        "pressCheckOut": any;
-        "editInitiated": TIglBookPropertyPayload;
-    }
     interface HTMLIrRoomElement extends Components.IrRoom, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrRoomElementEventMap>(type: K, listener: (this: HTMLIrRoomElement, ev: IrRoomCustomEvent<HTMLIrRoomElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrRoomElementEventMap>(type: K, listener: (this: HTMLIrRoomElement, ev: IrRoomCustomEvent<HTMLIrRoomElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrRoomElement: {
         prototype: HTMLIrRoomElement;
         new (): HTMLIrRoomElement;
     };
-    interface HTMLIrRoomNightsElementEventMap {
-        "closeRoomNightsDialog": IRoomNightsDataEventPayload;
-    }
     interface HTMLIrRoomNightsElement extends Components.IrRoomNights, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrRoomNightsElementEventMap>(type: K, listener: (this: HTMLIrRoomNightsElement, ev: IrRoomNightsCustomEvent<HTMLIrRoomNightsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrRoomNightsElementEventMap>(type: K, listener: (this: HTMLIrRoomNightsElement, ev: IrRoomNightsCustomEvent<HTMLIrRoomNightsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrRoomNightsElement: {
         prototype: HTMLIrRoomNightsElement;
         new (): HTMLIrRoomNightsElement;
     };
-    interface HTMLIrSelectElementEventMap {
-        "selectChange": any;
-    }
     interface HTMLIrSelectElement extends Components.IrSelect, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrSelectElementEventMap>(type: K, listener: (this: HTMLIrSelectElement, ev: IrSelectCustomEvent<HTMLIrSelectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrSelectElementEventMap>(type: K, listener: (this: HTMLIrSelectElement, ev: IrSelectCustomEvent<HTMLIrSelectElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrSelectElement: {
         prototype: HTMLIrSelectElement;
         new (): HTMLIrSelectElement;
     };
-    interface HTMLIrSidebarElementEventMap {
-        "irSidebarToggle": any;
-    }
     interface HTMLIrSidebarElement extends Components.IrSidebar, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrSidebarElementEventMap>(type: K, listener: (this: HTMLIrSidebarElement, ev: IrSidebarCustomEvent<HTMLIrSidebarElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrSidebarElementEventMap>(type: K, listener: (this: HTMLIrSidebarElement, ev: IrSidebarCustomEvent<HTMLIrSidebarElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrSidebarElement: {
         prototype: HTMLIrSidebarElement;
@@ -1627,18 +1074,7 @@ declare global {
         prototype: HTMLIrSpanElement;
         new (): HTMLIrSpanElement;
     };
-    interface HTMLIrSwitchElementEventMap {
-        "checkChange": boolean;
-    }
     interface HTMLIrSwitchElement extends Components.IrSwitch, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrSwitchElementEventMap>(type: K, listener: (this: HTMLIrSwitchElement, ev: IrSwitchCustomEvent<HTMLIrSwitchElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrSwitchElementEventMap>(type: K, listener: (this: HTMLIrSwitchElement, ev: IrSwitchCustomEvent<HTMLIrSwitchElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrSwitchElement: {
         prototype: HTMLIrSwitchElement;
@@ -1708,13 +1144,13 @@ declare global {
         "ir-date-view": HTMLIrDateViewElement;
         "ir-dropdown": HTMLIrDropdownElement;
         "ir-guest-info": HTMLIrGuestInfoElement;
+        "ir-housekeeping": HTMLIrHousekeepingElement;
         "ir-icon": HTMLIrIconElement;
         "ir-input-text": HTMLIrInputTextElement;
         "ir-interceptor": HTMLIrInterceptorElement;
         "ir-label": HTMLIrLabelElement;
         "ir-listing-header": HTMLIrListingHeaderElement;
         "ir-listing-modal": HTMLIrListingModalElement;
-        "ir-loader": HTMLIrLoaderElement;
         "ir-loading-screen": HTMLIrLoadingScreenElement;
         "ir-modal": HTMLIrModalElement;
         "ir-payment-details": HTMLIrPaymentDetailsElement;
@@ -1782,6 +1218,7 @@ declare namespace LocalJSX {
         "propertyid"?: number;
         "ticket"?: string;
         "to_date"?: string;
+        "withIrToastAndInterceptor"?: boolean;
     }
     interface IglBookPropertyFooter {
         "disabled"?: boolean;
@@ -2046,6 +1483,7 @@ declare namespace LocalJSX {
         "hasRoomEdit"?: boolean;
         "is_from_front_desk"?: boolean;
         "language"?: string;
+        "onBookingChanged"?: (event: IrBookingDetailsCustomEvent<Booking>) => void;
         "onToast"?: (event: IrBookingDetailsCustomEvent<IToast1>) => void;
         "propertyid"?: number;
         "ticket"?: string;
@@ -2174,6 +1612,12 @@ declare namespace LocalJSX {
         "setupDataCountries"?: selectOption[];
         "setupDataCountriesCode"?: selectOption[];
     }
+    interface IrHousekeeping {
+        "baseurl"?: string;
+        "language"?: string;
+        "propertyid"?: number;
+        "ticket"?: string;
+    }
     interface IrIcon {
         "icon"?: string;
         "onIconClickHandler"?: (event: IrIconCustomEvent<any>) => void;
@@ -2222,10 +1666,7 @@ declare namespace LocalJSX {
         "editBooking"?: { booking: Booking; cause: 'edit' | 'payment' | 'delete' };
         "modalTitle"?: string;
         "onModalClosed"?: (event: IrListingModalCustomEvent<null>) => void;
-        "onResetData"?: (event: IrListingModalCustomEvent<null>) => void;
-    }
-    interface IrLoader {
-        "size"?: string;
+        "onResetData"?: (event: IrListingModalCustomEvent<string>) => void;
     }
     interface IrLoadingScreen {
         "message"?: string;
@@ -2264,7 +1705,7 @@ declare namespace LocalJSX {
         "popoverTitle"?: string;
     }
     interface IrRoom {
-        "bookingEvent"?: Booking1;
+        "bookingEvent"?: Booking;
         "bookingIndex"?: number;
         "currency"?: string;
         "defaultTexts"?: ILocale;
@@ -2346,7 +1787,9 @@ declare namespace LocalJSX {
         "position"?: TPositions;
     }
     interface IrTooltip {
+        "customSlot"?: boolean;
         "message"?: string;
+        "withHtml"?: boolean;
     }
     interface OtaLabel {
         "label"?: string;
@@ -2392,13 +1835,13 @@ declare namespace LocalJSX {
         "ir-date-view": IrDateView;
         "ir-dropdown": IrDropdown;
         "ir-guest-info": IrGuestInfo;
+        "ir-housekeeping": IrHousekeeping;
         "ir-icon": IrIcon;
         "ir-input-text": IrInputText;
         "ir-interceptor": IrInterceptor;
         "ir-label": IrLabel;
         "ir-listing-header": IrListingHeader;
         "ir-listing-modal": IrListingModal;
-        "ir-loader": IrLoader;
         "ir-loading-screen": IrLoadingScreen;
         "ir-modal": IrModal;
         "ir-payment-details": IrPaymentDetails;
@@ -2459,13 +1902,13 @@ declare module "@stencil/core" {
             "ir-date-view": LocalJSX.IrDateView & JSXBase.HTMLAttributes<HTMLIrDateViewElement>;
             "ir-dropdown": LocalJSX.IrDropdown & JSXBase.HTMLAttributes<HTMLIrDropdownElement>;
             "ir-guest-info": LocalJSX.IrGuestInfo & JSXBase.HTMLAttributes<HTMLIrGuestInfoElement>;
+            "ir-housekeeping": LocalJSX.IrHousekeeping & JSXBase.HTMLAttributes<HTMLIrHousekeepingElement>;
             "ir-icon": LocalJSX.IrIcon & JSXBase.HTMLAttributes<HTMLIrIconElement>;
             "ir-input-text": LocalJSX.IrInputText & JSXBase.HTMLAttributes<HTMLIrInputTextElement>;
             "ir-interceptor": LocalJSX.IrInterceptor & JSXBase.HTMLAttributes<HTMLIrInterceptorElement>;
             "ir-label": LocalJSX.IrLabel & JSXBase.HTMLAttributes<HTMLIrLabelElement>;
             "ir-listing-header": LocalJSX.IrListingHeader & JSXBase.HTMLAttributes<HTMLIrListingHeaderElement>;
             "ir-listing-modal": LocalJSX.IrListingModal & JSXBase.HTMLAttributes<HTMLIrListingModalElement>;
-            "ir-loader": LocalJSX.IrLoader & JSXBase.HTMLAttributes<HTMLIrLoaderElement>;
             "ir-loading-screen": LocalJSX.IrLoadingScreen & JSXBase.HTMLAttributes<HTMLIrLoadingScreenElement>;
             "ir-modal": LocalJSX.IrModal & JSXBase.HTMLAttributes<HTMLIrModalElement>;
             "ir-payment-details": LocalJSX.IrPaymentDetails & JSXBase.HTMLAttributes<HTMLIrPaymentDetailsElement>;

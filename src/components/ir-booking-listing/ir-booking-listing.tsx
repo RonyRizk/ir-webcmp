@@ -31,6 +31,12 @@ export class IrBookingListing {
   private roomService = new RoomService();
   private listingModal: HTMLIrListingModalElement;
   private itemsPerPage = 20;
+  private statusColors = {
+    '001': 'badge-warning',
+    '002': 'badge-success',
+    '003': 'badge-danger',
+    '004': 'badge-danger',
+  };
 
   componentWillLoad() {
     if (this.baseurl) {
@@ -47,8 +53,6 @@ export class IrBookingListing {
       if (newTotal && this.totalPages !== newTotal) {
         this.totalPages = Math.round(newTotal / this.itemsPerPage);
       }
-      if (newValue.start_row !== this.oldStartValue) {
-      }
     });
   }
   @Watch('ticket')
@@ -60,6 +64,7 @@ export class IrBookingListing {
       this.initializeApp();
     }
   }
+
   async initializeApp() {
     try {
       this.isLoading = true;
@@ -72,13 +77,21 @@ export class IrBookingListing {
       this.isLoading = false;
     }
   }
+
   handleSideBarToggle(e: CustomEvent<boolean>) {
-    if (e.detail) {
-      if (this.editBookingItem) {
-        this.editBookingItem = null;
-      }
+    if (e.detail && this.editBookingItem) {
+      this.editBookingItem = null;
     }
   }
+
+  getPaginationBounds() {
+    const totalCount = booking_listing.userSelection.total_count;
+    const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+    let endItem = this.currentPage * this.itemsPerPage;
+    endItem = endItem > totalCount ? totalCount : endItem;
+    return { startItem, endItem, totalCount };
+  }
+
   openModal() {
     if (!this.listingModal) {
       this.listingModal = this.el.querySelector('ir-listing-modal');
@@ -86,29 +99,41 @@ export class IrBookingListing {
     this.listingModal.editBooking = this.editBookingItem;
     this.listingModal.openModal();
   }
+
   @Listen('resetData')
   async handleResetData(e: CustomEvent) {
     e.stopImmediatePropagation();
     e.stopPropagation();
     await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, is_to_export: false });
   }
+
+  @Listen('resetBookingData')
+  async handleResetStoreData(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, is_to_export: false });
+  }
+  @Listen('bookingChanged')
+  handleBookingChanged(e: CustomEvent<Booking>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    booking_listing.bookings = [
+      ...booking_listing.bookings.map(b => {
+        if (b.booking_nbr === e.detail.booking_nbr) {
+          return e.detail;
+        }
+        return b;
+      }),
+    ];
+  }
+
   renderItemRange() {
-    const totalCount = booking_listing.userSelection.total_count;
-    const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-    let endItem = this.currentPage * this.itemsPerPage;
-    endItem = endItem > totalCount ? totalCount : endItem;
-    booking_listing.userSelection = {
-      ...booking_listing.userSelection,
-      start_row: startItem - 1,
-      end_row: endItem,
-    };
+    const { endItem, startItem, totalCount } = this.getPaginationBounds();
     return `${locales.entries.Lcz_View} ${startItem} - ${endItem} ${locales.entries.Lcz_Of} ${totalCount}`;
   }
+
   async updateData() {
-    const { total_count } = booking_listing.userSelection;
-    let endItem = this.currentPage * this.itemsPerPage;
-    endItem = endItem > total_count ? total_count : endItem;
-    const startItem = (this.currentPage - 1) * this.itemsPerPage;
+    const { endItem, startItem } = this.getPaginationBounds();
     await this.bookingListingService.getExposedBookings({
       ...booking_listing.userSelection,
       is_to_export: false,
@@ -116,19 +141,16 @@ export class IrBookingListing {
       end_row: endItem,
     });
   }
+
   render() {
     if (this.isLoading) {
-      return (
-        <div class="h-screen bg-white d-flex flex-column align-items-center justify-content-center">
-          <ir-loading-screen></ir-loading-screen>
-        </div>
-      );
+      return <ir-loading-screen></ir-loading-screen>;
     }
     return (
       <Host>
         <ir-interceptor></ir-interceptor>
         <ir-toast></ir-toast>
-        <div class="p-2 main-container">
+        <div class="p-1 main-container">
           <ir-listing-header propertyId={this.propertyid} language={this.language} baseurl={this.baseurl}></ir-listing-header>
           <section>
             <div class="card p-1 flex-fill m-0 mt-2">
@@ -136,15 +158,22 @@ export class IrBookingListing {
                 <thead>
                   <tr>
                     <th scope="col" class="text-left">
-                      {locales.entries?.Lcz_Booking}#
+                      {locales.entries?.Lcz_Bookings}#
                     </th>
                     <th scope="col">{locales.entries?.Lcz_BookedOn}</th>
                     <th scope="col">{locales.entries?.Lcz_GuestSource}</th>
                     <th scope="col">
                       <p class={'m-0'}>{locales.entries?.Lcz_Price}</p>
-                      <p class={'m-0 btn due-btn'}>{locales.entries?.Lcz_Balance}</p>
+                      <ir-tooltip
+                        customSlot
+                        message={`<span style="width:100%;display:block;">${locales.entries?.Lcz_BookingBalance}</span><span>${locales.entries?.Lcz_ClickToSettle}</span>`}
+                      >
+                        <p slot="tooltip-trigger" class={'m-0 btn due-btn'}>
+                          {locales.entries?.Lcz_Balance}
+                        </p>
+                      </ir-tooltip>
                     </th>
-                    <th scope="col" class="text-left">
+                    <th scope="col" class="text-left services-cell">
                       {locales.entries?.Lcz_Services}
                     </th>
                     <th scope="col" class="in-out">
@@ -157,20 +186,13 @@ export class IrBookingListing {
                   </tr>
                 </thead>
                 <tbody class="">
+                  {booking_listing.bookings.length === 0 && (
+                    <tr>
+                      <td colSpan={8}>{locales.entries?.Lcz_NoDataAvailable}</td>
+                    </tr>
+                  )}
                   {booking_listing.bookings?.map(booking => {
-                    let confirmationBG: string = '';
-                    switch (booking.status.code) {
-                      case '001':
-                        confirmationBG = 'badge-warning';
-                        break;
-                      case '002':
-                        confirmationBG = 'badge-success';
-                        break;
-                      case '003':
-                      case '004':
-                        confirmationBG = 'badge-danger';
-                        break;
-                    }
+                    let confirmationBG: string = this.statusColors[booking.status.code];
                     return (
                       <tr key={booking.booking_nbr}>
                         <td class="text-left">
@@ -182,7 +204,7 @@ export class IrBookingListing {
                           </div>
                         </td>
                         <td>
-                          <p class="p-0 m-0">{moment(booking.booked_on.date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
+                          <p class="p-0 m-0 date-p">{moment(booking.booked_on.date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
                           <p class="p-0 m-0 secondary-p">
                             {booking.booked_on.hour}:{booking.booked_on.minute}
                           </p>
@@ -195,7 +217,7 @@ export class IrBookingListing {
                           <p class="p-0 m-0 secondary-p">{booking.origin.Label}</p>
                         </td>
                         <td>
-                          <p class="p-0 m-0">{formatAmount(booking.currency.code, booking.financial.gross_total)}</p>
+                          <p class="p-0 m-0">{formatAmount(booking.currency.code, booking.financial?.gross_total ?? 0)}</p>
                           {booking.financial.due_amount > 0 && (
                             <buuton
                               onClick={() => {
@@ -216,8 +238,8 @@ export class IrBookingListing {
                           </ul>
                         </td>
                         <td>
-                          <p class="p-0 m-0">{moment(booking.from_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
-                          <p class="p-0 m-0">{moment(booking.to_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
+                          <p class="p-0 m-0 date-p">{moment(booking.from_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
+                          <p class="p-0 m-0 date-p">{moment(booking.to_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
                         </td>
                         <td>
                           <p class={`m-0 badge ${confirmationBG}`}>{booking.status.description}</p>
@@ -277,6 +299,7 @@ export class IrBookingListing {
                       btn_disabled={this.currentPage === 1}
                       onClickHanlder={async () => {
                         this.currentPage = this.currentPage - 1;
+                        console.log(this.currentPage);
                         await this.updateData();
                       }}
                     >
@@ -320,6 +343,7 @@ export class IrBookingListing {
                       btn_disabled={this.currentPage === this.totalPages}
                       onClickHanlder={async () => {
                         this.currentPage = this.totalPages;
+                        console.log(this.currentPage);
                         await this.updateData();
                       }}
                     >
@@ -343,7 +367,7 @@ export class IrBookingListing {
           showCloseButton={this.editBookingItem !== null}
           sidebarStyles={{ width: this.editBookingItem ? '80rem' : 'var(--sidebar-width,40rem)', background: '#F2F3F8' }}
         >
-          {this.editBookingItem && (
+          {this.editBookingItem?.cause === 'edit' && (
             <ir-booking-details
               hasPrint
               hasReceipt
