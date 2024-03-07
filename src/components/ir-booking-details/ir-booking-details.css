@@ -1,0 +1,76 @@
+:host {
+  overflow-x: hidden;
+}
+.confirmed {
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+.bg-ir-green {
+  background: #629a4c;
+  height: 28px;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important ;
+}
+.h-28 {
+  height: 2rem;
+}
+.mx-01 {
+  --m: 5px;
+  margin-right: var(--m) !important;
+  margin-left: var(--m) !important;
+}
+.bg-ir-red {
+  background: #ff4961;
+  height: 28px;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important ;
+}
+.bg-ir-orange {
+  background: #ff9149;
+  height: 28px;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important ;
+}
+.date-margin {
+  margin-right: 5px;
+}
+.pickup-margin {
+  margin-bottom: 7px !important;
+}
+.header-date {
+  padding-left: 5px !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+:root {
+  --sidebar-width: 50rem;
+}
+
+.sm-padding-right {
+  padding-right: 0.2rem;
+}
+.sm-padding-left {
+  padding-left: 0.2rem;
+}
+.sm-padding-top {
+  padding-top: 0.2rem;
+}
+.sm-padding-bottom {
+  padding-bottom: 0.2rem;
+}
+
+.info-notes {
+  list-style: none;
+  padding-left: 0;
+}
+.light-blue-bg {
+  background-color: #acecff;
+  padding: 0rem 0.1rem;
+}
+.iframeHeight {
+  height: 17.5rem;
+}
