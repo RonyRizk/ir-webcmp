@@ -6,6 +6,7 @@ export interface ILocale {
 export type TLocaleEntries = (LocalizationStrings & LocalizationChannelFrontEntries & BookingListingCodes & HousekeepingLocalizedWords) | null;
 
 export type LocalizationStrings = {
+  Lcz_BookingCode: string;
   Lcz_Adding: string;
   Lcz_AddingRoomNightsTo: string;
   Lcz_AddingUnitToBooking: string;
@@ -211,6 +212,7 @@ export type BookingListingCodes = {
   Lcz_BookingBalance: string;
   Lcz_NoDataAvailable: string;
   Lcz_All: string;
+  Lcz_AgentCode: string;
 };
 export type HousekeepingLocalizedWords = {
   Lcz_Action: string;
