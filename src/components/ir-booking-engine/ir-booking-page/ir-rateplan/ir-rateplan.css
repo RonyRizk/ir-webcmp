@@ -1,8 +1,0 @@
-:host {
-  display: block;
-}
-@media (min-width: 768px) {
-  .mobile_custom_text {
-    display: none !important;
-  }
-}

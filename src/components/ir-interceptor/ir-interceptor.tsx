@@ -1,12 +1,12 @@
-import { Component, Host, Prop, State, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-// import { IToast } from '../ir-toast/toast';
+import { IToast } from '../ir-toast/toast';
 import interceptor_requests from '@/stores/ir-interceptor.store';
 
 @Component({
   tag: 'ir-interceptor',
   styleUrl: 'ir-interceptor.css',
-  shadow: true,
+  scoped: true,
 })
 export class IrInterceptor {
   @State() isShown = false;
@@ -14,7 +14,7 @@ export class IrInterceptor {
   @State() isUnassignedUnit = false;
 
   @Prop({ reflect: true }) handledEndpoints = ['/ReAllocate_Exposed_Room', '/Do_Payment', '/Get_Exposed_Bookings'];
-  //@Event({ bubbles: true, composed: true }) toast: EventEmitter<IToast>;
+  @Event({ bubbles: true, composed: true }) toast: EventEmitter<IToast>;
   componentWillLoad() {
     this.setupAxiosInterceptors();
   }
@@ -55,12 +55,12 @@ export class IrInterceptor {
   }
 
   handleError(error: string) {
-    // this.toast.emit({
-    //   type: 'error',
-    //   title: error,
-    //   description: '',
-    //   position: 'top-right',
-    // });
+    this.toast.emit({
+      type: 'error',
+      title: error,
+      description: '',
+      position: 'top-right',
+    });
     return Promise.reject(error);
   }
   render() {

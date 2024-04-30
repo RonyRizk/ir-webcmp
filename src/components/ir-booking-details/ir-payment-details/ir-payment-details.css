@@ -1,0 +1,30 @@
+.sm-margin-right {
+  margin-right: 5px !important;
+  background: #000;
+}
+.action_icons {
+  width: 60px;
+}
+.w-60 {
+  width: 100px;
+  padding: 0 5px;
+}
+.payments-height {
+  height: 30px;
+}
+.payment_date {
+  width: 100px;
+}
+.iframeHeight {
+  height: max-content;
+  height: 22.5rem;
+}
+.designation {
+  width: 120px;
+}
+.total-cost-container {
+  background: #7cbebe;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 5px;
+}

@@ -1,0 +1,170 @@
+:host {
+  display: block;
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+.svg-icon {
+  height: 20px;
+  width: 20px;
+}
+.darkGrey {
+  background: #ececec;
+}
+.btn {
+  pointer-events: auto;
+}
+
+.stickyCell {
+  display: -ms-inline-grid;
+  display: -moz-inline-grid;
+  display: inline-grid;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  height: 82px;
+  display: inline-block;
+  vertical-align: top;
+  z-index: 2;
+}
+
+.headersContainer {
+  background-color: #ffffff;
+}
+
+.headerCell {
+  display: inline-grid;
+  width: 58px;
+  height: 58px;
+  vertical-align: top;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.datePickerHidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+}
+
+.monthsContainer {
+  height: 20px;
+  background-color: #ffffff;
+  margin-bottom: 0.2em;
+}
+
+.monthCell {
+  display: inline-grid;
+  height: 20px;
+  background-color: #ececec;
+  border-right: 1px solid #c7c7c7;
+  vertical-align: top;
+}
+
+.monthCell:nth-child(odd) {
+  background-color: #dddddd;
+}
+
+.monthTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  font-weight: bold;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.topLeftCell {
+  left: 0px;
+  z-index: 3;
+  width: 170px;
+  background-color: #ffffff;
+  display: -ms-inline-grid;
+  display: -moz-inline-grid;
+  display: inline-grid;
+}
+
+.caledarBtns {
+  position: relative;
+  cursor: pointer;
+  font-size: 1.75em;
+  line-height: 1em;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.caledarBtns .la {
+  font-size: 1.1em;
+}
+
+.caledarBtns:hover {
+  background-color: #f6f6f6;
+}
+
+.dayTitle {
+  font-size: 0.8em;
+  font-weight: 600;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.currentDay .dayTitle {
+  font-weight: bold;
+}
+
+.currentDay {
+  background-color: #e3f3fa;
+}
+
+.dayCapacityPercent {
+  font-size: 0.75em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.badge-pill {
+  padding: 3px 1em;
+  font-size: 0.8em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.searchContiner {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.searchListContainer {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-bottom: none;
+}
+
+.searchListItem {
+  background: white;
+  border-bottom: 1px solid #ccc;
+  padding-left: 8px;
+}
+
+.badge-light {
+  background-color: #999999;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.min-width-full {
+  min-width: 100%;
+}
