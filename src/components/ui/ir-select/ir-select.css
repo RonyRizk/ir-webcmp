@@ -1,0 +1,36 @@
+@import url('../../gloabls.css');
+:host {
+  display: block;
+}
+.select-label {
+  transform-origin: left top;
+}
+.double-line {
+  padding-block-start: 1rem;
+  block-size: 40px;
+}
+select {
+  appearance: none;
+  outline: none;
+  background: transparent;
+}
+select:focus,
+select:focus-visible {
+  border-color: hsl(var(--brand-300, 206, 100%, 76%));
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1), 0 0 0 4px hsla(var(--brand-100, 209, 100%, 91%), 0.2);
+}
+.select-icon[data-variant='double-line']:dir(rtl) {
+  left: 1rem;
+}
+.select-icon[data-variant='double-line']:dir(ltr) {
+  right: 1rem;
+}
+.select-icon[data-variant='default']:dir(rtl) {
+  left: 6px;
+}
+.select-icon[data-variant='default']:dir(ltr) {
+  right: 6px;
+}
+select option {
+  text-indent: 100px; /* Adjust the value as needed */
+}

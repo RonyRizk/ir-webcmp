@@ -1,143 +1,142 @@
-import moment from 'moment';
-import IBooking, { ICountry, PhysicalRoomType } from '../models/IBooking';
-
-export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string): string {
-  const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
-  const date = moment(dateStr, 'DD MMM YYYY');
-  if (!date.isValid()) {
-    throw new Error('Invalid Date');
+import { ICurrency } from '@/components';
+import { Assignableunit } from '@/models/property';
+import app_store, { changeLocale } from '@/stores/app.store';
+import clsx, { ClassValue } from 'clsx';
+import { addDays, differenceInCalendarDays, format, Locale } from 'date-fns';
+import { ar, es, fr, de, pl, uk, ru, el, enUS } from 'date-fns/locale';
+import { twMerge } from 'tailwind-merge';
+const localeMap: { [key: string]: Locale } = {
+  en: enUS,
+  ar: ar,
+  fr: fr,
+  es: es,
+  de: de,
+  pl: pl,
+  ua: uk,
+  ru: ru,
+  el: el,
+};
+export function matchLocale(locale: string): Locale {
+  return localeMap[locale.toLowerCase()] || enUS;
+}
+export function getAbbreviatedWeekdays(locale: Locale) {
+  const baseDate = new Date(2020, 5, 7);
+  let weekdays = [];
+  for (let i = 0; i < 7; i++) {
+    const weekday = format(addDays(baseDate, i), 'eee', { locale });
+    weekdays.push(weekday);
   }
-  return date.format('D_M_YYYY');
+  return weekdays.slice(1, 7).concat(weekdays.slice(0, 1));
 }
 
-export function convertDateToTime(dayWithWeekday: string, monthWithYear: string): number {
-  const date = moment(dayWithWeekday + ' ' + monthWithYear, 'ddd DD MMM YYYY').toDate();
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
+export function setLanguagePreference(language: string): void {
+  const expiryDate = new Date();
+  expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+  const cookieValue = `language=${language}; expires=${expiryDate.toUTCString()}; path=/; Secure; SameSite=Lax`;
+  document.cookie = cookieValue;
 }
-export function dateDifference(FROM_DATE: string, TO_DATE: string): number {
-  const startDate = new Date(FROM_DATE);
-  const endDate = new Date(TO_DATE);
-  return Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+export function getLanguagePreference(): string | null {
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    let cookie = cookies[i].trim();
+    if (cookie.startsWith('language=')) {
+      return cookie.substring('language='.length);
+    }
+  }
+  return null;
 }
-export const getBrowserLanguage = (): string => {
-  const defaultLang = 'en';
-  const lang = navigator.language || defaultLang;
-  return lang.toUpperCase().split('-')[0];
+export function getAvailableRooms(assignable_units: Assignableunit[]) {
+  let result = [];
+  assignable_units.map(unit => {
+    if (unit.Is_Fully_Available) {
+      result.push({ name: unit.name, id: unit.pr_id });
+    }
+  });
+  return result;
+}
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+export const formatAmount = (amount: any, currency: string = 'USD') => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
+};
+type HSLColor = {
+  h: number;
+  s: number;
+  l: number;
 };
 
-export const transformBooking = (physicalRoom: PhysicalRoomType[]): IBooking[] => {
-  const myBookings: IBooking[] = [];
-  physicalRoom.forEach(room => {
-    Object.keys(room.calendar_cell).forEach(key => {
-      if (room.calendar_cell[key].Is_Available === false) {
-        if (myBookings.find(b => b.ID === room.id.toString())) {
-        } else {
-          //myBookings.push({})
-        }
-      }
-    });
-  });
-  return myBookings;
-};
+export function hexToHSL(hex: string): HSLColor {
+  let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-export function dateToFormattedString(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // +1 because months are 0-based in JS
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+  let r = parseInt(result[1], 16);
+  let g = parseInt(result[2], 16);
+  let b = parseInt(result[3], 16);
 
-export function formatLegendColors(legendData) {
-  let formattedLegendData: any = {};
+  (r /= 255), (g /= 255), (b /= 255);
+  let max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h,
+    s,
+    l = (max + min) / 2;
 
-  const statusId = {
-    'IN-HOUSE': { id: 1, clsName: 'IN_HOUSE' },
-    'CONFIRMED': { id: 2, clsName: 'CONFIRMED' },
-    'PENDING-CONFIRMATION': { id: 3, clsName: 'PENDING_CONFIRMATION' },
-    'SPLIT-UNIT': { id: 4, clsName: 'SPLIT_UNIT' },
-    'CHECKED-IN': { id: 5, clsName: 'CHECKED_IN' },
-    'CHECKED-OUT': { id: 5, clsName: 'CHECKED_OUT' },
-    'BLOCKED': { id: 6, clsName: 'BLOCKED' },
-    'BLOCKED-WITH-DATES': { id: 7, clsName: 'BLOCKED_WITH_DATES' },
-    'NOTES': { id: 8, clsName: 'NOTES' },
-    'OUTSTANDING-BALANCE': { id: 9, clsName: 'OUTSTANDING_BALANCE' },
-    'TEMP-EVENT': { id: 10, clsName: 'PENDING_CONFIRMATION' },
-  };
-  legendData.forEach(legend => {
-    formattedLegendData[legend.id] = legend;
-    formattedLegendData.statusId = statusId; // NOTE: This will overwrite the 'statusId' property with every iteration.
-  });
-
-  return formattedLegendData;
-}
-export function isBlockUnit(status_code: any) {
-  return ['003', '002', '004'].includes(status_code);
-}
-export function getCurrencySymbol(currencyCode) {
-  const formatter = new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: currencyCode,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return formatter.format(0).replace(/[0-9]/g, '').trim();
-}
-export const findCountry = (id: number, countries: ICountry[]): ICountry => countries.find(country => country.id === id);
-
-export function getReleaseHoursString(releaseDate: number) {
-  const dt = new Date();
-  const releaseAfterHours = releaseDate;
-
-  dt.setHours(dt.getHours() + releaseAfterHours, dt.getMinutes(), 0, 0);
-
-  return {
-    BLOCKED_TILL_DATE: dateToFormattedString(dt),
-    BLOCKED_TILL_HOUR: dt.getHours().toString(),
-    BLOCKED_TILL_MINUTE: dt.getMinutes().toString(),
-  };
-}
-
-export function computeEndDate(startDate: string, numberOfDays: number): string {
-  const dateObj = moment(startDate, 'D_M_YYYY');
-  dateObj.add(numberOfDays, 'days');
-  return dateObj.format('YYYY-MM-DD');
-}
-
-export function convertDMYToISO(date: string) {
-  const dateObj = moment(date, 'D_M_YYYY');
-  return dateObj.format('YYYY-MM-DD');
-}
-export function addTwoMonthToDate(date: Date) {
-  return moment(date).add(2, 'months').format('YYYY-MM-DD');
-}
-export function formatDate(dateString, option = 'DD MMM YYYY') {
-  const formattedDate = moment(dateString, option).format('ddd, DD MMM YYYY');
-  return formattedDate;
-}
-export function getNextDay(date: Date) {
-  return moment(date).add(1, 'days').format('YYYY-MM-DD');
-}
-
-export function convertDatePrice(date: string) {
-  return moment(date, 'YYYY-MM-DD').format('DD/MM ddd');
-}
-export function getDaysArray(date1: string, date2: string) {
-  let dates = [];
-  let start = moment.min(moment(date1).add(1, 'days'), moment(date2));
-  let end = moment.max(moment(date1), moment(date2));
-  while (start < end) {
-    dates.push(start.format('YYYY-MM-DD'));
-    start = start.clone().add(1, 'days');
+  if (max == min) {
+    h = s = 0; // achromatic
+  } else {
+    let d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h /= 6;
   }
 
-  return dates;
+  s = s * 100;
+  s = Math.round(s);
+  l = l * 100;
+  l = Math.round(l);
+  h = Math.round(360 * h);
+
+  return { h, s, l };
+}
+export function generateColorShades(baseHex: string): string[] {
+  const { h, s, l: baseL } = hexToHSL(baseHex);
+  let shades = [];
+  for (let i = -3; i <= 6; i++) {
+    let l = baseL + i * 4;
+    shades.push({ h, s, l: Math.min(Math.max(l, 0), 100) });
+  }
+  return shades;
+}
+export function getDateDifference(date1: Date, date2: Date) {
+  return differenceInCalendarDays(date2, date1);
 }
 export function renderTime(time: number) {
   return time < 10 ? time.toString().padStart(2, '0') : time.toString();
 }
-
-export function formatAmount(currency: string, amount: number) {
-  const symbol = getCurrencySymbol(currency);
-  return symbol + amount.toFixed(2);
+export function getUserPrefernce() {
+  const p = JSON.parse(localStorage.getItem('user_prefernce'));
+  if (p) {
+    const { direction, ...others } = p;
+    app_store.userPreferences = {
+      ...others,
+    };
+    changeLocale(direction, matchLocale(p.language_id));
+  }
+}
+export function setDefaultLocale({ currency }: { currency: ICurrency }) {
+  app_store.userPreferences = {
+    ...app_store.userPreferences,
+    currency_id: currency.code.toString(),
+  };
+  // matchLocale(language_id)
 }

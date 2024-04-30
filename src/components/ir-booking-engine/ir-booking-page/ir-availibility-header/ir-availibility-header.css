@@ -1,0 +1,6 @@
+:host {
+  display: block;
+}
+.availability-container {
+  border-radius: min(var(--radius, 8px), 8px);
+}
