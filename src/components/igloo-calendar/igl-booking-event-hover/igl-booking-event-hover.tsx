@@ -33,7 +33,7 @@ export class IglBookingEventHover {
   private hideButtons = false;
   @State() shouldHideUnassignUnit = false;
   componentWillLoad() {
-    console.log('this.bookingEvent', this.bookingEvent);
+    // console.log('this.bookingEvent', this.bookingEvent);
     this.eventService.setToken(calendar_data.token);
     let selectedRt = this.bookingEvent.roomsInfo.find(r => r.id === this.bookingEvent.RATE_TYPE);
     if (selectedRt) {
@@ -359,7 +359,7 @@ export class IglBookingEventHover {
         </div>
         <div class="row p-0 m-0">
           <div class="px-0 pr-0 col-12">
-            <ir-date-view from_date={this.bookingEvent.FROM_DATE} to_date={this.bookingEvent.TO_DATE} showDateDifference={false}></ir-date-view>
+            <ir-date-view from_date={this.bookingEvent.defaultDates.from_date} to_date={this.bookingEvent.defaultDates.to_date} showDateDifference={false}></ir-date-view>
             {/* <span class="font-weight-bold">{locales.entries.Lcz_In}: </span> */}
           </div>
         </div>
@@ -551,8 +551,8 @@ export class IglBookingEventHover {
           entryHour={this.bookingEvent.ENTRY_HOUR}
           entryMinute={this.bookingEvent.ENTRY_MINUTE}
           defaultData={this.bookingEvent}
-          fromDate={moment(this.bookingEvent.FROM_DATE, 'YYYY-MM-DD').format('DD MM YYYY')}
-          toDate={moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').format('DD MM YYYY')}
+          fromDate={moment(this.bookingEvent.defaultDates.from_date, 'YYYY-MM-DD').format('DD MM YYYY')}
+          toDate={moment(this.bookingEvent.defaultDates.to_date, 'YYYY-MM-DD').format('DD MM YYYY')}
           entryDate={this.getEntryDate()}
           onDataUpdateEvent={event => this.handleBlockDateUpdate(event)}
         ></igl-block-dates-view>
@@ -605,7 +605,7 @@ export class IglBookingEventHover {
                 />
               </svg>
               <span>
-                &nbsp;
+                `` &nbsp;
                 {locales.entries.Lcz_Delete}
               </span>
             </button>

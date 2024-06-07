@@ -1442,6 +1442,7 @@ declare namespace LocalJSX {
         "onShowDialog"?: (event: IglBookingEventCustomEvent<IReallocationPayload>) => void;
         "onShowRoomNightsDialog"?: (event: IglBookingEventCustomEvent<IRoomNightsData>) => void;
         "onToast"?: (event: IglBookingEventCustomEvent<IToast>) => void;
+        "onUpdateBookingEvent"?: (event: IglBookingEventCustomEvent<{ [key: string]: any }>) => void;
         "onUpdateEventData"?: (event: IglBookingEventCustomEvent<any>) => void;
     }
     interface IglBookingEventHover {
