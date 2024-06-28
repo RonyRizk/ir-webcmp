@@ -18,6 +18,7 @@
 | `hasRoomAdd`        | `has-room-add`          |             | `boolean` | `false`     |
 | `hasRoomDelete`     | `has-room-delete`       |             | `boolean` | `false`     |
 | `hasRoomEdit`       | `has-room-edit`         |             | `boolean` | `false`     |
+| `isEditable`        | `is-editable`           |             | `boolean` | `undefined` |
 | `legendData`        | `legend-data`           |             | `any`     | `undefined` |
 | `mealCodeName`      | `meal-code-name`        |             | `string`  | `undefined` |
 | `myRoomTypeFoodCat` | `my-room-type-food-cat` |             | `string`  | `undefined` |
