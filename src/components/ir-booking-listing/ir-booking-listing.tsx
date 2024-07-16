@@ -169,8 +169,14 @@ export class IrBookingListing {
                     </th>
                     <th scope="col">{locales.entries?.Lcz_BookedOn}</th>
                     <th scope="col">{locales.entries?.Lcz_GuestSource}</th>
+                    <th scope="col" class="text-left services-cell">
+                      {locales.entries?.Lcz_Services}
+                    </th>
+                    <th scope="col" class="in-out">
+                      {locales.entries?.Lcz_Dates}
+                    </th>
                     <th scope="col">
-                      <span class="price-span">{locales.entries?.Lcz_Price}</span>
+                      <span class="price-span">{locales.entries?.Lcz_Amount}</span>
 
                       <ir-tooltip
                         customSlot
@@ -186,12 +192,6 @@ export class IrBookingListing {
                         {locales.entries?.Lcz_Cost}
                       </th>
                     )}
-                    <th scope="col" class="text-left services-cell">
-                      {locales.entries?.Lcz_Services}
-                    </th>
-                    <th scope="col" class="in-out">
-                      {locales.entries?.Lcz_InOut}
-                    </th>
                     <th scope="col">{locales.entries?.Lcz_Status}</th>
                     <th scope="col">
                       <p class="sr-only">actions</p>
@@ -251,6 +251,18 @@ export class IrBookingListing {
                             </div>
                           </div>
                         </td>
+
+                        <td>
+                          <ul>
+                            {booking.rooms.map(room => (
+                              <li>{room.roomtype.name}</li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td>
+                          <p class="p-0 m-0 date-p">{moment(booking.from_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
+                          <p class="p-0 m-0 date-p">{moment(booking.to_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
+                        </td>
                         <td>
                           <p class="p-0 m-0">{formatAmount(booking.currency.code, booking.financial?.gross_total ?? 0)}</p>
                           {booking.financial.due_amount > 0 && (
@@ -270,17 +282,7 @@ export class IrBookingListing {
                             {booking.financial.gross_cost !== null && booking.financial.gross_cost === 0 ? '_' : formatAmount(booking.currency.code, booking.financial.gross_cost)}
                           </td>
                         )}
-                        <td>
-                          <ul>
-                            {booking.rooms.map(room => (
-                              <li>{room.roomtype.name}</li>
-                            ))}
-                          </ul>
-                        </td>
-                        <td>
-                          <p class="p-0 m-0 date-p">{moment(booking.from_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
-                          <p class="p-0 m-0 date-p">{moment(booking.to_date, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</p>
-                        </td>
+
                         <td>
                           <p class={`m-0 badge ${confirmationBG}`}>{booking.status.description}</p>
                         </td>
