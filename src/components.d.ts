@@ -292,12 +292,10 @@ export namespace Components {
         "ticket": string;
     }
     interface IrBookingPrinting {
-        "baseurl": string;
-        "bookingNumber": string;
-        "language": string;
+        "booking": any;
+        "countries": any;
         "mode": 'invoice' | 'default';
-        "propertyid": number;
-        "ticket": string;
+        "property": any;
     }
     interface IrButton {
         "btn_block": boolean;
@@ -498,10 +496,12 @@ export namespace Components {
         "message": string;
     }
     interface IrModal {
+        "autoClose": boolean;
         "btnPosition": 'left' | 'right' | 'center';
         "closeModal": () => Promise<void>;
         "icon": string;
         "iconAvailable": boolean;
+        "isLoading": boolean;
         "item": any;
         "leftBtnActive": boolean;
         "leftBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
@@ -817,6 +817,10 @@ export interface IrInterceptorCustomEvent<T> extends CustomEvent<T> {
 export interface IrLabelCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrLabelElement;
+}
+export interface IrListingHeaderCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrListingHeaderElement;
 }
 export interface IrListingModalCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -1734,7 +1738,18 @@ declare global {
         prototype: HTMLIrLabelElement;
         new (): HTMLIrLabelElement;
     };
+    interface HTMLIrListingHeaderElementEventMap {
+        "preventPageLoad": string;
+    }
     interface HTMLIrListingHeaderElement extends Components.IrListingHeader, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrListingHeaderElementEventMap>(type: K, listener: (this: HTMLIrListingHeaderElement, ev: IrListingHeaderCustomEvent<HTMLIrListingHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrListingHeaderElementEventMap>(type: K, listener: (this: HTMLIrListingHeaderElement, ev: IrListingHeaderCustomEvent<HTMLIrListingHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrListingHeaderElement: {
         prototype: HTMLIrListingHeaderElement;
@@ -2417,12 +2432,10 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrBookingPrinting {
-        "baseurl"?: string;
-        "bookingNumber"?: string;
-        "language"?: string;
+        "booking"?: any;
+        "countries"?: any;
         "mode"?: 'invoice' | 'default';
-        "propertyid"?: number;
-        "ticket"?: string;
+        "property"?: any;
     }
     interface IrButton {
         "btn_block"?: boolean;
@@ -2637,6 +2650,7 @@ declare namespace LocalJSX {
     interface IrListingHeader {
         "baseurl"?: string;
         "language"?: string;
+        "onPreventPageLoad"?: (event: IrListingHeaderCustomEvent<string>) => void;
         "propertyId"?: number;
     }
     interface IrListingModal {
@@ -2649,9 +2663,11 @@ declare namespace LocalJSX {
         "message"?: string;
     }
     interface IrModal {
+        "autoClose"?: boolean;
         "btnPosition"?: 'left' | 'right' | 'center';
         "icon"?: string;
         "iconAvailable"?: boolean;
+        "isLoading"?: boolean;
         "item"?: any;
         "leftBtnActive"?: boolean;
         "leftBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';

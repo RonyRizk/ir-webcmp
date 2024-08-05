@@ -46,6 +46,7 @@ export class IrRoom {
   @State() isLoading: boolean = false;
   @State() isModelOpen: boolean = false;
   private modal: IrModal;
+  irModalRef: HTMLIrModalElement;
   componentWillLoad() {
     if (this.bookingEvent) {
       this.item = this.bookingEvent.rooms[this.bookingIndex];
@@ -125,6 +126,7 @@ export class IrRoom {
       legendData: this.legendData,
       roomsInfo: this.roomsInfo,
       roomName: (this.item.unit as IUnit)?.name || '',
+      PICKUP_INFO: this.bookingEvent.pickup_info,
     });
   }
   handleDeleteClick() {
@@ -160,6 +162,7 @@ export class IrRoom {
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
+      this.irModalRef.closeModal();
       this.deleteFinished.emit(this.item.identifier);
     } catch (error) {
     } finally {
@@ -174,9 +177,9 @@ export class IrRoom {
           variant="icon"
           id="drawer-icon"
           data-toggle="collapse"
-          data-target={`#roomCollapse-${this.item.identifier.split(' ').join('')}`}
-          aria-expanded="false"
-          aria-controls="collapseExample"
+          data-target={`#roomCollapse-${this.item.identifier?.split(' ').join('')}`}
+          aria-expanded={this.collapsed ? 'true' : 'false'}
+          aria-controls="myCollapse"
           class="mr-1"
           icon_name={this.collapsed ? 'closed_eye' : 'open_eye'}
           onClickHanlder={() => {
@@ -230,7 +233,7 @@ export class IrRoom {
             <span class="mr-1">{`${this.item.guest.first_name || ''} ${this.item.guest.last_name || ''}`}</span>
             {this.item.rateplan.selected_variation.adult_nbr > 0 && <span> {this.item.rateplan.selected_variation.adult_child_offering}</span>}
           </div>
-          <div class="collapse" id={`roomCollapse-${this.item.identifier.split(' ').join('')}`}>
+          <div class="collapse" id={`roomCollapse-${this.item.identifier?.split(' ').join('')}`}>
             <div class="d-flex sm-mb-1 sm-mt-1">
               <div class=" sm-padding-top">
                 <strong class="sm-padding-right">{`${this.defaultTexts.entries.Lcz_Breakdown}:`}</strong>
@@ -303,6 +306,9 @@ export class IrRoom {
           </div>
         </div>
         <ir-modal
+          autoClose={false}
+          ref={el => (this.irModalRef = el)}
+          isLoading={this.isLoading}
           onConfirmModal={this.deleteRoom.bind(this)}
           iconAvailable={true}
           icon="ft-alert-triangle danger h1"
