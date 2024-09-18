@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    <title>igloorooms Extranet</title>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/moment.min.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/jquery.min.js"></script>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/daterangepicker.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/inputmask/jquery.inputmask.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/toastr/toastr.min.js"></script>
+    <script type="module" src="https://wb-cmp.igloorooms.com/backend/dist/ir-webcmp/ir-webcmp.esm.js"></script>
+    <link rel="stylesheet"
+        href="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/daterangepicker.css">
+</head>
+
+<body>
+    <ir-common></ir-common>
+    <ir-booking baseurl="https://gateway.igloorooms.com/IR"></ir-booking>
+    <link rel="stylesheet" href="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/toastr/toastr.css"
+        type="text/css">
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        const booking = document.querySelector("ir-booking");
+        booking.propertyid = getQueryParam("pid");
+        booking.bookingNumber = getQueryParam("BN");
+    </script>
+</body>
+
+</html>

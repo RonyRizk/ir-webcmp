@@ -1,0 +1,49 @@
+.light-blue-bg {
+  background: #acecff;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+
+  /* max-width: max-content; */
+}
+.payment-container {
+  position: absolute;
+  right: 1rem;
+  height: fit-content;
+}
+:host {
+  position: relative;
+}
+.sm-mr {
+  margin-right: 3px;
+}
+.subtotal_row {
+  padding-top: 8px;
+}
+.room_actions_btns {
+  gap: 0.5rem;
+}
+.night-cost {
+  color: #7cbebe;
+}
+/* .cancelation {
+  max-width: 30%;
+} */
+.mx-0-5 {
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+}
+.tax-width {
+  font-size: 10px;
+  /* flex-wrap: wrap; */
+}
+.sm-mb-1 {
+  margin-bottom: 5px !important;
+}
+.sm-mt-1 {
+  margin-top: 5px !important;
+}
+.mx-01 {
+  --m: 5px;
+  margin-right: var(--m) !important;
+  margin-left: var(--m) !important;
+}

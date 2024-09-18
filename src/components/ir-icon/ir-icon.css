@@ -1,0 +1,14 @@
+:host {
+  margin: 0;
+  padding: 0;
+}
+.icon-button {
+  all: unset;
+  margin: 0;
+  padding: 0;
+  color: #6b6f82;
+}
+.icon-button:hover {
+  cursor: pointer;
+  color: #104064;
+}

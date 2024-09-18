@@ -1,0 +1,105 @@
+:host {
+  display: block;
+  position: relative;
+  z-index: 100;
+}
+
+.btn {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+.balance_amount {
+  color: #ff4961;
+  font-size: 0.75rem;
+}
+.user-notes {
+  margin-left: 4px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  overflow: hidden;
+  max-width: 100%;
+  height: auto;
+}
+.events_btns {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.mx-01 {
+  --m: 5px;
+  margin-left: var(--m) !important;
+  margin-right: var(--m) !important;
+}
+
+.pointerContainerTop {
+  top: -26px;
+}
+
+.pointerContainer {
+  position: absolute;
+  height: 10px;
+  width: 350px;
+  left: var(--el-left, 50%);
+  transform: translateX(-50%);
+}
+
+.iglPopOver {
+  /* max-width: 350px; */
+  position: absolute;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #656ee7;
+  border-radius: 6px;
+  left: var(--el-left, 50%);
+  transform: translateX(-50%) translateY(10px);
+  box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.2);
+}
+
+.iglPopOver.infoBubble {
+  width: 350px;
+}
+
+.iglPopOver.blockedView {
+  max-width: 400px;
+  width: 400px;
+}
+
+.iglPopOver.newBookingOptions {
+  overflow-wrap: break-word !important;
+  min-width: 230px;
+  width: fit-content;
+}
+
+.bubblePointer {
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  transform: translate(-50%, 0px);
+}
+
+.bubblePointTop {
+  border-top: 10px solid #656ee7;
+}
+
+.bubblePointBottom {
+  border-bottom: 10px solid #656ee7;
+}
+
+.bubbleInfoAbove {
+  bottom: 35px;
+}
+
+.updateBtnIcon {
+  margin-right: 4px;
+}
+.icon-image {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-right: 5px;
+}

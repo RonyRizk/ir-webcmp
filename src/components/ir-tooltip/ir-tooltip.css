@@ -1,0 +1,18 @@
+:host {
+  position: relative;
+}
+.tooltip-icon {
+  margin: 0 5px;
+  padding: 0;
+}
+/* p {
+  position: absolute;
+  top: 10px;
+  background-color: antiquewhite;
+  border-radius: 7px;
+  padding: 10px 15px;
+  z-index: 1000000;
+} */
+.tooltip-inner-custom {
+  min-width: max-content !important;
+}

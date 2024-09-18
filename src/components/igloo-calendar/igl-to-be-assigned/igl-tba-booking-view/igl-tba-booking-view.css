@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.guestTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  /* margin-bottom: 5px; */
+}
+
+.guestTitle.selectedOrder {
+  background-color: #f9f9c9;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+hr {
+  margin-top: 8px;
+  margin-bottom: 0px;
+}
+
+.bookingContainer {
+  background-color: #ececec;
+}
+
+.actionsContainer {
+  display: flex;
+  align-items: center;
+  padding: 5px !important;
+  width: 100%;
+  gap: 16px;
+}
+.room-select {
+  flex: 1;
+}
+.selectContainer {
+  width: 195px;
+  margin-right: 8px;
+}
+
+.buttonsContainer {
+  box-sizing: border-box;
+}
+.btn-secondary {
+  margin-right: 8px !important;
+}

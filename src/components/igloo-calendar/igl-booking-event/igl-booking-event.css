@@ -1,0 +1,151 @@
+:host {
+  display: block;
+  position: absolute;
+}
+
+.bookingEventBase {
+  position: absolute;
+  background-color: rgb(49, 190, 241);
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  transform: skewX(-22deg);
+}
+
+.bookingEventBase.skewedLeft::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: -4px;
+  width: 50%;
+  height: 100%;
+  background-color: var(--ir-event-bg);
+  transform-origin: right;
+  transform: skewX(22deg);
+  border-radius: 4px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.bookingEventBase.skewedRight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -4px;
+  width: 50%;
+  height: 100%;
+  background-color: var(--ir-event-bg);
+  transform-origin: left;
+  transform: skewX(22deg);
+  border-radius: 4px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.bookingEventBase.border.skewedLeft::before {
+  border: 1px solid #424242;
+  border-right: 0;
+  border-left: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  top: -1px;
+  height: 20px;
+  left: -4px;
+}
+.bookingEventBase.border.skewedRight::before {
+  border: 1px solid #424242;
+  border-left: 0;
+  border-right: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  top: -1px;
+  height: 20px;
+  right: -4px;
+}
+.bookingEvent {
+  cursor: pointer;
+}
+.bookingEventBase {
+  cursor: pointer;
+}
+.bookingEventHiddenBase {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: calc(100% + 8);
+}
+
+.bookingEventDragHandle {
+  position: absolute;
+  top: 0;
+  width: 15px;
+  height: 100%;
+  opacity: 0.1;
+  background-color: rgba(0, 0, 0, 0.15);
+  transform: skewX(-22deg);
+  border-radius: 4px;
+  /* display: none; */
+  cursor: pointer;
+}
+
+.splitBooking {
+  border-right: 2px solid #000000;
+}
+
+:host:hover .bookingEventDragHandle {
+  display: block;
+  opacity: 1;
+}
+
+:host.newEvent:hover .bookingEventDragHandle {
+  display: none;
+  opacity: 1;
+}
+
+.leftSide {
+  left: 0;
+}
+.leftSide.skewedLeft {
+  transform: skewX(0);
+}
+.rightSide.skewedRight {
+  transform: skewX(0);
+}
+.rightSide {
+  right: 0;
+}
+
+.bookingEventTitle {
+  color: #fff;
+  font-size: 0.8em;
+  position: relative;
+  max-width: calc(100% - 10px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  top: 2px;
+  left: 5px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  cursor: pointer;
+}
+
+.legend_circle {
+  border-radius: 100%;
+  width: 10px;
+  height: 10px;
+  margin: 3px 3px 3px 2px;
+  border: 1px solid #fff;
+}
+
+.noteIcon {
+  position: absolute;
+  bottom: -8px;
+  left: 2px;
+}
+
+.balanceIcon {
+  position: absolute;
+  top: -8px;
+  right: 2px;
+}

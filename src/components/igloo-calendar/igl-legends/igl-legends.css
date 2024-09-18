@@ -1,0 +1,202 @@
+:host {
+  display: block;
+}
+
+/* Legend */
+
+.legendHeader {
+  font-weight: 500;
+  letter-spacing: 0.05rem;
+  font-size: 1.12rem;
+  padding-top: 5px;
+  margin-bottom: 1rem;
+}
+
+.legendCloseBtn {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  cursor: pointer;
+  font-size: 1.75em;
+  line-height: 1em;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transform: translateY(-50%);
+}
+
+.legendCloseBtn:hover {
+  background-color: #f6f6f6;
+}
+
+.stickyHeader {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 1;
+}
+
+.legendRow {
+  position: relative;
+  vertical-align: middle;
+  margin-bottom: 0.3rem;
+}
+
+.legendRow div {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.legend_skew,
+.legend_skew-bordered,
+.legend_skewsplit {
+  transform: skew(-30deg);
+  width: 15px;
+  height: 16px;
+}
+.legend_skew-bordered {
+  border: 1px solid black;
+}
+
+.legend_circle {
+  border-radius: 100%;
+  width: 10px;
+  height: 10px;
+  margin: 3px 3px 3px 2px;
+}
+
+.legend_skewsplit {
+  border-right: 2px solid #000000;
+}
+.headerCell .blueColor {
+  background-color: #31bef1;
+}
+.greenColor {
+  background-color: #45b16d;
+}
+.yellowColor {
+  background-color: #f4d552;
+}
+.greyColor {
+  background-color: #a0a0a0;
+}
+.redColor {
+  background-color: #f34752;
+}
+.pinkColor {
+  background-color: #f9b4b7;
+}
+
+/* Legend Calendar */
+
+.legendCalendar .legendRow {
+  margin-bottom: 0;
+}
+
+.legendCalendar .legendRow:first-child .legendCal {
+  background-color: #ececec;
+}
+
+.legendCalendar .legendRow div {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.total-availability {
+  font-size: 1em !important;
+}
+.legendCalendar .legendCal {
+  width: 80px;
+  height: 25px;
+  text-align: center;
+  display: inline-grid !important;
+  align-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.legendCalendar .legendCal .badge {
+  margin-top: 0.2rem;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.legendCalendar .legendCal.legendCal-h2 {
+  height: 40px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.br-t {
+  border-top: 1px solid #a0a0a0;
+}
+.br-s {
+  border-left: 1px solid #a0a0a0;
+  border-right: 1px solid #a0a0a0;
+}
+.br-bt {
+  border-bottom: 1px solid #a0a0a0;
+}
+
+.highphenLegend {
+  font-size: 0.9em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.highphenLegend::before {
+  width: 12px;
+  height: 0.5px;
+  content: ' ';
+  background-color: #000000;
+  vertical-align: middle;
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* .badge-pill {
+  padding: 4px 1.1em;
+  font-size: 0.9em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+} */
+.badge-pill {
+  padding: 3px 1em;
+  font-size: 0.8em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.headerCell {
+  width: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dayTitle {
+  font-size: 0.8em;
+  font-weight: 600;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.dayCapacityPercent {
+  font-size: 0.75em;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}

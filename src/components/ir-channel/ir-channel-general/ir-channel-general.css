@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+.label-style {
+  width: 6.25rem;
+  text-align: end;
+  padding-right: 0.625rem !important;
+}
+.connection-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.625rem !important;
+}
+.connection-title {
+  border-bottom: 1px solid #e4e5ec;
+}
+.ml-18 {
+  margin-left: 18% !important;
+}
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-size: 0.81rem;
+  margin: 0;
+  padding: 0;
+}

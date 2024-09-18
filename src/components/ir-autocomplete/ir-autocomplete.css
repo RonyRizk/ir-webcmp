@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  position: relative;
+}
+.selected {
+  color: #fff;
+  text-decoration: none;
+  background-color: #666ee8;
+}
+input {
+  width: 100%;
+  position: relative;
+  border-top-left-radius: 0px !important;
+  border-left: 0 !important;
+  border-bottom-left-radius: 0px !important;
+}
+label {
+  margin: 0;
+  border-top-right-radius: 0px !important;
+  border-right: 0 !important;
+  border-bottom-right-radius: 0px !important;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+
+  padding-right: 3px !important;
+  justify-content: center;
+  transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+}
+label[data-state='focused'] {
+  border-color: var(--blue);
+}
+
+.combobox {
+  margin: 0;
+  top: 30px;
+  min-width: 100%;
+  width: max-content;
+  display: block;
+  z-index: 10000;
+  padding: 1px;
+  background: white;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  padding: 5px 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+.dropdown-item {
+  cursor: pointer;
+}
+button {
+  all: unset;
+  right: 4px;
+}
+.combobox p,
+span,
+loader-container {
+  padding: 5px 16px;
+  margin: 0px;
+  margin-top: 2px;
+  width: 100%;
+}
+.combobox p {
+  cursor: pointer;
+}
+.combobox p:hover {
+  background: #f4f5fa;
+}
+
+.combobox p[data-selected],
+.combobox p[data-selected]:hover {
+  color: #fff;
+  text-decoration: none;
+  background-color: #666ee8;
+}
+.loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #0f0f0f;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
