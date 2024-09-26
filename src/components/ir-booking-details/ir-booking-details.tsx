@@ -74,7 +74,8 @@ export class IrBookingDetails {
 
   private dialogRef: HTMLIrDialogElement;
 
-  private printingBaseUrl = 'https://bookingmystay.com/%1/printing?id=%2';
+  // private printingBaseUrl = 'https://bookingmystay.com/%1/printing?id=%2';
+  private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing?id=%2';
 
   componentDidLoad() {
     if (this.baseurl) {
@@ -141,6 +142,17 @@ export class IrBookingDetails {
     }
   }
 
+  private async openPrinting(mode: 'invoice' | 'print' = 'print') {
+    let url = this.printingBaseUrl;
+    if (mode === 'invoice') {
+      url = url + '&mode=invoice';
+    }
+    const { data } = await axios.post(`Get_ShortLiving_Token?Ticket=${this.ticket}`);
+    if (!data.ExceptionMsg) {
+      url = url + `&token=${data.My_Result}`;
+    }
+    window.open(url);
+  }
   @Listen('clickHanlder')
   handleIconClick(e) {
     const target = e.target;
@@ -154,12 +166,14 @@ export class IrBookingDetails {
       case 'print':
         // this.printBooking();
         // window.open(`https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=B&TK=${this.ticket}`);
-        window.open(this.printingBaseUrl);
+        // window.open(this.printingBaseUrl);
+        this.openPrinting();
         return;
       case 'receipt':
         // this.printBooking('invoice');
         // window.open(`https://x.igloorooms.com/manage/AcBookingEdit.aspx?IRID=${this.bookingData.system_id}&&PM=I&TK=${this.ticket}`);
-        window.open(`${this.printingBaseUrl}&mode=invoice`);
+        this.openPrinting('invoice');
+        // window.open(`${this.printingBaseUrl}&mode=invoice`);
         return;
       case 'book-delete':
         return;
