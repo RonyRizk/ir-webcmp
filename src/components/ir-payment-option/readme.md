@@ -11,6 +11,7 @@
 | --------------- | ---------------- | ----------- | --------- | ----------- |
 | `baseurl`       | `baseurl`        |             | `string`  | `undefined` |
 | `defaultStyles` | `default-styles` |             | `boolean` | `true`      |
+| `hideLogs`      | `hide-logs`      |             | `boolean` | `false`     |
 | `language`      | `language`       |             | `string`  | `'en'`      |
 | `propertyid`    | `propertyid`     |             | `string`  | `undefined` |
 | `ticket`        | `ticket`         |             | `string`  | `undefined` |
