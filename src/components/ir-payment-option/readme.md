@@ -16,6 +16,13 @@
 | `ticket`        | `ticket`         |             | `string`  | `undefined` |
 
 
+## Events
+
+| Event   | Description | Type                                                                                                 |
+| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+
+
 ## Dependencies
 
 ### Depends on

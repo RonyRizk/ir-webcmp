@@ -67,6 +67,7 @@
  - [ir-payment-details](../ir-booking-details/ir-payment-details)
  - [ir-payment-option](../ir-payment-option)
  - [ir-pickup](../ir-booking-details/ir-pickup)
+ - [ir-pickup-view](../ir-booking-details/ir-pickup-view)
  - [ir-room](../ir-booking-details/ir-room)
  - [ir-room-nights](../ir-room-nights)
 
@@ -106,6 +107,7 @@ graph TD;
   ir-payment-details --> ir-button
   ir-payment-option --> ir-button
   ir-pickup --> ir-button
+  ir-pickup-view --> ir-button
   ir-room --> ir-button
   ir-room-nights --> ir-button
   style ir-button fill:#f9f,stroke:#333,stroke-width:4px
