@@ -18,7 +18,7 @@ export class IrPaymentOption {
   @Prop() ticket: string;
   @Prop() language: string = 'en';
   @Prop() defaultStyles: boolean = true;
-  @Prop() hideLogs: boolean = false;
+  @Prop() hideLogs: boolean = true;
 
   @State() paymentOptions: PaymentOption[] = [];
   @State() isLoading: boolean = false;
@@ -172,7 +172,7 @@ export class IrPaymentOption {
     this.log('paymentOptions', this.paymentOptions);
     this.log('----loading conditions----');
 
-    if (this.isLoading || this.paymentOptions.length == 0) {
+    if (this.isLoading === true || (this.paymentOptions && this.paymentOptions.length === 0)) {
       this.log('rendering the loading view');
       return (
         <Host class={this.defaultStyles ? 'p-2' : ''}>
@@ -183,17 +183,6 @@ export class IrPaymentOption {
       );
     }
     this.log('rendering the payment option');
-    // debugger;
-    if (this.propertyid.toString() === '42') {
-      return (
-        <div>
-          <p>Testing</p>
-          <p>locale.entries: {JSON.stringify(locales?.entries)}</p>
-          <p>payment options: {JSON.stringify(this.paymentOptions)}</p>
-          <p>Loading:{JSON.stringify(this.isLoading)}</p>
-        </div>
-      );
-    }
     return (
       <Host class={this.defaultStyles ? 'p-2' : ''}>
         <ir-toast></ir-toast>
