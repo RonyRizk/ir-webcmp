@@ -5,13 +5,6 @@
 <!-- Auto Generated Below -->
 
 
-## Properties
-
-| Property  | Attribute | Description | Type     | Default     |
-| --------- | --------- | ----------- | -------- | ----------- |
-| `baseurl` | `baseurl` |             | `string` | `undefined` |
-
-
 ## Events
 
 | Event        | Description | Type                                                           |

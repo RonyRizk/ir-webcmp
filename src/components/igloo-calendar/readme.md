@@ -9,11 +9,11 @@
 
 | Property         | Attribute         | Description | Type     | Default     |
 | ---------------- | ----------------- | ----------- | -------- | ----------- |
-| `baseurl`        | `baseurl`         |             | `string` | `undefined` |
 | `currencyName`   | `currency-name`   |             | `string` | `undefined` |
 | `from_date`      | `from_date`       |             | `string` | `undefined` |
 | `language`       | `language`        |             | `string` | `undefined` |
 | `loadingMessage` | `loading-message` |             | `string` | `undefined` |
+| `p`              | `p`               |             | `string` | `undefined` |
 | `propertyid`     | `propertyid`      |             | `number` | `undefined` |
 | `ticket`         | `ticket`          |             | `string` | `''`        |
 | `to_date`        | `to_date`         |             | `string` | `undefined` |
@@ -44,7 +44,7 @@
 - [ir-loading-screen](../ir-loading-screen)
 - [igl-book-property](igl-book-property)
 - [ir-sidebar](../ir-sidebar)
-- [ir-room-nights](../ir-room-nights)
+- [ir-room-nights](ir-room-nights)
 - [ir-booking-details](../ir-booking-details)
 - [ir-modal](../ir-modal)
 

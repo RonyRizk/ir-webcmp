@@ -5,7 +5,6 @@ import booking_listing, { updateUserSelection, onBookingListingChange } from '@/
 import locales from '@/stores/locales.store';
 import { formatAmount } from '@/utils/utils';
 import { Component, Host, Prop, State, Watch, h, Element, Listen } from '@stencil/core';
-import axios from 'axios';
 import moment from 'moment';
 import { _formatTime } from '../ir-booking-details/functions';
 import { getPrivateNote } from '@/utils/booking';
@@ -20,9 +19,9 @@ export class IrBookingListing {
 
   @Prop() language: string = '';
   @Prop() ticket: string = '';
-  @Prop() baseurl: string = '';
   @Prop() propertyid: number;
   @Prop() rowCount: number = 10;
+  @Prop() p: string;
 
   @State() isLoading = false;
   @State() currentPage = 1;
@@ -44,9 +43,6 @@ export class IrBookingListing {
   componentWillLoad() {
     updateUserSelection('end_row', this.rowCount);
     booking_listing.rowCount = this.rowCount;
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
       this.bookingListingService.setToken(this.ticket);
       this.roomService.setToken(this.ticket);
@@ -74,8 +70,34 @@ export class IrBookingListing {
   async initializeApp() {
     try {
       this.isLoading = true;
-      updateUserSelection('property_id', this.propertyid);
-      await Promise.all([this.bookingListingService.getExposedBookingsCriteria(this.propertyid), this.roomService.fetchLanguage(this.language, ['_BOOKING_LIST_FRONT'])]);
+      if (!this.propertyid && !this.p) {
+        throw new Error('Property ID or username is required');
+      }
+      let propertyId = this.propertyid;
+      if (!propertyId) {
+        const propertyData = await this.roomService.getExposedProperty({
+          id: 0,
+          aname: this.p,
+          language: this.language,
+          is_backend: true,
+        });
+        propertyId = propertyData.My_Result.id;
+      }
+
+      const requests = [this.bookingListingService.getExposedBookingsCriteria(propertyId), this.roomService.fetchLanguage(this.language, ['_BOOKING_LIST_FRONT'])];
+
+      if (this.propertyid) {
+        requests.unshift(
+          this.roomService.getExposedProperty({
+            id: this.propertyid,
+            language: this.language,
+            is_backend: true,
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+      updateUserSelection('property_id', propertyId);
       await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, is_to_export: false });
     } catch (error) {
       console.error(error);
@@ -159,7 +181,7 @@ export class IrBookingListing {
         <ir-interceptor></ir-interceptor>
         <ir-toast></ir-toast>
         <div class="p-1 main-container">
-          <ir-listing-header propertyId={this.propertyid} language={this.language} baseurl={this.baseurl}></ir-listing-header>
+          <ir-listing-header propertyId={this.propertyid} p={this.p} language={this.language}></ir-listing-header>
           <section>
             <div class="card p-1 flex-fill m-0 mt-2">
               <table class="table table-striped table-bordered no-footer dataTable">
@@ -384,6 +406,7 @@ export class IrBookingListing {
           {this.editBookingItem?.cause === 'edit' && (
             <ir-booking-details
               slot="sidebar-body"
+              p={this.p}
               hasPrint
               hasReceipt
               is_from_front_desk
@@ -394,7 +417,6 @@ export class IrBookingListing {
               onCloseSidebar={() => (this.editBookingItem = null)}
               bookingNumber={this.editBookingItem.booking.booking_nbr}
               ticket={this.ticket}
-              baseurl={this.baseurl}
               language={this.language}
               hasRoomAdd
             ></ir-booking-details>

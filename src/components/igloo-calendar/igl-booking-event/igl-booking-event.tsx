@@ -202,7 +202,6 @@ export class IglBookingEvent {
               });
             } else {
               if (this.isShrinking || !this.isStreatch) {
-                console.log(this.bookingEvent.PR_ID.toString() === toRoomId.toString(), this.bookingEvent.PR_ID.toString(), toRoomId.toString());
                 // try {
                 //   if (this.bookingEvent.PR_ID.toString() === toRoomId.toString()) {
                 //     await this.eventsService.reallocateEvent(pool, toRoomId, from_date, to_date);
@@ -217,7 +216,41 @@ export class IglBookingEvent {
                 if (status === '400') {
                   hideConfirmButton = true;
                 }
-                this.showDialog.emit({ ...event.detail, description, title: '', hideConfirmButton });
+                const oldFromDate = this.bookingEvent.defaultDates.from_date;
+                const oldToDate = this.bookingEvent.defaultDates.to_date;
+                const defaultDiffDays = moment(oldToDate, 'YYYY-MM-DD').diff(moment(oldFromDate, 'YYYY-MM-DD'), 'days');
+
+                let shrinkingDirection = null;
+                let fromDate = oldFromDate;
+                let toDate = oldToDate;
+                if (this.isShrinking) {
+                  if (moment(from_date, 'YYYY-MM-DD').isAfter(moment(oldFromDate, 'YYYY-MM-DD')) && moment(to_date, 'YYYY-MM-DD').isBefore(moment(oldToDate, 'YYYY-MM-DD'))) {
+                    fromDate = oldFromDate;
+                    toDate = to_date;
+                  } else {
+                    shrinkingDirection = moment(from_date, 'YYYY-MM-DD').isAfter(moment(oldFromDate, 'YYYY-MM-DD'))
+                      ? 'left'
+                      : moment(to_date, 'YYYY-MM-DD').isBefore(moment(oldToDate, 'YYYY-MM-DD'))
+                      ? 'right'
+                      : null;
+                    if (shrinkingDirection === 'left') {
+                      fromDate = from_date;
+                    }
+
+                    if (shrinkingDirection === 'right') {
+                      toDate = to_date;
+                    }
+                  }
+                } else {
+                  if (moment(from_date, 'YYYY-MM-DD').isBefore(moment(oldFromDate, 'YYYY-MM-DD'))) {
+                    fromDate = from_date;
+                    toDate = moment(from_date, 'YYYY-MM-DD').add(defaultDiffDays, 'days').format('YYYY-MM-DD');
+                  } else if (moment(to_date, 'YYYY-MM-DD').isAfter(moment(oldToDate, 'YYYY-MM-DD'))) {
+                    toDate = to_date;
+                    fromDate = moment(to_date, 'YYYY-MM-DD').subtract(defaultDiffDays, 'days').format('YYYY-MM-DD');
+                  }
+                }
+                this.showDialog.emit({ ...event.detail, description, title: '', hideConfirmButton, from_date: fromDate, to_date: toDate });
               } else {
                 // if (this.checkIfSlotOccupied(toRoomId, from_date, to_date)) {
                 //   this.animationFrameId = requestAnimationFrame(() => {
@@ -225,7 +258,14 @@ export class IglBookingEvent {
                 //   });
                 //   throw new Error('Overlapping Dates');
                 // } else {
-                this.showRoomNightsDialog.emit({ bookingNumber: this.bookingEvent.BOOKING_NUMBER, identifier: this.bookingEvent.IDENTIFIER, to_date, pool, from_date });
+                this.showRoomNightsDialog.emit({
+                  bookingNumber: this.bookingEvent.BOOKING_NUMBER,
+                  identifier: this.bookingEvent.IDENTIFIER,
+                  to_date,
+                  pool,
+                  from_date,
+                  defaultDates: this.bookingEvent.defaultDates,
+                });
                 // }
               }
             }
@@ -244,17 +284,6 @@ export class IglBookingEvent {
     }
   }
   private getModalDescription(toRoomId: number, from_date, to_date): { status: '200' | '400'; description: string } {
-    console.log(
-      `toRoomId: ${toRoomId}`,
-      '\n',
-      `new from_date: ${from_date}`,
-      '\n',
-      `old from_date: ${this.bookingEvent.FROM_DATE}`,
-      '\n',
-      `new to_date: ${to_date}`,
-      '\n',
-      `old to_date: ${this.bookingEvent.TO_DATE}`,
-    );
     const findRoomType = (roomId: number) => {
       let roomType = this.bookingEvent.roomsInfo.filter(room => room.physicalrooms.some(r => r.id === +roomId));
       if (roomType.length) {
@@ -474,22 +503,22 @@ export class IglBookingEvent {
     this.resizeSide = side;
     this.isDragging = true;
 
-    this.showEventInfo(false); // Hide bubble;
+    this.showEventInfo(false);
     this.isStreatch = side !== 'move';
     if (side === 'move') {
       this.initialX = event.clientX || event.touches[0].clientX;
       this.initialY = event.clientY || event.touches[0].clientY;
       this.elementRect = this.element.getBoundingClientRect();
-      const offsetX = 0; //this.initialX - this.elementRect.left - 18;
-      const offsetY = 0; // this.initialY - this.elementRect.top - (this.elementRect.height/2);
+      const offsetX = 0;
+      const offsetY = 0;
       this.dragInitPos = {
         id: this.getBookingId(),
         fromRoomId: this.getBookedRoomId(),
         top: this.getNumber(this.element.style.top) + offsetY,
         left: this.getNumber(this.element.style.left) + offsetX,
       };
-      this.dragInitPos.x = this.dragInitPos.left; // + 18;
-      this.dragInitPos.y = this.dragInitPos.top; // + (this.elementRect.height/2);
+      this.dragInitPos.x = this.dragInitPos.left;
+      this.dragInitPos.y = this.dragInitPos.top;
       this.dragEndPos = { ...this.dragInitPos };
       this.element.style.top = `${this.dragInitPos.top}px`;
       this.element.style.left = `${this.dragInitPos.left}px`;
@@ -587,7 +616,11 @@ export class IglBookingEvent {
           },
         });
       } else {
-        let numberOfDays = Math.round(this.finalWidth / this.dayWidth);
+        const finalWidth =
+          this.finalWidth -
+          (!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? this.dayWidth / 2 : 0);
+        const numberOfDays = Math.round(finalWidth / this.dayWidth);
+        console.log(finalWidth, this.dayWidth, numberOfDays);
         let initialStayDays = this.getStayDays();
         if (initialStayDays != numberOfDays && !isNaN(numberOfDays)) {
           //this.setStayDays(numberOfDays);
@@ -600,6 +633,8 @@ export class IglBookingEvent {
             }
             // set TO_DATE = FROM_DATE + numberOfDays
           }
+          // const nbrOfDays =
+          // !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? numberOfDays - 1 : numberOfDays;
           this.dragOverEventData.emit({
             id: 'STRETCH_OVER_END',
             data: {
@@ -611,8 +646,8 @@ export class IglBookingEvent {
               nbOfDays: numberOfDays,
             },
           });
-
-          this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace}px`;
+          const offset = !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? +this.dayWidth / 2 : 0;
+          this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace + offset}px`;
         } else {
           this.element.style.left = `${this.initialLeft}px`;
           this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace}px`;

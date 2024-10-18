@@ -23,9 +23,9 @@ export class IrBookingDetails {
   @Prop() language: string = '';
   @Prop() ticket: string = '';
   @Prop() bookingNumber: string = '';
-  @Prop() baseurl: string = '';
   @Prop() propertyid: number;
   @Prop() is_from_front_desk = false;
+  @Prop() p: string;
   // Booleans Conditions
   @Prop() hasPrint: boolean = false;
   @Prop() hasReceipt: boolean = false;
@@ -61,6 +61,7 @@ export class IrBookingDetails {
   @State() isPMSLogLoading: boolean = false;
   @State() userCountry: ICountry | null = null;
   @State() paymentActions: IPaymentAction[];
+  @State() property_id: number;
 
   // Payment Event
   @Event() toast: EventEmitter<IToast>;
@@ -81,9 +82,6 @@ export class IrBookingDetails {
   };
 
   componentDidLoad() {
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
       calendar_data.token = this.ticket;
       this.bookingService.setToken(this.ticket);
@@ -202,12 +200,13 @@ export class IrBookingDetails {
   private async initializeApp() {
     try {
       const [roomResponse, languageTexts, countriesList, bookingDetails] = await Promise.all([
-        this.roomService.fetchData(this.propertyid, this.language),
+        this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
         this.bookingService.getExposedBooking(this.bookingNumber, this.language),
       ]);
       this.paymentService.setToken(this.ticket);
+      this.property_id = roomResponse?.My_Result?.id;
       //TODO:Reenable payment actions
       // if (bookingDetails?.booking_nbr && bookingDetails?.currency?.id) {
       //   this.paymentActions = await this.paymentService.GetExposedCancelationDueAmount({
@@ -254,7 +253,7 @@ export class IrBookingDetails {
     if (this.tempStatus !== '' && this.tempStatus !== null) {
       try {
         this.isUpdateClicked = true;
-        await axios.post(`/Change_Exposed_Booking_Status?Ticket=${this.ticket}`, {
+        await axios.post(`/Change_Exposed_Booking_Status`, {
           book_nbr: this.bookingNumber,
           status: this.tempStatus,
         });
@@ -306,7 +305,7 @@ export class IrBookingDetails {
     if (mode === 'invoice') {
       url = url + '&mode=invoice';
     }
-    const { data } = await axios.post(`Get_ShortLiving_Token?Ticket=${this.ticket}`);
+    const { data } = await axios.post(`Get_ShortLiving_Token`);
     if (!data.ExceptionMsg) {
       url = url + `&token=${data.My_Result}`;
     }
@@ -598,7 +597,7 @@ export class IrBookingDetails {
             countryNodeList={this.countryNodeList}
             currency={this.calendarData.currency}
             language={this.language}
-            propertyid={this.propertyid}
+            propertyid={this.property_id}
             bookingData={this.bookingItem}
             onCloseBookingWindow={() => this.handleCloseBookingWindow()}
           ></igl-book-property>

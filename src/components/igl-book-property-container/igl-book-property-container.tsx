@@ -4,7 +4,6 @@ import { RoomService } from '@/services/room.service';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { Component, Host, State, h, Prop, Watch, Event, EventEmitter, Fragment } from '@stencil/core';
-import axios from 'axios';
 
 @Component({
   tag: 'igl-book-property-container',
@@ -14,7 +13,7 @@ import axios from 'axios';
 export class IglBookPropertyContainer {
   @Prop() language: string = '';
   @Prop() ticket: string = '';
-  @Prop() baseurl: string = '';
+  @Prop() p: string;
   @Prop() propertyid: number;
   @Prop() from_date: string;
   @Prop() to_date: string;
@@ -42,8 +41,11 @@ export class IglBookPropertyContainer {
   }
   async initializeApp() {
     try {
+      if (!this.propertyid && !this.p) {
+        throw new Error('Property ID or username is required');
+      }
       const [roomResponse, languageTexts, countriesList] = await Promise.all([
-        this.roomService.fetchData(this.propertyid, this.language),
+        this.roomService.getExposedProperty({ id: this.propertyid, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
       ]);
@@ -63,9 +65,6 @@ export class IglBookPropertyContainer {
     }
   }
   componentWillLoad() {
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
       calendar_data.token = this.ticket;
       this.bookingService.setToken(this.ticket);

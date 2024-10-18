@@ -4,7 +4,6 @@ import { RoomService } from '@/services/room.service';
 import housekeeping_store, { updateHKStore } from '@/stores/housekeeping.store';
 import locales from '@/stores/locales.store';
 import { Component, Host, Listen, Prop, State, Watch, h, Element } from '@stencil/core';
-import axios from 'axios';
 
 @Component({
   tag: 'ir-hk-tasks',
@@ -16,27 +15,24 @@ export class IrHkTasks {
 
   @Prop() language: string = '';
   @Prop() ticket: string = '';
-  @Prop() baseurl: string = '';
   @Prop() propertyid: number;
+  @Prop() p: string;
 
   @State() isLoading = false;
   @State() selectedDuration = '';
   @State() selectedHouseKeeper = '0';
   @State() selectedRoom: IPendingActions | null = null;
   @State() archiveOpened = false;
+  @State() property_id: number;
 
   private modalOpenTimeOut: NodeJS.Timeout;
   private roomService = new RoomService();
   private houseKeepingService = new HouseKeepingService();
 
   componentWillLoad() {
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
       this.roomService.setToken(this.ticket);
       this.houseKeepingService.setToken(this.ticket);
-      updateHKStore('default_properties', { token: this.ticket, property_id: this.propertyid, language: this.language });
       this.initializeApp();
     }
   }
@@ -60,7 +56,7 @@ export class IrHkTasks {
         id: unit.id,
       },
     });
-    await this.houseKeepingService.getExposedHKSetup(this.propertyid);
+    await this.houseKeepingService.getExposedHKSetup(this.property_id);
   }
 
   @Watch('ticket')
@@ -68,7 +64,6 @@ export class IrHkTasks {
     if (newValue !== oldValue) {
       this.roomService.setToken(this.ticket);
       this.houseKeepingService.setToken(this.ticket);
-      updateHKStore('default_properties', { token: this.ticket, property_id: this.propertyid, language: this.language });
       this.initializeApp();
     }
   }
@@ -96,7 +91,7 @@ export class IrHkTasks {
   }
   async getPendingActions() {
     await this.houseKeepingService.getHKPendingActions({
-      property_id: this.propertyid,
+      property_id: this.property_id,
       bracket: {
         code: this.selectedDuration,
       },
@@ -108,11 +103,30 @@ export class IrHkTasks {
   async initializeApp() {
     try {
       this.isLoading = true;
-      await Promise.all([
-        this.houseKeepingService.getExposedHKStatusCriteria(this.propertyid),
-        this.roomService.fetchData(this.propertyid, this.language),
-        this.roomService.fetchLanguage(this.language, ['_HK_FRONT']),
-      ]);
+      let propertyId = this.propertyid;
+      if (!propertyId) {
+        const propertyData = await this.roomService.getExposedProperty({
+          id: 0,
+          aname: this.p,
+          language: this.language,
+          is_backend: true,
+        });
+        propertyId = propertyData.My_Result.id;
+      }
+      this.property_id = propertyId;
+      updateHKStore('default_properties', { token: this.ticket, property_id: propertyId, language: this.language });
+      const requests = [this.houseKeepingService.getExposedHKStatusCriteria(propertyId), this.roomService.fetchLanguage(this.language, ['_HK_FRONT'])];
+
+      if (this.propertyid) {
+        requests.unshift(
+          this.roomService.getExposedProperty({
+            id: propertyId,
+            language: this.language,
+            is_backend: true,
+          }),
+        );
+      }
+      await Promise.all(requests);
       this.selectedDuration = housekeeping_store.hk_tasks.brackets[0].code;
       await this.getPendingActions();
     } catch (error) {
