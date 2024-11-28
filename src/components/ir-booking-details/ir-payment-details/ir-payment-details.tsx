@@ -5,7 +5,6 @@ import { BookingService } from '@/services/booking.service';
 import moment from 'moment';
 import { PaymentService, IPaymentAction } from '@/services/payment.service';
 import { ILocale, IToast } from '@/components';
-import calendar_data from '@/stores/calendar-data';
 import { colorVariants } from '@/components/ui/ir-icons/icons';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { formatAmount } from '@/utils/utils';
@@ -52,8 +51,6 @@ export class IrPaymentDetails {
   }
   async componentWillLoad() {
     try {
-      this.paymentService.setToken(calendar_data.token);
-      this.bookingService.setToken(calendar_data.token);
       this.initializeItemToBeAdded();
     } catch (error) {
       if (this.bookingDetails.guest.cci) {
@@ -354,26 +351,26 @@ export class IrPaymentDetails {
             </div>
           )}
           {/* TODO:IMPLEMENT THIS ON BOOKING ACTIONS */}
-          {/* <div class=" h4">
-            Balance: <span class="danger font-weight-bold">{_formatAmount(this.bookingDetails.financial.due_amount, this.bookingDetails.currency.code)}</span>
-          </div> */}
           <div class=" h4">
+            Balance: <span class="danger font-weight-bold">{formatAmount(this.bookingDetails.currency.symbol, this.bookingDetails.financial.due_amount)}</span>
+          </div>
+          {/* <div class=" h4">
             {this.defaultTexts.entries.Lcz_DueBalance}:{' '}
             <span class="danger font-weight-bold">{formatAmount(this.bookingDetails.currency.symbol, this.bookingDetails.financial.due_amount)}</span>
-          </div>
+          </div> */}
           {/* TODO:IMPLEMENT THIS ON BOOKING ACTIONS */}
-          {/* <div class="mb-2 h4">
+          <div class="mb-2 h4">
             Collected:{' '}
             <span class="">
-              {_formatAmount(
+              {formatAmount(
+                this.bookingDetails.currency.symbol,
                 this.bookingDetails.financial.payments ? this.bookingDetails.financial.payments.reduce((prev, curr) => prev + curr.amount, 0) : 0,
-                this.bookingDetails.currency.code,
               )}
             </span>
-          </div> */}
+          </div>
 
           {this.bookingGuarantee()}
-          <div class="mt-2">
+          {/* <div class="mt-2">
             <div>
               {this.bookingDetails.financial?.due_dates?.length > 0 && (
                 <Fragment>
@@ -398,9 +395,14 @@ export class IrPaymentDetails {
                 </Fragment>
               )}
             </div>
-          </div>
+          </div> */}
           {/* TODO:IMPLEMENT THIS ON BOOKING ACTIONS */}
-          {/* <ir-payment-actions paymentAction={this.paymentActions} booking={this.bookingDetails}></ir-payment-actions> */}
+          {this.paymentActions?.filter(pa => pa.amount !== 0).length > 0 && (
+            <div class="payment_action_beta_container">
+              <p class="beta">Beta</p>
+              <ir-payment-actions paymentAction={this.paymentActions} booking={this.bookingDetails}></ir-payment-actions>
+            </div>
+          )}
           <div class="mt-2 d-flex  flex-column rounded payment-container">
             <div class="d-flex align-items-center justify-content-between">
               <strong>{this.defaultTexts.entries.Lcz_Payments} history</strong>

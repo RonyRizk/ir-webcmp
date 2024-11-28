@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Front desk</title>
+    <!-- This script file contains functions for injecting required scripts and handling authentication -->
+    <script src="https://www.igloorooms.com/backend-cmp-injector.js"></script>
+</head>
+
+<body>
+
+    <ir-common></ir-common>
+    <igloo-calendar language="en"></igloo-calendar>
+    <link rel="stylesheet" href="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/toastr/toastr.css"
+        type="text/css">
+
+    <script>
+        /**
+        * Initializes the calendar component by setting necessary properties and authenticating the user.
+        * 
+        * This function attempts to authenticate the user using their username and password. If the user
+        * is authenticated successfully, the authentication token (ticket) will be retrieved and assigned
+        * to the `igloo-calendar` component along with the `from_date` and `to_date` attributes.
+        * 
+        * The username and password are required for standard login. If the user needs to log in as an MPO,
+        * the `mpoLogin` function should be used, which also requires an additional `aName` parameter.
+        * 
+        * Usage:
+        * - Replace `username` and `password` with actual credentials.
+        * - If logging in as MPO, uncomment the appropriate code and include the `aName` field.
+        * - Ensure proper token handling by storing passwords and tokens securely.
+        */
+        const init = async () => {
+            try {
+                // Define user credentials for authentication
+                const username = "username";  // Replace with the actual username
+                const password = "password";  // Replace with the actual password and store it securely
+                // const aName = "propertyAname";  // Replace with the actual property aName, required when logging in as MPO
+
+                // Select the igloo-calendar component from the DOM
+                const calendar = document.querySelector("igloo-calendar");
+
+                // Standard login to obtain a token (ticket)
+                const token = await login(username, password);
+
+                // If logging in as MPO, use the following method instead:
+                // const token = await mpoLogin({ username, password, aName });
+
+
+                // If the booking listing component exists, set its `propertyid` and `ticket` attributes
+                if (calendar) {
+                    const from_date = new Date();
+                    from_date.setDate(from_date.getDate() - 1);
+                    /*
+                     * Helper function to calculate a date range based on a starting date (can be a Date object or a string) and a maximum span of months. 
+                     * For more information about this method check https://www.igloorooms.com/backend-cmp-injector.js
+                    */
+                    const { _FROM_DATE, _TO_DATE } = calculateDateRange(from_date, 3);
+                    calendar.from_date = _FROM_DATE;
+                    calendar.to_date = _TO_DATE;
+                    calendar.p = username;  // Sets the `p` (username) attribute
+                    calendar.ticket = token;  // Sets the `ticket` (authentication token) attribute
+                }
+
+            } catch (error) {
+                console.error(error)
+            }
+        };
+        // Initialize the booking listing on page load
+        init();
+
+    </script>
+
+</body>
+
+</html>

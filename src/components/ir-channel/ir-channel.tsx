@@ -2,12 +2,11 @@ import { RoomService } from '@/services/room.service';
 import channels_data, { resetStore, selectChannel, setChannelIdAndActiveState, testConnection, updateChannelSettings } from '@/stores/channel.store';
 import locales from '@/stores/locales.store';
 import { Component, Host, Prop, Watch, h, Element, State, Fragment, Listen } from '@stencil/core';
-import axios from 'axios';
 import { actions } from './data';
 import { IModalCause } from './types';
 import { ChannelService } from '@/services/channel.service';
 import { IChannel } from '@/models/calendarData';
-import calendar_data from '@/stores/calendar-data';
+import Token from '@/models/Token';
 
 @Component({
   tag: 'ir-channel',
@@ -29,18 +28,14 @@ export class IrChannel {
 
   private roomService = new RoomService();
   private channelService = new ChannelService();
+  private token = new Token();
 
   private irModalRef: HTMLIrModalElement;
 
   componentWillLoad() {
     this.isLoading = true;
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
-      calendar_data.token = this.ticket;
-      this.channelService.setToken(this.ticket);
-      this.roomService.setToken(this.ticket);
+      this.token.setToken(this.ticket);
       this.initializeApp();
     }
   }
@@ -112,10 +107,11 @@ export class IrChannel {
   }
 
   @Watch('ticket')
-  async ticketChanged() {
-    calendar_data.token = this.ticket;
-    this.roomService.setToken(this.ticket);
-    this.channelService.setToken(this.ticket);
+  ticketChanged(newValue: string, oldValue: string) {
+    if (newValue === oldValue) {
+      return;
+    }
+    this.token.setToken(this.ticket);
     this.initializeApp();
   }
 

@@ -6,6 +6,14 @@ export interface ILocale {
 export type TLocaleEntries = (LocalizationStrings & LocalizationChannelFrontEntries & BookingListingCodes & HousekeepingLocalizedWords & LocalizationPAYMENTBACK) | null;
 
 export type LocalizationStrings = {
+  Lcz_AnyInfant: string;
+  Lcz_No: string;
+  Lcz_ThisService: string;
+  Lcz_Price: string;
+  Lcz_DatesOn: string;
+  Lcz_TillAndIncluding: string;
+  Lcz_Description: string;
+  Lcz_ExtraServices: string;
   Lcz_Guarantee: string;
   Lcz_PrivateNote_MaxChar: string;
   Lcz_VisibleToHotelOnly: string;
@@ -24,6 +32,8 @@ export type LocalizationStrings = {
   Lcz_AlternativeEmail: string;
   Lcz_Amount: string;
   Lcz_AnyMessageForUs: string;
+  Lcz_Infant: string;
+  Lcz_Infants: string;
   Lcz_AreYouSureDoYouWantToRemove: string;
   Lcz_AreYouSureWantToMoveAnotherUnit: string;
   Lcz_ArrivalTime: string;
@@ -37,6 +47,10 @@ export type LocalizationStrings = {
   Lcz_AutomaticReleaseIn: string;
   Lcz_Back: string;
   Lcz_BalanceWillBeCalculated: string;
+  Lcz_Adults: string;
+  Lcz_Adult: string;
+  Lcz_Child: string;
+  Lcz_Children: string;
   Lcz_Blockdates: string;
   Lcz_BlockDatesFor: string;
   Lcz_BlockedTill: string;
@@ -180,6 +194,7 @@ export type LocalizationStrings = {
   Lcz_IfDeletedPermantlyLost: string;
 };
 export type BookingListingCodes = {
+  Lcz_ExtraServices: string;
   Lcz_TotalCost: string;
   Lcz_Cost: string;
   Lcz_BookedOn: string;

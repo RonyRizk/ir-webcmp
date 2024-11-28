@@ -1,4 +1,4 @@
-import { Booking } from '@/models/booking.dto';
+import { Booking, IUnit } from '@/models/booking.dto';
 import { BookingListingService } from '@/services/booking_listing.service';
 import { RoomService } from '@/services/room.service';
 import booking_listing, { updateUserSelection, onBookingListingChange } from '@/stores/booking_listing.store';
@@ -8,6 +8,8 @@ import { Component, Host, Prop, State, Watch, h, Element, Listen } from '@stenci
 import moment from 'moment';
 import { _formatTime } from '../ir-booking-details/functions';
 import { getPrivateNote } from '@/utils/booking';
+import Token from '@/models/Token';
+import { isSingleUnit } from '@/stores/calendar-data';
 
 @Component({
   tag: 'ir-booking-listing',
@@ -29,8 +31,11 @@ export class IrBookingListing {
   @State() oldStartValue = 0;
   @State() editBookingItem: { booking: Booking; cause: 'edit' | 'payment' | 'delete' } | null = null;
   @State() showCost = false;
+
   private bookingListingService = new BookingListingService();
   private roomService = new RoomService();
+  private token = new Token();
+
   private listingModal: HTMLIrListingModalElement;
   private listingModalTimeout: NodeJS.Timeout;
   private statusColors = {
@@ -44,9 +49,8 @@ export class IrBookingListing {
     updateUserSelection('end_row', this.rowCount);
     booking_listing.rowCount = this.rowCount;
     if (this.ticket !== '') {
-      this.bookingListingService.setToken(this.ticket);
-      this.roomService.setToken(this.ticket);
       booking_listing.token = this.ticket;
+      this.token.setToken(this.ticket);
       this.initializeApp();
     }
     onBookingListingChange('userSelection', async newValue => {
@@ -58,13 +62,13 @@ export class IrBookingListing {
     });
   }
   @Watch('ticket')
-  async ticketChanged(newValue: string, oldValue: string) {
-    if (newValue !== oldValue) {
-      this.bookingListingService.setToken(this.ticket);
-      this.roomService.setToken(this.ticket);
-      booking_listing.token = this.ticket;
-      this.initializeApp();
+  ticketChanged(newValue: string, oldValue: string) {
+    if (newValue === oldValue) {
+      return;
     }
+    this.token.setToken(this.ticket);
+    booking_listing.token = this.ticket;
+    this.initializeApp();
   }
 
   async initializeApp() {
@@ -278,8 +282,24 @@ export class IrBookingListing {
                         <td>
                           <ul>
                             {booking.rooms.map(room => (
-                              <li>{room.roomtype.name}</li>
+                              <li>
+                                <div class={'room-service'}>
+                                  <p class={'m-0 p-0'}>{room.roomtype.name}</p>
+                                  {room.unit &&
+                                    !isSingleUnit(room.roomtype.id) &&
+                                    ((room.unit as IUnit)?.name?.length > 4 ? (
+                                      <ir-tooltip customSlot message={(room.unit as IUnit)?.name}>
+                                        <p class={'room-name-container cursor-pointer m-0'} slot="tooltip-trigger">
+                                          {(room.unit as IUnit)?.name?.substring(0, 4)}
+                                        </p>
+                                      </ir-tooltip>
+                                    ) : (
+                                      <p class={'room-name-container  m-0'}>{(room.unit as IUnit)?.name?.substring(0, 4)}</p>
+                                    ))}
+                                </div>
+                              </li>
                             ))}
+                            {booking.extra_services && <li>{locales.entries.Lcz_ExtraServices}</li>}
                           </ul>
                         </td>
                         <td>

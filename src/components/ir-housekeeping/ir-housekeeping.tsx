@@ -1,8 +1,8 @@
+import Token from '@/models/Token';
 import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
 import { updateHKStore } from '@/stores/housekeeping.store';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-import axios from 'axios';
 
 @Component({
   tag: 'ir-housekeeping',
@@ -12,7 +12,7 @@ import axios from 'axios';
 export class IrHousekeeping {
   @Prop() language: string = '';
   @Prop() ticket: string = '';
-  @Prop() baseurl: string = '';
+
   @Prop() propertyid: number;
   @Prop() p: string;
 
@@ -20,14 +20,11 @@ export class IrHousekeeping {
 
   private roomService = new RoomService();
   private houseKeepingService = new HouseKeepingService();
+  private token = new Token();
 
   componentWillLoad() {
-    if (this.baseurl) {
-      axios.defaults.baseURL = this.baseurl;
-    }
     if (this.ticket !== '') {
-      this.roomService.setToken(this.ticket);
-      this.houseKeepingService.setToken(this.ticket);
+      this.token.setToken(this.ticket);
       this.initializeApp();
     }
   }
@@ -38,12 +35,12 @@ export class IrHousekeeping {
     await this.houseKeepingService.getExposedHKSetup(this.propertyid);
   }
   @Watch('ticket')
-  async ticketChanged(newValue: string, oldValue: string) {
-    if (newValue !== oldValue) {
-      this.roomService.setToken(this.ticket);
-      this.houseKeepingService.setToken(this.ticket);
-      this.initializeApp();
+  ticketChanged(newValue: string, oldValue: string) {
+    if (newValue === oldValue) {
+      return;
     }
+    this.token.setToken(this.ticket);
+    this.initializeApp();
   }
 
   async initializeApp() {

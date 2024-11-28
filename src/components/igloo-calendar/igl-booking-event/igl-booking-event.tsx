@@ -7,7 +7,6 @@ import moment from 'moment';
 import { IToast } from '@components/ir-toast/toast';
 import { EventsService } from '@/services/events.service';
 import locales from '@/stores/locales.store';
-import calendar_data from '@/stores/calendar-data';
 
 @Component({
   tag: 'igl-booking-event',
@@ -72,9 +71,6 @@ export class IglBookingEvent {
   handleClickOutsideBind = this.handleClickOutside.bind(this);
 
   componentWillLoad() {
-    this.bookingService.setToken(calendar_data.token);
-    this.eventsService.setToken(calendar_data.token);
-
     window.addEventListener('click', this.handleClickOutsideBind);
   }
 
@@ -102,7 +98,7 @@ export class IglBookingEvent {
 
       const transformedBooking = transformNewBooking(data)[0];
       const { ID, TO_DATE, FROM_DATE, NO_OF_DAYS, STATUS, NAME, IDENTIFIER, PR_ID, POOL, BOOKING_NUMBER, NOTES, is_direct, BALANCE, ...otherBookingData } = transformedBooking;
-      this.bookingEvent = { ...otherBookingData, ...this.bookingEvent, PHONE_PREFIX: otherBookingData.PHONE_PREFIX, PRIVATE_NOTE: otherBookingData.PRIVATE_NOTE };
+      this.bookingEvent = { ...otherBookingData, ...this.bookingEvent, booking: data, PHONE_PREFIX: otherBookingData.PHONE_PREFIX, PRIVATE_NOTE: otherBookingData.PRIVATE_NOTE };
       this.updateBookingEvent.emit(this.bookingEvent);
       this.showEventInfo(true);
     } catch (error) {
