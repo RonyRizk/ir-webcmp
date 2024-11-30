@@ -1,7 +1,6 @@
 import { Component, Host, Prop, h, Event, EventEmitter, Fragment } from '@stencil/core';
 import { v4 as uuidv4 } from 'uuid';
 import locales from '@/stores/locales.store';
-import calendar_data from '@/stores/calendar-data';
 import { RatePlan, Variation } from '@/models/property';
 import booking_store, { IRatePlanSelection, reserveRooms, updateRoomParams } from '@/stores/booking.store';
 
@@ -29,7 +28,7 @@ export class IglRatePlan {
     if (bookingType === 'EDIT_BOOKING' && shouldBeDisabled) {
       return false;
     }
-    return !ratePlan.is_available_to_book || visibleInventory?.visibleInventory === 0 || !calendar_data.is_frontdesk_enabled;
+    return !ratePlan.is_available_to_book || visibleInventory?.visibleInventory === 0;
   }
 
   // Update the rate plan selection in the booking store
@@ -150,7 +149,10 @@ export class IglRatePlan {
     const disableForm = this.disableForm();
     const selectedVariation = visibleInventory?.selected_variation;
     const formattedVariations = ratePlan.variations?.map(v => this.formatVariation(v));
-
+    console.log(visibleInventory);
+    // if (!this.visibleInventory) {
+    //   return null;
+    // }
     return (
       <Host>
         <div
@@ -163,7 +165,9 @@ export class IglRatePlan {
                 <span>/{ratePlan.name.split('/')[1]}</span>
               </Fragment>
             ) : (
-              <span>{ratePlan.short_name}</span>
+              <span>
+                {ratePlan.short_name} {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
+              </span>
             )}
             {isAvailableToBook && <ir-tooltip message={this.getTooltipMessages()}></ir-tooltip>}
           </div>
@@ -191,7 +195,7 @@ export class IglRatePlan {
                         rp_amount: Number(e.detail),
                       })
                     }
-                    aria-label={`${this.visibleInventory.roomtype.name} ${this.ratePlan.short_name}'s rate`}
+                    aria-label={`${this.visibleInventory?.roomtype?.name} ${this.ratePlan.short_name}'s rate`}
                     aria-describedby={`${this.ratePlan.short_name}'s rate`}
                     class="ir-br-input-none"
                     currency={currency.symbol}
@@ -210,7 +214,7 @@ export class IglRatePlan {
                       }
                     >
                       {ratePricingMode.map(data => (
-                        <option value={data.CODE_NAME} selected={visibleInventory.view_mode === data.CODE_NAME}>
+                        <option value={data.CODE_NAME} selected={visibleInventory?.view_mode === data.CODE_NAME}>
                           {data.CODE_VALUE_EN}
                         </option>
                       ))}
