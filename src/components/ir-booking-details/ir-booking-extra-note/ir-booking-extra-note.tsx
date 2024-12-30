@@ -15,7 +15,7 @@ export class IrBookingExtraNote {
   @State() note = '';
 
   @Event() closeModal: EventEmitter<null>;
-  @Event() resetBookingData: EventEmitter<Booking | null>;
+  @Event() resetbooking: EventEmitter<Booking | null>;
 
   private bookingService = new BookingService();
   componentWillLoad() {
@@ -52,7 +52,7 @@ export class IrBookingExtraNote {
         Is_Non_Technical_Change: true,
         extras: prevExtras,
       });
-      this.resetBookingData.emit(res);
+      this.resetbooking.emit(res);
       this.closeModal.emit(null);
     } catch (error) {
       console.error(error);
@@ -74,7 +74,7 @@ export class IrBookingExtraNote {
           <ir-textarea placeholder={locales.entries.Lcz_PrivateNote_MaxChar} label="" value={this.note} maxLength={150} onTextChange={e => this.setNote(e.detail)}></ir-textarea>
           <div class={'d-flex flex-column flex-sm-row mt-3'}>
             <ir-button
-              onClickHanlder={() => this.closeModal.emit(null)}
+              onClickHandler={() => this.closeModal.emit(null)}
               btn_styles="justify-content-center"
               class={`mb-1 mb-sm-0 flex-fill  mr-sm-1'}`}
               icon=""

@@ -1,11 +1,10 @@
 import { Component, h, Prop, EventEmitter, Event, Listen, State, Element, Watch, Host, Fragment } from '@stencil/core';
-import { _formatDate, _getDay } from '../functions';
+import { _getDay } from '../functions';
 import { Booking, IUnit, IVariations, Occupancy, Room } from '@/models/booking.dto';
 import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { formatName } from '@/utils/booking';
-import { IrModal } from '@/components/ir-modal/ir-modal';
 import axios from 'axios';
-import locales, { ILocale } from '@/stores/locales.store';
+import locales from '@/stores/locales.store';
 import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
 import { colorVariants } from '@/components/ui/ir-icons/icons';
 import { formatAmount } from '@/utils/utils';
@@ -16,6 +15,7 @@ import { formatAmount } from '@/utils/utils';
   scoped: true,
 })
 export class IrRoom {
+  @Element() element: HTMLIrRoomElement;
   // Room Data
   @Prop() bookingEvent: Booking;
   @Prop() bookingIndex: number;
@@ -28,8 +28,6 @@ export class IrRoom {
   @Prop() legendData;
   @Prop() roomsInfo;
   @State() collapsed: boolean = false;
-  @Prop() defaultTexts: ILocale;
-  @Prop() ticket;
 
   // Booleans Conditions
   @Prop() hasRoomEdit: boolean = false;
@@ -37,7 +35,6 @@ export class IrRoom {
   @Prop() hasRoomAdd: boolean = false;
   @Prop() hasCheckIn: boolean = false;
   @Prop() hasCheckOut: boolean = false;
-  @Element() element: any;
   // Event Emitters
   @Event({ bubbles: true, composed: true }) deleteFinished: EventEmitter<string>;
   @Event({ bubbles: true, composed: true }) pressCheckIn: EventEmitter;
@@ -47,8 +44,7 @@ export class IrRoom {
   @State() isLoading: boolean = false;
   @State() isModelOpen: boolean = false;
 
-  private modal: IrModal;
-  private irModalRef: HTMLIrModalElement;
+  private modal: HTMLIrModalElement;
 
   componentWillLoad() {
     if (this.bookingEvent) {
@@ -56,16 +52,12 @@ export class IrRoom {
     }
   }
 
-  componentDidLoad() {
-    this.modal = this.element.querySelector('ir-modal');
-  }
-
   @Watch('bookingEvent')
   handleBookingEventChange() {
     this.item = this.bookingEvent.rooms[this.bookingIndex];
   }
 
-  @Listen('clickHanlder')
+  @Listen('clickHandler')
   handleClick(e) {
     let target = e.target;
     if (target.id == 'checkin') {
@@ -88,7 +80,7 @@ export class IrRoom {
       REFERENCE_TYPE: '',
       FROM_DATE: this.bookingEvent.from_date,
       TO_DATE: this.bookingEvent.to_date,
-      TITLE: `${this.defaultTexts.entries.Lcz_EditBookingFor} ${this.item?.roomtype?.name} ${(this.item?.unit as IUnit)?.name || ''}`,
+      TITLE: `${locales.entries.Lcz_EditBookingFor} ${this.item?.roomtype?.name} ${(this.item?.unit as IUnit)?.name || ''}`,
       defaultDateRange: {
         dateDifference: this.item.days.length,
         fromDate: new Date(this.item.from_date + 'T00:00:00'),
@@ -170,22 +162,14 @@ export class IrRoom {
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
-      this.irModalRef.closeModal();
+      this.modal.closeModal();
       this.deleteFinished.emit(this.item.identifier);
     } catch (error) {
     } finally {
       this.isLoading = false;
     }
   }
-  // private formatVariation({ adult_nbr, child_nbr, infant_nbr }: IVariations) {
-  //   const adultLabel = adult_nbr > 1 ? locales.entries.Lcz_Adults.toLowerCase() : locales.entries.Lcz_Adult.toLowerCase();
-  //   const childLabel = child_nbr > 1 ? locales.entries.Lcz_Children.toLowerCase() : locales.entries.Lcz_Child.toLowerCase();
-  //   const infantLabel = infant_nbr > 1 ? 'infants' : 'infant';
 
-  //   const parts = [`${adult_nbr} ${adultLabel}`, child_nbr ? `${child_nbr} ${childLabel}` : '', infant_nbr ? `${infant_nbr} ${infantLabel}` : ''];
-
-  //   return parts.filter(Boolean).join(' ');
-  // }
   private formatVariation({ adult_nbr, child_nbr }: IVariations, { infant_nbr }: Occupancy) {
     // Adjust child number based on infants
     const adjustedChildNbr = child_nbr;
@@ -213,7 +197,7 @@ export class IrRoom {
           aria-controls="myCollapse"
           class="mr-1"
           icon_name={this.collapsed ? 'closed_eye' : 'open_eye'}
-          onClickHanlder={() => {
+          onClickHandler={() => {
             this.collapsed = !this.collapsed;
           }}
           style={{ '--icon-size': '1.6rem' }}
@@ -222,8 +206,10 @@ export class IrRoom {
         <div class="flex-fill m-0 ">
           <div class="d-flex align-items-start justify-content-between sm-mb-1">
             <p class="m-0 p-0">
-              <strong class="m-0 p-0">{this.myRoomTypeFoodCat || ''} </strong> {this.mealCodeName}{' '}
-              {this.item.rateplan.is_non_refundable && ` - ${this.defaultTexts.entries.Lcz_NonRefundable}`}{' '}
+              <span class="m-0 p-0" style={{ fontWeight: '600' }}>
+                {this.myRoomTypeFoodCat || ''}{' '}
+              </span>{' '}
+              {this.mealCodeName} {this.item.rateplan.is_non_refundable && ` - ${locales.entries.Lcz_NonRefundable}`}{' '}
             </p>
             {/*this.item.My_Room_type.My_Room_type_desc[0].CUSTOM_TXT || ''*/}
             <div class="d-flex m-0 p-0 align-items-center room_actions_btns">
@@ -235,13 +221,13 @@ export class IrRoom {
                   icon_name="edit"
                   // class="mx-1"
                   style={colorVariants.secondary}
-                  onClickHanlder={this.handleEditClick.bind(this)}
+                  onClickHandler={this.handleEditClick.bind(this)}
                 ></ir-button>
               )}
               {this.hasRoomDelete && this.isEditable && (
                 <ir-button
                   variant="icon"
-                  onClickHanlder={this.handleDeleteClick.bind(this)}
+                  onClickHandler={this.handleDeleteClick.bind(this)}
                   id={`roomDelete-${this.item.identifier}`}
                   icon_name="trash"
                   style={colorVariants.danger}
@@ -268,7 +254,7 @@ export class IrRoom {
           <div class="collapse" id={`roomCollapse-${this.item.identifier?.split(' ').join('')}`}>
             <div class="d-flex sm-mb-1 sm-mt-1">
               <div class=" sm-padding-top">
-                <strong class="sm-padding-right">{`${this.defaultTexts.entries.Lcz_Breakdown}:`}</strong>
+                <p class="sm-padding-right" style={{ fontWeight: '600' }}>{`${locales.entries.Lcz_Breakdown}:`}</p>
               </div>
               <div class={'flex-fill'}>
                 <table>
@@ -283,7 +269,7 @@ export class IrRoom {
                       );
                     })}
                   <tr class={''}>
-                    <th class="text-right pr-2 subtotal_row">{this.defaultTexts.entries.Lcz_SubTotal}</th>
+                    <th class="text-right pr-2 subtotal_row">{locales.entries.Lcz_SubTotal}</th>
                     <th class="text-right subtotal_row">{formatAmount(this.currency, this.item.total)}</th>
                     {this.item.gross_cost > 0 && this.item.gross_cost !== null && <th class="pl-2 text-right night-cost">{formatAmount(this.currency, this.item.cost)}</th>}
                   </tr>
@@ -295,7 +281,7 @@ export class IrRoom {
                           return (
                             <tr>
                               <td class="text-right pr-2">
-                                {d.is_exlusive ? this.defaultTexts.entries.Lcz_Excluding : this.defaultTexts.entries.Lcz_Including} {d.name} ({d.pct}%)
+                                {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
                               </td>
                               <td class="text-right">{formatAmount(this.currency, (this.item.total * d.pct) / 100)}</td>
                               {this.item.gross_cost > 0 && this.item.gross_cost !== null && (
@@ -314,7 +300,7 @@ export class IrRoom {
                           return (
                             <tr>
                               <td class="text-right pr-2">
-                                {d.is_exlusive ? this.defaultTexts.entries.Lcz_Excluding : this.defaultTexts.entries.Lcz_Including} {d.name}
+                                {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name}
                               </td>
                               <td class="text-right">
                                 {d.currency.symbol}
@@ -330,53 +316,29 @@ export class IrRoom {
               </div>
             </div>
             {this.item.rateplan.cancelation && (
-              // <div class="sm-mb-1 room_statements">
-              //   <span>
-              //     <b>
-              //       <u>{this.defaultTexts.entries.Lcz_Cancellation}: </u>
-              //     </b>
-              //   </span>
-              //   <span>
-              //     njfsdnfjsfsdfdsfnijsnfijnfjsnfjsdnfjsnfkjsdnfjksdnfkjsdnfjksnfjksfnkjsdnfjksfnjksdnfjksdnfjsdnfjksnfjksdnfkjsdnfjksnfjksddnfjksnfjksddnfjsdnfjksf js
-              //     jnjnsjnfjksfnjsdfnjdskfnsddjfnsifnj
-              //   </span>
-              // </div>
-              <div class="room_statements">
-                <span>
-                  <b>{this.defaultTexts.entries.Lcz_Cancellation}:</b>
-                  <span innerHTML={this.item.rateplan.cancelation || ''}></span>
-                </span>
-              </div>
+              <ir-label labelText={`${locales.entries.Lcz_Cancellation}:`} content={this.item.rateplan.cancelation || ''} renderContentAsHtml></ir-label>
             )}
-            {this.item.rateplan.guarantee && (
-              <div class="sm-mb-1">
-                <span>
-                  <b>{this.defaultTexts.entries.Lcz_Guarantee}: </b>
-                  <span innerHTML={this.item.rateplan.guarantee || ''}></span>
-                </span>
-              </div>
-            )}
-
+            {this.item.rateplan.guarantee && <ir-label labelText={`${locales.entries.Lcz_Guarantee}:`} content={this.item.rateplan.guarantee || ''} renderContentAsHtml></ir-label>}
             {/* <ir-label label="PrePayment:" value={this.item.My_Room_type.My_Translated_Prepayment_Policy || ''}></ir-label>
             <ir-label label="Smoking Preference:" value={this.item.My_Room_type.My_Translated_Cancelation_Policy || ''}></ir-label> */}
-            {this.bookingEvent.is_direct && <ir-label label={`${this.defaultTexts.entries.Lcz_MealPlan}:`} value={this.mealCodeName}></ir-label>}
-            {/* <ir-label label={`${this.defaultTexts.entries.Lcz_SpecialRate}:`} value="Non-refundable"></ir-label> */}
+            {this.bookingEvent.is_direct && <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} content={this.mealCodeName}></ir-label>}
+            {/* <ir-label label={`${locales.entries.Lcz_SpecialRate}:`} value="Non-refundable"></ir-label> */}
           </div>
         </div>
         <ir-modal
           autoClose={false}
-          ref={el => (this.irModalRef = el)}
+          ref={el => (this.modal = el)}
           isLoading={this.isLoading}
           onConfirmModal={this.deleteRoom.bind(this)}
           iconAvailable={true}
           icon="ft-alert-triangle danger h1"
-          leftBtnText={this.defaultTexts.entries.Lcz_Cancel}
-          rightBtnText={this.defaultTexts.entries.Lcz_Delete}
+          leftBtnText={locales.entries.Lcz_Cancel}
+          rightBtnText={locales.entries.Lcz_Delete}
           leftBtnColor="secondary"
           rightBtnColor="danger"
-          modalTitle={this.defaultTexts.entries.Lcz_Confirmation}
-          modalBody={`${this.defaultTexts.entries['Lcz_AreYouSureDoYouWantToRemove ']} ${this.item.roomtype.name} ${this.item.unit ? (this.item.unit as IUnit).name : ''} ${
-            this.defaultTexts.entries.Lcz_FromThisBooking
+          modalTitle={locales.entries.Lcz_Confirmation}
+          modalBody={`${locales.entries['Lcz_AreYouSureDoYouWantToRemove ']} ${this.item.roomtype.name} ${this.item.unit ? (this.item.unit as IUnit).name : ''} ${
+            locales.entries.Lcz_FromThisBooking
           }`}
         ></ir-modal>
       </Host>

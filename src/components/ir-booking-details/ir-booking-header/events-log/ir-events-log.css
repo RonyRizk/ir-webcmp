@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.beta {
+  background: var(--red);
+  color: white;
+  padding: 0.2rem 0.3rem;
+  font-size: 12px;
+  border-radius: 4px;
+  margin: 0;
+}
+.event-row {
+  padding-bottom: 0.5rem;
+}

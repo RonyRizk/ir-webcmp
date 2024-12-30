@@ -2,10 +2,16 @@
   overflow-x: hidden;
   --ir-dialog-max-width: 20rem;
 }
+:host * {
+  font-family: inherit !important;
+}
 .confirmed {
   color: #fff;
   display: flex;
   align-items: center;
+}
+.font-medium {
+  font-weight: 600;
 }
 .bg-ir-green {
   background: #629a4c;
@@ -13,6 +19,9 @@
   /* height: 28px; */
   /* padding-top: 0 !important;
   padding-bottom: 0 !important ; */
+}
+:host th {
+  font-weight: 600;
 }
 .h-28 {
   height: 2rem;

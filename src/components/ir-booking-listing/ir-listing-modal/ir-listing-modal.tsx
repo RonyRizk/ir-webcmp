@@ -13,7 +13,7 @@ import moment from 'moment';
 })
 export class IrListingModal {
   @Prop() modalTitle: string = 'Modal Title';
-  @Prop() editBooking: { booking: Booking; cause: 'edit' | 'payment' | 'delete' };
+  @Prop() editBooking: { booking: Booking; cause: 'edit' | 'payment' | 'delete' | 'guest' };
 
   @State() isOpen: boolean = false;
   @State() deletionStage = 1;
@@ -44,7 +44,7 @@ export class IrListingModal {
     booking_listing.bookings = booking_listing.bookings.filter(booking => booking.booking_nbr !== this.editBooking.booking.booking_nbr);
   }
 
-  @Listen('clickHanlder')
+  @Listen('clickHandler')
   async btnClickHandler(event: CustomEvent) {
     let target = event.target as HTMLInputElement;
     let name = target.name;
