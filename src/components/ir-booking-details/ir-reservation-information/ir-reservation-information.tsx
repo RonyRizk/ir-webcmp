@@ -67,7 +67,7 @@ export class IrReservationInformation {
             )}`}
           ></ir-label>
           <ir-label labelText={`${locales.entries.Lcz_BookedBy}:`} content={`${this.booking.guest.first_name} ${this.booking.guest.last_name}`}>
-            {this.booking.guest?.nbr_confirmed_bookings > 1 && (
+            {this.booking.guest?.nbr_confirmed_bookings > 1 && !this.booking.agent && (
               <div class={'m-0 p-0'} slot="prefix">
                 <ir-tooltip message={`${locales.entries.Lcz_BookingsNbr}`.replace('%1', this.booking.guest.nbr_confirmed_bookings.toString())} customSlot>
                   <div class="d-flex align-items-center m-0 p-0" slot="tooltip-trigger" style={{ gap: '0.25rem' }}>
@@ -88,7 +88,7 @@ export class IrReservationInformation {
             ></ir-button>
           </ir-label>
           {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
-          <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>
+          {!this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>}
           {this.booking.guest.alternative_email && <ir-label labelText={`${locales.entries.Lcz_AlternativeEmail}:`} content={this.booking.guest.alternative_email}></ir-label>}
           {this.booking?.guest?.address && <ir-label labelText={`${locales.entries.Lcz_Address}:`} content={this.booking.guest.address}></ir-label>}
           {this.userCountry && (
@@ -119,7 +119,7 @@ export class IrReservationInformation {
           ) : (
             <ota-label
               class={'m-0 p-0'}
-              label={`${locales.entries.Lcz_GuestRemark}:`}
+              label={`${locales.entries.Lcz_ChannelNotes || 'Channel notes'}:`}
               remarks={this.booking.ota_notes}
               maxVisibleItems={this.booking.ota_notes?.length}
             ></ota-label>

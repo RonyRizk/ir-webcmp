@@ -8,7 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { IRatePlanSelection, RatePlanGuest } from "./stores/booking.store";
 import { ICurrency } from "./models/calendarData";
 import { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
-import { ICountry, RoomBlockDetails } from "./models/IBooking";
+import { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
 import { IToast } from "./components/ir-toast/toast";
 import { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 import { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
@@ -19,6 +19,7 @@ import { Booking, ExtraService, IBookingPickupInfo, IOtaNotes } from "./models/b
 import { OpenSidebarEvent } from "./components/ir-booking-details/types";
 import { TIcons } from "./components/ui/ir-icons/icons";
 import { checkboxes, selectOption } from "./common/models";
+import { ComboboxItem } from "./components/ir-combobox/ir-combobox";
 import { IToast as IToast2 } from "./components.d";
 import { IHouseKeepers, THKUser } from "./models/housekeeping";
 import { PaymentOption } from "./models/payment-options";
@@ -28,7 +29,7 @@ import { PluginConstructor, ToolbarConfigItem } from "ckeditor5";
 export { IRatePlanSelection, RatePlanGuest } from "./stores/booking.store";
 export { ICurrency } from "./models/calendarData";
 export { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
-export { ICountry, RoomBlockDetails } from "./models/IBooking";
+export { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
 export { IToast } from "./components/ir-toast/toast";
 export { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
 export { IToast as IToast1, TPositions } from "./components/ir-toast/toast";
@@ -39,6 +40,7 @@ export { Booking, ExtraService, IBookingPickupInfo, IOtaNotes } from "./models/b
 export { OpenSidebarEvent } from "./components/ir-booking-details/types";
 export { TIcons } from "./components/ui/ir-icons/icons";
 export { checkboxes, selectOption } from "./common/models";
+export { ComboboxItem } from "./components/ir-combobox/ir-combobox";
 export { IToast as IToast2 } from "./components.d";
 export { IHouseKeepers, THKUser } from "./models/housekeeping";
 export { PaymentOption } from "./models/payment-options";
@@ -362,7 +364,7 @@ export namespace Components {
     }
     interface IrCombobox {
         "autoFocus": boolean;
-        "data": { id: string; name: string; image?: string; occupancy?: number }[];
+        "data": ComboboxItem[];
         "disabled": boolean;
         "duration": number;
         "input_id": string;
@@ -675,6 +677,7 @@ export namespace Components {
         "countries": ICountry[];
     }
     interface IrRoom {
+        "bedPreferences": IEntries[];
         "bookingEvent": Booking;
         "bookingIndex": number;
         "currency": string;
@@ -684,6 +687,7 @@ export namespace Components {
         "hasRoomDelete": boolean;
         "hasRoomEdit": boolean;
         "isEditable": boolean;
+        "language": string;
         "legendData": any;
         "mealCodeName": string;
         "myRoomTypeFoodCat": string;
@@ -2897,7 +2901,7 @@ declare namespace LocalJSX {
     }
     interface IrCombobox {
         "autoFocus"?: boolean;
-        "data"?: { id: string; name: string; image?: string; occupancy?: number }[];
+        "data"?: ComboboxItem[];
         "disabled"?: boolean;
         "duration"?: number;
         "input_id"?: string;
@@ -3258,6 +3262,7 @@ declare namespace LocalJSX {
         "onOpenSidebar"?: (event: IrReservationInformationCustomEvent<OpenSidebarEvent>) => void;
     }
     interface IrRoom {
+        "bedPreferences"?: IEntries[];
         "bookingEvent"?: Booking;
         "bookingIndex"?: number;
         "currency"?: string;
@@ -3267,6 +3272,7 @@ declare namespace LocalJSX {
         "hasRoomDelete"?: boolean;
         "hasRoomEdit"?: boolean;
         "isEditable"?: boolean;
+        "language"?: string;
         "legendData"?: any;
         "mealCodeName"?: string;
         "myRoomTypeFoodCat"?: string;
