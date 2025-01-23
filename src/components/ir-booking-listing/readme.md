@@ -25,8 +25,8 @@
 - [ir-toast](../ir-toast)
 - [ir-listing-header](ir-listing-header)
 - [ir-tooltip](../ir-tooltip)
-- [ir-icons](../ui/ir-icons)
 - [ir-button](../ir-button)
+- [ir-icons](../ui/ir-icons)
 - [ir-select](../ir-select)
 - [ir-listing-modal](ir-listing-modal)
 - [ir-sidebar](../ir-sidebar)
@@ -41,8 +41,8 @@ graph TD;
   ir-booking-listing --> ir-toast
   ir-booking-listing --> ir-listing-header
   ir-booking-listing --> ir-tooltip
-  ir-booking-listing --> ir-icons
   ir-booking-listing --> ir-button
+  ir-booking-listing --> ir-icons
   ir-booking-listing --> ir-select
   ir-booking-listing --> ir-listing-modal
   ir-booking-listing --> ir-sidebar
