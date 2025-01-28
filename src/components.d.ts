@@ -20,7 +20,7 @@ import { OpenSidebarEvent } from "./components/ir-booking-details/types";
 import { TIcons } from "./components/ui/ir-icons/icons";
 import { checkboxes, selectOption } from "./common/models";
 import { ComboboxItem } from "./components/ir-combobox/ir-combobox";
-import { IToast as IToast2 } from "./components.d";
+import { ICountry as ICountry1, IToast as IToast2 } from "./components.d";
 import { IHouseKeepers, THKUser } from "./models/housekeeping";
 import { PaymentOption } from "./models/payment-options";
 import { IPaymentAction } from "./services/payment.service";
@@ -41,7 +41,7 @@ export { OpenSidebarEvent } from "./components/ir-booking-details/types";
 export { TIcons } from "./components/ui/ir-icons/icons";
 export { checkboxes, selectOption } from "./common/models";
 export { ComboboxItem } from "./components/ir-combobox/ir-combobox";
-export { IToast as IToast2 } from "./components.d";
+export { ICountry as ICountry1, IToast as IToast2 } from "./components.d";
 export { IHouseKeepers, THKUser } from "./models/housekeeping";
 export { PaymentOption } from "./models/payment-options";
 export { IPaymentAction } from "./services/payment.service";
@@ -512,6 +512,12 @@ export namespace Components {
     }
     interface IrLabel {
         /**
+          * inline styles for the component container
+         */
+        "containerStyle": {
+    [key: string]: string;
+  };
+        /**
           * The main text or HTML content to display
          */
         "content": string;
@@ -599,6 +605,7 @@ export namespace Components {
         "ticket": string;
     }
     interface IrPhoneInput {
+        "countries": ICountry[];
         "default_country": number;
         "disabled": boolean;
         "error": boolean;
@@ -3075,6 +3082,12 @@ declare namespace LocalJSX {
     }
     interface IrLabel {
         /**
+          * inline styles for the component container
+         */
+        "containerStyle"?: {
+    [key: string]: string;
+  };
+        /**
           * The main text or HTML content to display
          */
         "content"?: string;
@@ -3174,6 +3187,7 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrPhoneInput {
+        "countries"?: ICountry[];
         "default_country"?: number;
         "disabled"?: boolean;
         "error"?: boolean;
