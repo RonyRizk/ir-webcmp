@@ -19,7 +19,7 @@
 | Event              | Description | Type                                                                                                                                                                                  |
 | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `editExtraService` |             | `CustomEvent<{ description?: string; booking_system_id?: number; cost?: number; currency_id?: number; end_date?: string; price?: number; start_date?: string; system_id?: number; }>` |
-| `resetBookingData` |             | `CustomEvent<null>`                                                                                                                                                                   |
+| `resetBookingEvt`  |             | `CustomEvent<null>`                                                                                                                                                                   |
 
 
 ## Dependencies

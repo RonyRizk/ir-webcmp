@@ -17,7 +17,7 @@
 
 | Event                              | Description | Type                                                                                                 |
 | ---------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `resetBookingData`                 |             | `CustomEvent<null>`                                                                                  |
+| `resetBookingEvt`                  |             | `CustomEvent<null>`                                                                                  |
 | `resetExposedCancelationDueAmount` |             | `CustomEvent<null>`                                                                                  |
 | `toast`                            |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 

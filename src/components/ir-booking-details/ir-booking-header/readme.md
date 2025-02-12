@@ -19,12 +19,12 @@
 
 ## Events
 
-| Event          | Description | Type                                                                                                 |
-| -------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `closeSidebar` |             | `CustomEvent<null>`                                                                                  |
-| `openSidebar`  |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: unknown; }>`                             |
-| `resetbooking` |             | `CustomEvent<null>`                                                                                  |
-| `toast`        |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event             | Description | Type                                                                                                 |
+| ----------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `closeSidebar`    |             | `CustomEvent<null>`                                                                                  |
+| `openSidebar`     |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: unknown; }>`                             |
+| `resetBookingEvt` |             | `CustomEvent<null>`                                                                                  |
+| `toast`           |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
 ## Dependencies

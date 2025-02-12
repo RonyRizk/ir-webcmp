@@ -27,7 +27,7 @@
 | `animateIrSelect`    |             | `CustomEvent<string>`                                                                                |
 | `blockedCreated`     |             | `CustomEvent<RoomBlockDetails>`                                                                      |
 | `closeBookingWindow` |             | `CustomEvent<{ [key: string]: any; }>`                                                               |
-| `resetBookingData`   |             | `CustomEvent<null>`                                                                                  |
+| `resetBookingEvt`    |             | `CustomEvent<null>`                                                                                  |
 | `toast`              |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 

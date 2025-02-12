@@ -14,10 +14,10 @@
 
 ## Events
 
-| Event          | Description | Type                   |
-| -------------- | ----------- | ---------------------- |
-| `closeModal`   |             | `CustomEvent<null>`    |
-| `resetbooking` |             | `CustomEvent<Booking>` |
+| Event             | Description | Type                   |
+| ----------------- | ----------- | ---------------------- |
+| `closeModal`      |             | `CustomEvent<null>`    |
+| `resetBookingEvt` |             | `CustomEvent<Booking>` |
 
 
 ## Dependencies

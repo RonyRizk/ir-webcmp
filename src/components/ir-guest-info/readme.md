@@ -18,10 +18,10 @@
 
 ## Events
 
-| Event          | Description | Type                |
-| -------------- | ----------- | ------------------- |
-| `closeSideBar` |             | `CustomEvent<null>` |
-| `resetbooking` |             | `CustomEvent<null>` |
+| Event             | Description | Type                |
+| ----------------- | ----------- | ------------------- |
+| `closeSideBar`    |             | `CustomEvent<null>` |
+| `resetBookingEvt` |             | `CustomEvent<null>` |
 
 
 ## Dependencies
