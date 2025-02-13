@@ -35,7 +35,7 @@
 
 ### Depends on
 
-- [ir-popover](../../ir-popover)
+- [ir-popover](../../ui/ir-popover)
 - [igl-booking-event](../igl-booking-event)
 
 ### Graph

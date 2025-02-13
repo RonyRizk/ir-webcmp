@@ -20,16 +20,18 @@
   ],
   "scripts": {
     "build": "stencil build --docs",
-    "start": "stencil build --dev --watch --serve -p 7741",
+    "start": "stencil build --dev --watch --serve -p 7594",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",
     "generate": "stencil generate"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@stencil/core": "^4.7.0",
     "@types/inputmask": "^5.0.7",
     "@types/switchery": "^0.8.32",
     "add": "^2.0.6",
+    "air-datepicker": "^3.5.3",
     "axios": "^1.6.0",
     "bootstrap-switch": "^3.4.0",
     "ckeditor5": "^43.2.0",

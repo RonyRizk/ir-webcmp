@@ -30,9 +30,9 @@
 
 ### Depends on
 
-- [ir-button](../../../ir-button)
+- [ir-button](../../../ui/ir-button)
 - [ir-date-view](../../../ir-date-view)
-- [ir-modal](../../../ir-modal)
+- [ir-modal](../../../ui/ir-modal)
 
 ### Graph
 ```mermaid

@@ -37,9 +37,9 @@
 
 - [ir-pms-logs](ir-pms-logs)
 - [ir-events-log](events-log)
-- [ir-select](../../ir-select)
-- [ir-button](../../ir-button)
-- [ir-dialog](../../ir-dialog)
+- [ir-select](../../ui/ir-select)
+- [ir-button](../../ui/ir-button)
+- [ir-dialog](../../ui/ir-dialog)
 
 ### Graph
 ```mermaid

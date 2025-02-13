@@ -30,10 +30,10 @@
 
 ### Depends on
 
-- [ir-date-picker](../../ir-date-picker)
-- [ir-button](../../ir-button)
+- [ir-date-picker](../../ui/ir-date-picker)
+- [ir-button](../../ui/ir-button)
 - [ir-payment-actions](ir-payment-actions)
-- [ir-modal](../../ir-modal)
+- [ir-modal](../../ui/ir-modal)
 
 ### Graph
 ```mermaid

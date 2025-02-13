@@ -34,7 +34,7 @@
 
 ### Depends on
 
-- [ota-label](../../ota-label)
+- [ota-label](../../ui/ota-label)
 - [ir-date-view](../../ir-date-view)
 - [ir-label](../../ui/ir-label)
 - [ir-icons](../../ui/ir-icons)
