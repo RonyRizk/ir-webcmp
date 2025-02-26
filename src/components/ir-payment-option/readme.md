@@ -49,7 +49,7 @@ graph TD;
   ir-button --> ir-icons
   ir-sidebar --> ir-icon
   ir-option-details --> ir-select
-  ir-option-details --> ir-text-editor
+  ir-option-details --> ir-textarea
   ir-option-details --> ir-input-text
   ir-option-details --> ir-button
   style ir-payment-option fill:#f9f,stroke:#333,stroke-width:4px

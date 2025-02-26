@@ -25,19 +25,6 @@
 | `textChange` |             | `CustomEvent<string>` |
 
 
-## Dependencies
-
-### Used by
-
- - [ir-option-details](../../ir-payment-option/ir-option-details)
-
-### Graph
-```mermaid
-graph TD;
-  ir-option-details --> ir-text-editor
-  style ir-text-editor fill:#f9f,stroke:#333,stroke-width:4px
-```
-
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*
