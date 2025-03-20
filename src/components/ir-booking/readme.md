@@ -47,6 +47,7 @@ graph TD;
   ir-booking-details --> ir-pickup-view
   ir-booking-details --> ir-extra-services
   ir-booking-details --> ir-payment-details
+  ir-booking-details --> ir-modal
   ir-booking-details --> ir-sidebar
   ir-booking-details --> igl-book-property
   ir-guest-info --> ir-icon

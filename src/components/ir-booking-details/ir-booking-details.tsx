@@ -10,6 +10,8 @@ import { ICountry, IEntries } from '@/models/IBooking';
 import { IPaymentAction, PaymentService } from '@/services/payment.service';
 import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent } from './types';
+import { IrModalCustomEvent } from '@/components';
+import { isRequestPending } from '@/stores/ir-interceptor.store';
 
 @Component({
   tag: 'ir-booking-details',
@@ -59,6 +61,7 @@ export class IrBookingDetails {
   @State() property_id: number;
   @State() selectedService: ExtraService;
   @State() bedPreference: IEntries[];
+  @State() modalState: { type: 'email' | (string & {}); message: string; loading: boolean } = null;
   // Payment Event
   @Event() toast: EventEmitter<IToast>;
   @Event() bookingChanged: EventEmitter<Booking>;
@@ -70,6 +73,7 @@ export class IrBookingDetails {
   private token = new Token();
 
   private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing?id=%2';
+  modalRef: HTMLIrModalElement;
 
   componentWillLoad() {
     if (this.ticket !== '') {
@@ -101,6 +105,14 @@ export class IrBookingDetails {
         return;
       case 'close':
         this.closeSidebar.emit(null);
+        return;
+      case 'email':
+        this.modalState = {
+          type: 'email',
+          message: locales.entries.Lcz_EmailBookingto.replace('%1', this.booking.guest.email),
+          loading: isRequestPending('/Send_Booking_Confirmation_Email'),
+        };
+        this.modalRef.openModal();
         return;
       case 'print':
         this.openPrintingScreen();
@@ -274,7 +286,17 @@ export class IrBookingDetails {
       console.log(error);
     }
   }
-
+  private async handleModalConfirm(e: IrModalCustomEvent<any>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    switch (this.modalState.type) {
+      case 'email':
+        await this.bookingService.sendBookingConfirmationEmail(this.booking.booking_nbr, this.language);
+        break;
+    }
+    this.modalState = null;
+    this.modalRef.closeModal();
+  }
   private renderSidebarContent() {
     const handleClose = () => {
       this.sidebarState = null;
@@ -398,6 +420,20 @@ export class IrBookingDetails {
           </div>
         </div>
       </div>,
+      <ir-modal
+        modalBody={this.modalState?.message}
+        leftBtnText={locales.entries.Lcz_Cancel}
+        rightBtnText={locales.entries.Lcz_Confirm}
+        autoClose={false}
+        isLoading={isRequestPending('/Send_Booking_Confirmation_Email')}
+        ref={el => (this.modalRef = el)}
+        onConfirmModal={e => {
+          this.handleModalConfirm(e);
+        }}
+        onCancelModal={() => {
+          this.modalRef.closeModal();
+        }}
+      ></ir-modal>,
       <ir-sidebar
         open={this.sidebarState !== null}
         side={'right'}
