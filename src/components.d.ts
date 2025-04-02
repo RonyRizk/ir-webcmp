@@ -1125,6 +1125,10 @@ export interface IrOptionDetailsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrOptionDetailsElement;
 }
+export interface IrPasswordValidatorCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrPasswordValidatorElement;
+}
 export interface IrPaymentActionsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrPaymentActionsElement;
@@ -2232,7 +2236,18 @@ declare global {
         prototype: HTMLIrOtaServicesElement;
         new (): HTMLIrOtaServicesElement;
     };
+    interface HTMLIrPasswordValidatorElementEventMap {
+        "passwordValidationChange": boolean;
+    }
     interface HTMLIrPasswordValidatorElement extends Components.IrPasswordValidator, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrPasswordValidatorElementEventMap>(type: K, listener: (this: HTMLIrPasswordValidatorElement, ev: IrPasswordValidatorCustomEvent<HTMLIrPasswordValidatorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrPasswordValidatorElementEventMap>(type: K, listener: (this: HTMLIrPasswordValidatorElement, ev: IrPasswordValidatorCustomEvent<HTMLIrPasswordValidatorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrPasswordValidatorElement: {
         prototype: HTMLIrPasswordValidatorElement;
@@ -3404,6 +3419,7 @@ declare namespace LocalJSX {
         "services"?: OtaService[];
     }
     interface IrPasswordValidator {
+        "onPasswordValidationChange"?: (event: IrPasswordValidatorCustomEvent<boolean>) => void;
         /**
           * The password string to validate
          */
