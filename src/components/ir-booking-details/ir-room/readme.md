@@ -10,7 +10,7 @@
 | Property            | Attribute               | Description | Type         | Default     |
 | ------------------- | ----------------------- | ----------- | ------------ | ----------- |
 | `bedPreferences`    | --                      |             | `IEntries[]` | `undefined` |
-| `bookingEvent`      | --                      |             | `Booking`    | `undefined` |
+| `booking`           | --                      |             | `Booking`    | `undefined` |
 | `bookingIndex`      | `booking-index`         |             | `number`     | `undefined` |
 | `currency`          | `currency`              |             | `string`     | `'USD'`     |
 | `hasCheckIn`        | `has-check-in`          |             | `boolean`    | `false`     |
@@ -23,6 +23,7 @@
 | `legendData`        | `legend-data`           |             | `any`        | `undefined` |
 | `mealCodeName`      | `meal-code-name`        |             | `string`     | `undefined` |
 | `myRoomTypeFoodCat` | `my-room-type-food-cat` |             | `string`     | `undefined` |
+| `room`              | --                      |             | `Room`       | `undefined` |
 | `roomsInfo`         | `rooms-info`            |             | `any`        | `undefined` |
 
 

@@ -1,12 +1,6 @@
 :host {
   display: block;
 }
-
-.row {
-  padding: 0 0 0 15px;
-  margin: 0;
-}
-
 .bookedByEmailContainer {
   flex: auto;
   max-width: 350px;
@@ -16,11 +10,9 @@
   min-width: 125px;
   max-width: 125px;
 }
-
-.bookedDetailsForm .controlContainer {
-  /* width: calc(100% - 127px); */
+.row.sc-igl-booking-form {
+  padding: 0 !important;
 }
-
 .bookedDetailsForm .form-group {
   margin-bottom: 10px !important;
 }

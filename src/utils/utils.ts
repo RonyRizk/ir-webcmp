@@ -1,6 +1,8 @@
 import moment from 'moment';
 import IBooking, { ICountry, PhysicalRoomType } from '../models/IBooking';
 import { z } from 'zod';
+import { compareTime, createDateWithOffsetAndHour } from '@/utils/booking';
+import calendarData from '@/stores/calendar-data';
 
 export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string): string {
   const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
@@ -145,9 +147,9 @@ export function validateEmail(email: string) {
   return !parsedEmailResults.success;
 }
 export function formatAmount(currency: string, amount: number) {
-  // const symbol = getCurrencySymbol(currency);
-  return currency + amount.toFixed(2);
+  return currency + ' ' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
 export const extras = [
   {
     key: 'private_note',
@@ -167,6 +169,7 @@ export const extras = [
   },
   { key: 'payment_code', value: '' },
 ];
+
 export function manageAnchorSession(data: Record<string, unknown>, mode: 'add' | 'remove' = 'add') {
   const anchor = JSON.parse(sessionStorage.getItem('backend_anchor'));
   if (anchor) {
@@ -194,6 +197,51 @@ export function checkUserAuthState() {
   }
   return null;
 }
+
+export interface CheckInParams {
+  from_date: string;
+  to_date: string;
+  isCheckedIn?: boolean;
+}
+
+/**
+ * Determines whether a booking is eligible for check-in.
+ *
+ * @param params - An object containing the booking event, calendar data, current check-in status, and a flag indicating if check-in or checkout is allowed.
+ * @returns True if check-in is allowed; otherwise, false.
+ */
+export function canCheckIn({ from_date, to_date, isCheckedIn }: CheckInParams): boolean {
+  if (!calendarData.checkin_enabled || calendarData.is_automatic_check_in_out) {
+    return false;
+  }
+  if (isCheckedIn) {
+    return false;
+  }
+  const now = moment();
+  if (
+    (moment().isSameOrAfter(new Date(from_date), 'days') && moment().isBefore(new Date(to_date), 'days')) ||
+    (moment().isSame(new Date(to_date), 'days') &&
+      !compareTime(now.toDate(), createDateWithOffsetAndHour(calendarData.checkin_checkout_hours?.offset, calendarData.checkin_checkout_hours?.hour)))
+  ) {
+    return true;
+  }
+  return false;
+}
+/**
+ * Downloads a file from a given URL.
+ *
+ * @param url - The URL of the file to download.
+ * @param filename - The name of the file to save. If not provided, the URL will be used as the filename.
+ */
+export function downloadFile(url: string, filename?: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || url;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 /**
  * Converts an integer value into a float by shifting the decimal point.
  *
@@ -204,4 +252,68 @@ export function checkUserAuthState() {
 export function toFloat(value: number, decimalPlaces: number): number {
   const factor = Math.pow(10, decimalPlaces);
   return value / factor;
+}
+
+export async function sleep(time: number = 200) {
+  return new Promise(r => setTimeout(() => r(null), time));
+}
+export function handleBodyOverflow(open: boolean) {
+  const attr = 'data-ir-scroll-locked';
+  let counter = document.body.getAttribute(attr);
+  if (!document.getElementById('scroll-lock-style')) {
+    const style = document.createElement('style');
+    style.id = 'scroll-lock-style';
+    style.innerHTML = `
+      body:dir(ltr)[data-ir-scroll-locked] {
+        overflow: hidden !important;
+        overscroll-behavior: contain;
+        position: relative !important;
+        padding-left: 0px;
+        padding-top: 0px;
+        padding-right: 0px;
+        margin-left: 0;
+        margin-top: 0;
+        margin-right: 15px !important;
+      }
+      body:dir(rtl)[data-ir-scroll-locked] {
+        overflow: hidden !important;
+        overscroll-behavior: contain;
+        position: relative !important;
+        padding-left: 0px;
+        padding-top: 0px;
+        padding-right: 0px;
+        margin-right: 0;
+        margin-top: 0;
+        margin-left: 15px !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  if (!counter) {
+    document.body.setAttribute(attr, '1');
+  } else {
+    const newCount = open ? Number(counter) + 1 : Number(counter) - 1;
+    document.body.setAttribute(attr, newCount.toString());
+    if (newCount <= 0) {
+      document.body.removeAttribute(attr);
+    }
+  }
+}
+export function generatePassword(length = 16): string {
+  const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789' + '!@#$%^&*()-_=+[]{}|;:,.<>?';
+
+  const cryptoObj = (window.crypto || (window as any).msCrypto) as Crypto & { getRandomValues?: Function };
+  if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+    const randomValues = new Uint32Array(length);
+    cryptoObj.getRandomValues(randomValues);
+    return Array.from(randomValues, rv => CHARSET[rv % CHARSET.length]).join('');
+  } else {
+    console.warn('Secure crypto RNG not available—falling back to Math.random()');
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      const idx = Math.floor(Math.random() * CHARSET.length);
+      password += CHARSET.charAt(idx);
+    }
+    return password;
+  }
 }

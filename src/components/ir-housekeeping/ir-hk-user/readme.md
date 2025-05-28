@@ -32,6 +32,8 @@
 - [ir-title](../../ir-title)
 - [ir-input-text](../../ui/ir-input-text)
 - [ir-phone-input](../../ui/ir-phone-input)
+- [ir-textarea](../../ui/ir-textarea)
+- [ir-password-validator](../../ir-password-validator)
 - [ir-button](../../ui/ir-button)
 
 ### Graph
@@ -40,9 +42,13 @@ graph TD;
   ir-hk-user --> ir-title
   ir-hk-user --> ir-input-text
   ir-hk-user --> ir-phone-input
+  ir-hk-user --> ir-textarea
+  ir-hk-user --> ir-password-validator
   ir-hk-user --> ir-button
   ir-title --> ir-icon
   ir-phone-input --> ir-combobox
+  ir-password-validator --> requirement-check
+  requirement-check --> ir-icons
   ir-button --> ir-icons
   ir-hk-team --> ir-hk-user
   style ir-hk-user fill:#f9f,stroke:#333,stroke-width:4px

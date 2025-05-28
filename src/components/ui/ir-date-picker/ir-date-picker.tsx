@@ -7,7 +7,7 @@ import moment from 'moment';
 @Component({
   tag: 'ir-date-picker',
   styleUrl: 'ir-date-picker.css',
-  scoped: false,
+  shadow: false,
 })
 export class IrDatePicker {
   @Element() el: HTMLElement;
@@ -108,16 +108,24 @@ export class IrDatePicker {
    */
   @Prop() emitEmptyDate: boolean = false;
 
+  /**
+   * Styles for the trigger container
+   */
+  @Prop() triggerContainerStyle: string = '';
+
   @State() currentDate: Date | null = null;
 
   @Event() dateChanged: EventEmitter<{
     start: moment.Moment;
     end: moment.Moment;
   }>;
+  @Event() datePickerFocus: EventEmitter<void>;
+  @Event() datePickerBlur: EventEmitter<void>;
 
   private pickerRef!: HTMLInputElement;
   private datePicker!: AirDatepicker<HTMLElement>;
   private openDatePickerTimeout?: ReturnType<typeof setTimeout>;
+  private triggerSlot: HTMLElement | null = null;
 
   componentWillLoad() {
     // Sync initial @Prop to internal state
@@ -128,6 +136,38 @@ export class IrDatePicker {
 
   componentDidLoad() {
     this.initializeDatepicker();
+    this.setupTriggerFocusHandling();
+  }
+
+  /**
+   * Set up focus handling for the custom trigger slot
+   */
+  private setupTriggerFocusHandling() {
+    if (!this.customPicker) return;
+
+    // Get the slot element
+    const slotEl = this.el.querySelector('[slot="trigger"]') as HTMLSlotElement;
+    if (!slotEl) return;
+
+    // We'll consider the first assigned element as our trigger
+    this.triggerSlot = slotEl as HTMLElement;
+
+    // Add focus event listener to the trigger element
+    this.triggerSlot.addEventListener('focus', this.handleTriggerFocus.bind(this));
+
+    // Also handle click events on the trigger
+    this.triggerSlot.addEventListener('click', this.handleTriggerClick.bind(this));
+  }
+
+  private handleTriggerFocus() {
+    if (this.disabled) return;
+    this.openDatePicker();
+  }
+
+  private handleTriggerClick(event: Event) {
+    if (this.disabled) return;
+    event.preventDefault();
+    this.openDatePicker();
   }
 
   @Watch('date')
@@ -190,7 +230,7 @@ export class IrDatePicker {
       return;
     }
 
-    // If it’s a truly new date, select it
+    // If it's a truly new date, select it
     if (!this.isSameDates(this.currentDate, valid)) {
       this.currentDate = valid;
       if (this.forceDestroyOnUpdate) {
@@ -220,6 +260,12 @@ export class IrDatePicker {
       locale: localeEn,
       showOtherMonths: this.showOtherMonths,
       selectOtherMonths: this.selectOtherMonths,
+      onHide: () => {
+        this.datePickerBlur.emit();
+      },
+      onShow: () => {
+        this.datePickerFocus.emit();
+      },
       onSelect: ({ date }) => {
         if (!date || !(date instanceof Date)) {
           if (this.emitEmptyDate) {
@@ -269,12 +315,19 @@ export class IrDatePicker {
     if (this.openDatePickerTimeout) {
       clearTimeout(this.openDatePickerTimeout);
     }
+
+    // Clean up event listeners
+    if (this.triggerSlot) {
+      this.triggerSlot.removeEventListener('focus', this.handleTriggerFocus);
+      this.triggerSlot.removeEventListener('click', this.handleTriggerClick);
+    }
+
     this.datePicker?.destroy?.();
   }
 
   render() {
     return (
-      <div class="ir-date-picker-trigger">
+      <div class={`ir-date-picker-trigger ${this.triggerContainerStyle}`}>
         {this.customPicker && <slot name="trigger"></slot>}
         <input type="text" disabled={this.disabled} class={this.customPicker ? 'ir-date-picker-element' : 'form-control input-sm'} ref={el => (this.pickerRef = el)} />
       </div>

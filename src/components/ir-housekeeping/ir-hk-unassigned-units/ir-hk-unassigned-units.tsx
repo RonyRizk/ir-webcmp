@@ -3,11 +3,12 @@ import { HouseKeepingService } from '@/services/housekeeping.service';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import locales from '@/stores/locales.store';
+import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 
 @Component({
   tag: 'ir-hk-unassigned-units',
-  styleUrl: 'ir-hk-unassigned-units.css',
+  styleUrls: ['ir-hk-unassigned-units.css', '../../../common/sheet.css'],
   scoped: true,
 })
 export class IrHkUnassignedUnits {
@@ -65,9 +66,9 @@ export class IrHkUnassignedUnits {
     if (!this.user) {
       return housekeeping_store.hk_criteria.units_assignments.unassigned_units?.map(unit => (
         <tr key={unit.id}>
-          <td class="mr-2">{unit.name}</td>
+          <td class="">{unit.name}</td>
           <td class="sr-only"></td>
-          <td>
+          <td class="pl-1">
             <ir-select
               onSelectChange={e => {
                 let hk_id = e.detail;
@@ -86,11 +87,15 @@ export class IrHkUnassignedUnits {
       ));
     }
     return calendar_data.roomsInfo.map(roomType => {
+      console.log(roomType);
       if (!roomType.is_active) {
         return null;
       }
       return roomType.physicalrooms?.map(physical_room => {
-        let taken = !housekeeping_store.hk_criteria.units_assignments.unassigned_units?.find(unit => unit.id === physical_room.id);
+        if (!physical_room['is_active']) {
+          return null;
+        }
+        let taken = !housekeeping_store.hk_criteria.units_assignments.unassigned_units?.find(unit => unit.id.toString() === physical_room.id.toString());
         let housekeeper = [];
         const assignedRoom = this.assignedUnits.get(physical_room.id);
         if (assignedRoom && assignedRoom.is_to_assign) {
@@ -121,35 +126,35 @@ export class IrHkUnassignedUnits {
   }
   render() {
     return (
-      <Host>
-        <ir-title class="title px-1" displayContext="sidebar" label={!this.user ? 'Assingn Units' : `Assignment for ${this.user.name}`}></ir-title>
-        <section class="px-1">
+      <div class="sheet-container">
+        <ir-title class="title sheet-header px-1" displayContext="sidebar" label={!this.user ? 'Assingn Units' : `Assignment for ${this.user.name}`}></ir-title>
+        <section class="px-1 sheet-body">
           <table>
             <thead>
-              <th class="sr-only">room name</th>
-              <th class="sr-only">housekeeper name</th>
-              <th class="sr-only">actions</th>
+              <th class="sr-only">{locales.entries.Lcz_RoomName}</th>
+              <th class="sr-only">{locales.entries.Lcz_HousekeeperName}</th>
+              <th class="sr-only">{locales.entries.Lcz_Actions}</th>
             </thead>
             <tbody>{this.renderRooms()}</tbody>
           </table>
-          <div class="d-flex flex-column flex-md-row align-items-md-center mt-2 w-100">
-            <ir-button
-              onClickHandler={() => this.closeSideBar.emit(null)}
-              class="flex-fill"
-              btn_styles="w-100  justify-content-center align-items-center"
-              btn_color="secondary"
-              text={'Cancel'}
-            ></ir-button>
-            <ir-button
-              isLoading={isRequestPending('/Manage_Exposed_Assigned_Unit_To_HKM')}
-              onClickHandler={this.assignUnits.bind(this)}
-              class="flex-fill ml-md-1"
-              btn_styles="w-100  justify-content-center align-items-center mt-1 mt-md-0"
-              text={'Confirm'}
-            ></ir-button>
-          </div>
         </section>
-      </Host>
+        <div class="sheet-footer">
+          <ir-button
+            onClickHandler={() => this.closeSideBar.emit(null)}
+            class="flex-fill"
+            btn_styles="w-100 justify-content-center align-items-center"
+            btn_color="secondary"
+            text={locales.entries.Lcz_Cancel}
+          ></ir-button>
+          <ir-button
+            isLoading={isRequestPending('/Manage_Exposed_Assigned_Unit_To_HKM')}
+            onClickHandler={this.assignUnits.bind(this)}
+            class="flex-fill"
+            btn_styles="w-100  justify-content-center align-items-center"
+            text={locales.entries.Lcz_Confirm}
+          ></ir-button>
+        </div>
+      </div>
     );
   }
 }

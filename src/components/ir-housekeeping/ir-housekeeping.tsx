@@ -1,9 +1,11 @@
 import Token from '@/models/Token';
 import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
+import calendar_data from '@/stores/calendar-data';
 import { updateHKStore } from '@/stores/housekeeping.store';
-import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-
+import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { IToast } from '@components/ui/ir-toast/toast';
+import locales from '@/stores/locales.store';
 @Component({
   tag: 'ir-housekeeping',
   styleUrl: 'ir-housekeeping.css',
@@ -17,6 +19,8 @@ export class IrHousekeeping {
   @Prop() p: string;
 
   @State() isLoading = false;
+
+  @Event() toast: EventEmitter<IToast>;
 
   private roomService = new RoomService();
   private houseKeepingService = new HouseKeepingService();
@@ -53,18 +57,23 @@ export class IrHousekeeping {
           aname: this.p,
           language: this.language,
           is_backend: true,
+          include_sales_rate_plans: true,
         });
         propertyId = propertyData.My_Result.id;
       }
       updateHKStore('default_properties', { token: this.ticket, property_id: propertyId, language: this.language });
-      const requests = [this.houseKeepingService.getExposedHKSetup(propertyId), this.roomService.fetchLanguage(this.language, ['_HK_FRONT'])];
-
+      const requests: Array<Promise<any>> = [];
+      if (calendar_data.housekeeping_enabled) {
+        requests.push(this.houseKeepingService.getExposedHKSetup(propertyId));
+      }
+      requests.push(this.roomService.fetchLanguage(this.language, ['_HK_FRONT', '_PMS_FRONT']));
       if (this.propertyid) {
-        requests.unshift(
+        requests.push(
           this.roomService.getExposedProperty({
             id: propertyId,
             language: this.language,
             is_backend: true,
+            include_sales_rate_plans: true,
           }),
         );
       }
@@ -76,6 +85,24 @@ export class IrHousekeeping {
       this.isLoading = false;
     }
   }
+  private saveAutomaticCheckInCheckout(e: CustomEvent): void {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    try {
+      this.roomService.SetAutomaticCheckInOut({
+        property_id: this.propertyid,
+        flag: e.detail === 'auto',
+      });
+      this.toast.emit({
+        position: 'top-right',
+        title: 'Saved Successfully',
+        description: '',
+        type: 'success',
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   render() {
     if (this.isLoading) {
       return <ir-loading-screen></ir-loading-screen>;
@@ -85,8 +112,25 @@ export class IrHousekeeping {
         <ir-interceptor></ir-interceptor>
         <ir-toast></ir-toast>
         <section class="p-1">
-          <ir-unit-status class="mb-1"></ir-unit-status>
-          <ir-hk-team class="mb-1"></ir-hk-team>
+          <h3 class="mb-2">{locales.entries.Lcz_HouseKeepingAndCheckInSetup}</h3>
+          <div class="card p-1">
+            <ir-title borderShown label="Check-In Mode"></ir-title>
+            <div class={'d-flex align-items-center'}>
+              <p class="my-0 py-0 mr-1  ">{locales.entries.Lcz_CheckInOutGuestsAutomatically}</p>
+              <ir-select
+                LabelAvailable={false}
+                showFirstOption={false}
+                selectedValue={calendar_data.is_automatic_check_in_out ? 'auto' : 'manual'}
+                onSelectChange={e => this.saveAutomaticCheckInCheckout(e)}
+                data={[
+                  { text: locales.entries.Lcz_YesAsPerPropertyPolicy, value: 'auto' },
+                  { text: locales.entries.Lcz_NoIWillDoItManually, value: 'manual' },
+                ]}
+              ></ir-select>
+            </div>
+          </div>
+          {/*<ir-unit-status class="mb-1"></ir-unit-status>*/}
+          {calendar_data.housekeeping_enabled && <ir-hk-team class="mb-1"></ir-hk-team>}
         </section>
       </Host>
     );

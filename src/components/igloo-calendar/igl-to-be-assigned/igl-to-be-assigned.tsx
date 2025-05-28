@@ -82,27 +82,35 @@ export class IglToBeAssigned {
     event.stopImmediatePropagation();
     event.stopPropagation();
 
-    if (opt.key === 'assignUnit') {
-      if (Object.keys(this.data[data.selectedDate].categories).length === 1) {
-        this.isLoading = true;
-        this.noScroll = true;
+    if (opt?.key === 'assignUnit' && this.data) {
+      // Verify data.selectedDate exists in this.data
+      if (data?.selectedDate && this.data[data.selectedDate]) {
+        // Check if categories exist and there's only one category
+        if (this.data[data.selectedDate]?.categories && Object.keys(this.data[data.selectedDate]?.categories || {})?.length === 1) {
+          this.isLoading = true;
+          this.noScroll = true;
+        }
+
+        // Make sure all required properties exist before filtering
+        if (
+          data?.RT_ID &&
+          this.data[data.selectedDate]?.categories &&
+          this.data[data.selectedDate].categories[data.RT_ID] &&
+          Array.isArray(this.data[data.selectedDate].categories[data.RT_ID]) &&
+          data?.assignEvent?.ID
+        ) {
+          this.data[data.selectedDate].categories[data.RT_ID] = this.data[data.selectedDate].categories[data.RT_ID].filter(
+            eventData => eventData && eventData.ID !== data.assignEvent.ID,
+          );
+        }
+
+        // Only update calendarData if it exists in the data
+        if (data?.calendarData) {
+          this.calendarData = data.calendarData;
+        }
+
+        this.renderView();
       }
-      this.data[data.selectedDate].categories[data.RT_ID] = this.data[data.selectedDate].categories[data.RT_ID].filter(eventData => eventData.ID != data.assignEvent.ID);
-      this.calendarData = data.calendarData;
-      // this.calendarData.bookingEvents.push(data.assignEvent);
-
-      // if (!this.data[data.selectedDate].categories[data.RT_ID].length) {
-      //   delete this.data[data.selectedDate].categories[data.RT_ID];
-
-      //   if (!Object.keys(this.data[data.selectedDate].categories).length) {
-      //     delete this.data[data.selectedDate];
-      //     //this.orderedDatesList = this.orderedDatesList.filter(dateStamp => dateStamp != data.selectedDate);
-      //     //this.selectedDate = this.orderedDatesList.length ? this.orderedDatesList[0] : null;
-      //   }
-      // }
-      this.renderView();
-
-      // this.reduceAvailableUnitEvent.emit({key: "reduceAvailableDays", data: {selectedDate: data.selectedDate}});
     }
   }
 

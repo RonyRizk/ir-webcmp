@@ -20,6 +20,7 @@ export class IrPhoneInput {
   @Prop() phone_prefix: string | null = null;
   @Prop() placeholder: string;
   @Prop({ mutable: true }) countries: ICountry[] = [];
+  @Prop() testId: string;
 
   @Event() textChange: EventEmitter<{ phone_prefix: string; mobile: string }>;
   @State() inputValue: string = '';
@@ -72,7 +73,6 @@ export class IrPhoneInput {
     this.textChange.emit({ phone_prefix: this.currentCountry?.phone_prefix, mobile: this.inputValue });
   }
   private setCountryFromPhonePrefix() {
-    console.log(this.phone_prefix);
     let country = this.countries.find(country => country.phone_prefix === this.phone_prefix);
     if (!country) {
       country = this.countries.find(c => c.id.toString() === this.phone_prefix);
@@ -80,7 +80,6 @@ export class IrPhoneInput {
         return;
       }
     }
-    console.log(country);
     this.currentCountry = { ...country };
     this.textChange.emit({ phone_prefix: this.currentCountry?.phone_prefix, mobile: this.value });
   }
@@ -104,7 +103,7 @@ export class IrPhoneInput {
               </div>
             )}
             <div class={'form-control  input-container  flex-fill' + (this.error ? ' is-invalid' : '')}>
-              <button onClick={() => (this.isDropdownVisible = !this.isDropdownVisible)} class="dropdown-trigger">
+              <button type="button" onClick={() => (this.isDropdownVisible = !this.isDropdownVisible)} class="dropdown-trigger">
                 {this.currentCountry ? <img src={this.currentCountry?.flag} class="flag" /> : <p class="p-0 m-0 ">{locales.entries.Lcz_Select}</p>}
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
                   <path d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
@@ -112,8 +111,17 @@ export class IrPhoneInput {
               </button>
 
               <p class={'phone_prefix_label'}>{this.currentCountry?.phone_prefix}</p>
-              <input type="text" placeholder={this.placeholder} required value={this.inputValue} disabled={this.disabled} onInput={e => this.handleInputChange(e)} />
-            </div>{' '}
+              <input
+                data-testid={this.testId}
+                maxLength={14}
+                type="text"
+                placeholder={this.placeholder}
+                required
+                value={this.inputValue}
+                disabled={this.disabled}
+                onInput={e => this.handleInputChange(e)}
+              />
+            </div>
             {this.isDropdownVisible && (
               <div class="ir-dropdown-container">
                 <ir-combobox

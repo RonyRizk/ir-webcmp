@@ -1,6 +1,7 @@
 import { BookingListingService } from '@/services/booking_listing.service';
 import booking_listing, { initializeUserSelection, updateUserSelection } from '@/stores/booking_listing.store';
 import locales from '@/stores/locales.store';
+import { downloadFile } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 
@@ -20,9 +21,8 @@ export class IrListingHeader {
   @Event() preventPageLoad: EventEmitter<string>;
 
   private bookingListingService = new BookingListingService();
-  private toDateRef: HTMLIrDatePickerElement;
 
-  private downloadUrlTag: HTMLAnchorElement;
+  // private toDateRef: HTMLIrDatePickerElement;
 
   private async handleSearchClicked(is_to_export: boolean) {
     if (this.inputValue !== '') {
@@ -41,16 +41,21 @@ export class IrListingHeader {
         book_nbr: '',
       };
     }
+    // setParams({
+    //   s: booking_listing.userSelection.start_row,
+    //   e: booking_listing.userSelection.end_row,
+    //   c: booking_listing.userSelection.channel,
+    //   status: booking_listing.userSelection.booking_status,
+    //   from: booking_listing.userSelection.from,
+    //   to: booking_listing.userSelection.to,
+    //   filter: booking_listing.userSelection.filter_type,
+    // });
     this.isLoading = is_to_export ? 'excel' : 'search';
     this.preventPageLoad.emit('/Get_Exposed_Bookings');
     await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, start_row: 0, end_row: 20, is_to_export });
     this.isLoading = null;
     if (booking_listing.download_url) {
-      const url = booking_listing.download_url;
-      this.downloadUrlTag.href = url;
-      this.downloadUrlTag.download = url;
-      this.downloadUrlTag.click();
-      booking_listing.download_url = null;
+      downloadFile(booking_listing.download_url);
     }
   }
   private async handleClearUserField() {
@@ -60,27 +65,24 @@ export class IrListingHeader {
     }
     await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, start_row: 0, end_row: 20, is_to_export: false });
   }
-  private async handleFromDateChange(e: CustomEvent) {
-    e.stopImmediatePropagation();
-    e.stopPropagation();
-    const date = e.detail.start;
-    if (moment(booking_listing.userSelection.from, 'YYYY-MM-DD').isSame(date, 'days')) {
-      return;
-    }
-    let fromDate = date;
-    let toDate = moment(new Date(booking_listing.userSelection.to));
-    if (fromDate.isAfter(toDate)) {
-      toDate = fromDate;
-    }
-    booking_listing.userSelection = { ...booking_listing.userSelection, from: fromDate.format('YYYY-MM-DD'), to: toDate.format('YYYY-MM-DD') };
-    await this.toDateRef.openDatePicker();
-  }
+  // private async handleFromDateChange(e: CustomEvent) {
+  //   e.stopImmediatePropagation();
+  //   e.stopPropagation();
+  //   const date = e.detail.start;
+  //   if (moment(booking_listing.userSelection.from, 'YYYY-MM-DD').isSame(date, 'days')) {
+  //     return;
+  //   }
+  //   let fromDate = date;
+  //   let toDate = moment(new Date(booking_listing.userSelection.to));
+  //   if (fromDate.isAfter(toDate)) {
+  //     toDate = fromDate;
+  //   }
+  //   booking_listing.userSelection = { ...booking_listing.userSelection, from: fromDate.format('YYYY-MM-DD'), to: toDate.format('YYYY-MM-DD') };
+  //   await this.toDateRef.openDatePicker();
+  // }
   render() {
     return (
       <Host>
-        <a ref={el => (this.downloadUrlTag = el)}>
-          <p class="sr-only">download url</p>
-        </a>
         <section class="d-flex align-items-center ">
           <div class="d-flex flex-fill flex-column flex-md-row align-items-md-center booking-container">
             <div class="d-flex mb-1 d-md-none align-items-center justify-content-bettween width-fill">
@@ -157,7 +159,7 @@ export class IrListingHeader {
             select_id="dateTo"
             LabelAvailable={false}
           ></ir-select>
-          <div class={'booking-dates-container'}>
+          {/* <div class={'booking-dates-container'}>
             <span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox={'0 0 448 512'} style={{ height: '14px', width: '14px' }}>
                 <path
@@ -209,7 +211,25 @@ export class IrListingHeader {
                 {moment(new Date(booking_listing.userSelection.to)).format('MMM DD, YYYY')}
               </p>
             </ir-date-picker>
-          </div>
+          </div> */}
+          <ir-range-picker
+            onDateRangeChanged={e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              const { fromDate, toDate } = e.detail;
+              let to_date = toDate.format('YYYY-MM-DD');
+              if (
+                toDate.isSame(moment(booking_listing.userSelection.to, 'YYYY-MM-DD'), 'days') ||
+                toDate.isBefore(moment(booking_listing.userSelection.from, 'YYYY-MM-DD'), 'days')
+              ) {
+                to_date = booking_listing.userSelection.to;
+              }
+              booking_listing.userSelection = { ...booking_listing.userSelection, to: to_date, from: fromDate.format('YYYY-MM-DD') };
+            }}
+            allowNullDates={false}
+            fromDate={moment(booking_listing.userSelection.from, 'YYYY-MM-DD')}
+            toDate={moment(booking_listing.userSelection.to, 'YYYY-MM-DD')}
+          />
           <ir-select
             class="flex-sm-wrap"
             selectedValue={booking_listing.userSelection.booking_status}

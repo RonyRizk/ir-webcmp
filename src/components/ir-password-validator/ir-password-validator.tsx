@@ -13,6 +13,13 @@ export class IrPasswordValidator {
 
   @Event({ bubbles: true, composed: true }) passwordValidationChange: EventEmitter<boolean>;
 
+  @Watch('password')
+  handlePasswordChange(newValue: string, oldValue: string) {
+    if (newValue !== oldValue) {
+      this.passwordValidationChange.emit(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+]).{8,16}$/.test(newValue));
+    }
+  }
+
   private get validLength(): boolean {
     if (!this.password) {
       return false;
@@ -46,12 +53,6 @@ export class IrPasswordValidator {
       return false;
     }
     return /[!@#$%^&*()\-_=+]/.test(this.password);
-  }
-  @Watch('password')
-  handlePasswordChange(newValue: string, oldValue: string) {
-    if (newValue !== oldValue) {
-      this.passwordValidationChange.emit(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+]).{8,16}$/.test(newValue));
-    }
   }
   render() {
     return (

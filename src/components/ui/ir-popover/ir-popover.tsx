@@ -1,56 +1,63 @@
-import { Component, Host, Prop, State, h, Element } from '@stencil/core';
+import { Component, Host, Prop, h, Element } from '@stencil/core';
 
 @Component({
   tag: 'ir-popover',
   styleUrl: 'ir-popover.css',
-  scoped: true,
+  shadow: false,
 })
 export class IrPopover {
   @Element() el: HTMLElement;
-  @Prop() popoverTitle: string;
-  @State() isHovered: boolean = false;
-  @State() showPopover: boolean = false;
+
+  @Prop() content: string;
   @Prop() irPopoverLeft: string = '10px';
+  @Prop() placement: 'top' | 'bottom' | 'left' | 'right' | 'auto' = 'auto';
+  @Prop() trigger: 'focus' | 'click' | 'hover' = 'focus';
+  @Prop() renderContentAsHtml: boolean = false;
 
-  componentWillLoad() {
-    this.checkTitleWidth();
+  private initialized: boolean = false;
+  private popoverTrigger: HTMLElement;
+
+  componentDidLoad() {
+    if (this.initialized) {
+      return;
+    }
+    this.initializePopover();
   }
-  handleMouseEnter = () => {
-    if (!this.showPopover) {
-      return;
-    }
-    if (this.showPopover) {
-      this.isHovered = true;
-    }
-  };
 
-  handleMouseLeave = () => {
-    if (!this.showPopover) {
-      return;
-    }
-    this.isHovered = false;
-  };
-
-  checkTitleWidth() {
-    requestAnimationFrame(() => {
-      const titleElement = this.el.querySelector('.popover-title');
-      if (titleElement) {
-        const width = titleElement.scrollWidth;
-        this.showPopover = width > 150; // Show popover if title width exceeds 170px
-      }
+  initializePopover() {
+    $(this.popoverTrigger).popover({
+      trigger: this.trigger,
+      content: this.content,
+      placement: this.placement,
+      html: this.renderContentAsHtml,
     });
+    this.initialized = true;
+  }
+
+  disconnectedCallback() {
+    $(this.popoverTrigger).popover('dispose');
   }
 
   render() {
     return (
       <Host style={{ '--ir-popover-left': this.irPopoverLeft }}>
-        <p class="popover-title" onMouseLeave={this.handleMouseLeave} onMouseEnter={this.handleMouseEnter}>
-          {this.popoverTitle}
-        </p>
-        {this.showPopover && this.isHovered && (
-          <div data-state="show" class="popover-container">
-            {this.popoverTitle}
-          </div>
+        {this.trigger !== 'focus' ? (
+          <p
+            ref={el => (this.popoverTrigger = el)}
+            class="popover-title m-0 p-0"
+            style={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              cursor: 'pointer',
+            }}
+          >
+            <slot />
+          </p>
+        ) : (
+          <button tabindex="0" class="popover-trigger" ref={el => (this.popoverTrigger = el)}>
+            <slot />
+          </button>
         )}
       </Host>
     );

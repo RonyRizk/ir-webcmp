@@ -2,13 +2,13 @@ import { Booking, ExtraService, ExtraServiceSchema } from '@/models/booking.dto'
 import { BookingService } from '@/services/booking.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
-import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { ZodError } from 'zod';
 import { _formatDate } from '../../functions';
 
 @Component({
   tag: 'ir-extra-service-config',
-  styleUrl: 'ir-extra-service-config.css',
+  styleUrls: ['ir-extra-service-config.css', '../../../../common/sheet.css'],
   scoped: true,
 })
 export class IrExtraServiceConfig {
@@ -24,6 +24,10 @@ export class IrExtraServiceConfig {
   @Event() resetBookingEvt: EventEmitter<null>;
 
   private bookingService = new BookingService();
+  // private d1: HTMLDivElement;
+  // private d1_0: HTMLDivElement;
+  // private d2_0: HTMLDivElement;
+  // private d2: HTMLInputElement;
 
   componentWillLoad() {
     if (this.service) {
@@ -72,11 +76,17 @@ export class IrExtraServiceConfig {
   }
   render() {
     return (
-      <Host class={'p-0'}>
-        <ir-title class="px-1" onCloseSideBar={() => this.closeModal.emit(null)} label={locales.entries.Lcz_ExtraServices} displayContext="sidebar"></ir-title>
-        <section class={'px-1'}>
+      <form
+        class={'sheet-container'}
+        onSubmit={async e => {
+          e.preventDefault();
+          await this.saveAmenity();
+        }}
+      >
+        <ir-title class="px-1 sheet-header" onCloseSideBar={() => this.closeModal.emit(null)} label={locales.entries.Lcz_ExtraServices} displayContext="sidebar"></ir-title>
+        <section class={'px-1 sheet-body'}>
           {/* Description */}
-          <fieldset class="input-group mb-1 mt-3 service-description">
+          <fieldset class="input-group mb-1 service-description">
             <div class="input-group-prepend">
               <span class="input-group-text">{locales.entries.Lcz_Description}</span>
             </div>
@@ -97,9 +107,21 @@ export class IrExtraServiceConfig {
                   {locales.entries.Lcz_DatesOn}
                 </span>
               </div>
-              <div class="form-control p-0 m-0 d-flex align-items-center justify-content-center date-from">
+              <div
+                // ref={el => (this.d1_0 = el)}
+                class="form-control p-0 m-0 d-flex align-items-center justify-content-center date-from"
+              >
                 <div class="service-date-container">
                   <ir-date-picker
+                    // onDatePickerFocus={() => {
+                    //   this.d1?.classList.add('date-focused');
+                    //   this.d1_0?.classList.add('date-focused');
+                    // }}
+                    // onDatePickerBlur={() => {
+                    //   this.d1?.classList.remove('date-focused');
+                    //   this.d1_0?.classList.remove('date-focused');
+                    // }}
+                    // customPicker
                     emitEmptyDate
                     date={this.s_service?.start_date}
                     minDate={this.booking.from_date}
@@ -107,10 +129,12 @@ export class IrExtraServiceConfig {
                     onDateChanged={e => this.updateService({ start_date: e.detail.start?.format('YYYY-MM-DD') })}
                   >
                     <input
+                      // ref={el => (this.d1 = el)}
+                      type="text"
                       slot="trigger"
                       value={this.s_service?.start_date ? _formatDate(this.s_service.start_date) : null}
-                      style={{ borderLeftWidth: '0', borderRightWidth: '0', width: '100%' }}
-                      class="text-center form-control input-sm"
+                      style={{ borderLeftWidth: '0', borderRightWidth: '0', width: '100%', borderRadius: '0' }}
+                      class="text-center w-100 form-control input-sm"
                     ></input>
                   </ir-date-picker>
                   {this.s_service?.start_date && (
@@ -139,9 +163,20 @@ export class IrExtraServiceConfig {
                   {locales.entries.Lcz_TillAndIncluding}
                 </span>
               </div>
-              <div class="form-control p-0 m-0 d-flex align-items-center justify-content-center">
+              <div
+                // ref={el => (this.d2_0 = el)}
+                class="form-control p-0 m-0 d-flex align-items-center justify-content-center"
+              >
                 <div class="service-date-container">
                   <ir-date-picker
+                    // onDatePickerFocus={() => {
+                    //   this.d2?.classList.add('date-focused');
+                    //   this.d2_0?.classList.add('date-focused');
+                    // }}
+                    // onDatePickerBlur={() => {
+                    //   this.d2?.classList.remove('date-focused');
+                    //   this.d2_0?.classList.remove('date-focused');
+                    // }}
                     emitEmptyDate
                     date={this.s_service?.end_date}
                     minDate={this.s_service?.start_date ?? this.booking.from_date}
@@ -153,6 +188,7 @@ export class IrExtraServiceConfig {
                     }}
                   >
                     <input
+                      // ref={el => (this.d2 = el)}
                       slot="trigger"
                       value={this.s_service?.end_date ? _formatDate(this.s_service.end_date) : null}
                       style={{ borderLeftWidth: '0', borderRightWidth: '0', width: '100%' }}
@@ -199,7 +235,7 @@ export class IrExtraServiceConfig {
             <ir-price-input
               autoValidate={false}
               label={locales.entries.Lcz_Cost}
-              labelStyle="cost-label"
+              labelStyle="rounded-0 border-left-0"
               currency={this.booking.currency.symbol}
               // class="ir-bl-lbl-none ir-bl-none"
               value={this.s_service?.cost?.toString()}
@@ -210,28 +246,28 @@ export class IrExtraServiceConfig {
               aria-describedby="service cost"
             ></ir-price-input>
           </div>
-          <div class={'d-flex flex-column flex-sm-row mt-3'}>
-            <ir-button
-              onClick={() => this.closeModal.emit(null)}
-              btn_styles="justify-content-center"
-              class={`mb-1 mb-sm-0 flex-fill mr-sm-1`}
-              icon=""
-              text={locales.entries.Lcz_Cancel}
-              btn_color="secondary"
-            ></ir-button>
-
-            <ir-button
-              btn_styles="justify-content-center align-items-center"
-              class={'m-0 flex-fill text-center'}
-              icon=""
-              isLoading={isRequestPending('/Do_Booking_Extra_Service')}
-              text={locales.entries.Lcz_Save}
-              btn_color="primary"
-              onClick={this.saveAmenity.bind(this)}
-            ></ir-button>
-          </div>
         </section>
-      </Host>
+        <div class={'sheet-footer'}>
+          <ir-button
+            onClick={() => this.closeModal.emit(null)}
+            btn_styles="justify-content-center"
+            class={`flex-fill`}
+            icon=""
+            text={locales.entries.Lcz_Cancel}
+            btn_color="secondary"
+          ></ir-button>
+
+          <ir-button
+            btn_styles="justify-content-center align-items-center"
+            class={'flex-fill'}
+            icon=""
+            btn_type="submit"
+            isLoading={isRequestPending('/Do_Booking_Extra_Service')}
+            text={locales.entries.Lcz_Save}
+            btn_color="primary"
+          ></ir-button>
+        </div>
+      </form>
     );
   }
 }

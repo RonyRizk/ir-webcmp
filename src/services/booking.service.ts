@@ -1,9 +1,10 @@
+import { HandleExposedRoomGuestsRequest } from './../models/booking.dto';
 import { DayData } from '../models/DayType';
 import axios from 'axios';
 import { BookingDetails, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthType } from '../models/IBooking';
 import { convertDateToCustomFormat, convertDateToTime, dateToFormattedString, extras } from '../utils/utils';
 import { getMyBookings } from '../utils/booking';
-import { Booking, Day, ExtraService, Guest, IBookingPickupInfo, IPmsLog } from '../models/booking.dto';
+import { Booking, Day, ExtraService, Guest, IBookingPickupInfo, IPmsLog, RoomInOut } from '../models/booking.dto';
 import booking_store from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 export interface IBookingParams {
@@ -35,6 +36,20 @@ export interface ExposedBookingEvent {
   type: string;
 }
 export class BookingService {
+  public async handleExposedRoomInOut(props: { booking_nbr: string; room_identifier: string; status: RoomInOut['code'] }) {
+    const { data } = await axios.post(`/Handle_Exposed_Room_InOut`, props);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
+  public async getLov() {
+    const { data } = await axios.post(`/Get_LOV`, {});
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
   public async sendBookingConfirmationEmail(booking_nbr: string, language: string) {
     const { data } = await axios.post(`/Send_Booking_Confirmation_Email`, {
       booking_nbr,
@@ -93,6 +108,13 @@ export class BookingService {
     } catch (error) {
       console.error(error);
     }
+  }
+  public async handleExposedRoomGuests(props: HandleExposedRoomGuestsRequest) {
+    const { data } = await axios.post('/Handle_Exposed_Room_Guests', props);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
   }
   public async fetchGuest(email: string): Promise<Guest> {
     try {
@@ -248,15 +270,14 @@ export class BookingService {
       throw new Error(error);
     }
   }
-
-  public async getBedPreferences(): Promise<IEntries[]> {
+  public async getSetupEntriesByTableName(TBL_NAME: string): Promise<IEntries[]> {
     const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME`, {
-      TBL_NAME: '_BED_PREFERENCE_TYPE',
+      TBL_NAME,
     });
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
-    const res: any[] = data.My_Result;
+    const res: IEntries[] = data.My_Result ?? [];
     return res;
   }
 

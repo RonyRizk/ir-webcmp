@@ -2,6 +2,14 @@ export interface IExposedHouseKeepingSetup {
   statuses: IHKStatuses[];
   housekeepers: IHouseKeepers[];
   units_assignments: IUnitAssignments;
+  cleaning_frequencies: ExposedHKSetup[];
+  cleaning_periods: ExposedHKSetup[];
+  dusty_periods: ExposedHKSetup[];
+  highlight_checkin_options: ExposedHKSetup[];
+}
+export interface ExposedHKSetup {
+  code: string;
+  description: string;
 }
 
 export interface IHouseKeepers {
@@ -40,6 +48,7 @@ export interface IUnit {
   housekeeper: null;
   id: number;
   name: string;
+  is_active: boolean;
 }
 export interface IUnitAssignments {
   assigned: number;
@@ -94,3 +103,29 @@ export interface IPendingActions {
   status: IHKStatuses;
   unit: IUnit;
 }
+export interface ArchivedTask {
+  booking_nbr: string;
+  date: string;
+  house_keeper: string;
+  unit: string;
+}
+export interface Task {
+  id: string;
+  adult: number;
+  child: number;
+  date: string;
+  is_highlight: boolean;
+  formatted_date: string;
+  hint: string;
+  hkm_id: number;
+  infant: number;
+  status: TaskStatus;
+  unit: IUnit;
+  housekeeper: string;
+  booking_nbr: string | null;
+}
+export type TaskStatus = {
+  code: string;
+  description: string;
+};
+export type TaskStatusCode = 'IH' | 'CI' | 'CO' | 'VA';

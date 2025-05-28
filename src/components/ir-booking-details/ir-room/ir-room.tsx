@@ -9,7 +9,7 @@ import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
 import { colorVariants } from '@/components/ui/ir-icons/icons';
 import { formatAmount } from '@/utils/utils';
 import { IEntries } from '@/models/IBooking';
-
+//TODO revert back to the room cmp with adults
 @Component({
   tag: 'ir-room',
   styleUrl: 'ir-room.css',
@@ -18,9 +18,10 @@ import { IEntries } from '@/models/IBooking';
 export class IrRoom {
   @Element() element: HTMLIrRoomElement;
   // Room Data
-  @Prop() bookingEvent: Booking;
+  @Prop() booking: Booking;
   @Prop() bookingIndex: number;
   @Prop() isEditable: boolean;
+  @Prop() room: Room;
   // Meal Code names
   @Prop() mealCodeName: string;
   @Prop() myRoomTypeFoodCat: string;
@@ -51,14 +52,14 @@ export class IrRoom {
   private modal: HTMLIrModalElement;
 
   componentWillLoad() {
-    if (this.bookingEvent) {
-      this.item = this.bookingEvent.rooms[this.bookingIndex];
+    if (this.booking) {
+      this.item = this.booking.rooms[this.bookingIndex];
     }
   }
 
-  @Watch('bookingEvent')
-  handleBookingEventChange() {
-    this.item = this.bookingEvent.rooms[this.bookingIndex];
+  @Watch('booking')
+  handlebookingChange() {
+    this.item = this.booking.rooms[this.bookingIndex];
   }
 
   @Listen('clickHandler')
@@ -79,11 +80,11 @@ export class IrRoom {
       event_type: 'EDIT_BOOKING',
       ID: this.item['assigned_units_pool'],
       NAME: formatName(this.item.guest.first_name, this.item.guest.last_name),
-      EMAIL: this.bookingEvent.guest.email,
-      PHONE: this.bookingEvent.guest.mobile,
+      EMAIL: this.booking.guest.email,
+      PHONE: this.booking.guest.mobile,
       REFERENCE_TYPE: '',
-      FROM_DATE: this.bookingEvent.from_date,
-      TO_DATE: this.bookingEvent.to_date,
+      FROM_DATE: this.booking.from_date,
+      TO_DATE: this.booking.to_date,
       TITLE: `${locales.entries.Lcz_EditBookingFor} ${this.item?.roomtype?.name} ${(this.item?.unit as IUnit)?.name || ''}`,
       defaultDateRange: {
         dateDifference: this.item.days.length,
@@ -96,40 +97,40 @@ export class IrRoom {
       bed_preference: this.item.bed_preference,
       adult_child_offering: this.item.rateplan.selected_variation.adult_child_offering,
       ADULTS_COUNT: this.item.rateplan.selected_variation.adult_nbr,
-      ARRIVAL: this.bookingEvent.arrival,
-      ARRIVAL_TIME: this.bookingEvent.arrival.description,
-      BOOKING_NUMBER: this.bookingEvent.booking_nbr,
+      ARRIVAL: this.booking.arrival,
+      ARRIVAL_TIME: this.booking.arrival.description,
+      BOOKING_NUMBER: this.booking.booking_nbr,
       cancelation: this.item.rateplan.cancelation,
-      channel_booking_nbr: this.bookingEvent.channel_booking_nbr,
+      channel_booking_nbr: this.booking.channel_booking_nbr,
       CHILDREN_COUNT: this.item.rateplan.selected_variation.child_nbr,
-      COUNTRY: this.bookingEvent.guest.country_id,
-      ENTRY_DATE: this.bookingEvent.from_date,
-      FROM_DATE_STR: this.bookingEvent.format.from_date,
+      COUNTRY: this.booking.guest.country_id,
+      ENTRY_DATE: this.booking.from_date,
+      FROM_DATE_STR: this.booking.format.from_date,
       guarantee: this.item.rateplan.guarantee,
-      GUEST: this.bookingEvent.guest,
+      GUEST: this.booking.guest as any,
       IDENTIFIER: this.item.identifier,
-      is_direct: this.bookingEvent.is_direct,
-      IS_EDITABLE: this.bookingEvent.is_editable,
+      is_direct: this.booking.is_direct,
+      IS_EDITABLE: this.booking.is_editable,
       NO_OF_DAYS: this.item.days.length,
-      NOTES: this.bookingEvent.remark,
-      origin: this.bookingEvent.origin,
+      NOTES: this.booking.remark,
+      origin: this.booking.origin,
       POOL: this.item['assigned_units_pool'],
       PR_ID: (this.item.unit as IUnit)?.id,
       RATE: this.item.total,
       RATE_PLAN: this.item.rateplan.name,
       RATE_PLAN_ID: this.item.rateplan.id,
       RATE_TYPE: this.item.roomtype.id,
-      ROOMS: this.bookingEvent.rooms,
-      SOURCE: this.bookingEvent.source,
+      ROOMS: this.booking.rooms,
+      SOURCE: this.booking.source,
       SPLIT_BOOKING: false,
       STATUS: 'IN-HOUSE',
-      TO_DATE_STR: this.bookingEvent.format.to_date,
-      TOTAL_PRICE: this.bookingEvent.total,
+      TO_DATE_STR: this.booking.format.to_date,
+      TOTAL_PRICE: this.booking.total,
       legendData: this.legendData,
       roomsInfo: this.roomsInfo,
       roomName: (this.item.unit as IUnit)?.name || '',
-      PICKUP_INFO: this.bookingEvent.pickup_info,
-      booking: this.bookingEvent,
+      PICKUP_INFO: this.booking.pickup_info,
+      booking: this.booking,
       currentRoomType: this.item,
     });
   }
@@ -139,7 +140,7 @@ export class IrRoom {
   private async deleteRoom() {
     try {
       this.isLoading = true;
-      let oldRooms = [...this.bookingEvent.rooms];
+      let oldRooms = [...this.booking.rooms];
       oldRooms = oldRooms.filter(room => room.identifier !== this.item.identifier);
 
       const body = {
@@ -148,15 +149,15 @@ export class IrRoom {
         is_pms: true,
         is_direct: true,
         booking: {
-          booking_nbr: this.bookingEvent.booking_nbr,
-          from_date: this.bookingEvent.from_date,
-          to_date: this.bookingEvent.to_date,
-          remark: this.bookingEvent.remark,
-          property: this.bookingEvent.property,
-          source: this.bookingEvent.source,
-          currency: this.bookingEvent.currency,
-          arrival: this.bookingEvent.arrival,
-          guest: this.bookingEvent.guest,
+          booking_nbr: this.booking.booking_nbr,
+          from_date: this.booking.from_date,
+          to_date: this.booking.to_date,
+          remark: this.booking.remark,
+          property: this.booking.property,
+          source: this.booking.source,
+          currency: this.booking.currency,
+          arrival: this.booking.arrival,
+          guest: this.booking.guest,
           rooms: oldRooms,
         },
       };
@@ -198,7 +199,7 @@ export class IrRoom {
   }
 
   private getSmokingLabel() {
-    if (this.bookingEvent.is_direct) {
+    if (this.booking.is_direct) {
       if (!this.item.smoking_option) {
         return null;
       }
@@ -216,7 +217,7 @@ export class IrRoom {
   }
 
   private getBedName() {
-    if (this.bookingEvent.is_direct) {
+    if (this.booking.is_direct) {
       const bed = this.bedPreferences.find(p => p.CODE_NAME === this.item?.bed_preference?.toString());
       if (!bed) {
         return;
@@ -315,7 +316,7 @@ export class IrRoom {
                     <th class="text-right subtotal_row">{formatAmount(this.currency, this.item.total)}</th>
                     {this.item.gross_cost > 0 && this.item.gross_cost !== null && <th class="pl-2 text-right night-cost">{formatAmount(this.currency, this.item.cost)}</th>}
                   </tr>
-                  {this.bookingEvent.is_direct ? (
+                  {this.booking.is_direct ? (
                     <Fragment>
                       {(() => {
                         const filtered_data = calendar_data.taxes.filter(tx => tx.pct > 0);
@@ -358,7 +359,7 @@ export class IrRoom {
               </div>
             </div>
             <ir-label labelText={`${locales.entries.Lcz_SmokingOptions}:`} display="inline" content={this.getSmokingLabel()}></ir-label>
-            {this.bookingEvent.is_direct && (
+            {this.booking.is_direct && (
               <Fragment>
                 {this.item.rateplan.cancelation && (
                   <ir-label labelText={`${locales.entries.Lcz_Cancellation}:`} display="inline" content={this.item.rateplan.cancelation || ''} renderContentAsHtml></ir-label>
@@ -374,7 +375,7 @@ export class IrRoom {
                 <ir-label labelText={`${locales.entries.Lcz_Policies}:`} display="inline" content={this.item.ota_meta.policies}></ir-label>
               </div>
             )}
-            {/* {this.bookingEvent.is_direct && <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} content={this.mealCodeName}></ir-label>} */}
+            {/* {this.booking.is_direct && <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} content={this.mealCodeName}></ir-label>} */}
           </div>
         </div>
         <ir-modal

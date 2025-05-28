@@ -2,14 +2,25 @@
   background: #acecff;
   padding: 0.1rem 0.3rem;
   border-radius: 5px;
+  display: block;
+  max-width: 100px;
+  box-sizing: border-box;
+  display: inline-block;
+  overflow: hidden;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
 
-  /* max-width: max-content; */
+.room_statements {
+  display: block;
+  width: 100%; /* Ensure the container uses the full width */
 }
 .room_statements {
   display: block;
   width: 100%;
 }
-
 .room_statements span {
   display: inline;
   white-space: normal;
@@ -41,6 +52,16 @@
 }
 .night-cost {
   color: #7cbebe;
+}
+.room_actions_btns {
+  /* max-width: 50%; */
+  white-space: nowrap;
+  width: max-content;
+}
+.room_actions_btns {
+  flex: 1 1 0%;
+  display: flex;
+  justify-content: flex-end;
 }
 /* .cancelation {
   max-width: 30%;

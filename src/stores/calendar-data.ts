@@ -1,16 +1,27 @@
 import { CalendarDataDetails } from '@/models/calendarData';
 import { createStore } from '@stencil/store';
 
-type CalendarStore = CalendarDataDetails & { roomHistory: Record<string, boolean> };
+type CalendarStore = CalendarDataDetails & {
+  roomHistory: Record<string, boolean>;
+  housekeeping_enabled: boolean;
+  checkin_enabled: boolean;
+  checkin_checkout_hours: {
+    hour: number;
+    minute: number;
+    offset: number;
+  };
+};
 const initialState: CalendarStore = {
   adultChildConstraints: {
     adult_max_nbr: 0,
     child_max_nbr: 0,
     child_max_age: 0,
   },
+  checkin_checkout_hours: null,
   allowedBookingSources: [],
   currency: undefined,
   endingDate: 0,
+  housekeeping_enabled: false, //TODO: revert to true
   formattedLegendData: undefined,
   is_vacation_rental: false,
   legendData: [],
@@ -20,6 +31,7 @@ const initialState: CalendarStore = {
   toBeAssignedEvents: [],
   allowed_payment_methods: [],
   pickup_service: undefined,
+  checkin_enabled: false, //TODO: revert to true
   max_nights: 0,
   is_frontdesk_enabled: false,
   taxes: [],
@@ -30,6 +42,7 @@ const initialState: CalendarStore = {
   country: undefined,
   is_pms_enabled: false,
   roomHistory: {},
+  is_automatic_check_in_out: false,
 };
 export const { state: calendar_data, onChange: onCalendarDatesChange } = createStore<CalendarStore>(initialState);
 export function isSingleUnit(id: number) {

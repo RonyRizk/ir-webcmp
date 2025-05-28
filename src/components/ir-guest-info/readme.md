@@ -7,13 +7,14 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type      | Default     |
-| ------------- | -------------- | ----------- | --------- | ----------- |
-| `booking_nbr` | `booking_nbr`  |             | `string`  | `undefined` |
-| `email`       | `email`        |             | `string`  | `undefined` |
-| `headerShown` | `header-shown` |             | `boolean` | `undefined` |
-| `language`    | `language`     |             | `string`  | `undefined` |
-| `ticket`      | `ticket`       |             | `string`  | `undefined` |
+| Property      | Attribute        | Description | Type      | Default     |
+| ------------- | ---------------- | ----------- | --------- | ----------- |
+| `booking_nbr` | `booking_nbr`    |             | `string`  | `undefined` |
+| `email`       | `email`          |             | `string`  | `undefined` |
+| `headerShown` | `header-shown`   |             | `boolean` | `undefined` |
+| `isInSideBar` | `is-in-side-bar` |             | `boolean` | `undefined` |
+| `language`    | `language`       |             | `string`  | `undefined` |
+| `ticket`      | `ticket`         |             | `string`  | `undefined` |
 
 
 ## Events
@@ -33,9 +34,10 @@
 
 ### Depends on
 
-- [ir-icon](../ui/ir-icon)
+- [ir-spinner](../ui/ir-spinner)
+- [ir-title](../ir-title)
 - [ir-input-text](../ui/ir-input-text)
-- [ir-select](../ui/ir-select)
+- [ir-country-picker](../ui/ir-country-picker)
 - [ir-phone-input](../ui/ir-phone-input)
 - [ir-textarea](../ui/ir-textarea)
 - [ir-button](../ui/ir-button)
@@ -43,12 +45,15 @@
 ### Graph
 ```mermaid
 graph TD;
-  ir-guest-info --> ir-icon
+  ir-guest-info --> ir-spinner
+  ir-guest-info --> ir-title
   ir-guest-info --> ir-input-text
-  ir-guest-info --> ir-select
+  ir-guest-info --> ir-country-picker
   ir-guest-info --> ir-phone-input
   ir-guest-info --> ir-textarea
   ir-guest-info --> ir-button
+  ir-title --> ir-icon
+  ir-country-picker --> ir-input-text
   ir-phone-input --> ir-combobox
   ir-button --> ir-icons
   ir-booking-details --> ir-guest-info

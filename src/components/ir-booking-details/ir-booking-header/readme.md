@@ -23,7 +23,7 @@
 | Event             | Description | Type                                                                                                 |
 | ----------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
 | `closeSidebar`    |             | `CustomEvent<null>`                                                                                  |
-| `openSidebar`     |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: unknown; }>`                             |
+| `openSidebar`     |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: any; }>`                                 |
 | `resetBookingEvt` |             | `CustomEvent<null>`                                                                                  |
 | `toast`           |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 

@@ -1,9 +1,12 @@
-import { Component, Host, h, Prop, Event, EventEmitter, State, Element, Fragment } from '@stencil/core';
-import { findCountry, formatAmount } from '@/utils/utils';
+import { Component, Host, h, Prop, Event, EventEmitter, State, Element, Fragment, Watch, Listen } from '@stencil/core';
+import { canCheckIn, findCountry, formatAmount } from '@/utils/utils';
 import { ICountry } from '@/models/IBooking';
 import { EventsService } from '@/services/events.service';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
+import calendar_data from '@/stores/calendar-data';
+import { CalendarModalEvent } from '@/models/property-types';
+import { compareTime, createDateWithOffsetAndHour } from '@/utils/booking';
 //import { transformNewBLockedRooms } from '../../../utils/booking';
 
 @Component({
@@ -12,60 +15,63 @@ import locales from '@/stores/locales.store';
   scoped: true,
 })
 export class IglBookingEventHover {
+  @Element() element: HTMLIglBookingEventHoverElement;
+
   @Prop({ mutable: true }) bookingEvent: { [key: string]: any };
   @Prop() bubbleInfoTop: boolean = false;
   @Prop() currency;
-  @Prop() countryNodeList: ICountry[];
+  @Prop() countries: ICountry[];
   @Prop() is_vacation_rental: boolean = false;
+
   @State() isLoading: string;
+  @State() shouldHideUnassignUnit = false;
+  @State() canCheckInOrCheckout: boolean;
 
   @Event() showBookingPopup: EventEmitter;
   @Event({ bubbles: true, composed: true }) hideBubbleInfo: EventEmitter;
   @Event({ bubbles: true, composed: true }) deleteButton: EventEmitter<string>;
   @Event() bookingCreated: EventEmitter<{ pool?: string; data: any[] }>;
-  @Element() element;
-  private fromTimeStamp: number;
-  private toTimeStamp: number;
-  private todayTimeStamp: number = new Date().setHours(0, 0, 0, 0);
+  @Event() showDialog: EventEmitter<CalendarModalEvent>;
+
   private eventService = new EventsService();
   private hideButtons = false;
-  @State() shouldHideUnassignUnit = false;
+
   componentWillLoad() {
     let selectedRt = this.bookingEvent.roomsInfo.find(r => r.id === this.bookingEvent.RATE_TYPE);
     if (selectedRt) {
-      console.log(selectedRt.physicalrooms.length === 1);
       this.shouldHideUnassignUnit = selectedRt.physicalrooms.length === 1;
     }
     if (moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').isBefore(moment())) {
       this.hideButtons = true;
     }
-    this.handleKeyDown = this.handleKeyDown.bind(this);
+
+    this.canCheckInOrCheckout = moment().isSameOrAfter(new Date(this.bookingEvent.FROM_DATE), 'days') && moment().isBefore(new Date(this.bookingEvent.TO_DATE), 'days');
   }
 
-  handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      this.hideBubble();
-    } else return;
+  @Watch('bookingEvent')
+  handleBookingEventChange(newValue, oldValue) {
+    if (newValue !== oldValue)
+      this.canCheckInOrCheckout =
+        moment(new Date()).isSameOrAfter(new Date(this.bookingEvent.FROM_DATE), 'days') && moment(new Date()).isBefore(new Date(this.bookingEvent.TO_DATE), 'days');
   }
-
-  hideBubble() {
+  private getBookingId() {
+    return this.bookingEvent.ID;
+  }
+  private hideBubble() {
     this.hideBubbleInfo.emit({
       key: 'hidebubble',
       currentInfoBubbleId: this.getBookingId(),
     });
-    document.removeEventListener('keydown', this.handleKeyDown);
   }
-  componentDidLoad() {
-    document.addEventListener('keydown', this.handleKeyDown);
-  }
-  disconnectedCallback() {
-    document.removeEventListener('keydown', this.handleKeyDown);
-  }
-  getBookingId() {
-    return this.bookingEvent.ID;
+  @Listen('keydown', { target: 'body' })
+  handleListenKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      this.hideBubble();
+    } else return;
   }
 
-  getTotalOccupants() {
+  private getTotalOccupants() {
     const { CHILDREN_COUNT, ADULTS_COUNT } = this.bookingEvent;
     if (CHILDREN_COUNT === 0) {
       return `${ADULTS_COUNT} ${ADULTS_COUNT > 1 ? locales.entries.Lcz_AdultsCaption.toLowerCase() : locales.entries.Lcz_Single_Adult?.toLowerCase()}`;
@@ -75,119 +81,105 @@ export class IglBookingEventHover {
     }`;
   }
 
-  getPhoneNumber() {
+  private getPhoneNumber() {
     return this.bookingEvent.PHONE;
   }
 
-  getCountry() {
-    return findCountry(this.bookingEvent.COUNTRY, this.countryNodeList).name;
+  private getCountry() {
+    return findCountry(this.bookingEvent.COUNTRY, this.countries).name;
   }
-  getPhoneCode() {
+  private getPhoneCode() {
     if (this.bookingEvent.PHONE_PREFIX) {
       return this.bookingEvent.PHONE_PREFIX;
     }
-    return findCountry(this.bookingEvent.COUNTRY, this.countryNodeList).phone_prefix;
+    return findCountry(this.bookingEvent.COUNTRY, this.countries).phone_prefix;
   }
-  renderPhone() {
+  private renderPhone() {
     return this.bookingEvent.COUNTRY ? `${this.bookingEvent.is_direct ? this.getPhoneCode() + '-' : ''}${this.getPhoneNumber()} - ${this.getCountry()}` : this.getPhoneNumber();
   }
 
-  getGuestNote() {
-    return this.bookingEvent.NOTES && <p class={'user-notes p-0 my-0'}>{this.bookingEvent.NOTES}</p>;
-  }
+  // private getGuestNote() {
+  //   return this.bookingEvent.NOTES && <p class={'user-notes p-0 my-0'}>{this.bookingEvent.NOTES}</p>;
+  // }
 
-  getInternalNote() {
+  private getInternalNote() {
     return this.bookingEvent.INTERNAL_NOTE;
   }
 
-  getTotalPrice() {
+  private getTotalPrice() {
     return this.bookingEvent.TOTAL_PRICE;
   }
 
-  getCheckInDate() {
-    return this.bookingEvent.FROM_DATE_STR;
-  }
-
-  getCheckOutDate() {
-    return this.bookingEvent.TO_DATE_STR;
-  }
-
-  getArrivalTime() {
+  private getArrivalTime() {
     return this.bookingEvent.ARRIVAL_TIME;
   }
 
-  getRatePlan() {
+  private getRatePlan() {
     return this.bookingEvent.RATE_PLAN;
   }
 
-  getEntryDate() {
+  private getEntryDate() {
     return this.bookingEvent.ENTRY_DATE;
   }
 
-  getReleaseAfterHours() {
-    return this.bookingEvent.RELEASE_AFTER_HOURS;
-  }
-
-  isNewBooking() {
+  private isNewBooking() {
     return this.getBookingId() === 'NEW_TEMP_EVENT';
   }
 
-  isCheckedIn() {
-    return this.bookingEvent.STATUS === 'CHECKED-IN';
+  private isCheckedIn() {
+    return this.bookingEvent.STATUS === 'IN-HOUSE';
   }
 
-  isCheckedOut() {
-    return this.bookingEvent.STATUS === 'CHECKED-OUT';
-  }
-
-  isBlockedDateEvent() {
+  private isBlockedDateEvent() {
     return this.bookingEvent.STATUS === 'BLOCKED' || this.bookingEvent.STATUS === 'BLOCKED-WITH-DATES';
   }
 
-  getRoomId() {
-    return this.bookingEvent.PR_ID;
-  }
-
-  getCategoryByRoomId(roomId) {
-    // console.log("room id ",roomId)
-    // console.log("booking event",this.bookingEvent)
-    return this.bookingEvent.roomsInfo.find(roomCategory => roomCategory.physicalrooms.find(room => room.id === roomId));
-  }
-
-  hasSplitBooking() {
+  private hasSplitBooking() {
     return this.bookingEvent.hasOwnProperty('splitBookingEvents') && this.bookingEvent.splitBookingEvents;
   }
 
-  canCheckIn() {
-    if (!this.fromTimeStamp) {
-      let dt = new Date(this.getCheckInDate());
-      dt.setHours(0, 0, 0, 0);
-      this.fromTimeStamp = dt.getTime();
-    }
-    if (!this.toTimeStamp) {
-      let dt = new Date(this.getCheckOutDate());
-      dt.setHours(0, 0, 0, 0);
-      this.toTimeStamp = dt.getTime();
-    }
-    if (this.isCheckedIn() || this.isCheckedOut()) {
-      return false;
-    }
-    if (this.fromTimeStamp <= this.todayTimeStamp && this.todayTimeStamp <= this.toTimeStamp) {
-      return true;
-    } else {
-      return false;
-    }
+  private canCheckIn() {
+    // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
+    //   return false;
+    // }
+    // if (this.isCheckedIn()) {
+    //   return false;
+    // }
+    // const now = moment();
+    // if (
+    //   this.canCheckInOrCheckout ||
+    //   (moment().isSame(new Date(this.bookingEvent.TO_DATE), 'days') &&
+    //     !compareTime(now.toDate(), createDateWithOffsetAndHour(calendar_data.checkin_checkout_hours?.offset, calendar_data.checkin_checkout_hours?.hour)))
+    // ) {
+    //   return true;
+    // }
+    // return false;
+    return canCheckIn({
+      from_date: this.bookingEvent.FROM_DATE,
+      to_date: this.bookingEvent.TO_DATE,
+      isCheckedIn: this.isCheckedIn(),
+    });
   }
 
-  canCheckOut() {
-    if (this.isCheckedIn() && this.todayTimeStamp <= this.toTimeStamp) {
-      return true;
-    } else {
+  private canCheckOut() {
+    if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
       return false;
     }
+    if (this.isCheckedIn()) {
+      return true;
+    }
+    const now = moment();
+    if (
+      this.bookingEvent.ROOM_INFO?.in_out?.code === '000' &&
+      moment().isSameOrAfter(new Date(this.bookingEvent.TO_DATE), 'days') &&
+      compareTime(now.toDate(), createDateWithOffsetAndHour(calendar_data.checkin_checkout_hours?.offset, calendar_data.checkin_checkout_hours?.hour))
+    ) {
+      return true;
+    }
+    return false;
   }
 
-  handleBlockDateUpdate(event: CustomEvent<{ [key: string]: any }>) {
+  private handleBlockDateUpdate(event: CustomEvent<{ [key: string]: any }>) {
     event.stopImmediatePropagation();
     event.stopPropagation();
     const opt: { [key: string]: any } = event.detail;
@@ -195,17 +187,17 @@ export class IglBookingEventHover {
     //console.log("blocked date booking event", this.bookingEvent);
   }
 
-  handleEditBooking() {
+  private handleEditBooking() {
     // console.log("Edit booking");
     this.bookingEvent.TITLE = locales.entries.Lcz_EditBookingFor;
     this.handleBookingOption('EDIT_BOOKING');
   }
 
-  getStringDateFormat(dt) {
+  private getStringDateFormat(dt) {
     return dt.getFullYear() + '-' + (dt.getMonth() < 9 ? '0' : '') + (dt.getMonth() + 1) + '-' + (dt.getDate() <= 9 ? '0' : '') + dt.getDate();
   }
 
-  handleAddRoom() {
+  private handleAddRoom() {
     let fromDate = new Date(this.bookingEvent.FROM_DATE);
     fromDate.setHours(0, 0, 0, 0);
     let from_date_str = this.getStringDateFormat(fromDate);
@@ -245,20 +237,36 @@ export class IglBookingEventHover {
     this.handleBookingOption('ADD_ROOM', eventData);
   }
 
-  handleCustomerCheckIn() {
-    console.log('Handle Customer Check In');
+  private handleCustomerCheckIn() {
+    const { adult_nbr, children_nbr, infant_nbr } = this.bookingEvent.ROOM_INFO.occupancy;
+    this.showDialog.emit({
+      reason: 'checkin',
+      bookingNumber: this.bookingEvent.BOOKING_NUMBER,
+      roomIdentifier: this.bookingEvent.IDENTIFIER,
+      roomName: '',
+      roomUnit: '',
+      sidebarPayload: {
+        identifier: this.bookingEvent.IDENTIFIER,
+        bookingNumber: this.bookingEvent.BOOKING_NUMBER,
+        checkin: false,
+        roomName: this.bookingEvent.ROOM_INFO.unit?.name ?? '',
+        sharing_persons: this.bookingEvent.ROOM_INFO.sharing_persons,
+        totalGuests: adult_nbr + children_nbr + infant_nbr,
+      },
+    });
   }
 
-  handleCustomerCheckOut() {
-    console.log('Handle Customer Check Out');
+  private handleCustomerCheckOut() {
+    this.showDialog.emit({ reason: 'checkout', bookingNumber: this.bookingEvent.BOOKING_NUMBER, roomIdentifier: this.bookingEvent.IDENTIFIER, roomName: '', roomUnit: '' });
   }
-  handleDeleteEvent() {
+
+  private handleDeleteEvent() {
     this.hideBubble();
     this.deleteButton.emit(this.bookingEvent.POOL);
     console.log('Delete Event');
   }
 
-  async handleUpdateBlockedDates() {
+  private async handleUpdateBlockedDates() {
     try {
       this.isLoading = 'update';
       setTimeout(() => {
@@ -271,11 +279,11 @@ export class IglBookingEventHover {
     }
   }
 
-  handleConvertBlockedDateToBooking() {
+  private handleConvertBlockedDateToBooking() {
     this.handleBookingOption('BAR_BOOKING');
   }
 
-  getRoomInfo() {
+  private getRoomInfo() {
     const roomIdToFind = +this.bookingEvent.PR_ID;
     let selectedRoom: any = {};
 
@@ -292,7 +300,7 @@ export class IglBookingEventHover {
 
     return selectedRoom;
   }
-  renderTitle(eventType, roomInfo) {
+  private renderTitle(eventType, roomInfo) {
     switch (eventType) {
       case 'EDIT_BOOKING':
         return `${locales.entries.Lcz_EditBookingFor} ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
@@ -340,35 +348,35 @@ export class IglBookingEventHover {
       currentInfoBubbleId: this.getBookingId(),
     });
   }
-  renderNote() {
-    const { is_direct, ota_notes } = this.bookingEvent;
-    const guestNote = this.getGuestNote();
-    const noteLabel = locales.entries.Lcz_Note + ':';
+  // private renderNote() {
+  //   const { is_direct, ota_notes } = this.bookingEvent;
+  //   const guestNote = this.getGuestNote();
+  //   const noteLabel = locales.entries.Lcz_Note + ':';
 
-    if (!is_direct && ota_notes) {
-      return (
-        <div class="row p-0 m-0">
-          <div class="col-12 px-0 text-wrap d-flex">
-            <ota-label label={noteLabel} remarks={ota_notes}></ota-label>
-          </div>
-        </div>
-      );
-    } else if (is_direct && guestNote) {
-      return (
-        <div class="row p-0 m-0">
-          <div class="col-12 px-0 text-wrap d-flex">
-            <Fragment>
-              <span class="font-weight-bold">{noteLabel} </span>
-              {guestNote}
-            </Fragment>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  }
+  //   if (!is_direct && ota_notes) {
+  //     return (
+  //       <div class="row p-0 m-0">
+  //         <div class="col-12 px-0 text-wrap d-flex">
+  //           <ota-label label={noteLabel} remarks={ota_notes}></ota-label>
+  //         </div>
+  //       </div>
+  //     );
+  //   } else if (is_direct && guestNote) {
+  //     return (
+  //       <div class="row p-0 m-0">
+  //         <div class="col-12 px-0 text-wrap d-flex">
+  //           <Fragment>
+  //             <span class="font-weight-bold">{noteLabel} </span>
+  //             {guestNote}
+  //           </Fragment>
+  //         </div>
+  //       </div>
+  //     );
+  //   }
+  //   return null;
+  // }
 
-  getInfoElement() {
+  private getInfoElement() {
     return (
       <div class={`iglPopOver infoBubble ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
         <div class={`row p-0 m-0  ${this.bookingEvent.BALANCE > 1 ? 'pb-0' : 'pb-1'}`}>
@@ -443,15 +451,18 @@ export class IglBookingEventHover {
         )}
 
         {/* {this.renderNote()} */}
-        {this.bookingEvent.is_direct ? (
+        {/* {this.bookingEvent.is_direct ? (
           <ir-label containerStyle={{ padding: '0', margin: '0' }} labelText={`${locales.entries.Lcz_GuestRemark}:`} display="inline" content={this.bookingEvent.NOTES}></ir-label>
         ) : (
           <ota-label
-            class={'m-0 p-0'}
+            class={'m-0 p-0 ota-notes'}
             label={`${locales.entries.Lcz_ChannelNotes || 'Channel notes'}:`}
             remarks={this.bookingEvent.ota_notes}
             maxVisibleItems={this.bookingEvent.ota_notes?.length}
           ></ota-label>
+        )} */}
+        {this.bookingEvent.is_direct && (
+          <ir-label containerStyle={{ padding: '0', margin: '0' }} labelText={`${locales.entries.Lcz_GuestRemark}:`} display="inline" content={this.bookingEvent.NOTES}></ir-label>
         )}
         {/* {this.getInternalNote() ? (
           <div class="row p-0 m-0">
@@ -469,69 +480,64 @@ export class IglBookingEventHover {
         ) : null} */}
         {this.getInternalNote() && <ir-label labelText={`${locales.entries.Lcz_InternalRemark}:`} content={this.getInternalNote()}></ir-label>}
         <div class="row p-0 m-0 mt-2">
-          <div class="full-width btn-group  btn-group-sm font-small-3" role="group">
-            <button
-              type="button"
-              class={`btn btn-primary events_btns ${this.hideButtons ? 'mr-0' : 'mr-1'} ${this.shouldHideUnassignUnit ? 'w-50' : ''}`}
-              onClick={_ => {
-                this.handleEditBooking();
-              }}
-              // disabled={!this.bookingEvent.IS_EDITABLE}
-            >
-              <ir-icons name="edit" style={{ '--icon-size': '0.875rem' }}></ir-icons>
-              <span>{locales.entries.Lcz_Edit}</span>
-            </button>
+          <div class="full-width d-flex align-items-center" style={{ gap: '0.25rem' }} role="group">
+            <ir-button
+              style={{ '--icon-size': '0.875rem' }}
+              onClickHandler={() => this.handleEditBooking()}
+              class={'w-100'}
+              btn_block
+              text={locales.entries.Lcz_Edit}
+              icon_name="edit"
+              btn_styles="h-100"
+              size="sm"
+            ></ir-button>
             {this.bookingEvent.is_direct && this.bookingEvent.IS_EDITABLE && !this.hideButtons && (
-              <button
-                type="button"
-                class={`btn btn-primary events_btns ${!this.shouldHideUnassignUnit ? 'mr-1' : 'w-50'}`}
-                onClick={_ => {
-                  this.handleAddRoom();
-                }}
-              >
-                <ir-icons name="square_plus" style={{ '--icon-size': '0.875rem' }}></ir-icons>
-                <span>{locales.entries.Lcz_AddRoom}</span>
-              </button>
+              <ir-button
+                style={{ '--icon-size': '0.875rem' }}
+                text={locales.entries.Lcz_AddRoom}
+                icon_name="square_plus"
+                size="sm"
+                class={'w-100'}
+                btn_styles="h-100"
+                onClickHandler={() => this.handleAddRoom()}
+              ></ir-button>
             )}
-            {/* {this.canCheckIn() ? (
-              <button
-                type="button"
-                class="btn btn-primary p-0 mr-1"
-                onClick={_ => {
-                  this.handleCustomerCheckIn();
-                }}
-                disabled={!this.bookingEvent.IS_EDITABLE}
-              >
-                <i class="ft ft-edit font-small-3"></i> {locales.entries.Lcz_CheckIn}
-              </button>
-            ) : null}
-            {this.canCheckOut() ? (
-              <button
-                type="button"
-                class="btn btn-primary p-0 mr-1"
-                onClick={_ => {
-                  this.handleCustomerCheckOut();
-                }}
-                disabled={!this.bookingEvent.IS_EDITABLE}
-              >
-                <i class="ft ft-log-out font-small-3"></i> {locales.entries.Lcz_CheckOut}
-              </button>
-            ) : null} */}
-
+            {this.canCheckIn() && (
+              <ir-button
+                class={'w-100'}
+                style={{ '--icon-size': '0.875rem' }}
+                text={locales.entries.Lcz_CheckIn}
+                onClickHandler={() => this.handleCustomerCheckIn()}
+                icon_name="edit"
+                btn_styles="h-100"
+                size="sm"
+              ></ir-button>
+            )}
+            {this.canCheckOut() && (
+              <ir-button
+                class={'w-100'}
+                btn_styles="h-100"
+                style={{ '--icon-size': '0.875rem' }}
+                text={locales.entries.Lcz_CheckOut}
+                icon_name="edit"
+                onClickHandler={() => this.handleCustomerCheckOut()}
+                size="sm"
+              ></ir-button>
+            )}
             {this.hideButtons
               ? null
               : !this.shouldHideUnassignUnit && (
-                  <button
-                    type="button"
-                    class="btn btn-primary events_btns"
-                    onClick={_ => {
+                  <ir-button
+                    class={'w-100'}
+                    btn_styles="h-100"
+                    style={{ '--icon-size': '0.875rem' }}
+                    size="sm"
+                    text={locales.entries.Lcz_Unassign}
+                    icon_name="xmark"
+                    onClickHandler={_ => {
                       this.handleDeleteEvent();
                     }}
-                    // disabled={!this.bookingEvent.IS_EDITABLE || this.is_vacation_rental}
-                  >
-                    <ir-icons name="xmark" style={{ '--icon-size': '0.875rem' }}></ir-icons>
-                    <span class="m-0 p-0">{locales.entries.Lcz_Unassign}</span>
-                  </button>
+                  ></ir-button>
                 )}
           </div>
         </div>
@@ -542,42 +548,48 @@ export class IglBookingEventHover {
   private getNewBookingOptions() {
     const shouldDisplayButtons = this.bookingEvent.roomsInfo[0].rateplans.some(rate => rate.is_active);
     return (
-      <div class={`iglPopOver newBookingOptions ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
+      <div class={`iglPopOver d-flex flex-column newBookingOptions ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`} style={{ gap: '0.5rem' }}>
         {shouldDisplayButtons ? (
           <Fragment>
-            <button
-              type="button"
-              class="d-block full-width btn btn-sm btn-primary mb-1 font-small-3 square"
-              onClick={_ => {
+            {/* <div class={'mb-1'}> */}
+            <ir-button
+              size="sm"
+              btn_block
+              data-testid="bar_booking_btn"
+              text={locales.entries.Lcz_CreateNewBooking}
+              onClickHandler={_ => {
                 this.handleBookingOption('BAR_BOOKING');
               }}
-            >
-              {locales.entries.Lcz_CreateNewBooking}
-            </button>
-            {this.hasSplitBooking() ? (
-              <button
-                type="button"
-                class="d-block full-width btn btn-sm btn-primary mb-1 font-small-3 square"
-                onClick={_ => {
+            ></ir-button>
+            {/* </div> */}
+            {/* <div> */}
+            {this.hasSplitBooking() && (
+              // <div class="mb-1">
+              <ir-button
+                size="sm"
+                btn_block
+                text={locales.entries.Lcz_AssignUnitToExistingBooking}
+                onClickHandler={_ => {
                   this.handleBookingOption('SPLIT_BOOKING');
                 }}
-              >
-                {locales.entries.Lcz_AssignUnitToExistingBooking}
-              </button>
-            ) : null}
+              ></ir-button>
+              // </div>
+            )}
+            {/* </div> */}
           </Fragment>
         ) : (
           <p class={'text-danger'}>{locales.entries.Lcz_NoRatePlanDefined}</p>
         )}
-        <button
-          type="button"
-          class="d-block full-width btn btn-sm btn-primary font-small-3 square"
-          onClick={_ => {
+        {/* <div> */}
+        <ir-button
+          size="sm"
+          text={locales.entries.Lcz_Blockdates}
+          btn_block
+          onClickHandler={_ => {
             this.handleBookingOption('BLOCK_DATES');
           }}
-        >
-          {locales.entries.Lcz_Blockdates}
-        </button>
+        ></ir-button>
+        {/* </div> */}
       </div>
     );
   }
@@ -598,38 +610,45 @@ export class IglBookingEventHover {
           onDataUpdateEvent={event => this.handleBlockDateUpdate(event)}
         ></igl-block-dates-view>
         <div class="row p-0 m-0 mt-2">
-          <div class="full-width btn-group btn-group-sm font-small-3" role="group">
-            <button
-              disabled={this.isLoading === 'update'}
-              type="button"
-              class="btn btn-primary mr-1 events_btns"
-              onClick={_ => {
+          <div class="full-width d-flex align-items-center" style={{ gap: '0.25rem' }} role="group">
+            <ir-button
+              btn_disabled={this.isLoading === 'update'}
+              text={locales.entries.Lcz_Update}
+              onClickHandler={_ => {
                 this.handleUpdateBlockedDates();
               }}
-            >
-              {this.isLoading === 'update' ? <i class="la la-circle-o-notch spinner mx-1"></i> : <ir-icons name="edit" style={{ '--icon-size': '0.875rem' }}></ir-icons>}
-              <span>{locales.entries.Lcz_Update}</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary events_btns"
-              onClick={() => {
+              icon_name="edit"
+              size="sm"
+              btn_styles="h-100"
+              isLoading={this.isLoading === 'update'}
+              style={{ '--icon-size': '0.875rem' }}
+              btn_block
+              class={'w-100'}
+            ></ir-button>
+            <ir-button
+              class={'w-100 h-100 my-0'}
+              btn_block
+              btn_styles="h-100"
+              size="sm"
+              text={locales.entries.Lcz_ConvertToBooking}
+              onClickHandler={() => {
                 this.handleConvertBlockedDateToBooking();
               }}
-            >
-              {locales.entries.Lcz_ConvertToBooking}
-            </button>
+            ></ir-button>
 
-            <button
-              type="button"
-              class="btn btn-danger ml-1 events_btns"
-              onClick={_ => {
+            <ir-button
+              class={'w-100'}
+              btn_styles="h-100"
+              btn_block
+              size="sm"
+              style={{ '--icon-size': '0.875rem' }}
+              icon_name="trash"
+              btn_color="danger"
+              onClickHandler={_ => {
                 this.handleDeleteEvent();
               }}
-            >
-              <ir-icons name="trash" style={{ '--icon-size': '0.875rem' }}></ir-icons>
-              <span>{locales.entries.Lcz_Delete}</span>
-            </button>
+              text={locales.entries.Lcz_Delete}
+            ></ir-button>
           </div>
         </div>
       </div>

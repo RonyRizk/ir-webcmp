@@ -124,7 +124,7 @@ export class IglBookPropertyHeader {
           <fieldset>
             <div class="btn-group ml-0">
               <ir-select
-                // testId="adult_number"
+                testId="adult_number"
                 class={'m-0'}
                 selectedValue={this.adultChildCount?.adult?.toString()}
                 onSelectChange={e => this.handleAdultChildChange('adult', e.detail)}
@@ -149,7 +149,7 @@ export class IglBookPropertyHeader {
                 </select> */}
                 <ir-select
                   selectedValue={this.adultChildCount?.child?.toString()}
-                  // testId="child_number"
+                  testId="child_number"
                   onSelectChange={e => this.handleAdultChildChange('child', e.detail)}
                   select_id="child_select"
                   firstOption={this.renderChildCaption()}

@@ -1,4 +1,4 @@
-import { Component, Prop, Event, EventEmitter, h, Listen } from '@stencil/core';
+import { Component, Prop, Event, EventEmitter, h, Listen, Method } from '@stencil/core';
 import { v4 } from 'uuid';
 import { TIcons } from '../ir-icons/icons';
 
@@ -33,6 +33,7 @@ export class IrButton {
   @Event({ bubbles: true, composed: true }) clickHandler: EventEmitter<any>;
 
   private buttonEl: HTMLButtonElement;
+
   @Listen('animateIrButton', { target: 'body' })
   handleButtonAnimation(e: CustomEvent) {
     if (!this.buttonEl || e.detail !== this.btn_id) {
@@ -44,7 +45,14 @@ export class IrButton {
     void this.buttonEl.offsetWidth;
     this.buttonEl.classList.add('bounce-3');
   }
+  @Method()
+  async bounce() {
+    this.buttonEl.classList.remove('bounce-3');
+    void this.buttonEl.offsetWidth;
+    this.buttonEl.classList.add('bounce-3');
+  }
   render() {
+    const disabled = this.btn_disabled || this.isLoading;
     if (this.variant === 'icon') {
       return (
         <button
@@ -53,7 +61,7 @@ export class IrButton {
           ref={el => (this.buttonEl = el)}
           onClick={() => this.clickHandler.emit()}
           type={this.btn_type}
-          disabled={this.btn_disabled}
+          disabled={disabled}
         >
           {this.isLoading ? <span class="icon-loader"></span> : <ir-icons class={'m-0 p-0'} name={this.icon_name}></ir-icons>}
         </button>
@@ -68,7 +76,7 @@ export class IrButton {
         class={`btn btn-${this.btn_color} ${this.btn_styles} ir-button-class  btn-${this.size} text-${this.textSize} ${blockClass}`}
         type={this.btn_type}
         style={this.btnStyle}
-        disabled={this.btn_disabled || this.isLoading}
+        disabled={disabled}
       >
         {this.icon_name && this.iconPosition === 'left' && <ir-icons name={this.icon_name} style={this.icon_style}></ir-icons>}
         {this.text &&

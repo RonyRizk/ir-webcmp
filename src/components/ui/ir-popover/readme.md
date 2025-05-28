@@ -7,22 +7,25 @@
 
 ## Properties
 
-| Property        | Attribute         | Description | Type     | Default     |
-| --------------- | ----------------- | ----------- | -------- | ----------- |
-| `irPopoverLeft` | `ir-popover-left` |             | `string` | `'10px'`    |
-| `popoverTitle`  | `popover-title`   |             | `string` | `undefined` |
+| Property              | Attribute                | Description | Type                                               | Default     |
+| --------------------- | ------------------------ | ----------- | -------------------------------------------------- | ----------- |
+| `content`             | `content`                |             | `string`                                           | `undefined` |
+| `irPopoverLeft`       | `ir-popover-left`        |             | `string`                                           | `'10px'`    |
+| `placement`           | `placement`              |             | `"auto" \| "bottom" \| "left" \| "right" \| "top"` | `'auto'`    |
+| `renderContentAsHtml` | `render-content-as-html` |             | `boolean`                                          | `false`     |
+| `trigger`             | `trigger`                |             | `"click" \| "focus" \| "hover"`                    | `'focus'`   |
 
 
 ## Dependencies
 
 ### Used by
 
- - [igl-cal-body](../../igloo-calendar/igl-cal-body)
+ - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-cal-body --> ir-popover
+  ir-hk-team --> ir-popover
   style ir-popover fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

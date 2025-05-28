@@ -17,6 +17,7 @@
 ### Used by
 
  - [ir-booking](../ir-booking)
+ - [ir-secure-tasks](../ir-secure-tasks)
 
 ### Depends on
 
@@ -34,8 +35,13 @@ graph TD;
   ir-login --> ir-input-text
   ir-login --> ir-icons
   ir-login --> ir-button
+  ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-spinner
+  ir-otp-modal --> ir-otp
+  ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-booking --> ir-login
+  ir-secure-tasks --> ir-login
   style ir-login fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

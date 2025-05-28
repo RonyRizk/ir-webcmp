@@ -20,8 +20,8 @@ export class IglRatePlan {
   @Prop() isBookDisabled: boolean = false;
   @Prop() visibleInventory!: IRatePlanSelection;
 
-  // @Event() gotoSplitPageTwoEvent!: EventEmitter<{ [key: string]: any }>;
   @Event() buttonClicked!: EventEmitter<{ [key: string]: any }>;
+
   // Determine if the form inputs should be disabled
   private disableForm(): boolean {
     const { bookingType, shouldBeDisabled, ratePlan, visibleInventory } = this;
@@ -66,14 +66,13 @@ export class IglRatePlan {
 
   // Navigate to the next page for booking
   private bookProperty(): void {
-    // this.handleDataChange('totalRooms', { target: { value: '1' } } as any);
-    // this.gotoSplitPageTwoEvent.emit({ key: 'gotoSplitPage', data: '' });
     if (this.bookingType === 'BAR_BOOKING') {
       resetReserved();
     }
     this.reserveRoom();
     this.buttonClicked.emit({ key: 'next' });
   }
+
   private reserveRoom() {
     reserveRooms({
       roomTypeId: this.roomTypeId,
@@ -81,7 +80,8 @@ export class IglRatePlan {
       rooms: 1,
       guest: [
         {
-          name: booking_store.guest?.name,
+          last_name: booking_store.guest?.last_name,
+          first_name: booking_store.guest?.first_name,
           unit: this.roomTypeId === booking_store.guest?.roomtype_id ? booking_store.guest?.unit : null,
           bed_preference: this.visibleInventory.roomtype.is_bed_configuration_enabled ? booking_store.guest?.bed_preference : null,
           infant_nbr: this.visibleInventory.selected_variation?.child_nbr > 0 ? booking_store.guest?.infant_nbr : null,
@@ -97,7 +97,7 @@ export class IglRatePlan {
       return visibleInventory.rp_amount.toString();
     }
     const { selected_variation, view_mode } = visibleInventory;
-    const amount = view_mode === '001' ? selected_variation?.discounted_gross_amount : selected_variation?.amount_per_night_gross;
+    const amount = view_mode === '001' ? selected_variation?.discounted_amount : selected_variation?.amount_per_night_gross;
     return amount?.toString() || '';
   }
 
@@ -158,7 +158,6 @@ export class IglRatePlan {
     const disableForm = this.disableForm();
     const selectedVariation = visibleInventory?.selected_variation;
     const formattedVariations = ratePlan.variations?.map(v => this.formatVariation(v));
-    // console.log(visibleInventory);
     // if (!this.visibleInventory) {
     //   return null;
     // }
@@ -207,7 +206,7 @@ export class IglRatePlan {
               <div class="m-0 p-0 mt-1 mt-md-0 d-flex justify-content-between align-items-md-center ml-md-1">
                 <div class="d-flex m-0 p-0 rate-total-night-view mt-0 flex-grow-1">
                   <ir-price-input
-                    // testId={'amount_input'}
+                    testId={'amount_input'}
                     disabled={disableForm}
                     onTextChange={e =>
                       this.updateRateplanSelection({

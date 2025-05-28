@@ -1,4 +1,5 @@
-import { IExposedHouseKeepingSetup, IInspectionMode, IPropertyHousekeepingAssignment, THKUser, TPendingHkSetupParams } from '@/models/housekeeping';
+import { RoomHkStatus } from '@/models/booking.dto';
+import { ArchivedTask, IExposedHouseKeepingSetup, IInspectionMode, IPropertyHousekeepingAssignment, THKUser, TPendingHkSetupParams } from '@/models/housekeeping';
 import { updateHKStore } from '@/stores/housekeeping.store';
 import axios from 'axios';
 
@@ -11,11 +12,20 @@ export class HouseKeepingService {
     return data['My_Result'];
   }
   public async getExposedHKStatusCriteria(property_id: number): Promise<IExposedHouseKeepingSetup> {
-    const { data } = await axios.post(`/Get_Exposed_HK_Status_Criteria`, {
-      property_id,
-    });
+    const { data } = await axios.post(`/Get_Exposed_HK_Status_Criteria`, { property_id });
     updateHKStore('hk_tasks', data['My_Result']);
     return data['My_Result'];
+  }
+  public async getArchivedHKTasks(params: {
+    property_id: number;
+    from_date: string;
+    to_date: string;
+    filtered_by_hkm?: number[];
+    filtered_by_unit?: number[];
+    is_export_to_excel?: boolean;
+  }): Promise<{ tasks: ArchivedTask[]; url: string } | null> {
+    const { data } = await axios.post(`/Get_Archived_HK_Tasks`, params);
+    return { url: data.My_Params_Get_Archived_HK_Tasks.Link_excel, tasks: data['My_Result'] ?? [] };
   }
 
   public async setExposedInspectionMode(property_id: number, mode: IInspectionMode) {
@@ -38,10 +48,48 @@ export class HouseKeepingService {
   }
   public async getHKPendingActions(params: TPendingHkSetupParams) {
     const { data } = await axios.post(`/Get_HK_Pending_Actions`, { ...params });
-    updateHKStore('pending_housekeepers', [...data['My_Result']]);
+    updateHKStore(
+      'pending_housekeepers',
+      [...data['My_Result']].map(d => ({ original: d, selected: false })),
+    );
     return data['My_Result'];
   }
-  public async executeHKAction(params) {
+  public async setExposedUnitHKStatus(params: {
+    property_id: number;
+    status: {
+      code: RoomHkStatus;
+    };
+    unit: {
+      id: number;
+    };
+  }) {
+    const { data } = await axios.post(`/Set_Exposed_Unit_HK_Status`, { ...params });
+    return data['My_Result'];
+  }
+  public async getHkTasks(params: {
+    property_id: number;
+    from_date: string;
+    to_date: string;
+    housekeepers?: { id: number }[];
+    cleaning_frequency?: string;
+    dusty_window?: string;
+    highlight_window?: string;
+    is_export_to_excel?: boolean;
+  }) {
+    const { data } = await axios.post('/Get_HK_Tasks', params);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return { url: data.My_Params_Get_HK_Tasks?.Link_excel, tasks: data.My_Result };
+  }
+  public async executeHKAction(params: {
+    actions: {
+      unit_id: number;
+      hkm_id: number;
+      description: string;
+      booking_nbr?: string | number;
+    }[];
+  }) {
     await axios.post(`/Execute_HK_Action`, { ...params });
   }
   public async generateUserName(name: string) {

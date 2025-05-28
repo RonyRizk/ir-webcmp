@@ -54,7 +54,11 @@ export type bookingReasons =
   | 'UPDATE_CALENDAR_AVAILABILITY'
   | 'CHANGE_IN_DUE_AMOUNT'
   | 'CHANGE_IN_BOOK_STATUS'
-  | 'NON_TECHNICAL_CHANGE_IN_BOOKING';
+  | 'NON_TECHNICAL_CHANGE_IN_BOOKING'
+  | 'SHARING_PERSONS_UPDATED'
+  | 'ROOM_STATUS_CHANGED'
+  | 'UNIT_HK_STATUS_CHANGED'
+  | 'EMAIL_VERIFIED';
 export const validReasons = new Set<bookingReasons>([
   'DORESERVATION',
   'BLOCK_EXPOSED_UNIT',
@@ -284,6 +288,8 @@ export interface RoomUpdateEvent {
 }
 
 export interface RoomBookingDetails {
+  CHECKIN: boolean;
+  CHECKOUT: boolean;
   ID: string;
   TO_DATE: string;
   ARRIVAL: Arrival;
@@ -328,6 +334,8 @@ export interface RoomBookingDetails {
     from_date: string;
     to_date: string;
   };
+  BASE_STATUS_CODE: string;
+  ROOM_INFO: Pick<Room, 'occupancy' | 'sharing_persons' | 'unit' | 'in_out'>;
 }
 export interface ISource {
   code: string;

@@ -45,8 +45,12 @@ Type: `Promise<void>`
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
+ - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
+ - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
  - [ir-payment-option](../../ir-payment-option)
+ - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
+ - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Depends on
 
@@ -60,8 +64,12 @@ graph TD;
   ir-booking-details --> ir-sidebar
   ir-booking-listing --> ir-sidebar
   ir-channel --> ir-sidebar
+  ir-hk-archive --> ir-sidebar
+  ir-hk-tasks --> ir-sidebar
   ir-hk-team --> ir-sidebar
   ir-payment-option --> ir-sidebar
+  ir-user-form-panel --> ir-sidebar
+  ir-user-management-table --> ir-sidebar
   style ir-sidebar fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

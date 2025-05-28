@@ -23,6 +23,7 @@
 | `rightBtnActive` | `right-btn-active` |             | `boolean`                                                                                       | `true`          |
 | `rightBtnColor`  | `right-btn-color`  |             | `"danger" \| "dark" \| "info" \| "light" \| "primary" \| "secondary" \| "success" \| "warning"` | `'primary'`     |
 | `rightBtnText`   | `right-btn-text`   |             | `string`                                                                                        | `'Confirm'`     |
+| `showTitle`      | `show-title`       |             | `boolean`                                                                                       | `undefined`     |
 
 
 ## Events
@@ -60,6 +61,7 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [igl-cal-body](../../igloo-calendar/igl-cal-body)
  - [igloo-calendar](../../igloo-calendar)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-channel](../../ir-channel)
@@ -67,6 +69,7 @@ Type: `Promise<void>`
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Depends on
 
@@ -77,6 +80,7 @@ Type: `Promise<void>`
 graph TD;
   ir-modal --> ir-button
   ir-button --> ir-icons
+  igl-cal-body --> ir-modal
   igloo-calendar --> ir-modal
   ir-booking-details --> ir-modal
   ir-channel --> ir-modal
@@ -84,6 +88,7 @@ graph TD;
   ir-hk-tasks --> ir-modal
   ir-payment-details --> ir-modal
   ir-room --> ir-modal
+  ir-user-management-table --> ir-modal
   style ir-modal fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

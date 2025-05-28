@@ -18,7 +18,7 @@ export class IglPropertyBookedBy {
   @Prop() showPaymentDetails: boolean = false;
   @Prop() defaultData: { [key: string]: any };
   @Event() dataUpdateEvent: EventEmitter<{ [key: string]: any }>;
-  @Prop() countryNodeList: ICountry[] = [];
+  @Prop() countries: ICountry[] = [];
   @Prop() propertyId: number;
   @State() isButtonPressed: boolean = false;
   private bookingService: BookingService = new BookingService();
@@ -81,7 +81,7 @@ export class IglPropertyBookedBy {
     console.log('initial bookedby data', this.bookedByData);
   }
 
-  handleDataChange(key, event) {
+  private handleDataChange(key, event) {
     this.bookedByData[key] = key === 'emailGuest' ? event.target.checked : event.target.value;
     this.dataUpdateEvent.emit({
       key: 'bookedByInfoUpdated',
@@ -95,8 +95,20 @@ export class IglPropertyBookedBy {
     }
     // console.log(this.bookedByData);
   }
+  private handleCountryChange(value) {
+    this.bookedByData = {
+      ...this.bookedByData,
+      isdCode: value,
+      countryId: value,
+    };
+    this.dataUpdateEvent.emit({
+      key: 'bookedByInfoUpdated',
+      data: { ...this.bookedByData },
+    });
+    // console.log(this.bookedByData);
+  }
 
-  handleNumberInput(key, event: InputEvent) {
+  private handleNumberInput(key, event: InputEvent) {
     const inputElement = event.target as HTMLInputElement;
     const inputValue = inputElement.value;
 
@@ -275,6 +287,7 @@ export class IglPropertyBookedBy {
                 onBlur={() => this.checkUser()}
               /> */}
               <ir-autocomplete
+                testId={'main_guest_email'}
                 onComboboxValue={this.handleComboboxChange.bind(this)}
                 propertyId={this.propertyId}
                 type="text"
@@ -296,6 +309,7 @@ export class IglPropertyBookedBy {
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_FirstName}</label>
                 <div class="p-0 m-0  controlContainer flex-fill  ">
                   <input
+                    data-testid="main_guest_first_name"
                     class={`form-control flex-fill ${this.isButtonPressed && this.bookedByData.firstName === '' && 'border-danger'}`}
                     type="text"
                     placeholder={locales.entries.Lcz_FirstName}
@@ -314,6 +328,7 @@ export class IglPropertyBookedBy {
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_LastName}</label>
                 <div class="p-0 m-0  controlContainer flex-fill">
                   <input
+                    data-testid="main_guest_last_name"
                     class={`form-control ${this.isButtonPressed && this.bookedByData.lastName === '' && 'border-danger'}`}
                     type="text"
                     placeholder={locales.entries.Lcz_LastName}
@@ -326,18 +341,25 @@ export class IglPropertyBookedBy {
 
               <div class="form-group  p-0 d-flex flex-column flex-md-row align-items-md-center">
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_Country}</label>
-                <div class="p-0 m-0  controlContainer flex-fill">
-                  <select class={`form-control input-sm pr-0`} id={v4()} onChange={event => this.handleDataChange('countryId', event)}>
+                {/* <div class="p-0 m-0  controlContainer flex-fill"> */}
+                <ir-country-picker
+                  testId="main_guest_country"
+                  class="flex-grow-1 m-0"
+                  onCountryChange={e => this.handleCountryChange(e.detail.id)}
+                  countries={this.countries}
+                  country={this.countries.find(c => c.id === this.bookedByData.countryId)}
+                ></ir-country-picker>
+                {/* <select class={`form-control input-sm pr-0`} id={v4()} onChange={event => this.handleDataChange('countryId', event)}>
                     <option value="" selected={this.bookedByData.countryId === ''}>
                       {locales.entries.Lcz_Select}
                     </option>
-                    {this.countryNodeList.map(countryNode => (
+                    {this.countries.map(countryNode => (
                       <option value={countryNode.id} selected={this.bookedByData.countryId === countryNode.id}>
                         {countryNode.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                  </select> */}
+                {/* </div> */}
               </div>
 
               {/* <div class="form-group  p-0 d-flex flex-column flex-md-row align-items-md-center">
@@ -348,7 +370,7 @@ export class IglPropertyBookedBy {
                       <option value="" selected={this.bookedByData.isdCode === ''}>
                         {locales.entries.Lcz_Isd}
                       </option>
-                      {this.countryNodeList.map(country => (
+                      {this.countries.map(country => (
                         <option value={country.id} selected={this.bookedByData.isdCode === country.id.toString()}>
                           {country.phone_prefix}
                         </option>
@@ -373,6 +395,7 @@ export class IglPropertyBookedBy {
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_MobilePhone}</label>
                 <div class="p-0 m-0 controlContainer flex-fill">
                   <ir-phone-input
+                    testId="main_guest_phone"
                     language={this.language}
                     // label={locales.entries.Lcz_MobilePhone}
                     value={this.bookedByData.contactNumber}
@@ -389,6 +412,7 @@ export class IglPropertyBookedBy {
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_YourArrivalTime}</label>
                 <div class="p-0 m-0  controlContainer flex-fill">
                   <select
+                    data-testid="arrival_time"
                     class={`form-control input-sm pr-0 ${this.isButtonPressed && this.bookedByData.selectedArrivalTime.code === '' && 'border-danger'}`}
                     id={v4()}
                     onChange={event => this.handleDataChange('selectedArrivalTime', event)}
@@ -410,6 +434,7 @@ export class IglPropertyBookedBy {
                 <label class="p-0 m-0 margin3">{locales.entries.Lcz_AnyMessageForUs}</label>
                 <div class="p-0 m-0  controlContainer flex-fill ">
                   <textarea
+                    data-testid="note"
                     id={v4()}
                     rows={4}
                     class="form-control "

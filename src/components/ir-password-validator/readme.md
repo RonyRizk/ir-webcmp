@@ -21,6 +21,12 @@
 
 ## Dependencies
 
+### Used by
+
+ - [ir-hk-user](../ir-housekeeping/ir-hk-user)
+ - [ir-reset-password](../ir-reset-password)
+ - [ir-user-form-panel](../ir-user-management/ir-user-form-panel)
+
 ### Depends on
 
 - [requirement-check](requirement-check)
@@ -30,6 +36,9 @@
 graph TD;
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
+  ir-hk-user --> ir-password-validator
+  ir-reset-password --> ir-password-validator
+  ir-user-form-panel --> ir-password-validator
   style ir-password-validator fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

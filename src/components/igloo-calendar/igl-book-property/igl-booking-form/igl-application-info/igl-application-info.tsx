@@ -139,7 +139,7 @@ export class IglApplicationInfo {
       variations: this.rateplanSelection.ratePlan.variations,
     });
     return (
-      <Host class={'my-2'}>
+      <Host class={'my-2'} data-testid={`room_info_${this.rateplanSelection.ratePlan.id}`}>
         <div class="booking-header">
           {(this.bookingType === 'PLUS_BOOKING' || this.bookingType === 'ADD_ROOM' || this.bookingType === 'EDIT_BOOKING') && (
             <span class="booking-roomtype-title">{this.rateplanSelection.roomtype.name}</span>
@@ -168,13 +168,14 @@ export class IglApplicationInfo {
           <div class="mr-md-1 mb-1 mb-md-0 flex-fill guest-info-container">
             <input
               id={v4()}
-              type="email"
-              class={`form-control ${this.isButtonPressed && this.guestInfo?.name === '' && 'border-danger'}`}
-              placeholder={locales.entries.Lcz_GuestFirstnameAndLastname}
-              name="guestName"
+              type="text"
+              data-testid="guest_first_name"
+              class={`form-control ${this.isButtonPressed && this.guestInfo?.first_name === '' && 'border-danger'}`}
+              placeholder={locales.entries['Lcz_GuestFirstname'] ?? 'Guest first name'}
+              name="guestFirstName"
               onInput={event => {
                 const name = (event.target as HTMLInputElement).value;
-                this.updateGuest({ name });
+                this.updateGuest({ first_name: name });
                 if (booking_store.event_type.type === 'EDIT_BOOKING') {
                   modifyBookingStore('guest', {
                     ...booking_store.guest,
@@ -183,32 +184,53 @@ export class IglApplicationInfo {
                 }
               }}
               required
-              value={this.guestInfo?.name}
+              value={this.guestInfo?.first_name}
+            />
+          </div>
+          <div class="mr-md-1 flex-fill guest-info-container">
+            <input
+              id={v4()}
+              type="text"
+              class={`form-control ${this.isButtonPressed && this.guestInfo?.last_name === '' && 'border-danger'}`}
+              placeholder={locales.entries['Lcz_GuestLastname'] ?? 'Guest last name'}
+              name="guestLastName"
+              data-testid="guest_last_name"
+              onInput={event => {
+                const name = (event.target as HTMLInputElement).value;
+                this.updateGuest({ last_name: name });
+                if (booking_store.event_type.type === 'EDIT_BOOKING') {
+                  modifyBookingStore('guest', {
+                    ...booking_store.guest,
+                    name,
+                  });
+                }
+              }}
+              required
+              value={this.guestInfo?.last_name}
             />
           </div>
           {calendar_data.is_frontdesk_enabled &&
             !isSingleUnit(this.rateplanSelection.roomtype.id) &&
             (this.bookingType === 'PLUS_BOOKING' || this.bookingType === 'ADD_ROOM' || this.bookingType === 'EDIT_BOOKING') && (
-              <div class="mb-1 mt-0 my-md-0 d-flex align-items-center flex-fill unit-select-container">
-                <div class="d-flex align-items-center flex-fill">
-                  <div class="mr-md-1 p-0 flex-fill preference-select-container">
-                    <select class="form-control input-sm pr-0" id={v4()} onChange={event => this.updateGuest({ unit: (event.target as HTMLInputElement).value })}>
-                      <option value="" selected={this.guestInfo?.unit === ''}>
-                        {locales.entries.Lcz_Assignunits}
+              <div class="mt-1 mt-md-0 d-flex align-items-center flex-fill">
+                <div class="mr-md-1 p-0 flex-fill preference-select-container">
+                  <select data-testid="unit" class="form-control input-sm pr-0" id={v4()} onChange={event => this.updateGuest({ unit: (event.target as HTMLInputElement).value })}>
+                    <option value="" selected={this.guestInfo?.unit === ''}>
+                      {locales.entries.Lcz_Assignunits}
+                    </option>
+                    {filteredRoomList?.map(room => (
+                      <option value={room.id} selected={this.guestInfo?.unit === room.id.toString()}>
+                        {room.name}
                       </option>
-                      {filteredRoomList?.map(room => (
-                        <option value={room.id} selected={this.guestInfo?.unit === room.id.toString()}>
-                          {room.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
           {this.rateplanSelection.roomtype.is_bed_configuration_enabled && (
-            <div class="mr-md-1 flex-fill bed-preference-container">
+            <div class="mt-1 mt-md-0 mr-md-1 flex-fill">
               <select
+                data-testid="bed_configuration"
                 class={`form-control input-sm ${this.isButtonPressed && this.guestInfo?.bed_preference === '' && 'border-danger'}`}
                 id={v4()}
                 onChange={event => this.updateGuest({ bed_preference: (event.target as HTMLInputElement).value })}

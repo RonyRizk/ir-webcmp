@@ -2,11 +2,12 @@ import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, 
 import { BookingService } from '@/services/booking.service';
 import { calculateDaysBetweenDates, transformNewBooking } from '@/utils/booking';
 import { isBlockUnit } from '@/utils/utils';
-import { IReallocationPayload, IRoomNightsData } from '@/models/property-types';
+import { IRoomNightsData, CalendarModalEvent } from '@/models/property-types';
 import moment from 'moment';
 import { IToast } from '@components/ui/ir-toast/toast';
 import { EventsService } from '@/services/events.service';
 import locales from '@/stores/locales.store';
+import { ICountry } from '@/models/IBooking';
 
 @Component({
   tag: 'igl-booking-event',
@@ -21,13 +22,13 @@ export class IglBookingEvent {
   @Prop() language: string;
   @Prop({ mutable: true }) bookingEvent: { [key: string]: any };
   @Prop() allBookingEvents: { [key: string]: any } = [];
-  @Prop() countryNodeList;
+  @Prop() countries: ICountry[];
 
   @Event({ bubbles: true, composed: true }) hideBubbleInfo: EventEmitter;
   @Event() updateEventData: EventEmitter;
   @Event() dragOverEventData: EventEmitter;
   @Event() showRoomNightsDialog: EventEmitter<IRoomNightsData>;
-  @Event() showDialog: EventEmitter<IReallocationPayload>;
+  @Event() showDialog: EventEmitter<CalendarModalEvent>;
   @Event() resetStreachedBooking: EventEmitter<string>;
   @Event() toast: EventEmitter<IToast>;
   @Event() updateBookingEvent: EventEmitter<{ [key: string]: any }>;
@@ -782,7 +783,7 @@ export class IglBookingEvent {
       >
         {/* onMouseOver={() =>this.showEventInfo(true)}  */}
         <div
-          class={`bookingEventBase ${
+          class={`bookingEventBase  ${
             !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? 'skewedLeft' : ''
           }
           ${!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.to_date)).isAfter(new Date(this.bookingEvent.TO_DATE)) ? 'skewedRight' : ''}
@@ -791,7 +792,7 @@ export class IglBookingEvent {
             !isBlockUnit(this.bookingEvent.STATUS_CODE) &&
             this.bookingEvent.STATUS !== 'TEMP-EVENT' &&
             this.bookingEvent.ID !== 'NEW_TEMP_EVENT' &&
-            'border border-dark'
+            'border border-dark ota-booking-event'
           }  ${this.isSplitBooking() ? 'splitBooking' : ''}`}
           style={{ 'backgroundColor': legend.color, '--ir-event-bg': legend.color }}
           onTouchStart={event => this.startDragging(event, 'move')}
@@ -829,7 +830,7 @@ export class IglBookingEvent {
         {this.showInfoPopup ? (
           <igl-booking-event-hover
             is_vacation_rental={this.is_vacation_rental}
-            countryNodeList={this.countryNodeList}
+            countries={this.countries}
             currency={this.currency}
             class="top"
             bookingEvent={this.bookingEvent}

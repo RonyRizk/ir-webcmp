@@ -1,5 +1,4 @@
-import { Arrival, Booking, IBookingPickupInfo, Room } from './booking.dto';
-export type FooterButtonType = 'cancel' | 'next';
+import { Arrival, Booking, IBookingPickupInfo, Room, SharedPerson } from './booking.dto';
 export type TPropertyButtonsTypes = 'cancel' | 'save' | 'back' | 'book' | 'bookAndCheckIn' | 'next' | 'check';
 export type TSourceOption = { code: string; description: string; tag: string; id?: string; type?: string };
 export type TSourceOptions = { id: string; value: string; tag: string; type: string };
@@ -60,7 +59,7 @@ interface IglBookPropertyPayloadEditBooking extends IglBookPropertyPayload {
   RATE_TYPE: number;
   ADULTS_COUNT: number;
   CHILDREN_COUNT: number;
-  GUEST: {};
+  GUEST: SharedPerson;
   ROOMS: Array<{}>;
   cancelation: string;
   guarantee: string;

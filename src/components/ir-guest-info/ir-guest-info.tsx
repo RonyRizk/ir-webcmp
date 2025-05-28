@@ -1,14 +1,15 @@
-import { Component, State, h, Prop, EventEmitter, Event, Watch } from '@stencil/core';
+import { Component, State, h, Prop, EventEmitter, Event, Watch, Fragment } from '@stencil/core';
 import { Guest } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking.service';
 import { ICountry } from '@/components';
 import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import Token from '@/models/Token';
+import { isRequestPending } from '@/stores/ir-interceptor.store';
 
 @Component({
   tag: 'ir-guest-info',
-  styleUrl: 'ir-guest-info.css',
+  styleUrls: ['ir-guest-info.css', '../../common/sheet.css'],
   scoped: true,
 })
 export class GuestInfo {
@@ -17,11 +18,13 @@ export class GuestInfo {
   @Prop() email: string;
   @Prop() booking_nbr: string;
   @Prop() ticket: string;
+  @Prop() isInSideBar: boolean;
 
   @State() countries: ICountry[];
-  @State() submit: boolean = false;
+  // @State() submit: boolean = false;
   @State() guest: Guest | null = null;
-  @State() isLoading: boolean = false;
+  @State() isLoading: boolean = true;
+  @State() autoValidate = false;
 
   @Event() closeSideBar: EventEmitter<null>;
   @Event({ bubbles: true }) resetBookingEvt: EventEmitter<null>;
@@ -34,7 +37,7 @@ export class GuestInfo {
     if (this.ticket) {
       this.token.setToken(this.ticket);
     }
-    if (!!this.token.getToken()) await this.init();
+    if (!!this.token.getToken()) this.init();
   }
 
   @Watch('ticket')
@@ -45,18 +48,11 @@ export class GuestInfo {
     this.token.setToken(this.ticket);
     this.init();
   }
-  // async init() {
-  //   try {
 
-  //     const [guest, countries] = await Promise.all([this.bookingService.fetchGuest(this.email), this.bookingService.getCountries(this.language)]);
-  //     this.countries = countries;
-  //     this.guest = guest;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
   async init() {
     try {
+      console.log('first');
+      this.isLoading = true;
       const [guest, countries, fetchedLocales] = await Promise.all([
         this.bookingService.fetchGuest(this.email),
         this.bookingService.getCountries(this.language),
@@ -74,93 +70,86 @@ export class GuestInfo {
       this.guest = { ...guest, mobile: guest.mobile_without_prefix };
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   }
   private handleInputChange(params: Partial<Guest>) {
     this.guest = { ...this.guest, ...params };
   }
 
-  async editGuest() {
+  private async editGuest() {
     try {
-      this.isLoading = true;
+      this.autoValidate = true;
+
       await this.bookingService.editExposedGuest(this.guest, this.booking_nbr ?? null);
       this.closeSideBar.emit(null);
       this.resetBookingEvt.emit(null);
     } catch (error) {
       console.log(error);
-    } finally {
-      this.isLoading = false;
-      console.log('done');
     }
   }
   render() {
-    if (!this.guest) {
+    if (this.isLoading && this.isInSideBar) {
+      <div class={'loading-container'}>
+        <ir-spinner></ir-spinner>
+      </div>;
+    }
+    if (this.isLoading) {
       return null;
     }
-    return [
-      <div class="p-0">
-        {this.headerShown && (
-          <div class="position-sticky mb-1 shadow-none p-0">
-            <div class="d-flex align-items-center justify-content-between ir-card-header py-1 p-0">
-              <h3 class="card-title text-left font-medium-2 px-1 my-0">{locales.entries.Lcz_GuestDetails}</h3>
-              <ir-icon
-                class="close close-icon px-1"
-                onIconClickHandler={() => {
-                  this.closeSideBar.emit(null);
-                }}
-              >
-                <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height={20} width={20}>
-                  <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-                </svg>
-              </ir-icon>
-            </div>
-          </div>
-        )}
-        <div class="card-content collapse show">
-          <div class={this.headerShown ? 'card-body px-1' : 'pt-0'}>
+    return (
+      <form
+        class={'p-0 sheet-container'}
+        onSubmit={async e => {
+          e.preventDefault();
+          await this.editGuest();
+        }}
+      >
+        {this.headerShown && <ir-title class="px-1 sheet-header" displayContext="sidebar" label={locales.entries.Lcz_GuestDetails}></ir-title>}
+        <div class={this.isInSideBar ? 'sheet-body' : 'card-content collapse show '}>
+          <div class={this.headerShown ? 'card-body px-1 pt-0' : 'pt-0'}>
             <ir-input-text
-              placeholder=""
-              label={locales.entries.Lcz_FirstName}
+              autoValidate={this.autoValidate}
+              label={locales.entries?.Lcz_FirstName}
               name="firstName"
-              submited={this.submit}
+              // submitted={this.submit}
               value={this.guest?.first_name}
               required
               onTextChange={e => this.handleInputChange({ first_name: e.detail })}
             ></ir-input-text>
             <ir-input-text
-              placeholder=""
-              label={locales.entries.Lcz_LastName}
+              autoValidate={this.autoValidate}
+              label={locales.entries?.Lcz_LastName}
               name="lastName"
-              submited={this.submit}
+              // submitted={this.submit}
               value={this.guest?.last_name}
               required
               onTextChange={e => this.handleInputChange({ last_name: e.detail })}
             ></ir-input-text>
             <ir-input-text
-              placeholder=""
-              label={locales.entries.Lcz_Email}
+              label={locales.entries?.Lcz_Email}
               name="email"
-              submited={this.submit}
+              // submitted={this.submit}
               value={this.guest?.email}
               required
               onTextChange={e => this.handleInputChange({ email: e.detail })}
             ></ir-input-text>
             <ir-input-text
-              placeholder=""
-              label={locales.entries.Lcz_AlternativeEmail}
+              label={locales.entries?.Lcz_AlternativeEmail}
               name="altEmail"
               value={this.guest?.alternative_email}
               onTextChange={e => this.handleInputChange({ alternative_email: e.detail })}
             ></ir-input-text>
             {/* <ir-input-text label="Password" placeholder="" name="password" submited={this.submit} type="password" value={this.Model.password} required></ir-input-text> */}
-            <ir-select
+            {/* <ir-select
               selectContainerStyle="mb-1"
               required
               name="country"
               submited={this.submit}
               label={locales.entries.Lcz_Country}
-              selectedValue={this.guest.country_id?.toString() ?? ''}
-              data={this.countries.map(item => {
+              selectedValue={this.guest?.country_id?.toString() ?? ''}
+              data={this.countries?.map(item => {
                 return {
                   value: item.id.toString(),
                   text: item.name,
@@ -168,37 +157,14 @@ export class GuestInfo {
               })}
               firstOption={'...'}
               onSelectChange={e => this.handleInputChange({ country_id: e.detail })}
-            ></ir-select>
-            {/* <div class="form-group mr-0">
-              <div class="input-group row m-0 p-0">
-                <div class={`input-group-prepend col-3 p-0 text-dark border-none`}>
-                  <label class={`input-group-text  border-theme flex-grow-1 text-dark  `}>
-                    {locales.entries.Lcz_MobilePhone}
-                    {'*'}
-                  </label>
-                </div>
-                <select
-                  class={`form-control text-md  col-2 py-0 mobilePrefixSelect`}
-                  onInput={e => this.handleInputChange('country_phone_prefix', (e.target as HTMLSelectElement).value)}
-                  required
-                >
-                  <option value={null}>...</option>
-                  {this.countries.map(item => (
-                    <option selected={this.guest.country_phone_prefix?.toString() === item.phone_prefix.toString()} value={item.phone_prefix}>
-                      {item.phone_prefix}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  required
-                  value={this.guest.mobile}
-                  class={'form-control flex-fill mobilePrefixInput'}
-                  onInput={e => this.handleInputChange('mobile', (e.target as HTMLInputElement).value)}
-                />
-              </div>
-            </div> */}
-
+            ></ir-select> */}
+            <ir-country-picker
+              // error={this.submit && !this.guest.country_id}
+              country={this.countries.find(c => c.id === this.guest.country_id)}
+              label={locales.entries?.Lcz_Country}
+              onCountryChange={e => this.handleInputChange({ country_id: e.detail.id })}
+              countries={this.countries}
+            ></ir-country-picker>
             <ir-phone-input
               onTextChange={e => {
                 e.stopImmediatePropagation();
@@ -212,7 +178,7 @@ export class GuestInfo {
               phone_prefix={this.guest.country_phone_prefix}
               value={this.guest.mobile}
               language={this.language}
-              label={locales.entries.Lcz_MobilePhone}
+              label={locales.entries?.Lcz_MobilePhone}
               countries={this.countries}
             />
             <div class="mb-2">
@@ -220,7 +186,7 @@ export class GuestInfo {
                 variant="prepend"
                 onTextChange={e => this.handleInputChange({ notes: e.detail })}
                 value={this.guest?.notes}
-                label={locales.entries.Lcz_PrivateNote}
+                label={locales.entries?.Lcz_PrivateNote}
               ></ir-textarea>
             </div>
             <div class={'p-0 m-0'}>
@@ -235,20 +201,44 @@ export class GuestInfo {
                 <span class="checkmark m-0 p-0"></span>
                 <span class={'m-0 p-0  check-label'}>{locales.entries.Lcz_Newsletter}</span>
               </label>
+              {!this.isInSideBar && (
+                <Fragment>
+                  <hr />
+                  <ir-button
+                    isLoading={this.isLoading}
+                    btn_disabled={this.isLoading}
+                    btn_styles="d-flex align-items-center justify-content-center"
+                    text={locales.entries.Lcz_Save}
+                    onClickHandler={this.editGuest.bind(this)}
+                    color="btn-primary"
+                  ></ir-button>
+                </Fragment>
+              )}
             </div>
-
-            <hr />
-            <ir-button
-              isLoading={this.isLoading}
-              btn_disabled={this.isLoading}
-              btn_styles="d-flex align-items-center justify-content-center"
-              text={locales.entries.Lcz_Save}
-              onClickHandler={this.editGuest.bind(this)}
-              color="btn-primary"
-            ></ir-button>
           </div>
         </div>
-      </div>,
-    ];
+        {this.isInSideBar && (
+          <div class={'sheet-footer'}>
+            <ir-button
+              data-testid="cancel"
+              onClickHandler={() => this.closeSideBar.emit(null)}
+              class="flex-fill m-0 p-0"
+              btn_styles="w-100 m-0  justify-content-center align-items-center"
+              btn_color="secondary"
+              text={locales.entries.Lcz_Cancel}
+            ></ir-button>
+            <ir-button
+              data-testid="save"
+              isLoading={isRequestPending('/Edit_Exposed_Guest')}
+              btn_disabled={this.isLoading}
+              class="flex-fill m-0"
+              btn_type="submit"
+              btn_styles="w-100 m-0  justify-content-center align-items-center"
+              text={locales.entries.Lcz_Save}
+            ></ir-button>
+          </div>
+        )}
+      </form>
+    );
   }
 }

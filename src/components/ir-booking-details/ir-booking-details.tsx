@@ -1,5 +1,5 @@
 import { Component, Listen, h, Prop, Watch, State, Event, EventEmitter, Element, Fragment } from '@stencil/core';
-import { Booking, ExtraService, Guest, IPmsLog, Room } from '@/models/booking.dto';
+import { Booking, ExtraService, Guest, IPmsLog, Room, SharedPerson } from '@/models/booking.dto';
 import axios from 'axios';
 import { BookingService } from '@/services/booking.service';
 import { IglBookPropertyPayloadAddRoom, TIglBookPropertyPayload } from '@/models/igl-book-property';
@@ -10,6 +10,8 @@ import { ICountry, IEntries } from '@/models/IBooking';
 import { IPaymentAction, PaymentService } from '@/services/payment.service';
 import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent } from './types';
+import calendar_data from '@/stores/calendar-data';
+import moment from 'moment';
 import { IrModalCustomEvent } from '@/components';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 
@@ -21,7 +23,7 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 export class IrBookingDetails {
   @Element() element: HTMLElement;
   // Setup Data
-  @Prop() language: string = '';
+  @Prop() language: string = 'en';
   @Prop() ticket: string = '';
   @Prop() bookingNumber: string = '';
   @Prop() propertyid: number;
@@ -46,13 +48,14 @@ export class IrBookingDetails {
 
   @State() showPaymentDetails: any;
   @State() booking: Booking;
-  @State() countryNodeList: ICountry[];
+  @State() countries: ICountry[];
   @State() calendarData: any = {};
   // Guest Data
   @State() guestData: Guest = null;
   // Rerender Flag
   @State() rerenderFlag = false;
   @State() sidebarState: BookingDetailsSidebarEvents | null = null;
+  @State() sidebarPayload: any;
   @State() isUpdateClicked = false;
 
   @State() pms_status: IPmsLog;
@@ -61,6 +64,7 @@ export class IrBookingDetails {
   @State() property_id: number;
   @State() selectedService: ExtraService;
   @State() bedPreference: IEntries[];
+  @State() roomGuest: any;
   @State() modalState: { type: 'email' | (string & {}); message: string; loading: boolean } = null;
   // Payment Event
   @Event() toast: EventEmitter<IToast>;
@@ -92,8 +96,9 @@ export class IrBookingDetails {
   }
 
   @Listen('openSidebar')
-  handleSideBarEvents(e: CustomEvent<OpenSidebarEvent>) {
+  handleSideBarEvents(e: CustomEvent<OpenSidebarEvent<unknown>>) {
     this.sidebarState = e.detail.type;
+    this.sidebarPayload = e.detail.payload;
   }
 
   @Listen('clickHandler')
@@ -174,6 +179,19 @@ export class IrBookingDetails {
   handleEditInitiated(e: CustomEvent<TIglBookPropertyPayload>) {
     this.bookingItem = e.detail;
   }
+  @Listen('updateRoomGuests')
+  handleRoomGuestsUpdate(e: CustomEvent<{ identifier: string; guests: SharedPerson[] }>) {
+    const { identifier, guests } = e.detail;
+    const rooms = [...this.booking.rooms];
+    let currentRoomIndex = rooms.findIndex(r => r.identifier === identifier);
+    if (currentRoomIndex === -1) {
+      return;
+    }
+    const currentRoom = rooms[currentRoomIndex];
+    const updatedRoom = { ...currentRoom, sharing_persons: guests };
+    rooms[currentRoomIndex] = updatedRoom;
+    this.booking = { ...this.booking, rooms: [...rooms] };
+  }
 
   @Listen('resetBookingEvt')
   async handleResetBooking(e: CustomEvent<Booking | null>) {
@@ -207,7 +225,7 @@ export class IrBookingDetails {
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
         this.bookingService.getExposedBooking(this.bookingNumber, this.language),
-        this.bookingService.getBedPreferences(),
+        this.bookingService.getSetupEntriesByTableName('_BED_PREFERENCE_TYPE'),
       ]);
       this.property_id = roomResponse?.My_Result?.id;
       this.bedPreference = bedPreference;
@@ -225,7 +243,7 @@ export class IrBookingDetails {
         locales.entries = languageTexts.entries;
         locales.direction = languageTexts.direction;
       }
-      this.countryNodeList = countriesList;
+      this.countries = countriesList;
       const myResult = roomResponse?.My_Result;
       if (myResult) {
         const { allowed_payment_methods: paymentMethods, currency, allowed_booking_sources, adult_child_constraints, calendar_legends, aname } = myResult;
@@ -305,6 +323,7 @@ export class IrBookingDetails {
       case 'guest':
         return (
           <ir-guest-info
+            isInSideBar
             headerShown
             slot="sidebar-body"
             booking_nbr={this.bookingNumber}
@@ -340,6 +359,21 @@ export class IrBookingDetails {
             }}
           ></ir-extra-service-config>
         );
+      case 'room-guest':
+        return (
+          <ir-room-guests
+            countries={this.countries}
+            language={this.language}
+            identifier={this.sidebarPayload?.identifier}
+            bookingNumber={this.booking.booking_nbr}
+            roomName={this.sidebarPayload?.roomName}
+            totalGuests={this.sidebarPayload?.totalGuests}
+            sharedPersons={this.sidebarPayload?.sharing_persons}
+            slot="sidebar-body"
+            checkIn={this.sidebarPayload?.checkin}
+            onCloseModal={handleClose}
+          ></ir-room-guests>
+        );
       default:
         return null;
     }
@@ -373,7 +407,7 @@ export class IrBookingDetails {
       <div class="fluid-container p-1 text-left mx-0">
         <div class="row m-0">
           <div class="col-12 p-0 mx-0 pr-lg-1 col-lg-6">
-            <ir-reservation-information countries={this.countryNodeList} booking={this.booking}></ir-reservation-information>
+            <ir-reservation-information countries={this.countries} booking={this.booking}></ir-reservation-information>
             <div class="font-size-large d-flex justify-content-between align-items-center mb-1">
               <ir-date-view from_date={this.booking.from_date} to_date={this.booking.to_date}></ir-date-view>
               {this.hasRoomAdd && this.booking.is_direct && this.booking.is_editable && (
@@ -382,8 +416,11 @@ export class IrBookingDetails {
             </div>
             <div class="card p-0 mx-0">
               {this.booking.rooms.map((room: Room, index: number) => {
+                const showCheckin = this.handleRoomCheckin(room);
+                const showCheckout = this.handleRoomCheckout(room);
                 return [
                   <ir-room
+                    room={room}
                     language={this.language}
                     bedPreferences={this.bedPreference}
                     isEditable={this.booking.is_editable}
@@ -394,9 +431,9 @@ export class IrBookingDetails {
                     currency={this.booking.currency.symbol}
                     hasRoomEdit={this.hasRoomEdit && this.booking.status.code !== '003' && this.booking.is_direct}
                     hasRoomDelete={this.hasRoomDelete && this.booking.status.code !== '003' && this.booking.is_direct}
-                    hasCheckIn={this.hasCheckIn}
-                    hasCheckOut={this.hasCheckOut}
-                    bookingEvent={this.booking}
+                    hasCheckIn={showCheckin}
+                    hasCheckOut={showCheckout}
+                    booking={this.booking}
                     bookingIndex={index}
                     onDeleteFinished={this.handleDeleteFinish.bind(this)}
                   />,
@@ -439,6 +476,7 @@ export class IrBookingDetails {
         open={this.sidebarState !== null}
         side={'right'}
         id="editGuestInfo"
+        style={{ '--sidebar-width': this.sidebarState === 'room-guest' ? '60rem' : undefined }}
         onIrSidebarToggle={e => {
           e.stopImmediatePropagation();
           e.stopPropagation();
@@ -454,7 +492,7 @@ export class IrBookingDetails {
             allowedBookingSources={this.calendarData.allowed_booking_sources}
             adultChildConstraints={this.calendarData.adult_child_constraints}
             showPaymentDetails={this.showPaymentDetails}
-            countryNodeList={this.countryNodeList}
+            countries={this.countries}
             currency={this.calendarData.currency}
             language={this.language}
             propertyid={this.property_id}
@@ -464,5 +502,26 @@ export class IrBookingDetails {
         )}
       </Fragment>,
     ];
+  }
+  private handleRoomCheckout(room: Room): boolean {
+    if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
+      return false;
+    }
+    return room.in_out.code === '001';
+  }
+  private handleRoomCheckin(room: Room): boolean {
+    if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
+      return false;
+    }
+    if (!room.unit) {
+      return false;
+    }
+    if (room.in_out && room.in_out.code !== '000') {
+      return false;
+    }
+    if (moment(new Date()).isSameOrAfter(new Date(room.from_date), 'days') && moment(new Date()).isBefore(new Date(room.to_date), 'days')) {
+      return true;
+    }
+    return false;
   }
 }

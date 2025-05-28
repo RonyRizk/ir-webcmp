@@ -5,7 +5,7 @@ import { Component, Host, Listen, State, h, Element } from '@stencil/core';
 
 @Component({
   tag: 'ir-hk-team',
-  styleUrl: 'ir-hk-team.css',
+  styleUrls: ['ir-hk-team.css', '../../../common/table.css'],
   scoped: true,
 })
 export class IrHkTeam {
@@ -28,7 +28,7 @@ export class IrHkTeam {
       <span>
         {hk.assigned_units.length} -{' '}
         <button onClick={() => (this.currentTrigger = { type: 'unassigned_units', user: hk })} class="outline-btn">
-          {locales.entries.Lcz_Edit}
+          {'Edit'}
         </button>
       </span>
     );
@@ -62,6 +62,9 @@ export class IrHkTeam {
     clearTimeout(this.deletionTimout);
   }
   render() {
+    if (!housekeeping_store.hk_criteria) {
+      return null;
+    }
     const { assigned, total, un_assigned } = housekeeping_store.hk_criteria.units_assignments;
 
     return (
@@ -84,17 +87,20 @@ export class IrHkTeam {
           </ir-title>
           <p class={'m-0 p-0'}>{locales.entries.Lcz_AsAnOption}</p>
         </section>
-        <section class="table-container">
+
+        <section class="mt-1 table-responsive">
           <table class="table">
             <thead>
               <tr>
                 <th class="text-left">{locales.entries.Lcz_Name}</th>
                 <th>{locales.entries.Lcz_Mobile}</th>
                 <th>{locales.entries.Lcz_Username}</th>
-                <th>{locales.entries.Lcz_Note}</th>
+                {/* <th>{locales.entries.Lcz_Note}</th> */}
                 <th>{locales.entries.Lcz_UnitsAssigned}</th>
-                <th class="text-center">
+                <th>
                   <ir-icon
+                    class="pl-1"
+                    data-testid="new_user"
                     title={locales.entries.Lcz_CreateHousekeeper}
                     onIconClickHandler={() => {
                       this.currentTrigger = {
@@ -116,17 +122,32 @@ export class IrHkTeam {
             </thead>
             <tbody>
               {housekeeping_store.hk_criteria.housekeepers.map(hk => (
-                <tr key={hk.id}>
-                  <td class="text-left">{hk.name}</td>
-                  <td>
+                <tr key={hk.id} class="ir-table-row">
+                  <td class="text-left">
+                    <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
+                      {hk.name?.length > 25 ? (
+                        <ir-popover trigger="hover" content={hk.name}>
+                          <span>{hk.name.slice(0, 25)}...</span>
+                        </ir-popover>
+                      ) : (
+                        hk.name
+                      )}
+                      {hk.note && (
+                        <ir-popover content={hk.note}>
+                          <ir-button variant="icon" icon_name="note" data-toggle="tooltip" data-placement="bottom" title="Click to view note"></ir-button>
+                        </ir-popover>
+                      )}
+                    </div>
+                  </td>
+                  <td class="">
                     {hk.phone_prefix} {hk.mobile}
                   </td>
                   <td>{hk.username}</td>
-                  <td>{hk.note}</td>
                   <td>{this.renderAssignedUnits(hk)}</td>
-                  <td class="text-center">
+                  <td class="">
                     <div class="icons-container">
                       <ir-icon
+                        data-testid="edit"
                         title={locales.entries.Lcz_EditHousekeeper}
                         onIconClickHandler={() => {
                           const { assigned_units, is_soft_deleted, is_active, ...user } = hk;
@@ -146,7 +167,12 @@ export class IrHkTeam {
                         </svg>
                       </ir-icon>
                       <span> &nbsp;</span>
-                      <ir-icon title={locales.entries.Lcz_DeleteHousekeeper} icon="ft-trash-2 danger h5 pointer" onIconClickHandler={() => this.handleDeletion(hk)}>
+                      <ir-icon
+                        data-testid="delete"
+                        title={locales.entries.Lcz_DeleteHousekeeper}
+                        icon="ft-trash-2 danger h5 pointer"
+                        onIconClickHandler={() => this.handleDeletion(hk)}
+                      >
                         <svg slot="icon" fill="#ff2441" xmlns="http://www.w3.org/2000/svg" height="16" width="14.25" viewBox="0 0 448 512">
                           <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
                         </svg>

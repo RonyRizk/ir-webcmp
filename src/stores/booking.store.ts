@@ -31,11 +31,12 @@ export interface IRatePlanSelection {
   };
 }
 export interface RatePlanGuest {
-  name: string;
+  first_name: string;
+  last_name: string;
   unit: string | null;
   bed_preference: string | null;
   infant_nbr: number | null;
-  roomtype_id?: number | null;
+  roomtype_id?: number;
 }
 
 export interface IRoomTypeSelection {
@@ -190,7 +191,6 @@ export function updateInventory(roomTypeId: number) {
   }
 }
 export function updateRoomParams({ ratePlanId, roomTypeId, params }: { roomTypeId: number; ratePlanId: number; params: Partial<IRatePlanSelection> }) {
-  console.log(ratePlanId, roomTypeId, params);
   booking_store.ratePlanSelections = {
     ...booking_store.ratePlanSelections,
     [Number(roomTypeId)]: {
@@ -201,7 +201,6 @@ export function updateRoomParams({ ratePlanId, roomTypeId, params }: { roomTypeI
       },
     },
   };
-  console.log(booking_store.ratePlanSelections);
 }
 
 export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTypeId: number; ratePlanId: number; rooms: number; guest?: RatePlanGuest[] }) {
@@ -216,14 +215,11 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   if (!ratePlan) {
     throw new Error('Invalid rate plan');
   }
-  let newGuest = Array.from({ length: rooms }, () => ({ name: '', unit: null, bed_preference: null, infant_nbr: null }));
-  console.log('guest', guest);
+  let newGuest = Array.from({ length: rooms }, () => ({ first_name: '', last_name: '', unit: null, bed_preference: null, infant_nbr: null }));
   if (guest) {
     newGuest = guest;
   }
-  console.log('newGuest', newGuest);
   if (!booking_store.ratePlanSelections[roomTypeId][ratePlanId]) {
-    console.log('new guest', newGuest);
     booking_store.ratePlanSelections[roomTypeId][ratePlanId] = {
       guestName: null,
       reserved: 0,
