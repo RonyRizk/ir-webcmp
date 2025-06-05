@@ -245,6 +245,7 @@ graph TD;
   ir-user-form-panel --> ir-button
   ir-user-form-panel --> ir-sidebar
   ir-user-form-panel --> ir-reset-password
+  ir-reset-password --> ir-loading-screen
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title

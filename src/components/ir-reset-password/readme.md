@@ -31,6 +31,7 @@
 
 ### Depends on
 
+- [ir-loading-screen](../ir-loading-screen)
 - [ir-interceptor](../ir-interceptor)
 - [ir-toast](../ui/ir-toast)
 - [ir-title](../ir-title)
@@ -41,6 +42,7 @@
 ### Graph
 ```mermaid
 graph TD;
+  ir-reset-password --> ir-loading-screen
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
