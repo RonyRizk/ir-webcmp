@@ -61,7 +61,6 @@ graph TD;
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
   ir-sidebar --> ir-icon
-  ir-reset-password --> ir-loading-screen
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
