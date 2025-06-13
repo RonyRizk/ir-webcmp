@@ -125,6 +125,7 @@ export namespace Components {
         "sourceOptions": TSourceOptions[];
         "splitBookingId": any;
         "splitBookings": any[];
+        "wasBlockedUnit": boolean;
     }
     interface IglBookingEvent {
         "allBookingEvents": { [key: string]: any };
@@ -174,6 +175,10 @@ export namespace Components {
         "selectedRooms": Map<string, Map<string, any>>;
         "showSplitBookingOption": boolean;
         "sourceOptions": TSourceOptions[];
+        "wasBlockedUnit": boolean;
+    }
+    interface IglBulkStopSale {
+        "maxDatesLength": number;
     }
     interface IglCalBody {
         "calendarData": { [key: string]: any };
@@ -262,6 +267,7 @@ export namespace Components {
         "unassignedDatesProp": any;
     }
     interface IglooCalendar {
+        "baseUrl": string;
         "currencyName": string;
         "from_date": string;
         "language": string;
@@ -323,6 +329,7 @@ export namespace Components {
         "hasReceipt": boolean;
     }
     interface IrBookingListing {
+        "baseUrl": string;
         "language": string;
         "p": string;
         "propertyid": number;
@@ -338,29 +345,85 @@ export namespace Components {
         "token": string;
     }
     interface IrButton {
+        /**
+          * Triggers a bounce animation on the button.
+         */
         "bounce": () => Promise<void>;
+        /**
+          * Custom inline styles for the button element.
+         */
         "btnStyle": { [key: string]: string };
+        /**
+          * Whether the button should expand to the full width of its container.
+         */
         "btn_block": boolean;
+        /**
+          * The color theme of the button.
+         */
         "btn_color": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'outline' | 'link';
+        /**
+          * Disables the button when set to true.
+         */
         "btn_disabled": boolean;
+        /**
+          * A unique identifier for the button instance.
+         */
         "btn_id": string;
+        /**
+          * Additional custom class names for the button.
+         */
         "btn_styles": string;
+        /**
+          * The button type attribute (`button`, `submit`, or `reset`).
+         */
         "btn_type": string;
-        "icon": string;
+        /**
+          * Position of the icon relative to the button text.
+         */
         "iconPosition": 'left' | 'right';
+        /**
+          * The name of the icon to display.
+         */
         "icon_name": TIcons;
+        /**
+          * Custom style object for the icon.
+         */
         "icon_style": any;
+        /**
+          * Displays a loading indicator when true and disables the button.
+         */
         "isLoading": boolean;
+        /**
+          * Custom inline styles for the label/text inside the button.
+         */
         "labelStyle": { [key: string]: string };
+        /**
+          * The name of the button, used for identification purposes.
+         */
         "name": string;
         /**
-          * If true, will render `content` as HTML
+          * If true, renders the text property as raw HTML inside the button.
          */
         "renderContentAsHtml": boolean;
+        /**
+          * The size of the button.
+         */
         "size": 'sm' | 'md' | 'lg';
+        /**
+          * The text content displayed inside the button.
+         */
         "text": string;
+        /**
+          * The size of the text inside the button.
+         */
         "textSize": 'sm' | 'md' | 'lg';
+        /**
+          * Visual variant of the button: either standard (`default`) or icon-only (`icon`).
+         */
         "variant": 'default' | 'icon';
+        /**
+          * If true, applies a visible background when hovered.
+         */
         "visibleBackgroundOnHover": boolean;
     }
     interface IrChannel {
@@ -383,35 +446,99 @@ export namespace Components {
     interface IrChannelMapping {
     }
     interface IrCheckbox {
+        /**
+          * The unique ID of the checkbox element.
+         */
         "checkboxId": string;
+        /**
+          * Whether the checkbox is checked.
+         */
         "checked": boolean;
+        /**
+          * Disables the checkbox when true.
+         */
         "disabled": boolean;
+        /**
+          * Whether the checkbox is in an indeterminate state.
+         */
         "indeterminate": boolean;
+        /**
+          * The label text associated with the checkbox.
+         */
         "label": string;
+        /**
+          * CSS class applied to the label element.
+         */
+        "labelClass": string;
+        /**
+          * The name attribute of the checkbox, used for form submission.
+         */
         "name": string;
     }
     interface IrCheckboxes {
         "checkboxes": checkboxes[];
     }
     interface IrCombobox {
+        /**
+          * Autofocuses the input field when true.
+         */
         "autoFocus": boolean;
+        /**
+          * The list of items displayed in the combobox.
+         */
         "data": ComboboxItem[];
+        /**
+          * Disables the combobox input when set to true.
+         */
         "disabled": boolean;
+        /**
+          * Debounce duration in milliseconds for search input.
+         */
         "duration": number;
+        /**
+          * Unique identifier for the input element.
+         */
         "input_id": string;
+        /**
+          * Placeholder text for the input field.
+         */
         "placeholder": string;
+        /**
+          * The current value of the input field.
+         */
         "value": string;
     }
     interface IrCommon {
         "extraResources": string;
     }
     interface IrCountryPicker {
+        /**
+          * Whether to automatically validate the input.
+         */
         "autoValidate": boolean;
+        /**
+          * List of countries to display in the dropdown.
+         */
         "countries": ICountry[];
+        /**
+          * Currently selected country.
+         */
         "country": ICountry;
+        /**
+          * Whether to show an error state on the input.
+         */
         "error": boolean;
+        /**
+          * The label to display for the input.
+         */
         "label": string;
+        /**
+          * The property-associated country, shown separately if relevant.
+         */
         "propertyCountry": ICountry;
+        /**
+          * Test ID for automated testing.
+         */
         "testId": string;
     }
     interface IrDatePicker {
@@ -487,27 +614,93 @@ export namespace Components {
         "triggerContainerStyle": string;
     }
     interface IrDateRange {
+        /**
+          * Text shown on the Apply button.
+         */
         "applyLabel": string;
+        /**
+          * Whether to apply the selected range automatically without clicking 'Apply'.
+         */
         "autoApply": boolean;
+        /**
+          * Text shown on the Cancel button.
+         */
         "cancelLabel": string;
+        /**
+          * Label used for the custom date range option.
+         */
         "customRangeLabel": string;
+        /**
+          * Single date selection value (used in single date picker mode).
+         */
         "date": Date;
+        /**
+          * Abbreviated names of the days of the week.
+         */
         "daysOfWeek": string[];
+        /**
+          * Disables the date range input when true.
+         */
         "disabled": boolean;
+        /**
+          * First day of the week (0 = Sunday, 1 = Monday, ...).
+         */
         "firstDay": number;
+        /**
+          * Date format used in the input and picker.
+         */
         "format": string;
+        /**
+          * Start date for the date range.
+         */
         "fromDate": Date;
+        /**
+          * Label for the "From" date input.
+         */
         "fromLabel": string;
+        /**
+          * Maximum selectable date.
+         */
         "maxDate": string | Date;
+        /**
+          * Maximum range span (e.g., `{ days: 240 }`).
+         */
         "maxSpan": moment.DurationInputArg1;
+        /**
+          * Minimum selectable date.
+         */
         "minDate": string | Date;
+        /**
+          * Month names shown in the calendar header.
+         */
         "monthNames": string[];
+        /**
+          * Opens the date picker programmatically.  Example: ```ts const el = document.querySelector('ir-date-range'); await el.openDatePicker(); ```
+         */
         "openDatePicker": () => Promise<void>;
+        /**
+          * Defines which side the calendar opens to. Options: `'left'`, `'right'`, `'center'`.
+         */
         "opens": 'left' | 'right' | 'center';
+        /**
+          * Separator string used between start and end dates.
+         */
         "separator": string;
+        /**
+          * Enables single date selection mode.
+         */
         "singleDatePicker": boolean;
+        /**
+          * End date for the date range.
+         */
         "toDate": Date;
+        /**
+          * Label for the "To" date input.
+         */
         "toLabel": string;
+        /**
+          * Label for the week column in the calendar.
+         */
         "weekLabel": string;
     }
     interface IrDateView {
@@ -522,8 +715,17 @@ export namespace Components {
         "user": IHouseKeepers;
     }
     interface IrDialog {
+        /**
+          * Closes the modal dialog programmatically. Reverts body scroll and emits `openChange`.
+         */
         "closeModal": () => Promise<void>;
+        /**
+          * Controls whether the dialog should be opened. Can be updated externally and watched internally.
+         */
         "open": boolean;
+        /**
+          * Opens the modal dialog programmatically. Applies `overflow: hidden` to the `body`.  Example: ```ts const dialog = document.querySelector('ir-dialog'); await dialog.openModal(); ```
+         */
         "openModal": () => Promise<void>;
     }
     interface IrDrawer {
@@ -581,6 +783,7 @@ export namespace Components {
         "ticket": string;
     }
     interface IrHkTasks {
+        "baseUrl": string;
         "language": string;
         "p": string;
         "propertyid": number;
@@ -596,6 +799,7 @@ export namespace Components {
         "user": THKUser | null;
     }
     interface IrHousekeeping {
+        "baseUrl": string;
         "language": string;
         "p": string;
         "propertyid": number;
@@ -606,8 +810,17 @@ export namespace Components {
         "type": 'button' | 'submit' | 'reset';
     }
     interface IrIcons {
+        /**
+          * Sets the `color` attribute on the `<svg>` element. Accepts any valid CSS color string.
+         */
         "color": string;
+        /**
+          * The name of the icon to render. Must match a key from the imported `icons` map.  Example: ```tsx <ir-icons name="check" /> ```
+         */
         "name": TIcons;
+        /**
+          * Additional CSS class applied to the `<svg>` element. Can be used for sizing, positioning, etc.
+         */
         "svgClassName": string;
     }
     interface IrInputText {
@@ -754,13 +967,31 @@ export namespace Components {
         "zod"?: ZodType<any, any>;
     }
     interface IrInteractiveTitle {
+        /**
+          * The number of characters to display before cropping the title with ellipsis.
+         */
         "cropSize": number;
+        /**
+          * Whether to show the housekeeping (HK) status dot.
+         */
         "hkStatus": boolean;
+        /**
+          * CSS offset for the left position of the popover. Used as a CSS variable `--ir-popover-left`.
+         */
         "irPopoverLeft": string;
+        /**
+          * The full title string that may be cropped in the UI.
+         */
         "popoverTitle": string;
     }
     interface IrInterceptor {
+        /**
+          * List of endpoint paths that should trigger loader logic and OTP handling.
+         */
         "handledEndpoints": string[];
+        /**
+          * List of endpoints for which to suppress toast messages.
+         */
         "suppressToastEndpoints": string[];
     }
     interface IrLabel {
@@ -821,22 +1052,73 @@ export namespace Components {
     interface IrLogin {
     }
     interface IrModal {
+        /**
+          * If true, the modal automatically closes after confirm/cancel actions.
+         */
         "autoClose": boolean;
+        /**
+          * Horizontal alignment of the footer buttons.
+         */
         "btnPosition": 'left' | 'right' | 'center';
+        /**
+          * Closes the modal.
+         */
         "closeModal": () => Promise<void>;
+        /**
+          * Icon name to render next to the title (if `iconAvailable` is true).
+         */
         "icon": string;
+        /**
+          * Whether an icon should be displayed next to the title.
+         */
         "iconAvailable": boolean;
+        /**
+          * Whether the modal is in a loading state, disabling interaction.
+         */
         "isLoading": boolean;
+        /**
+          * Payload object to pass along with confirm/cancel events.
+         */
         "item": any;
+        /**
+          * Whether the left (cancel/close) button is visible.
+         */
         "leftBtnActive": boolean;
+        /**
+          * Color theme of the left button.
+         */
         "leftBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+        /**
+          * Text displayed on the left (cancel/close) button.
+         */
         "leftBtnText": string;
+        /**
+          * The main content text shown in the modal body.
+         */
         "modalBody": string;
+        /**
+          * The title text displayed in the modal header.
+         */
         "modalTitle": string;
+        /**
+          * Opens the modal.  Example: ```ts const modal = document.querySelector('ir-modal'); modal.openModal(); ```
+         */
         "openModal": () => Promise<void>;
+        /**
+          * Whether the right (confirm) button is visible.
+         */
         "rightBtnActive": boolean;
+        /**
+          * Color theme of the right button.
+         */
         "rightBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+        /**
+          * Text displayed on the right (confirm) button.
+         */
         "rightBtnText": string;
+        /**
+          * Controls whether the modal title is rendered.
+         */
         "showTitle": boolean;
     }
     interface IrOptionDetails {
@@ -944,16 +1226,49 @@ export namespace Components {
         "ticket": string;
     }
     interface IrPhoneInput {
+        /**
+          * Country list, used to populate prefix and dropdown. If not provided, fetched from the booking service.
+         */
         "countries": ICountry[];
+        /**
+          * Default country ID used if no phone prefix is set.
+         */
         "default_country": number;
+        /**
+          * Disables the phone input when true.
+         */
         "disabled": boolean;
+        /**
+          * If true, styles the input to indicate an error state.
+         */
         "error": boolean;
+        /**
+          * Label displayed next to the phone input.
+         */
         "label": string;
+        /**
+          * Two-letter language code used for country fetching.
+         */
         "language": string;
+        /**
+          * If provided, sets the phone prefix and updates selected country.
+         */
         "phone_prefix": string | null;
+        /**
+          * Placeholder text for the input.
+         */
         "placeholder": string;
+        /**
+          * Identifier for test automation.
+         */
         "testId": string;
+        /**
+          * Auth token used by the booking service (if needed).
+         */
         "token": string;
+        /**
+          * Initial phone number value.
+         */
         "value": string;
     }
     interface IrPickup {
@@ -969,10 +1284,25 @@ export namespace Components {
         "bookingNumber": string;
     }
     interface IrPopover {
+        /**
+          * Content to display inside the popover. Can be plain text or HTML depending on `renderContentAsHtml`.
+         */
         "content": string;
+        /**
+          * Horizontal offset (left) of the popover from its trigger. Used in inline style as `--ir-popover-left`.
+         */
         "irPopoverLeft": string;
+        /**
+          * Position of the popover relative to the trigger. Options: `'top'`, `'bottom'`, `'left'`, `'right'`, `'auto'`.
+         */
         "placement": 'top' | 'bottom' | 'left' | 'right' | 'auto';
+        /**
+          * Whether to treat `content` as raw HTML. When true, `content` will be injected with `html: true` in jQuery popover.
+         */
         "renderContentAsHtml": boolean;
+        /**
+          * Event that triggers the popover. Options: `'focus'`, `'click'`, `'hover'`.
+         */
         "trigger": 'focus' | 'click' | 'hover';
     }
     interface IrPriceInput {
@@ -1036,6 +1366,36 @@ export namespace Components {
           * A Zod schema for validating the input Example: z.coerce.number()
          */
         "zod"?: ZodType<any, any>;
+    }
+    interface IrRadio {
+        /**
+          * Whether the checkbox is checked.
+         */
+        "checked": boolean;
+        /**
+          * Disables the checkbox when true.
+         */
+        "disabled": boolean;
+        /**
+          * Whether the checkbox is in an indeterminate state.
+         */
+        "indeterminate": boolean;
+        /**
+          * The label text associated with the checkbox.
+         */
+        "label": string;
+        /**
+          * CSS class applied to the label element.
+         */
+        "labelClass": string;
+        /**
+          * The name attribute of the checkbox, used for form submission.
+         */
+        "name": string;
+        /**
+          * The unique ID of the checkbox element.
+         */
+        "radioBoxId": string;
     }
     interface IrRangePicker {
         /**
@@ -1158,9 +1518,6 @@ export namespace Components {
         "LabelAvailable": boolean;
         "data": selectOption[];
         "disabled": boolean;
-        /**
-          * Whether the select has an error
-         */
         "error": boolean;
         "firstOption": string;
         "label": string;
@@ -1184,26 +1541,72 @@ export namespace Components {
         "textSize": 'sm' | 'md' | 'lg';
     }
     interface IrSidebar {
+        /**
+          * Label text displayed in the sidebar header.
+         */
         "label": string;
+        /**
+          * Identifier for the sidebar instance.
+         */
         "name": string;
+        /**
+          * Whether the sidebar is open. Can be used with two-way binding.
+         */
         "open": boolean;
+        /**
+          * Prevents the sidebar from closing when `toggleSidebar()` is called. When true, emits `beforeSidebarClose` instead of toggling.
+         */
+        "preventClose": boolean;
+        /**
+          * Whether to show the close (X) button in the sidebar header.
+         */
         "showCloseButton": boolean;
+        /**
+          * Which side of the screen the sidebar appears on. Options: `'left'` or `'right'`.
+         */
         "side": 'right' | 'left';
+        /**
+          * Inline styles applied to the sidebar container.
+         */
         "sidebarStyles": Partial<CSSStyleDeclaration>;
+        /**
+          * Toggles the sidebar's visibility.  - If `preventClose` is true, emits `beforeSidebarClose` and does nothing else. - Otherwise, emits `irSidebarToggle` with the current `open` state.  Example: ```ts const el = document.querySelector('ir-sidebar'); await el.toggleSidebar(); ```
+         */
         "toggleSidebar": () => Promise<void>;
     }
     interface IrSpan {
         "text": any;
     }
     interface IrSpinner {
+        /**
+          * Thickness of the spinner's border. Example: `borderWidth={4}` renders a `4px` or `4rem` thick border.
+         */
         "borderWidth": number;
+        /**
+          * Color of the spinner. Accepts any valid CSS color string.
+         */
         "color": string;
+        /**
+          * Size of the spinner (diameter). Example: `size={2}` with `unit="rem"` sets spinner to `2rem`.
+         */
         "size": number;
+        /**
+          * CSS unit used for `size` and `borderWidth`. Can be `'px'` or `'rem'`.
+         */
         "unit": 'px' | 'rem';
     }
     interface IrSwitch {
+        /**
+          * Whether the switch is currently checked (on). This is mutable and can be toggled internally.
+         */
         "checked": boolean;
+        /**
+          * Disables the switch if true.
+         */
         "disabled": boolean;
+        /**
+          * Optional ID for the switch. If not provided, a random ID will be generated.
+         */
         "switchId": string;
     }
     interface IrTasksFilters {
@@ -1242,17 +1645,53 @@ export namespace Components {
         "value": string;
     }
     interface IrTextarea {
+        /**
+          * Number of visible character columns.
+         */
         "cols": number;
+        /**
+          * Text label displayed above or beside the textarea.
+         */
         "label": string;
+        /**
+          * Width of the label in grid columns (for `variant="prepend"`).
+         */
         "labelWidth": 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+        /**
+          * Maximum number of characters allowed.
+         */
         "maxLength": number;
+        /**
+          * Placeholder text shown when input is empty.
+         */
         "placeholder": string;
+        /**
+          * Number of visible text lines.
+         */
         "rows": number;
+        /**
+          * Inline styles applied directly to the textarea.
+         */
         "styles": { [key: string]: string };
+        /**
+          * `data-testid` for targeting in tests.
+         */
         "testId": string;
+        /**
+          * Unused property, intended to store textarea text.
+         */
         "text": string;
+        /**
+          * Additional classes for the textarea element.
+         */
         "textareaClassname": string;
+        /**
+          * Current value of the textarea (supports two-way binding).
+         */
         "value": string;
+        /**
+          * Layout style of the textarea: `'default'` shows label above, `'prepend'` shows label on the left.
+         */
         "variant": 'default' | 'prepend';
     }
     interface IrTitle {
@@ -1275,12 +1714,27 @@ export namespace Components {
         "label": string;
     }
     interface IrToast {
+        /**
+          * Position where toasts will appear. Options include: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`.
+         */
         "position": TPositions;
     }
     interface IrTooltip {
+        /**
+          * Inline styles applied to the outer tooltip container.
+         */
         "containerStyle": { [key: string]: string };
+        /**
+          * When true, allows a custom element to trigger the tooltip using a named slot. If false, a default info icon is used.
+         */
         "customSlot": boolean;
+        /**
+          * Text or HTML content to be displayed in the tooltip.
+         */
         "message": string;
+        /**
+          * Whether the tooltip content should be rendered using `innerHTML`. If false, treats message as plain text.
+         */
         "withHtml": boolean;
     }
     interface IrUnitStatus {
@@ -1319,9 +1773,24 @@ export namespace Components {
         "userTypes": Map<string | number, string>;
         "users": User[];
     }
+    interface IrWeekdaySelector {
+        /**
+          * Initial list of selected weekdays (numeric values).
+         */
+        "weekdays": number[];
+    }
     interface OtaLabel {
+        /**
+          * Label displayed as the section title.
+         */
         "label": string;
+        /**
+          * Maximum number of remarks to display before showing the "Show More" button.
+         */
         "maxVisibleItems": number;
+        /**
+          * Array of OTA notes to display in the list.
+         */
         "remarks": IOtaNotes[];
     }
     interface RequirementCheck {
@@ -1370,6 +1839,10 @@ export interface IglBookingFormCustomEvent<T> extends CustomEvent<T> {
 export interface IglBookingOverviewPageCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglBookingOverviewPageElement;
+}
+export interface IglBulkStopSaleCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglBulkStopSaleElement;
 }
 export interface IglCalBodyCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -1587,6 +2060,10 @@ export interface IrPriceInputCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrPriceInputElement;
 }
+export interface IrRadioCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrRadioElement;
+}
 export interface IrRangePickerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrRangePickerElement;
@@ -1662,6 +2139,10 @@ export interface IrUserFormPanelCustomEvent<T> extends CustomEvent<T> {
 export interface IrUserManagementTableCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrUserManagementTableElement;
+}
+export interface IrWeekdaySelectorCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrWeekdaySelectorElement;
 }
 declare global {
     interface HTMLIglApplicationInfoElement extends Components.IglApplicationInfo, HTMLStencilElement {
@@ -1850,6 +2331,24 @@ declare global {
     var HTMLIglBookingOverviewPageElement: {
         prototype: HTMLIglBookingOverviewPageElement;
         new (): HTMLIglBookingOverviewPageElement;
+    };
+    interface HTMLIglBulkStopSaleElementEventMap {
+        "closeModal": null;
+        "toast": IToast;
+    }
+    interface HTMLIglBulkStopSaleElement extends Components.IglBulkStopSale, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglBulkStopSaleElementEventMap>(type: K, listener: (this: HTMLIglBulkStopSaleElement, ev: IglBulkStopSaleCustomEvent<HTMLIglBulkStopSaleElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglBulkStopSaleElementEventMap>(type: K, listener: (this: HTMLIglBulkStopSaleElement, ev: IglBulkStopSaleCustomEvent<HTMLIglBulkStopSaleElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglBulkStopSaleElement: {
+        prototype: HTMLIglBulkStopSaleElement;
+        new (): HTMLIglBulkStopSaleElement;
     };
     interface HTMLIglCalBodyElementEventMap {
         "addBookingDatasEvent": any[];
@@ -2955,6 +3454,23 @@ declare global {
         prototype: HTMLIrPriceInputElement;
         new (): HTMLIrPriceInputElement;
     };
+    interface HTMLIrRadioElementEventMap {
+        "checkChange": boolean;
+    }
+    interface HTMLIrRadioElement extends Components.IrRadio, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrRadioElementEventMap>(type: K, listener: (this: HTMLIrRadioElement, ev: IrRadioCustomEvent<HTMLIrRadioElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrRadioElementEventMap>(type: K, listener: (this: HTMLIrRadioElement, ev: IrRadioCustomEvent<HTMLIrRadioElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrRadioElement: {
+        prototype: HTMLIrRadioElement;
+        new (): HTMLIrRadioElement;
+    };
     interface HTMLIrRangePickerElementEventMap {
         "dateRangeChanged": { fromDate: Moment; toDate: Moment };
     }
@@ -3116,6 +3632,7 @@ declare global {
     };
     interface HTMLIrSidebarElementEventMap {
         "irSidebarToggle": any;
+        "beforeSidebarClose": any;
     }
     interface HTMLIrSidebarElement extends Components.IrSidebar, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrSidebarElementEventMap>(type: K, listener: (this: HTMLIrSidebarElement, ev: IrSidebarCustomEvent<HTMLIrSidebarElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -3341,6 +3858,23 @@ declare global {
         prototype: HTMLIrUserManagementTableElement;
         new (): HTMLIrUserManagementTableElement;
     };
+    interface HTMLIrWeekdaySelectorElementEventMap {
+        "weekdayChange": number[];
+    }
+    interface HTMLIrWeekdaySelectorElement extends Components.IrWeekdaySelector, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrWeekdaySelectorElementEventMap>(type: K, listener: (this: HTMLIrWeekdaySelectorElement, ev: IrWeekdaySelectorCustomEvent<HTMLIrWeekdaySelectorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrWeekdaySelectorElementEventMap>(type: K, listener: (this: HTMLIrWeekdaySelectorElement, ev: IrWeekdaySelectorCustomEvent<HTMLIrWeekdaySelectorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrWeekdaySelectorElement: {
+        prototype: HTMLIrWeekdaySelectorElement;
+        new (): HTMLIrWeekdaySelectorElement;
+    };
     interface HTMLOtaLabelElement extends Components.OtaLabel, HTMLStencilElement {
     }
     var HTMLOtaLabelElement: {
@@ -3364,6 +3898,7 @@ declare global {
         "igl-booking-event-hover": HTMLIglBookingEventHoverElement;
         "igl-booking-form": HTMLIglBookingFormElement;
         "igl-booking-overview-page": HTMLIglBookingOverviewPageElement;
+        "igl-bulk-stop-sale": HTMLIglBulkStopSaleElement;
         "igl-cal-body": HTMLIglCalBodyElement;
         "igl-cal-footer": HTMLIglCalFooterElement;
         "igl-cal-header": HTMLIglCalHeaderElement;
@@ -3438,6 +3973,7 @@ declare global {
         "ir-pms-logs": HTMLIrPmsLogsElement;
         "ir-popover": HTMLIrPopoverElement;
         "ir-price-input": HTMLIrPriceInputElement;
+        "ir-radio": HTMLIrRadioElement;
         "ir-range-picker": HTMLIrRangePickerElement;
         "ir-reservation-information": HTMLIrReservationInformationElement;
         "ir-reset-password": HTMLIrResetPasswordElement;
@@ -3466,6 +4002,7 @@ declare global {
         "ir-user-form-panel": HTMLIrUserFormPanelElement;
         "ir-user-management": HTMLIrUserManagementElement;
         "ir-user-management-table": HTMLIrUserManagementTableElement;
+        "ir-weekday-selector": HTMLIrWeekdaySelectorElement;
         "ota-label": HTMLOtaLabelElement;
         "requirement-check": HTMLRequirementCheckElement;
     }
@@ -3550,6 +4087,7 @@ declare namespace LocalJSX {
         "sourceOptions"?: TSourceOptions[];
         "splitBookingId"?: any;
         "splitBookings"?: any[];
+        "wasBlockedUnit"?: boolean;
     }
     interface IglBookingEvent {
         "allBookingEvents"?: { [key: string]: any };
@@ -3618,6 +4156,12 @@ declare namespace LocalJSX {
         "selectedRooms"?: Map<string, Map<string, any>>;
         "showSplitBookingOption"?: boolean;
         "sourceOptions"?: TSourceOptions[];
+        "wasBlockedUnit"?: boolean;
+    }
+    interface IglBulkStopSale {
+        "maxDatesLength"?: number;
+        "onCloseModal"?: (event: IglBulkStopSaleCustomEvent<null>) => void;
+        "onToast"?: (event: IglBulkStopSaleCustomEvent<IToast>) => void;
     }
     interface IglCalBody {
         "calendarData"?: { [key: string]: any };
@@ -3734,6 +4278,7 @@ declare namespace LocalJSX {
         "unassignedDatesProp"?: any;
     }
     interface IglooCalendar {
+        "baseUrl"?: string;
         "currencyName"?: string;
         "from_date"?: string;
         "language"?: string;
@@ -3813,6 +4358,7 @@ declare namespace LocalJSX {
         "onToast"?: (event: IrBookingHeaderCustomEvent<IToast>) => void;
     }
     interface IrBookingListing {
+        "baseUrl"?: string;
         "language"?: string;
         "p"?: string;
         "propertyid"?: number;
@@ -3828,29 +4374,85 @@ declare namespace LocalJSX {
         "token"?: string;
     }
     interface IrButton {
+        /**
+          * Custom inline styles for the button element.
+         */
         "btnStyle"?: { [key: string]: string };
+        /**
+          * Whether the button should expand to the full width of its container.
+         */
         "btn_block"?: boolean;
+        /**
+          * The color theme of the button.
+         */
         "btn_color"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'outline' | 'link';
+        /**
+          * Disables the button when set to true.
+         */
         "btn_disabled"?: boolean;
+        /**
+          * A unique identifier for the button instance.
+         */
         "btn_id"?: string;
+        /**
+          * Additional custom class names for the button.
+         */
         "btn_styles"?: string;
+        /**
+          * The button type attribute (`button`, `submit`, or `reset`).
+         */
         "btn_type"?: string;
-        "icon"?: string;
+        /**
+          * Position of the icon relative to the button text.
+         */
         "iconPosition"?: 'left' | 'right';
+        /**
+          * The name of the icon to display.
+         */
         "icon_name"?: TIcons;
+        /**
+          * Custom style object for the icon.
+         */
         "icon_style"?: any;
+        /**
+          * Displays a loading indicator when true and disables the button.
+         */
         "isLoading"?: boolean;
+        /**
+          * Custom inline styles for the label/text inside the button.
+         */
         "labelStyle"?: { [key: string]: string };
+        /**
+          * The name of the button, used for identification purposes.
+         */
         "name"?: string;
+        /**
+          * Emits a custom click event when the button is clicked.
+         */
         "onClickHandler"?: (event: IrButtonCustomEvent<any>) => void;
         /**
-          * If true, will render `content` as HTML
+          * If true, renders the text property as raw HTML inside the button.
          */
         "renderContentAsHtml"?: boolean;
+        /**
+          * The size of the button.
+         */
         "size"?: 'sm' | 'md' | 'lg';
+        /**
+          * The text content displayed inside the button.
+         */
         "text"?: string;
+        /**
+          * The size of the text inside the button.
+         */
         "textSize"?: 'sm' | 'md' | 'lg';
+        /**
+          * Visual variant of the button: either standard (`default`) or icon-only (`icon`).
+         */
         "variant"?: 'default' | 'icon';
+        /**
+          * If true, applies a visible background when hovered.
+         */
         "visibleBackgroundOnHover"?: boolean;
     }
     interface IrChannel {
@@ -3878,12 +4480,37 @@ declare namespace LocalJSX {
     interface IrChannelMapping {
     }
     interface IrCheckbox {
+        /**
+          * The unique ID of the checkbox element.
+         */
         "checkboxId"?: string;
+        /**
+          * Whether the checkbox is checked.
+         */
         "checked"?: boolean;
+        /**
+          * Disables the checkbox when true.
+         */
         "disabled"?: boolean;
+        /**
+          * Whether the checkbox is in an indeterminate state.
+         */
         "indeterminate"?: boolean;
+        /**
+          * The label text associated with the checkbox.
+         */
         "label"?: string;
+        /**
+          * CSS class applied to the label element.
+         */
+        "labelClass"?: string;
+        /**
+          * The name attribute of the checkbox, used for form submission.
+         */
         "name"?: string;
+        /**
+          * Emitted when the checkbox's checked state changes.
+         */
         "onCheckChange"?: (event: IrCheckboxCustomEvent<boolean>) => void;
     }
     interface IrCheckboxes {
@@ -3891,28 +4518,82 @@ declare namespace LocalJSX {
         "onCheckboxesChange"?: (event: IrCheckboxesCustomEvent<checkboxes[]>) => void;
     }
     interface IrCombobox {
+        /**
+          * Autofocuses the input field when true.
+         */
         "autoFocus"?: boolean;
+        /**
+          * The list of items displayed in the combobox.
+         */
         "data"?: ComboboxItem[];
+        /**
+          * Disables the combobox input when set to true.
+         */
         "disabled"?: boolean;
+        /**
+          * Debounce duration in milliseconds for search input.
+         */
         "duration"?: number;
+        /**
+          * Unique identifier for the input element.
+         */
         "input_id"?: string;
+        /**
+          * Emitted when a selection is made from the combobox.
+         */
         "onComboboxValueChange"?: (event: IrComboboxCustomEvent<{ key: string; data: unknown }>) => void;
+        /**
+          * Emitted when the input is cleared by the user.
+         */
         "onInputCleared"?: (event: IrComboboxCustomEvent<null>) => void;
+        /**
+          * Emits a toast notification.
+         */
         "onToast"?: (event: IrComboboxCustomEvent<IToast>) => void;
+        /**
+          * Placeholder text for the input field.
+         */
         "placeholder"?: string;
+        /**
+          * The current value of the input field.
+         */
         "value"?: string;
     }
     interface IrCommon {
         "extraResources"?: string;
     }
     interface IrCountryPicker {
+        /**
+          * Whether to automatically validate the input.
+         */
         "autoValidate"?: boolean;
+        /**
+          * List of countries to display in the dropdown.
+         */
         "countries"?: ICountry[];
+        /**
+          * Currently selected country.
+         */
         "country"?: ICountry;
+        /**
+          * Whether to show an error state on the input.
+         */
         "error"?: boolean;
+        /**
+          * The label to display for the input.
+         */
         "label"?: string;
+        /**
+          * Event emitted when a country is selected.
+         */
         "onCountryChange"?: (event: IrCountryPickerCustomEvent<ICountry>) => void;
+        /**
+          * The property-associated country, shown separately if relevant.
+         */
         "propertyCountry"?: ICountry;
+        /**
+          * Test ID for automated testing.
+         */
         "testId"?: string;
     }
     interface IrDatePicker {
@@ -3992,30 +4673,96 @@ declare namespace LocalJSX {
         "triggerContainerStyle"?: string;
     }
     interface IrDateRange {
+        /**
+          * Text shown on the Apply button.
+         */
         "applyLabel"?: string;
+        /**
+          * Whether to apply the selected range automatically without clicking 'Apply'.
+         */
         "autoApply"?: boolean;
+        /**
+          * Text shown on the Cancel button.
+         */
         "cancelLabel"?: string;
+        /**
+          * Label used for the custom date range option.
+         */
         "customRangeLabel"?: string;
+        /**
+          * Single date selection value (used in single date picker mode).
+         */
         "date"?: Date;
+        /**
+          * Abbreviated names of the days of the week.
+         */
         "daysOfWeek"?: string[];
+        /**
+          * Disables the date range input when true.
+         */
         "disabled"?: boolean;
+        /**
+          * First day of the week (0 = Sunday, 1 = Monday, ...).
+         */
         "firstDay"?: number;
+        /**
+          * Date format used in the input and picker.
+         */
         "format"?: string;
+        /**
+          * Start date for the date range.
+         */
         "fromDate"?: Date;
+        /**
+          * Label for the "From" date input.
+         */
         "fromLabel"?: string;
+        /**
+          * Maximum selectable date.
+         */
         "maxDate"?: string | Date;
+        /**
+          * Maximum range span (e.g., `{ days: 240 }`).
+         */
         "maxSpan"?: moment.DurationInputArg1;
+        /**
+          * Minimum selectable date.
+         */
         "minDate"?: string | Date;
+        /**
+          * Month names shown in the calendar header.
+         */
         "monthNames"?: string[];
+        /**
+          * Emits when a new date range is selected.  Example: ```tsx <ir-date-range onDateChanged={(e) => console.log(e.detail)} /> ```
+         */
         "onDateChanged"?: (event: IrDateRangeCustomEvent<{
     start: moment.Moment;
     end: moment.Moment;
   }>) => void;
+        /**
+          * Defines which side the calendar opens to. Options: `'left'`, `'right'`, `'center'`.
+         */
         "opens"?: 'left' | 'right' | 'center';
+        /**
+          * Separator string used between start and end dates.
+         */
         "separator"?: string;
+        /**
+          * Enables single date selection mode.
+         */
         "singleDatePicker"?: boolean;
+        /**
+          * End date for the date range.
+         */
         "toDate"?: Date;
+        /**
+          * Label for the "To" date input.
+         */
         "toLabel"?: string;
+        /**
+          * Label for the week column in the calendar.
+         */
         "weekLabel"?: string;
     }
     interface IrDateView {
@@ -4030,7 +4777,13 @@ declare namespace LocalJSX {
         "user"?: IHouseKeepers;
     }
     interface IrDialog {
+        /**
+          * Emits the open/close state of the modal.  Example: ```tsx <ir-dialog onOpenChange={(e) => console.log(e.detail)} /> ```
+         */
         "onOpenChange"?: (event: IrDialogCustomEvent<boolean>) => void;
+        /**
+          * Controls whether the dialog should be opened. Can be updated externally and watched internally.
+         */
         "open"?: boolean;
     }
     interface IrDrawer {
@@ -4102,6 +4855,7 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrHkTasks {
+        "baseUrl"?: string;
         "language"?: string;
         "onClearSelectedHkTasks"?: (event: IrHkTasksCustomEvent<void>) => void;
         "p"?: string;
@@ -4122,6 +4876,7 @@ declare namespace LocalJSX {
         "user"?: THKUser | null;
     }
     interface IrHousekeeping {
+        "baseUrl"?: string;
         "language"?: string;
         "onToast"?: (event: IrHousekeepingCustomEvent<IToast>) => void;
         "p"?: string;
@@ -4134,8 +4889,17 @@ declare namespace LocalJSX {
         "type"?: 'button' | 'submit' | 'reset';
     }
     interface IrIcons {
+        /**
+          * Sets the `color` attribute on the `<svg>` element. Accepts any valid CSS color string.
+         */
         "color"?: string;
+        /**
+          * The name of the icon to render. Must match a key from the imported `icons` map.  Example: ```tsx <ir-icons name="check" /> ```
+         */
         "name"?: TIcons;
+        /**
+          * Additional CSS class applied to the `<svg>` element. Can be used for sizing, positioning, etc.
+         */
         "svgClassName"?: string;
     }
     interface IrInputText {
@@ -4285,14 +5049,35 @@ declare namespace LocalJSX {
         "zod"?: ZodType<any, any>;
     }
     interface IrInteractiveTitle {
+        /**
+          * The number of characters to display before cropping the title with ellipsis.
+         */
         "cropSize"?: number;
+        /**
+          * Whether to show the housekeeping (HK) status dot.
+         */
         "hkStatus"?: boolean;
+        /**
+          * CSS offset for the left position of the popover. Used as a CSS variable `--ir-popover-left`.
+         */
         "irPopoverLeft"?: string;
+        /**
+          * The full title string that may be cropped in the UI.
+         */
         "popoverTitle"?: string;
     }
     interface IrInterceptor {
+        /**
+          * List of endpoint paths that should trigger loader logic and OTP handling.
+         */
         "handledEndpoints"?: string[];
+        /**
+          * Emits a toast notification (`type`, `title`, `description`, `position`).
+         */
         "onToast"?: (event: IrInterceptorCustomEvent<IToast>) => void;
+        /**
+          * List of endpoints for which to suppress toast messages.
+         */
         "suppressToastEndpoints"?: string[];
     }
     interface IrLabel {
@@ -4358,22 +5143,73 @@ declare namespace LocalJSX {
   }>) => void;
     }
     interface IrModal {
+        /**
+          * If true, the modal automatically closes after confirm/cancel actions.
+         */
         "autoClose"?: boolean;
+        /**
+          * Horizontal alignment of the footer buttons.
+         */
         "btnPosition"?: 'left' | 'right' | 'center';
+        /**
+          * Icon name to render next to the title (if `iconAvailable` is true).
+         */
         "icon"?: string;
+        /**
+          * Whether an icon should be displayed next to the title.
+         */
         "iconAvailable"?: boolean;
+        /**
+          * Whether the modal is in a loading state, disabling interaction.
+         */
         "isLoading"?: boolean;
+        /**
+          * Payload object to pass along with confirm/cancel events.
+         */
         "item"?: any;
+        /**
+          * Whether the left (cancel/close) button is visible.
+         */
         "leftBtnActive"?: boolean;
+        /**
+          * Color theme of the left button.
+         */
         "leftBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+        /**
+          * Text displayed on the left (cancel/close) button.
+         */
         "leftBtnText"?: string;
+        /**
+          * The main content text shown in the modal body.
+         */
         "modalBody"?: string;
+        /**
+          * The title text displayed in the modal header.
+         */
         "modalTitle"?: string;
+        /**
+          * Fired when the cancel (left) button or backdrop is clicked.
+         */
         "onCancelModal"?: (event: IrModalCustomEvent<any>) => void;
+        /**
+          * Fired when the confirm (right) button is clicked. Emits the current `item` value.
+         */
         "onConfirmModal"?: (event: IrModalCustomEvent<any>) => void;
+        /**
+          * Whether the right (confirm) button is visible.
+         */
         "rightBtnActive"?: boolean;
+        /**
+          * Color theme of the right button.
+         */
         "rightBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+        /**
+          * Text displayed on the right (confirm) button.
+         */
         "rightBtnText"?: string;
+        /**
+          * Controls whether the modal title is rendered.
+         */
         "showTitle"?: boolean;
     }
     interface IrOptionDetails {
@@ -4496,17 +5332,53 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrPhoneInput {
+        /**
+          * Country list, used to populate prefix and dropdown. If not provided, fetched from the booking service.
+         */
         "countries"?: ICountry[];
+        /**
+          * Default country ID used if no phone prefix is set.
+         */
         "default_country"?: number;
+        /**
+          * Disables the phone input when true.
+         */
         "disabled"?: boolean;
+        /**
+          * If true, styles the input to indicate an error state.
+         */
         "error"?: boolean;
+        /**
+          * Label displayed next to the phone input.
+         */
         "label"?: string;
+        /**
+          * Two-letter language code used for country fetching.
+         */
         "language"?: string;
+        /**
+          * Emits when the user changes the phone number. Emits `{ phone_prefix, mobile }` object.  Example: ```tsx <ir-phone-input onTextChange={(e) => console.log(e.detail)} /> ```
+         */
         "onTextChange"?: (event: IrPhoneInputCustomEvent<{ phone_prefix: string; mobile: string }>) => void;
+        /**
+          * If provided, sets the phone prefix and updates selected country.
+         */
         "phone_prefix"?: string | null;
+        /**
+          * Placeholder text for the input.
+         */
         "placeholder"?: string;
+        /**
+          * Identifier for test automation.
+         */
         "testId"?: string;
+        /**
+          * Auth token used by the booking service (if needed).
+         */
         "token"?: string;
+        /**
+          * Initial phone number value.
+         */
         "value"?: string;
     }
     interface IrPickup {
@@ -4524,10 +5396,25 @@ declare namespace LocalJSX {
         "bookingNumber"?: string;
     }
     interface IrPopover {
+        /**
+          * Content to display inside the popover. Can be plain text or HTML depending on `renderContentAsHtml`.
+         */
         "content"?: string;
+        /**
+          * Horizontal offset (left) of the popover from its trigger. Used in inline style as `--ir-popover-left`.
+         */
         "irPopoverLeft"?: string;
+        /**
+          * Position of the popover relative to the trigger. Options: `'top'`, `'bottom'`, `'left'`, `'right'`, `'auto'`.
+         */
         "placement"?: 'top' | 'bottom' | 'left' | 'right' | 'auto';
+        /**
+          * Whether to treat `content` as raw HTML. When true, `content` will be injected with `html: true` in jQuery popover.
+         */
         "renderContentAsHtml"?: boolean;
+        /**
+          * Event that triggers the popover. Options: `'focus'`, `'click'`, `'hover'`.
+         */
         "trigger"?: 'focus' | 'click' | 'hover';
     }
     interface IrPriceInput {
@@ -4603,6 +5490,40 @@ declare namespace LocalJSX {
           * A Zod schema for validating the input Example: z.coerce.number()
          */
         "zod"?: ZodType<any, any>;
+    }
+    interface IrRadio {
+        /**
+          * Whether the checkbox is checked.
+         */
+        "checked"?: boolean;
+        /**
+          * Disables the checkbox when true.
+         */
+        "disabled"?: boolean;
+        /**
+          * Whether the checkbox is in an indeterminate state.
+         */
+        "indeterminate"?: boolean;
+        /**
+          * The label text associated with the checkbox.
+         */
+        "label"?: string;
+        /**
+          * CSS class applied to the label element.
+         */
+        "labelClass"?: string;
+        /**
+          * The name attribute of the checkbox, used for form submission.
+         */
+        "name"?: string;
+        /**
+          * Emitted when the checkbox's checked state changes.
+         */
+        "onCheckChange"?: (event: IrRadioCustomEvent<boolean>) => void;
+        /**
+          * The unique ID of the checkbox element.
+         */
+        "radioBoxId"?: string;
     }
     interface IrRangePicker {
         /**
@@ -4737,9 +5658,6 @@ declare namespace LocalJSX {
         "LabelAvailable"?: boolean;
         "data"?: selectOption[];
         "disabled"?: boolean;
-        /**
-          * Whether the select has an error
-         */
         "error"?: boolean;
         "firstOption"?: string;
         "label"?: string;
@@ -4764,27 +5682,80 @@ declare namespace LocalJSX {
         "textSize"?: 'sm' | 'md' | 'lg';
     }
     interface IrSidebar {
+        /**
+          * Label text displayed in the sidebar header.
+         */
         "label"?: string;
+        /**
+          * Identifier for the sidebar instance.
+         */
         "name"?: string;
+        /**
+          * Event emitted *before* the sidebar attempts to close, but only if `preventClose` is set to true.
+         */
+        "onBeforeSidebarClose"?: (event: IrSidebarCustomEvent<any>) => void;
+        /**
+          * Event emitted when the sidebar is toggled open/closed. Emits the current `open` state.
+         */
         "onIrSidebarToggle"?: (event: IrSidebarCustomEvent<any>) => void;
+        /**
+          * Whether the sidebar is open. Can be used with two-way binding.
+         */
         "open"?: boolean;
+        /**
+          * Prevents the sidebar from closing when `toggleSidebar()` is called. When true, emits `beforeSidebarClose` instead of toggling.
+         */
+        "preventClose"?: boolean;
+        /**
+          * Whether to show the close (X) button in the sidebar header.
+         */
         "showCloseButton"?: boolean;
+        /**
+          * Which side of the screen the sidebar appears on. Options: `'left'` or `'right'`.
+         */
         "side"?: 'right' | 'left';
+        /**
+          * Inline styles applied to the sidebar container.
+         */
         "sidebarStyles"?: Partial<CSSStyleDeclaration>;
     }
     interface IrSpan {
         "text"?: any;
     }
     interface IrSpinner {
+        /**
+          * Thickness of the spinner's border. Example: `borderWidth={4}` renders a `4px` or `4rem` thick border.
+         */
         "borderWidth"?: number;
+        /**
+          * Color of the spinner. Accepts any valid CSS color string.
+         */
         "color"?: string;
+        /**
+          * Size of the spinner (diameter). Example: `size={2}` with `unit="rem"` sets spinner to `2rem`.
+         */
         "size"?: number;
+        /**
+          * CSS unit used for `size` and `borderWidth`. Can be `'px'` or `'rem'`.
+         */
         "unit"?: 'px' | 'rem';
     }
     interface IrSwitch {
+        /**
+          * Whether the switch is currently checked (on). This is mutable and can be toggled internally.
+         */
         "checked"?: boolean;
+        /**
+          * Disables the switch if true.
+         */
         "disabled"?: boolean;
+        /**
+          * Emitted when the checked state changes. Emits `true` when turned on, `false` when turned off.  Example: ```tsx <ir-switch onCheckChange={(e) => console.log(e.detail)} /> ```
+         */
         "onCheckChange"?: (event: IrSwitchCustomEvent<boolean>) => void;
+        /**
+          * Optional ID for the switch. If not provided, a random ID will be generated.
+         */
         "switchId"?: string;
     }
     interface IrTasksFilters {
@@ -4832,18 +5803,57 @@ declare namespace LocalJSX {
         "value"?: string;
     }
     interface IrTextarea {
+        /**
+          * Number of visible character columns.
+         */
         "cols"?: number;
+        /**
+          * Text label displayed above or beside the textarea.
+         */
         "label"?: string;
+        /**
+          * Width of the label in grid columns (for `variant="prepend"`).
+         */
         "labelWidth"?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+        /**
+          * Maximum number of characters allowed.
+         */
         "maxLength"?: number;
+        /**
+          * Emits when the textarea content changes.  Example: ```tsx <ir-textarea onTextChange={(e) => console.log(e.detail)} /> ```
+         */
         "onTextChange"?: (event: IrTextareaCustomEvent<string>) => void;
+        /**
+          * Placeholder text shown when input is empty.
+         */
         "placeholder"?: string;
+        /**
+          * Number of visible text lines.
+         */
         "rows"?: number;
+        /**
+          * Inline styles applied directly to the textarea.
+         */
         "styles"?: { [key: string]: string };
+        /**
+          * `data-testid` for targeting in tests.
+         */
         "testId"?: string;
+        /**
+          * Unused property, intended to store textarea text.
+         */
         "text"?: string;
+        /**
+          * Additional classes for the textarea element.
+         */
         "textareaClassname"?: string;
+        /**
+          * Current value of the textarea (supports two-way binding).
+         */
         "value"?: string;
+        /**
+          * Layout style of the textarea: `'default'` shows label above, `'prepend'` shows label on the left.
+         */
         "variant"?: 'default' | 'prepend';
     }
     interface IrTitle {
@@ -4867,12 +5877,27 @@ declare namespace LocalJSX {
         "onCloseSideBar"?: (event: IrTitleCustomEvent<null>) => void;
     }
     interface IrToast {
+        /**
+          * Position where toasts will appear. Options include: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`.
+         */
         "position"?: TPositions;
     }
     interface IrTooltip {
+        /**
+          * Inline styles applied to the outer tooltip container.
+         */
         "containerStyle"?: { [key: string]: string };
+        /**
+          * When true, allows a custom element to trigger the tooltip using a named slot. If false, a default info icon is used.
+         */
         "customSlot"?: boolean;
+        /**
+          * Text or HTML content to be displayed in the tooltip.
+         */
         "message"?: string;
+        /**
+          * Whether the tooltip content should be rendered using `innerHTML`. If false, treats message as plain text.
+         */
         "withHtml"?: boolean;
     }
     interface IrUnitStatus {
@@ -4916,9 +5941,28 @@ declare namespace LocalJSX {
         "userTypes"?: Map<string | number, string>;
         "users"?: User[];
     }
+    interface IrWeekdaySelector {
+        /**
+          * Emits an updated list of selected weekday values when the selection changes.  Example: ```tsx <ir-weekday-selector onWeekdayChange={(e) => console.log(e.detail)} /> ```
+         */
+        "onWeekdayChange"?: (event: IrWeekdaySelectorCustomEvent<number[]>) => void;
+        /**
+          * Initial list of selected weekdays (numeric values).
+         */
+        "weekdays"?: number[];
+    }
     interface OtaLabel {
+        /**
+          * Label displayed as the section title.
+         */
         "label"?: string;
+        /**
+          * Maximum number of remarks to display before showing the "Show More" button.
+         */
         "maxVisibleItems"?: number;
+        /**
+          * Array of OTA notes to display in the list.
+         */
         "remarks"?: IOtaNotes[];
     }
     interface RequirementCheck {
@@ -4942,6 +5986,7 @@ declare namespace LocalJSX {
         "igl-booking-event-hover": IglBookingEventHover;
         "igl-booking-form": IglBookingForm;
         "igl-booking-overview-page": IglBookingOverviewPage;
+        "igl-bulk-stop-sale": IglBulkStopSale;
         "igl-cal-body": IglCalBody;
         "igl-cal-footer": IglCalFooter;
         "igl-cal-header": IglCalHeader;
@@ -5016,6 +6061,7 @@ declare namespace LocalJSX {
         "ir-pms-logs": IrPmsLogs;
         "ir-popover": IrPopover;
         "ir-price-input": IrPriceInput;
+        "ir-radio": IrRadio;
         "ir-range-picker": IrRangePicker;
         "ir-reservation-information": IrReservationInformation;
         "ir-reset-password": IrResetPassword;
@@ -5044,6 +6090,7 @@ declare namespace LocalJSX {
         "ir-user-form-panel": IrUserFormPanel;
         "ir-user-management": IrUserManagement;
         "ir-user-management-table": IrUserManagementTable;
+        "ir-weekday-selector": IrWeekdaySelector;
         "ota-label": OtaLabel;
         "requirement-check": RequirementCheck;
     }
@@ -5062,6 +6109,7 @@ declare module "@stencil/core" {
             "igl-booking-event-hover": LocalJSX.IglBookingEventHover & JSXBase.HTMLAttributes<HTMLIglBookingEventHoverElement>;
             "igl-booking-form": LocalJSX.IglBookingForm & JSXBase.HTMLAttributes<HTMLIglBookingFormElement>;
             "igl-booking-overview-page": LocalJSX.IglBookingOverviewPage & JSXBase.HTMLAttributes<HTMLIglBookingOverviewPageElement>;
+            "igl-bulk-stop-sale": LocalJSX.IglBulkStopSale & JSXBase.HTMLAttributes<HTMLIglBulkStopSaleElement>;
             "igl-cal-body": LocalJSX.IglCalBody & JSXBase.HTMLAttributes<HTMLIglCalBodyElement>;
             "igl-cal-footer": LocalJSX.IglCalFooter & JSXBase.HTMLAttributes<HTMLIglCalFooterElement>;
             "igl-cal-header": LocalJSX.IglCalHeader & JSXBase.HTMLAttributes<HTMLIglCalHeaderElement>;
@@ -5136,6 +6184,7 @@ declare module "@stencil/core" {
             "ir-pms-logs": LocalJSX.IrPmsLogs & JSXBase.HTMLAttributes<HTMLIrPmsLogsElement>;
             "ir-popover": LocalJSX.IrPopover & JSXBase.HTMLAttributes<HTMLIrPopoverElement>;
             "ir-price-input": LocalJSX.IrPriceInput & JSXBase.HTMLAttributes<HTMLIrPriceInputElement>;
+            "ir-radio": LocalJSX.IrRadio & JSXBase.HTMLAttributes<HTMLIrRadioElement>;
             "ir-range-picker": LocalJSX.IrRangePicker & JSXBase.HTMLAttributes<HTMLIrRangePickerElement>;
             "ir-reservation-information": LocalJSX.IrReservationInformation & JSXBase.HTMLAttributes<HTMLIrReservationInformationElement>;
             "ir-reset-password": LocalJSX.IrResetPassword & JSXBase.HTMLAttributes<HTMLIrResetPasswordElement>;
@@ -5164,6 +6213,7 @@ declare module "@stencil/core" {
             "ir-user-form-panel": LocalJSX.IrUserFormPanel & JSXBase.HTMLAttributes<HTMLIrUserFormPanelElement>;
             "ir-user-management": LocalJSX.IrUserManagement & JSXBase.HTMLAttributes<HTMLIrUserManagementElement>;
             "ir-user-management-table": LocalJSX.IrUserManagementTable & JSXBase.HTMLAttributes<HTMLIrUserManagementTableElement>;
+            "ir-weekday-selector": LocalJSX.IrWeekdaySelector & JSXBase.HTMLAttributes<HTMLIrWeekdaySelectorElement>;
             "ota-label": LocalJSX.OtaLabel & JSXBase.HTMLAttributes<HTMLOtaLabelElement>;
             "requirement-check": LocalJSX.RequirementCheck & JSXBase.HTMLAttributes<HTMLRequirementCheckElement>;
         }

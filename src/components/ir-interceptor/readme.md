@@ -7,17 +7,17 @@
 
 ## Properties
 
-| Property                 | Attribute | Description | Type       | Default                                                                                                   |
-| ------------------------ | --------- | ----------- | ---------- | --------------------------------------------------------------------------------------------------------- |
-| `handledEndpoints`       | --        |             | `string[]` | `['/Get_Exposed_Calendar', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']` |
-| `suppressToastEndpoints` | --        |             | `string[]` | `[]`                                                                                                      |
+| Property                 | Attribute | Description                                                               | Type       | Default                                                                                                   |
+| ------------------------ | --------- | ------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------- |
+| `handledEndpoints`       | --        | List of endpoint paths that should trigger loader logic and OTP handling. | `string[]` | `['/Get_Exposed_Calendar', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']` |
+| `suppressToastEndpoints` | --        | List of endpoints for which to suppress toast messages.                   | `string[]` | `[]`                                                                                                      |
 
 
 ## Events
 
-| Event   | Description | Type                                                                                                 |
-| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event   | Description                                                              | Type                                                                                                 |
+| ------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `toast` | Emits a toast notification (`type`, `title`, `description`, `position`). | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
 ## Dependencies

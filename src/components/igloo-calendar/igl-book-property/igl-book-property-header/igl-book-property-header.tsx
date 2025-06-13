@@ -28,6 +28,7 @@ export class IglBookPropertyHeader {
   @Prop() bookedByInfoData: any;
   @Prop() defaultDaterange: { from_date: string; to_date: string };
   @Prop() propertyId: number;
+  @Prop() wasBlockedUnit: boolean;
 
   @Event() splitBookingDropDownChange: EventEmitter<any>;
   @Event() sourceDropDownChange: EventEmitter<string>;
@@ -165,7 +166,6 @@ export class IglBookPropertyHeader {
           <ir-button
             btn_id="check_availability"
             isLoading={isRequestPending('/Check_Availability')}
-            icon=""
             size="sm"
             class="ml-2"
             text={locales.entries.Lcz_Check}
@@ -237,7 +237,21 @@ export class IglBookPropertyHeader {
   isEventType(key: string) {
     return this.bookingData.event_type === key;
   }
-
+  private getMinDate() {
+    if (this.isEventType('PLUS_BOOKING')) {
+      return moment().add(-1, 'months').startOf('month').format('YYYY-MM-DD');
+    }
+    if (this.wasBlockedUnit) {
+      return this.bookingData?.block_exposed_unit_props.from_date;
+    }
+    return this.minDate;
+  }
+  private getMaxDate() {
+    if (!this.bookingData?.block_exposed_unit_props) {
+      return undefined;
+    }
+    return this.bookingData?.block_exposed_unit_props.to_date;
+  }
   render() {
     const showSourceNode = this.showSplitBookingOption ? this.getSplitBookingList() : this.isEventType('EDIT_BOOKING') || this.isEventType('ADD_ROOM') ? false : true;
     return (
@@ -250,8 +264,9 @@ export class IglBookPropertyHeader {
               data-testid="date_picker"
               variant="booking"
               dateLabel={locales.entries.Lcz_Dates}
-              minDate={this.isEventType('PLUS_BOOKING') ? moment().add(-1, 'months').startOf('month').format('YYYY-MM-DD') : this.minDate}
-              disabled={this.isEventType('BAR_BOOKING') || this.isEventType('SPLIT_BOOKING')}
+              maxDate={this.getMaxDate()}
+              minDate={this.getMinDate()}
+              disabled={(this.isEventType('BAR_BOOKING') && !this.wasBlockedUnit) || this.isEventType('SPLIT_BOOKING')}
               defaultData={this.bookingDataDefaultDateRange}
             ></igl-date-range>
           </fieldset>

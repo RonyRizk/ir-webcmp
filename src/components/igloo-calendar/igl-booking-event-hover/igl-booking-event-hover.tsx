@@ -390,6 +390,7 @@ export class IglBookingEventHover {
       .map(o => `${separator}${o.statement}`)
       .join('');
   }
+
   private getInfoElement() {
     return (
       <div class={`iglPopOver infoBubble ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
@@ -652,7 +653,7 @@ export class IglBookingEventHover {
               btn_block
               btn_styles="h-100"
               size="sm"
-              text={locales.entries.Lcz_ConvertToBooking}
+              text={locales.entries.Lcz_ConvertSplitBooking}
               onClickHandler={() => {
                 this.handleConvertBlockedDateToBooking();
               }}

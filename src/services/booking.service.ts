@@ -43,6 +43,16 @@ export class BookingService {
     }
     return data;
   }
+  public async setExposedRestrictionPerRoomType(params: { is_closed: boolean; restrictions: { room_type_id: number | string; night: string }[]; operation_type?: string }) {
+    const { data } = await axios.post(`https://gateway.igloorooms.com/IRBE/Set_Exposed_Restriction_Per_Room_Type`, {
+      operation_type: params.operation_type ?? 'close_open',
+      ...params,
+    });
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
   public async getLov() {
     const { data } = await axios.post(`/Get_LOV`, {});
     if (data.ExceptionMsg !== '') {
@@ -81,14 +91,20 @@ export class BookingService {
             daysCount: month.days.length,
             monthName: month.description,
           });
-          return month.days.map(day => ({
-            day: convertDateToCustomFormat(day.description, month.description),
-            currentDate: convertDateToTime(day.description, month.description),
-            dayDisplayName: day.description,
-            rate: day.room_types,
-            unassigned_units_nbr: day.unassigned_units_nbr,
-            occupancy: day.occupancy,
-          }));
+          return month.days.map(day => {
+            if (day['value'] === '2025-05-30') {
+              console.log(day);
+            }
+            return {
+              day: convertDateToCustomFormat(day.description, month.description),
+              value: day.value,
+              currentDate: convertDateToTime(day.description, month.description),
+              dayDisplayName: day.description,
+              rate: day.room_types,
+              unassigned_units_nbr: day.unassigned_units_nbr,
+              occupancy: day.occupancy,
+            };
+          });
         })
         .flat();
 

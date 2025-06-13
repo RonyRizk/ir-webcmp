@@ -9,6 +9,7 @@
 
 | Property         | Attribute         | Description | Type     | Default     |
 | ---------------- | ----------------- | ----------- | -------- | ----------- |
+| `baseUrl`        | `base-url`        |             | `string` | `undefined` |
 | `currencyName`   | `currency-name`   |             | `string` | `undefined` |
 | `from_date`      | `from_date`       |             | `string` | `undefined` |
 | `language`       | `language`        |             | `string` | `undefined` |
@@ -21,14 +22,14 @@
 
 ## Events
 
-| Event                      | Description | Type                                                                                     |
-| -------------------------- | ----------- | ---------------------------------------------------------------------------------------- |
-| `calculateUnassignedDates` |             | `CustomEvent<any>`                                                                       |
-| `dragOverHighlightElement` |             | `CustomEvent<any>`                                                                       |
-| `moveBookingTo`            |             | `CustomEvent<any>`                                                                       |
-| `openCalendarSidebar`      |             | `CustomEvent<{ type: "room-guests" \| "booking-details" \| "add-days"; payload: any; }>` |
-| `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                     |
-| `revertBooking`            |             | `CustomEvent<any>`                                                                       |
+| Event                      | Description | Type                                                                                                      |
+| -------------------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
+| `calculateUnassignedDates` |             | `CustomEvent<any>`                                                                                        |
+| `dragOverHighlightElement` |             | `CustomEvent<any>`                                                                                        |
+| `moveBookingTo`            |             | `CustomEvent<any>`                                                                                        |
+| `openCalendarSidebar`      |             | `CustomEvent<{ type: "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks"; payload: any; }>` |
+| `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                                      |
+| `revertBooking`            |             | `CustomEvent<any>`                                                                                        |
 
 
 ## Dependencies
@@ -52,6 +53,7 @@
 - [ir-room-nights](ir-room-nights)
 - [ir-booking-details](../ir-booking-details)
 - [ir-room-guests](../ir-booking-details/ir-room-guests)
+- [igl-bulk-stop-sale](igl-bulk-stop-sale)
 - [ir-modal](../ui/ir-modal)
 
 ### Graph
@@ -70,6 +72,7 @@ graph TD;
   igloo-calendar --> ir-room-nights
   igloo-calendar --> ir-booking-details
   igloo-calendar --> ir-room-guests
+  igloo-calendar --> igl-bulk-stop-sale
   igloo-calendar --> ir-modal
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
@@ -200,6 +203,12 @@ graph TD;
   ir-payment-details --> ir-payment-actions
   ir-payment-details --> ir-modal
   ir-payment-actions --> ir-button
+  igl-bulk-stop-sale --> ir-title
+  igl-bulk-stop-sale --> ir-select
+  igl-bulk-stop-sale --> ir-weekday-selector
+  igl-bulk-stop-sale --> ir-button
+  igl-bulk-stop-sale --> ir-date-picker
+  ir-weekday-selector --> ir-checkbox
   ir-secure-tasks --> igloo-calendar
   style igloo-calendar fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -16,6 +16,7 @@ import calendar_data from '@/stores/calendar-data';
 import { addUnassignedDates, handleUnAssignedDatesChange, removeUnassignedDates } from '@/stores/unassigned_dates.store';
 import Token from '@/models/Token';
 import { RoomHkStatus, RoomType } from '@/models/booking.dto';
+import { BatchingQueue } from '@/utils/Queue';
 // import Auth from '@/models/Auth';
 export interface UnitHkStatusChangePayload {
   PR_ID: number;
@@ -32,8 +33,10 @@ export interface UnitHkStatusChangePayload {
   My_Room_category: null;
   My_Hkm: null;
 }
+export type SalesBatchPayload = { rate_plan_id: number; night: string; is_available_to_book: boolean };
+export type AvailabilityBatchPayload = { room_type_id: number; date: string; availability: number };
 export type CalendarSidebarState = {
-  type: 'room-guests' | 'booking-details' | 'add-days';
+  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks';
   payload: any;
 };
 @Component({
@@ -50,6 +53,7 @@ export class IglooCalendar {
   @Prop() currencyName: string;
   @Prop() ticket: string = '';
   @Prop() p: string;
+  @Prop() baseUrl: string;
 
   @Element() private element: HTMLElement;
 
@@ -67,7 +71,6 @@ export class IglooCalendar {
   @State() roomNightsData: IRoomNightsData | null = null;
   @State() renderAgain = false;
   @State() showBookProperty: boolean = false;
-  @State() totalAvailabilityQueue: { room_type_id: number; date: string; availability: number }[] = [];
   @State() highlightedDate: string;
   @State() calDates: { from: string; to: string };
   @State() isAuthenticated = false;
@@ -94,11 +97,29 @@ export class IglooCalendar {
   private reachedEndOfCalendar = false;
 
   private socket: Socket;
-  private availabilityTimeout: NodeJS.Timeout;
   private token = new Token();
-  calendarModalEl: HTMLIrModalElement;
+  private calendarModalEl: HTMLIrModalElement;
+
+  private salesQueue = new BatchingQueue<SalesBatchPayload[]>(this.processSalesBatch.bind(this), {
+    batchSize: 50,
+    flushInterval: 1000,
+    maxQueueSize: 5000,
+    onError: e => console.error('Batch Sales Update Error:', e),
+  });
+
+  private availabilityQueue = new BatchingQueue<AvailabilityBatchPayload[]>(this.processAvailabilityBatch.bind(this), {
+    batchSize: 50,
+    flushInterval: 1000,
+    maxQueueSize: 5000,
+    onError: e => console.error('Batch Availability Update Error:', e),
+  });
+
+  private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
 
   componentWillLoad() {
+    if (this.baseUrl) {
+      this.token.setBaseUrl(this.baseUrl);
+    }
     this.init();
   }
   componentDidLoad() {
@@ -272,11 +293,9 @@ export class IglooCalendar {
     }
   }
   private setUpCalendarData(roomResp, bookingResp) {
-    console.log(roomResp);
     this.calendarData.currency = roomResp['My_Result'].currency;
     this.calendarData.allowedBookingSources = roomResp['My_Result'].allowed_booking_sources;
     this.calendarData.adultChildConstraints = roomResp['My_Result'].adult_child_constraints;
-    console.log(this.calendarData.allowedBookingSources);
     this.calendarData.legendData = this.getLegendData(roomResp);
     this.calendarData.is_vacation_rental = roomResp['My_Result'].is_vacation_rental;
     this.calendarData.from_date = bookingResp.My_Params_Get_Rooming_Data.FROM;
@@ -390,7 +409,7 @@ export class IglooCalendar {
     } else {
       result = JSON.parse(PAYLOAD);
     }
-    console.log(KEY, result);
+    console.log({ [REASON]: result });
     const reasonHandlers: Partial<Record<bookingReasons, Function>> = {
       DORESERVATION: this.handleDoReservation,
       BLOCK_EXPOSED_UNIT: this.handleBlockExposedUnit,
@@ -398,13 +417,15 @@ export class IglooCalendar {
       REALLOCATE_EXPOSED_ROOM_BLOCK: this.handleReallocateExposedRoomBlock,
       DELETE_CALENDAR_POOL: this.handleDeleteCalendarPool,
       GET_UNASSIGNED_DATES: this.handleGetUnassignedDates,
-      UPDATE_CALENDAR_AVAILABILITY: this.handleUpdateCalendarAvailability,
+      UPDATE_CALENDAR_AVAILABILITY: r => this.availabilityQueue.offer(r),
       CHANGE_IN_DUE_AMOUNT: this.handleChangeInDueAmount,
       CHANGE_IN_BOOK_STATUS: this.handleChangeInBookStatus,
       NON_TECHNICAL_CHANGE_IN_BOOKING: this.handleNonTechnicalChangeInBooking,
       ROOM_STATUS_CHANGED: this.handleRoomStatusChanged,
       UNIT_HK_STATUS_CHANGED: this.handleUnitHKStatusChanged,
       SHARING_PERSONS_UPDATED: this.handleSharingPersonsUpdated,
+      ROOM_TYPE_CLOSE: r => this.salesQueue.offer({ ...r, is_available_to_book: false }),
+      ROOM_TYPE_OPEN: r => this.salesQueue.offer({ ...r, is_available_to_book: true }),
     };
 
     const handler = reasonHandlers[REASON];
@@ -541,16 +562,6 @@ export class IglooCalendar {
     return result;
   }
 
-  private handleUpdateCalendarAvailability(result: any) {
-    this.totalAvailabilityQueue.push(result);
-    if (this.totalAvailabilityQueue.length > 0) {
-      clearTimeout(this.availabilityTimeout);
-    }
-    this.availabilityTimeout = setTimeout(() => {
-      this.updateTotalAvailability();
-    }, 1000);
-  }
-
   private handleChangeInDueAmount(result: any) {
     this.calendarData = {
       ...this.calendarData,
@@ -671,25 +682,89 @@ export class IglooCalendar {
     });
   }
    */
-
-  private updateTotalAvailability() {
-    let days = [...calendar_dates.days];
-    this.totalAvailabilityQueue.forEach(queue => {
-      let selectedDate = new Date(queue.date);
-      selectedDate.setMilliseconds(0);
-      selectedDate.setSeconds(0);
-      selectedDate.setMinutes(0);
-      selectedDate.setHours(0);
-      //find the selected day
-      const index = days.findIndex(day => day.currentDate === selectedDate.getTime());
-      if (index != -1) {
-        //find room_type_id
-        const room_type_index = days[index].rate.findIndex(room => room.id === queue.room_type_id);
-        if (room_type_index != -1) {
-          days[index].rate[room_type_index].exposed_inventory.rts = queue.availability;
-        }
+  private processSalesBatch(batch: SalesBatchPayload[]) {
+    const days = [...calendar_dates.days];
+    const disabled_cells = new Map(calendar_dates.disabled_cells);
+    for (const sale of batch) {
+      // 1) find the day index
+      const dayIdx = days.findIndex(d => d.value === sale.night);
+      if (dayIdx === -1) {
+        console.warn(`Couldn't find day ${sale.night}`);
+        continue;
       }
-    });
+
+      // 2) check cache entry
+      let entry = this.roomTypeIdsCache.get(sale.rate_plan_id);
+      if (entry === 'skip') {
+        // previously determined no matching room type for this rate_plan_id
+        continue;
+      }
+
+      // 3) if not cached, look it up and cache it
+      if (!entry) {
+        const rtIdx = days[dayIdx].rate.findIndex(rt => rt.rateplans.some(rp => rp.id === sale.rate_plan_id));
+        if (rtIdx === -1) {
+          this.roomTypeIdsCache.set(sale.rate_plan_id, 'skip');
+          console.warn(`Couldn't find room type for rate plan ${sale.rate_plan_id}`);
+          continue;
+        }
+        const roomType = days[dayIdx].rate[rtIdx];
+        const rpIdx = roomType.rateplans.findIndex(rp => rp.id === sale.rate_plan_id);
+        entry = { id: rtIdx, index: rpIdx };
+        this.roomTypeIdsCache.set(sale.rate_plan_id, entry);
+      }
+
+      // 4) apply cached indices
+      const { id: roomTypeIdx, index: ratePlanIdx } = entry as { id: number; index: number };
+      const roomType = days[dayIdx].rate[roomTypeIdx];
+
+      // 5) update that specific rateplan
+      const updatedRateplans = roomType.rateplans.map((rp, i) => (i === ratePlanIdx ? { ...rp, is_available_to_book: sale.is_available_to_book } : rp));
+      const is_available_to_book = updatedRateplans.some(rp => rp.is_available_to_book);
+      days[dayIdx].rate[roomTypeIdx] = {
+        ...roomType,
+        rateplans: updatedRateplans,
+        // overall room availability = true if any rateplan is bookable
+        is_available_to_book,
+      };
+      //update the disabled cells
+      for (const room of roomType.physicalrooms) {
+        const key = `${room.id}_${days[dayIdx].value}`;
+        disabled_cells.set(key, { disabled: !is_available_to_book, reason: 'stop_sale' });
+      }
+    }
+
+    // 6) write back to the store
+    calendar_dates['disabled_cells'] = new Map(disabled_cells);
+    calendar_dates.days = days;
+  }
+  private processAvailabilityBatch(batch: AvailabilityBatchPayload[]) {
+    let days = [...calendar_dates.days];
+    const disabled_cells = new Map(calendar_dates.disabled_cells);
+    for (const queue of batch) {
+      //find the selected day
+      const index = days.findIndex(day => day.value === queue.date);
+      if (index === -1) {
+        console.warn(`Couldn't find day ${queue.date}`);
+        return;
+      }
+      //find room_type_id
+      const room_type_index = days[index].rate.findIndex(room => room.id === queue.room_type_id);
+      if (room_type_index === -1) {
+        console.warn(`Couldn't find room type ${queue.room_type_id}`);
+        return;
+      }
+      const room_type = days[index].rate[room_type_index];
+      //update the availability
+      room_type.exposed_inventory.rts = queue.availability;
+      const isClosed = room_type.rateplans.every(rp => !rp.is_available_to_book);
+      for (const room of room_type.physicalrooms) {
+        const key = `${room.id}_${queue.date}`;
+        // disabled_cells.set(key, { disabled: isClosed || queue.availability === 0, reason: isClosed ? 'stop_sale' : 'inventory' });
+        disabled_cells.set(key, { disabled: queue.availability === 0, reason: isClosed ? 'stop_sale' : 'inventory' });
+      }
+    }
+    calendar_dates['disabled_cells'] = new Map(disabled_cells);
     calendar_dates.days = [...days];
   }
 
@@ -792,6 +867,12 @@ export class IglooCalendar {
         this.highlightedDate = this.transformDateForScroll(dt);
         break;
       case 'search':
+        break;
+      case 'bulk':
+        this.calendarSidebarState = {
+          type: 'bulk-blocks',
+          payload: null,
+        };
         break;
       case 'add':
         //console.log('data:', opt.data);
@@ -1255,6 +1336,9 @@ export class IglooCalendar {
               checkIn={this.calendarSidebarState?.payload?.checkin}
               onCloseModal={() => (this.calendarSidebarState = null)}
             ></ir-room-guests>
+          )}
+          {this.calendarSidebarState?.type === 'bulk-blocks' && (
+            <igl-bulk-stop-sale slot="sidebar-body" onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-stop-sale>
           )}
         </ir-sidebar>
         <ir-modal
