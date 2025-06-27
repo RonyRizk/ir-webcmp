@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property         | Attribute          | Description | Type     | Default |
-| ---------------- | ------------------ | ----------- | -------- | ------- |
-| `maxDatesLength` | `max-dates-length` |             | `number` | `8`     |
+| Property         | Attribute          | Description | Type     | Default     |
+| ---------------- | ------------------ | ----------- | -------- | ----------- |
+| `maxDatesLength` | `max-dates-length` |             | `number` | `8`         |
+| `property_id`    | `property_id`      |             | `number` | `undefined` |
 
 
 ## Events
