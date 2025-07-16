@@ -45,6 +45,7 @@ graph TD;
   ir-sales-filters --> ir-range-picker
   ir-sales-filters --> ir-checkbox
   ir-range-picker --> ir-date-picker
+  ir-sales-table --> ir-button
   style ir-sales-by-country fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
