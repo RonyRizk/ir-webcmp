@@ -30,6 +30,7 @@
 | `openCalendarSidebar`      |             | `CustomEvent<{ type: "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks"; payload: any; }>` |
 | `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                                      |
 | `revertBooking`            |             | `CustomEvent<any>`                                                                                        |
+| `showRoomNightsDialog`     |             | `CustomEvent<IRoomNightsData>`                                                                            |
 
 
 ## Dependencies
@@ -179,6 +180,7 @@ graph TD;
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
+  ir-booking-header --> ir-modal
   ir-pms-logs --> ir-spinner
   ir-events-log --> ir-spinner
   ir-dialog --> ir-icon

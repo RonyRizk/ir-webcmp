@@ -147,9 +147,11 @@ graph TD;
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
+  ir-booking-header --> ir-modal
   ir-pms-logs --> ir-spinner
   ir-events-log --> ir-spinner
   ir-dialog --> ir-icon
+  ir-modal --> ir-button
   ir-reservation-information --> ir-label
   ir-reservation-information --> ir-tooltip
   ir-reservation-information --> ir-icons
@@ -159,7 +161,6 @@ graph TD;
   ir-room --> ir-date-view
   ir-room --> ir-label
   ir-room --> ir-modal
-  ir-modal --> ir-button
   ir-pickup-view --> ir-button
   ir-extra-services --> ir-extra-service
   ir-extra-service --> ir-button

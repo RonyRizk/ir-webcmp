@@ -41,6 +41,7 @@
 - [ir-select](../../ui/ir-select)
 - [ir-button](../../ui/ir-button)
 - [ir-dialog](../../ui/ir-dialog)
+- [ir-modal](../../ui/ir-modal)
 
 ### Graph
 ```mermaid
@@ -50,10 +51,12 @@ graph TD;
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
+  ir-booking-header --> ir-modal
   ir-pms-logs --> ir-spinner
   ir-events-log --> ir-spinner
   ir-button --> ir-icons
   ir-dialog --> ir-icon
+  ir-modal --> ir-button
   ir-booking-details --> ir-booking-header
   style ir-booking-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

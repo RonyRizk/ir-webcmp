@@ -70,6 +70,7 @@ Type: `Promise<void>`
  - [igl-cal-body](../../igloo-calendar/igl-cal-body)
  - [igloo-calendar](../../igloo-calendar)
  - [ir-booking-details](../../ir-booking-details)
+ - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-channel](../../ir-channel)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
@@ -89,6 +90,7 @@ graph TD;
   igl-cal-body --> ir-modal
   igloo-calendar --> ir-modal
   ir-booking-details --> ir-modal
+  ir-booking-header --> ir-modal
   ir-channel --> ir-modal
   ir-extra-service --> ir-modal
   ir-hk-tasks --> ir-modal
