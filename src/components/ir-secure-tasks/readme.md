@@ -12,6 +12,7 @@
 | `bookingNumber` | `booking-number` |             | `string` | `undefined` |
 | `p`             | `p`              |             | `string` | `undefined` |
 | `propertyid`    | `propertyid`     |             | `number` | `undefined` |
+| `ticket`        | `ticket`         |             | `string` | `undefined` |
 
 
 ## Dependencies
@@ -23,6 +24,7 @@
 - [igloo-calendar](../igloo-calendar)
 - [ir-housekeeping](../ir-housekeeping)
 - [ir-user-management](../ir-user-management)
+- [ir-sales-by-country](../ir-sales-by-country)
 
 ### Graph
 ```mermaid
@@ -32,6 +34,7 @@ graph TD;
   ir-secure-tasks --> igloo-calendar
   ir-secure-tasks --> ir-housekeeping
   ir-secure-tasks --> ir-user-management
+  ir-secure-tasks --> ir-sales-by-country
   ir-login --> ir-interceptor
   ir-login --> ir-toast
   ir-login --> ir-input-text
@@ -45,16 +48,25 @@ graph TD;
   ir-hk-tasks --> ir-loading-screen
   ir-hk-tasks --> ir-toast
   ir-hk-tasks --> ir-interceptor
-  ir-hk-tasks --> ir-tasks-header
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-modal
   ir-hk-tasks --> ir-sidebar
   ir-hk-tasks --> ir-hk-archive
-  ir-tasks-header --> ir-button
   ir-tasks-filters --> ir-button
   ir-tasks-filters --> ir-select
+  ir-tasks-table --> ir-tasks-header
+  ir-tasks-table --> ir-tasks-card
+  ir-tasks-table --> ir-tasks-table-pagination
   ir-tasks-table --> ir-checkbox
+  ir-tasks-header --> ir-input-text
+  ir-tasks-header --> ir-icons
+  ir-tasks-header --> ir-button
+  ir-tasks-card --> ir-button
+  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-pagination
+  ir-pagination --> ir-select
+  ir-pagination --> ir-button
   ir-modal --> ir-button
   ir-sidebar --> ir-icon
   ir-hk-archive --> ir-title
@@ -115,6 +127,7 @@ graph TD;
   ir-room-guests --> ir-button
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
+  ir-booking-header --> ir-popover
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
@@ -129,6 +142,7 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-room --> ir-button
   ir-room --> ir-date-view
+  ir-room --> ir-tooltip
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-pickup-view --> ir-button
@@ -259,6 +273,17 @@ graph TD;
   ir-reset-password --> ir-input-text
   ir-reset-password --> ir-password-validator
   ir-reset-password --> ir-button
+  ir-sales-by-country --> ir-loading-screen
+  ir-sales-by-country --> ir-toast
+  ir-sales-by-country --> ir-interceptor
+  ir-sales-by-country --> ir-button
+  ir-sales-by-country --> ir-sales-filters
+  ir-sales-by-country --> ir-sales-table
+  ir-sales-filters --> ir-button
+  ir-sales-filters --> ir-select
+  ir-sales-filters --> ir-range-picker
+  ir-sales-filters --> ir-checkbox
+  ir-sales-table --> ir-button
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -17,6 +17,10 @@
 
 ## Dependencies
 
+### Used by
+
+ - [ir-secure-tasks](../ir-secure-tasks)
+
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
@@ -46,6 +50,7 @@ graph TD;
   ir-sales-filters --> ir-checkbox
   ir-range-picker --> ir-date-picker
   ir-sales-table --> ir-button
+  ir-secure-tasks --> ir-sales-by-country
   style ir-sales-by-country fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

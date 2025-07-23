@@ -34,7 +34,6 @@
 - [ir-loading-screen](../../ir-loading-screen)
 - [ir-toast](../../ui/ir-toast)
 - [ir-interceptor](../../ir-interceptor)
-- [ir-tasks-header](ir-tasks-header)
 - [ir-tasks-filters](ir-tasks-filters)
 - [ir-tasks-table](ir-tasks-table)
 - [ir-modal](../../ui/ir-modal)
@@ -47,7 +46,6 @@ graph TD;
   ir-hk-tasks --> ir-loading-screen
   ir-hk-tasks --> ir-toast
   ir-hk-tasks --> ir-interceptor
-  ir-hk-tasks --> ir-tasks-header
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-modal
@@ -58,10 +56,20 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
-  ir-tasks-header --> ir-button
   ir-tasks-filters --> ir-button
   ir-tasks-filters --> ir-select
+  ir-tasks-table --> ir-tasks-header
+  ir-tasks-table --> ir-tasks-card
+  ir-tasks-table --> ir-tasks-table-pagination
   ir-tasks-table --> ir-checkbox
+  ir-tasks-header --> ir-input-text
+  ir-tasks-header --> ir-icons
+  ir-tasks-header --> ir-button
+  ir-tasks-card --> ir-button
+  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-pagination
+  ir-pagination --> ir-select
+  ir-pagination --> ir-button
   ir-modal --> ir-button
   ir-sidebar --> ir-icon
   ir-hk-archive --> ir-title
@@ -122,6 +130,7 @@ graph TD;
   ir-room-guests --> ir-button
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
+  ir-booking-header --> ir-popover
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
@@ -136,6 +145,7 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-room --> ir-button
   ir-room --> ir-date-view
+  ir-room --> ir-tooltip
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-pickup-view --> ir-button

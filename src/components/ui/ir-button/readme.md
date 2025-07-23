@@ -15,7 +15,7 @@
 | `btn_styles`               | `btn_styles`                  | Additional custom class names for the button.                                    | `string`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `undefined` |
 | `btn_type`                 | `btn_type`                    | The button type attribute (`button`, `submit`, or `reset`).                      | `string`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `'button'`  |
 | `iconPosition`             | `icon-position`               | Position of the icon relative to the button text.                                | `"left" \| "right"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `'left'`    |
-| `icon_name`                | `icon_name`                   | The name of the icon to display.                                                 | `"print" \| "key" \| "search" \| "email" \| "save" \| "check" \| "calendar" \| "note" \| "user" \| "file" \| "server" \| "danger" \| "clock" \| "heart-fill" \| "envelope-circle-check" \| "bell" \| "burger_menu" \| "home" \| "xmark" \| "minus" \| "heart" \| "user_group" \| "arrow_right" \| "arrow_left" \| "circle_info" \| "xmark-fill" \| "globe" \| "facebook" \| "twitter" \| "whatsapp" \| "instagram" \| "youtube" \| "angle_left" \| "circle_check" \| "eraser" \| "edit" \| "trash" \| "plus" \| "reciept" \| "menu_list" \| "credit_card" \| "closed_eye" \| "open_eye" \| "double_caret_left" \| "square_plus" \| "angles_left" \| "angle_right" \| "angles_right" \| "outline_user" \| "unlock" \| "circle_plus" \| "arrow-right-from-bracket" \| "calendar-xmark"` | `undefined` |
+| `icon_name`                | `icon_name`                   | The name of the icon to display.                                                 | `"print" \| "key" \| "search" \| "email" \| "save" \| "check" \| "calendar" \| "note" \| "user" \| "file" \| "server" \| "angles_left" \| "clock" \| "heart-fill" \| "envelope-circle-check" \| "danger" \| "bell" \| "burger_menu" \| "home" \| "xmark" \| "minus" \| "heart" \| "user_group" \| "arrow_right" \| "arrow_left" \| "circle_info" \| "xmark-fill" \| "globe" \| "facebook" \| "twitter" \| "whatsapp" \| "instagram" \| "youtube" \| "angle_left" \| "circle_check" \| "eraser" \| "edit" \| "trash" \| "plus" \| "reciept" \| "menu_list" \| "credit_card" \| "closed_eye" \| "open_eye" \| "double_caret_left" \| "square_plus" \| "angle_right" \| "angles_right" \| "outline_user" \| "unlock" \| "circle_plus" \| "arrow-right-from-bracket" \| "calendar-xmark"` | `undefined` |
 | `icon_style`               | `icon_style`                  | Custom style object for the icon.                                                | `any`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `undefined` |
 | `isLoading`                | `is-loading`                  | Displays a loading indicator when true and disables the button.                  | `boolean`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `false`     |
 | `labelStyle`               | --                            | Custom inline styles for the label/text inside the button.                       | `{ [key: string]: string; }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `undefined` |
@@ -81,6 +81,7 @@ Type: `Promise<void>`
  - [ir-modal](../ir-modal)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-otp-modal](../../ir-otp-modal)
+ - [ir-pagination](../../ir-pagination)
  - [ir-payment-actions](../../ir-booking-details/ir-payment-details/ir-payment-actions)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-payment-option](../../ir-payment-option)
@@ -94,8 +95,10 @@ Type: `Promise<void>`
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
+ - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
+ - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Depends on
@@ -135,6 +138,7 @@ graph TD;
   ir-modal --> ir-button
   ir-option-details --> ir-button
   ir-otp-modal --> ir-button
+  ir-pagination --> ir-button
   ir-payment-actions --> ir-button
   ir-payment-details --> ir-button
   ir-payment-option --> ir-button
@@ -148,8 +152,10 @@ graph TD;
   ir-sales-by-country --> ir-button
   ir-sales-filters --> ir-button
   ir-sales-table --> ir-button
+  ir-tasks-card --> ir-button
   ir-tasks-filters --> ir-button
   ir-tasks-header --> ir-button
+  ir-tasks-table-pagination --> ir-button
   ir-user-form-panel --> ir-button
   style ir-button fill:#f9f,stroke:#333,stroke-width:4px
 ```

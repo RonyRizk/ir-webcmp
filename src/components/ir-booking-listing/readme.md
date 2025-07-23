@@ -28,6 +28,7 @@
 - [ir-tooltip](../ui/ir-tooltip)
 - [ir-button](../ui/ir-button)
 - [ir-icons](../ui/ir-icons)
+- [ir-popover](../ui/ir-popover)
 - [ir-select](../ui/ir-select)
 - [ir-listing-modal](ir-listing-modal)
 - [ir-sidebar](../ui/ir-sidebar)
@@ -44,6 +45,7 @@ graph TD;
   ir-booking-listing --> ir-tooltip
   ir-booking-listing --> ir-button
   ir-booking-listing --> ir-icons
+  ir-booking-listing --> ir-popover
   ir-booking-listing --> ir-select
   ir-booking-listing --> ir-listing-modal
   ir-booking-listing --> ir-sidebar
@@ -144,6 +146,7 @@ graph TD;
   ir-room-guests --> ir-button
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
+  ir-booking-header --> ir-popover
   ir-booking-header --> ir-select
   ir-booking-header --> ir-button
   ir-booking-header --> ir-dialog
@@ -159,6 +162,7 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-room --> ir-button
   ir-room --> ir-date-view
+  ir-room --> ir-tooltip
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-pickup-view --> ir-button

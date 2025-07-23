@@ -63,6 +63,7 @@
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
+ - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
@@ -77,6 +78,7 @@ graph TD;
   ir-pickup --> ir-input-text
   ir-reset-password --> ir-input-text
   ir-room-guests --> ir-input-text
+  ir-tasks-header --> ir-input-text
   ir-user-form-panel --> ir-input-text
   style ir-input-text fill:#f9f,stroke:#333,stroke-width:4px
 ```
