@@ -79,6 +79,8 @@ Type: `Promise<void>`
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
  - [ir-login](../../ir-login)
  - [ir-modal](../ir-modal)
+ - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
+ - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-otp-modal](../../ir-otp-modal)
  - [ir-pagination](../../ir-pagination)
@@ -136,6 +138,8 @@ graph TD;
   ir-listing-modal --> ir-button
   ir-login --> ir-button
   ir-modal --> ir-button
+  ir-monthly-bookings-report --> ir-button
+  ir-monthly-bookings-report-filter --> ir-button
   ir-option-details --> ir-button
   ir-otp-modal --> ir-button
   ir-pagination --> ir-button

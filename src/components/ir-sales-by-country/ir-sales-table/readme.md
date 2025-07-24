@@ -21,11 +21,13 @@
 
 ### Depends on
 
+- [ir-progress-indicator](../../ui/ir-progress-indicator)
 - [ir-button](../../ui/ir-button)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-sales-table --> ir-progress-indicator
   ir-sales-table --> ir-button
   ir-button --> ir-icons
   ir-sales-by-country --> ir-sales-table

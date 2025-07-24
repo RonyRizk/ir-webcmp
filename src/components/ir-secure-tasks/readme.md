@@ -25,6 +25,7 @@
 - [ir-housekeeping](../ir-housekeeping)
 - [ir-user-management](../ir-user-management)
 - [ir-sales-by-country](../ir-sales-by-country)
+- [ir-monthly-bookings-report](../ir-monthly-bookings-report)
 
 ### Graph
 ```mermaid
@@ -35,6 +36,7 @@ graph TD;
   ir-secure-tasks --> ir-housekeeping
   ir-secure-tasks --> ir-user-management
   ir-secure-tasks --> ir-sales-by-country
+  ir-secure-tasks --> ir-monthly-bookings-report
   ir-login --> ir-interceptor
   ir-login --> ir-toast
   ir-login --> ir-input-text
@@ -283,7 +285,18 @@ graph TD;
   ir-sales-filters --> ir-select
   ir-sales-filters --> ir-range-picker
   ir-sales-filters --> ir-checkbox
+  ir-sales-table --> ir-progress-indicator
   ir-sales-table --> ir-button
+  ir-monthly-bookings-report --> ir-loading-screen
+  ir-monthly-bookings-report --> ir-toast
+  ir-monthly-bookings-report --> ir-interceptor
+  ir-monthly-bookings-report --> ir-button
+  ir-monthly-bookings-report --> ir-monthly-bookings-report-filter
+  ir-monthly-bookings-report --> ir-monthly-bookings-report-table
+  ir-monthly-bookings-report-filter --> ir-select
+  ir-monthly-bookings-report-filter --> ir-checkbox
+  ir-monthly-bookings-report-filter --> ir-button
+  ir-monthly-bookings-report-table --> ir-progress-indicator
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

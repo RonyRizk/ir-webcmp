@@ -56,6 +56,7 @@
  - [ir-housekeeping](../../ir-housekeeping)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
+ - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-pagination](../../ir-pagination)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
@@ -78,6 +79,7 @@ graph TD;
   ir-housekeeping --> ir-select
   ir-listing-header --> ir-select
   ir-listing-modal --> ir-select
+  ir-monthly-bookings-report-filter --> ir-select
   ir-option-details --> ir-select
   ir-pagination --> ir-select
   ir-pickup --> ir-select
