@@ -3,7 +3,7 @@ import Token from '@/models/Token';
 import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
 import housekeeping_store from '@/stores/housekeeping.store';
-import { isRequestPending } from '@/stores/ir-interceptor.store';
+// import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
 import { Component, Host, Prop, State, h, Element, Watch, Event, EventEmitter, Listen } from '@stencil/core';
 import moment from 'moment';
@@ -27,6 +27,7 @@ export class IrHkTasks {
   @Prop() baseUrl: string;
 
   @State() isLoading = false;
+  @State() isCleaningLoading = false;
   @State() selectedDuration = '';
   @State() selectedHouseKeeper = '0';
   @State() selectedRoom: IPendingActions | null = null;
@@ -200,6 +201,7 @@ export class IrHkTasks {
       if (hkTasksStore.selectedTasks.length === 0) {
         return;
       }
+      this.isCleaningLoading = true;
       await this.houseKeepingService.executeHKAction({
         actions: hkTasksStore.selectedTasks.map(t => ({ description: 'Cleaned', hkm_id: t.hkm_id === 0 ? null : t.hkm_id, unit_id: t.unit.id, booking_nbr: t.booking_nbr })),
       });
@@ -209,6 +211,7 @@ export class IrHkTasks {
       if (this.selectedTask) {
         this.selectedTask = null;
       }
+      this.isCleaningLoading = false;
       // this.clearSelectedTasks.emit();
       this.modal.closeModal();
     }
@@ -281,7 +284,7 @@ export class IrHkTasks {
         <ir-modal
           autoClose={false}
           ref={el => (this.modal = el)}
-          isLoading={isRequestPending('/Execute_HK_Action')}
+          isLoading={this.isCleaningLoading}
           onConfirmModal={this.handleModalConfirmation.bind(this)}
           onCancelModal={() => {
             if (this.selectedTask) {

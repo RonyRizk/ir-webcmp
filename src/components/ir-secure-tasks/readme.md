@@ -287,6 +287,7 @@ graph TD;
   ir-sales-filters --> ir-checkbox
   ir-sales-table --> ir-progress-indicator
   ir-sales-table --> ir-button
+  ir-monthly-bookings-report --> ir-icons
   ir-monthly-bookings-report --> ir-loading-screen
   ir-monthly-bookings-report --> ir-toast
   ir-monthly-bookings-report --> ir-interceptor

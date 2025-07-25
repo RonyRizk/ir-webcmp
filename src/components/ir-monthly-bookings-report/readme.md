@@ -23,6 +23,7 @@
 
 ### Depends on
 
+- [ir-icons](../ui/ir-icons)
 - [ir-loading-screen](../ir-loading-screen)
 - [ir-toast](../ui/ir-toast)
 - [ir-interceptor](../ir-interceptor)
@@ -33,6 +34,7 @@
 ### Graph
 ```mermaid
 graph TD;
+  ir-monthly-bookings-report --> ir-icons
   ir-monthly-bookings-report --> ir-loading-screen
   ir-monthly-bookings-report --> ir-toast
   ir-monthly-bookings-report --> ir-interceptor
