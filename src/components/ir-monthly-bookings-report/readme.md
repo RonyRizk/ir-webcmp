@@ -49,6 +49,7 @@ graph TD;
   ir-monthly-bookings-report-filter --> ir-select
   ir-monthly-bookings-report-filter --> ir-checkbox
   ir-monthly-bookings-report-filter --> ir-button
+  ir-monthly-bookings-report-table --> ir-tooltip
   ir-monthly-bookings-report-table --> ir-progress-indicator
   ir-secure-tasks --> ir-monthly-bookings-report
   style ir-monthly-bookings-report fill:#f9f,stroke:#333,stroke-width:4px

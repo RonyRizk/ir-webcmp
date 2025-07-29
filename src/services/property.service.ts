@@ -20,6 +20,7 @@ export interface MonthlyStatsResults {
   DailyStats: DailyStat[];
   ExcelLink: null;
   PeakDays: PeakDay[];
+  Occupancy_Difference_From_Previous_Month: number;
   TotalUnitsBooked: number;
 }
 
@@ -32,6 +33,9 @@ export interface DailyStat {
   Date: string;
   Occupancy: number;
   Units_booked: number;
+  Rooms_Revenue: number;
+  ADR: number;
+  Total_Guests: number | undefined;
 }
 export class PropertyService {
   public async getExposedProperty(params: {

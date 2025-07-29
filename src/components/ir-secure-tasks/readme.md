@@ -297,6 +297,7 @@ graph TD;
   ir-monthly-bookings-report-filter --> ir-select
   ir-monthly-bookings-report-filter --> ir-checkbox
   ir-monthly-bookings-report-filter --> ir-button
+  ir-monthly-bookings-report-table --> ir-tooltip
   ir-monthly-bookings-report-table --> ir-progress-indicator
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
