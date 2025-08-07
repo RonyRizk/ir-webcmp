@@ -145,6 +145,7 @@ graph TD;
   ir-room --> ir-button
   ir-room --> ir-date-view
   ir-room --> ir-tooltip
+  ir-room --> ir-select
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-pickup-view --> ir-button
@@ -207,6 +208,7 @@ graph TD;
   igl-tba-booking-view --> ir-button
   igl-cal-header --> ir-button
   igl-cal-header --> ir-date-picker
+  igl-cal-header --> ir-m-combobox
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> ir-modal
@@ -287,13 +289,14 @@ graph TD;
   ir-sales-filters --> ir-checkbox
   ir-sales-table --> ir-progress-indicator
   ir-sales-table --> ir-button
-  ir-monthly-bookings-report --> ir-icons
   ir-monthly-bookings-report --> ir-loading-screen
   ir-monthly-bookings-report --> ir-toast
   ir-monthly-bookings-report --> ir-interceptor
   ir-monthly-bookings-report --> ir-button
+  ir-monthly-bookings-report --> ir-report-stats-card
   ir-monthly-bookings-report --> ir-monthly-bookings-report-filter
   ir-monthly-bookings-report --> ir-monthly-bookings-report-table
+  ir-report-stats-card --> ir-icons
   ir-monthly-bookings-report-filter --> ir-select
   ir-monthly-bookings-report-filter --> ir-checkbox
   ir-monthly-bookings-report-filter --> ir-button

@@ -60,6 +60,7 @@
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-pagination](../../ir-pagination)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
+ - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
@@ -83,6 +84,7 @@ graph TD;
   ir-option-details --> ir-select
   ir-pagination --> ir-select
   ir-pickup --> ir-select
+  ir-room --> ir-select
   ir-room-guests --> ir-select
   ir-sales-filters --> ir-select
   ir-tasks-filters --> ir-select

@@ -9,13 +9,19 @@
 
 ### Depends on
 
-- [ir-range-picker](../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
+- [ir-m-combobox](../ir-m-combobox)
+- [ir-notifications](../ir-notifications)
+- [ac-pages-menu](../ac-pages-menu)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-test-cmp --> ir-range-picker
-  ir-range-picker --> ir-date-picker
+  ir-test-cmp --> ir-m-combobox
+  ir-test-cmp --> ir-notifications
+  ir-test-cmp --> ac-pages-menu
+  ir-notifications --> ir-button
+  ir-notifications --> ir-icons
+  ir-button --> ir-icons
   style ir-test-cmp fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

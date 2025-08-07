@@ -86,6 +86,7 @@ graph TD;
   igl-tba-booking-view --> ir-button
   igl-cal-header --> ir-button
   igl-cal-header --> ir-date-picker
+  igl-cal-header --> ir-m-combobox
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> ir-modal
@@ -193,6 +194,7 @@ graph TD;
   ir-room --> ir-button
   ir-room --> ir-date-view
   ir-room --> ir-tooltip
+  ir-room --> ir-select
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-pickup-view --> ir-button

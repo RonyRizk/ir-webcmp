@@ -20,8 +20,9 @@
  - [ir-button](../ir-button)
  - [ir-channel-general](../../ir-channel/ir-channel-general)
  - [ir-login](../../ir-login)
- - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
+ - [ir-notifications](../../ir-notifications)
  - [ir-payment-option](../../ir-payment-option)
+ - [ir-report-stats-card](../../ir-monthly-bookings-report/ir-report-stats-card)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [requirement-check](../../ir-password-validator/requirement-check)
@@ -33,8 +34,9 @@ graph TD;
   ir-button --> ir-icons
   ir-channel-general --> ir-icons
   ir-login --> ir-icons
-  ir-monthly-bookings-report --> ir-icons
+  ir-notifications --> ir-icons
   ir-payment-option --> ir-icons
+  ir-report-stats-card --> ir-icons
   ir-reservation-information --> ir-icons
   ir-tasks-header --> ir-icons
   requirement-check --> ir-icons
