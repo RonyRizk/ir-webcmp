@@ -74,6 +74,7 @@ Type: `Promise<void>`
  - [ir-channel](../../ir-channel)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
+ - [ir-housekeeping](../../ir-housekeeping)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
@@ -94,6 +95,7 @@ graph TD;
   ir-channel --> ir-modal
   ir-extra-service --> ir-modal
   ir-hk-tasks --> ir-modal
+  ir-housekeeping --> ir-modal
   ir-payment-details --> ir-modal
   ir-room --> ir-modal
   ir-user-management-table --> ir-modal

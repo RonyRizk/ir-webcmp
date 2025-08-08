@@ -9,7 +9,7 @@
 
 | Property      | Attribute     | Description | Type                                                                       | Default         |
 | ------------- | ------------- | ----------- | -------------------------------------------------------------------------- | --------------- |
-| `editBooking` | --            |             | `{ booking: Booking; cause: "guest" \| "delete" \| "edit" \| "payment"; }` | `undefined`     |
+| `editBooking` | --            |             | `{ booking: Booking; cause: "edit" \| "guest" \| "delete" \| "payment"; }` | `undefined`     |
 | `modalTitle`  | `modal-title` |             | `string`                                                                   | `'Modal Title'` |
 
 

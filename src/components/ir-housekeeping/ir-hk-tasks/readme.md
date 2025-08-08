@@ -62,6 +62,7 @@ graph TD;
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
   ir-tasks-table --> ir-checkbox
+  ir-tasks-table --> ir-button
   ir-tasks-header --> ir-input-text
   ir-tasks-header --> ir-icons
   ir-tasks-header --> ir-button

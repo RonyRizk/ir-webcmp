@@ -22,6 +22,7 @@ graph TD;
   ir-notifications --> ir-button
   ir-notifications --> ir-icons
   ir-button --> ir-icons
+  ac-pages-menu --> ir-icons
   style ir-test-cmp fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

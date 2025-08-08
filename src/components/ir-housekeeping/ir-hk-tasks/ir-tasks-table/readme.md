@@ -18,6 +18,7 @@
 | ---------------------- | ----------- | ------------------------------------------------------------- |
 | `animateCleanedButton` |             | `CustomEvent<null>`                                           |
 | `rowSelectChange`      |             | `CustomEvent<Task[]>`                                         |
+| `skipSelectedTask`     |             | `CustomEvent<Task>`                                           |
 | `sortingChanged`       |             | `CustomEvent<{ field: string; direction: "ASC" \| "DESC"; }>` |
 
 
@@ -33,6 +34,7 @@
 - [ir-tasks-card](ir-tasks-card)
 - [ir-tasks-table-pagination](ir-tasks-table-pagination)
 - [ir-checkbox](../../../ui/ir-checkbox)
+- [ir-button](../../../ui/ir-button)
 
 ### Graph
 ```mermaid
@@ -41,6 +43,7 @@ graph TD;
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
   ir-tasks-table --> ir-checkbox
+  ir-tasks-table --> ir-button
   ir-tasks-header --> ir-input-text
   ir-tasks-header --> ir-icons
   ir-tasks-header --> ir-button

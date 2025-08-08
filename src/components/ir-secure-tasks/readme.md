@@ -61,6 +61,7 @@ graph TD;
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
   ir-tasks-table --> ir-checkbox
+  ir-tasks-table --> ir-button
   ir-tasks-header --> ir-input-text
   ir-tasks-header --> ir-icons
   ir-tasks-header --> ir-button
@@ -233,6 +234,7 @@ graph TD;
   ir-housekeeping --> ir-title
   ir-housekeeping --> ir-select
   ir-housekeeping --> ir-hk-team
+  ir-housekeeping --> ir-modal
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-hk-user
   ir-hk-team --> ir-title

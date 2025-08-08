@@ -10,6 +10,7 @@
 | Property      | Attribute      | Description | Type      | Default     |
 | ------------- | -------------- | ----------- | --------- | ----------- |
 | `isCheckable` | `is-checkable` |             | `boolean` | `undefined` |
+| `isSkippable` | `is-skippable` |             | `boolean` | `undefined` |
 | `task`        | --             |             | `Task`    | `undefined` |
 
 
@@ -18,6 +19,7 @@
 | Event               | Description | Type                |
 | ------------------- | ----------- | ------------------- |
 | `cleanSelectedTask` |             | `CustomEvent<Task>` |
+| `skipSelectedTask`  |             | `CustomEvent<Task>` |
 
 
 ## Dependencies

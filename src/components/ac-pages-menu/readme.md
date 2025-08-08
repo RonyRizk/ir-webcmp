@@ -26,9 +26,14 @@
 
  - [ir-test-cmp](../ir-test-cmp)
 
+### Depends on
+
+- [ir-icons](../ui/ir-icons)
+
 ### Graph
 ```mermaid
 graph TD;
+  ac-pages-menu --> ir-icons
   ir-test-cmp --> ac-pages-menu
   style ac-pages-menu fill:#f9f,stroke:#333,stroke-width:4px
 ```
