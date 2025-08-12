@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  height: 100%;
+}
+.bulk-sheet-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 1rem;
+}
+.animated-container {
+  transition: all 0.5s ease;
+}
+.days-checkbox {
+  gap: 0.5rem;
+}

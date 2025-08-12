@@ -54,7 +54,7 @@
 - [ir-room-nights](ir-room-nights)
 - [ir-booking-details](../ir-booking-details)
 - [ir-room-guests](../ir-booking-details/ir-room-guests)
-- [igl-bulk-stop-sale](igl-bulk-stop-sale)
+- [igl-bulk-operations](igl-bulk-operations)
 - [ir-modal](../ui/ir-modal)
 
 ### Graph
@@ -73,7 +73,7 @@ graph TD;
   igloo-calendar --> ir-room-nights
   igloo-calendar --> ir-booking-details
   igloo-calendar --> ir-room-guests
-  igloo-calendar --> igl-bulk-stop-sale
+  igloo-calendar --> igl-bulk-operations
   igloo-calendar --> ir-modal
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
@@ -209,12 +209,19 @@ graph TD;
   ir-payment-details --> ir-payment-actions
   ir-payment-details --> ir-modal
   ir-payment-actions --> ir-button
-  igl-bulk-stop-sale --> ir-title
+  igl-bulk-operations --> ir-title
+  igl-bulk-operations --> ir-tabs
+  igl-bulk-operations --> igl-bulk-stop-sale
+  igl-bulk-operations --> igl-bulk-block
   igl-bulk-stop-sale --> ir-select
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-button
   igl-bulk-stop-sale --> ir-date-picker
   ir-weekday-selector --> ir-checkbox
+  igl-bulk-block --> ir-select
+  igl-bulk-block --> ir-radio
+  igl-bulk-block --> ir-button
+  igl-bulk-block --> ir-date-picker
   ir-secure-tasks --> igloo-calendar
   style igloo-calendar fill:#f9f,stroke:#333,stroke-width:4px
 ```

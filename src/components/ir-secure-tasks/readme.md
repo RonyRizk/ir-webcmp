@@ -201,7 +201,7 @@ graph TD;
   igloo-calendar --> ir-room-nights
   igloo-calendar --> ir-booking-details
   igloo-calendar --> ir-room-guests
-  igloo-calendar --> igl-bulk-stop-sale
+  igloo-calendar --> igl-bulk-operations
   igloo-calendar --> ir-modal
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-button
@@ -222,12 +222,19 @@ graph TD;
   ir-room-nights --> ir-loading-screen
   ir-room-nights --> ir-title
   ir-room-nights --> ir-button
-  igl-bulk-stop-sale --> ir-title
+  igl-bulk-operations --> ir-title
+  igl-bulk-operations --> ir-tabs
+  igl-bulk-operations --> igl-bulk-stop-sale
+  igl-bulk-operations --> igl-bulk-block
   igl-bulk-stop-sale --> ir-select
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-button
   igl-bulk-stop-sale --> ir-date-picker
   ir-weekday-selector --> ir-checkbox
+  igl-bulk-block --> ir-select
+  igl-bulk-block --> ir-radio
+  igl-bulk-block --> ir-button
+  igl-bulk-block --> ir-date-picker
   ir-housekeeping --> ir-loading-screen
   ir-housekeeping --> ir-interceptor
   ir-housekeeping --> ir-toast

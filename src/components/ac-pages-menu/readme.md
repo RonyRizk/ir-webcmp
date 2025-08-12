@@ -15,9 +15,9 @@
 
 ## Events
 
-| Event         | Description | Type                      |
-| ------------- | ----------- | ------------------------- |
-| `linkClicked` |             | `CustomEvent<MouseEvent>` |
+| Event          | Description | Type                      |
+| -------------- | ----------- | ------------------------- |
+| `link-clicked` |             | `CustomEvent<MouseEvent>` |
 
 
 ## Dependencies
