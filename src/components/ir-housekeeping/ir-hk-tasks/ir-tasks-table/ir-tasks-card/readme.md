@@ -16,10 +16,10 @@
 
 ## Events
 
-| Event               | Description | Type                |
-| ------------------- | ----------- | ------------------- |
-| `cleanSelectedTask` |             | `CustomEvent<Task>` |
-| `skipSelectedTask`  |             | `CustomEvent<Task>` |
+| Event               | Description | Type                                                    |
+| ------------------- | ----------- | ------------------------------------------------------- |
+| `cleanSelectedTask` |             | `CustomEvent<{ task: Task; status?: "004" \| "001"; }>` |
+| `skipSelectedTask`  |             | `CustomEvent<Task>`                                     |
 
 
 ## Dependencies
