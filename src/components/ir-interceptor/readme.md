@@ -28,6 +28,7 @@
  - [igloo-calendar](../igloo-calendar)
  - [ir-booking-details](../ir-booking-details)
  - [ir-booking-listing](../ir-booking-listing)
+ - [ir-guest-info](../ir-guest-info)
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-login](../ir-login)
@@ -53,6 +54,7 @@ graph TD;
   igloo-calendar --> ir-interceptor
   ir-booking-details --> ir-interceptor
   ir-booking-listing --> ir-interceptor
+  ir-guest-info --> ir-interceptor
   ir-hk-tasks --> ir-interceptor
   ir-housekeeping --> ir-interceptor
   ir-login --> ir-interceptor

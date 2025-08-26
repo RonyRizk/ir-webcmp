@@ -64,12 +64,18 @@ graph TD;
   ir-booking-details --> ir-sidebar
   ir-booking-details --> igl-book-property
   ir-guest-info --> ir-spinner
+  ir-guest-info --> ir-toast
+  ir-guest-info --> ir-interceptor
   ir-guest-info --> ir-title
   ir-guest-info --> ir-input-text
   ir-guest-info --> ir-country-picker
   ir-guest-info --> ir-phone-input
   ir-guest-info --> ir-textarea
   ir-guest-info --> ir-button
+  ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-spinner
+  ir-otp-modal --> ir-otp
+  ir-otp-modal --> ir-button
   ir-country-picker --> ir-input-text
   ir-phone-input --> ir-combobox
   ir-pickup --> ir-title
@@ -91,10 +97,6 @@ graph TD;
   ir-room-guests --> ir-country-picker
   ir-room-guests --> ir-select
   ir-room-guests --> ir-button
-  ir-interceptor --> ir-otp-modal
-  ir-otp-modal --> ir-spinner
-  ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-popover

@@ -21,6 +21,7 @@
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
+ - [ir-guest-info](../../ir-guest-info)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../../ir-housekeeping)
  - [ir-login](../../ir-login)
@@ -38,6 +39,7 @@ graph TD;
   ir-booking-details --> ir-toast
   ir-booking-listing --> ir-toast
   ir-channel --> ir-toast
+  ir-guest-info --> ir-toast
   ir-hk-tasks --> ir-toast
   ir-housekeeping --> ir-toast
   ir-login --> ir-toast

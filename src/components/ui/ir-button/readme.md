@@ -104,6 +104,7 @@ Type: `Promise<void>`
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
+ - [ir-test-cmp](../../ir-test-cmp)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Depends on
@@ -166,6 +167,7 @@ graph TD;
   ir-tasks-header --> ir-button
   ir-tasks-table --> ir-button
   ir-tasks-table-pagination --> ir-button
+  ir-test-cmp --> ir-button
   ir-user-form-panel --> ir-button
   style ir-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
