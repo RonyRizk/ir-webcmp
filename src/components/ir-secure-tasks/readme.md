@@ -292,8 +292,11 @@ graph TD;
   ir-sales-by-country --> ir-toast
   ir-sales-by-country --> ir-interceptor
   ir-sales-by-country --> ir-button
+  ir-sales-by-country --> ir-sales-by-country-summary
   ir-sales-by-country --> ir-sales-filters
   ir-sales-by-country --> ir-sales-table
+  ir-sales-by-country-summary --> ir-stats-card
+  ir-stats-card --> ir-icons
   ir-sales-filters --> ir-button
   ir-sales-filters --> ir-select
   ir-sales-filters --> ir-range-picker

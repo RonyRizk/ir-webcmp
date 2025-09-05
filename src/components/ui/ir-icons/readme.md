@@ -24,6 +24,7 @@
  - [ir-payment-option](../../ir-payment-option)
  - [ir-report-stats-card](../../ir-monthly-bookings-report/ir-report-stats-card)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
+ - [ir-stats-card](../ir-stats-card)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [requirement-check](../../ir-password-validator/requirement-check)
 
@@ -38,6 +39,7 @@ graph TD;
   ir-payment-option --> ir-icons
   ir-report-stats-card --> ir-icons
   ir-reservation-information --> ir-icons
+  ir-stats-card --> ir-icons
   ir-tasks-header --> ir-icons
   requirement-check --> ir-icons
   style ir-icons fill:#f9f,stroke:#333,stroke-width:4px
