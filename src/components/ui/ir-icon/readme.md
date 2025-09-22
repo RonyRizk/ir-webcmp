@@ -28,7 +28,6 @@
  - [ir-channel-editor](../../ir-channel/ir-channel-editor)
  - [ir-channel-mapping](../../ir-channel/ir-channel-mapping)
  - [ir-dialog](../ir-dialog)
- - [ir-dropdown](../ir-dropdown)
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
  - [ir-sidebar](../ir-sidebar)
@@ -42,7 +41,6 @@ graph TD;
   ir-channel-editor --> ir-icon
   ir-channel-mapping --> ir-icon
   ir-dialog --> ir-icon
-  ir-dropdown --> ir-icon
   ir-hk-team --> ir-icon
   ir-listing-modal --> ir-icon
   ir-sidebar --> ir-icon

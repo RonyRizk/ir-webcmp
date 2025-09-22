@@ -19,6 +19,8 @@
  - [igloo-calendar](../igloo-calendar)
  - [ir-booking-listing](../ir-booking-listing)
  - [ir-channel](../ir-channel)
+ - [ir-daily-revenue](../ir-daily-revenue)
+ - [ir-financial-actions](../ir-financial-actions)
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
@@ -32,6 +34,8 @@ graph TD;
   igloo-calendar --> ir-loading-screen
   ir-booking-listing --> ir-loading-screen
   ir-channel --> ir-loading-screen
+  ir-daily-revenue --> ir-loading-screen
+  ir-financial-actions --> ir-loading-screen
   ir-hk-tasks --> ir-loading-screen
   ir-housekeeping --> ir-loading-screen
   ir-monthly-bookings-report --> ir-loading-screen

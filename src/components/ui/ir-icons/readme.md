@@ -17,12 +17,15 @@
 ### Used by
 
  - [ac-pages-menu](../../ac-pages-menu)
+ - [ir-accordion](../ir-accordion)
+ - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-button](../ir-button)
  - [ir-channel-general](../../ir-channel/ir-channel-general)
+ - [ir-dropdown](../ir-dropdown)
  - [ir-login](../../ir-login)
+ - [ir-payment-item](../../ir-booking-details/ir-payment-details/ir-payment-item)
  - [ir-payment-option](../../ir-payment-option)
- - [ir-report-stats-card](../../ir-monthly-bookings-report/ir-report-stats-card)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-stats-card](../ir-stats-card)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
@@ -32,12 +35,15 @@
 ```mermaid
 graph TD;
   ac-pages-menu --> ir-icons
+  ir-accordion --> ir-icons
+  ir-applicable-policies --> ir-icons
   ir-booking-listing --> ir-icons
   ir-button --> ir-icons
   ir-channel-general --> ir-icons
+  ir-dropdown --> ir-icons
   ir-login --> ir-icons
+  ir-payment-item --> ir-icons
   ir-payment-option --> ir-icons
-  ir-report-stats-card --> ir-icons
   ir-reservation-information --> ir-icons
   ir-stats-card --> ir-icons
   ir-tasks-header --> ir-icons

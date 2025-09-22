@@ -43,6 +43,8 @@
  - [igloo-calendar](../igloo-calendar)
  - [ir-booking](../ir-booking)
  - [ir-booking-listing](../ir-booking-listing)
+ - [ir-daily-revenue](../ir-daily-revenue)
+ - [ir-financial-actions](../ir-financial-actions)
  - [ir-hk-archive](../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
 
 ### Depends on
@@ -52,6 +54,7 @@
 - [ir-booking-extra-note](ir-booking-extra-note)
 - [ir-extra-service-config](./ir-extra-services/ir-extra-service-config)
 - [ir-room-guests](ir-room-guests)
+- [ir-payment-folio](./ir-payment-details/ir-payment-folio)
 - [ir-spinner](../ui/ir-spinner)
 - [ir-toast](../ui/ir-toast)
 - [ir-interceptor](../ir-interceptor)
@@ -75,6 +78,7 @@ graph TD;
   ir-booking-details --> ir-booking-extra-note
   ir-booking-details --> ir-extra-service-config
   ir-booking-details --> ir-room-guests
+  ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-spinner
   ir-booking-details --> ir-toast
   ir-booking-details --> ir-interceptor
@@ -125,6 +129,14 @@ graph TD;
   ir-room-guests --> ir-country-picker
   ir-room-guests --> ir-select
   ir-room-guests --> ir-button
+  ir-payment-folio --> ir-dropdown-item
+  ir-payment-folio --> ir-title
+  ir-payment-folio --> ir-date-picker
+  ir-payment-folio --> ir-price-input
+  ir-payment-folio --> ir-dropdown
+  ir-payment-folio --> ir-input-text
+  ir-payment-folio --> ir-button
+  ir-dropdown --> ir-icons
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-popover
@@ -152,13 +164,21 @@ graph TD;
   ir-extra-service --> ir-button
   ir-extra-service --> ir-date-view
   ir-extra-service --> ir-modal
-  ir-payment-details --> ir-date-picker
-  ir-payment-details --> ir-price-input
+  ir-payment-details --> ir-payment-summary
+  ir-payment-details --> ir-booking-guarantee
+  ir-payment-details --> ir-applicable-policies
   ir-payment-details --> ir-button
-  ir-payment-details --> ir-label
-  ir-payment-details --> ir-payment-actions
+  ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-modal
-  ir-payment-actions --> ir-button
+  ir-booking-guarantee --> ir-label
+  ir-booking-guarantee --> ir-button
+  ir-applicable-policies --> ir-button
+  ir-applicable-policies --> ir-icons
+  ir-payments-folio --> ir-payment-item
+  ir-payments-folio --> ir-button
+  ir-payment-item --> ir-popover
+  ir-payment-item --> ir-icons
+  ir-payment-item --> ir-button
   ir-sidebar --> ir-icon
   igl-book-property --> igl-block-dates-view
   igl-book-property --> ir-spinner
@@ -190,6 +210,8 @@ graph TD;
   igloo-calendar --> ir-booking-details
   ir-booking --> ir-booking-details
   ir-booking-listing --> ir-booking-details
+  ir-daily-revenue --> ir-booking-details
+  ir-financial-actions --> ir-booking-details
   ir-hk-archive --> ir-booking-details
   style ir-booking-details fill:#f9f,stroke:#333,stroke-width:4px
 ```

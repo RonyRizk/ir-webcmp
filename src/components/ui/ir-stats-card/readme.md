@@ -19,6 +19,8 @@
 
 ### Used by
 
+ - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
+ - [ir-revenue-summary](../../ir-daily-revenue/ir-revenue-summary)
  - [ir-sales-by-country-summary](../../ir-sales-by-country/ir-sales-by-country-summary)
 
 ### Depends on
@@ -29,6 +31,8 @@
 ```mermaid
 graph TD;
   ir-stats-card --> ir-icons
+  ir-monthly-bookings-report --> ir-stats-card
+  ir-revenue-summary --> ir-stats-card
   ir-sales-by-country-summary --> ir-stats-card
   style ir-stats-card fill:#f9f,stroke:#333,stroke-width:4px
 ```

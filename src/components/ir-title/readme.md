@@ -36,6 +36,7 @@
  - [ir-hk-user](../ir-housekeeping/ir-hk-user)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-option-details](../ir-payment-option/ir-option-details)
+ - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
  - [ir-pickup](../ir-booking-details/ir-pickup)
  - [ir-reset-password](../ir-reset-password)
  - [ir-room-guests](../ir-booking-details/ir-room-guests)
@@ -61,6 +62,7 @@ graph TD;
   ir-hk-user --> ir-title
   ir-housekeeping --> ir-title
   ir-option-details --> ir-title
+  ir-payment-folio --> ir-title
   ir-pickup --> ir-title
   ir-reset-password --> ir-title
   ir-room-guests --> ir-title

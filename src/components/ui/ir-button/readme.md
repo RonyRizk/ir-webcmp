@@ -61,16 +61,24 @@ Type: `Promise<void>`
  - [igl-cal-header](../../igloo-calendar/igl-cal-header)
  - [igl-tba-booking-view](../../igloo-calendar/igl-to-be-assigned/igl-tba-booking-view)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
+ - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-booking-details](../../ir-booking-details)
+ - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
+ - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
  - [ir-channel-editor](../../ir-channel/ir-channel-editor)
  - [ir-channel-mapping](../../ir-channel/ir-channel-mapping)
+ - [ir-daily-revenue](../../ir-daily-revenue)
+ - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
+ - [ir-financial-actions](../../ir-financial-actions)
+ - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
+ - [ir-financial-table](../../ir-financial-actions/ir-financial-table)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
@@ -86,13 +94,17 @@ Type: `Promise<void>`
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-otp-modal](../../ir-otp-modal)
  - [ir-pagination](../../ir-pagination)
- - [ir-payment-actions](../../ir-booking-details/ir-payment-details/ir-payment-actions)
+ - [ir-payment-action](../../ir-booking-details/ir-payment-details/ir-payment-actions/ir-payment-action)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
+ - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
+ - [ir-payment-item](../../ir-booking-details/ir-payment-details/ir-payment-item)
  - [ir-payment-option](../../ir-payment-option)
+ - [ir-payments-folio](../../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-reset-password](../../ir-reset-password)
+ - [ir-revenue-row-details](../../ir-daily-revenue/ir-revenue-table/ir-revenue-row/ir-revenue-row-details)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-room-nights](../../igloo-calendar/ir-room-nights)
@@ -124,16 +136,24 @@ graph TD;
   igl-cal-header --> ir-button
   igl-tba-booking-view --> ir-button
   igl-to-be-assigned --> ir-button
+  ir-applicable-policies --> ir-button
   ir-booking-details --> ir-button
+  ir-booking-email-logs --> ir-button
   ir-booking-extra-note --> ir-button
+  ir-booking-guarantee --> ir-button
   ir-booking-header --> ir-button
   ir-booking-listing --> ir-button
   ir-channel --> ir-button
   ir-channel-editor --> ir-button
   ir-channel-mapping --> ir-button
+  ir-daily-revenue --> ir-button
+  ir-daily-revenue-filters --> ir-button
   ir-delete-modal --> ir-button
   ir-extra-service --> ir-button
   ir-extra-service-config --> ir-button
+  ir-financial-actions --> ir-button
+  ir-financial-filters --> ir-button
+  ir-financial-table --> ir-button
   ir-guest-info --> ir-button
   ir-hk-archive --> ir-button
   ir-hk-team --> ir-button
@@ -149,13 +169,17 @@ graph TD;
   ir-option-details --> ir-button
   ir-otp-modal --> ir-button
   ir-pagination --> ir-button
-  ir-payment-actions --> ir-button
+  ir-payment-action --> ir-button
   ir-payment-details --> ir-button
+  ir-payment-folio --> ir-button
+  ir-payment-item --> ir-button
   ir-payment-option --> ir-button
+  ir-payments-folio --> ir-button
   ir-pickup --> ir-button
   ir-pickup-view --> ir-button
   ir-reservation-information --> ir-button
   ir-reset-password --> ir-button
+  ir-revenue-row-details --> ir-button
   ir-room --> ir-button
   ir-room-guests --> ir-button
   ir-room-nights --> ir-button
