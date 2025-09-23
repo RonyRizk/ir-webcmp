@@ -24,7 +24,6 @@
  - [ir-channel-general](../../ir-channel/ir-channel-general)
  - [ir-dropdown](../ir-dropdown)
  - [ir-login](../../ir-login)
- - [ir-payment-item](../../ir-booking-details/ir-payment-details/ir-payment-item)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-stats-card](../ir-stats-card)
@@ -42,7 +41,6 @@ graph TD;
   ir-channel-general --> ir-icons
   ir-dropdown --> ir-icons
   ir-login --> ir-icons
-  ir-payment-item --> ir-icons
   ir-payment-option --> ir-icons
   ir-reservation-information --> ir-icons
   ir-stats-card --> ir-icons

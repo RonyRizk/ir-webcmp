@@ -57,7 +57,6 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-button
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   ir-modal --> ir-button
   ir-booking-details --> ir-payment-details

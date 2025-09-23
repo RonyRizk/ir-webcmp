@@ -38,7 +38,6 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-button
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   ir-button --> ir-icons
   ir-payment-details --> ir-payments-folio

@@ -37,14 +37,12 @@
 ### Depends on
 
 - [ir-popover](../../../ui/ir-popover)
-- [ir-icons](../../../ui/ir-icons)
 - [ir-button](../../../ui/ir-button)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   ir-button --> ir-icons
   ir-payments-folio --> ir-payment-item

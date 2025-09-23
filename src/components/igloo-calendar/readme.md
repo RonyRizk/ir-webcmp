@@ -226,7 +226,6 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-button
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   igl-bulk-operations --> ir-title
   igl-bulk-operations --> ir-tabs

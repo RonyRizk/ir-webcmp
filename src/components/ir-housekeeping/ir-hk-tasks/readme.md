@@ -179,7 +179,6 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-button
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   igl-book-property --> igl-block-dates-view
   igl-book-property --> ir-spinner

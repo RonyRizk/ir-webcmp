@@ -199,7 +199,6 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-button
   ir-payment-item --> ir-popover
-  ir-payment-item --> ir-icons
   ir-payment-item --> ir-button
   ir-secure-tasks --> ir-booking-listing
   style ir-booking-listing fill:#f9f,stroke:#333,stroke-width:4px
