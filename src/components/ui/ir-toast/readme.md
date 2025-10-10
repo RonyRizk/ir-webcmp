@@ -31,6 +31,7 @@
  - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-reset-password](../../ir-reset-password)
+ - [ir-sales-by-channel](../../ir-sales-by-channel)
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-user-management](../../ir-user-management)
 
@@ -52,6 +53,7 @@ graph TD;
   ir-monthly-bookings-report --> ir-toast
   ir-payment-option --> ir-toast
   ir-reset-password --> ir-toast
+  ir-sales-by-channel --> ir-toast
   ir-sales-by-country --> ir-toast
   ir-user-management --> ir-toast
   style ir-toast fill:#f9f,stroke:#333,stroke-width:4px

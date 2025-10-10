@@ -76,6 +76,7 @@ Type: `Promise<void>`
  - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
+ - [ir-filters-panel](../ir-filters-panel)
  - [ir-financial-actions](../../ir-financial-actions)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
  - [ir-financial-table](../../ir-financial-actions/ir-financial-table)
@@ -108,6 +109,8 @@ Type: `Promise<void>`
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-room-nights](../../igloo-calendar/ir-room-nights)
+ - [ir-sales-by-channel](../../ir-sales-by-channel)
+ - [ir-sales-by-channel-table](../../ir-sales-by-channel/ir-sales-by-channel-table)
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
@@ -151,6 +154,7 @@ graph TD;
   ir-delete-modal --> ir-button
   ir-extra-service --> ir-button
   ir-extra-service-config --> ir-button
+  ir-filters-panel --> ir-button
   ir-financial-actions --> ir-button
   ir-financial-filters --> ir-button
   ir-financial-table --> ir-button
@@ -183,6 +187,8 @@ graph TD;
   ir-room --> ir-button
   ir-room-guests --> ir-button
   ir-room-nights --> ir-button
+  ir-sales-by-channel --> ir-button
+  ir-sales-by-channel-table --> ir-button
   ir-sales-by-country --> ir-button
   ir-sales-filters --> ir-button
   ir-sales-table --> ir-button

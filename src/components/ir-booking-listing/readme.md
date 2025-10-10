@@ -15,6 +15,7 @@
 | `propertyid` | `propertyid` |             | `number` | `undefined` |
 | `rowCount`   | `row-count`  |             | `number` | `10`        |
 | `ticket`     | `ticket`     |             | `string` | `''`        |
+| `userType`   | `user-type`  |             | `number` | `undefined` |
 
 
 ## Dependencies

@@ -29,6 +29,7 @@
 - [ir-daily-revenue](../ir-daily-revenue)
 - [ir-booking-email-logs](../ir-booking-email-logs)
 - [ir-booking-listing](../ir-booking-listing)
+- [ir-sales-by-channel](../ir-sales-by-channel)
 
 ### Graph
 ```mermaid
@@ -43,6 +44,7 @@ graph TD;
   ir-secure-tasks --> ir-daily-revenue
   ir-secure-tasks --> ir-booking-email-logs
   ir-secure-tasks --> ir-booking-listing
+  ir-secure-tasks --> ir-sales-by-channel
   ir-login --> ir-interceptor
   ir-login --> ir-toast
   ir-login --> ir-input-text
@@ -382,6 +384,20 @@ graph TD;
   ir-listing-modal --> ir-icon
   ir-listing-modal --> ir-select
   ir-listing-modal --> ir-button
+  ir-sales-by-channel --> ir-loading-screen
+  ir-sales-by-channel --> ir-toast
+  ir-sales-by-channel --> ir-interceptor
+  ir-sales-by-channel --> ir-button
+  ir-sales-by-channel --> ir-sales-by-channel-filters
+  ir-sales-by-channel --> ir-sales-by-channel-table
+  ir-sales-by-channel-filters --> ir-filters-panel
+  ir-sales-by-channel-filters --> ir-select
+  ir-sales-by-channel-filters --> ir-m-combobox
+  ir-sales-by-channel-filters --> ir-range-picker
+  ir-sales-by-channel-filters --> ir-checkbox
+  ir-filters-panel --> ir-button
+  ir-sales-by-channel-table --> ir-progress-indicator
+  ir-sales-by-channel-table --> ir-button
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
