@@ -84,6 +84,9 @@ graph TD;
   igl-to-be-assigned --> ir-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
+  igl-legends --> ir-input-text
+  igl-legends --> ir-success-loader
+  ir-success-loader --> ir-icons
   igl-cal-header --> ir-button
   igl-cal-header --> ir-date-picker
   igl-cal-header --> ir-m-combobox
@@ -91,10 +94,14 @@ graph TD;
   igl-cal-body --> igl-booking-event
   igl-cal-body --> ir-modal
   igl-booking-event --> igl-booking-event-hover
+  igl-booking-event-hover --> ir-dropdown
+  igl-booking-event-hover --> ir-icons
+  igl-booking-event-hover --> ir-dropdown-item
   igl-booking-event-hover --> ir-date-view
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-button
   igl-booking-event-hover --> igl-block-dates-view
+  ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
   ir-modal --> ir-button
   igl-book-property --> igl-block-dates-view
@@ -186,7 +193,6 @@ graph TD;
   ir-payment-folio --> ir-dropdown
   ir-payment-folio --> ir-input-text
   ir-payment-folio --> ir-button
-  ir-dropdown --> ir-icons
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-popover

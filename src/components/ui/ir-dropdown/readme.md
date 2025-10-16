@@ -9,6 +9,7 @@
 
 | Property   | Attribute  | Description | Type               | Default     |
 | ---------- | ---------- | ----------- | ------------------ | ----------- |
+| `caret`    | `caret`    |             | `boolean`          | `true`      |
 | `disabled` | `disabled` |             | `boolean`          | `false`     |
 | `value`    | `value`    |             | `number \| string` | `undefined` |
 
@@ -24,6 +25,7 @@
 
 ### Used by
 
+ - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
  - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
 
 ### Depends on
@@ -34,6 +36,7 @@
 ```mermaid
 graph TD;
   ir-dropdown --> ir-icons
+  igl-booking-event-hover --> ir-dropdown
   ir-payment-folio --> ir-dropdown
   style ir-dropdown fill:#f9f,stroke:#333,stroke-width:4px
 ```
