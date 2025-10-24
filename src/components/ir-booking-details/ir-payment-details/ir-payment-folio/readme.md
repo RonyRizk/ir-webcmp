@@ -36,8 +36,8 @@
 - [ir-dropdown-item](../../../ui/ir-dropdown-item)
 - [ir-title](../../../ir-title)
 - [ir-date-picker](../../../ui/ir-date-picker)
-- [ir-price-input](../../../ui/ir-price-input)
 - [ir-dropdown](../../../ui/ir-dropdown)
+- [ir-price-input](../../../ui/ir-price-input)
 - [ir-input-text](../../../ui/ir-input-text)
 - [ir-button](../../../ui/ir-button)
 
@@ -47,8 +47,8 @@ graph TD;
   ir-payment-folio --> ir-dropdown-item
   ir-payment-folio --> ir-title
   ir-payment-folio --> ir-date-picker
-  ir-payment-folio --> ir-price-input
   ir-payment-folio --> ir-dropdown
+  ir-payment-folio --> ir-price-input
   ir-payment-folio --> ir-input-text
   ir-payment-folio --> ir-button
   ir-title --> ir-icon
