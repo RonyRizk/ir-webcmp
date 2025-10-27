@@ -95,6 +95,7 @@ graph TD;
   ir-booking-details --> ir-extra-service-config
   ir-booking-details --> ir-room-guests
   ir-booking-details --> ir-payment-folio
+  ir-booking-details --> ir-room
   ir-booking-details --> ir-spinner
   ir-booking-details --> ir-toast
   ir-booking-details --> ir-interceptor
@@ -102,7 +103,6 @@ graph TD;
   ir-booking-details --> ir-reservation-information
   ir-booking-details --> ir-date-view
   ir-booking-details --> ir-button
-  ir-booking-details --> ir-room
   ir-booking-details --> ir-pickup-view
   ir-booking-details --> ir-extra-services
   ir-booking-details --> ir-payment-details
@@ -147,6 +147,12 @@ graph TD;
   ir-payment-folio --> ir-input-text
   ir-payment-folio --> ir-button
   ir-dropdown --> ir-icons
+  ir-room --> ir-button
+  ir-room --> ir-date-view
+  ir-room --> ir-tooltip
+  ir-room --> ir-select
+  ir-room --> ir-label
+  ir-room --> ir-modal
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-popover
@@ -156,18 +162,11 @@ graph TD;
   ir-booking-header --> ir-modal
   ir-pms-logs --> ir-spinner
   ir-events-log --> ir-spinner
-  ir-dialog --> ir-icon
   ir-reservation-information --> ir-label
   ir-reservation-information --> ir-tooltip
   ir-reservation-information --> ir-icons
   ir-reservation-information --> ir-button
   ir-reservation-information --> ota-label
-  ir-room --> ir-button
-  ir-room --> ir-date-view
-  ir-room --> ir-tooltip
-  ir-room --> ir-select
-  ir-room --> ir-label
-  ir-room --> ir-modal
   ir-pickup-view --> ir-button
   ir-extra-services --> ir-extra-service
   ir-extra-service --> ir-button
@@ -225,14 +224,17 @@ graph TD;
   igloo-calendar --> igl-book-property
   igloo-calendar --> ir-sidebar
   igloo-calendar --> ir-room-nights
+  igloo-calendar --> igl-split-booking
   igloo-calendar --> ir-booking-details
   igloo-calendar --> ir-room-guests
   igloo-calendar --> igl-bulk-operations
+  igloo-calendar --> igl-reallocation-dialog
   igloo-calendar --> ir-modal
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
+  igl-legends --> ir-new-badge
   igl-legends --> ir-input-text
   igl-legends --> ir-success-loader
   ir-success-loader --> ir-icons
@@ -250,10 +252,17 @@ graph TD;
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-button
   igl-booking-event-hover --> igl-block-dates-view
+  igl-cal-footer --> ir-new-badge
   ir-room-nights --> ir-price-input
   ir-room-nights --> ir-loading-screen
   ir-room-nights --> ir-title
   ir-room-nights --> ir-button
+  igl-split-booking --> ir-title
+  igl-split-booking --> ir-date-view
+  igl-split-booking --> ir-date-picker
+  igl-split-booking --> ir-button
+  igl-split-booking --> ir-radio
+  igl-split-booking --> ir-select
   igl-bulk-operations --> ir-title
   igl-bulk-operations --> ir-tabs
   igl-bulk-operations --> igl-bulk-stop-sale
@@ -267,6 +276,9 @@ graph TD;
   igl-bulk-block --> ir-radio
   igl-bulk-block --> ir-button
   igl-bulk-block --> ir-date-picker
+  igl-reallocation-dialog --> ir-dialog
+  igl-reallocation-dialog --> ir-select
+  igl-reallocation-dialog --> ir-button
   ir-housekeeping --> ir-loading-screen
   ir-housekeeping --> ir-interceptor
   ir-housekeeping --> ir-toast

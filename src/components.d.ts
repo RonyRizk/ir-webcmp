@@ -12,12 +12,13 @@ import { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
 import { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
 import { IToast } from "./components/ui/ir-toast/toast";
 import { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
-import { CalendarModalEvent, IRoomNightsData, IRoomNightsDataEventPayload } from "./models/property-types";
+import { CalendarModalEvent, IReallocationPayload, IRoomNightsData, IRoomNightsDataEventPayload } from "./models/property-types";
+import { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar";
 import { IPageTwoDataUpdateProps } from "./models/models";
 import { IrToast } from "./components/ui/ir-toast/ir-toast";
 import { Currency, RatePlan, RoomType } from "./models/property";
-import { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar";
 import { Booking, ExtraService, IBookingPickupInfo, IOtaNotes, IPayment, OtaService, Room, SharedPerson } from "./models/booking.dto";
+import { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
 import { IPaymentAction } from "./services/payment.service";
 import { IToast as IToast1, TPositions } from "./components/ui/ir-toast/toast";
 import { BookingService } from "./services/booking.service";
@@ -57,12 +58,13 @@ export { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
 export { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
 export { IToast } from "./components/ui/ir-toast/toast";
 export { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes, TSourceOptions } from "./models/igl-book-property";
-export { CalendarModalEvent, IRoomNightsData, IRoomNightsDataEventPayload } from "./models/property-types";
+export { CalendarModalEvent, IReallocationPayload, IRoomNightsData, IRoomNightsDataEventPayload } from "./models/property-types";
+export { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar";
 export { IPageTwoDataUpdateProps } from "./models/models";
 export { IrToast } from "./components/ui/ir-toast/ir-toast";
 export { Currency, RatePlan, RoomType } from "./models/property";
-export { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar";
 export { Booking, ExtraService, IBookingPickupInfo, IOtaNotes, IPayment, OtaService, Room, SharedPerson } from "./models/booking.dto";
+export { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
 export { IPaymentAction } from "./services/payment.service";
 export { IToast as IToast1, TPositions } from "./components/ui/ir-toast/toast";
 export { BookingService } from "./services/booking.service";
@@ -277,6 +279,9 @@ export namespace Components {
         "shouldBeDisabled": boolean;
         "visibleInventory": IRatePlanSelection;
     }
+    interface IglReallocationDialog {
+        "data"?: IReallocationPayload;
+    }
     interface IglRoomType {
         "bookingType": string;
         "currency": any;
@@ -286,6 +291,10 @@ export namespace Components {
         "ratePricingMode": any[];
         "roomInfoId": number | null;
         "roomType": RoomType;
+    }
+    interface IglSplitBooking {
+        "booking": Booking;
+        "identifier": Room['identifier'];
     }
     interface IglTbaBookingView {
         "calendarData": { [key: string]: any };
@@ -807,15 +816,15 @@ export namespace Components {
     }
     interface IrDialog {
         /**
-          * Closes the modal dialog programmatically. Reverts body scroll and emits `openChange`.
+          * Closes the dialog programmatically and restores focus to the previously active element.
          */
         "closeModal": () => Promise<void>;
         /**
-          * Controls whether the dialog should be opened. Can be updated externally and watched internally.
+          * Controls whether the dialog is open. Reflects to the host attribute for CSS hooks.
          */
         "open": boolean;
         /**
-          * Opens the modal dialog programmatically. Applies `overflow: hidden` to the `body`.  Example: ```ts const dialog = document.querySelector('ir-dialog'); await dialog.openModal(); ```
+          * Opens the dialog programmatically using the native `showModal` API.
          */
         "openModal": () => Promise<void>;
     }
@@ -1429,6 +1438,8 @@ export namespace Components {
     interface IrMonthlyBookingsReportTable {
         "reports": DailyReport[];
     }
+    interface IrNewBadge {
+    }
     interface IrNotifications {
         "notifications": Notification[];
     }
@@ -1872,6 +1883,7 @@ export namespace Components {
         "hasRoomAdd": boolean;
         "hasRoomDelete": boolean;
         "hasRoomEdit": boolean;
+        "includeDepartureTime": boolean;
         "isEditable": boolean;
         "language": string;
         "legendData": any;
@@ -2403,9 +2415,17 @@ export interface IglRatePlanCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglRatePlanElement;
 }
+export interface IglReallocationDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglReallocationDialogElement;
+}
 export interface IglRoomTypeCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglRoomTypeElement;
+}
+export interface IglSplitBookingCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglSplitBookingElement;
 }
 export interface IglTbaBookingViewCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -2911,6 +2931,7 @@ declare global {
         "deleteButton": string;
         "bookingCreated": { pool?: string; data: any[] };
         "showDialog": CalendarModalEvent;
+        "openCalendarSidebar": CalendarSidebarState;
     }
     interface HTMLIglBookingEventHoverElement extends Components.IglBookingEventHover, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBookingEventHoverElementEventMap>(type: K, listener: (this: HTMLIglBookingEventHoverElement, ev: IglBookingEventHoverCustomEvent<HTMLIglBookingEventHoverElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -3146,6 +3167,25 @@ declare global {
         prototype: HTMLIglRatePlanElement;
         new (): HTMLIglRatePlanElement;
     };
+    interface HTMLIglReallocationDialogElementEventMap {
+        "dialogClose": boolean;
+        "revertBooking": string;
+        "resetModalState": void;
+    }
+    interface HTMLIglReallocationDialogElement extends Components.IglReallocationDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglReallocationDialogElementEventMap>(type: K, listener: (this: HTMLIglReallocationDialogElement, ev: IglReallocationDialogCustomEvent<HTMLIglReallocationDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglReallocationDialogElementEventMap>(type: K, listener: (this: HTMLIglReallocationDialogElement, ev: IglReallocationDialogCustomEvent<HTMLIglReallocationDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglReallocationDialogElement: {
+        prototype: HTMLIglReallocationDialogElement;
+        new (): HTMLIglReallocationDialogElement;
+    };
     interface HTMLIglRoomTypeElementEventMap {
         "dataUpdateEvent": { [key: string]: any };
     }
@@ -3162,6 +3202,23 @@ declare global {
     var HTMLIglRoomTypeElement: {
         prototype: HTMLIglRoomTypeElement;
         new (): HTMLIglRoomTypeElement;
+    };
+    interface HTMLIglSplitBookingElementEventMap {
+        "closeModal": null;
+    }
+    interface HTMLIglSplitBookingElement extends Components.IglSplitBooking, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglSplitBookingElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingElement, ev: IglSplitBookingCustomEvent<HTMLIglSplitBookingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglSplitBookingElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingElement, ev: IglSplitBookingCustomEvent<HTMLIglSplitBookingElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglSplitBookingElement: {
+        prototype: HTMLIglSplitBookingElement;
+        new (): HTMLIglSplitBookingElement;
     };
     interface HTMLIglTbaBookingViewElementEventMap {
         "highlightToBeAssignedBookingEvent": any;
@@ -3228,7 +3285,7 @@ declare global {
         "calculateUnassignedDates": any;
         "reduceAvailableUnitEvent": { fromDate: string; toDate: string };
         "revertBooking": any;
-        "openCalendarSidebar": CalendarSidebarState;
+        "openCalendarSidebar": CalendarSidebarState1;
         "showRoomNightsDialog": IRoomNightsData;
     }
     interface HTMLIglooCalendarElement extends Components.IglooCalendar, HTMLStencilElement {
@@ -4157,6 +4214,12 @@ declare global {
         prototype: HTMLIrMonthlyBookingsReportTableElement;
         new (): HTMLIrMonthlyBookingsReportTableElement;
     };
+    interface HTMLIrNewBadgeElement extends Components.IrNewBadge, HTMLStencilElement {
+    }
+    var HTMLIrNewBadgeElement: {
+        prototype: HTMLIrNewBadgeElement;
+        new (): HTMLIrNewBadgeElement;
+    };
     interface HTMLIrNotificationsElementEventMap {
         "notificationCleared": Notification;
     }
@@ -5080,7 +5143,9 @@ declare global {
         "igl-legends": HTMLIglLegendsElement;
         "igl-property-booked-by": HTMLIglPropertyBookedByElement;
         "igl-rate-plan": HTMLIglRatePlanElement;
+        "igl-reallocation-dialog": HTMLIglReallocationDialogElement;
         "igl-room-type": HTMLIglRoomTypeElement;
+        "igl-split-booking": HTMLIglSplitBookingElement;
         "igl-tba-booking-view": HTMLIglTbaBookingViewElement;
         "igl-tba-category-view": HTMLIglTbaCategoryViewElement;
         "igl-to-be-assigned": HTMLIglToBeAssignedElement;
@@ -5151,6 +5216,7 @@ declare global {
         "ir-monthly-bookings-report": HTMLIrMonthlyBookingsReportElement;
         "ir-monthly-bookings-report-filter": HTMLIrMonthlyBookingsReportFilterElement;
         "ir-monthly-bookings-report-table": HTMLIrMonthlyBookingsReportTableElement;
+        "ir-new-badge": HTMLIrNewBadgeElement;
         "ir-notifications": HTMLIrNotificationsElement;
         "ir-option-details": HTMLIrOptionDetailsElement;
         "ir-ota-service": HTMLIrOtaServiceElement;
@@ -5334,6 +5400,7 @@ declare namespace LocalJSX {
         "onBookingCreated"?: (event: IglBookingEventHoverCustomEvent<{ pool?: string; data: any[] }>) => void;
         "onDeleteButton"?: (event: IglBookingEventHoverCustomEvent<string>) => void;
         "onHideBubbleInfo"?: (event: IglBookingEventHoverCustomEvent<any>) => void;
+        "onOpenCalendarSidebar"?: (event: IglBookingEventHoverCustomEvent<CalendarSidebarState>) => void;
         "onShowBookingPopup"?: (event: IglBookingEventHoverCustomEvent<any>) => void;
         "onShowDialog"?: (event: IglBookingEventHoverCustomEvent<CalendarModalEvent>) => void;
     }
@@ -5464,6 +5531,12 @@ declare namespace LocalJSX {
         "shouldBeDisabled": boolean;
         "visibleInventory": IRatePlanSelection;
     }
+    interface IglReallocationDialog {
+        "data"?: IReallocationPayload;
+        "onDialogClose"?: (event: IglReallocationDialogCustomEvent<boolean>) => void;
+        "onResetModalState"?: (event: IglReallocationDialogCustomEvent<void>) => void;
+        "onRevertBooking"?: (event: IglReallocationDialogCustomEvent<string>) => void;
+    }
     interface IglRoomType {
         "bookingType"?: string;
         "currency"?: any;
@@ -5474,6 +5547,11 @@ declare namespace LocalJSX {
         "ratePricingMode"?: any[];
         "roomInfoId"?: number | null;
         "roomType"?: RoomType;
+    }
+    interface IglSplitBooking {
+        "booking"?: Booking;
+        "identifier"?: Room['identifier'];
+        "onCloseModal"?: (event: IglSplitBookingCustomEvent<null>) => void;
     }
     interface IglTbaBookingView {
         "calendarData"?: { [key: string]: any };
@@ -5519,7 +5597,7 @@ declare namespace LocalJSX {
         "onCalculateUnassignedDates"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onDragOverHighlightElement"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onMoveBookingTo"?: (event: IglooCalendarCustomEvent<any>) => void;
-        "onOpenCalendarSidebar"?: (event: IglooCalendarCustomEvent<CalendarSidebarState>) => void;
+        "onOpenCalendarSidebar"?: (event: IglooCalendarCustomEvent<CalendarSidebarState1>) => void;
         "onReduceAvailableUnitEvent"?: (event: IglooCalendarCustomEvent<{ fromDate: string; toDate: string }>) => void;
         "onRevertBooking"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onShowRoomNightsDialog"?: (event: IglooCalendarCustomEvent<IRoomNightsData>) => void;
@@ -6063,11 +6141,11 @@ declare namespace LocalJSX {
     }
     interface IrDialog {
         /**
-          * Emits the open/close state of the modal.  Example: ```tsx <ir-dialog onOpenChange={(e) => console.log(e.detail)} /> ```
+          * Emits when the open state changes due to user interaction or programmatic control.
          */
         "onOpenChange"?: (event: IrDialogCustomEvent<boolean>) => void;
         /**
-          * Controls whether the dialog should be opened. Can be updated externally and watched internally.
+          * Controls whether the dialog is open. Reflects to the host attribute for CSS hooks.
          */
         "open"?: boolean;
     }
@@ -6752,6 +6830,8 @@ declare namespace LocalJSX {
     interface IrMonthlyBookingsReportTable {
         "reports"?: DailyReport[];
     }
+    interface IrNewBadge {
+    }
     interface IrNotifications {
         "notifications"?: Notification[];
         "onNotificationCleared"?: (event: IrNotificationsCustomEvent<Notification>) => void;
@@ -7270,6 +7350,7 @@ declare namespace LocalJSX {
         "hasRoomAdd"?: boolean;
         "hasRoomDelete"?: boolean;
         "hasRoomEdit"?: boolean;
+        "includeDepartureTime"?: boolean;
         "isEditable"?: boolean;
         "language"?: string;
         "legendData"?: any;
@@ -7800,7 +7881,9 @@ declare namespace LocalJSX {
         "igl-legends": IglLegends;
         "igl-property-booked-by": IglPropertyBookedBy;
         "igl-rate-plan": IglRatePlan;
+        "igl-reallocation-dialog": IglReallocationDialog;
         "igl-room-type": IglRoomType;
+        "igl-split-booking": IglSplitBooking;
         "igl-tba-booking-view": IglTbaBookingView;
         "igl-tba-category-view": IglTbaCategoryView;
         "igl-to-be-assigned": IglToBeAssigned;
@@ -7871,6 +7954,7 @@ declare namespace LocalJSX {
         "ir-monthly-bookings-report": IrMonthlyBookingsReport;
         "ir-monthly-bookings-report-filter": IrMonthlyBookingsReportFilter;
         "ir-monthly-bookings-report-table": IrMonthlyBookingsReportTable;
+        "ir-new-badge": IrNewBadge;
         "ir-notifications": IrNotifications;
         "ir-option-details": IrOptionDetails;
         "ir-ota-service": IrOtaService;
@@ -7967,7 +8051,9 @@ declare module "@stencil/core" {
             "igl-legends": LocalJSX.IglLegends & JSXBase.HTMLAttributes<HTMLIglLegendsElement>;
             "igl-property-booked-by": LocalJSX.IglPropertyBookedBy & JSXBase.HTMLAttributes<HTMLIglPropertyBookedByElement>;
             "igl-rate-plan": LocalJSX.IglRatePlan & JSXBase.HTMLAttributes<HTMLIglRatePlanElement>;
+            "igl-reallocation-dialog": LocalJSX.IglReallocationDialog & JSXBase.HTMLAttributes<HTMLIglReallocationDialogElement>;
             "igl-room-type": LocalJSX.IglRoomType & JSXBase.HTMLAttributes<HTMLIglRoomTypeElement>;
+            "igl-split-booking": LocalJSX.IglSplitBooking & JSXBase.HTMLAttributes<HTMLIglSplitBookingElement>;
             "igl-tba-booking-view": LocalJSX.IglTbaBookingView & JSXBase.HTMLAttributes<HTMLIglTbaBookingViewElement>;
             "igl-tba-category-view": LocalJSX.IglTbaCategoryView & JSXBase.HTMLAttributes<HTMLIglTbaCategoryViewElement>;
             "igl-to-be-assigned": LocalJSX.IglToBeAssigned & JSXBase.HTMLAttributes<HTMLIglToBeAssignedElement>;
@@ -8038,6 +8124,7 @@ declare module "@stencil/core" {
             "ir-monthly-bookings-report": LocalJSX.IrMonthlyBookingsReport & JSXBase.HTMLAttributes<HTMLIrMonthlyBookingsReportElement>;
             "ir-monthly-bookings-report-filter": LocalJSX.IrMonthlyBookingsReportFilter & JSXBase.HTMLAttributes<HTMLIrMonthlyBookingsReportFilterElement>;
             "ir-monthly-bookings-report-table": LocalJSX.IrMonthlyBookingsReportTable & JSXBase.HTMLAttributes<HTMLIrMonthlyBookingsReportTableElement>;
+            "ir-new-badge": LocalJSX.IrNewBadge & JSXBase.HTMLAttributes<HTMLIrNewBadgeElement>;
             "ir-notifications": LocalJSX.IrNotifications & JSXBase.HTMLAttributes<HTMLIrNotificationsElement>;
             "ir-option-details": LocalJSX.IrOptionDetails & JSXBase.HTMLAttributes<HTMLIrOptionDetailsElement>;
             "ir-ota-service": LocalJSX.IrOtaService & JSXBase.HTMLAttributes<HTMLIrOtaServiceElement>;

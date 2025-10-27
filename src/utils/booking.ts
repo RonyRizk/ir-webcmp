@@ -7,25 +7,164 @@ import locales from '@/stores/locales.store';
 import calendar_dates from '@/stores/calendar-dates.store';
 import calendar_data from '@/stores/calendar-data';
 
+export type SplitRole = 'fullSplit' | 'leftSplit' | 'rightSplit' | null;
+
+export type SplitIndex = {
+  // fast lookups
+  parentOf: Map<string, string | null>; // child -> parent
+  childrenOf: Map<string, string[]>; // parent -> ordered children
+  roleOf: Map<string, SplitRole>; // node -> role
+  chainOf: Map<string, string[]>; // any node -> full chain (head..tail)
+  heads: string[]; // all chain heads
+};
+
+/**
+ * Builds an index of split chains for a booking's rooms.
+ * @param rooms - The booking's rooms array.
+ * @returns A {@link SplitIndex} with constant-time lookups, or `null` if no rooms are provided.
+ */
+export function buildSplitIndex(rooms: Room[]): SplitIndex | null {
+  if (!rooms) {
+    return;
+  }
+  const parentOf = new Map<string, string | null>();
+  const childrenOf = new Map<string, string[]>();
+
+  // 1) index parents/children
+  for (const r of rooms) {
+    if (!r?.identifier) continue;
+    const id = r.identifier;
+    const parent = r.parent_room_identifier ?? null;
+    parentOf.set(id, parent);
+    if (parent) {
+      if (!childrenOf.has(parent)) childrenOf.set(parent, []);
+      childrenOf.get(parent)!.push(id);
+    } else {
+      if (!childrenOf.has(id)) childrenOf.set(id, []); // ensure every head exists in map
+    }
+  }
+
+  // 2) deterministic child order
+  const byId = new Map(rooms.map(r => [r.identifier, r]));
+  for (const [_, kids] of childrenOf) {
+    kids.sort((a, b) => {
+      const ad = byId.get(a)?.from_date ?? '';
+      const bd = byId.get(b)?.from_date ?? '';
+      if (ad < bd) return -1;
+      if (ad > bd) return 1;
+      return a.localeCompare(b);
+    });
+  }
+
+  // 3) find heads (nodes with no parent in map or parent missing)
+  const heads: string[] = [];
+  for (const id of parentOf.keys()) {
+    const parent = parentOf.get(id);
+    if (!parent || !parentOf.has(parent)) heads.push(id);
+  }
+
+  // 4) build chains, roles, and guard against cycles
+  const roleOf = new Map<string, SplitRole>();
+  const chainOf = new Map<string, string[]>();
+
+  const visitChain = (head: string) => {
+    const chain: string[] = [];
+    const seen = new Set<string>();
+    let cur: string | undefined = head;
+
+    while (cur && !seen.has(cur)) {
+      seen.add(cur);
+      chain.push(cur);
+      const kids = childrenOf.get(cur) ?? [];
+      // if data branches, we follow the earliest child and treat the rest as separate heads
+      cur = kids[0];
+    }
+
+    // assign roles
+    for (let i = 0; i < chain.length; i++) {
+      const id = chain[i];
+      const hasParent = i > 0;
+      const hasChild = i < chain.length - 1;
+      const role: SplitRole = hasParent && hasChild ? 'fullSplit' : hasParent ? 'leftSplit' : hasChild ? 'rightSplit' : null;
+      roleOf.set(id, role);
+      chainOf.set(id, chain);
+    }
+  };
+
+  // visit each head
+  for (const h of heads) visitChain(h);
+
+  // handle orphans/cycles that weren’t reachable from heads
+  for (const id of parentOf.keys()) {
+    if (!chainOf.has(id)) visitChain(id);
+  }
+
+  return { parentOf, childrenOf, roleOf, chainOf, heads };
+}
+
+/**
+ * Returns the split role of a given room identifier.
+ *
+ * Roles:
+ * - `"fullSplit"`: node has a parent and a child (middle of a chain)
+ * - `"leftSplit"`: node has a parent only (tail)
+ * - `"rightSplit"`: node has a child only (head that splits)
+ * - `null`: singleton (no parent & no child) or not part of any chain in the index
+ *
+ * @param index - A previously built {@link SplitIndex}.
+ * @param identifier - The room identifier to query.
+ * @returns The role of the identifier, or `null` if not present.
+ */
+export function getSplitRole(index: SplitIndex, identifier: string): SplitRole {
+  return index.roleOf.get(identifier) ?? null;
+}
+
+/**
+ * Returns the full ordered chain (head → … → tail) containing the identifier.
+ * If the identifier is unknown to the index, returns a single-element array with the identifier.
+ *
+ * @param index - A previously built {@link SplitIndex}.
+ * @param identifier - The room identifier to query.
+ * @returns An array of identifiers representing the chain.
+ */
+export function getSplitChain(index: SplitIndex, identifier: string): string[] {
+  return index.chainOf.get(identifier) ?? [identifier];
+}
+
 export async function getMyBookings(months: MonthType[]): Promise<any[]> {
-  const myBookings: any[] = [];
+  if (!months?.length) {
+    return [];
+  }
+
   const stayStatus = await getStayStatus();
+  const stayStatusLookup = new Map<string, string>(stayStatus.map(item => [item.code, item.value]));
+  const bookingsByPool = new Map<string, any>();
+
   for (const month of months) {
     for (const day of month.days) {
       for (const room of day.room_types) {
-        assignBooking(room.physicalrooms, myBookings, stayStatus);
+        assignBooking(room.physicalrooms, bookingsByPool, stayStatusLookup);
       }
     }
   }
 
-  return myBookings;
+  return Array.from(bookingsByPool.values());
 }
 
-function assignBooking(physicalRoom: PhysicalRoomType[], myBookings: any[], stayStatus: { code: string; value: string }[]): void {
+function assignBooking(
+  physicalRoom: PhysicalRoomType[],
+  bookingsByPool: Map<string, any>,
+  stayStatusLookup: Map<string, string>,
+): void {
+  if (!physicalRoom?.length) {
+    return;
+  }
+
   for (const room of physicalRoom) {
-    for (const key in room.calendar_cell) {
-      if (room.calendar_cell[key].Is_Available === false) {
-        addOrUpdateBooking(room.calendar_cell[key], myBookings, stayStatus);
+    const calendarCells = room?.calendar_cell ? Object.values(room.calendar_cell) : [];
+    for (const cell of calendarCells) {
+      if (cell?.Is_Available === false) {
+        addOrUpdateBooking(cell, bookingsByPool, stayStatusLookup);
       }
     }
   }
@@ -42,6 +181,8 @@ export const bookingStatus: Record<string, STATUS> = {
   '003': 'CHECKED-OUT',
 };
 
+type StayStatusEntry = { code: string; value: string };
+
 export function formatName(firstName: string | null, lastName: string | null) {
   if ((firstName === null && lastName === null) || !firstName) return '';
   if (!!lastName) {
@@ -49,7 +190,7 @@ export function formatName(firstName: string | null, lastName: string | null) {
   }
   return firstName;
 }
-async function getStayStatus() {
+async function getStayStatus(): Promise<StayStatusEntry[]> {
   try {
     const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME_Multi`, {
       TBL_NAMES: ['_STAY_STATUS'],
@@ -60,6 +201,7 @@ async function getStayStatus() {
     }));
   } catch (error) {
     console.log(error);
+    return [];
   }
 }
 function renderBlock003Date(date, hour, minute) {
@@ -68,7 +210,7 @@ function renderBlock003Date(date, hour, minute) {
   dt.setMinutes(minute);
   return `${locales.entries.Lcz_BlockedTill} ${moment(dt).format('MMM DD, HH:mm')}`;
 }
-function getDefaultData(cell: CellType, stayStatus: { code: string; value: string }[]): any {
+function getDefaultData(cell: CellType, stayStatusLookup: Map<string, string>): any {
   if (isBlockUnit(cell.STAY_STATUS_CODE)) {
     const blockedFromDate = moment(cell.My_Block_Info.from_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.My_Block_Info.from_date : cell.DATE;
     const blockedToDate = moment(cell.My_Block_Info.to_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.My_Block_Info.to_date : cell.DATE;
@@ -81,7 +223,7 @@ function getDefaultData(cell: CellType, stayStatus: { code: string; value: strin
           ? cell.My_Block_Info.NOTES
           : cell.STAY_STATUS_CODE === '003'
           ? renderBlock003Date(cell.My_Block_Info.BLOCKED_TILL_DATE, cell.My_Block_Info.BLOCKED_TILL_HOUR, cell.My_Block_Info.BLOCKED_TILL_MINUTE)
-          : stayStatus.find(st => st.code === cell.STAY_STATUS_CODE).value || '',
+          : stayStatusLookup.get(cell.STAY_STATUS_CODE) || '',
       RELEASE_AFTER_HOURS: cell.My_Block_Info.DESCRIPTION,
       PR_ID: cell.My_Block_Info.pr_id,
       ENTRY_DATE: cell.My_Block_Info.BLOCKED_TILL_DATE,
@@ -108,71 +250,78 @@ function getDefaultData(cell: CellType, stayStatus: { code: string; value: strin
   //   console.log(moment(cell.room.from_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.from_date : cell.DATE);
   //   console.log(cell);
   // }
-  if (cell.booking.booking_nbr.toString() === '00553011358') {
+  // if (cell.booking.booking_nbr.toString() === '00553011358') {
+  //   console.log(cell);
+  // }
+  try {
+    const bookingFromDate = moment(cell.room.from_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.from_date : cell.DATE;
+    const bookingToDate = moment(cell.room.to_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.to_date : cell.DATE;
+    const mainGuest = cell.room.sharing_persons?.find(p => p.is_main);
+    return {
+      ID: cell.POOL,
+      FROM_DATE: bookingFromDate,
+      TO_DATE: bookingToDate,
+      NO_OF_DAYS: dateDifference(bookingFromDate, bookingToDate),
+      STATUS: bookingStatus[cell.booking?.status.code],
+      // NAME: formatName(mainGuest?.first_name, mainGuest?.last_name),
+      NAME: formatName(mainGuest?.first_name, mainGuest?.last_name) || formatName(cell?.booking.guest?.first_name, cell?.booking?.guest?.last_name),
+      IDENTIFIER: cell.room.identifier,
+      PR_ID: cell.pr_id,
+      POOL: cell.POOL,
+      BOOKING_NUMBER: cell.booking.booking_nbr,
+      NOTES: cell.booking.is_direct ? cell.booking.remark : null,
+      PRIVATE_NOTE: getPrivateNote(cell.booking.extras),
+      is_direct: cell.booking.is_direct,
+      BALANCE: cell.booking.financial?.due_amount,
+      channel_booking_nbr: cell.booking.channel_booking_nbr,
+      ARRIVAL_TIME: cell.booking.arrival.description,
+      defaultDates: {
+        from_date: cell.room.from_date,
+        to_date: cell.room.to_date,
+      },
+      DEPARTURE_TIME: cell.room.departure_time,
+      ///from here
+      ENTRY_DATE: cell.booking.booked_on.date,
+      PHONE_PREFIX: cell.booking.guest.country_phone_prefix,
+      IS_EDITABLE: cell.booking.is_editable,
+      ARRIVAL: cell.booking.arrival,
+      PHONE: cell.booking.guest.mobile_without_prefix ?? '',
+      RATE: cell.room.total,
+      RATE_PLAN: cell.room.rateplan.name,
+      SPLIT_BOOKING: false,
+      RATE_PLAN_ID: cell.room.rateplan.id,
+      RATE_TYPE: cell.room?.roomtype?.id,
+      ADULTS_COUNT: cell.room.occupancy.adult_nbr,
+      CHILDREN_COUNT: cell.room.occupancy.children_nbr,
+      origin: cell.booking.origin,
+      GUEST: cell.booking.guest,
+      ROOMS: cell.booking.rooms,
+      cancelation: cell.room.rateplan.cancelation,
+      guarantee: cell.room.rateplan.guarantee,
+      TOTAL_PRICE: cell.booking.financial?.gross_total,
+      COUNTRY: cell.booking.guest.country_id,
+      FROM_DATE_STR: cell.booking.format.from_date,
+      TO_DATE_STR: cell.booking.format.to_date,
+      adult_child_offering: cell.room.rateplan.selected_variation.adult_child_offering,
+      SOURCE: { code: cell.booking.source.code, description: cell.booking.source.description, tag: cell.booking.source.tag },
+      //TODO:Implement checkin-checkout
+      CHECKIN: cell.room.in_out?.code === '001',
+      CHECKOUT: cell.room.in_out?.code === '002',
+      ROOM_INFO: {
+        occupancy: cell.room.occupancy,
+        sharing_persons: cell.room.sharing_persons,
+        unit: cell.room.unit,
+        in_out: cell.room.in_out,
+        calendar_extra: cell.room.calendar_extra ? JSON.parse(cell.room.calendar_extra) : null,
+        parent_room_identifier: cell.room.parent_room_identifier,
+      },
+      BASE_STATUS_CODE: cell.booking.status?.code,
+    };
+  } catch (error) {
+    console.error(`Something went wrong in cell`);
     console.log(cell);
+    console.error(error);
   }
-  const bookingFromDate = moment(cell.room.from_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.from_date : cell.DATE;
-  const bookingToDate = moment(cell.room.to_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.to_date : cell.DATE;
-  const mainGuest = cell.room.sharing_persons?.find(p => p.is_main);
-  return {
-    ID: cell.POOL,
-    FROM_DATE: bookingFromDate,
-    TO_DATE: bookingToDate,
-    NO_OF_DAYS: dateDifference(bookingFromDate, bookingToDate),
-    STATUS: bookingStatus[cell.booking?.status.code],
-    // NAME: formatName(mainGuest?.first_name, mainGuest?.last_name),
-    NAME: formatName(mainGuest?.first_name, mainGuest?.last_name) || formatName(cell?.booking.guest?.first_name, cell?.booking?.guest?.last_name),
-    IDENTIFIER: cell.room.identifier,
-    PR_ID: cell.pr_id,
-    POOL: cell.POOL,
-    BOOKING_NUMBER: cell.booking.booking_nbr,
-    NOTES: cell.booking.is_direct ? cell.booking.remark : null,
-    PRIVATE_NOTE: getPrivateNote(cell.booking.extras),
-    is_direct: cell.booking.is_direct,
-    BALANCE: cell.booking.financial?.due_amount,
-    channel_booking_nbr: cell.booking.channel_booking_nbr,
-    ARRIVAL_TIME: cell.booking.arrival.description,
-    defaultDates: {
-      from_date: cell.room.from_date,
-      to_date: cell.room.to_date,
-    },
-    DEPARTURE_TIME: cell.room.departure_time,
-    ///from here
-    ENTRY_DATE: cell.booking.booked_on.date,
-    PHONE_PREFIX: cell.booking.guest.country_phone_prefix,
-    IS_EDITABLE: cell.booking.is_editable,
-    ARRIVAL: cell.booking.arrival,
-    PHONE: cell.booking.guest.mobile_without_prefix ?? '',
-    RATE: cell.room.total,
-    RATE_PLAN: cell.room.rateplan.name,
-    SPLIT_BOOKING: false,
-    RATE_PLAN_ID: cell.room.rateplan.id,
-    RATE_TYPE: cell.room?.roomtype?.id,
-    ADULTS_COUNT: cell.room.occupancy.adult_nbr,
-    CHILDREN_COUNT: cell.room.occupancy.children_nbr,
-    origin: cell.booking.origin,
-    GUEST: cell.booking.guest,
-    ROOMS: cell.booking.rooms,
-    cancelation: cell.room.rateplan.cancelation,
-    guarantee: cell.room.rateplan.guarantee,
-    TOTAL_PRICE: cell.booking.financial?.gross_total,
-    COUNTRY: cell.booking.guest.country_id,
-    FROM_DATE_STR: cell.booking.format.from_date,
-    TO_DATE_STR: cell.booking.format.to_date,
-    adult_child_offering: cell.room.rateplan.selected_variation.adult_child_offering,
-    SOURCE: { code: cell.booking.source.code, description: cell.booking.source.description, tag: cell.booking.source.tag },
-    //TODO:Implement checkin-checkout
-    CHECKIN: cell.room.in_out?.code === '001',
-    CHECKOUT: cell.room.in_out?.code === '002',
-    ROOM_INFO: {
-      occupancy: cell.room.occupancy,
-      sharing_persons: cell.room.sharing_persons,
-      unit: cell.room.unit,
-      in_out: cell.room.in_out,
-      calendar_extra: cell.room.calendar_extra ? JSON.parse(cell.room.calendar_extra) : null,
-    },
-    BASE_STATUS_CODE: cell.booking.status?.code,
-  };
 }
 
 // function updateBookingWithStayData(data: any, cell: CellType): any {
@@ -247,16 +396,16 @@ export function getRoomStatus(params: Pick<Room, 'in_out' | 'from_date' | 'to_da
     }
   }
 }
-function addOrUpdateBooking(cell: CellType, myBookings: any[], stayStatus: { code: string; value: string }[]): void {
-  const index = myBookings.findIndex(booking => booking.POOL === cell.POOL);
-  if (index === -1) {
-    const newData = getDefaultData(cell, stayStatus);
-    myBookings.push(newData);
+
+function addOrUpdateBooking(cell: CellType, bookingsByPool: Map<string, any>, stayStatusLookup: Map<string, string>): void {
+  if (!cell?.POOL || bookingsByPool.has(cell.POOL)) {
+    return;
   }
-  //else {
-  //   const updatedData = updateBookingWithStayData(myBookings[index], cell);
-  //   myBookings[index] = updatedData;
-  // }
+
+  const newData = getDefaultData(cell, stayStatusLookup);
+  if (newData) {
+    bookingsByPool.set(cell.POOL, newData);
+  }
 }
 export function getPrivateNote(extras: Extras[] | null) {
   if (!extras) {
@@ -264,6 +413,7 @@ export function getPrivateNote(extras: Extras[] | null) {
   }
   return extras.find(e => e.key === 'private_note')?.value || null;
 }
+
 export function transformNewBooking(data: any): RoomBookingDetails[] {
   let bookings: RoomBookingDetails[] = [];
   const rooms = data.rooms.filter(room => !!room['assigned_units_pool']);
@@ -334,6 +484,7 @@ export function transformNewBooking(data: any): RoomBookingDetails[] {
         sharing_persons: room.sharing_persons,
         unit: room.unit,
         in_out: room.in_out,
+        parent_room_identifier: room.parent_room_identifier,
         calendar_extra: room.calendar_extra ? JSON.parse(room.calendar_extra) : null,
       },
       BASE_STATUS_CODE: data.status?.code,
@@ -341,6 +492,7 @@ export function transformNewBooking(data: any): RoomBookingDetails[] {
   });
   return bookings;
 }
+
 export async function transformNewBLockedRooms(data: any): Promise<RoomBlockDetails> {
   const stayStatus = await getStayStatus();
   return {
@@ -374,15 +526,18 @@ export async function transformNewBLockedRooms(data: any): Promise<RoomBlockDeta
     },
   };
 }
+
 export function calculateDaysBetweenDates(from_date: string, to_date: string) {
   const startDate = moment(from_date, 'YYYY-MM-DD').startOf('day');
   const endDate = moment(to_date, 'YYYY-MM-DD').endOf('day');
   const daysDiff = endDate.diff(startDate, 'days');
   return daysDiff || 1;
 }
+
 export function compareTime(date1: Date, date2: Date) {
   return date1.getHours() >= date2.getHours() && date1.getMinutes() >= date2.getMinutes();
 }
+
 /**
  * Creates a Date object for today at the specified hour in a given time zone.
  * The offset is the number of hours that the target time zone is ahead of UTC.

@@ -337,6 +337,7 @@ export interface IFinancial {
   collected: number;
   gross_total: number;
   gross_cost: number;
+  refunds: number;
   invoice_nbr: string;
   gross_total_with_extras: number;
 }
@@ -520,6 +521,8 @@ export interface Room {
   applicable_policies: ExposedApplicablePolicy[];
   from_date: string;
   calendar_extra: string;
+  parent_room_identifier: string | null;
+  is_split: boolean;
   guest: Guest;
   occupancy_default: number;
   notes: string | null;
@@ -586,6 +589,10 @@ export interface RatePlan {
   custom_text: string | null;
   is_active: boolean;
   short_name: string;
+  meal_plan: {
+    code: string;
+    description: string | null;
+  } | null;
 }
 export interface IVariations {
   adult_child_offering: string;

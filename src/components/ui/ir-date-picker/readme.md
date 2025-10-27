@@ -67,6 +67,7 @@ Type: `Promise<void>`
  - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
  - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-cal-header](../../igloo-calendar/igl-cal-header)
+ - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
@@ -80,6 +81,7 @@ graph TD;
   igl-bulk-block --> ir-date-picker
   igl-bulk-stop-sale --> ir-date-picker
   igl-cal-header --> ir-date-picker
+  igl-split-booking --> ir-date-picker
   ir-daily-revenue-filters --> ir-date-picker
   ir-extra-service-config --> ir-date-picker
   ir-financial-filters --> ir-date-picker

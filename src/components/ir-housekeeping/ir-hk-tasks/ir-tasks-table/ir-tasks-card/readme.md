@@ -18,7 +18,7 @@
 
 | Event               | Description | Type                                                    |
 | ------------------- | ----------- | ------------------------------------------------------- |
-| `cleanSelectedTask` |             | `CustomEvent<{ task: Task; status?: "004" \| "001"; }>` |
+| `cleanSelectedTask` |             | `CustomEvent<{ task: Task; status?: "001" \| "004"; }>` |
 | `skipSelectedTask`  |             | `CustomEvent<Task>`                                     |
 
 

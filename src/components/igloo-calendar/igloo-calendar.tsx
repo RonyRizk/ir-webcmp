@@ -39,7 +39,7 @@ export interface UnitHkStatusChangePayload {
 export type SalesBatchPayload = { rate_plan_id: number; night: string; is_available_to_book: boolean };
 export type AvailabilityBatchPayload = { room_type_id: number; date: string; availability: number };
 export type CalendarSidebarState = {
-  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks';
+  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split';
   payload: any;
 };
 @Component({
@@ -121,6 +121,7 @@ export class IglooCalendar {
 
   private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
   private tasksEndDate: string;
+  dialogEl: HTMLIrDialogElement;
 
   componentWillLoad() {
     if (this.baseUrl) {
@@ -169,7 +170,9 @@ export class IglooCalendar {
     event.stopImmediatePropagation();
     event.stopPropagation();
     this.dialogData = event.detail;
-    this.calendarModalEl?.openModal();
+    if (this.dialogData.reason !== 'reallocate') {
+      this.calendarModalEl?.openModal();
+    }
   }
   @Listen('showRoomNightsDialog')
   handleShowRoomNightsDialog(event: CustomEvent<IRoomNightsData>) {
@@ -1264,7 +1267,7 @@ export class IglooCalendar {
     }
   }
   private handleModalCancel() {
-    if (this.dialogData?.reason === 'reallocate' || this.dialogData.reason === 'stretch') {
+    if (this.dialogData?.reason === 'reallocate' || this.dialogData?.reason === 'stretch') {
       this.revertBooking.emit(this.dialogData.pool);
     }
     this.dialogData = null;
@@ -1388,6 +1391,14 @@ export class IglooCalendar {
               propertyId={this.property_id}
             ></ir-room-nights>
           )}
+          {this.calendarSidebarState?.type === 'split' && (
+            <igl-split-booking
+              slot="sidebar-body"
+              booking={this.calendarSidebarState?.payload?.booking}
+              identifier={this.calendarSidebarState?.payload?.identifier}
+              onCloseModal={() => (this.calendarSidebarState = null)}
+            ></igl-split-booking>
+          )}
           {this.editBookingItem && this.editBookingItem.event_type === 'EDIT_BOOKING' && (
             <ir-booking-details
               slot="sidebar-body"
@@ -1424,6 +1435,11 @@ export class IglooCalendar {
             // <igl-bulk-stop-sale slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-stop-sale>
           )}
         </ir-sidebar>
+        <igl-reallocation-dialog
+          onResetModalState={() => (this.dialogData = null)}
+          onDialogClose={() => this.handleModalCancel()}
+          data={this.dialogData?.reason === 'reallocate' ? this.dialogData : undefined}
+        ></igl-reallocation-dialog>
         <ir-modal
           ref={el => (this.calendarModalEl = el)}
           modalTitle={''}
