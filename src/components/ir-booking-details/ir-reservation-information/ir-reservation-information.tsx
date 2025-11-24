@@ -1,4 +1,3 @@
-import { colorVariants } from '@/components/ui/ir-icons/icons';
 import { Booking } from '@/models/booking.dto';
 import locales from '@/stores/locales.store';
 import { getPrivateNote } from '@/utils/booking';
@@ -7,6 +6,8 @@ import { ICountry } from '@/models/IBooking';
 import { _formatDate, _formatTime } from '../functions';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent } from '../types';
 
+// Hover over WaButtonJsxProps: you should see an `onClick?` property.
+// If you don't, the global .d.ts file isn't being loaded.
 @Component({
   tag: 'ir-reservation-information',
   styleUrl: 'ir-reservation-information.css',
@@ -17,7 +18,9 @@ export class IrReservationInformation {
   @Prop() countries: ICountry[];
 
   @State() userCountry: ICountry | null = null;
+  @State() isOpen: boolean;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<any>>;
+  private irBookingCompanyFormRef: any;
   componentWillLoad() {
     const guestCountryId = this.booking?.guest?.country_id;
     this.userCountry = guestCountryId ? this.countries?.find(country => country.id === guestCountryId) || null : null;
@@ -65,8 +68,8 @@ export class IrReservationInformation {
   render() {
     const privateNote = getPrivateNote(this.booking.extras);
     return (
-      <div class="card">
-        <div class="p-1">
+      <wa-card>
+        <div>
           <p>{this.booking.property.name || ''}</p>
           <ir-label
             labelText={`${locales.entries.Lcz_Source}:`}
@@ -94,14 +97,34 @@ export class IrReservationInformation {
                 </ir-tooltip>
               </div>
             )}
-            <ir-button
-              slot="suffix"
-              variant="icon"
-              icon_name={'edit'}
-              style={{ ...colorVariants.secondary, '--icon-size': '1.1rem' }}
-              onClickHandler={e => this.handleEditClick(e, 'guest')}
-            ></ir-button>
+
+            <wa-tooltip for={`edit_guest-details`}>Edit guest details</wa-tooltip>
+            <ir-custom-button slot="suffix" id={`edit_guest-details`} onClickHandler={e => this.handleEditClick(e, 'guest')} appearance={'plain'} variant={'neutral'}>
+              <wa-icon name="edit" label="Edit guest details" style={{ fontSize: '1rem' }}></wa-icon>
+            </ir-custom-button>
           </ir-label>
+          <div class="d-flex align-items-center justify-content-between">
+            <ir-label
+              labelText={`Company:`}
+              placeholder={'no company entered'}
+              content={''}
+              display={'flex'}
+              // ignore_content
+            ></ir-label>
+            <wa-tooltip for={`edit_create-company-info`}>Add company info</wa-tooltip>
+            <ir-custom-button
+              id={`edit_create-company-info`}
+              onClickHandler={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                this.irBookingCompanyFormRef.openCompanyForm();
+              }}
+              appearance={'plain'}
+              variant={'neutral'}
+            >
+              <wa-icon name="edit" label="Add or modify company info" style={{ fontSize: '1rem' }}></wa-icon>
+            </ir-custom-button>
+          </div>
           {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
           {!this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>}
           {this.booking.guest.alternative_email && <ir-label labelText={`${locales.entries.Lcz_AlternativeEmail}:`} content={this.booking.guest.alternative_email}></ir-label>}
@@ -139,6 +162,7 @@ export class IrReservationInformation {
               maxVisibleItems={this.booking.ota_notes?.length}
             ></ota-label>
           )}
+
           <div class="d-flex align-items-center justify-content-between">
             <ir-label
               labelText={`${locales.entries.Lcz_BookingPrivateNote}:`}
@@ -147,10 +171,14 @@ export class IrReservationInformation {
               display={privateNote ? 'inline' : 'flex'}
               // ignore_content
             ></ir-label>
-            <ir-button variant="icon" icon_name="edit" style={colorVariants.secondary} onClickHandler={e => this.handleEditClick(e, 'extra_note')}></ir-button>
+            <wa-tooltip for={`edit_create-extra-note`}>{privateNote ? 'Edit' : 'Create'} private note</wa-tooltip>
+            <ir-custom-button id={`edit_create-extra-note`} onClickHandler={e => this.handleEditClick(e, 'extra_note')} appearance={'plain'} variant={'neutral'}>
+              <wa-icon style={{ fontSize: '1rem' }} name="edit" label="Edit or create private note"></wa-icon>
+            </ir-custom-button>
           </div>
+          <ir-booking-company-form booking={this.booking} ref={el => (this.irBookingCompanyFormRef = el)}></ir-booking-company-form>
         </div>
-      </div>
+      </wa-card>
     );
   }
 }

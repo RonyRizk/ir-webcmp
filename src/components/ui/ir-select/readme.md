@@ -64,7 +64,6 @@
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
- - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
@@ -95,7 +94,6 @@ graph TD;
   igl-property-booked-by --> ir-select
   igl-reallocation-dialog --> ir-select
   igl-split-booking --> ir-select
-  ir-booking-header --> ir-select
   ir-booking-listing --> ir-select
   ir-delete-modal --> ir-select
   ir-financial-filters --> ir-select
