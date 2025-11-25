@@ -62,7 +62,6 @@
  - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
  - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
- - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
@@ -76,7 +75,6 @@
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-pagination](../../ir-pagination)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
- - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
@@ -92,7 +90,6 @@ graph TD;
   igl-bulk-block --> ir-select
   igl-bulk-stop-sale --> ir-select
   igl-property-booked-by --> ir-select
-  igl-reallocation-dialog --> ir-select
   igl-split-booking --> ir-select
   ir-booking-listing --> ir-select
   ir-delete-modal --> ir-select
@@ -106,7 +103,6 @@ graph TD;
   ir-option-details --> ir-select
   ir-pagination --> ir-select
   ir-pickup --> ir-select
-  ir-room --> ir-select
   ir-room-guests --> ir-select
   ir-sales-by-channel-filters --> ir-select
   ir-sales-filters --> ir-select

@@ -12,6 +12,13 @@
 | `booking` | --        |             | `Booking` | `undefined` |
 
 
+## Events
+
+| Event             | Description | Type                   |
+| ----------------- | ----------- | ---------------------- |
+| `resetBookingEvt` |             | `CustomEvent<Booking>` |
+
+
 ## Methods
 
 ### `openCompanyForm() => Promise<void>`

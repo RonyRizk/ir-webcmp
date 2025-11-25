@@ -29,8 +29,6 @@
 ### Depends on
 
 - [ir-label](../../ui/ir-label)
-- [ir-tooltip](../../ui/ir-tooltip)
-- [ir-icons](../../ui/ir-icons)
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ota-label](../../ui/ota-label)
 - [ir-booking-company-form](../ir-booking-company-form)
@@ -39,8 +37,6 @@
 ```mermaid
 graph TD;
   ir-reservation-information --> ir-label
-  ir-reservation-information --> ir-tooltip
-  ir-reservation-information --> ir-icons
   ir-reservation-information --> ir-custom-button
   ir-reservation-information --> ota-label
   ir-reservation-information --> ir-booking-company-form

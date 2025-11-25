@@ -26,6 +26,19 @@
 | `irValueChange`      | Emits whenever the tracked value changes.    | `CustomEvent<{ value: unknown; }>`                 |
 
 
+## Dependencies
+
+### Used by
+
+ - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
+
+### Graph
+```mermaid
+graph TD;
+  ir-payment-folio --> ir-validator
+  style ir-validator fill:#f9f,stroke:#333,stroke-width:4px
+```
+
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

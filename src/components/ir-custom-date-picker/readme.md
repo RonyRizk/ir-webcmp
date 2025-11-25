@@ -60,6 +60,19 @@ Type: `Promise<void>`
 
 
 
+## Dependencies
+
+### Used by
+
+ - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
+
+### Graph
+```mermaid
+graph TD;
+  ir-payment-folio --> ir-custom-date-picker
+  style ir-custom-date-picker fill:#f9f,stroke:#333,stroke-width:4px
+```
+
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

@@ -41,7 +41,6 @@ graph TD;
   ir-booking-details --> ir-booking-extra-note
   ir-booking-details --> ir-extra-service-config
   ir-booking-details --> ir-room-guests
-  ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-room
   ir-booking-details --> ir-spinner
   ir-booking-details --> ir-toast
@@ -55,6 +54,7 @@ graph TD;
   ir-booking-details --> ir-payment-details
   ir-booking-details --> ir-modal
   ir-booking-details --> ir-sidebar
+  ir-booking-details --> ir-payment-folio
   ir-booking-details --> igl-book-property
   ir-guest-info --> ir-spinner
   ir-guest-info --> ir-toast
@@ -87,19 +87,10 @@ graph TD;
   ir-room-guests --> ir-country-picker
   ir-room-guests --> ir-select
   ir-room-guests --> ir-button
-  ir-payment-folio --> ir-dropdown-item
-  ir-payment-folio --> ir-title
-  ir-payment-folio --> ir-date-picker
-  ir-payment-folio --> ir-dropdown
-  ir-payment-folio --> ir-price-input
-  ir-payment-folio --> ir-input-text
-  ir-payment-folio --> ir-button
-  ir-dropdown --> ir-icons
   ir-room --> ir-custom-button
   ir-room --> ir-date-view
   ir-room --> ir-tooltip
   ir-room --> ir-button
-  ir-room --> ir-select
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-modal --> ir-button
@@ -112,8 +103,6 @@ graph TD;
   ir-pms-logs --> ir-spinner
   ir-events-log --> ir-spinner
   ir-reservation-information --> ir-label
-  ir-reservation-information --> ir-tooltip
-  ir-reservation-information --> ir-icons
   ir-reservation-information --> ir-custom-button
   ir-reservation-information --> ota-label
   ir-reservation-information --> ir-booking-company-form
@@ -121,6 +110,7 @@ graph TD;
   ir-booking-company-form --> ir-custom-input
   ir-booking-company-form --> ir-custom-button
   ir-pickup-view --> ir-custom-button
+  ir-pickup-view --> ir-label
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-service --> ir-custom-button
@@ -142,6 +132,11 @@ graph TD;
   ir-payment-item --> ir-button
   ir-payment-item --> ir-custom-button
   ir-sidebar --> ir-icon
+  ir-payment-folio --> ir-drawer
+  ir-payment-folio --> ir-custom-date-picker
+  ir-payment-folio --> ir-validator
+  ir-payment-folio --> ir-custom-input
+  ir-payment-folio --> ir-custom-button
   igl-book-property --> igl-block-dates-view
   igl-book-property --> ir-spinner
   igl-book-property --> ir-icon

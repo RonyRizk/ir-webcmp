@@ -111,7 +111,6 @@
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-login](../../ir-login)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
- - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
@@ -130,7 +129,6 @@ graph TD;
   ir-listing-header --> ir-input-text
   ir-login --> ir-input-text
   ir-option-details --> ir-input-text
-  ir-payment-folio --> ir-input-text
   ir-pickup --> ir-input-text
   ir-reset-password --> ir-input-text
   ir-room-guests --> ir-input-text
