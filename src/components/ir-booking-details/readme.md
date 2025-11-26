@@ -51,7 +51,6 @@
 
 - [ir-guest-info](../ir-guest-info)
 - [ir-pickup](ir-pickup)
-- [ir-booking-extra-note](ir-booking-extra-note)
 - [ir-extra-service-config](./ir-extra-services/ir-extra-service-config)
 - [ir-room-guests](ir-room-guests)
 - [ir-room](ir-room)
@@ -75,7 +74,6 @@
 graph TD;
   ir-booking-details --> ir-guest-info
   ir-booking-details --> ir-pickup
-  ir-booking-details --> ir-booking-extra-note
   ir-booking-details --> ir-extra-service-config
   ir-booking-details --> ir-room-guests
   ir-booking-details --> ir-room
@@ -116,9 +114,6 @@ graph TD;
   ir-pickup --> ir-input-text
   ir-pickup --> ir-price-input
   ir-pickup --> ir-button
-  ir-booking-extra-note --> ir-title
-  ir-booking-extra-note --> ir-textarea
-  ir-booking-extra-note --> ir-button
   ir-extra-service-config --> ir-title
   ir-extra-service-config --> ir-date-picker
   ir-extra-service-config --> ir-button
@@ -132,7 +127,6 @@ graph TD;
   ir-room --> ir-custom-button
   ir-room --> ir-date-view
   ir-room --> ir-tooltip
-  ir-room --> ir-button
   ir-room --> ir-label
   ir-room --> ir-modal
   ir-modal --> ir-button
@@ -147,7 +141,10 @@ graph TD;
   ir-reservation-information --> ir-label
   ir-reservation-information --> ir-custom-button
   ir-reservation-information --> ota-label
+  ir-reservation-information --> ir-booking-extra-note
   ir-reservation-information --> ir-booking-company-form
+  ir-booking-extra-note --> ir-dialog
+  ir-booking-extra-note --> ir-custom-button
   ir-booking-company-form --> ir-dialog
   ir-booking-company-form --> ir-custom-input
   ir-booking-company-form --> ir-custom-button

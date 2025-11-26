@@ -63,7 +63,6 @@ Type: `Promise<void>`
  - [igl-tba-booking-view](../../igloo-calendar/igl-to-be-assigned/igl-tba-booking-view)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
- - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
  - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
@@ -99,7 +98,6 @@ Type: `Promise<void>`
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-revenue-row-details](../../ir-daily-revenue/ir-revenue-table/ir-revenue-row/ir-revenue-row-details)
- - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-room-nights](../../igloo-calendar/ir-room-nights)
  - [ir-sales-by-channel](../../ir-sales-by-channel)
@@ -134,7 +132,6 @@ graph TD;
   igl-tba-booking-view --> ir-button
   igl-to-be-assigned --> ir-button
   ir-booking-email-logs --> ir-button
-  ir-booking-extra-note --> ir-button
   ir-booking-guarantee --> ir-button
   ir-booking-listing --> ir-button
   ir-channel --> ir-button
@@ -170,7 +167,6 @@ graph TD;
   ir-pickup --> ir-button
   ir-reset-password --> ir-button
   ir-revenue-row-details --> ir-button
-  ir-room --> ir-button
   ir-room-guests --> ir-button
   ir-room-nights --> ir-button
   ir-sales-by-channel --> ir-button

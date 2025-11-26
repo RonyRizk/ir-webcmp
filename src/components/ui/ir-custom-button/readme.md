@@ -47,6 +47,7 @@
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-booking-company-form](../../ir-booking-details/ir-booking-company-form)
  - [ir-booking-details](../../ir-booking-details)
+ - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
@@ -64,6 +65,7 @@ graph TD;
   ir-applicable-policies --> ir-custom-button
   ir-booking-company-form --> ir-custom-button
   ir-booking-details --> ir-custom-button
+  ir-booking-extra-note --> ir-custom-button
   ir-booking-header --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-services --> ir-custom-button

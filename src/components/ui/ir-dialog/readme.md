@@ -54,6 +54,7 @@ Type: `Promise<void>`
 
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [ir-booking-company-form](../../ir-booking-details/ir-booking-company-form)
+ - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
 
 ### Graph
@@ -61,6 +62,7 @@ Type: `Promise<void>`
 graph TD;
   igl-reallocation-dialog --> ir-dialog
   ir-booking-company-form --> ir-dialog
+  ir-booking-extra-note --> ir-dialog
   ir-booking-header --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
