@@ -28,11 +28,13 @@
 
 ### Used by
 
+ - [ir-invoice](../ir-invoice)
  - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-invoice --> ir-drawer
   ir-payment-folio --> ir-drawer
   style ir-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

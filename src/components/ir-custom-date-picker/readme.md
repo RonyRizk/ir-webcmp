@@ -64,11 +64,13 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [ir-invoice](../ir-invoice)
  - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-invoice --> ir-custom-date-picker
   ir-payment-folio --> ir-custom-date-picker
   style ir-custom-date-picker fill:#f9f,stroke:#333,stroke-width:4px
 ```

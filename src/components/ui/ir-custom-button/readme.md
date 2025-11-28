@@ -51,12 +51,14 @@
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
+ - [ir-invoice](../../ir-invoice)
  - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
  - [ir-payment-item](../../ir-booking-details/ir-payment-details/ir-payment-item)
  - [ir-payments-folio](../../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-test2-cmp](../../ir-test-cmp)
 
 ### Graph
 ```mermaid
@@ -69,12 +71,14 @@ graph TD;
   ir-booking-header --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-services --> ir-custom-button
+  ir-invoice --> ir-custom-button
   ir-payment-folio --> ir-custom-button
   ir-payment-item --> ir-custom-button
   ir-payments-folio --> ir-custom-button
   ir-pickup-view --> ir-custom-button
   ir-reservation-information --> ir-custom-button
   ir-room --> ir-custom-button
+  ir-test2-cmp --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -386,6 +386,9 @@ export namespace Components {
         "p": string;
         "propertyid": number;
     }
+    interface IrBookingBillingRecipient {
+        "booking": Booking;
+    }
     interface IrBookingCompanyForm {
         "booking": Booking;
         "openCompanyForm": () => Promise<void>;
@@ -1588,6 +1591,42 @@ export namespace Components {
          */
         "suppressToastEndpoints": string[];
     }
+    interface IrInvoice {
+        /**
+          * When `true`, automatically triggers `window.print()` after an invoice is created. Useful for setups where the invoice should immediately be sent to a printer.
+         */
+        "autoPrint": boolean;
+        /**
+          * The booking object for which the invoice is being generated. Should contain room, guest, and pricing information.
+         */
+        "booking": Booking;
+        /**
+          * Closes the invoice drawer.  This method sets the `open` property to `false`, hiding the drawer. Parent components can call this to close the drawer programmatically, and it is also used internally when the drawer emits `onDrawerHide`.  Also emits the `invoiceClose` event.
+          * @returns Resolves once the drawer state is updated.
+         */
+        "closeDrawer": () => Promise<void>;
+        /**
+          * Specifies what the invoice is for. - `"room"`: invoice for a specific room - `"booking"`: invoice for the entire booking
+         */
+        "for": 'room' | 'booking';
+        /**
+          * Determines what should happen after creating the invoice. - `"create"`: create an invoice normally - `"check_in-create"`: create an invoice as part of the check-in flow
+         */
+        "mode": 'create' | 'check_in-create';
+        /**
+          * Whether the invoice drawer is open.  This prop is mutable and reflected to the host element, allowing parent components to control visibility via markup or via the public `openDrawer()` / `closeDrawer()` methods.
+         */
+        "open": boolean;
+        /**
+          * Opens the invoice drawer.  This method sets the `open` property to `true`, making the drawer visible. It can be called programmatically by parent components.  Also emits the `invoiceOpen` event.
+          * @returns Resolves once the drawer state is updated.
+         */
+        "openDrawer": () => Promise<void>;
+        /**
+          * The identifier of the room for which the invoice is being generated. Used when invoicing at room level instead of booking level.
+         */
+        "roomIdentifier": string;
+    }
     interface IrLabel {
         /**
           * inline styles for the component container
@@ -2512,6 +2551,8 @@ export namespace Components {
     }
     interface IrTestCmp {
     }
+    interface IrTest2Cmp {
+    }
     interface IrTextEditor {
         "error": boolean;
         "maxLength": number;
@@ -2851,6 +2892,10 @@ export interface IrAutocompleteCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrAutocompleteElement;
 }
+export interface IrBookingBillingRecipientCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrBookingBillingRecipientElement;
+}
 export interface IrBookingCompanyFormCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrBookingCompanyFormElement;
@@ -3002,6 +3047,10 @@ export interface IrInputTextCustomEvent<T> extends CustomEvent<T> {
 export interface IrInterceptorCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrInterceptorElement;
+}
+export interface IrInvoiceCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrInvoiceElement;
 }
 export interface IrListingHeaderCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -3781,8 +3830,26 @@ declare global {
         prototype: HTMLIrBookingElement;
         new (): HTMLIrBookingElement;
     };
+    interface HTMLIrBookingBillingRecipientElementEventMap {
+        "recipientChange": string;
+    }
+    interface HTMLIrBookingBillingRecipientElement extends Components.IrBookingBillingRecipient, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrBookingBillingRecipientElementEventMap>(type: K, listener: (this: HTMLIrBookingBillingRecipientElement, ev: IrBookingBillingRecipientCustomEvent<HTMLIrBookingBillingRecipientElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrBookingBillingRecipientElementEventMap>(type: K, listener: (this: HTMLIrBookingBillingRecipientElement, ev: IrBookingBillingRecipientCustomEvent<HTMLIrBookingBillingRecipientElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrBookingBillingRecipientElement: {
+        prototype: HTMLIrBookingBillingRecipientElement;
+        new (): HTMLIrBookingBillingRecipientElement;
+    };
     interface HTMLIrBookingCompanyFormElementEventMap {
         "resetBookingEvt": Booking;
+        "companyFormClosed": void;
     }
     interface HTMLIrBookingCompanyFormElement extends Components.IrBookingCompanyForm, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrBookingCompanyFormElementEventMap>(type: K, listener: (this: HTMLIrBookingCompanyFormElement, ev: IrBookingCompanyFormCustomEvent<HTMLIrBookingCompanyFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -4573,6 +4640,31 @@ declare global {
     var HTMLIrInterceptorElement: {
         prototype: HTMLIrInterceptorElement;
         new (): HTMLIrInterceptorElement;
+    };
+    interface HTMLIrInvoiceElementEventMap {
+        "invoiceOpen": void;
+        "invoiceClose": void;
+        "invoiceCreated": {
+    booking: Booking;
+    recipientId: string;
+    for: 'room' | 'booking';
+    roomIdentifier?: string;
+    mode: 'create' | 'check_in-create';
+  };
+    }
+    interface HTMLIrInvoiceElement extends Components.IrInvoice, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrInvoiceElementEventMap>(type: K, listener: (this: HTMLIrInvoiceElement, ev: IrInvoiceCustomEvent<HTMLIrInvoiceElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrInvoiceElementEventMap>(type: K, listener: (this: HTMLIrInvoiceElement, ev: IrInvoiceCustomEvent<HTMLIrInvoiceElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrInvoiceElement: {
+        prototype: HTMLIrInvoiceElement;
+        new (): HTMLIrInvoiceElement;
     };
     interface HTMLIrLabelElement extends Components.IrLabel, HTMLStencilElement {
     }
@@ -5491,6 +5583,12 @@ declare global {
         prototype: HTMLIrTestCmpElement;
         new (): HTMLIrTestCmpElement;
     };
+    interface HTMLIrTest2CmpElement extends Components.IrTest2Cmp, HTMLStencilElement {
+    }
+    var HTMLIrTest2CmpElement: {
+        prototype: HTMLIrTest2CmpElement;
+        new (): HTMLIrTest2CmpElement;
+    };
     interface HTMLIrTextEditorElementEventMap {
         "textChange": string;
     }
@@ -5693,6 +5791,7 @@ declare global {
         "ir-applicable-policies": HTMLIrApplicablePoliciesElement;
         "ir-autocomplete": HTMLIrAutocompleteElement;
         "ir-booking": HTMLIrBookingElement;
+        "ir-booking-billing-recipient": HTMLIrBookingBillingRecipientElement;
         "ir-booking-company-form": HTMLIrBookingCompanyFormElement;
         "ir-booking-details": HTMLIrBookingDetailsElement;
         "ir-booking-email-logs": HTMLIrBookingEmailLogsElement;
@@ -5748,6 +5847,7 @@ declare global {
         "ir-input-text": HTMLIrInputTextElement;
         "ir-interactive-title": HTMLIrInteractiveTitleElement;
         "ir-interceptor": HTMLIrInterceptorElement;
+        "ir-invoice": HTMLIrInvoiceElement;
         "ir-label": HTMLIrLabelElement;
         "ir-listing-header": HTMLIrListingHeaderElement;
         "ir-listing-modal": HTMLIrListingModalElement;
@@ -5818,6 +5918,7 @@ declare global {
         "ir-tasks-table": HTMLIrTasksTableElement;
         "ir-tasks-table-pagination": HTMLIrTasksTablePaginationElement;
         "ir-test-cmp": HTMLIrTestCmpElement;
+        "ir-test2-cmp": HTMLIrTest2CmpElement;
         "ir-text-editor": HTMLIrTextEditorElement;
         "ir-textarea": HTMLIrTextareaElement;
         "ir-title": HTMLIrTitleElement;
@@ -6204,8 +6305,13 @@ declare namespace LocalJSX {
         "p"?: string;
         "propertyid"?: number;
     }
+    interface IrBookingBillingRecipient {
+        "booking"?: Booking;
+        "onRecipientChange"?: (event: IrBookingBillingRecipientCustomEvent<string>) => void;
+    }
     interface IrBookingCompanyForm {
         "booking"?: Booking;
+        "onCompanyFormClosed"?: (event: IrBookingCompanyFormCustomEvent<void>) => void;
         "onResetBookingEvt"?: (event: IrBookingCompanyFormCustomEvent<Booking>) => void;
     }
     interface IrBookingDetails {
@@ -7534,6 +7640,50 @@ declare namespace LocalJSX {
          */
         "suppressToastEndpoints"?: string[];
     }
+    interface IrInvoice {
+        /**
+          * When `true`, automatically triggers `window.print()` after an invoice is created. Useful for setups where the invoice should immediately be sent to a printer.
+         */
+        "autoPrint"?: boolean;
+        /**
+          * The booking object for which the invoice is being generated. Should contain room, guest, and pricing information.
+         */
+        "booking"?: Booking;
+        /**
+          * Specifies what the invoice is for. - `"room"`: invoice for a specific room - `"booking"`: invoice for the entire booking
+         */
+        "for"?: 'room' | 'booking';
+        /**
+          * Determines what should happen after creating the invoice. - `"create"`: create an invoice normally - `"check_in-create"`: create an invoice as part of the check-in flow
+         */
+        "mode"?: 'create' | 'check_in-create';
+        /**
+          * Emitted when the invoice drawer is closed.  Fired when `closeDrawer()` is called, including when the underlying drawer emits `onDrawerHide`.
+         */
+        "onInvoiceClose"?: (event: IrInvoiceCustomEvent<void>) => void;
+        /**
+          * Emitted when an invoice is created/confirmed.  The event `detail` contains: - `booking`: the booking associated with the invoice - `recipientId`: the selected billing recipient - `for`: whether the invoice is for `"room"` or `"booking"` - `roomIdentifier`: the room identifier when invoicing a specific room - `mode`: the current invoice mode
+         */
+        "onInvoiceCreated"?: (event: IrInvoiceCustomEvent<{
+    booking: Booking;
+    recipientId: string;
+    for: 'room' | 'booking';
+    roomIdentifier?: string;
+    mode: 'create' | 'check_in-create';
+  }>) => void;
+        /**
+          * Emitted when the invoice drawer is opened.  Fired when `openDrawer()` is called and the component transitions into the open state.
+         */
+        "onInvoiceOpen"?: (event: IrInvoiceCustomEvent<void>) => void;
+        /**
+          * Whether the invoice drawer is open.  This prop is mutable and reflected to the host element, allowing parent components to control visibility via markup or via the public `openDrawer()` / `closeDrawer()` methods.
+         */
+        "open"?: boolean;
+        /**
+          * The identifier of the room for which the invoice is being generated. Used when invoicing at room level instead of booking level.
+         */
+        "roomIdentifier"?: string;
+    }
     interface IrLabel {
         /**
           * inline styles for the component container
@@ -8598,6 +8748,8 @@ declare namespace LocalJSX {
     }
     interface IrTestCmp {
     }
+    interface IrTest2Cmp {
+    }
     interface IrTextEditor {
         "error"?: boolean;
         "maxLength"?: number;
@@ -8875,6 +9027,7 @@ declare namespace LocalJSX {
         "ir-applicable-policies": IrApplicablePolicies;
         "ir-autocomplete": IrAutocomplete;
         "ir-booking": IrBooking;
+        "ir-booking-billing-recipient": IrBookingBillingRecipient;
         "ir-booking-company-form": IrBookingCompanyForm;
         "ir-booking-details": IrBookingDetails;
         "ir-booking-email-logs": IrBookingEmailLogs;
@@ -8930,6 +9083,7 @@ declare namespace LocalJSX {
         "ir-input-text": IrInputText;
         "ir-interactive-title": IrInteractiveTitle;
         "ir-interceptor": IrInterceptor;
+        "ir-invoice": IrInvoice;
         "ir-label": IrLabel;
         "ir-listing-header": IrListingHeader;
         "ir-listing-modal": IrListingModal;
@@ -9000,6 +9154,7 @@ declare namespace LocalJSX {
         "ir-tasks-table": IrTasksTable;
         "ir-tasks-table-pagination": IrTasksTablePagination;
         "ir-test-cmp": IrTestCmp;
+        "ir-test2-cmp": IrTest2Cmp;
         "ir-text-editor": IrTextEditor;
         "ir-textarea": IrTextarea;
         "ir-title": IrTitle;
@@ -9051,6 +9206,7 @@ declare module "@stencil/core" {
             "ir-applicable-policies": LocalJSX.IrApplicablePolicies & JSXBase.HTMLAttributes<HTMLIrApplicablePoliciesElement>;
             "ir-autocomplete": LocalJSX.IrAutocomplete & JSXBase.HTMLAttributes<HTMLIrAutocompleteElement>;
             "ir-booking": LocalJSX.IrBooking & JSXBase.HTMLAttributes<HTMLIrBookingElement>;
+            "ir-booking-billing-recipient": LocalJSX.IrBookingBillingRecipient & JSXBase.HTMLAttributes<HTMLIrBookingBillingRecipientElement>;
             "ir-booking-company-form": LocalJSX.IrBookingCompanyForm & JSXBase.HTMLAttributes<HTMLIrBookingCompanyFormElement>;
             "ir-booking-details": LocalJSX.IrBookingDetails & JSXBase.HTMLAttributes<HTMLIrBookingDetailsElement>;
             "ir-booking-email-logs": LocalJSX.IrBookingEmailLogs & JSXBase.HTMLAttributes<HTMLIrBookingEmailLogsElement>;
@@ -9106,6 +9262,7 @@ declare module "@stencil/core" {
             "ir-input-text": LocalJSX.IrInputText & JSXBase.HTMLAttributes<HTMLIrInputTextElement>;
             "ir-interactive-title": LocalJSX.IrInteractiveTitle & JSXBase.HTMLAttributes<HTMLIrInteractiveTitleElement>;
             "ir-interceptor": LocalJSX.IrInterceptor & JSXBase.HTMLAttributes<HTMLIrInterceptorElement>;
+            "ir-invoice": LocalJSX.IrInvoice & JSXBase.HTMLAttributes<HTMLIrInvoiceElement>;
             "ir-label": LocalJSX.IrLabel & JSXBase.HTMLAttributes<HTMLIrLabelElement>;
             "ir-listing-header": LocalJSX.IrListingHeader & JSXBase.HTMLAttributes<HTMLIrListingHeaderElement>;
             "ir-listing-modal": LocalJSX.IrListingModal & JSXBase.HTMLAttributes<HTMLIrListingModalElement>;
@@ -9176,6 +9333,7 @@ declare module "@stencil/core" {
             "ir-tasks-table": LocalJSX.IrTasksTable & JSXBase.HTMLAttributes<HTMLIrTasksTableElement>;
             "ir-tasks-table-pagination": LocalJSX.IrTasksTablePagination & JSXBase.HTMLAttributes<HTMLIrTasksTablePaginationElement>;
             "ir-test-cmp": LocalJSX.IrTestCmp & JSXBase.HTMLAttributes<HTMLIrTestCmpElement>;
+            "ir-test2-cmp": LocalJSX.IrTest2Cmp & JSXBase.HTMLAttributes<HTMLIrTest2CmpElement>;
             "ir-text-editor": LocalJSX.IrTextEditor & JSXBase.HTMLAttributes<HTMLIrTextEditorElement>;
             "ir-textarea": LocalJSX.IrTextarea & JSXBase.HTMLAttributes<HTMLIrTextareaElement>;
             "ir-title": LocalJSX.IrTitle & JSXBase.HTMLAttributes<HTMLIrTitleElement>;
