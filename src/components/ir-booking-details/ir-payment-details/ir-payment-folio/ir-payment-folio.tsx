@@ -41,7 +41,7 @@ const folioBaseSchema = z.object({
       },
       { message: `Invalid date` },
     ),
-  amount: z.coerce.number().min(0.01),
+  amount: z.coerce.number().min(0),
   reference: z.string().optional().nullable(),
   payment_type: paymentTypeSchema,
   payment_method: paymentMethodSchema.nullable().optional(),
@@ -273,6 +273,14 @@ export class IrPaymentFolio {
     return (
       <ir-drawer
         placement="start"
+        style={{
+          '--ir-drawer-width': '40rem',
+          '--ir-drawer-background-color': 'var(--wa-color-surface-default)',
+          '--ir-drawer-padding-left': 'var(--spacing)',
+          '--ir-drawer-padding-right': 'var(--spacing)',
+          '--ir-drawer-padding-top': 'var(--spacing)',
+          '--ir-drawer-padding-bottom': 'var(--spacing)',
+        }}
         label={this.payment?.id !== -1 ? 'Edit Folio Entry' : 'New Folio Entry'}
         open={this.isOpen}
         onDrawerHide={event => {
@@ -357,6 +365,7 @@ export class IrPaymentFolio {
               blurEvent="input-blur"
             >
               <ir-custom-input
+                aria-invalid={String(!!this.errors?.amount)}
                 value={this.folioData?.amount?.toString() ?? ''}
                 label="Amount"
                 mask="price"
