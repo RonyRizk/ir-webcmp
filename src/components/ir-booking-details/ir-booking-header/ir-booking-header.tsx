@@ -6,6 +6,7 @@ import { Component, Event, EventEmitter, Fragment, h, Listen, Prop, State } from
 import { BookingDetailsDialogEvents, OpenDialogEvent, OpenSidebarEvent } from '../types';
 import { BookingService } from '@/services/booking.service';
 import WaBadge from '@awesome.me/webawesome/dist/components/badge/badge';
+import calendar_data from '@/stores/calendar-data';
 
 @Component({
   tag: 'ir-booking-header',
@@ -97,6 +98,7 @@ export class IrBookingHeader {
 
   render() {
     const lastManipulation = this.booking.ota_manipulations ? this.booking.ota_manipulations[this.booking.ota_manipulations.length - 1] : null;
+    const showPms = (calendar_data.property?.linked_pms ?? [])?.findIndex(lp => lp?.is_active && lp?.booking_integration_mode?.code === '001') !== -1;
     return (
       <div class="fluid-container px-1">
         <div class="d-flex flex-column p-0 mx-0 flex-lg-row align-items-md-center justify-content-between">
@@ -183,18 +185,20 @@ export class IrBookingHeader {
             >
               Events log
             </ir-custom-button>
-            <ir-custom-button
-              onClickHandler={e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                this.openDialog({ type: 'pms' });
-              }}
-              appearance={'outlined'}
-              size="small"
-              variant="brand"
-            >
-              PMS
-            </ir-custom-button>
+            {showPms && (
+              <ir-custom-button
+                onClickHandler={e => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  this.openDialog({ type: 'pms' });
+                }}
+                appearance={'outlined'}
+                size="small"
+                variant="brand"
+              >
+                PMS
+              </ir-custom-button>
+            )}
 
             {this.hasReceipt && (
               <Fragment>
