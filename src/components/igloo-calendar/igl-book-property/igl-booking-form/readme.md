@@ -52,9 +52,11 @@ graph TD;
   igl-booking-form --> ir-date-view
   igl-booking-form --> igl-application-info
   igl-booking-form --> igl-property-booked-by
+  igl-application-info --> ir-validator
   igl-application-info --> ir-input
   igl-property-booked-by --> ir-picker
   igl-property-booked-by --> ir-picker-item
+  igl-property-booked-by --> ir-validator
   igl-property-booked-by --> ir-input
   igl-property-booked-by --> ir-country-picker
   igl-property-booked-by --> ir-mobile-input

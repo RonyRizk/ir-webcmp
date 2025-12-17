@@ -33,6 +33,7 @@
 
 - [ir-picker](../../../../ui/ir-picker)
 - [ir-picker-item](../../../../ui/ir-picker/ir-picker-item)
+- [ir-validator](../../../../ui/ir-validator)
 - [ir-input](../../../../ui/ir-input)
 - [ir-country-picker](../../../../ui/ir-country-picker)
 - [ir-mobile-input](../../../../ui/ir-mobile-input)
@@ -42,6 +43,7 @@
 graph TD;
   igl-property-booked-by --> ir-picker
   igl-property-booked-by --> ir-picker-item
+  igl-property-booked-by --> ir-validator
   igl-property-booked-by --> ir-input
   igl-property-booked-by --> ir-country-picker
   igl-property-booked-by --> ir-mobile-input
