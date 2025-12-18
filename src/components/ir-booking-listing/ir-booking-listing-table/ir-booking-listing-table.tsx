@@ -30,6 +30,8 @@ export class IrBookingListingTable {
     try {
       this.isLoading = true;
       await this.bookingListingsService.removeExposedBooking(this.booking_nbr, true);
+      booking_listing.bookings = [...booking_listing.bookings.filter(b => b.booking_nbr?.toString() !== this.booking_nbr)];
+      this.booking_nbr = null;
     } catch (error) {
     } finally {
       this.isLoading = false;
@@ -239,22 +241,17 @@ export class IrBookingListingTable {
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
             e.stopPropagation();
+          }}
+          onIrDialogAfterHide={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
             this.booking_nbr = null;
           }}
           lightDismiss={false}
         >
           <span>{locales.entries.Lcz_SureYouWantToDeleteBookingNbr + this.booking_nbr}</span>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button
-              onClickHandler={e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                this.booking_nbr = null;
-              }}
-              size="medium"
-              variant="neutral"
-              appearance="filled"
-            >
+            <ir-custom-button data-dialog="close" size="medium" variant="neutral" appearance="filled">
               Cancel
             </ir-custom-button>
             <ir-custom-button

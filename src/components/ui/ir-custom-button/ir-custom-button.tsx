@@ -84,25 +84,31 @@ export class IrCustomButton {
 
   @Event() clickHandler: EventEmitter<MouseEvent>;
 
-  private buttonEl: NativeButton;
-
-  componentDidLoad() {
-    this.buttonEl.addEventListener('click', this.handleButtonClick);
-  }
-
-  disconnectedCallback() {
-    this.buttonEl.removeEventListener('click', this.handleButtonClick);
-  }
-
-  private handleButtonClick = (e: MouseEvent) => {
+  private handleButtonClick(e: MouseEvent) {
     this.clickHandler.emit(e);
-  };
+  }
 
   render() {
+    if (this.link) {
+      return (
+        <button
+          class="ir-button__link"
+          onClick={e => {
+            this.clickHandler.emit(e);
+          }}
+        >
+          <slot slot="start" name="start"></slot>
+          <slot></slot>
+          <slot slot="end" name="end"></slot>
+        </button>
+      );
+    }
     return (
       <Host>
         <wa-button
-          ref={el => (this.buttonEl = el)}
+          onClick={e => {
+            this.handleButtonClick(e);
+          }}
           /* core button props */
           type={this.type}
           size={this.size}
