@@ -170,7 +170,6 @@ graph TD;
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-button
   igl-bulk-stop-sale --> ir-date-picker
-  ir-weekday-selector --> ir-checkbox
   igl-bulk-block --> ir-select
   igl-bulk-block --> ir-radio
   igl-bulk-block --> ir-button
