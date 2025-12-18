@@ -84,6 +84,7 @@ graph TD;
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
+  ir-mobile-input --> ir-input
   igl-book-property-footer --> ir-custom-button
   ir-range-picker --> ir-date-picker
   ir-booking-listing --> ir-listing-header

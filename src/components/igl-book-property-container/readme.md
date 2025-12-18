@@ -83,6 +83,7 @@ graph TD;
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
+  ir-mobile-input --> ir-input
   igl-book-property-footer --> ir-custom-button
   ir-listing-header --> igl-book-property-container
   style igl-book-property-container fill:#f9f,stroke:#333,stroke-width:4px

@@ -1,6 +1,4 @@
-import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
-import IMask, { FactoryArg, InputMask } from 'imask';
-import { masks } from './countries_masks';
+import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
 import { NativeWaInput } from '../ir-input/ir-input';
 
@@ -16,6 +14,7 @@ export interface IrMobileInputChangeDetail {
   shadow: true,
 })
 export class IrMobileInput {
+  @Element() el: HTMLIrMobileInputElement;
   private static idCounter = 0;
   private readonly componentId = ++IrMobileInput.idCounter;
   private readonly inputId = `ir-mobile-input-${this.componentId}`;
@@ -23,9 +22,6 @@ export class IrMobileInput {
   private readonly descriptionId = `${this.inputId}-description`;
   private readonly errorId = `${this.inputId}-error`;
   private readonly countryStatusId = `${this.inputId}-country-status`;
-
-  private inputRef?: HTMLInputElement;
-  private mask?: InputMask<any>;
 
   /** The input's size. */
   @Prop({ reflect: true }) size: NativeWaInput['size'] = 'small';
@@ -57,24 +53,19 @@ export class IrMobileInput {
   @Event({ eventName: 'mobile-input-country-change' }) mobileInputCountryChange!: EventEmitter<ICountry>;
 
   @State() selectedCountry?: ICountry;
-  @State() displayValue: string = '';
+  @State() isInvalid: boolean = false;
 
   componentWillLoad() {
     const resolvedCountry: ICountry | null = this.resolveCountry(this.countryCode) ?? null;
     if (!resolvedCountry) {
       return;
     }
+    if (this.el.hasAttribute('aria-invalid')) {
+      this.isInvalid = Boolean(JSON.parse(this.el.getAttribute('aria-invalid')));
+    }
     this.selectedCountry = resolvedCountry;
     this.countryCode = resolvedCountry?.code;
-    this.displayValue = this.value ?? '';
-  }
-
-  componentDidLoad() {
-    requestAnimationFrame(() => this.initializeMask());
-  }
-
-  disconnectedCallback() {
-    this.destroyMask();
+    this.value = this.value ?? '';
   }
 
   @Watch('countryCode')
@@ -92,29 +83,21 @@ export class IrMobileInput {
       if (this.countryCode !== next.code) {
         this.countryCode = next.code;
       }
-      this.rebuildMask();
       this.mobileInputCountryChange.emit(next);
     }
   }
 
   @Watch('value')
   protected handleValueChange(newValue: string, oldValue: string) {
-    // if (newValue === oldValue) return;
-    // if (this.mask) {
-    //   if (this.mask.unmaskedValue !== (newValue ?? '')) {
-    //     this.mask.unmaskedValue = newValue ?? '';
-    //   }
-    //   this.displayValue = this.mask.value;
-    // } else {
-    //   this.displayValue = newValue ?? '';
-    //   if (this.inputRef && this.inputRef.value !== this.displayValue) {
-    //     this.inputRef.value = this.displayValue;
-    //   }
-    // }
     if (newValue !== oldValue) {
-      if (this.mask) {
-        this.mask.value = newValue;
-      }
+      this.value = newValue ?? '';
+    }
+  }
+
+  @Watch('aria-invalid')
+  handleAriaInvalidChange(newValue: string, oldValue: string) {
+    if (newValue !== oldValue) {
+      this.isInvalid = Boolean(newValue);
     }
   }
 
@@ -122,75 +105,14 @@ export class IrMobileInput {
     if (!code) return undefined;
     return this.countries.find(country => country.code.toUpperCase() === code.toUpperCase());
   }
-
-  private initializeMask() {
-    if (!this.inputRef) return;
-    const maskConfig = this.buildMaskOptions(this.selectedCountry);
-    if (!maskConfig) {
-      this.destroyMask();
-      return;
-    }
-    this.mask = IMask(this.inputRef, maskConfig as FactoryArg);
-    if (this.value) {
-      this.mask.unmaskedValue = this.value;
-    }
-    this.displayValue = this.mask.value;
-    this.mask.on('accept', () => {
-      if (!this.mask) return;
-      const nextValue = this.mask.unmaskedValue ?? '';
-      if (nextValue !== this.value) {
-        this.value = nextValue;
-      }
-      this.displayValue = this.mask.value;
-      this.emitChange();
-    });
-  }
-
-  private rebuildMask() {
-    this.destroyMask();
-    this.initializeMask();
-  }
-
-  private destroyMask() {
-    if (this.mask) {
-      this.mask.destroy();
-      this.mask = undefined;
-    }
-    this.displayValue = this.value ?? '';
-  }
-
-  private buildMaskOptions(country?: ICountry) {
-    if (!country) return undefined;
-    const iso = country.code?.toUpperCase();
-    if (!iso) return undefined;
-    const rawMask = masks[iso];
-    if (!rawMask) return undefined;
-
-    const normalizePattern = (pattern: string) => pattern.replace(/#/g, '0');
-
-    if (Array.isArray(rawMask)) {
-      return {
-        mask: rawMask.map(pattern => ({ mask: this.selectedCountry.phone_prefix + ' ' + normalizePattern(pattern) })),
-        lazy: false,
-        placeholderChar: '_',
-      };
-    }
-
-    return {
-      mask: this.selectedCountry.phone_prefix + ' ' + normalizePattern(rawMask),
-      lazy: false,
-      placeholderChar: '_',
-    };
-  }
-
-  private emitChange() {
-    if (!this.selectedCountry) return;
-    this.mobileInputChange.emit({
-      country: this.selectedCountry,
-      value: this.value ?? '',
-      formattedValue: this.displayValue ?? '',
-    });
-  }
+  // private emitChange() {
+  //   if (!this.selectedCountry) return;
+  //   this.mobileInputChange.emit({
+  //     country: this.selectedCountry,
+  //     value: this.value ?? '',
+  //     formattedValue: this.value ?? '',
+  //   });
+  // }
 
   private handleCountrySelect = (event: CustomEvent) => {
     if (this.disabled) return;
@@ -202,19 +124,22 @@ export class IrMobileInput {
       this.selectedCountry = selected;
     }
     requestAnimationFrame(() => {
-      this.inputRef?.focus();
+      const innerInput = this.el.shadowRoot?.querySelector('ir-input')?.shadowRoot?.querySelector('input') as HTMLInputElement | undefined;
+      innerInput?.focus();
     });
   };
 
-  private handlePlainInput = (event: Event) => {
-    if (this.mask) return;
-    const nextValue = (event.target as HTMLInputElement)?.value ?? '';
-    if (nextValue !== this.value) {
-      this.value = nextValue;
-      this.displayValue = nextValue;
-      this.emitChange();
-    }
-  };
+  // private handlePlainInput = (event: Event) => {
+  //   const { value } = event.target as HTMLInputElement;
+  //   this.mobileInputChange.emit({ formattedValue: value, value, country: this.selectedCountry });
+  //   if (this.mask) return;
+  //   const nextValue = (event.target as HTMLInputElement)?.value ?? '';
+  //   if (nextValue !== this.value) {
+  //     this.value = nextValue;
+  //     this.displayValue = nextValue;
+  //     this.emitChange();
+  //   }
+  // };
 
   render() {
     const describedByIds = [this.description ? this.descriptionId : null, this.error ? this.errorId : null].filter(Boolean).join(' ') || undefined;
@@ -247,7 +172,15 @@ export class IrMobileInput {
             onwa-select={this.handleCountrySelect}
             class="mobile-input__prefix-dropdown"
           >
-            <button slot="trigger" type="button" class="mobile-input__trigger" disabled={this.disabled} aria-haspopup="listbox" aria-label="Change country calling code">
+            <button
+              aria-invalid={String(this.isInvalid && !this.selectedCountry)}
+              slot="trigger"
+              type="button"
+              class="mobile-input__trigger"
+              disabled={this.disabled}
+              aria-haspopup="listbox"
+              aria-label="Change country calling code"
+            >
               <div class="mobile-input__phone-country" style={{ marginRight: '1rem' }}>
                 {this.selectedCountry ? <img src={this.selectedCountry?.flag} alt={this.selectedCountry?.name} class="mobile-input__logo" /> : <span>Select</span>}
                 {/* <span aria-hidden="true">{this.selectedCountry?.phone_prefix}</span> */}
@@ -267,25 +200,24 @@ export class IrMobileInput {
               </wa-dropdown-item>
             ))}
           </wa-dropdown>
-          <input
-            ref={el => (this.inputRef = el)}
-            id={this.inputId}
-            class={{
-              'mobile-input__phone': true,
-              'mobile-input__phone--invalid': Boolean(this.error),
-            }}
-            name={this.name}
+          <ir-input
+            aria-invalid={String(this.isInvalid && (this.value ?? '').length < 4)}
             type="tel"
-            inputmode="tel"
-            autocomplete="tel"
-            aria-required={this.required ? 'true' : undefined}
-            aria-invalid={this.error ? 'true' : 'false'}
-            aria-describedby={describedByIds}
+            inputMode="tel"
+            autocomplete="off"
             disabled={this.disabled}
             placeholder={this.placeholder}
-            value={this.displayValue}
-            onInput={this.handlePlainInput}
-          />
+            defaultValue={this.value}
+            value={this.value}
+            class="phone__input"
+            onText-change={e => {
+              const value = e.detail;
+              this.value = value;
+              this.mobileInputChange.emit({ formattedValue: value, value, country: this.selectedCountry });
+            }}
+          >
+            {this.selectedCountry && <span slot="start">{this.selectedCountry?.phone_prefix}</span>}
+          </ir-input>
         </div>
         {this.error ? (
           <p id={this.errorId} class="mobile-input__error" role="alert">

@@ -63,6 +63,7 @@ graph TD;
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
+  ir-mobile-input --> ir-input
   igl-book-property --> igl-booking-form
   style igl-booking-form fill:#f9f,stroke:#333,stroke-width:4px
 ```

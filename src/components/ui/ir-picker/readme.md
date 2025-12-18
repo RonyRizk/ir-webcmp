@@ -33,6 +33,16 @@
 
 ## Methods
 
+### `clearInput() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 ### `close() => Promise<void>`
 
 

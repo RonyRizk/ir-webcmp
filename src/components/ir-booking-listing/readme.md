@@ -93,6 +93,7 @@ graph TD;
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
+  ir-mobile-input --> ir-input
   igl-book-property-footer --> ir-custom-button
   ir-range-picker --> ir-date-picker
   ir-booking-listing-table --> ir-booking-number-cell
@@ -244,6 +245,7 @@ graph TD;
   ir-guest-info-drawer --> ir-drawer
   ir-guest-info-drawer --> ir-guest-info-form
   ir-guest-info-drawer --> ir-custom-button
+  ir-guest-info-form --> ir-spinner
   ir-guest-info-form --> ir-validator
   ir-guest-info-form --> ir-input
   ir-guest-info-form --> ir-country-picker
