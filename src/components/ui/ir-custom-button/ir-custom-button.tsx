@@ -1,5 +1,5 @@
 import type WaButton from '@awesome.me/webawesome/dist/components/button/button';
-import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 export type NativeButton = WaButton;
 
 @Component({
@@ -8,7 +8,10 @@ export type NativeButton = WaButton;
   shadow: false,
 })
 export class IrCustomButton {
+  @Element() el: HTMLIrCustomButtonElement;
+
   @Prop() link: boolean;
+
   @Prop({ reflect: true }) iconBtn: boolean;
   /** The button's theme variant. Defaults to `neutral` if not within another element with a variant. */
   @Prop() variant: NativeButton['variant'];
@@ -133,6 +136,7 @@ export class IrCustomButton {
           form-method={this.formMethod}
           form-no-validate={this.formNoValidate}
           form-target={this.formTarget}
+          exportparts="base, start, label, end, caret, spinner"
         >
           <slot slot="start" name="start"></slot>
           <slot></slot>
