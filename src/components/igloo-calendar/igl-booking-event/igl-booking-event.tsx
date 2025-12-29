@@ -1938,6 +1938,9 @@ export class IglBookingEvent {
   //    * @returns {boolean} `true` if departure is after `check_out_till`, otherwise `false`.
   //    */
   private isDepartureAfterHotelCheckout(): boolean {
+    if (calendar_data.property.is_automatic_check_in_out) {
+      return;
+    }
     const departureTime = this.bookingEvent.DEPARTURE_TIME;
     if (!departureTime?.code) {
       return false;
