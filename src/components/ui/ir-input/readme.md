@@ -66,6 +66,7 @@
  - [ir-arrivals-filters](../../ir-arrivals/ir-arrivals-filters)
  - [ir-booking-company-form](../../ir-booking-company-dialog/ir-booking-company-form)
  - [ir-custom-date-picker](../../ir-custom-date-picker)
+ - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
@@ -85,6 +86,7 @@ graph TD;
   ir-arrivals-filters --> ir-input
   ir-booking-company-form --> ir-input
   ir-custom-date-picker --> ir-input
+  ir-date-select --> ir-input
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
   ir-guest-info-form --> ir-input

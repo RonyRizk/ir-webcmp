@@ -31,6 +31,7 @@ export class IglCalHeader {
   private roomsList: { [key: string]: any }[] = [];
   private toBeAssignedService = new ToBeAssignedService();
   dateRef: HTMLIrButtonElement;
+  dateSelectRef: HTMLIrDateSelectElement;
   componentWillLoad() {
     try {
       this.initializeRoomsList();
@@ -212,7 +213,7 @@ export class IglCalHeader {
                   </ir-custom-button>
                 </Fragment>
               )}
-              <ir-date-picker
+              {/* <ir-date-picker
                 minDate={moment().add(-2, 'months').startOf('month').format('YYYY-MM-DD')}
                 // autoApply
                 // singleDatePicker
@@ -235,14 +236,45 @@ export class IglCalHeader {
                     aria-label={locales.entries.Lcz_Navigate}
                   ></wa-icon>
                 </ir-custom-button>
-              </ir-date-picker>
+              </ir-date-picker> */}
               <wa-tooltip for="fd-dates-navigation_btn">{locales.entries.Lcz_Navigate}</wa-tooltip>
-              <Fragment>
+              <ir-date-select
+                minDate={moment().add(-2, 'months').startOf('month').format('YYYY-MM-DD')}
+                onDateChanged={evt => {
+                  console.log('evt', evt);
+                  this.handleDateSelect(evt);
+                }}
+                ref={el => (this.dateSelectRef = el)}
+              >
+                <ir-custom-button slot="trigger" id="fd-dates-navigation_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('calendar')}>
+                  <wa-icon
+                    style={{ fontSize: '1.5rem' }}
+                    name="calendar"
+                    variant="regular"
+                    label={locales.entries.Lcz_Navigate}
+                    aria-label={locales.entries.Lcz_Navigate}
+                  ></wa-icon>
+                </ir-custom-button>
+                <div class="fd-dates__actions">
+                  <wa-divider></wa-divider>
+                  <ir-custom-button
+                    variant="neutral"
+                    appearance="outlined"
+                    onClickHandler={() => {
+                      this.handleOptionEvent('gotoToday');
+                      this.dateSelectRef.closeDatePicker();
+                    }}
+                  >
+                    Today
+                  </ir-custom-button>
+                </div>
+              </ir-date-select>
+              {/* <Fragment>
                 <wa-tooltip for="fd-today-navigation_btn">{locales.entries.Lcz_Today}</wa-tooltip>
                 <ir-custom-button slot="trigger" id="fd-today-navigation_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('gotoToday')}>
                   <wa-icon style={{ fontSize: '1.5rem' }} name="clock" variant="regular" label={locales.entries.Lcz_Today} aria-label={locales.entries.Lcz_Today}></wa-icon>
                 </ir-custom-button>
-              </Fragment>
+              </Fragment> */}
               <Fragment>
                 <wa-tooltip for="fd-new-booking_btn">{locales.entries.Lcz_CreateNewBooking}</wa-tooltip>
                 <ir-custom-button

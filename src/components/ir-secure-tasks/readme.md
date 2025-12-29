@@ -292,9 +292,11 @@ graph TD;
   igl-legends --> ir-success-loader
   ir-success-loader --> ir-icons
   igl-cal-header --> ir-custom-button
-  igl-cal-header --> ir-date-picker
+  igl-cal-header --> ir-date-select
   igl-cal-header --> ir-picker
   igl-cal-header --> ir-picker-item
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> ir-modal

@@ -1,0 +1,53 @@
+@import url('../../../../assets/webawesome/component/host.css');
+:host {
+  display: flex;
+  --arrow-size: 0.375rem;
+  --max-width: 25rem;
+  --show-duration: 100ms;
+  --hide-duration: 100ms;
+  /* Internal calculated properties */
+  --arrow-diagonal-size: calc((var(--arrow-size) * sin(45deg)));
+  /** Defaults for inherited CSS properties */
+  font-size: var(--wa-font-size-m);
+  line-height: var(--wa-line-height-normal);
+  text-align: start;
+  white-space: normal;
+}
+.ir-date-select__control {
+  width: 100%;
+  display: flex;
+}
+.ir-date-select__calendar {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: var(--max-width);
+  padding: var(--wa-space-l);
+  background-color: var(--wa-color-surface-default);
+  border: var(--wa-panel-border-width) solid var(--wa-color-surface-border);
+  border-radius: var(--wa-panel-border-radius);
+  border-style: var(--wa-panel-border-style);
+  box-shadow: var(--wa-shadow-l);
+  color: var(--wa-color-text-normal);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ir-date-select__popup {
+  --arrow-size: inherit;
+  --show-duration: inherit;
+  --hide-duration: inherit;
+  pointer-events: auto;
+}
+.ir-date-select__popup::part(arrow) {
+  background-color: var(--wa-color-surface-default);
+  border-top: none;
+  border-left: none;
+  border-bottom: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
+  border-right: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
+  box-shadow: none;
+}
+.ir-date-select__control[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}

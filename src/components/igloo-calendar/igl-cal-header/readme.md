@@ -35,7 +35,7 @@
 ### Depends on
 
 - [ir-custom-button](../../ui/ir-custom-button)
-- [ir-date-picker](../../ui/ir-date-picker)
+- [ir-date-select](../../ui/date-picker/ir-date-select)
 - [ir-picker](../../ui/ir-picker)
 - [ir-picker-item](../../ui/ir-picker/ir-picker-item)
 
@@ -43,9 +43,11 @@
 ```mermaid
 graph TD;
   igl-cal-header --> ir-custom-button
-  igl-cal-header --> ir-date-picker
+  igl-cal-header --> ir-date-select
   igl-cal-header --> ir-picker
   igl-cal-header --> ir-picker-item
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igloo-calendar --> igl-cal-header
   style igl-cal-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

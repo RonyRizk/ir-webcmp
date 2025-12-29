@@ -71,6 +71,7 @@ export class IrArrivalsTable {
   private renderRow(booking: Booking, room: Booking['rooms'][number], index: number, showAction: boolean) {
     const rowKey = `${booking.booking_nbr}-${room?.identifier ?? index}`;
     const isOverdueCheckIn = moment(room.from_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'), 'dates');
+
     return (
       <tr class="ir-table-row" key={rowKey}>
         <td class="sticky-column">
@@ -106,7 +107,9 @@ export class IrArrivalsTable {
         </td>
         <td>
           <div class="arrivals-table__actions-cell">
-            {showAction ? (
+            {!room.unit ? (
+              <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>Not assigned</span>
+            ) : showAction ? (
               <ir-actions-cell
                 buttons={isOverdueCheckIn ? ['overdue_check_in'] : ['check_in']}
                 onIrAction={e => {

@@ -180,7 +180,7 @@ function splitBookingsByStatus(bookings: Booking[]) {
 }
 
 function isNeedsCheckOut(room: Room) {
-  return canCheckout({ to_date: room.to_date, inOutCode: room.in_out.code });
+  return canCheckout({ to_date: room.to_date, inOutCode: room.in_out.code, skipAutoCheckout: true });
 }
 
 function isOut(room: Room) {

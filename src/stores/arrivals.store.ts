@@ -167,9 +167,9 @@ function splitBookingsByStatus(bookings: Booking[]) {
 }
 
 function isNeedsCheckIn(room: Room) {
-  if (!room.unit) {
-    return false;
-  }
+  // if (!room.unit) {
+  //   return false;
+  // }
   return canCheckIn({
     from_date: room.from_date,
     to_date: room.to_date,
