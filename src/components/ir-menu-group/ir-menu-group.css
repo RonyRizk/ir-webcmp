@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+.menu-group__details::part(summary) {
+  width: 100%;
+}
+.menu-group__details::part(header) {
+  transition: color var(--wa-transition-normal, 150ms ease);
+  transition-property: background, border, box-shadow, color;
+  transition-duration: var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
+}
+.menu-group__details::part(header),
+.menu-group__details::part(content) {
+  padding: 0;
+  border-radius: 0;
+  padding: 0 0.5rem;
+}
+.menu-group__details::part(header):hover {
+  color: var(--wa-color-text-normal);
+  background-color: var(--wa-color-neutral-fill-quiet);
+}
+.menu-group__details::part(header):active {
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active));
+}
+
+.menu-group__details::part(content) {
+  display: flex;
+  flex-direction: column;
+  border-inline-start: 1px solid var(--wa-color-surface-border);
+  margin-inline-start: 1.5rem;
+}

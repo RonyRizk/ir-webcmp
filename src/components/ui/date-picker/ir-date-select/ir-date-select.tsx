@@ -245,6 +245,7 @@ export class IrDateSelect {
               <slot name="trigger">
                 <ir-input
                   disabled={this.disabled}
+                  class="ir-date-select__input"
                   placeholder={this.placeholder}
                   withClear={this.withClear}
                   tabIndex={!this.customPicker && !this.disabled ? 0 : undefined}
@@ -295,7 +296,10 @@ export class IrDateSelect {
                 e.stopPropagation();
                 this.currentDate = e.detail?.start;
                 this.dateChanged.emit(e.detail);
-                this.togglePicker();
+                const shouldClose = this.autoClose && (!this.range || (this.range && (e.detail.dates as any).length > 1));
+                if (shouldClose) {
+                  this.togglePicker();
+                }
               }}
             />
             <slot></slot>

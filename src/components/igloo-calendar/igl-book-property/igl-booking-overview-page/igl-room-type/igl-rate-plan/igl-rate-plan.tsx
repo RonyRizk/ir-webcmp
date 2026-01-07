@@ -21,7 +21,7 @@ export class IglRatePlan {
   @Prop() visibleInventory!: IRatePlanSelection;
 
   @Event() buttonClicked!: EventEmitter<{ [key: string]: any }>;
-
+  @Event() bookingStepChange!: EventEmitter<{ direction: 'next' | 'prev' }>;
   // Determine if the form inputs should be disabled
   private disableForm(): boolean {
     const { bookingType, shouldBeDisabled, ratePlan, visibleInventory } = this;
@@ -70,6 +70,7 @@ export class IglRatePlan {
       resetReserved();
     }
     this.reserveRoom();
+    this.bookingStepChange.emit({ direction: 'next' });
     this.buttonClicked.emit({ key: 'next' });
   }
 
@@ -97,7 +98,8 @@ export class IglRatePlan {
       return visibleInventory.rp_amount.toString();
     }
     const { selected_variation, view_mode } = visibleInventory;
-    const amount = view_mode === '001' ? selected_variation?.discounted_gross_amount : selected_variation?.amount_per_night_gross;
+    // const amount = view_mode === '001' ? selected_variation?.discounted_gross_amount : selected_variation?.amount_per_night_gross;
+    const amount = view_mode === '001' ? selected_variation?.discounted_amount : selected_variation?.amount_per_night;
     return amount?.toString() || '';
   }
 
@@ -324,7 +326,8 @@ export class IglRatePlan {
                       this.bookProperty();
                     }}
                   >
-                    {visibleInventory.reserved === 1 ? locales.entries.Lcz_Current : locales.entries.Lcz_Select}
+                    {/* {visibleInventory.reserved === 1 ? locales.entries.Lcz_Current : locales.entries.Lcz_Select} */}
+                    {locales.entries.Lcz_Select}
                   </ir-custom-button>
                 </Fragment>
               )}

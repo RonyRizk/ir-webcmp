@@ -1,5 +1,5 @@
 import WaInput from '@awesome.me/webawesome/dist/components/input/input';
-import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+import { AttachInternals, Component, Element, Event, EventEmitter, Host, Method, Prop, State, Watch, h } from '@stencil/core';
 import { masks } from './masks';
 import IMask, { FactoryArg, InputMask } from 'imask';
 
@@ -12,8 +12,11 @@ export type NativeWaInput = WaInput;
   tag: 'ir-input',
   styleUrl: 'ir-input.css',
   shadow: true,
+  formAssociated: true,
 })
 export class IrInput {
+  @AttachInternals() internals: ElementInternals;
+
   @Element() el: HTMLIrInputElement;
 
   @Prop() name: string;
@@ -221,6 +224,7 @@ export class IrInput {
     if (!this.mask) {
       this.value = nextValue ?? '';
     }
+    this.internals.setFormValue(nextValue ?? '');
     this.textChange.emit(nextValue ?? '');
   };
 
@@ -352,7 +356,16 @@ export class IrInput {
   private hasSlot(name: string): boolean {
     return !!this.el.querySelector(`[slot="${name}"]`);
   }
+  @Method()
+  async focusInput() {
+    console.log(this.inputRef);
+    this.inputRef?.focus();
+  }
 
+  @Method()
+  async blurInput() {
+    this.inputRef?.blur();
+  }
   render() {
     let displayValue = this.value;
     if (this._mask && this.returnMaskedValue) {
@@ -403,7 +416,7 @@ export class IrInput {
           onwa-clear={this.handleClear}
           onblur={this.handleBlur}
           onfocus={this.handleFocus}
-          exportparts="base"
+          exportparts="base, hint, label, input, start, end, clear-button, password-toggle-button"
         >
           {this.slotState.get('label') && <slot name="label" slot="label"></slot>}
           {this.slotState.get('start') && <slot name="start" slot="start"></slot>}

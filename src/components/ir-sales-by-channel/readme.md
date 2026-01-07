@@ -40,6 +40,8 @@ graph TD;
   ir-sales-by-channel --> ir-button
   ir-sales-by-channel --> ir-sales-by-channel-filters
   ir-sales-by-channel --> ir-sales-by-channel-table
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner

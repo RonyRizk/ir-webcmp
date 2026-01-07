@@ -2,8 +2,8 @@ import { Component, h, State, Event, EventEmitter, Prop, Watch } from '@stencil/
 import { IToast } from '@components/ui/ir-toast/toast';
 import locales from '@/stores/locales.store';
 import { calculateDaysBetweenDates } from '@/utils/booking';
-import moment from 'moment';
-
+import moment, { Moment } from 'moment';
+export type DateRangeChangeEvent = { checkIn: Moment; checkOut: Moment };
 @Component({
   tag: 'igl-date-range',
   styleUrl: 'igl-date-range.css',
@@ -18,15 +18,18 @@ export class IglDateRange {
   @Prop() maxDate: string;
   @Prop() withDateDifference: boolean = true;
   @Prop() variant: 'booking' | 'default' = 'default';
+  @Prop() hint: string;
 
   @State() renderAgain: boolean = false;
 
   @Event() dateSelectEvent: EventEmitter<{ [key: string]: any }>;
+  @Event({ composed: true, cancelable: true, bubbles: true }) dateRangeChange: EventEmitter<DateRangeChangeEvent>;
   @Event() toast: EventEmitter<IToast>;
 
   private totalNights: number = 0;
   @State() fromDate: Date = moment().toDate();
   @State() toDate: Date = moment().add(1, 'day').toDate();
+  @State() isInvalid: string;
 
   componentWillLoad() {
     this.initializeDates();
@@ -75,6 +78,10 @@ export class IglDateRange {
       toDateStr: end.format('DD MMM YYYY'),
       dateDifference: this.totalNights,
     });
+    this.dateRangeChange.emit({
+      checkIn: start,
+      checkOut: end,
+    });
 
     this.renderAgain = !this.renderAgain;
   }
@@ -105,6 +112,10 @@ export class IglDateRange {
     const toDate = moment(this.toDate).format('YYYY-MM-DD');
     return [fromDate, toDate];
   }
+  @Watch('aria-invalid')
+  handleAriaInvalidChange(newValue) {
+    this.isInvalid = newValue;
+  }
   render() {
     const showNights = this.variant === 'booking' && this.withDateDifference;
     return (
@@ -119,20 +130,22 @@ export class IglDateRange {
       //       minDate={this.minDate}
       //       autoApply
       //       data-state={this.disabled ? 'disabled' : 'active'}
-      //       onDateChanged={evt => {
+      //       onDateRangeChange={evt => {
       //         this.handleDateChange(evt);
       //       }}
       //     ></ir-date-range>
       //     {this.renderDateSummary(showNights)}
       //   </div>
       // </Host>
-      <ir-custom-date-picker
+      <ir-date-select
         disabled={this.disabled}
         class="custom-picker"
         minDate={this.minDate}
+        aria-invalid={this.isInvalid}
         maxDate={this.maxDate}
         onDateChanged={e => this.handleDateChange(e)}
         range
+        // hint={this.hint}
         dates={this.dates}
       >
         <wa-icon slot="start" variant="regular" name="calendar"></wa-icon>
@@ -141,7 +154,7 @@ export class IglDateRange {
             {this.totalNights + (this.totalNights > 1 ? ` ${locales.entries.Lcz_Nights}` : ` ${locales.entries.Lcz_Night}`)}
           </span>
         )}
-      </ir-custom-date-picker>
+      </ir-date-select>
     );
   }
 }

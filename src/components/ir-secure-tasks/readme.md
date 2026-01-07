@@ -1,7 +1,5 @@
 # ir-secure-tasks
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -64,6 +62,8 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-hk-tasks --> ir-loading-screen
   ir-hk-tasks --> ir-toast
   ir-hk-tasks --> ir-interceptor
@@ -116,7 +116,7 @@ graph TD;
   ir-booking-details --> ir-billing-drawer
   ir-booking-details --> ir-guest-info-drawer
   ir-booking-details --> ir-payment-folio
-  ir-booking-details --> igl-book-property
+  ir-booking-details --> ir-booking-editor-drawer
   ir-room --> ir-custom-button
   ir-room --> ir-date-view
   ir-room --> ir-unit-tag
@@ -158,6 +158,7 @@ graph TD;
   ir-booking-header --> ir-popover
   ir-booking-header --> ir-dialog
   ir-pms-logs --> ir-spinner
+  ir-pms-logs --> ir-custom-button
   ir-events-log --> ir-spinner
   ir-reservation-information --> ir-label
   ir-reservation-information --> ir-custom-button
@@ -233,37 +234,37 @@ graph TD;
   ir-payment-folio-form --> ir-custom-date-picker
   ir-payment-folio-form --> ir-validator
   ir-payment-folio-form --> ir-input
-  igl-book-property --> igl-block-dates-view
-  igl-book-property --> ir-spinner
-  igl-book-property --> ir-custom-button
-  igl-book-property --> igl-booking-overview-page
-  igl-book-property --> igl-booking-form
-  igl-book-property --> ir-button
-  igl-book-property --> igl-book-property-footer
-  igl-block-dates-view --> ir-date-view
-  igl-booking-overview-page --> igl-book-property-header
-  igl-booking-overview-page --> igl-room-type
-  igl-book-property-header --> ir-picker
-  igl-book-property-header --> ir-picker-item
-  igl-book-property-header --> ir-validator
-  igl-book-property-header --> igl-date-range
-  igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-custom-date-picker
+  ir-booking-editor-drawer --> ir-custom-button
+  ir-booking-editor-drawer --> ir-drawer
+  ir-booking-editor-drawer --> ir-booking-editor
+  ir-booking-editor --> ir-spinner
+  ir-booking-editor --> ir-interceptor
+  ir-booking-editor --> ir-booking-editor-header
+  ir-booking-editor --> igl-room-type
+  ir-booking-editor --> ir-booking-editor-form
+  ir-booking-editor-header --> ir-validator
+  ir-booking-editor-header --> ir-picker
+  ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> igl-date-range
+  ir-booking-editor-header --> ir-custom-button
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
-  igl-booking-form --> ir-date-view
-  igl-booking-form --> igl-application-info
-  igl-booking-form --> igl-property-booked-by
+  ir-booking-editor-form --> ir-date-view
+  ir-booking-editor-form --> igl-application-info
+  ir-booking-editor-form --> ir-picker
+  ir-booking-editor-form --> ir-picker-item
+  ir-booking-editor-form --> ir-custom-button
+  ir-booking-editor-form --> ir-booking-editor-guest-form
   igl-application-info --> ir-validator
   igl-application-info --> ir-input
-  igl-property-booked-by --> ir-picker
-  igl-property-booked-by --> ir-picker-item
-  igl-property-booked-by --> ir-validator
-  igl-property-booked-by --> ir-input
-  igl-property-booked-by --> ir-country-picker
-  igl-property-booked-by --> ir-mobile-input
-  igl-book-property-footer --> ir-custom-button
+  ir-booking-editor-guest-form --> ir-input
+  ir-booking-editor-guest-form --> ir-validator
+  ir-booking-editor-guest-form --> ir-country-picker
+  ir-booking-editor-guest-form --> ir-mobile-input
   igloo-calendar --> ir-toast
   igloo-calendar --> ir-interceptor
   igloo-calendar --> igl-to-be-assigned
@@ -272,34 +273,32 @@ graph TD;
   igloo-calendar --> igl-cal-body
   igloo-calendar --> igl-cal-footer
   igloo-calendar --> ir-loading-screen
-  igloo-calendar --> igl-book-property
   igloo-calendar --> ir-sidebar
   igloo-calendar --> ir-room-nights
   igloo-calendar --> igl-split-booking
   igloo-calendar --> igl-bulk-operations
   igloo-calendar --> ir-booking-details-drawer
   igloo-calendar --> ir-room-guests
+  igloo-calendar --> ir-reallocation-drawer
   igloo-calendar --> igl-reallocation-dialog
   igloo-calendar --> ir-modal
   igloo-calendar --> ir-checkout-dialog
   igloo-calendar --> ir-invoice
+  igloo-calendar --> ir-booking-editor-drawer
+  igloo-calendar --> igl-blocked-date-drawer
   igl-to-be-assigned --> igl-tba-category-view
-  igl-to-be-assigned --> ir-button
+  igl-to-be-assigned --> ir-custom-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
-  igl-legends --> ir-new-badge
-  igl-legends --> ir-input-text
+  igl-legends --> ir-custom-button
   igl-legends --> ir-success-loader
-  ir-success-loader --> ir-icons
   igl-cal-header --> ir-custom-button
   igl-cal-header --> ir-date-select
   igl-cal-header --> ir-picker
   igl-cal-header --> ir-picker-item
-  ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
-  igl-cal-body --> ir-modal
+  igl-cal-body --> igl-housekeeping-dialog
   igl-booking-event --> igl-booking-event-hover
   igl-booking-event-hover --> ir-dropdown
   igl-booking-event-hover --> ir-icons
@@ -309,6 +308,9 @@ graph TD;
   igl-booking-event-hover --> ir-custom-button
   igl-booking-event-hover --> igl-block-dates-view
   ir-dropdown --> ir-icons
+  igl-block-dates-view --> ir-date-view
+  igl-housekeeping-dialog --> ir-dialog
+  igl-housekeeping-dialog --> ir-custom-button
   igl-cal-footer --> ir-new-badge
   ir-room-nights --> ir-price-input
   ir-room-nights --> ir-loading-screen
@@ -334,8 +336,18 @@ graph TD;
   igl-bulk-block --> ir-date-picker
   ir-booking-details-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-booking-details
+  ir-reallocation-drawer --> ir-drawer
+  ir-reallocation-drawer --> ir-reallocation-form
+  ir-reallocation-drawer --> ir-custom-button
+  ir-reallocation-form --> ir-spinner
+  ir-reallocation-form --> ir-date-view
+  ir-reallocation-form --> ir-empty-state
+  ir-reallocation-form --> ir-validator
   igl-reallocation-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-custom-button
+  igl-blocked-date-drawer --> ir-drawer
+  igl-blocked-date-drawer --> igl-block-dates-view
+  igl-blocked-date-drawer --> ir-custom-button
   ir-housekeeping --> ir-loading-screen
   ir-housekeeping --> ir-interceptor
   ir-housekeeping --> ir-toast
@@ -444,13 +456,12 @@ graph TD;
   ir-booking-listing --> ir-booking-details-drawer
   ir-booking-listing --> ir-guest-info-drawer
   ir-booking-listing --> ir-payment-folio
-  ir-listing-header --> igl-book-property-container
-  ir-listing-header --> ir-custom-button
+  ir-listing-header --> ir-booking-new-form
   ir-listing-header --> ir-input
   ir-listing-header --> ir-range-picker
-  igl-book-property-container --> ir-toast
-  igl-book-property-container --> ir-interceptor
-  igl-book-property-container --> igl-book-property
+  ir-listing-header --> ir-custom-button
+  ir-booking-new-form --> ir-custom-button
+  ir-booking-new-form --> ir-booking-editor-drawer
   ir-booking-listing-table --> ir-booking-number-cell
   ir-booking-listing-table --> ir-booked-on-cell
   ir-booking-listing-table --> ir-booked-by-cell

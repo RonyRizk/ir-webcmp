@@ -53,6 +53,8 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-title --> ir-icon
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons

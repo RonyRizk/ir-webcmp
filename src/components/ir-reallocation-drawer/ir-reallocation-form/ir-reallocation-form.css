@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  height: 100%;
+  color: var(--ir-text-color, #1f2a37);
+  font-family: var(--ir-font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+}
+
+.reallocation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.booking-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rateplan-details {
+  margin: 0;
+  font-weight: 500;
+  color: var(--wa-color-text-quiet, #4b5563);
+}
+.rateplan-details-unit {
+  font-weight: 700;
+  color: var(--wa-color-text-normal);
+}
+
+.date-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.date-picker-row .ir-custom-date-picker {
+  flex: 1 1 220px;
+}
+
+.error-message {
+  margin: 0;
+  margin-top: 0.75rem;
+  color: var(--ir-error-color, #c0392b);
+  font-size: 0.95rem;
+}
+
+.room-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* margin-top: 0.75rem; */
+}
+.arrow-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.choice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.room-type-name {
+  font-weight: 600;
+  color: var(--ir-heading-color, #111827);
+}
+
+.physical-room {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  padding-inline-start: 1rem;
+}
+.physical-room::part(label) {
+  display: flex;
+  align-items: center;
+}
+.physical-room + .physical-room {
+  margin-top: 0.5rem;
+}
+
+.physical-room--last {
+  margin-bottom: 0.25rem;
+}
+
+.physical-room wa-select {
+  margin-left: 1rem;
+  min-width: 220px;
+}
+.custom-date-picker {
+  max-width: 200px;
+}
+.room-type-row {
+  margin-bottom: 0.5rem;
+}

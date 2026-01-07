@@ -27,17 +27,14 @@
 
 ### Depends on
 
-- [ir-new-badge](../../ir-new-badge)
-- [ir-input-text](../../ui/ir-input-text)
+- [ir-custom-button](../../ui/ir-custom-button)
 - [ir-success-loader](../../ui/ir-success-loader)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-legends --> ir-new-badge
-  igl-legends --> ir-input-text
+  igl-legends --> ir-custom-button
   igl-legends --> ir-success-loader
-  ir-success-loader --> ir-icons
   igloo-calendar --> igl-legends
   style igl-legends fill:#f9f,stroke:#333,stroke-width:4px
 ```

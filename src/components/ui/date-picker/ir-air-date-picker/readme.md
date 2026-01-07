@@ -34,26 +34,16 @@
 
 ## Events
 
-| Event             | Description                                                                          | Type                                           |
-| ----------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| `dateChanged`     | Emitted when the selected date changes. Returns the selected date as Moment objects. | `CustomEvent<{ start: Moment; end: Moment; }>` |
-| `datePickerBlur`  | Emitted when the date picker loses focus or is closed.                               | `CustomEvent<void>`                            |
-| `datePickerFocus` | Emitted when the date picker gains focus or is opened.                               | `CustomEvent<void>`                            |
+| Event             | Description                                                                          | Type                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `dateChanged`     | Emitted when the selected date changes. Returns the selected date as Moment objects. | `CustomEvent<{ start: Moment; end: Moment; dates: Date \| Date[]; }>` |
+| `datePickerBlur`  | Emitted when the date picker loses focus or is closed.                               | `CustomEvent<void>`                                                   |
+| `datePickerFocus` | Emitted when the date picker gains focus or is opened.                               | `CustomEvent<void>`                                                   |
 
 
 ## Methods
 
 ### `clearDatePicker() => Promise<void>`
-
-
-
-#### Returns
-
-Type: `Promise<void>`
-
-
-
-### `openDatePicker() => Promise<void>`
 
 
 

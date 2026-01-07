@@ -340,6 +340,7 @@ export class IglBookingEventHover {
     let data = roomData ? roomData : this.bookingEvent;
     data.event_type = eventType;
     data.TITLE = this.renderTitle(eventType, roomInfo);
+    data.IDENTIFIER = this.bookingEvent.IDENTIFIER;
 
     if (['003', '002', '004'].includes(this.bookingEvent.STATUS_CODE)) {
       data.roomsInfo = [roomInfo.ROOMS_INFO];
@@ -434,49 +435,51 @@ export class IglBookingEventHover {
             <p class={'p-0 m-0'}>{!this.bookingEvent.is_direct ? this.bookingEvent.channel_booking_nbr : this.bookingEvent.BOOKING_NUMBER}</p>
           </div>
           <div class="pr-0  text-right d-flex align-items-center" style={{ gap: '0.5rem' }}>
-            <ir-dropdown
-              caret={false}
-              onOptionChange={async e => {
-                const newBookingColor = e.detail === 'none' ? null : calendar_data.property.calendar_extra?.booking_colors.find(c => c.color === e.detail);
-                await this.propertyService.setRoomCalendarExtra({
-                  property_id: calendar_data.property.id,
-                  room_identifier: this.bookingEvent.IDENTIFIER,
-                  value: JSON.stringify({
-                    booking_color: newBookingColor,
-                  }),
-                });
-                this.bookingColor = newBookingColor;
-              }}
-              style={{ '--ir-dropdown-menu-min-width': 'fit-content', 'width': '1.5rem' }}
-            >
-              <button class="booking-event-hover__color-picker-trigger" slot="trigger">
-                {this.bookingColor ? (
-                  <div style={{ height: '1rem', width: '1rem', background: this.bookingColor?.color, borderRadius: '0.21rem' }}></div>
-                ) : (
-                  <ir-icons
-                    class="p-0 m-0 d-flex align-items-center"
-                    style={{
-                      '--icon-size': '1rem',
-                      'height': '1rem',
-                      'width': '1rem',
-                      'background': this.baseColor,
-                      'color': 'white',
-                      'borderRadius': '0.21rem',
-                      'padding': '0.25rem',
-                    }}
-                    name="ban"
-                  ></ir-icons>
-                )}
-              </button>
-              <ir-dropdown-item value="none">
-                <ir-icons class="p-0 m-0 d-flex align-items-center" style={{ '--icon-size': '1rem', 'height': '1rem', 'width': '1rem' }} name="ban"></ir-icons>
-              </ir-dropdown-item>
-              {calendar_data.property.calendar_extra?.booking_colors.map(s => (
-                <ir-dropdown-item value={s.color}>
-                  <div style={{ height: '1rem', width: '1rem', borderRadius: '0.21rem', background: s.color }}></div>
+            {this.bookingEvent?.STATUS !== 'PENDING-CONFIRMATION' && (
+              <ir-dropdown
+                caret={false}
+                onOptionChange={async e => {
+                  const newBookingColor = e.detail === 'none' ? null : calendar_data.property.calendar_extra?.booking_colors.find(c => c.color === e.detail);
+                  await this.propertyService.setRoomCalendarExtra({
+                    property_id: calendar_data.property.id,
+                    room_identifier: this.bookingEvent.IDENTIFIER,
+                    value: JSON.stringify({
+                      booking_color: newBookingColor,
+                    }),
+                  });
+                  this.bookingColor = newBookingColor;
+                }}
+                style={{ '--ir-dropdown-menu-min-width': 'fit-content', 'width': '1.5rem' }}
+              >
+                <button class="booking-event-hover__color-picker-trigger" slot="trigger">
+                  {this.bookingColor ? (
+                    <div style={{ height: '1rem', width: '1rem', background: this.bookingColor?.color, borderRadius: '0.21rem' }}></div>
+                  ) : (
+                    <ir-icons
+                      class="p-0 m-0 d-flex align-items-center"
+                      style={{
+                        '--icon-size': '1rem',
+                        'height': '1rem',
+                        'width': '1rem',
+                        'background': this.baseColor,
+                        'color': 'white',
+                        'borderRadius': '0.21rem',
+                        'padding': '0.25rem',
+                      }}
+                      name="ban"
+                    ></ir-icons>
+                  )}
+                </button>
+                <ir-dropdown-item value="none">
+                  <ir-icons class="p-0 m-0 d-flex align-items-center" style={{ '--icon-size': '1rem', 'height': '1rem', 'width': '1rem' }} name="ban"></ir-icons>
                 </ir-dropdown-item>
-              ))}
-            </ir-dropdown>
+                {calendar_data.property.calendar_extra?.booking_colors.map(s => (
+                  <ir-dropdown-item value={s.color}>
+                    <div style={{ height: '1rem', width: '1rem', borderRadius: '0.21rem', background: s.color }}></div>
+                  </ir-dropdown-item>
+                ))}
+              </ir-dropdown>
+            )}
             {formatAmount(this.currency.symbol, this.getTotalPrice())}
           </div>
         </div>
@@ -540,7 +543,10 @@ export class IglBookingEventHover {
               size="sm"
             ></ir-button> */}
             <ir-custom-button style={{ width: '100%' }} variant="brand" onClickHandler={() => this.handleEditBooking()}>
-              {locales.entries.Lcz_Edit}
+              Edit
+            </ir-custom-button>
+            <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleReallocationBooking()}>
+              Reassign
             </ir-custom-button>
             {this.bookingEvent.is_direct && this.bookingEvent.IS_EDITABLE && !this.hideButtons && (
               <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleAddRoom()}>
@@ -580,6 +586,13 @@ export class IglBookingEventHover {
         </div>
       </div>
     );
+  }
+  private handleReallocationBooking(): void {
+    this.hideBubble();
+    this.openCalendarSidebar.emit({
+      type: 'reallocate-drawer',
+      payload: { booking: this.bookingEvent.base_booking, pool: this.bookingEvent.POOL, identifier: this.bookingEvent.IDENTIFIER },
+    });
   }
   private handleSplitBooking(): void {
     this.hideBubble();

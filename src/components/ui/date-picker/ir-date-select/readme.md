@@ -89,6 +89,7 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-cal-header](../../../igloo-calendar/igl-cal-header)
+ - [igl-date-range](../../../igloo-calendar/igl-date-range)
 
 ### Depends on
 
@@ -101,6 +102,7 @@ graph TD;
   ir-date-select --> ir-input
   ir-date-select --> ir-air-date-picker
   igl-cal-header --> ir-date-select
+  igl-date-range --> ir-date-select
   style ir-date-select fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

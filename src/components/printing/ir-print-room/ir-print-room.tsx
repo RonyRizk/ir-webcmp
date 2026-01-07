@@ -1,6 +1,6 @@
 import { Booking, Property } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
-import { Component, Prop, h } from '@stencil/core';
+import { Component, Fragment, Prop, h } from '@stencil/core';
 import moment from 'moment';
 
 @Component({
@@ -106,22 +106,34 @@ export class IrPrintRoom {
     }
 
     // Direct booking taxes
-    const filteredData = this.property?.taxes?.filter(tx => tx.pct > 0);
+    const filteredData = this.property?.taxes?.filter(tx => tx.pct > 0 && tx.is_exlusive);
 
-    return filteredData?.map((d, index) => {
-      const amount = (this.room.total * d.pct) / 100;
+    return (
+      <Fragment>
+        {filteredData?.map((d, index) => {
+          const amount = (this.room.total * d.pct) / 100;
 
-      return (
-        <div key={`direct_room_${d.name}_${index}`} class="ir-print-room__tax-row">
-          <p class="ir-print-room__tax-label">
-            {d.is_exlusive ? 'Excluding' : 'Including'} {d.name}
-          </p>
-          <p class="ir-print-room__tax-amount">
-            {d.pct}%: {formatAmount(this.currency, amount)}
-          </p>
-        </div>
-      );
-    });
+          return (
+            <div key={`direct_room_${d.name}_${index}`} class="ir-print-room__tax-row">
+              <p class="ir-print-room__tax-label">
+                {d.is_exlusive ? 'Excluding' : 'Including'} {d.name}
+              </p>
+              <p class="ir-print-room__tax-amount">
+                {d.pct}%: {formatAmount(this.currency, amount)}
+              </p>
+            </div>
+          );
+        })}
+        {this.room.inclusive_taxes?.CALCULATED_INCLUSIVE_TAXES?.map((d, index) => (
+          <div key={`direct_room_${d.TAX_NAME}_${index}`} class="ir-print-room__tax-row">
+            <p class="ir-print-room__tax-label">Including {d.TAX_NAME}</p>
+            <p class="ir-print-room__tax-amount">
+              {d.TAX_PCT * 100}%: {formatAmount(this.currency, d.CALCULATED_VALUE)}
+            </p>
+          </div>
+        ))}
+      </Fragment>
+    );
   }
   render() {
     const { room, booking, property, currency, idx } = this;

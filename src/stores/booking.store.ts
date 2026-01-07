@@ -1,9 +1,21 @@
 import { Booking, Guest } from '@/models/booking.dto';
+import { ICountry, ISetupEntries } from '@/models/IBooking';
 import { BookingSource, TEventType } from '@/models/igl-book-property';
 import { BeddingSetup, ISmokingOption, RatePlan, RoomType, Variation } from '@/models/property';
+import { BookingService } from '@/services/booking-service/booking.service';
+import { calculateDaysBetweenDates } from '@/utils/booking';
 import { createStore } from '@stencil/store';
 import moment, { Moment } from 'moment';
+import calendar_data from './calendar-data';
+import VariationService from '@/services/variation.service';
 
+// -----------------------------------------------------------------------------
+// Type Definitions
+// -----------------------------------------------------------------------------
+
+/**
+ * Shape of a single rate plan selection for a specific room type.
+ */
 export interface IRatePlanSelection {
   reserved: number;
   visibleInventory: number;
@@ -47,7 +59,7 @@ export interface ISelectedVariation {
   variation: Variation;
   state: 'default' | 'modified';
 }
-export interface IBookinAvailabilityParams {
+export interface IBookingAvailabilityParams {
   from_date: Date | null;
   to_date: Date | null;
   adult_nbr: number;
@@ -59,6 +71,9 @@ export interface IBookinAvailabilityParams {
   agent_code?: string;
 }
 
+/**
+ * Temporary booking info captured across the booking wizard.
+ */
 export interface BookingDraft {
   dates: {
     checkIn: Moment;
@@ -72,9 +87,40 @@ export interface BookingDraft {
   guest?: any;
 }
 
+/**
+ * Lookup datasets used by dropdowns across the booking experience.
+ */
 export interface BookingSelects {
   sources: BookingSource[];
+  ratePricingMode: ISetupEntries['ratePricingMode'];
+  arrivalTime: ISetupEntries['arrivalTime'];
+  bedPreferences: ISetupEntries['bedPreferenceType'];
+  countries: ICountry[];
 }
+
+/**
+ * Snapshot of the guest that pays for or books the reservation.
+ */
+export interface BookedByGuest {
+  id: number | null;
+  email: string;
+  firstName: string;
+  lastName: string;
+  company: string;
+  countryId: string;
+  phone_prefix: string;
+  mobile: string;
+  selectedArrivalTime: string;
+  emailGuest: boolean;
+  note: string;
+  cardNumber: string;
+  cardHolderName: string;
+  expiryMonth: string;
+  expiryYear: string;
+}
+/**
+ * Root state shared across the booking experience.
+ */
 export interface BookingStore {
   tax_statement: { message: string } | null;
   checkout_guest: Guest | null;
@@ -84,16 +130,48 @@ export interface BookingStore {
   ratePlanSelections: { [roomTypeId: number]: IRoomTypeSelection };
   event_type: { type: TEventType };
   guest: RatePlanGuest;
-  bookingAvailabilityParams: IBookinAvailabilityParams;
+  bookingAvailabilityParams: IBookingAvailabilityParams;
   booking: Booking;
   resetBooking: boolean;
   isInFreeCancelationZone: boolean;
   fictus_booking_nbr: { nbr: string | null };
   bookingDraft: BookingDraft;
   selects: BookingSelects;
+  bookedByGuest: BookedByGuest;
+  bookedByGuestManuallyEdited: boolean;
 }
 
+export interface ReservedRoomSelection {
+  roomTypeId: number;
+  ratePlanId: number;
+  reservationIndex: number;
+  guest: RatePlanGuest | null;
+  ratePlanSelection: IRatePlanSelection;
+}
+export const bookedByGuestBaseData = {
+  id: -1,
+  email: '',
+  company: '',
+  firstName: '',
+  lastName: '',
+  countryId: '',
+  phone_prefix: '',
+  mobile: '',
+  selectedArrivalTime: '',
+  emailGuest: true,
+  note: '',
+  cardNumber: '',
+  cardHolderName: '',
+  expiryMonth: '',
+  expiryYear: '',
+};
+
+// -----------------------------------------------------------------------------
+// Store Initialization
+// -----------------------------------------------------------------------------
 const initialState: BookingStore = {
+  bookedByGuest: bookedByGuestBaseData,
+  bookedByGuestManuallyEdited: false,
   bookingDraft: {
     dates: {
       checkIn: moment().startOf('day'),
@@ -107,6 +185,10 @@ const initialState: BookingStore = {
   },
   selects: {
     sources: [],
+    ratePricingMode: [],
+    arrivalTime: [],
+    bedPreferences: [],
+    countries: [],
   },
   checkout_guest: null,
   guest: null,
@@ -130,15 +212,33 @@ const initialState: BookingStore = {
 };
 
 export let { state: booking_store, onChange: onRoomTypeChange, reset } = createStore<BookingStore>(initialState);
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Clears the booking store. Optionally rehydrates dropdowns and guest info when keeping the modal open.
+ */
 export function resetBookingStore(closeModal: boolean) {
-  const { bookingDraft, selects } = booking_store;
+  const { bookingDraft, selects, bookedByGuest } = booking_store;
   reset();
   if (!closeModal) {
     setBookingDraft(bookingDraft);
+    updateBookedByGuest(bookedByGuest);
     setBookingSelectOptions(selects);
   }
 }
+/**
+ * Convenience helper that resets shared state while keeping the modal visible.
+ */
+export function resetAvailability(): void {
+  resetBookingStore(false);
+}
 
+/**
+ * Updates booking draft pieces (dates, occupancy, source) while keeping unrelated keys intact.
+ */
 export function setBookingDraft(params: Partial<BookingDraft>) {
   booking_store.bookingDraft = {
     ...booking_store.bookingDraft,
@@ -153,13 +253,19 @@ export function setBookingDraft(params: Partial<BookingDraft>) {
     },
   };
 }
+/**
+ * Updates dropdown lookup datasets (sources, bed preferences, etc.).
+ */
 export function setBookingSelectOptions(params: Partial<BookingSelects>) {
   booking_store.selects = {
     ...booking_store.selects,
     ...params,
   };
 }
-function checkVariation(variations: Variation[], selected_variation: Variation): Variation {
+/**
+ * Ensures the selected variation still exists on the server payload.
+ */
+function resolveSelectedVariation(variations: Variation[], selected_variation: Variation): Variation {
   if (!variations) {
     return null;
   }
@@ -169,6 +275,9 @@ function checkVariation(variations: Variation[], selected_variation: Variation):
   return variations?.find(v => v.adult_nbr === selected_variation.adult_nbr && v.child_nbr === selected_variation.child_nbr) ?? null;
 }
 
+/**
+ * Keeps `ratePlanSelections` in sync when backend refreshes available room types.
+ */
 onRoomTypeChange('roomTypes', (newValue: RoomType[]) => {
   const currentSelections = booking_store.ratePlanSelections;
   const ratePlanSelections: { [roomTypeId: number]: IRoomTypeSelection } = {};
@@ -186,7 +295,7 @@ onRoomTypeChange('roomTypes', (newValue: RoomType[]) => {
           ? {
               ...currentRatePlanSelection,
               ratePlan,
-              selected_variation: checkVariation(ratePlan.variations, currentRatePlanSelection.selected_variation) ?? null,
+              selected_variation: resolveSelectedVariation(ratePlan.variations, currentRatePlanSelection.selected_variation) ?? null,
               visibleInventory: roomType.inventory,
               reserved: roomType.inventory === 0 ? 0 : booking_store.resetBooking ? 0 : currentRatePlanSelection.reserved,
               checkoutVariations: roomType.inventory === 0 ? [] : currentRatePlanSelection.checkoutVariations,
@@ -223,35 +332,83 @@ onRoomTypeChange('roomTypes', (newValue: RoomType[]) => {
   booking_store.resetBooking = false;
 });
 
+// -----------------------------------------------------------------------------
+// State Mutators
+// -----------------------------------------------------------------------------
+/**
+ * Partially updates the booked-by guest snapshot, preserving other properties.
+ */
+export function updateBookedByGuest(params: Partial<BookedByGuest>) {
+  booking_store.bookedByGuest = {
+    ...booking_store.bookedByGuest,
+    ...params,
+  };
+}
+/**
+ * Updates the guest list assigned to a specific rate plan selection.
+ */
+export function updateRoomGuest({
+  guest,
+  ratePlanId,
+  roomTypeId,
+  ratePlanSelection,
+}: {
+  roomTypeId: number;
+  ratePlanId: number;
+  guest: IRatePlanSelection['guest'];
+  ratePlanSelection: IRatePlanSelection;
+}) {
+  booking_store.ratePlanSelections = {
+    ...booking_store.ratePlanSelections,
+    [roomTypeId]: {
+      ...booking_store.ratePlanSelections[roomTypeId],
+      [ratePlanId]: { ...ratePlanSelection, guest: [...guest] },
+    },
+  };
+}
+/**
+ * Recomputes remaining visible inventory for a room type whenever selections change.
+ */
 export function updateInventory(roomTypeId: number) {
   const roomTypeSelection = booking_store.ratePlanSelections[roomTypeId];
-  const calculateTotalSelectedRoomsExcludingIndex = (excludedRatePlanId: number) => {
-    return Object.entries(roomTypeSelection).reduce((acc, [ratePlanId, ratePlan]) => {
-      return Number(ratePlanId) !== excludedRatePlanId ? acc + ratePlan.reserved : acc;
-    }, 0);
-  };
-  const newRatePlans = Object.fromEntries(
-    Object.entries(roomTypeSelection).map(([ratePlanId, ratePlan]) => {
-      const totalSelectedRoomsExcludingCurrent = calculateTotalSelectedRoomsExcludingIndex(Number(ratePlanId));
-      const roomTypeData = booking_store.roomTypes.find(rt => rt.id === roomTypeId);
-      const availableRooms = roomTypeData ? roomTypeData.inventory - totalSelectedRoomsExcludingCurrent : 0;
+  if (!roomTypeSelection) {
+    return;
+  }
+  const roomTypeData = booking_store.roomTypes.find(rt => rt.id === roomTypeId);
+  if (!roomTypeData) {
+    return;
+  }
+  const totalReserved = Object.values(roomTypeSelection).reduce((acc, ratePlan) => acc + ratePlan.reserved, 0);
+  let hasChanges = false;
 
-      return [
-        ratePlanId,
-        {
-          ...ratePlan,
-          visibleInventory: availableRooms > 0 ? availableRooms : 0,
-        },
-      ];
-    }),
-  );
-  if (JSON.stringify(roomTypeSelection) !== JSON.stringify(newRatePlans)) {
+  const newRatePlans = Object.entries(roomTypeSelection).reduce((acc, [ratePlanId, ratePlan]) => {
+    const roomsExcludingCurrent = totalReserved - ratePlan.reserved;
+    const availableRooms = Math.max(roomTypeData.inventory - roomsExcludingCurrent, 0);
+    if (ratePlan.visibleInventory !== availableRooms) {
+      hasChanges = true;
+      acc[ratePlanId] = { ...ratePlan, visibleInventory: availableRooms };
+    } else {
+      acc[ratePlanId] = ratePlan;
+    }
+    return acc;
+  }, {} as IRoomTypeSelection);
+
+  if (hasChanges) {
     booking_store.ratePlanSelections = {
       ...booking_store.ratePlanSelections,
       [roomTypeId]: newRatePlans,
     };
   }
 }
+/**
+ * Returns true when any room type currently has at least one reservation selected.
+ */
+export function hasAtLeastOneRoomSelected(): boolean {
+  return Object.values(booking_store.ratePlanSelections).some(roomTypeSelection => Object.values(roomTypeSelection).some(ratePlan => ratePlan.reserved > 0));
+}
+/**
+ * Applies a patch of values to the given room type & rate plan combination.
+ */
 export function updateRoomParams({ ratePlanId, roomTypeId, params }: { roomTypeId: number; ratePlanId: number; params: Partial<IRatePlanSelection> }) {
   booking_store.ratePlanSelections = {
     ...booking_store.ratePlanSelections,
@@ -265,6 +422,9 @@ export function updateRoomParams({ ratePlanId, roomTypeId, params }: { roomTypeI
   };
 }
 
+/**
+ * Reserves a number of rooms for a rate plan and bootstraps its selection entry if needed.
+ */
 export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTypeId: number; ratePlanId: number; rooms: number; guest?: RatePlanGuest[] }) {
   if (!booking_store.ratePlanSelections[roomTypeId]) {
     booking_store.ratePlanSelections[roomTypeId] = {};
@@ -283,7 +443,7 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   }
   if (!booking_store.ratePlanSelections[roomTypeId][ratePlanId]) {
     booking_store.ratePlanSelections[roomTypeId][ratePlanId] = {
-      guestName: null,
+      guestName: [],
       reserved: 0,
       view_mode: '001',
       rp_amount: 0,
@@ -325,6 +485,12 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   updateInventory(roomTypeId);
 }
 
+// -----------------------------------------------------------------------------
+// Selectors & Derived Data
+// -----------------------------------------------------------------------------
+/**
+ * Safely retrieves the selection payload for a specific room type/rate plan pair.
+ */
 export function getVisibleInventory(roomTypeId: number, ratePlanId: number): IRatePlanSelection {
   if (!booking_store.ratePlanSelections || !booking_store.ratePlanSelections[roomTypeId]) {
     return {
@@ -346,10 +512,19 @@ export function getVisibleInventory(roomTypeId: number, ratePlanId: number): IRa
   return booking_store.ratePlanSelections[roomTypeId][ratePlanId];
 }
 
+/**
+ * Generic setter for store keys when more specific helpers are unnecessary.
+ */
 export function modifyBookingStore(key: keyof BookingStore, value: any) {
   booking_store[key] = value;
 }
 
+// -----------------------------------------------------------------------------
+// Pricing & Validation
+// -----------------------------------------------------------------------------
+/**
+ * Computes total and prepayment amounts with an option to force gross calculation.
+ */
 export function calculateTotalCost(gross: boolean = false): { totalAmount: number; prePaymentAmount: number } {
   let prePaymentAmount = 0;
   let totalAmount = 0;
@@ -375,12 +550,96 @@ export function calculateTotalCost(gross: boolean = false): { totalAmount: numbe
   });
   return { totalAmount, prePaymentAmount };
 }
+/**
+ * Returns the amount displayed for a rate plan, honoring overrides and nightly view.
+ */
+async function getRatePlanDisplayAmount({
+  rateplanSelection,
+  totalNights,
+  index,
+  bookingService,
+  variationService,
+}: {
+  rateplanSelection: IRatePlanSelection;
+  totalNights: number;
+  index: number;
+  bookingService: BookingService;
+  variationService: VariationService;
+}) {
+  if (rateplanSelection.is_amount_modified) {
+    const net = rateplanSelection.view_mode === '001' ? rateplanSelection.rp_amount : rateplanSelection.rp_amount * totalNights;
+    const tax = await bookingService.calculateExclusiveTax({
+      property_id: calendar_data.property.id,
+      amount: net,
+    });
+    return net + tax;
+  }
+  const guestInfo = rateplanSelection.guest ? rateplanSelection.guest[index] : null;
+  let variation = rateplanSelection.selected_variation;
+  if (guestInfo.infant_nbr) {
+    variation = variationService.getVariationBasedOnInfants({
+      variations: rateplanSelection.ratePlan.variations,
+      baseVariation: rateplanSelection.selected_variation,
+      infants: guestInfo?.infant_nbr,
+    });
+  }
+  return variation?.discounted_gross_amount ?? 0;
+}
+/**
+ * Aggregates the total booking price combining all selected rate plans.
+ */
+export async function getBookingTotalPrice(): Promise<number> {
+  const dateDiff = calculateDaysBetweenDates(booking_store.bookingDraft.dates.checkIn.format('YYYY-MM-DD'), booking_store.bookingDraft.dates.checkOut.format('YYYY-MM-DD'));
+  const bookingService = new BookingService();
+  const variationService = new VariationService();
+  let totalPrice = 0;
 
+  for (const roomTypeSelection of Object.values(booking_store.ratePlanSelections)) {
+    for (let j = 0; j < Object.values(roomTypeSelection).length; j++) {
+      const ratePlan = Object.values(roomTypeSelection)[j];
+      if (ratePlan.reserved === 0) continue;
+
+      const rateAmount = await getRatePlanDisplayAmount({
+        bookingService,
+        variationService,
+        index: j,
+        rateplanSelection: ratePlan,
+        totalNights: dateDiff,
+      });
+      totalPrice += rateAmount * ratePlan.reserved;
+    }
+  }
+
+  return Number(totalPrice.toFixed(2));
+}
+// export  function getBookingTotalPrice(): number {
+//   const dateDiff = calculateDaysBetweenDates(booking_store.bookingDraft.dates.checkIn.format('YYYY-MM-DD'), booking_store.bookingDraft.dates.checkOut.format('YYYY-MM-DD'));
+
+//   let totalPrice = 0;
+
+//   Object.values(booking_store.ratePlanSelections).forEach((roomTypeSelection) => {
+//     Object.values(roomTypeSelection).forEach(ratePlan => {
+//       if (ratePlan.reserved === 0) {
+//         return;
+//       }
+//       const rateAmount = getRatePlanDisplayAmount(ratePlan, dateDiff);
+//       totalPrice += rateAmount * ratePlan.reserved;
+//     });
+//   });
+
+//   return totalPrice;
+// }
+/**
+ * Validates that every reserved guest entry contains a non-empty name.
+ */
 export function validateBooking() {
   return Object.values(booking_store.ratePlanSelections).every(roomTypeSelection =>
     Object.values(roomTypeSelection).every(ratePlan => ratePlan.guestName.every(name => name.trim() !== '')),
   );
 }
+/**
+ * Counts the number of reserved rooms across all rate plans.
+ */
 export function calculateTotalRooms() {
   return Object.values(booking_store.ratePlanSelections).reduce((total, value) => {
     return (
@@ -394,15 +653,62 @@ export function calculateTotalRooms() {
     );
   }, 0);
 }
+
+/**
+ * Clears all reserved rooms and resets per-rate-plan metadata.
+ */
 export function resetReserved(): void {
   const updatedSelections = Object.entries(booking_store.ratePlanSelections).reduce((acc, [roomTypeId, ratePlans]) => {
     const roomType = booking_store.roomTypes.find(rt => rt.id.toString() === roomTypeId.toString());
     acc[roomTypeId] = Object.entries(ratePlans).reduce((rpAcc, [ratePlanId, ratePlan]) => {
-      rpAcc[ratePlanId] = { ...ratePlan, reserved: 0, visibleInventory: roomType?.inventory ?? ratePlan.visibleInventory };
+      const initialInventory = roomType?.inventory ?? ratePlan.roomtype?.inventory ?? ratePlan.visibleInventory;
+      rpAcc[ratePlanId] = {
+        ...ratePlan,
+        reserved: 0,
+        guest: null,
+        guestName: [],
+        checkoutVariations: [],
+        checkoutBedSelection: [],
+        checkoutSmokingSelection: [],
+        visibleInventory: initialInventory ?? 0,
+      };
       return rpAcc;
     }, {} as any);
     return acc;
   }, {} as any);
   booking_store.ratePlanSelections = { ...updatedSelections };
 }
+
+/**
+ * Flags whether the booked-by guest fields were manually edited (for UX hints elsewhere).
+ */
+export function setBookedByGuestManualEditState(isEdited: boolean) {
+  booking_store.bookedByGuestManuallyEdited = isEdited;
+}
+
+/**
+ * Returns a flat array of each reserved room along with its guest/context.
+ */
+export function getReservedRooms(): ReservedRoomSelection[] {
+  const reservedRooms: ReservedRoomSelection[] = [];
+  Object.entries(booking_store.ratePlanSelections).forEach(([roomTypeId, ratePlans]) => {
+    Object.entries(ratePlans).forEach(([ratePlanId, ratePlanSelection]) => {
+      if (!ratePlanSelection.reserved) {
+        return;
+      }
+      const guests = ratePlanSelection.guest ?? [];
+      for (let reservationIndex = 0; reservationIndex < ratePlanSelection.reserved; reservationIndex++) {
+        reservedRooms.push({
+          roomTypeId: Number(roomTypeId),
+          ratePlanId: Number(ratePlanId),
+          reservationIndex,
+          guest: guests[reservationIndex] ?? null,
+          ratePlanSelection,
+        });
+      }
+    });
+  });
+  return reservedRooms;
+}
+
 export default booking_store;

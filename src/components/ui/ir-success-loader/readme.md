@@ -24,10 +24,9 @@
 
 ## Shadow Parts
 
-| Part        | Description |
-| ----------- | ----------- |
-| `"check"`   |             |
-| `"spinner"` |             |
+| Part      | Description |
+| --------- | ----------- |
+| `"check"` |             |
 
 
 ## Dependencies
@@ -36,14 +35,9 @@
 
  - [igl-legends](../../igloo-calendar/igl-legends)
 
-### Depends on
-
-- [ir-icons](../ir-icons)
-
 ### Graph
 ```mermaid
 graph TD;
-  ir-success-loader --> ir-icons
   igl-legends --> ir-success-loader
   style ir-success-loader fill:#f9f,stroke:#333,stroke-width:4px
 ```

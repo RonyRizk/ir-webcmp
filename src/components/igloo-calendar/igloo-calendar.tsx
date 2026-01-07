@@ -41,7 +41,7 @@ export interface UnitHkStatusChangePayload {
 export type SalesBatchPayload = { rate_plan_id: number; night: string; is_available_to_book: boolean };
 export type AvailabilityBatchPayload = { room_type_id: number; date: string; availability: number };
 export type CalendarSidebarState = {
-  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split';
+  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer';
   payload: any;
 };
 @Component({
@@ -530,6 +530,7 @@ export class IglooCalendar {
             });
             return {
               ...e,
+              ROOM_INFO: { ...e.ROOM_INFO, in_out: { ...e.ROOM_INFO.in_out, code: result.status } },
               CHECKIN: result.status === '001',
               CHECKOUT: result.status === '002',
               STATUS,
@@ -1351,6 +1352,7 @@ export class IglooCalendar {
     // if (!this.isAuthenticated) {
     //   return <ir-login onAuthFinish={() => this.auth.setIsAuthenticated(true)}></ir-login>;
     // }
+    // console.log(this.bookingItem);
     return (
       <Host>
         <ir-toast></ir-toast>
@@ -1405,7 +1407,7 @@ export class IglooCalendar {
             <ir-loading-screen message="Preparing Calendar Data"></ir-loading-screen>
           )}
         </div>
-        {this.bookingItem && (
+        {/* {this.bookingItem && (
           <igl-book-property
             allowedBookingSources={this.calendarData.allowedBookingSources}
             adultChildConstraints={this.calendarData.adultChildConstraints}
@@ -1417,7 +1419,7 @@ export class IglooCalendar {
             bookingData={this.bookingItem}
             onCloseBookingWindow={() => this.handleCloseBookingWindow()}
           ></igl-book-property>
-        )}
+        )} */}
         <ir-sidebar
           onIrSidebarToggle={this.handleSideBarToggle.bind(this)}
           open={this.isSidebarOpen}
@@ -1475,7 +1477,13 @@ export class IglooCalendar {
           checkIn={true}
           onCloseModal={() => (this.calendarSidebarState = null)}
         ></ir-room-guests>
-
+        <ir-reallocation-drawer
+          open={this.calendarSidebarState?.type === 'reallocate-drawer'}
+          booking={this.calendarSidebarState?.payload?.booking}
+          pool={this.calendarSidebarState?.payload?.pool}
+          roomIdentifier={this.calendarSidebarState?.payload?.identifier}
+          onCloseModal={() => (this.calendarSidebarState = null)}
+        ></ir-reallocation-drawer>
         <igl-reallocation-dialog
           onResetModalState={() => (this.dialogData = null)}
           onDialogClose={() => this.handleModalCancel()}
@@ -1505,6 +1513,42 @@ export class IglooCalendar {
           roomIdentifier={this.invoiceState?.identifier}
           open={this.invoiceState !== null}
         ></ir-invoice>
+        <ir-booking-editor-drawer
+          roomTypeIds={(this.bookingItem as any)?.roomsInfo?.map(r => r.id)}
+          onBookingEditorClosed={this.handleCloseBookingWindow.bind(this)}
+          unitId={(this.bookingItem as any)?.PR_ID}
+          mode={this.bookingItem?.event_type as any}
+          label={this.bookingItem?.TITLE}
+          ticket={this.ticket}
+          roomIdentifier={(this.bookingItem as any)?.IDENTIFIER}
+          open={this.bookingItem !== null && this.bookingItem.event_type !== 'BLOCK_DATES'}
+          language={this.language}
+          booking={(this.bookingItem as any)?.booking}
+          propertyid={this.propertyid as any}
+          checkIn={this.bookingItem?.FROM_DATE}
+          blockedUnit={{
+            ENTRY_DATE: (this.bookingItem as any)?.ENTRY_DATE,
+            ENTRY_HOUR: (this.bookingItem as any)?.ENTRY_HOUR,
+            ENTRY_MINUTE: (this.bookingItem as any)?.ENTRY_MINUTE,
+            OPTIONAL_REASON: (this.bookingItem as any)?.OPTIONAL_REASON,
+            OUT_OF_SERVICE: (this.bookingItem as any)?.OUT_OF_SERVICE,
+            RELEASE_AFTER_HOURS: (this.bookingItem as any)?.RELEASE_AFTER_HOURS,
+            STATUS_CODE: (this.bookingItem as any)?.STATUS_CODE,
+          }}
+          checkOut={this.bookingItem?.TO_DATE}
+        ></ir-booking-editor-drawer>
+        <igl-blocked-date-drawer
+          onBlockedDateDrawerClosed={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.bookingItem = null;
+          }}
+          unitId={(this.bookingItem as any)?.PR_ID}
+          fromDate={this.bookingItem?.FROM_DATE}
+          toDate={this.bookingItem?.TO_DATE}
+          label={(this.bookingItem as any)?.BLOCK_DATES_TITLE?.trim()}
+          open={this.bookingItem?.event_type === 'BLOCK_DATES'}
+        ></igl-blocked-date-drawer>
       </Host>
     );
   }

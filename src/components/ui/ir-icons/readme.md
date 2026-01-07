@@ -26,7 +26,6 @@
  - [ir-login](../../ir-login)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-stats-card](../ir-stats-card)
- - [ir-success-loader](../ir-success-loader)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [requirement-check](../../ir-password-validator/requirement-check)
 
@@ -43,7 +42,6 @@ graph TD;
   ir-login --> ir-icons
   ir-payment-option --> ir-icons
   ir-stats-card --> ir-icons
-  ir-success-loader --> ir-icons
   ir-tasks-header --> ir-icons
   requirement-check --> ir-icons
   style ir-icons fill:#f9f,stroke:#333,stroke-width:4px

@@ -252,9 +252,9 @@ export class IglBookPropertyHeader {
   }
   private getMaxDate() {
     if (!this.bookingData?.block_exposed_unit_props) {
-      if (this.isEventType('PLUS_BOOKING')) {
-        return moment().add(60, 'days').format('YYYY-MM-DD');
-      }
+      // if (this.isEventType('PLUS_BOOKING')) {
+      //   return moment().add(60, 'days').format('YYYY-MM-DD');
+      // }
       return undefined;
     }
     return this.bookingData?.block_exposed_unit_props.to_date;

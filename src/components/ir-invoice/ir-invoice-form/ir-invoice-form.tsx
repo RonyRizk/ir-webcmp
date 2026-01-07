@@ -100,21 +100,28 @@ export class IrInvoiceForm {
   @Event() loadingChange: EventEmitter<boolean>;
 
   private room: Booking['rooms'][0];
-  private splitDisabledKeys: Set<number> = new Set();
   private confirmButtonRef: HTMLIrCustomButtonElement;
   private bookingService = new BookingService();
   private invoiceTarget: IEntries[];
+  private apiDisabledItemKeys: Set<number> = new Set();
+  private alreadyInvoicedItemKeys: Set<number> = new Set();
 
   componentWillLoad() {
     this.init();
   }
+
   componentDidLoad() {
     this.confirmButtonRef = document.querySelector(`#confirm-btn_${this.formId}`);
   }
+
   @Watch('viewMode')
   handleViewModeChange() {
+    if (this.invoicableKey?.size) {
+      this.applyDefaultSelections(Array.from(this.invoicableKey.values()));
+    }
     this.enforceNonInvoiceableSelections();
   }
+
   @Watch('booking')
   handleBookingChange() {
     if (this.booking) {
@@ -125,21 +132,23 @@ export class IrInvoiceForm {
     }
     this.setUpDisabledItems();
   }
+
   @Watch('invoiceInfo')
   handleInvoiceInfoChange() {
     this.setupInvoicables(this.invoiceInfo);
   }
 
+  /**
+   * Builds the list of invoice items that cannot yet be invoiced based on dates, splits and API-provided flags.
+   */
   private setUpDisabledItems() {
     if (!this.booking || !this.invoicableKey?.size) {
       this.notInvoiceableItemKeys = new Set();
-      this.splitDisabledKeys = new Set();
       return;
     }
 
     const invoiceDate = (this.invoiceDate ?? moment()).clone().startOf('day');
     const disabledKeys = new Set<number>();
-    this.splitDisabledKeys = new Set();
     const markIfBefore = (key: number | undefined, dateStr?: string | null, options?: { checkedOut?: boolean }) => {
       if (options?.checkedOut) {
         return;
@@ -191,30 +200,30 @@ export class IrInvoiceForm {
             return;
           }
           disabledKeys.add(room.system_id);
-          this.splitDisabledKeys.add(room.system_id);
         });
       });
     }
 
     this.notInvoiceableItemKeys = disabledKeys;
-    this.enforceNonInvoiceableSelections(disabledKeys);
+    this.enforceNonInvoiceableSelections(this.getCombinedDisabledKeys(disabledKeys));
   }
 
-  private enforceNonInvoiceableSelections(disabledKeys: Set<number> = this.notInvoiceableItemKeys ?? new Set()) {
-    if (!disabledKeys.size) {
+  /**
+   * Removes selections that correspond to disabled invoice items unless in proforma mode.
+   */
+  private enforceNonInvoiceableSelections(disabledKeys?: Set<number>) {
+    if (this.viewMode === 'proforma') {
       return;
     }
+
+    const enforcedDisabledKeys = disabledKeys ?? this.getCombinedDisabledKeys();
+    if (!enforcedDisabledKeys.size) {
+      return;
+    }
+
     const nextKeys = new Set(this.selectedItemKeys);
     let changed = false;
-    disabledKeys.forEach(key => {
-      const isSplitDisabled = this.splitDisabledKeys.has(key);
-      if (this.viewMode === 'proforma' && !isSplitDisabled) {
-        if (!nextKeys.has(key)) {
-          nextKeys.add(key);
-          changed = true;
-        }
-        return;
-      }
+    enforcedDisabledKeys.forEach(key => {
       if (nextKeys.delete(key)) {
         changed = true;
       }
@@ -224,6 +233,32 @@ export class IrInvoiceForm {
       this.syncSelectedItems(nextKeys);
     }
   }
+
+  /**
+   * Returns the union of API-disabled keys and client-calculated non-invoiceable keys.
+   */
+  private getCombinedDisabledKeys(baseKeys?: Set<number>) {
+    const base = baseKeys ?? this.notInvoiceableItemKeys ?? new Set();
+    const merged = new Set(base);
+    this.apiDisabledItemKeys.forEach(key => merged.add(key));
+    if (this.viewMode === 'invoice') {
+      this.alreadyInvoicedItemKeys.forEach(key => merged.add(key));
+    }
+    return merged;
+  }
+
+  /**
+   * Indicates whether an item was already invoiced, used to disable it in invoice mode.
+   */
+  private isAlreadyInvoiced(systemId?: number) {
+    if (this.viewMode !== 'invoice' || typeof systemId !== 'number') {
+      return false;
+    }
+    return this.alreadyInvoicedItemKeys.has(systemId);
+  }
+  /**
+   * Synchronizes the selected keys set with derived arrays and button states.
+   */
   private syncSelectedItems(selectedKeys: Set<number>) {
     this.selectedItemKeys = selectedKeys;
     const selectedItems: InvoiceableItem[] = [];
@@ -246,14 +281,23 @@ export class IrInvoiceForm {
     }
   }
 
+  /**
+   * Indicates whether a room has an invoiceable entry.
+   */
   private canInvoiceRoom(room?: Room) {
     return Boolean(room && this.invoicableKey?.has(room.system_id));
   }
 
+  /**
+   * Checks if any rooms in a collection are invoiceable.
+   */
   private hasInvoiceableRooms(rooms: Room[]) {
     return rooms.some(room => this.canInvoiceRoom(room));
   }
 
+  /**
+   * Returns the system IDs for rooms that can be invoiced.
+   */
   private getInvoiceableRoomIds(rooms: Room[]) {
     const ids: number[] = [];
     rooms.forEach(room => {
@@ -264,6 +308,9 @@ export class IrInvoiceForm {
     return ids;
   }
 
+  /**
+   * Loads booking/invoice data and ancillary metadata required to render the form.
+   */
   private async init() {
     try {
       this.isLoading = true;
@@ -293,11 +340,53 @@ export class IrInvoiceForm {
     }
   }
 
-  private setupInvoicables(invoiceInfo: BookingInvoiceInfo) {
-    const invoiceableItems = (invoiceInfo.invoiceable_items ?? []).filter(item => item.is_invoiceable);
-    this.invoicableKey = new Map(invoiceableItems.map(item => [item.key, item]));
-    this.syncSelectedItems(new Set(invoiceableItems.map(item => item.key)));
+  /**
+   * Converts API invoiceable items into lookup maps/sets and applies default selections.
+   */
+  private setupInvoicables(invoiceInfo?: BookingInvoiceInfo) {
+    const invoiceableItems = invoiceInfo?.invoiceable_items ?? [];
+    const mapEntries: [number, InvoiceableItem][] = [];
+    invoiceableItems.forEach(item => {
+      mapEntries.push([item.key, item]);
+      if (typeof item.system_id === 'number' && item.system_id !== item.key) {
+        mapEntries.push([item.system_id, item]);
+      }
+    });
+    this.invoicableKey = new Map(mapEntries);
+    this.apiDisabledItemKeys = new Set(invoiceableItems.filter(item => !item.is_invoiceable).map(item => this.getSelectableKey(item)));
+    const alreadyInvoicedKeys: number[] = [];
+    invoiceableItems.forEach(item => {
+      if (item.reason?.code !== '001') {
+        return;
+      }
+      alreadyInvoicedKeys.push(item.key);
+      if (typeof item.system_id === 'number' && item.system_id !== item.key) {
+        alreadyInvoicedKeys.push(item.system_id);
+      }
+    });
+    this.alreadyInvoicedItemKeys = new Set(alreadyInvoicedKeys);
+    this.applyDefaultSelections(invoiceableItems);
     this.setUpDisabledItems();
+  }
+
+  /**
+   * Selects invoiceable items by default, or all items in proforma mode.
+   */
+  private applyDefaultSelections(items: InvoiceableItem[]) {
+    const keysToSelect =
+      this.viewMode === 'proforma'
+        ? items.map(item => this.getSelectableKey(item))
+        : items
+            .filter(item => item.is_invoiceable && item.reason?.code !== '001')
+            .map(item => this.getSelectableKey(item));
+    this.syncSelectedItems(new Set(keysToSelect));
+  }
+
+  /**
+   * Resolves the correct checkbox key to use for a given invoiceable item.
+   */
+  private getSelectableKey(item: InvoiceableItem) {
+    return typeof item.system_id === 'number' ? item.system_id : item.key;
   }
 
   /**
@@ -363,6 +452,9 @@ export class IrInvoiceForm {
       this.loadingChange.emit(false);
     }
   }
+  /**
+   * Opens the most recently created invoice in a new window using the booking service.
+   */
   private async openLastInvoice(invoiceInfo: BookingInvoiceInfo) {
     const lastInvoice = invoiceInfo.invoices[invoiceInfo.invoices.length - 1];
     const { My_Result } = await this.bookingService.printInvoice({
@@ -373,6 +465,9 @@ export class IrInvoiceForm {
     window.open(My_Result);
   }
 
+  /**
+   * Provides the minimum selectable invoice date depending on booking vs. room mode.
+   */
   private getMinDate() {
     if (this.for === 'room') {
       return this.room.to_date;
@@ -392,10 +487,16 @@ export class IrInvoiceForm {
     return this.booking.from_date;
   }
 
+  /**
+   * Returns today's date as the maximum invoice date.
+   */
   private getMaxDate() {
     return moment().format('YYYY-MM-DD');
   }
 
+  /**
+   * Groups rooms so that linked/split rooms can be invoiced together and ordered consistently.
+   */
   private computeRoomGroups(rooms: Room[]) {
     const indexById = new Map<string, number>();
     rooms.forEach((room, idx) => indexById.set(room.identifier, idx));
@@ -483,6 +584,9 @@ export class IrInvoiceForm {
     return { groups: grouped, indexById, hasSplitGroups: true };
   }
 
+  /**
+   * Renders the visual date range for a given service entry.
+   */
   private getDateView(fromDate: string, toDate: string) {
     if (!fromDate) {
       return;
@@ -499,6 +603,117 @@ export class IrInvoiceForm {
     );
   }
 
+  /**
+   * Outputs the non-invoiceable reason text for a given system ID when in invoice mode.
+   */
+  private renderReasonDescription(systemId?: number) {
+    if (this.viewMode !== 'invoice' || typeof systemId !== 'number' || !this.invoicableKey?.size) {
+      return null;
+    }
+    const item = this.invoicableKey.get(systemId);
+    if (!item || item.is_invoiceable || !item.reason?.description) {
+      return null;
+    }
+    return <span class="ir-invoice__reason">{item.reason.description}</span>;
+  }
+
+  /**
+   * Renders a price/value column along with any reason description for the given system ID.
+   */
+  private renderPriceColumn(amount: number | undefined, systemId?: number) {
+    const hasAmount = typeof amount === 'number';
+    const reason = this.renderReasonDescription(systemId);
+    if (!hasAmount && !reason) {
+      return null;
+    }
+    const currencySymbol = this.booking?.currency?.symbol ?? '';
+    return (
+      <div class="ir-invoice__price-column">
+        {hasAmount && <span class="ir-invoice__checkbox-price">{formatAmount(currencySymbol, amount as number)}</span>}
+        {reason}
+      </div>
+    );
+  }
+
+  /**
+   * Handles toggling checkbox selections for invoiceable items.
+   */
+  private handleCheckChange({ checked, system_id, system_ids }: { checked: boolean; system_id?: number; system_ids?: number[] }) {
+    if (!this.invoicableKey) {
+      return;
+    }
+    const ids = [...(Array.isArray(system_ids) ? system_ids : []), ...(typeof system_id === 'number' ? [system_id] : [])].filter((id): id is number => typeof id === 'number');
+
+    if (!ids.length) {
+      return;
+    }
+
+    if (this.isDisabled(ids)) {
+      return;
+    }
+
+    const nextKeys = new Set(this.selectedItemKeys);
+    let changed = false;
+
+    ids.forEach(id => {
+      if (!this.invoicableKey.has(id)) {
+        return;
+      }
+      if (checked) {
+        if (!nextKeys.has(id)) {
+          nextKeys.add(id);
+          changed = true;
+        }
+      } else if (nextKeys.delete(id)) {
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      this.syncSelectedItems(nextKeys);
+    }
+  }
+
+  /**
+   * Determines if any ID in a collection is currently selected.
+   */
+  private isSelected(system_ids: (number | undefined)[] = []) {
+    if (!system_ids?.length) {
+      return false;
+    }
+    for (const id of system_ids) {
+      if (typeof id === 'number' && this.selectedItemKeys.has(id)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Determines if any member of a checkbox group should be disabled.
+   */
+  private isDisabled(systemIds: (number | undefined)[] = []) {
+    if (this.viewMode === 'proforma' || !systemIds?.length) {
+      return false;
+    }
+    const disabledKeys = this.getCombinedDisabledKeys();
+    if (!disabledKeys.size) {
+      return false;
+    }
+    return systemIds.some(id => {
+      if (typeof id !== 'number') {
+        return false;
+      }
+      if (this.isAlreadyInvoiced(id)) {
+        return true;
+      }
+      return disabledKeys.has(id);
+    });
+  }
+
+  /**
+   * Renders the room checkboxes, grouping split rooms when necessary.
+   */
   private renderRooms() {
     const rooms = this.booking?.rooms ?? [];
     if (!rooms.length || !this.invoicableKey?.size) {
@@ -537,7 +752,7 @@ export class IrInvoiceForm {
                   </span>
                   {this.getDateView(room.from_date, room.to_date)}
                 </div>
-                <span class="ir-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, room.gross_total)}</span>
+                {this.renderPriceColumn(room.gross_total, room.system_id)}
               </div>
             </wa-checkbox>
           </div>
@@ -581,7 +796,7 @@ export class IrInvoiceForm {
                       </p>
                       {this.getDateView(room.from_date, room.to_date)}
                     </div>
-                    <span class="ir-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, room.gross_total)}</span>
+                    {this.renderPriceColumn(room.gross_total, room.system_id)}
                   </div>
                 );
               })}
@@ -592,61 +807,9 @@ export class IrInvoiceForm {
     });
   }
 
-  private handleCheckChange({ checked, system_id, system_ids }: { checked: boolean; system_id?: number; system_ids?: number[] }) {
-    if (!this.invoicableKey) {
-      return;
-    }
-    const ids = [...(Array.isArray(system_ids) ? system_ids : []), ...(typeof system_id === 'number' ? [system_id] : [])].filter((id): id is number => typeof id === 'number');
-
-    if (!ids.length) {
-      return;
-    }
-
-    if (this.viewMode === 'invoice' && ids.some(id => this.notInvoiceableItemKeys.has(id))) {
-      return;
-    }
-
-    const nextKeys = new Set(this.selectedItemKeys);
-    let changed = false;
-
-    ids.forEach(id => {
-      if (!this.invoicableKey.has(id)) {
-        return;
-      }
-      if (checked) {
-        if (!nextKeys.has(id)) {
-          nextKeys.add(id);
-          changed = true;
-        }
-      } else if (nextKeys.delete(id)) {
-        changed = true;
-      }
-    });
-
-    if (changed) {
-      this.syncSelectedItems(nextKeys);
-    }
-  }
-
-  private isSelected(system_ids: (number | undefined)[] = []) {
-    if (!system_ids?.length) {
-      return false;
-    }
-    for (const id of system_ids) {
-      if (typeof id === 'number' && this.selectedItemKeys.has(id)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isDisabled(systemIds: (number | undefined)[] = []) {
-    if (this.viewMode === 'proforma' || !systemIds?.length) {
-      return false;
-    }
-    return systemIds.some(id => typeof id === 'number' && this.notInvoiceableItemKeys.has(id));
-  }
-
+  /**
+   * Renders the pickup service row when invoiceable.
+   */
   private renderPickup() {
     const sysId = this.booking.pickup_info?.['system_id'];
     if (!this.invoicableKey?.has(sysId)) {
@@ -673,13 +836,16 @@ export class IrInvoiceForm {
               <span>Pickup</span>
               {this.getDateView(this.booking.pickup_info.date, null)}
             </div>
-            <span class="ir-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, this.booking.pickup_info.selected_option.amount)}</span>
+            {this.renderPriceColumn(this.booking.pickup_info.selected_option.amount, sysId)}
           </div>
         </wa-checkbox>
       </div>
     );
   }
 
+  /**
+   * Renders the cancellation penalty checkbox when the booking contains one.
+   */
   private renderCancellationPenalty() {
     const cancellationPenalty = this.booking.financial.payments?.find(p => p.payment_type?.code === '013');
     if (!cancellationPenalty) {
@@ -710,12 +876,13 @@ export class IrInvoiceForm {
               <span>Cancellation penalty</span>
               {this.getDateView(cancellationPenalty.date, null)}
             </div>
-            <span class="ir-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, item.amount)}</span>
+            {this.renderPriceColumn(item.amount, sysId)}
           </div>
         </wa-checkbox>
       </div>
     );
   }
+
   render() {
     if (this.isLoading) {
       return (
@@ -747,49 +914,53 @@ export class IrInvoiceForm {
             maxDate={this.getMaxDate()}
           ></ir-custom-date-picker>
           <ir-booking-billing-recipient onRecipientChange={e => (this.selectedRecipient = e.detail)} booking={this.booking}></ir-booking-billing-recipient>
-          <div class={'ir-invoice__services'}>
-            <p class="ir-invoice__form-control-label">
-              Choose what to invoice <span style={{ color: 'var(--wa-color-gray-60)', paddingLeft: '0.5rem' }}> (Disabled services are not eligible to be invoiced yet)</span>
-            </p>
+          {this.viewMode === 'invoice' && moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') ? (
+            <ir-empty-state message="Invoices cannot be issued before guest arrival"></ir-empty-state>
+          ) : (
+            <div class={'ir-invoice__services'}>
+              <p class="ir-invoice__form-control-label">
+                Choose what to invoice <span style={{ color: 'var(--wa-color-gray-60)', paddingLeft: '0.5rem' }}> (Disabled services are not eligible to be invoiced yet)</span>
+              </p>
 
-            <div class="ir-invoice__services-container">
-              {this.invoicableKey.size === 0 && <ir-empty-state style={{ marginTop: '3rem' }}></ir-empty-state>}
-              {this.renderRooms()}
-              {this.booking.pickup_info && this.renderPickup()}
-              {this.booking.extra_services?.map(extra_service => {
-                const sysId = extra_service.system_id;
-                if (!this.invoicableKey?.has(sysId)) {
-                  return null;
-                }
-                const isSelected = this.isSelected([sysId]);
-                const isDisabled = this.isDisabled([sysId]);
-                return (
-                  <div key={extra_service.system_id} class="ir-invoice__service">
-                    <wa-checkbox
-                      disabled={isDisabled}
-                      size="small"
-                      onchange={e => {
-                        const value = (e.target as any).checked;
-                        this.handleCheckChange({ checked: value, system_id: sysId });
-                      }}
-                      defaultChecked={isSelected}
-                      class="ir-invoice__checkbox"
-                      checked={isSelected}
-                    >
-                      <div class="ir-invoice__room-checkbox-container">
-                        <div class={'ir-invoice__room-info'}>
-                          <span>{extra_service.description}</span>
-                          {this.getDateView(extra_service.start_date, extra_service.end_date)}
+              <div class="ir-invoice__services-container">
+                {this.invoicableKey.size === 0 && <ir-empty-state style={{ marginTop: '3rem' }}></ir-empty-state>}
+                {this.renderRooms()}
+                {this.booking.pickup_info && this.renderPickup()}
+                {this.booking.extra_services?.map(extra_service => {
+                  const sysId = extra_service.system_id;
+                  if (!this.invoicableKey?.has(sysId)) {
+                    return null;
+                  }
+                  const isSelected = this.isSelected([sysId]);
+                  const isDisabled = this.isDisabled([sysId]);
+                  return (
+                    <div key={extra_service.system_id} class="ir-invoice__service">
+                      <wa-checkbox
+                        disabled={isDisabled}
+                        size="small"
+                        onchange={e => {
+                          const value = (e.target as any).checked;
+                          this.handleCheckChange({ checked: value, system_id: sysId });
+                        }}
+                        defaultChecked={isSelected}
+                        class="ir-invoice__checkbox"
+                        checked={isSelected}
+                      >
+                        <div class="ir-invoice__room-checkbox-container">
+                          <div class={'ir-invoice__room-info'}>
+                            <span>{extra_service.description}</span>
+                            {this.getDateView(extra_service.start_date, extra_service.end_date)}
+                          </div>
+                          {this.renderPriceColumn(extra_service.price, sysId)}
                         </div>
-                        <span class="ir-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, extra_service.price)}</span>
-                      </div>
-                    </wa-checkbox>
-                  </div>
-                );
-              })}
-              {this.renderCancellationPenalty()}
+                      </wa-checkbox>
+                    </div>
+                  );
+                })}
+                {this.renderCancellationPenalty()}
+              </div>
             </div>
-          </div>
+          )}
         </form>
       </Host>
     );

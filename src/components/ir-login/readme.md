@@ -41,6 +41,8 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-booking --> ir-login
   ir-secure-tasks --> ir-login
   style ir-login fill:#f9f,stroke:#333,stroke-width:4px

@@ -35,6 +35,11 @@
 .bookingEventBase.leftSplit.skewedRight {
   border-right: 0;
 }
+.bookingEventBase.pending {
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--wa-color-success-fill-loud);
+}
 
 .bookingEvent {
   cursor: pointer;
@@ -258,4 +263,7 @@
 }
 .splitBooking {
   border-right: 2px solid #000000;
+}
+.bookingEventTitle.pending {
+  color: var(--wa-color-success-on-quiet) !important;
 }

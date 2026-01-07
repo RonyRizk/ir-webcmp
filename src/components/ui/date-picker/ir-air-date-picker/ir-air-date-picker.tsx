@@ -129,6 +129,7 @@ export class IrAirDatePicker {
   @Event() dateChanged: EventEmitter<{
     start: moment.Moment | null;
     end: moment.Moment | null;
+    dates: Date | Date[];
   }>;
 
   /**
@@ -177,14 +178,6 @@ export class IrAirDatePicker {
     if (!this.isSameDates(newVal, oldVal)) {
       this.datePicker?.update({ maxDate: this.toValidDate(newVal) });
     }
-  }
-
-  @Method()
-  async openDatePicker() {
-    // small delay to let the input mount if needed
-    this.openDatePickerTimeout = setTimeout(() => {
-      this.el.focus();
-    }, 20);
   }
 
   @Method()
@@ -272,6 +265,7 @@ export class IrAirDatePicker {
         this.dateChanged.emit({
           start: null,
           end: null,
+          dates: selected,
         });
       }
       this.currentDate = null;
@@ -287,6 +281,7 @@ export class IrAirDatePicker {
     this.dateChanged.emit({
       start: startDate ? moment(startDate) : null,
       end: endDate ? moment(endDate) : null,
+      dates: selected,
     });
   }
   disconnectedCallback() {

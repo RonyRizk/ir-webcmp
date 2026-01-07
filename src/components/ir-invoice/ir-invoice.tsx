@@ -1,9 +1,10 @@
 import { Booking } from '@/models/booking.dto';
-import { Component, Event, EventEmitter, Host, Method, Prop, State, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Method, Prop, State, Watch, h } from '@stencil/core';
 import { v4 } from 'uuid';
 import { BookingInvoiceInfo, ViewMode } from './types';
 import { IssueInvoiceProps } from '@/components';
 import calendar_data from '@/stores/calendar-data';
+import moment from 'moment';
 
 @Component({
   tag: 'ir-invoice',
@@ -108,7 +109,22 @@ export class IrInvoice {
   @State() viewMode: ViewMode = 'invoice';
   @State() isLoading: boolean;
   private _id = `invoice-form__${v4()}`;
-
+  componentWillLoad() {
+    if (this.booking) {
+      if (moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') && this.viewMode === 'invoice') {
+        this.viewMode = 'proforma';
+      }
+    }
+  }
+  @Watch('booking')
+  handleBookingChange() {
+    if (!this.booking) {
+      return;
+    }
+    if (moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') && this.viewMode === 'invoice') {
+      this.viewMode = 'proforma';
+    }
+  }
   render() {
     return (
       <Host>
@@ -131,6 +147,8 @@ export class IrInvoice {
         >
           <div class="d-flex align-items-center" slot="header-actions">
             <wa-switch
+              defaultChecked={this.viewMode === 'proforma'}
+              checked={this.viewMode === 'proforma'}
               onchange={e => {
                 if ((e.target as any).checked) {
                   this.viewMode = 'proforma';

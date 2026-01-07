@@ -38,14 +38,14 @@
 
 - [ir-interactive-title](../../ui/ir-interactive-title)
 - [igl-booking-event](../igl-booking-event)
-- [ir-modal](../../ui/ir-modal)
+- [igl-housekeeping-dialog](igl-housekeeping-dialog)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
-  igl-cal-body --> ir-modal
+  igl-cal-body --> igl-housekeeping-dialog
   igl-booking-event --> igl-booking-event-hover
   igl-booking-event-hover --> ir-dropdown
   igl-booking-event-hover --> ir-icons
@@ -56,8 +56,8 @@ graph TD;
   igl-booking-event-hover --> igl-block-dates-view
   ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
-  ir-modal --> ir-button
-  ir-button --> ir-icons
+  igl-housekeeping-dialog --> ir-dialog
+  igl-housekeeping-dialog --> ir-custom-button
   igloo-calendar --> igl-cal-body
   style igl-cal-body fill:#f9f,stroke:#333,stroke-width:4px
 ```

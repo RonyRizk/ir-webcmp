@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.property-switcher__search-input {
+  padding: 1rem;
+}
+
+.property-switcher__results {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.property-switcher__status {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--ir-color-text-muted, #646464);
+}

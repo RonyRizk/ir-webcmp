@@ -484,14 +484,20 @@ export class IrRoom {
                       {this.booking.is_direct ? (
                         <Fragment>
                           {(() => {
-                            const filtered_data = calendar_data.taxes.filter(tx => tx.pct > 0);
+                            const filtered_data = calendar_data.taxes.filter(tx => tx.pct > 0 && tx.is_exlusive);
                             return filtered_data.map(d => {
+                              const amount = d.is_exlusive
+                                ? // Tax is added on top
+                                  this.room.total * d.pct
+                                : // Tax is included in total → extract it
+                                  this.room.total - this.room.total / (1 + d.pct);
+
                               return (
                                 <tr>
                                   <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
                                     {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
                                   </td>
-                                  <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, (this.room.total * d.pct) / 100)}</td>
+                                  <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, amount / 100)}</td>
                                   {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
                                     <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">
                                       {formatAmount(this.currency, (this.room.cost * d.pct) / 100)}
@@ -501,6 +507,19 @@ export class IrRoom {
                               );
                             });
                           })()}
+                          {this.room.inclusive_taxes?.CALCULATED_INCLUSIVE_TAXES?.map(d => (
+                            <tr>
+                              <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
+                                {locales.entries.Lcz_Including} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
+                              </td>
+                              <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, d.CALCULATED_VALUE)}</td>
+                              {/* {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
+                                <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">
+                                  {formatAmount(this.currency, (this.room.cost * d.pct) / 100)}
+                                </td>
+                              )} */}
+                            </tr>
+                          ))}
                         </Fragment>
                       ) : (
                         <Fragment>

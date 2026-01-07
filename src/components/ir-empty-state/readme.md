@@ -28,8 +28,10 @@
  - [ir-departures-table](../ir-departures/ir-departures-table)
  - [ir-extra-services](../ir-booking-details/ir-extra-services)
  - [ir-invoice-form](../ir-invoice/ir-invoice-form)
+ - [ir-notifications](../ir-notifications)
  - [ir-payments-folio](../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup-view](../ir-booking-details/ir-pickup-view)
+ - [ir-reallocation-form](../ir-reallocation-drawer/ir-reallocation-form)
 
 ### Graph
 ```mermaid
@@ -39,8 +41,10 @@ graph TD;
   ir-departures-table --> ir-empty-state
   ir-extra-services --> ir-empty-state
   ir-invoice-form --> ir-empty-state
+  ir-notifications --> ir-empty-state
   ir-payments-folio --> ir-empty-state
   ir-pickup-view --> ir-empty-state
+  ir-reallocation-form --> ir-empty-state
   style ir-empty-state fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

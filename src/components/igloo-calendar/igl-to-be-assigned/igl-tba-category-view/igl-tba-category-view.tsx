@@ -61,7 +61,7 @@ export class IglTbaCategoryView {
     return (
       <Host>
         <div class="sectionContainer">
-          <div class="font-weight-bold mt-1 font-small-3">{this.categoriesData[this.categoryId]?.name}</div>
+          <div class="font-weight-bold font-small-3">{this.categoriesData[this.categoryId]?.name}</div>
           {this.getEventView(this.categoryId, this.eventDatas)}
         </div>
       </Host>

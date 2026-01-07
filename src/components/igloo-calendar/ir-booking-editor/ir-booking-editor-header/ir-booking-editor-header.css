@@ -1,0 +1,37 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m, 1rem);
+}
+.booking-editor-header__container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m, 1rem);
+}
+.booking-editor-header__booking-picker {
+  max-width: 350px;
+}
+.booking-editor-header__booking-picker-validator {
+  margin-bottom: 1rem;
+}
+.booking-editor-header__tax_statement {
+  margin-top: 1.5rem;
+}
+@media (min-width: 768px) {
+  .booking-editor-header__container {
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .booking-editor-header__adults-select {
+    width: 100px;
+  }
+  .booking-editor-header__children-select {
+    width: 170px;
+  }
+}
+@media (min-width: 1024px) {
+  .booking-editor__date-validator::part(error-message) {
+    position: absolute;
+  }
+}

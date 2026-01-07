@@ -72,7 +72,6 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [igl-cal-body](../../igloo-calendar/igl-cal-body)
  - [igloo-calendar](../../igloo-calendar)
  - [ir-channel](../../ir-channel)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
@@ -88,7 +87,6 @@ Type: `Promise<void>`
 graph TD;
   ir-modal --> ir-button
   ir-button --> ir-icons
-  igl-cal-body --> ir-modal
   igloo-calendar --> ir-modal
   ir-channel --> ir-modal
   ir-hk-tasks --> ir-modal

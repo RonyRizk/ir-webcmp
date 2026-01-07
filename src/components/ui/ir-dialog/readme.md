@@ -52,6 +52,7 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [ir-billing](../../ir-billing)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
@@ -63,11 +64,13 @@ Type: `Promise<void>`
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
+ - [ir-property-switcher](../../ir-property-switcher)
  - [ir-room](../../ir-booking-details/ir-room)
 
 ### Graph
 ```mermaid
 graph TD;
+  igl-housekeeping-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-dialog
   ir-billing --> ir-dialog
   ir-booking-company-dialog --> ir-dialog
@@ -79,6 +82,7 @@ graph TD;
   ir-extra-service --> ir-dialog
   ir-payment-details --> ir-dialog
   ir-preview-screen-dialog --> ir-dialog
+  ir-property-switcher --> ir-dialog
   ir-room --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```

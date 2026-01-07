@@ -55,6 +55,8 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-title --> ir-icon
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-hk-user

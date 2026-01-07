@@ -1,13 +1,15 @@
-import { Component, Host, h, Prop, State, Listen } from '@stencil/core';
+import { Component, Host, h, Prop, State, Listen, Watch, Event, EventEmitter } from '@stencil/core';
 import { TPropertyButtonsTypes } from '@/components';
 import { ICurrency } from '@/models/calendarData';
-import booking_store, { IRatePlanSelection, modifyBookingStore, RatePlanGuest } from '@/stores/booking.store';
+import booking_store, { IRatePlanSelection, modifyBookingStore, RatePlanGuest, updateBookedByGuest, updateRoomGuest } from '@/stores/booking.store';
 import locales from '@/stores/locales.store';
 import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import VariationService from '@/services/variation.service';
 import { GuestCredentials } from '../../types';
 import { z } from 'zod';
+import { v4 } from 'uuid';
+import { BookingService } from '../../../../../services/booking-service/booking.service';
 
 @Component({
   tag: 'igl-application-info',
@@ -23,16 +25,24 @@ export class IglApplicationInfo {
   @Prop() roomIndex: number;
   @Prop() totalNights: number = 1;
   @Prop() baseData: { unit: { id: string; name: string }; roomtypeId: number };
+  @Prop() autoFillGuest: boolean;
 
   @State() isButtonPressed = false;
+  @State() amount = 0;
+
+  @Event() recalculateTotalCost: EventEmitter<void>;
 
   private variationService = new VariationService();
+  private bookingService = new BookingService();
+  private shouldSyncBookedByFirstName = !booking_store.bookedByGuest?.firstName;
+  private shouldSyncBookedByLastName = !booking_store.bookedByGuest?.lastName;
 
-  componentWillLoad() {
+  async componentWillLoad() {
     if (isSingleUnit(this.rateplanSelection.roomtype.id)) {
       const filteredRooms = this.filterRooms();
       if (filteredRooms.length > 0) this.updateGuest({ unit: filteredRooms[0]?.id?.toString() });
     }
+    this.amount = await this.getAmount();
   }
 
   private updateGuest(params: Partial<RatePlanGuest>) {
@@ -43,13 +53,41 @@ export class IglApplicationInfo {
       ...prevGuest[this.roomIndex],
       ...params,
     };
-    booking_store.ratePlanSelections = {
-      ...booking_store.ratePlanSelections,
-      [roomTypeId]: {
-        ...booking_store.ratePlanSelections[roomTypeId],
-        [ratePlanId]: { ...this.rateplanSelection, guest: [...prevGuest] },
-      },
-    };
+    updateRoomGuest({
+      ratePlanSelection: this.rateplanSelection,
+      ratePlanId,
+      roomTypeId,
+      guest: prevGuest,
+    });
+
+    const shouldAutoFill = this.autoFillGuest && !booking_store.bookedByGuestManuallyEdited;
+    if (!shouldAutoFill) {
+      if (booking_store.bookedByGuestManuallyEdited) {
+        this.shouldSyncBookedByFirstName = false;
+        this.shouldSyncBookedByLastName = false;
+      }
+      return;
+    }
+
+    if (typeof params.first_name === 'string' && this.shouldSyncBookedByFirstName) {
+      updateBookedByGuest({
+        firstName: params.first_name,
+      });
+    }
+
+    if (typeof params.last_name === 'string' && this.shouldSyncBookedByLastName) {
+      updateBookedByGuest({
+        lastName: params.last_name,
+      });
+    }
+  }
+
+  @Watch('guestInfo')
+  async handleGuestInfoChange() {
+    if (this.rateplanSelection.is_amount_modified) {
+      return;
+    }
+    this.amount = await this.getAmount();
   }
 
   @Listen('buttonClicked', { target: 'body' })
@@ -98,9 +136,14 @@ export class IglApplicationInfo {
     return tooltip || undefined;
   }
 
-  private getAmount(): number {
+  private async getAmount(): Promise<number> {
     if (this.rateplanSelection.is_amount_modified) {
-      return this.rateplanSelection.view_mode === '001' ? this.rateplanSelection.rp_amount : this.rateplanSelection.rp_amount * this.totalNights;
+      const net = this.rateplanSelection.view_mode === '001' ? this.rateplanSelection.rp_amount : this.rateplanSelection.rp_amount * this.totalNights;
+      const tax = await this.bookingService.calculateExclusiveTax({
+        amount: net,
+        property_id: calendar_data.property.id,
+      });
+      return net + (tax ?? 0);
     }
     let variation = this.rateplanSelection.selected_variation;
     if (this.guestInfo?.infant_nbr) {
@@ -131,6 +174,7 @@ export class IglApplicationInfo {
           .sort((a, b) => a.name.localeCompare(b.name))
       : filteredResults;
   }
+  private tooltipId = `room_info_tooltip_${v4()}`;
 
   render() {
     const filteredRoomList = this.filterRooms();
@@ -139,6 +183,7 @@ export class IglApplicationInfo {
       infants: this.guestInfo.infant_nbr,
       variations: this.rateplanSelection.ratePlan.variations,
     });
+    // const amount = await this.getAmount();
 
     return (
       <Host class="fd-application-info" data-testid={`room_info_${this.rateplanSelection.ratePlan.id}`}>
@@ -153,28 +198,31 @@ export class IglApplicationInfo {
                 {this.rateplanSelection.ratePlan.short_name}
                 {this.rateplanSelection.ratePlan.is_non_refundable && <span class="fd-application-info__non-refundable">Non Refundable</span>}
               </p>
-              <wa-tooltip for={`room_info_tooltip_${this.rateplanSelection.ratePlan.id}`}>
+              <wa-tooltip for={this.tooltipId}>
                 <span innerHTML={this.getTooltipMessages()}></span>
               </wa-tooltip>
-              <wa-icon name="circle-info" id={`room_info_tooltip_${this.rateplanSelection.ratePlan.id}`}></wa-icon>
+              <wa-icon name="circle-info" id={this.tooltipId}></wa-icon>
               {/* <ir-tooltip class="fd-application-info__tooltip" message={this.getTooltipMessages()}></ir-tooltip> */}
             </div>
 
             <p class="fd-application-info__variation" innerHTML={formattedVariation}></p>
           </div>
 
-          <p class="fd-application-info__price p-0 m-0">
-            <span class="ir-price">{formatAmount(this.currency?.symbol, this.getAmount())}</span>/{locales.entries.Lcz_Stay}
+          <p class="fd-application-info__price">
+            <span class="ir-price">
+              {formatAmount(this.currency?.symbol, this.amount)}/{locales.entries.Lcz_Stay}
+            </span>
+            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>Including taxes and fees</p>
           </p>
         </div>
 
         <div class="fd-application-info__footer">
           <div class="fd-application-info__rateplan">
             <p class="fd-application-info__rateplan-name">{this.rateplanSelection.ratePlan.short_name}</p>
-            <wa-tooltip for={`room_info_tooltip_mobile_${this.rateplanSelection.ratePlan.id}`}>
+            <wa-tooltip for={`mobile-${this.tooltipId}`}>
               <span innerHTML={this.getTooltipMessages()}></span>
             </wa-tooltip>
-            <wa-icon name="circle-info" id={`room_info_tooltip_mobile_${this.rateplanSelection.ratePlan.id}`}></wa-icon>
+            <wa-icon name="circle-info" id={`mobile-${this.tooltipId}`}></wa-icon>
           </div>
 
           <p class="fd-application-info__variation" innerHTML={formattedVariation}></p>
@@ -275,7 +323,10 @@ export class IglApplicationInfo {
           )}
 
           <p class="fd-application-info__price-inline">
-            <span class="ir-price">{formatAmount(this.currency?.symbol, this.getAmount())}</span>/{locales.entries.Lcz_Stay}
+            <span class="ir-price">
+              {formatAmount(this.currency?.symbol, this.amount)}/{locales.entries.Lcz_Stay}
+            </span>
+            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>Including taxes and fees</p>
           </p>
         </div>
 
@@ -288,11 +339,15 @@ export class IglApplicationInfo {
               placeholder={locales.entries['No'] || 'No'}
               value={this.guestInfo?.infant_nbr?.toString()}
               defaultValue={this.guestInfo?.infant_nbr?.toString()}
-              onchange={event =>
+              onchange={event => {
                 this.updateGuest({
                   infant_nbr: Number((event.target as HTMLInputElement).value),
-                })
-              }
+                });
+                if (this.rateplanSelection.is_amount_modified) {
+                  return;
+                }
+                this.recalculateTotalCost.emit();
+              }}
               withClear
             >
               {Array.from({ length: this.rateplanSelection.selected_variation.child_nbr }, (_, i) => i + 1).map(item => (

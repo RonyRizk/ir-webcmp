@@ -18,6 +18,7 @@
 | `disabled`              | `disabled`                | Disables the input and prevents interaction.                                                                                                                                                                                                                                           | `boolean`           | `false`        |
 | `emitEmptyDate`         | `emit-empty-date`         | If `true`, the component will emit a `dateChanged` event when the selected date becomes empty (null). Otherwise, empty-date changes will be ignored (no event emitted).  Defaults to `false`.                                                                                          | `boolean`           | `false`        |
 | `forceDestroyOnUpdate`  | `force-destroy-on-update` | If `true`, the date picker instance is destroyed and rebuilt each time the `date` prop changes. This can be useful if you need the picker to fully re-initialize in response to dynamic changes, but note that it may affect performance if triggered frequently. Defaults to `false`. | `boolean`           | `false`        |
+| `hint`                  | `hint`                    | The date picker's hint.                                                                                                                                                                                                                                                                | `string`            | `undefined`    |
 | `inline`                | `inline`                  | Determines whether the date picker is rendered inline or in a pop-up. If `true`, the picker is always visible inline.                                                                                                                                                                  | `boolean`           | `false`        |
 | `label`                 | `label`                   |                                                                                                                                                                                                                                                                                        | `string`            | `undefined`    |
 | `maxDate`               | `max-date`                | The latest date that can be selected.                                                                                                                                                                                                                                                  | `Date \| string`    | `undefined`    |
@@ -68,7 +69,6 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [igl-date-range](../igloo-calendar/igl-date-range)
  - [ir-arrivals-filters](../ir-arrivals/ir-arrivals-filters)
  - [ir-departures-filter](../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
@@ -84,7 +84,6 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   ir-custom-date-picker --> ir-input
-  igl-date-range --> ir-custom-date-picker
   ir-arrivals-filters --> ir-custom-date-picker
   ir-departures-filter --> ir-custom-date-picker
   ir-extra-service-config-form --> ir-custom-date-picker

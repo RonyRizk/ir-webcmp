@@ -36,13 +36,13 @@
 ### Depends on
 
 - [igl-tba-category-view](igl-tba-category-view)
-- [ir-button](../../ui/ir-button)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-to-be-assigned --> igl-tba-category-view
-  igl-to-be-assigned --> ir-button
+  igl-to-be-assigned --> ir-custom-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
   ir-button --> ir-icons

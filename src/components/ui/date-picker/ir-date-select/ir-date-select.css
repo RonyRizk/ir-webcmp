@@ -1,4 +1,4 @@
-@import url('../../../../assets/webawesome/component/host.css');
+/* @import url('../../../../assets/webawesome/component/host.css'); */
 :host {
   display: flex;
   --arrow-size: 0.375rem;
@@ -22,7 +22,7 @@
   flex-direction: column;
   width: max-content;
   max-width: var(--max-width);
-  padding: var(--wa-space-l);
+  padding: var(--wa-space-m);
   background-color: var(--wa-color-surface-default);
   border: var(--wa-panel-border-width) solid var(--wa-color-surface-border);
   border-radius: var(--wa-panel-border-radius);
@@ -50,4 +50,8 @@
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+.ir-date-select__trigger,
+.ir-date-select__input {
+  width: 100%;
 }

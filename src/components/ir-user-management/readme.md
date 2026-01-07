@@ -40,6 +40,8 @@ graph TD;
   ir-user-management --> ir-interceptor
   ir-user-management --> ir-loading-screen
   ir-user-management --> ir-user-management-table
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner

@@ -551,6 +551,10 @@ import calendar_data from '@/stores/calendar-data';
 import { PaymentEntries } from '@/components/ir-booking-details/types';
 import { z } from 'zod';
 import {
+  AckExposedRevisionProps,
+  AckExposedRevisionPropsSchema,
+  CalculateExclusiveTaxProps,
+  CalculateExclusiveTaxPropsSchema,
   ExposedGuests,
   GetBookingInvoiceInfoProps,
   GetBookingInvoiceInfoPropsSchema,
@@ -826,6 +830,11 @@ export class BookingService {
       throw new Error(error);
     }
   }
+  public async ackExposedRevision(props: AckExposedRevisionProps) {
+    const payload = AckExposedRevisionPropsSchema.parse(props);
+    const { data } = await axios.post('/Ack_Exposed_Revision', payload);
+    return data;
+  }
   public async getExposedBookingEvents(booking_nbr: string | number): Promise<ExposedBookingEvent[] | null> {
     try {
       const { data } = await axios.post(`/Get_Exposed_Booking_Events`, { booking_nbr });
@@ -884,6 +893,11 @@ export class BookingService {
       console.error(error);
       throw new Error(error);
     }
+  }
+  public async calculateExclusiveTax(props: CalculateExclusiveTaxProps) {
+    const payload = CalculateExclusiveTaxPropsSchema.parse(props);
+    const { data } = await axios.post('/Calculate_Exclusive_Tax', payload);
+    return data.My_Result ?? 0;
   }
   private sortRoomTypes(roomTypes, userCriteria: { adult_nbr: number; child_nbr: number }) {
     return roomTypes.sort((a, b) => {

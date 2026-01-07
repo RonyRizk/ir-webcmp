@@ -1,7 +1,5 @@
 # ir-custom-button
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -44,13 +42,17 @@
 
 ### Used by
 
+ - [igl-blocked-date-drawer](../../igloo-calendar/igl-blocked-date-drawer)
  - [igl-book-property](../../igloo-calendar/igl-book-property)
  - [igl-book-property-footer](../../igloo-calendar/igl-book-property/igl-book-property-footer)
  - [igl-book-property-header](../../igloo-calendar/igl-book-property/igl-book-property-header)
  - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
  - [igl-cal-header](../../igloo-calendar/igl-cal-header)
+ - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
+ - [igl-legends](../../igloo-calendar/igl-legends)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
+ - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-arrivals-table](../../ir-arrivals/ir-arrivals-table)
@@ -58,10 +60,14 @@
  - [ir-billing](../../ir-billing)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
  - [ir-booking-details](../../ir-booking-details)
+ - [ir-booking-editor-drawer](../../igloo-calendar/ir-booking-editor/ir-booking-editor-drawer)
+ - [ir-booking-editor-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-form)
+ - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-booking-listing-mobile-card](../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-booking-new-form](../../ir-booking-new-form)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
  - [ir-departures-table](../../ir-departures/ir-departures-table)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
@@ -70,6 +76,7 @@
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
+ - [ir-notifications](../../ir-notifications)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
@@ -77,23 +84,31 @@
  - [ir-payments-folio](../../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
+ - [ir-pms-logs](../../ir-booking-details/ir-booking-header/ir-pms-logs)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
+ - [ir-property-switcher](../../ir-property-switcher)
+ - [ir-reallocation-drawer](../../ir-reallocation-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-test2-cmp](../../ir-test-cmp)
+ - [ir-test3-cmp](../../ir-test-cmp)
 
 ### Graph
 ```mermaid
 graph TD;
+  igl-blocked-date-drawer --> ir-custom-button
   igl-book-property --> ir-custom-button
   igl-book-property-footer --> ir-custom-button
   igl-book-property-header --> ir-custom-button
   igl-booking-event-hover --> ir-custom-button
   igl-cal-header --> ir-custom-button
+  igl-housekeeping-dialog --> ir-custom-button
+  igl-legends --> ir-custom-button
   igl-rate-plan --> ir-custom-button
   igl-reallocation-dialog --> ir-custom-button
+  igl-to-be-assigned --> ir-custom-button
   ir-actions-cell --> ir-custom-button
   ir-applicable-policies --> ir-custom-button
   ir-arrivals-table --> ir-custom-button
@@ -101,10 +116,14 @@ graph TD;
   ir-billing --> ir-custom-button
   ir-booking-company-dialog --> ir-custom-button
   ir-booking-details --> ir-custom-button
+  ir-booking-editor-drawer --> ir-custom-button
+  ir-booking-editor-form --> ir-custom-button
+  ir-booking-editor-header --> ir-custom-button
   ir-booking-extra-note --> ir-custom-button
   ir-booking-header --> ir-custom-button
   ir-booking-listing-mobile-card --> ir-custom-button
   ir-booking-listing-table --> ir-custom-button
+  ir-booking-new-form --> ir-custom-button
   ir-checkout-dialog --> ir-custom-button
   ir-departures-table --> ir-custom-button
   ir-extra-service --> ir-custom-button
@@ -113,6 +132,7 @@ graph TD;
   ir-guest-info-drawer --> ir-custom-button
   ir-invoice --> ir-custom-button
   ir-listing-header --> ir-custom-button
+  ir-notifications --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button
   ir-payment-folio --> ir-custom-button
@@ -120,12 +140,16 @@ graph TD;
   ir-payments-folio --> ir-custom-button
   ir-pickup --> ir-custom-button
   ir-pickup-view --> ir-custom-button
+  ir-pms-logs --> ir-custom-button
   ir-preview-screen-dialog --> ir-custom-button
+  ir-property-switcher --> ir-custom-button
+  ir-reallocation-drawer --> ir-custom-button
   ir-reservation-information --> ir-custom-button
   ir-room --> ir-custom-button
   ir-room-guests --> ir-custom-button
   ir-secure-tasks --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
+  ir-test3-cmp --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

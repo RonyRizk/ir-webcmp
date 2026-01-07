@@ -41,6 +41,8 @@ graph TD;
   ir-monthly-bookings-report --> ir-stats-card
   ir-monthly-bookings-report --> ir-monthly-bookings-report-filter
   ir-monthly-bookings-report --> ir-monthly-bookings-report-table
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner

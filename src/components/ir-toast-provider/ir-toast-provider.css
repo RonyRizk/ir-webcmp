@@ -1,0 +1,63 @@
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+/* Container positioning */
+.toast-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 10000;
+  max-width: 100vw;
+  box-sizing: border-box;
+  padding: 1rem;
+  pointer-events: all;
+}
+
+/* Vertical positioning */
+.toast-container--top {
+  top: 0;
+}
+
+.toast-container--bottom {
+  bottom: 0;
+}
+
+/* Horizontal positioning */
+.toast-container--start {
+  left: 0;
+  align-items: flex-start;
+}
+
+.toast-container--center {
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.toast-container--end {
+  right: 0;
+  align-items: flex-end;
+}
+
+/* RTL adjustments */
+.toast-container.rtl.toast-container--start {
+  left: auto;
+  right: 0;
+  align-items: flex-end;
+}
+
+.toast-container.rtl.toast-container--end {
+  right: auto;
+  left: 0;
+  align-items: flex-start;
+}

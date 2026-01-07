@@ -878,7 +878,14 @@ export interface Room {
   unit: string | number | IUnit | null;
   ota_taxes: IOtaTax[];
   ota_meta: OtaMeta;
-
+  inclusive_taxes: {
+    CALCULATED_INCLUSIVE_TAXES: {
+      CALCULATED_VALUE: number;
+      TAX_NAME: string;
+      TAX_PCT: number;
+    }[];
+    NET_PREMIUM: number;
+  };
   cost: number | null;
   gross_cost: number;
   gross_total: number;
@@ -974,5 +981,6 @@ export interface IPmsLog {
   is_sent: boolean;
   sent_date: string;
   sent_hour: number;
+  revision_id: number;
   sent_minute: number;
 }

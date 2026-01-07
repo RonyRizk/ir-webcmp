@@ -73,6 +73,8 @@ graph TD;
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-modal --> ir-button
   ir-user-management --> ir-user-management-table
   style ir-user-management-table fill:#f9f,stroke:#333,stroke-width:4px

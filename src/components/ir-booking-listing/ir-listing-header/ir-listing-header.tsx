@@ -75,34 +75,41 @@ export class IrListingHeader {
               <h3 class="page-title">{locales.entries?.Lcz_Bookings}</h3>
               <div>
                 {!havePrivilege && (
-                  <igl-book-property-container
-                    p={this.p}
-                    withIrToastAndInterceptor={false}
-                    propertyid={this.propertyId}
-                    language={this.language}
-                    title={locales.entries.Lcz_CreateNewBooking}
-                    ticket={booking_listing.token}
-                  >
-                    {/* <ir-button slot="trigger"  variant="icon" icon_name="square_plus"></ir-button> */}
-                    <ir-custom-button id="new-booking" class={'new-booking-btn'} variant="brand" appearance="plain" slot="trigger">
-                      <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
-                    </ir-custom-button>
-                  </igl-book-property-container>
+                  // <igl-book-property-container
+                  //   p={this.p}
+                  //   withIrToastAndInterceptor={false}
+                  //   propertyid={this.propertyId}
+                  //   language={this.language}
+                  //   title={locales.entries.Lcz_CreateNewBooking}
+                  //   ticket={booking_listing.token}
+                  // >
+                  //   {/* <ir-button slot="trigger"  variant="icon" icon_name="square_plus"></ir-button> */}
+                  //   <ir-custom-button id="new-booking" class={'new-booking-btn'} variant="brand" appearance="plain" slot="trigger">
+                  //     <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                  //   </ir-custom-button>
+                  // </igl-book-property-container>
+                  <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
                 )}
               </div>
             </div>
             <h3 class="d-none d-md-block page-title">{locales.entries?.Lcz_Bookings}</h3>
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                console.log(this.inputValue);
-                this.handleSearchClicked(false);
-              }}
+            <div
+              // onSubmit={e => {
+              //   e.preventDefault();
+              //   console.log(this.inputValue);
+              //   this.handleSearchClicked(false);
+              // }}
               class="booking-search-field width-fill"
             >
               <ir-input
                 class={'flex-fill w-100'}
                 value={this.inputValue}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleSearchClicked(false);
+                  }
+                }}
                 onText-change={e => (this.inputValue = e.detail)}
                 size="small"
                 placeholder={locales.entries?.Lcz_FindBookNbrorName}
@@ -110,24 +117,25 @@ export class IrListingHeader {
                 <wa-icon name="magnifying-glass" slot="start"></wa-icon>
               </ir-input>
               <h5 class="m-0 font-weight-bold d-none d-sm-block">{locales.entries?.Lcz_Or}</h5>
-            </form>
+            </div>
           </div>
           <div class="d-none d-md-block">
             <wa-tooltip for="new-booking">Create new booking</wa-tooltip>
             {!havePrivilege && (
-              <igl-book-property-container
-                p={this.p}
-                withIrToastAndInterceptor={false}
-                propertyid={this.propertyId}
-                language={this.language}
-                title={locales.entries.Lcz_CreateNewBooking}
-                ticket={booking_listing.token}
-              >
-                <ir-custom-button id="new-booking" variant="brand" appearance="plain" slot="trigger">
-                  <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
-                </ir-custom-button>
-                {/* <ir-button slot="trigger" class={'new-booking-btn'} variant="icon" icon_name="square_plus"></ir-button> */}
-              </igl-book-property-container>
+              // <igl-book-property-container
+              //   p={this.p}
+              //   withIrToastAndInterceptor={false}
+              //   propertyid={this.propertyId}
+              //   language={this.language}
+              //   title={locales.entries.Lcz_CreateNewBooking}
+              //   ticket={booking_listing.token}
+              // >
+              //   <ir-custom-button id="new-booking" variant="brand" appearance="plain" slot="trigger">
+              //     <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+              //   </ir-custom-button>
+              //   {/* <ir-button slot="trigger" class={'new-booking-btn'} variant="icon" icon_name="square_plus"></ir-button> */}
+              // </igl-book-property-container>
+              <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
             )}
           </div>
         </section>

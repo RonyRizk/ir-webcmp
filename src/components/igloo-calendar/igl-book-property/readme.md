@@ -1,7 +1,5 @@
 # igl-book-property
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -36,8 +34,6 @@
 ### Used by
 
  - [igl-book-property-container](../../igl-book-property-container)
- - [igloo-calendar](..)
- - [ir-booking-details](../../ir-booking-details)
 
 ### Depends on
 
@@ -67,8 +63,9 @@ graph TD;
   igl-book-property-header --> ir-validator
   igl-book-property-header --> igl-date-range
   igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
@@ -90,8 +87,6 @@ graph TD;
   ir-button --> ir-icons
   igl-book-property-footer --> ir-custom-button
   igl-book-property-container --> igl-book-property
-  igloo-calendar --> igl-book-property
-  ir-booking-details --> igl-book-property
   style igl-book-property fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

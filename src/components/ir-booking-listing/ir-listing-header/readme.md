@@ -1,7 +1,5 @@
 # ir-listing-header
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -29,63 +27,61 @@
 
 ### Depends on
 
-- [igl-book-property-container](../../igl-book-property-container)
-- [ir-custom-button](../../ui/ir-custom-button)
+- [ir-booking-new-form](../../ir-booking-new-form)
 - [ir-input](../../ui/ir-input)
 - [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-listing-header --> igl-book-property-container
-  ir-listing-header --> ir-custom-button
+  ir-listing-header --> ir-booking-new-form
   ir-listing-header --> ir-input
   ir-listing-header --> ir-range-picker
-  igl-book-property-container --> ir-toast
-  igl-book-property-container --> ir-interceptor
-  igl-book-property-container --> igl-book-property
+  ir-listing-header --> ir-custom-button
+  ir-booking-new-form --> ir-custom-button
+  ir-booking-new-form --> ir-booking-editor-drawer
+  ir-booking-editor-drawer --> ir-custom-button
+  ir-booking-editor-drawer --> ir-drawer
+  ir-booking-editor-drawer --> ir-booking-editor
+  ir-booking-editor --> ir-spinner
+  ir-booking-editor --> ir-interceptor
+  ir-booking-editor --> ir-booking-editor-header
+  ir-booking-editor --> igl-room-type
+  ir-booking-editor --> ir-booking-editor-form
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
-  igl-book-property --> igl-block-dates-view
-  igl-book-property --> ir-spinner
-  igl-book-property --> ir-custom-button
-  igl-book-property --> igl-booking-overview-page
-  igl-book-property --> igl-booking-form
-  igl-book-property --> ir-button
-  igl-book-property --> igl-book-property-footer
-  igl-block-dates-view --> ir-date-view
-  igl-booking-overview-page --> igl-book-property-header
-  igl-booking-overview-page --> igl-room-type
-  igl-book-property-header --> ir-picker
-  igl-book-property-header --> ir-picker-item
-  igl-book-property-header --> ir-validator
-  igl-book-property-header --> igl-date-range
-  igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  ir-booking-editor-header --> ir-validator
+  ir-booking-editor-header --> ir-picker
+  ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> igl-date-range
+  ir-booking-editor-header --> ir-custom-button
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
-  igl-booking-form --> ir-date-view
-  igl-booking-form --> igl-application-info
-  igl-booking-form --> igl-property-booked-by
+  ir-booking-editor-form --> ir-date-view
+  ir-booking-editor-form --> igl-application-info
+  ir-booking-editor-form --> ir-picker
+  ir-booking-editor-form --> ir-picker-item
+  ir-booking-editor-form --> ir-custom-button
+  ir-booking-editor-form --> ir-booking-editor-guest-form
   igl-application-info --> ir-validator
   igl-application-info --> ir-input
-  igl-property-booked-by --> ir-picker
-  igl-property-booked-by --> ir-picker-item
-  igl-property-booked-by --> ir-validator
-  igl-property-booked-by --> ir-input
-  igl-property-booked-by --> ir-country-picker
-  igl-property-booked-by --> ir-mobile-input
+  ir-booking-editor-guest-form --> ir-input
+  ir-booking-editor-guest-form --> ir-validator
+  ir-booking-editor-guest-form --> ir-country-picker
+  ir-booking-editor-guest-form --> ir-mobile-input
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
   ir-mobile-input --> ir-input
-  igl-book-property-footer --> ir-custom-button
   ir-range-picker --> ir-date-picker
   ir-booking-listing --> ir-listing-header
   style ir-listing-header fill:#f9f,stroke:#333,stroke-width:4px

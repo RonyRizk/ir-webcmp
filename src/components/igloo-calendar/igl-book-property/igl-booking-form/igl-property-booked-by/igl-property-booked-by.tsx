@@ -6,7 +6,7 @@ import locales from '@/stores/locales.store';
 import { TPropertyButtonsTypes } from '@/components';
 import { z } from 'zod';
 import { validateEmail } from '@/utils/utils';
-import booking_store, { BookingStore, modifyBookingStore } from '@/stores/booking.store';
+import booking_store, { BookingStore, modifyBookingStore, setBookedByGuestManualEditState } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import { AllowedPaymentMethod } from '@/models/booking.dto';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
@@ -110,6 +110,9 @@ export class IglPropertyBookedBy {
       key: 'bookedByInfoUpdated',
       data: { ...this.bookedByData },
     });
+    if (key === 'firstName' || key === 'lastName') {
+      setBookedByGuestManualEditState(true);
+    }
     if (key === 'countryId') {
       this.bookedByData = {
         ...this.bookedByData,
@@ -133,9 +136,10 @@ export class IglPropertyBookedBy {
     // console.log(this.bookedByData);
   }
   private handleCountryChange(value) {
+    const country = this.countries?.find(country => country.id === value);
     this.bookedByData = {
       ...this.bookedByData,
-      isdCode: value,
+      isdCode: this.bookedByData?.contactNumber ? this.bookedByData?.isdCode : country?.phone_prefix,
       countryId: value,
     };
     this.dataUpdateEvent.emit({
@@ -181,6 +185,7 @@ export class IglPropertyBookedBy {
       isdCode: this.country.toString(),
       countryId: this.country,
     };
+    setBookedByGuestManualEditState(false);
     this.dataUpdateEvent.emit({
       key: 'bookedByInfoUpdated',
       data: { ...this.bookedByData },

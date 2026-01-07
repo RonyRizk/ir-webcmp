@@ -129,6 +129,7 @@ function runDeparturesPipeline() {
   departuresStore.paginatedBookings = searchedBookings;
 
   const split = splitBookingsByStatus(searchedBookings);
+  console.log(searchedBookings, split);
   departuresStore.needsCheckOutBookings = split.needsCheckOut;
   departuresStore.outBookings = split.out;
   departuresStore.futureRooms = split.futureRooms;

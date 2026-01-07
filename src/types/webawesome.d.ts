@@ -51,11 +51,17 @@ type WithInput<T> = T & {
   name?: string;
 };
 
+type WithRole<T> = T & {
+  role?: string;
+};
+
 declare module '@stencil/core' {
   export namespace JSX {
     interface IntrinsicElements {
       'wa-button': WithHTMLEvents<CustomElements['wa-button']>;
+      'wa-option': WithHTMLEvents<CustomElements['wa-option']>;
       'wa-input': WithInput<CustomElements['wa-input']>;
+      'wa-icon': WithRole<CustomElements['wa-icon']>;
     }
   }
 }

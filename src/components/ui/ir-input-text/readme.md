@@ -103,7 +103,6 @@
 
 ### Used by
 
- - [igl-legends](../../igloo-calendar/igl-legends)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-country-picker](../ir-country-picker)
  - [ir-guest-info](../../ir-guest-info)
@@ -118,7 +117,6 @@
 ### Graph
 ```mermaid
 graph TD;
-  igl-legends --> ir-input-text
   ir-booking-email-logs --> ir-input-text
   ir-country-picker --> ir-input-text
   ir-guest-info --> ir-input-text

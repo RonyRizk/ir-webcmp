@@ -255,3 +255,16 @@ export type ExposedGuest = z.infer<typeof ExposedGuestSchema>;
 
 export const ExposedGuestsSchema = z.array(ExposedGuestSchema);
 export type ExposedGuests = z.infer<typeof ExposedGuestsSchema>;
+
+export const CalculateExclusiveTaxPropsSchema = z.object({
+  property_id: z.number().min(1),
+  amount: z.number(),
+});
+
+export type CalculateExclusiveTaxProps = z.infer<typeof CalculateExclusiveTaxPropsSchema>;
+
+export const AckExposedRevisionPropsSchema = z.object({
+  revision_id: z.number(),
+});
+
+export type AckExposedRevisionProps = z.infer<typeof AckExposedRevisionPropsSchema>;

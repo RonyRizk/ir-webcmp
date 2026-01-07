@@ -37,9 +37,15 @@
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-user-management](../../ir-user-management)
 
+### Depends on
+
+- [ir-toast-provider](../../ir-toast-provider)
+
 ### Graph
 ```mermaid
 graph TD;
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   igl-book-property-container --> ir-toast
   igloo-calendar --> ir-toast
   ir-arrivals --> ir-toast

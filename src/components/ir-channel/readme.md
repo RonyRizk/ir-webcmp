@@ -38,6 +38,8 @@ graph TD;
   ir-channel --> ir-sidebar
   ir-channel --> ir-channel-editor
   ir-channel --> ir-modal
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-button --> ir-icons
   ir-sidebar --> ir-icon
   ir-channel-editor --> ir-channel-general

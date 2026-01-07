@@ -1,7 +1,5 @@
 # igl-book-property-header
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -58,8 +56,9 @@ graph TD;
   igl-book-property-header --> ir-validator
   igl-book-property-header --> igl-date-range
   igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-booking-overview-page --> igl-book-property-header
   style igl-book-property-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

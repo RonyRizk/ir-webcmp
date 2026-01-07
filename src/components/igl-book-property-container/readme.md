@@ -1,7 +1,5 @@
 # igl-book-property-container
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -27,10 +25,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-listing-header](../ir-booking-listing/ir-listing-header)
-
 ### Depends on
 
 - [ir-toast](../ui/ir-toast)
@@ -43,6 +37,8 @@ graph TD;
   igl-book-property-container --> ir-toast
   igl-book-property-container --> ir-interceptor
   igl-book-property-container --> igl-book-property
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-alert
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
@@ -64,8 +60,9 @@ graph TD;
   igl-book-property-header --> ir-validator
   igl-book-property-header --> igl-date-range
   igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
@@ -85,7 +82,6 @@ graph TD;
   ir-country-picker --> ir-input-text
   ir-mobile-input --> ir-input
   igl-book-property-footer --> ir-custom-button
-  ir-listing-header --> igl-book-property-container
   style igl-book-property-container fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

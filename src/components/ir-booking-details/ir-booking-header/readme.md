@@ -53,6 +53,7 @@ graph TD;
   ir-booking-header --> ir-popover
   ir-booking-header --> ir-dialog
   ir-pms-logs --> ir-spinner
+  ir-pms-logs --> ir-custom-button
   ir-events-log --> ir-spinner
   ir-booking-details --> ir-booking-header
   style ir-booking-header fill:#f9f,stroke:#333,stroke-width:4px

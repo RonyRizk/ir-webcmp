@@ -57,7 +57,6 @@ Type: `Promise<void>`
  - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [igl-tba-booking-view](../../igloo-calendar/igl-to-be-assigned/igl-tba-booking-view)
- - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-channel](../../ir-channel)
@@ -80,7 +79,6 @@ Type: `Promise<void>`
  - [ir-modal](../ir-modal)
  - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
  - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
- - [ir-notifications](../../ir-notifications)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-otp-modal](../../ir-otp-modal)
  - [ir-payment-action](../../ir-booking-details/ir-payment-details/ir-payment-actions/ir-payment-action)
@@ -114,7 +112,6 @@ graph TD;
   igl-bulk-stop-sale --> ir-button
   igl-split-booking --> ir-button
   igl-tba-booking-view --> ir-button
-  igl-to-be-assigned --> ir-button
   ir-booking-email-logs --> ir-button
   ir-booking-guarantee --> ir-button
   ir-channel --> ir-button
@@ -137,7 +134,6 @@ graph TD;
   ir-modal --> ir-button
   ir-monthly-bookings-report --> ir-button
   ir-monthly-bookings-report-filter --> ir-button
-  ir-notifications --> ir-button
   ir-option-details --> ir-button
   ir-otp-modal --> ir-button
   ir-payment-action --> ir-button

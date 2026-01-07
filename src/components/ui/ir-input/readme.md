@@ -56,6 +56,29 @@
 | `text-change` |             | `CustomEvent<string>` |
 
 
+## Methods
+
+### `blurInput() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `focusInput() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+
 ## Dependencies
 
 ### Used by
@@ -65,6 +88,7 @@
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [ir-arrivals-filters](../../ir-arrivals/ir-arrivals-filters)
  - [ir-booking-company-form](../../ir-booking-company-dialog/ir-booking-company-form)
+ - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
  - [ir-custom-date-picker](../../ir-custom-date-picker)
  - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
@@ -74,8 +98,10 @@
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
+ - [ir-property-switcher-dialog-content](../../ir-property-switcher)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-secure-tasks](../../ir-secure-tasks)
+ - [ir-test3-cmp](../../ir-test-cmp)
 
 ### Graph
 ```mermaid
@@ -85,6 +111,7 @@ graph TD;
   igl-rate-plan --> ir-input
   ir-arrivals-filters --> ir-input
   ir-booking-company-form --> ir-input
+  ir-booking-editor-guest-form --> ir-input
   ir-custom-date-picker --> ir-input
   ir-date-select --> ir-input
   ir-departures-filter --> ir-input
@@ -94,8 +121,10 @@ graph TD;
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input
+  ir-property-switcher-dialog-content --> ir-input
   ir-room-guests-form --> ir-input
   ir-secure-tasks --> ir-input
+  ir-test3-cmp --> ir-input
   style ir-input fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
