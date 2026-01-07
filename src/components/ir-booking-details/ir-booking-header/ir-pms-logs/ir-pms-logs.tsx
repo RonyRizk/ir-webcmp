@@ -58,7 +58,7 @@ export class IrPmsLogs {
               <p class="list-title p-0 m-0">{locales.entries.Lcz_Acknowledged}</p>
               <div class="d-flex align-items-center" style={{ gap: '1rem' }}>
                 <p class={`list-item  ${this.pmsLogs?.is_acknowledged ? 'green' : 'red'}`}>{this.pmsLogs?.is_acknowledged ? locales.entries.Lcz_YES : locales.entries.Lcz_NO}</p>
-                {!this.pmsLogs?.is_acknowledged && this.userTypeCode === '1' && (
+                {!this.pmsLogs?.is_acknowledged && this.pmsLogs?.revision_id && this.userTypeCode === '1' && (
                   <ir-custom-button
                     variant="brand"
                     loading={isRequestPending('/Ack_Exposed_Revision')}
