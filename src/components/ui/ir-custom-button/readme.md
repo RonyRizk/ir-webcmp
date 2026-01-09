@@ -88,6 +88,7 @@
  - [ir-pms-page](../../pms-header/ir-pms-page)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
+ - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reallocation-drawer](../../ir-reallocation-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-room](../../ir-booking-details/ir-room)
@@ -144,6 +145,7 @@ graph TD;
   ir-pms-page --> ir-custom-button
   ir-preview-screen-dialog --> ir-custom-button
   ir-property-switcher --> ir-custom-button
+  ir-queue-manager --> ir-custom-button
   ir-reallocation-drawer --> ir-custom-button
   ir-reservation-information --> ir-custom-button
   ir-room --> ir-custom-button

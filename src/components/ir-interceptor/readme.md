@@ -40,6 +40,7 @@
  - [ir-login](../ir-login)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
  - [ir-payment-option](../ir-payment-option)
+ - [ir-queue-manager](../ir-queue-manager)
  - [ir-reset-password](../ir-reset-password)
  - [ir-sales-by-channel](../ir-sales-by-channel)
  - [ir-sales-by-country](../ir-sales-by-country)
@@ -75,6 +76,7 @@ graph TD;
   ir-login --> ir-interceptor
   ir-monthly-bookings-report --> ir-interceptor
   ir-payment-option --> ir-interceptor
+  ir-queue-manager --> ir-interceptor
   ir-reset-password --> ir-interceptor
   ir-sales-by-channel --> ir-interceptor
   ir-sales-by-country --> ir-interceptor

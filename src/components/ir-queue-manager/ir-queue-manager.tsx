@@ -1,4 +1,5 @@
 import Token from '@/models/Token';
+import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
 import axios from 'axios';
 
@@ -36,6 +37,10 @@ export class IrQueueManager {
   }
 
   private async init() {
+    await this.fetchData();
+    this.isLoading = false;
+  }
+  private async fetchData() {
     const { data } = await axios.post('/Get_Q_Summary', {});
     if (data.ExceptionMsg) {
       return;
@@ -49,7 +54,6 @@ export class IrQueueManager {
         total_pending: r.total_pending,
       };
     });
-    this.isLoading = false;
   }
   private formatResults(data: string): {
     properties: string[];
@@ -91,8 +95,21 @@ export class IrQueueManager {
 
     return (
       <Host>
+        <ir-interceptor></ir-interceptor>
+        <ir-toast></ir-toast>
         <div class="ir-page__container">
-          <h3 class="page-title">Pending Queues</h3>
+          <div class="queue-page__header">
+            <h3 class="page-title">Pending Queues</h3>
+            <ir-custom-button
+              onClickHandler={() => {
+                this.fetchData();
+              }}
+              appearance="filled"
+              loading={isRequestPending('/Get_Q_Summary')}
+            >
+              <wa-icon name="refresh"></wa-icon>
+            </ir-custom-button>
+          </div>
 
           {this.data.length === 0 && <ir-empty-state style={{ marginTop: '20vh' }}></ir-empty-state>}
 
@@ -114,7 +131,9 @@ export class IrQueueManager {
                       <div class="queue-item__status">
                         <wa-progress-bar class="queue-item__progress" value={percentage}></wa-progress-bar>
 
-                        <span class="queue-item__count">{pending}</span>
+                        <span class="queue-item__count">
+                          {pending} ({percentage.toFixed(2)}%)
+                        </span>
                       </div>
                     </div>
                   );
