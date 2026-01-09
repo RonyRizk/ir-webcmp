@@ -31,6 +31,7 @@
  - [ir-notifications](../ir-notifications)
  - [ir-payments-folio](../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup-view](../ir-booking-details/ir-pickup-view)
+ - [ir-queue-manager](../ir-queue-manager)
  - [ir-reallocation-form](../ir-reallocation-drawer/ir-reallocation-form)
 
 ### Graph
@@ -44,6 +45,7 @@ graph TD;
   ir-notifications --> ir-empty-state
   ir-payments-folio --> ir-empty-state
   ir-pickup-view --> ir-empty-state
+  ir-queue-manager --> ir-empty-state
   ir-reallocation-form --> ir-empty-state
   style ir-empty-state fill:#f9f,stroke:#333,stroke-width:4px
 ```

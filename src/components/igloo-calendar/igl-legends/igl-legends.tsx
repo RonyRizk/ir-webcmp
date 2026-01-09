@@ -106,8 +106,20 @@ export class IglLegends {
   private handleLoaderComplete(index: number) {
     this.loadingIndex = this.loadingIndex.filter(currentIndex => currentIndex !== index);
   }
-
+  private updateLegend() {
+    let newLegendArray = [...calendar_data.property.calendar_legends];
+    //step 1: replace scheduled cleaning index 12 with dirty now index 11;
+    let dirtyNow = newLegendArray[11];
+    newLegendArray[11] = newLegendArray[12];
+    newLegendArray[12] = dirtyNow;
+    //step 2: move index 13 to index 7 and push the other 1 index lower;
+    const splitBooking = newLegendArray[13];
+    newLegendArray = newLegendArray.filter((_, i) => i !== 13);
+    newLegendArray.splice(7, 0, splitBooking);
+    return newLegendArray;
+  }
   render() {
+    const legend = this.updateLegend();
     return (
       <Host class="legendContainer text-left">
         <div class="fd-legend__header">
@@ -120,7 +132,7 @@ export class IglLegends {
         </div>
         <section class="fd-legend__body">
           <div>
-            {this.legendData.map(legendInfo => {
+            {legend.map(legendInfo => {
               const stripeColor = calendar_data.colorsForegrounds[legendInfo?.color];
               return (
                 <div class="fd-legend__row">

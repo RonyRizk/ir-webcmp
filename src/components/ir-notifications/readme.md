@@ -23,8 +23,8 @@
 
 ### Used by
 
+ - [ir-pms-page](../pms-header/ir-pms-page)
  - [ir-test-cmp](../ir-test-cmp)
- - [ir-test3-cmp](../ir-test-cmp)
 
 ### Depends on
 
@@ -36,8 +36,8 @@
 graph TD;
   ir-notifications --> ir-custom-button
   ir-notifications --> ir-empty-state
+  ir-pms-page --> ir-notifications
   ir-test-cmp --> ir-notifications
-  ir-test3-cmp --> ir-notifications
   style ir-notifications fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -1,5 +1,4 @@
 import { IglBookPropertyPayloadPlusBooking } from '@/models/igl-book-property';
-import locales from '@/stores/locales.store';
 import { Component, Host, Prop, State, h } from '@stencil/core';
 
 @Component({
@@ -34,7 +33,7 @@ export class IrBookingNewForm {
       NAME: '',
       PHONE: '',
       REFERENCE_TYPE: '',
-      TITLE: locales?.entries.Lcz_NewBooking,
+      TITLE: 'New Booking',
     };
   }
   render() {

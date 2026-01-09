@@ -85,15 +85,15 @@
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
  - [ir-pms-logs](../../ir-booking-details/ir-booking-header/ir-pms-logs)
+ - [ir-pms-page](../../pms-header/ir-pms-page)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
- - [ir-property-switcher](../../ir-property-switcher)
+ - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-reallocation-drawer](../../ir-reallocation-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-test2-cmp](../../ir-test-cmp)
- - [ir-test3-cmp](../../ir-test-cmp)
 
 ### Graph
 ```mermaid
@@ -141,6 +141,7 @@ graph TD;
   ir-pickup --> ir-custom-button
   ir-pickup-view --> ir-custom-button
   ir-pms-logs --> ir-custom-button
+  ir-pms-page --> ir-custom-button
   ir-preview-screen-dialog --> ir-custom-button
   ir-property-switcher --> ir-custom-button
   ir-reallocation-drawer --> ir-custom-button
@@ -149,7 +150,6 @@ graph TD;
   ir-room-guests --> ir-custom-button
   ir-secure-tasks --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
-  ir-test3-cmp --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -16,7 +16,7 @@ export class BookingListingService {
     initializeUserSelection();
   }
 
-  public async getExposedBookings(params: ExposedBookingsParams, options?: { append?: boolean }) {
+  public async getExposedBookings(params: ExposedBookingsParams, options?: { append?: boolean; skipStore?: boolean }) {
     const { property_id, userTypeCode, channel, property_ids, ...rest } = params;
     const havePrivilege = isPrivilegedUser(userTypeCode);
     const { data } = await axios.post(`/Get_Exposed_Bookings`, {
@@ -28,6 +28,9 @@ export class BookingListingService {
     });
     const result = data.My_Result;
     const header = data.My_Params_Get_Exposed_Bookings;
+    if (options?.skipStore) {
+      return result;
+    }
     if (options?.append) {
       booking_listing.bookings = [...booking_listing.bookings, ...result];
     } else {

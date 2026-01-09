@@ -35,7 +35,7 @@
  - [ir-extra-service-config](../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-guest-info-drawer](../ir-guest-info/ir-guest-info-drawer)
  - [ir-invoice](../ir-invoice)
- - [ir-menu-drawer](../ir-menu-drawer)
+ - [ir-menu-drawer](../pms-header/ir-menu-drawer)
  - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
  - [ir-pickup](../ir-booking-details/ir-pickup)
  - [ir-reallocation-drawer](../ir-reallocation-drawer)

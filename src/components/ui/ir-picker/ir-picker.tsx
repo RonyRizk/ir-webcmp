@@ -111,13 +111,18 @@ export class IrPicker {
   }
 
   @Method()
+  async focusInput() {
+    this._focusInput();
+  }
+
+  @Method()
   async open() {
     if (this.isOpen) {
-      this.focusInput();
+      this._focusInput();
       return;
     }
     this.isOpen = true;
-    requestAnimationFrame(() => this.focusInput());
+    requestAnimationFrame(() => this._focusInput());
     if (this.filteredItems.length) {
       const selectedIndex = this.filteredItems.findIndex(item => item.value === this.value);
       if (selectedIndex >= 0) {
@@ -187,7 +192,7 @@ export class IrPicker {
   private closeCombobox(options: { restoreFocus?: boolean } = {}) {
     this.isOpen = false;
     if (options.restoreFocus) {
-      this.focusInput();
+      this._focusInput();
     }
   }
 
@@ -356,7 +361,7 @@ export class IrPicker {
     this.activeIndex = -1;
   }
 
-  private focusInput() {
+  private _focusInput() {
     this.inputRef?.focus();
     this.nativeInput?.focus();
   }
@@ -581,6 +586,7 @@ export class IrPicker {
             {this.loading && <wa-spinner slot="end"></wa-spinner>}
 
             <wa-icon slot="start" name="magnifying-glass" aria-hidden="true"></wa-icon>
+            <slot name="end" slot="end"></slot>
           </wa-input>
           <div class="menu" role="presentation">
             <p class="sr-only" id={this.listboxLabelId}>

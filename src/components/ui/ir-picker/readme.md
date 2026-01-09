@@ -54,6 +54,16 @@ Type: `Promise<void>`
 
 
 
+### `focusInput() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 ### `open() => Promise<void>`
 
 
@@ -75,6 +85,7 @@ Type: `Promise<void>`
  - [ir-booking-editor-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-form)
  - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-country-picker](../ir-country-picker)
+ - [ir-pms-search](../../pms-header/ir-pms-search)
 
 ### Graph
 ```mermaid
@@ -85,6 +96,7 @@ graph TD;
   ir-booking-editor-form --> ir-picker
   ir-booking-editor-header --> ir-picker
   ir-country-picker --> ir-picker
+  ir-pms-search --> ir-picker
   style ir-picker fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

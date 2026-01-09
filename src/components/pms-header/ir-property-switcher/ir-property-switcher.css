@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+.property-switcher__trigger {
+  width: 200px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.property-switcher__dialog::part(body) {
+  padding: 0;
+}

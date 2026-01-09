@@ -64,7 +64,7 @@ Type: `Promise<void>`
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
- - [ir-property-switcher](../../ir-property-switcher)
+ - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-room](../../ir-booking-details/ir-room)
 
 ### Graph
