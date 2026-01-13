@@ -34,9 +34,10 @@
 - [ir-interceptor](../ir-interceptor)
 - [ir-toast](../ui/ir-toast)
 - [ir-title](../ir-title)
-- [ir-input-text](../ui/ir-input-text)
+- [ir-validator](../ui/ir-validator)
+- [ir-input](../ui/ir-input)
 - [ir-password-validator](../ir-password-validator)
-- [ir-button](../ui/ir-button)
+- [ir-custom-button](../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
@@ -44,9 +45,10 @@ graph TD;
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
-  ir-reset-password --> ir-input-text
+  ir-reset-password --> ir-validator
+  ir-reset-password --> ir-input
   ir-reset-password --> ir-password-validator
-  ir-reset-password --> ir-button
+  ir-reset-password --> ir-custom-button
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner

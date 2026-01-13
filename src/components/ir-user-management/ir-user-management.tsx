@@ -25,6 +25,9 @@ export class IrUserManagement {
   @Prop() baseUserTypeCode: string | number;
   @Prop() userId: string | number;
 
+  @State() currentTrigger: any = null;
+  @State() user: User = null;
+
   @State() isLoading = true;
   @State() users: User[] = [];
   @State() property_id: number;
@@ -213,10 +216,10 @@ export class IrUserManagement {
         <ir-toast></ir-toast>
         <ir-interceptor suppressToastEndpoints={['/Change_User_Pwd', '/Handle_Exposed_User']}></ir-interceptor>
         <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex  pb-2 align-items-center justify-content-between">
+          {/* <div class="d-flex  pb-2 align-items-center justify-content-between">
             <h3 class="mb-1 mb-md-0">{locales.entries.Lcz_ExtranetUsers}</h3>
-          </div>
-
+          </div> */}
+          <h3 class="page-title">{locales.entries.Lcz_ExtranetUsers}</h3>
           <div class="" style={{ gap: '1rem' }}>
             <ir-user-management-table
               property_id={this.property_id}
@@ -225,7 +228,6 @@ export class IrUserManagement {
               userTypeCode={this.userTypeCode}
               haveAdminPrivileges={[this.superAdminId, '17'].includes(this.userTypeCode?.toString())}
               userTypes={this.userTypes}
-              class="card"
               isSuperAdmin={this.userTypeCode?.toString() === this.superAdminId}
               users={this.users}
             ></ir-user-management-table>

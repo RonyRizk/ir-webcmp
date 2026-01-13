@@ -358,7 +358,6 @@ export class IrInput {
   }
   @Method()
   async focusInput() {
-    console.log(this.inputRef);
     this.inputRef?.focus();
   }
 

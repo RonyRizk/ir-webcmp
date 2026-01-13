@@ -40,6 +40,7 @@
  - [ir-pickup](../ir-booking-details/ir-pickup)
  - [ir-reallocation-drawer](../ir-reallocation-drawer)
  - [ir-room-guests](../ir-booking-details/ir-room-guests)
+ - [ir-user-form-panel-drawer](../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
 
 ### Graph
 ```mermaid
@@ -56,6 +57,7 @@ graph TD;
   ir-pickup --> ir-drawer
   ir-reallocation-drawer --> ir-drawer
   ir-room-guests --> ir-drawer
+  ir-user-form-panel-drawer --> ir-drawer
   style ir-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

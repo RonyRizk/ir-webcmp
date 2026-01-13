@@ -58,10 +58,10 @@ import { DailyReport, DailyReportFilter } from "./components/ir-monthly-bookings
 import { Notification } from "./components/ir-notifications/types";
 import { PaymentOption } from "./models/payment-options";
 import { IrComboboxSelectEventDetail } from "./components/ui/ir-picker/ir-picker";
+import { AllowedProperties, FetchedProperty, LinkedProperty } from "./services/property.service";
 import { Moment as Moment1 } from "moment";
 import { SidebarOpenEvent as SidebarOpenEvent1 } from "./components/ir-daily-revenue/types";
 import { ChannelReportResult, ChannelSaleFilter, SalesByChannelMode } from "./components/ir-sales-by-channel/types";
-import { AllowedProperties } from "./services/property.service";
 import { CountrySalesFilter, MappedCountries, SalesRecord } from "./components/ir-sales-by-country/types";
 import { TIcons as TIcons1 } from "./components/ui/ir-icons/icons";
 import { Tab } from "./components/ui/ir-tabs/ir-tabs";
@@ -124,10 +124,10 @@ export { DailyReport, DailyReportFilter } from "./components/ir-monthly-bookings
 export { Notification } from "./components/ir-notifications/types";
 export { PaymentOption } from "./models/payment-options";
 export { IrComboboxSelectEventDetail } from "./components/ui/ir-picker/ir-picker";
+export { AllowedProperties, FetchedProperty, LinkedProperty } from "./services/property.service";
 export { Moment as Moment1 } from "moment";
 export { SidebarOpenEvent as SidebarOpenEvent1 } from "./components/ir-daily-revenue/types";
 export { ChannelReportResult, ChannelSaleFilter, SalesByChannelMode } from "./components/ir-sales-by-channel/types";
-export { AllowedProperties } from "./services/property.service";
 export { CountrySalesFilter, MappedCountries, SalesRecord } from "./components/ir-sales-by-country/types";
 export { TIcons as TIcons1 } from "./components/ui/ir-icons/icons";
 export { Tab } from "./components/ui/ir-tabs/ir-tabs";
@@ -3036,6 +3036,7 @@ export namespace Components {
         "percentage": string;
     }
     interface IrPropertySwitcher {
+        "baseUrl": string;
         "mode": 'dropdown' | 'dialog';
         "ticket": string;
     }
@@ -3048,6 +3049,10 @@ export namespace Components {
           * Whether the surrounding dialog is open. Used to focus and reset the search input as needed.
          */
         "open": boolean;
+        /**
+          * Linked properties provided by the parent switcher.
+         */
+        "properties": LinkedProperty[];
         /**
           * ID of the property that is currently selected in the parent component.
          */
@@ -3666,9 +3671,23 @@ export namespace Components {
     interface IrUserFormPanel {
         "allowedUsersTypes": AllowedUser[];
         "baseUserTypeCode": string | number;
+        "formId": string;
         "haveAdminPrivileges": boolean;
         "isEdit": boolean;
         "language": string;
+        "property_id": number;
+        "superAdminId": string;
+        "user": User;
+        "userTypeCode": string | number;
+        "userTypes": { new (entries?: readonly (readonly [string | number, string])[]): Map<string | number, string>; new (iterable?: Iterable<readonly [string | number, string]>): Map<string | number, string>; readonly prototype: Map<any, any>; readonly [Symbol.species]: MapConstructor; };
+    }
+    interface IrUserFormPanelDrawer {
+        "allowedUsersTypes": AllowedUser[];
+        "baseUserTypeCode": string | number;
+        "haveAdminPrivileges": boolean;
+        "isEdit": boolean;
+        "language": string;
+        "open": boolean;
         "property_id": number;
         "superAdminId": string;
         "user": User;
@@ -3698,6 +3717,7 @@ export namespace Components {
         "users": User[];
     }
     interface IrValidator {
+        "asyncValidation": boolean;
         /**
           * Enables automatic validation on every value change.
          */
@@ -4371,6 +4391,10 @@ export interface IrUnitStatusCustomEvent<T> extends CustomEvent<T> {
 export interface IrUserFormPanelCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrUserFormPanelElement;
+}
+export interface IrUserFormPanelDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrUserFormPanelDrawerElement;
 }
 export interface IrUserManagementTableCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -7003,7 +7027,8 @@ declare global {
         new (): HTMLIrProgressIndicatorElement;
     };
     interface HTMLIrPropertySwitcherElementEventMap {
-        "propertyChange": AllowedProperty;
+        "propertyChange": FetchedProperty;
+        "linkedPropertyChange": { linkedProperty: LinkedProperty; property: FetchedProperty };
     }
     interface HTMLIrPropertySwitcherElement extends Components.IrPropertySwitcher, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrPropertySwitcherElementEventMap>(type: K, listener: (this: HTMLIrPropertySwitcherElement, ev: IrPropertySwitcherCustomEvent<HTMLIrPropertySwitcherElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -7020,7 +7045,8 @@ declare global {
         new (): HTMLIrPropertySwitcherElement;
     };
     interface HTMLIrPropertySwitcherDialogContentElementEventMap {
-        "propertySelected": AllowedProperty;
+        "propertySelected": FetchedProperty['PROPERTY_ID'];
+        "linkedPropertyChange": LinkedProperty;
     }
     /**
      * Internal component responsible for rendering the searchable list of properties inside the switcher dialog.
@@ -7676,6 +7702,23 @@ declare global {
         prototype: HTMLIrUserFormPanelElement;
         new (): HTMLIrUserFormPanelElement;
     };
+    interface HTMLIrUserFormPanelDrawerElementEventMap {
+        "closeSideBar": void;
+    }
+    interface HTMLIrUserFormPanelDrawerElement extends Components.IrUserFormPanelDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrUserFormPanelDrawerElementEventMap>(type: K, listener: (this: HTMLIrUserFormPanelDrawerElement, ev: IrUserFormPanelDrawerCustomEvent<HTMLIrUserFormPanelDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrUserFormPanelDrawerElementEventMap>(type: K, listener: (this: HTMLIrUserFormPanelDrawerElement, ev: IrUserFormPanelDrawerCustomEvent<HTMLIrUserFormPanelDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrUserFormPanelDrawerElement: {
+        prototype: HTMLIrUserFormPanelDrawerElement;
+        new (): HTMLIrUserFormPanelDrawerElement;
+    };
     interface HTMLIrUserManagementElement extends Components.IrUserManagement, HTMLStencilElement {
     }
     var HTMLIrUserManagementElement: {
@@ -7981,6 +8024,7 @@ declare global {
         "ir-unit-status": HTMLIrUnitStatusElement;
         "ir-unit-tag": HTMLIrUnitTagElement;
         "ir-user-form-panel": HTMLIrUserFormPanelElement;
+        "ir-user-form-panel-drawer": HTMLIrUserFormPanelDrawerElement;
         "ir-user-management": HTMLIrUserManagementElement;
         "ir-user-management-table": HTMLIrUserManagementTableElement;
         "ir-validator": HTMLIrValidatorElement;
@@ -11270,11 +11314,13 @@ declare namespace LocalJSX {
         "percentage"?: string;
     }
     interface IrPropertySwitcher {
+        "baseUrl"?: string;
         "mode"?: 'dropdown' | 'dialog';
+        "onLinkedPropertyChange"?: (event: IrPropertySwitcherCustomEvent<{ linkedProperty: LinkedProperty; property: FetchedProperty }>) => void;
         /**
-          * Emits whenever the user selects a new property from the switcher dialog.
+          * Emits whenever the user selects a new property
          */
-        "onPropertyChange"?: (event: IrPropertySwitcherCustomEvent<AllowedProperty>) => void;
+        "onPropertyChange"?: (event: IrPropertySwitcherCustomEvent<FetchedProperty>) => void;
         "ticket"?: string;
     }
     /**
@@ -11282,14 +11328,19 @@ declare namespace LocalJSX {
      * It owns the data fetching, filtering and keyboard navigation logic so the parent dialog stays lean.
      */
     interface IrPropertySwitcherDialogContent {
+        "onLinkedPropertyChange"?: (event: IrPropertySwitcherDialogContentCustomEvent<LinkedProperty>) => void;
         /**
           * Emits whenever the user picks a property from the list.
          */
-        "onPropertySelected"?: (event: IrPropertySwitcherDialogContentCustomEvent<AllowedProperty>) => void;
+        "onPropertySelected"?: (event: IrPropertySwitcherDialogContentCustomEvent<FetchedProperty['PROPERTY_ID']>) => void;
         /**
           * Whether the surrounding dialog is open. Used to focus and reset the search input as needed.
          */
         "open"?: boolean;
+        /**
+          * Linked properties provided by the parent switcher.
+         */
+        "properties"?: LinkedProperty[];
         /**
           * ID of the property that is currently selected in the parent component.
          */
@@ -11969,11 +12020,26 @@ declare namespace LocalJSX {
     interface IrUserFormPanel {
         "allowedUsersTypes"?: AllowedUser[];
         "baseUserTypeCode"?: string | number;
+        "formId"?: string;
         "haveAdminPrivileges"?: boolean;
         "isEdit"?: boolean;
         "language"?: string;
         "onCloseSideBar"?: (event: IrUserFormPanelCustomEvent<null>) => void;
         "onResetData"?: (event: IrUserFormPanelCustomEvent<null>) => void;
+        "property_id"?: number;
+        "superAdminId"?: string;
+        "user"?: User;
+        "userTypeCode"?: string | number;
+        "userTypes"?: { new (entries?: readonly (readonly [string | number, string])[]): Map<string | number, string>; new (iterable?: Iterable<readonly [string | number, string]>): Map<string | number, string>; readonly prototype: Map<any, any>; readonly [Symbol.species]: MapConstructor; };
+    }
+    interface IrUserFormPanelDrawer {
+        "allowedUsersTypes"?: AllowedUser[];
+        "baseUserTypeCode"?: string | number;
+        "haveAdminPrivileges"?: boolean;
+        "isEdit"?: boolean;
+        "language"?: string;
+        "onCloseSideBar"?: (event: IrUserFormPanelDrawerCustomEvent<void>) => void;
+        "open"?: boolean;
         "property_id"?: number;
         "superAdminId"?: string;
         "user"?: User;
@@ -12005,6 +12071,7 @@ declare namespace LocalJSX {
         "users"?: User[];
     }
     interface IrValidator {
+        "asyncValidation"?: boolean;
         /**
           * Enables automatic validation on every value change.
          */
@@ -12308,6 +12375,7 @@ declare namespace LocalJSX {
         "ir-unit-status": IrUnitStatus;
         "ir-unit-tag": IrUnitTag;
         "ir-user-form-panel": IrUserFormPanel;
+        "ir-user-form-panel-drawer": IrUserFormPanelDrawer;
         "ir-user-management": IrUserManagement;
         "ir-user-management-table": IrUserManagementTable;
         "ir-validator": IrValidator;
@@ -12563,6 +12631,7 @@ declare module "@stencil/core" {
             "ir-unit-status": LocalJSX.IrUnitStatus & JSXBase.HTMLAttributes<HTMLIrUnitStatusElement>;
             "ir-unit-tag": LocalJSX.IrUnitTag & JSXBase.HTMLAttributes<HTMLIrUnitTagElement>;
             "ir-user-form-panel": LocalJSX.IrUserFormPanel & JSXBase.HTMLAttributes<HTMLIrUserFormPanelElement>;
+            "ir-user-form-panel-drawer": LocalJSX.IrUserFormPanelDrawer & JSXBase.HTMLAttributes<HTMLIrUserFormPanelDrawerElement>;
             "ir-user-management": LocalJSX.IrUserManagement & JSXBase.HTMLAttributes<HTMLIrUserManagementElement>;
             "ir-user-management-table": LocalJSX.IrUserManagementTable & JSXBase.HTMLAttributes<HTMLIrUserManagementTableElement>;
             "ir-validator": LocalJSX.IrValidator & JSXBase.HTMLAttributes<HTMLIrValidatorElement>;

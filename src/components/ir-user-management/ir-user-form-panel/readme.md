@@ -11,6 +11,7 @@
 | --------------------- | ----------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | `allowedUsersTypes`   | --                      |             | `AllowedUser[]`                                                                                                                                                                                                                                                                     | `[]`                            |
 | `baseUserTypeCode`    | `base-user-type-code`   |             | `number \| string`                                                                                                                                                                                                                                                                  | `undefined`                     |
+| `formId`              | `form-id`               |             | `string`                                                                                                                                                                                                                                                                            | `undefined`                     |
 | `haveAdminPrivileges` | `have-admin-privileges` |             | `boolean`                                                                                                                                                                                                                                                                           | `undefined`                     |
 | `isEdit`              | `is-edit`               |             | `boolean`                                                                                                                                                                                                                                                                           | `false`                         |
 | `language`            | `language`              |             | `string`                                                                                                                                                                                                                                                                            | `'en'`                          |
@@ -33,13 +34,12 @@
 
 ### Used by
 
- - [ir-user-management-table](../ir-user-management-table)
+ - [ir-user-form-panel-drawer](ir-user-form-panel-drawer)
 
 ### Depends on
 
-- [ir-title](../../ir-title)
-- [ir-input-text](../../ui/ir-input-text)
-- [ir-select](../../ui/ir-select)
+- [ir-validator](../../ui/ir-validator)
+- [ir-input](../../ui/ir-input)
 - [ir-password-validator](../../ir-password-validator)
 - [ir-button](../../ui/ir-button)
 - [ir-sidebar](../../ui/ir-sidebar)
@@ -48,14 +48,12 @@
 ### Graph
 ```mermaid
 graph TD;
-  ir-user-form-panel --> ir-title
-  ir-user-form-panel --> ir-input-text
-  ir-user-form-panel --> ir-select
+  ir-user-form-panel --> ir-validator
+  ir-user-form-panel --> ir-input
   ir-user-form-panel --> ir-password-validator
   ir-user-form-panel --> ir-button
   ir-user-form-panel --> ir-sidebar
   ir-user-form-panel --> ir-reset-password
-  ir-title --> ir-icon
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
   ir-button --> ir-icons
@@ -63,9 +61,10 @@ graph TD;
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
-  ir-reset-password --> ir-input-text
+  ir-reset-password --> ir-validator
+  ir-reset-password --> ir-input
   ir-reset-password --> ir-password-validator
-  ir-reset-password --> ir-button
+  ir-reset-password --> ir-custom-button
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
@@ -73,7 +72,8 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-user-management-table --> ir-user-form-panel
+  ir-title --> ir-icon
+  ir-user-form-panel-drawer --> ir-user-form-panel
   style ir-user-form-panel fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

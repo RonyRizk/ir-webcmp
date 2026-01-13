@@ -20,17 +20,19 @@ It owns the data fetching, filtering and keyboard navigation logic so the parent
 
 ## Properties
 
-| Property             | Attribute              | Description                                                                                 | Type      | Default     |
-| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `open`               | `open`                 | Whether the surrounding dialog is open. Used to focus and reset the search input as needed. | `boolean` | `false`     |
-| `selectedPropertyId` | `selected-property-id` | ID of the property that is currently selected in the parent component.                      | `number`  | `undefined` |
+| Property             | Attribute              | Description                                                                                 | Type               | Default     |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------- | ------------------ | ----------- |
+| `open`               | `open`                 | Whether the surrounding dialog is open. Used to focus and reset the search input as needed. | `boolean`          | `false`     |
+| `properties`         | --                     | Linked properties provided by the parent switcher.                                          | `LinkedProperty[]` | `[]`        |
+| `selectedPropertyId` | `selected-property-id` | ID of the property that is currently selected in the parent component.                      | `number`           | `undefined` |
 
 
 ## Events
 
-| Event              | Description                                             | Type                                           |
-| ------------------ | ------------------------------------------------------- | ---------------------------------------------- |
-| `propertySelected` | Emits whenever the user picks a property from the list. | `CustomEvent<{ name?: string; id?: number; }>` |
+| Event                  | Description                                             | Type                                                                 |
+| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
+| `linkedPropertyChange` |                                                         | `CustomEvent<{ name: string; property_id: number; token: string; }>` |
+| `propertySelected`     | Emits whenever the user picks a property from the list. | `CustomEvent<number>`                                                |
 
 
 ## Dependencies

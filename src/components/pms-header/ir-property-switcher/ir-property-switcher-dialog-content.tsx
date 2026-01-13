@@ -1,7 +1,7 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
-import { AllowedProperties } from '@/services/property.service';
-
-type AllowedProperty = NonNullable<AllowedProperties>[number];
+import { FetchedProperty, LinkedProperty } from '@/services/property.service';
+import axios from 'axios';
+import { Debounce } from '../../../decorators/debounce';
 
 /**
  * Internal component responsible for rendering the searchable list of properties inside the switcher dialog.
@@ -21,22 +21,19 @@ export class IrPropertySwitcherDialogContent {
   /** ID of the property that is currently selected in the parent component. */
   @Prop() selectedPropertyId?: number;
 
-  /** Emits whenever the user picks a property from the list. */
-  @Event({ bubbles: true, composed: true }) propertySelected: EventEmitter<AllowedProperty>;
+  /** Linked properties provided by the parent switcher. */
+  @Prop() properties: LinkedProperty[] = [];
 
-  @State() private properties: AllowedProperty[] = [];
-  @State() private filteredProperties: AllowedProperty[] = [];
+  /** Emits whenever the user picks a property from the list. */
+  @Event({ bubbles: true, composed: true }) propertySelected: EventEmitter<FetchedProperty['PROPERTY_ID']>;
+  @Event({ bubbles: true, composed: true })
+  linkedPropertyChange: EventEmitter<LinkedProperty>;
+
+  @State() private filteredProperties: FetchedProperty[] = [];
   @State() private searchTerm: string = '';
   @State() private highlightedIndex: number = -1;
-  @State() private isLoading = false;
-  @State() private error: string | null = null;
 
-  // private propertyService = new PropertyService();
   private inputRef?: HTMLIrInputElement;
-
-  componentWillLoad() {
-    this.loadProperties();
-  }
 
   @Watch('open')
   handleOpenChange(isOpen: boolean) {
@@ -45,8 +42,12 @@ export class IrPropertySwitcherDialogContent {
     }
     requestAnimationFrame(() => {
       this.inputRef?.focusInput();
-      this.resetFilters();
+      this.resetSearch();
     });
+  }
+
+  componentDidLoad() {
+    this.inputRef?.focusInput();
   }
 
   @Watch('selectedPropertyId')
@@ -54,52 +55,45 @@ export class IrPropertySwitcherDialogContent {
     this.syncHighlightedIndex();
   }
 
-  private async loadProperties() {
-    this.isLoading = true;
-    this.error = null;
-    try {
-      // const result = await this.propertyService.getExposedAllowedProperties();
-      // this.properties = Array.isArray(result) ? result : [];
-      // this.applyFilters(true);
-    } catch (error) {
-      console.error('Failed to fetch allowed properties', error);
-      this.error = (error as Error)?.message ?? 'Unable to fetch properties.';
-      this.properties = [];
-      this.applyFilters(true);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  private resetFilters() {
+  private resetSearch() {
     this.searchTerm = '';
-    this.applyFilters(true);
+    this.filteredProperties = [];
+    this.highlightedIndex = -1;
   }
 
-  private applyFilters(resetHighlight = false) {
-    const query = this.searchTerm.trim().toLowerCase();
-    const filtered = !query ? [...this.properties] : this.properties.filter(property => property.name.toLowerCase().includes(query));
-    this.filteredProperties = filtered;
-
-    if (!filtered.length) {
+  @Debounce(300)
+  private async fetchProperties(searchTerm: string) {
+    const query = searchTerm.trim();
+    if (!query) {
+      this.filteredProperties = [];
       this.highlightedIndex = -1;
       return;
     }
 
-    if (resetHighlight) {
-      const selectedIndex = this.getSelectedIndex(filtered);
-      this.highlightedIndex = selectedIndex >= 0 ? selectedIndex : 0;
-    } else {
-      this.syncHighlightedIndex();
+    try {
+      const { data } = await axios.post('/Fetch_Properties', { SEARCH_TERM: query });
+      const properties = data.My_Result;
+      this.filteredProperties = properties;
+    } catch (error) {
+      console.error('Failed to fetch properties', error);
+      this.filteredProperties = [];
     }
+
+    if (!this.filteredProperties.length) {
+      this.highlightedIndex = -1;
+      return;
+    }
+
+    const selectedIndex = this.getSelectedIndex(this.filteredProperties);
+    this.highlightedIndex = selectedIndex >= 0 ? selectedIndex : 0;
     requestAnimationFrame(() => this.ensureHighlightedVisible());
   }
 
-  private getSelectedIndex(list: AllowedProperty[]) {
+  private getSelectedIndex(list: FetchedProperty[]) {
     if (!this.selectedPropertyId) {
       return -1;
     }
-    return list.findIndex(property => property.id === this.selectedPropertyId);
+    return list.findIndex(property => this.getPropertyId(property) === this.selectedPropertyId);
   }
 
   private syncHighlightedIndex() {
@@ -107,19 +101,17 @@ export class IrPropertySwitcherDialogContent {
       this.highlightedIndex = -1;
       return;
     }
-
     const selectedIndex = this.getSelectedIndex(this.filteredProperties);
     if (selectedIndex >= 0) {
       this.highlightedIndex = selectedIndex;
       return;
     }
-
     this.highlightedIndex = Math.min(Math.max(this.highlightedIndex, 0), this.filteredProperties.length - 1);
   }
 
   private handleSearchChange = (event: CustomEvent<string>) => {
     this.searchTerm = event.detail ?? '';
-    this.applyFilters(true);
+    this.fetchProperties(this.searchTerm);
   };
 
   private handleKeyDown = (event: KeyboardEvent) => {
@@ -154,11 +146,19 @@ export class IrPropertySwitcherDialogContent {
     option?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
-  private selectProperty(property?: AllowedProperty) {
+  private selectProperty(property?: FetchedProperty | LinkedProperty) {
     if (!property) {
       return;
     }
-    this.propertySelected.emit(property);
+    const propertyId = this.getPropertyId(property);
+    if (typeof propertyId !== 'number') {
+      return;
+    }
+    this.propertySelected.emit(propertyId);
+  }
+
+  private getPropertyId(property: FetchedProperty | LinkedProperty) {
+    return 'PROPERTY_ID' in property ? property.PROPERTY_ID : property.property_id;
   }
 
   private renderStatus(text: string) {
@@ -169,7 +169,7 @@ export class IrPropertySwitcherDialogContent {
     return (
       <Host>
         <ir-input
-          autoFocus
+          autofocus
           ref={el => (this.inputRef = el)}
           placeholder="Find property"
           class="property-switcher__search-input"
@@ -179,21 +179,45 @@ export class IrPropertySwitcherDialogContent {
           withClear
         ></ir-input>
         <div tabIndex={-1} class="property-switcher__results">
-          {this.isLoading && this.renderStatus('Loading properties...')}
-          {!this.isLoading && this.error && this.renderStatus(this.error)}
-          {!this.isLoading && !this.error && this.filteredProperties.length === 0 && this.renderStatus('No properties found')}
-          {!this.isLoading &&
-            !this.error &&
-            this.filteredProperties.map((property, index) => (
+          {!this.searchTerm && this.properties?.length > 0 && (
+            <div>
+              <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>
+                <small>Linked Properties</small>
+              </p>
+              {this.properties.map(property => {
+                const label = `${property.name}`;
+                return (
+                  <wa-option
+                    onClick={() => {
+                      // this.selectProperty(property as any);
+                      this.linkedPropertyChange.emit(property);
+                    }}
+                    selected={this.selectedPropertyId === property.property_id}
+                    value={property.property_id?.toString()}
+                    label={label}
+                  >
+                    {label}
+                  </wa-option>
+                );
+              })}
+              <wa-divider></wa-divider>
+            </div>
+          )}
+          {this.searchTerm && this.filteredProperties.length === 0 && this.renderStatus('No properties found')}
+          {this.filteredProperties.map((property, index) => {
+            const label = `${property.PROPERTY_NAME} ${property.COUNTRY_NAME}`;
+            return (
               <wa-option
-                value={property.id?.toString()}
                 onClick={() => this.selectProperty(property)}
-                selected={this.selectedPropertyId === property.id}
+                selected={this.selectedPropertyId === property.PROPERTY_ID}
                 current={this.highlightedIndex === index}
+                value={property.PROPERTY_ID?.toString()}
+                label={label}
               >
-                {property.name}
+                {label}
               </wa-option>
-            ))}
+            );
+          })}
         </div>
       </Host>
     );

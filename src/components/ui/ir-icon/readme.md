@@ -30,7 +30,6 @@
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
  - [ir-sidebar](../ir-sidebar)
  - [ir-title](../../ir-title)
- - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Graph
 ```mermaid
@@ -41,7 +40,6 @@ graph TD;
   ir-listing-modal --> ir-icon
   ir-sidebar --> ir-icon
   ir-title --> ir-icon
-  ir-user-management-table --> ir-icon
   style ir-icon fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -75,7 +75,6 @@
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-test-cmp](../../ir-test-cmp)
  - [ir-unit-status](../../ir-housekeeping/ir-unit-status)
- - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
 ```mermaid
@@ -97,7 +96,6 @@ graph TD;
   ir-tasks-filters --> ir-select
   ir-test-cmp --> ir-select
   ir-unit-status --> ir-select
-  ir-user-form-panel --> ir-select
   style ir-select fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

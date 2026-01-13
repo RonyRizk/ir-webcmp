@@ -99,8 +99,10 @@ Type: `Promise<void>`
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
  - [ir-property-switcher-dialog-content](../../pms-header/ir-property-switcher)
+ - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-secure-tasks](../../ir-secure-tasks)
+ - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
 ```mermaid
@@ -121,8 +123,10 @@ graph TD;
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input
   ir-property-switcher-dialog-content --> ir-input
+  ir-reset-password --> ir-input
   ir-room-guests-form --> ir-input
   ir-secure-tasks --> ir-input
+  ir-user-form-panel --> ir-input
   style ir-input fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

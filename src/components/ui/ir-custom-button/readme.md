@@ -91,10 +91,13 @@
  - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reallocation-drawer](../../ir-reallocation-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
+ - [ir-reset-password](../../ir-reset-password)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-test2-cmp](../../ir-test-cmp)
+ - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
+ - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Graph
 ```mermaid
@@ -148,10 +151,13 @@ graph TD;
   ir-queue-manager --> ir-custom-button
   ir-reallocation-drawer --> ir-custom-button
   ir-reservation-information --> ir-custom-button
+  ir-reset-password --> ir-custom-button
   ir-room --> ir-custom-button
   ir-room-guests --> ir-custom-button
   ir-secure-tasks --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
+  ir-user-form-panel-drawer --> ir-custom-button
+  ir-user-management-table --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

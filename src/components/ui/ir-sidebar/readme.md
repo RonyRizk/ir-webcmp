@@ -61,7 +61,6 @@ Type: `Promise<void>`
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
- - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Depends on
 
@@ -80,7 +79,6 @@ graph TD;
   ir-hk-team --> ir-sidebar
   ir-payment-option --> ir-sidebar
   ir-user-form-panel --> ir-sidebar
-  ir-user-management-table --> ir-sidebar
   style ir-sidebar fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

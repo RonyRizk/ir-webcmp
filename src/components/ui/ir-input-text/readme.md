@@ -109,10 +109,8 @@
  - [ir-hk-user](../../ir-housekeeping/ir-hk-user)
  - [ir-login](../../ir-login)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
- - [ir-reset-password](../../ir-reset-password)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-test-cmp](../../ir-test-cmp)
- - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
 ```mermaid
@@ -123,10 +121,8 @@ graph TD;
   ir-hk-user --> ir-input-text
   ir-login --> ir-input-text
   ir-option-details --> ir-input-text
-  ir-reset-password --> ir-input-text
   ir-tasks-header --> ir-input-text
   ir-test-cmp --> ir-input-text
-  ir-user-form-panel --> ir-input-text
   style ir-input-text fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

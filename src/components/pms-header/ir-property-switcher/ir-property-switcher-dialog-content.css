@@ -8,7 +8,9 @@
 
 .property-switcher__results {
   max-height: 250px;
+  min-height: 150px;
   overflow-y: auto;
+  padding-bottom: 1rem;
 }
 
 .property-switcher__status {

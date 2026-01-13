@@ -66,6 +66,7 @@ Type: `Promise<void>`
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Graph
 ```mermaid
@@ -84,6 +85,7 @@ graph TD;
   ir-preview-screen-dialog --> ir-dialog
   ir-property-switcher --> ir-dialog
   ir-room --> ir-dialog
+  ir-user-management-table --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -4,49 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate HTML Page</title>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    <title>igloorooms Extranet</title>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/moment.min.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/jquery.min.js"></script>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/daterangepicker.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/inputmask/jquery.inputmask.js"></script>
+    <script src="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/toastr/toastr.min.js"></script>
+    <script type="module" src="dist/ir-webcmp/ir-webcmp.esm.js"></script>
+    <link rel="stylesheet"
+        href="https://wb-cmp.igloorooms.com/backend/dist/collection/assets/scripts/daterangepicker/daterangepicker.css">
 </head>
 
 <body>
-    <button id="generateButton">Generate HTML Page</button>
+    <ir-common></ir-common>
+    <dialog id="toastAlert" class="toast-style">
+        <p>Data saved successfully!</p>
+    </dialog>
+    <ir-drawer open id="mainModal">
+        <h3>Edit Profile</h3>
+        <button onclick="triggerToast()">Save Changes</button>
+        <button onclick="mainModal.close()">Close</button>
+    </ir-drawer>
+
+
+    <style>
+        /* Standard toast styling */
+        .toast-style {
+
+            top: 20px;
+            right: 20px;
+            left: auto;
+            bottom: auto;
+            /* Reset default centering */
+            border: none;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Remove the default backdrop for the toast dialog */
+        #toastAlert::backdrop {
+            background: transparent;
+        }
+    </style>
 
     <script>
-        document.getElementById('generateButton').addEventListener('click', function () {
-            // HTML content to be generated
-            var htmlContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Generated Page</title>
-            </head>
-            <body>
-                <h1>Hello, World!</h1>
-                <p>This is a generated HTML page.</p>
-            </body>
-            </html>
-            `;
+        const mainModal = document.querySelector('#mainModal');
+        const toastAlert = document.querySelector('#toastAlert');
 
-            try {
-                // Create a Blob from the HTML string
-                var blob = new Blob([htmlContent], { type: 'text/html' });
+        mainModal.showModal();
 
-                // Create an object URL from the Blob
-                var url = URL.createObjectURL(blob);
+        function triggerToast() {
+            // Calling showModal() puts it on top of mainModal
+            toastAlert.showModal();
 
-                // Open the URL in a new window or tab
-                window.open(url);
-
-                // Optionally, you can revoke the object URL after some time to free up memory
-                setTimeout(function () {
-                    URL.revokeObjectURL(url);
-                }, 10000); // Adjust the timeout as needed
-            } catch (error) {
-                console.error('Error creating or opening the generated HTML page:', error);
-                alert('Failed to generate and open the HTML page. Check the console for details.');
-            }
-        });
+            // Auto-close after 3 seconds
+            setTimeout(() => {
+                toastAlert.close();
+            }, 3000);
+        }
     </script>
 </body>
 

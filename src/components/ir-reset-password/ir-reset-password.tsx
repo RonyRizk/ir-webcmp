@@ -170,59 +170,58 @@ export class IrResetPassword {
               </div>
               {!this.submitted && (
                 <section>
-                  <div class={'mb-2'}>
+                  <div class={'mb-2 d-flex flex-column'} style={{ gap: '1rem' }}>
                     <div class="m-0 p-0">
                       <div class={'position-relative'}>
-                        <ir-input-text
-                          error={this.error?.password}
-                          autoValidate={this.autoValidate}
-                          value={this.password}
-                          onTextChange={e => (this.password = e.detail)}
-                          label=""
-                          class="m-0 p-0"
-                          inputStyles={'m-0'}
-                          zod={this.ResetPasswordSchema.pick({ password: true })}
-                          wrapKey="password"
-                          placeholder={locales.entries?.Lcz_NewPassword}
-                          onInputFocus={() => (this.showValidator = true)}
-                          type={'password'}
-                        ></ir-input-text>
+                        <ir-validator schema={this.ResetPasswordSchema.shape.password} value={this.password}>
+                          <ir-input
+                            type="password"
+                            passwordToggle
+                            onText-change={e => (this.password = e.detail)}
+                            onInputFocus={() => (this.showValidator = true)}
+                            placeholder={locales.entries?.Lcz_NewPassword}
+                            value={this.password}
+                          ></ir-input>
+                        </ir-validator>
                       </div>
                       {this.showValidator && <ir-password-validator class="mb-1" password={this.password}></ir-password-validator>}
                     </div>
                     <div class={'position-relative'}>
-                      <ir-input-text
-                        error={this.error?.confirm_password}
-                        autoValidate={this.autoValidate}
-                        zod={this.ResetPasswordSchema.pick({ confirm_password: true })}
-                        wrapKey="confirm_password"
-                        value={this.confirmPassword}
-                        onTextChange={e => (this.confirmPassword = e.detail)}
-                        label=""
-                        placeholder={locales.entries?.Lcz_ConfirmPassword}
-                        type={'password'}
-                      ></ir-input-text>
+                      <ir-validator schema={this.ResetPasswordSchema.shape.confirm_password} value={this.confirmPassword}>
+                        <ir-input
+                          type="password"
+                          passwordToggle
+                          onText-change={e => (this.confirmPassword = e.detail)}
+                          placeholder={locales.entries?.Lcz_ConfirmPassword}
+                          value={this.confirmPassword}
+                        ></ir-input>
+                      </ir-validator>
                     </div>
                   </div>
 
                   {!insideSidebar && (
                     <div class="d-flex flex-column mt-2 flex-sm-row align-items-sm-center" style={{ gap: '0.5rem' }}>
-                      <ir-button
-                        btn_styles={'flex-fill'}
+                      <ir-custom-button
+                        // btn_styles={'flex-fill'}
                         onClickHandler={() => window.history.back()}
                         class="flex-fill"
-                        text={locales.entries?.Lcz_Cancel}
-                        size="md"
-                        btn_color="secondary"
-                      ></ir-button>
-                      <ir-button
-                        btn_styles={'flex-fill'}
+                        // text={locales.entries?.Lcz_Cancel}
+                        size="medium"
+                        appearance="filled"
+                        variant="neutral"
+                      >
+                        {locales.entries?.Lcz_Cancel}
+                      </ir-custom-button>
+                      <ir-custom-button
+                        // btn_styles={'flex-fill'}
                         class="flex-fill"
-                        isLoading={this.isLoading}
-                        btn_type="submit"
-                        text={locales.entries?.Lcz_ChangePassword}
-                        size="md"
-                      ></ir-button>
+                        loading={this.isLoading}
+                        type="submit"
+                        size="medium"
+                        variant="brand"
+                      >
+                        {locales.entries?.Lcz_ChangePassword}
+                      </ir-custom-button>
                     </div>
                   )}
                 </section>
@@ -230,22 +229,12 @@ export class IrResetPassword {
             </div>
             {insideSidebar && (
               <div class={'sheet-footer w-full'}>
-                <ir-button
-                  text={locales.entries.Lcz_Cancel}
-                  onClickHandler={() => this.closeSideBar.emit(null)}
-                  class="flex-fill"
-                  btn_color="secondary"
-                  btn_styles="w-100 justify-content-center align-items-center"
-                  size="md"
-                ></ir-button>
-                <ir-button
-                  isLoading={this.isLoading}
-                  class="flex-fill"
-                  btn_type="submit"
-                  btn_styles="w-100 justify-content-center align-items-center"
-                  text={locales.entries.Lcz_ChangePassword}
-                  size="md"
-                ></ir-button>
+                <ir-custom-button onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="medium">
+                  {locales.entries.Lcz_Cancel}
+                </ir-custom-button>
+                <ir-custom-button variant="brand" loading={this.isLoading} class="flex-fill" type="submit" size="medium">
+                  {locales.entries.Lcz_ChangePassword}
+                </ir-custom-button>
               </div>
             )}
           </form>

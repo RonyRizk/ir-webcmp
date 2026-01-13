@@ -4,6 +4,14 @@ import { downloadFile } from '@/utils/utils';
 import axios from 'axios';
 import { z } from 'zod';
 
+export type FetchedProperty = {
+  A_NAME: string;
+  COUNTRY_CODE: string;
+  COUNTRY_NAME: string;
+  PROPERTY_ID: number;
+  PROPERTY_NAME: string;
+};
+export type LinkedProperty = { name: string; property_id: number; token: string };
 export type CountrySalesParams = {
   AC_ID: number;
   WINDOW: number;
@@ -140,6 +148,15 @@ export class PropertyService {
       throw new Error(data.ExceptionMsg);
     }
     return AllowedPropertiesSchema.parse(data.My_Result);
+  }
+
+  public async searchExposedAllowedProperties(searchTerm: string): Promise<FetchedProperty[]> {
+    const payload = searchTerm ? { search_term: searchTerm } : {};
+    const { data } = await axios.post('/Get_Exposed_Allowed_Properties', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return Array.isArray(data.My_Result) ? data.My_Result : [];
   }
 
   public async getCountrySales(params: CountrySalesParams) {

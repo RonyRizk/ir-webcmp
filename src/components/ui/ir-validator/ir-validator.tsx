@@ -1,3 +1,4 @@
+import { Debounce } from '@/decorators/debounce';
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import type { ZodTypeAny } from 'zod';
 
@@ -16,6 +17,7 @@ export class IrValidator {
   /** Zod schema used to validate the child control's value. */
   @Prop() schema!: ZodTypeAny;
   @Prop() value: any;
+  @Prop() asyncValidation: boolean;
 
   @Prop() showErrorMessage: boolean;
 
@@ -75,17 +77,17 @@ export class IrValidator {
   }
 
   @Watch('schema')
-  protected handleSchemaChange() {
+  protected async handleSchemaChange() {
     if (this.autoValidateActive && this.hasInteracted) {
-      this.flushValidation();
+      await this.flushValidation();
     }
   }
 
   @Watch('autovalidate')
-  protected handleAutoValidatePropChange(next?: boolean) {
+  protected async handleAutoValidatePropChange(next?: boolean) {
     this.syncAutovalidateFlag(next);
     if (this.autoValidateActive) {
-      this.flushValidation();
+      await this.flushValidation();
     }
   }
 
@@ -120,12 +122,12 @@ export class IrValidator {
   }
 
   @Watch('value')
-  protected handleValuePropChange(next: unknown, previous: unknown) {
+  protected async handleValuePropChange(next: unknown, previous: unknown) {
     if (Object.is(next, previous)) return;
     // keep the tracked value in sync with external changes without emitting another change event
     this.updateValue(next, { suppressValidation: true, emitChange: false });
     if (this.autoValidateActive && this.hasInteracted) {
-      this.flushValidation();
+      await this.flushValidation();
     }
   }
 
@@ -207,11 +209,11 @@ export class IrValidator {
     this.updateValue(nextValue);
   };
 
-  private handleBlurEvent = () => {
+  private handleBlurEvent = async () => {
     if (!this.childEl) return;
     this.hasInteracted = true;
     if (this.autoValidateActive) {
-      this.flushValidation();
+      await this.flushValidation();
     }
   };
 
@@ -252,11 +254,17 @@ export class IrValidator {
     }
   }
 
-  private validateCurrentValue(forceDisplay = false) {
+  private async validateCurrentValue(forceDisplay = false) {
     if (!this.schema) return true;
     const value = this.currentValue ?? this.readValueFromChild();
     this.currentValue = value;
-    const result = this.schema.safeParse(value);
+    let result;
+    if (this.asyncValidation) {
+      result = await this.schema.safeParseAsync(value);
+    } else {
+      result = this.schema.safeParse(value);
+    }
+
     const nextValidity = result.success;
     const previousValidity = this.isValid;
     this.isValid = nextValidity;
@@ -311,31 +319,32 @@ export class IrValidator {
     return this.el.closest('form');
   }
 
-  private handleFormSubmit = () => {
+  private handleFormSubmit = async () => {
     this.hasInteracted = true;
-    const valid = this.flushValidation();
+    const valid = await this.flushValidation();
     if (!valid && !this.autoValidateActive) {
       this.autoValidateActive = true;
     }
   };
 
-  private scheduleValidation(immediate = false) {
-    this.clearValidationTimer();
-    const delay = Number(this.validationDebounce);
-    if (immediate || !isFinite(delay) || delay <= 0) {
-      return this.validateCurrentValue(true);
-    }
+  @Debounce(300)
+  private async scheduleValidation() {
+    // this.clearValidationTimer();
+    // const delay = Number(this.validationDebounce);
+    // if (immediate || !isFinite(delay) || delay <= 0) {
+    return await this.validateCurrentValue(true);
+    // }
 
-    this.validationTimer = setTimeout(() => {
-      this.validationTimer = undefined;
-      this.validateCurrentValue(true);
-    }, delay);
+    // this.validationTimer = setTimeout(async () => {
+    //   this.validationTimer = undefined;
+    //   await this.validateCurrentValue(true);
+    // }, delay);
 
-    return this.isValid;
+    // return this.isValid;
   }
 
-  private flushValidation() {
-    return this.scheduleValidation(true);
+  private async flushValidation() {
+    return await this.scheduleValidation();
   }
 
   private clearValidationTimer() {

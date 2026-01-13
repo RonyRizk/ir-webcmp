@@ -7,6 +7,7 @@
 
 | Property              | Attribute             | Description                                                                  | Type                     | Default                                           |
 | --------------------- | --------------------- | ---------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------- |
+| `asyncValidation`     | `async-validation`    |                                                                              | `boolean`                | `undefined`                                       |
 | `autovalidate`        | `autovalidate`        | Enables automatic validation on every value change.                          | `boolean`                | `undefined`                                       |
 | `blurEvent`           | `blur-event`          | Event names (space/comma separated) dispatched when the child loses focus.   | `string`                 | `'blur input-blur select-blur'`                   |
 | `form`                | `form`                | Optional form id. Falls back to the closest ancestor form when omitted.      | `string`                 | `undefined`                                       |
@@ -46,7 +47,9 @@
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
+ - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
+ - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
 ```mermaid
@@ -61,7 +64,9 @@ graph TD;
   ir-payment-folio-form --> ir-validator
   ir-pickup-form --> ir-validator
   ir-reallocation-form --> ir-validator
+  ir-reset-password --> ir-validator
   ir-room-guests-form --> ir-validator
+  ir-user-form-panel --> ir-validator
   style ir-validator fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -76,7 +76,6 @@ Type: `Promise<void>`
  - [ir-channel](../../ir-channel)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../../ir-housekeeping)
- - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Depends on
 
@@ -91,7 +90,6 @@ graph TD;
   ir-channel --> ir-modal
   ir-hk-tasks --> ir-modal
   ir-housekeeping --> ir-modal
-  ir-user-management-table --> ir-modal
   style ir-modal fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -382,14 +382,14 @@ graph TD;
   ir-user-management --> ir-interceptor
   ir-user-management --> ir-loading-screen
   ir-user-management --> ir-user-management-table
-  ir-user-management-table --> ir-user-form-panel
-  ir-user-management-table --> ir-icon
-  ir-user-management-table --> ir-switch
-  ir-user-management-table --> ir-sidebar
-  ir-user-management-table --> ir-modal
-  ir-user-form-panel --> ir-title
-  ir-user-form-panel --> ir-input-text
-  ir-user-form-panel --> ir-select
+  ir-user-management-table --> ir-custom-button
+  ir-user-management-table --> ir-user-form-panel-drawer
+  ir-user-management-table --> ir-dialog
+  ir-user-form-panel-drawer --> ir-drawer
+  ir-user-form-panel-drawer --> ir-user-form-panel
+  ir-user-form-panel-drawer --> ir-custom-button
+  ir-user-form-panel --> ir-validator
+  ir-user-form-panel --> ir-input
   ir-user-form-panel --> ir-password-validator
   ir-user-form-panel --> ir-button
   ir-user-form-panel --> ir-sidebar
@@ -397,9 +397,10 @@ graph TD;
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
-  ir-reset-password --> ir-input-text
+  ir-reset-password --> ir-validator
+  ir-reset-password --> ir-input
   ir-reset-password --> ir-password-validator
-  ir-reset-password --> ir-button
+  ir-reset-password --> ir-custom-button
   ir-sales-by-country --> ir-loading-screen
   ir-sales-by-country --> ir-toast
   ir-sales-by-country --> ir-interceptor

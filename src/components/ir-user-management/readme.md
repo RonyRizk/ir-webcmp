@@ -48,29 +48,29 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
-  ir-user-management-table --> ir-user-form-panel
-  ir-user-management-table --> ir-icon
-  ir-user-management-table --> ir-switch
-  ir-user-management-table --> ir-sidebar
-  ir-user-management-table --> ir-modal
-  ir-user-form-panel --> ir-title
-  ir-user-form-panel --> ir-input-text
-  ir-user-form-panel --> ir-select
+  ir-user-management-table --> ir-custom-button
+  ir-user-management-table --> ir-user-form-panel-drawer
+  ir-user-management-table --> ir-dialog
+  ir-user-form-panel-drawer --> ir-drawer
+  ir-user-form-panel-drawer --> ir-user-form-panel
+  ir-user-form-panel-drawer --> ir-custom-button
+  ir-user-form-panel --> ir-validator
+  ir-user-form-panel --> ir-input
   ir-user-form-panel --> ir-password-validator
   ir-user-form-panel --> ir-button
   ir-user-form-panel --> ir-sidebar
   ir-user-form-panel --> ir-reset-password
-  ir-title --> ir-icon
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
   ir-sidebar --> ir-icon
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
-  ir-reset-password --> ir-input-text
+  ir-reset-password --> ir-validator
+  ir-reset-password --> ir-input
   ir-reset-password --> ir-password-validator
-  ir-reset-password --> ir-button
-  ir-modal --> ir-button
+  ir-reset-password --> ir-custom-button
+  ir-title --> ir-icon
   ir-secure-tasks --> ir-user-management
   style ir-user-management fill:#f9f,stroke:#333,stroke-width:4px
 ```
