@@ -42,28 +42,60 @@ export class IrMonthlyBookingsReportFilter {
     this.applyFilters.emit(this.filters);
   }
 
+  // private generateMonths(): ReportDate[] {
+  //   const firstOfThisMonth = moment().startOf('month');
+  //   const startDate = moment().subtract(1, 'year').startOf('month');
+  //   const dates = [];
+  //   const format = 'YYYY-MM-DD';
+
+  //   let cursor = startDate.clone();
+
+  //   while (cursor.format(format) !== firstOfThisMonth.format(format)) {
+  //     dates.push({
+  //       description: cursor.format('MMMM YYYY'),
+  //       firstOfMonth: cursor.format('YYYY-MM-DD'),
+  //       lastOfMonth: cursor.clone().endOf('month').format('YYYY-MM-DD'),
+  //     });
+  //     cursor.add(1, 'month');
+  //   }
+
+  //   dates.push({
+  //     description: firstOfThisMonth.format('MMMM YYYY'),
+  //     firstOfMonth: firstOfThisMonth.format('YYYY-MM-DD'),
+  //     lastOfMonth: firstOfThisMonth.clone().endOf('month').format('YYYY-MM-DD'),
+  //   });
+
+  //   return dates.reverse();
+  // }
   private generateMonths(): ReportDate[] {
-    const firstOfThisMonth = moment().startOf('month');
-    const startDate = moment().subtract(1, 'year').startOf('month');
-    const dates = [];
     const format = 'YYYY-MM-DD';
 
+    const firstOfThisMonth = moment().startOf('month');
+    const startDate = moment().subtract(1, 'year').startOf('month');
+
+    const dates: ReportDate[] = [];
     let cursor = startDate.clone();
 
-    while (cursor.format(format) !== firstOfThisMonth.format(format)) {
+    // Past → current month
+    while (cursor.isSameOrBefore(firstOfThisMonth, 'month')) {
       dates.push({
         description: cursor.format('MMMM YYYY'),
-        firstOfMonth: cursor.format('YYYY-MM-DD'),
-        lastOfMonth: cursor.clone().endOf('month').format('YYYY-MM-DD'),
+        firstOfMonth: cursor.format(format),
+        lastOfMonth: cursor.clone().endOf('month').format(format),
       });
       cursor.add(1, 'month');
     }
 
-    dates.push({
-      description: firstOfThisMonth.format('MMMM YYYY'),
-      firstOfMonth: firstOfThisMonth.format('YYYY-MM-DD'),
-      lastOfMonth: firstOfThisMonth.clone().endOf('month').format('YYYY-MM-DD'),
-    });
+    // Add 6 future months
+    const futureCursor = firstOfThisMonth.clone().add(1, 'month');
+    for (let i = 0; i < 6; i++) {
+      dates.push({
+        description: futureCursor.format('MMMM YYYY'),
+        firstOfMonth: futureCursor.format(format),
+        lastOfMonth: futureCursor.clone().endOf('month').format(format),
+      });
+      futureCursor.add(1, 'month');
+    }
 
     return dates.reverse();
   }
