@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property        | Attribute | Description | Type             | Default |
-| --------------- | --------- | ----------- | ---------------- | ------- |
-| `notifications` | --        |             | `Notification[]` | `[]`    |
+| Property     | Attribute    | Description | Type     | Default     |
+| ------------ | ------------ | ----------- | -------- | ----------- |
+| `propertyid` | `propertyid` |             | `number` | `undefined` |
+| `ticket`     | `ticket`     |             | `string` | `undefined` |
 
 
 ## Events

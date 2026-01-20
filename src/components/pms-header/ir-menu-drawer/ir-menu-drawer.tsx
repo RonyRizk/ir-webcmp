@@ -1,4 +1,4 @@
-import { Component, Method, Prop, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Method, Prop, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'ir-menu-drawer',
@@ -8,6 +8,7 @@ import { Component, Method, Prop, h } from '@stencil/core';
 export class IrMenuDrawer {
   @Prop({ reflect: true, mutable: true }) open: boolean;
 
+  @Event({ bubbles: true, composed: true }) menuOpenChanged: EventEmitter<boolean>
   componentWillLoad() {
     document.addEventListener('keydown', this.handleDocumentKeyDown);
   }
@@ -28,6 +29,11 @@ export class IrMenuDrawer {
   @Method()
   async openDrawer() {
     this.open = true;
+
+  }
+  @Watch('open')
+  handleOpenChange() {
+    this.menuOpenChanged.emit(this.open)
   }
 
   render() {

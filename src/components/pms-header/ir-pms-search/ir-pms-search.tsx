@@ -1,8 +1,10 @@
 import { IrComboboxSelectEventDetail } from '@/components';
+import { Debounce } from '@/decorators/debounce';
 import { Booking } from '@/models/booking.dto';
 import Token from '@/models/Token';
 import { BookingListingService } from '@/services/booking_listing.service';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+
 
 @Component({
   tag: 'ir-pms-search',
@@ -17,22 +19,20 @@ export class IrPmsSearch {
   @State() bookings: Booking[] = [];
   @State() isLoading: boolean;
 
-  private pickerInputRef: HTMLIrPickerElement;
 
   private tokenService = new Token();
   private bookingListingService = new BookingListingService();
 
   @Event({ bubbles: true, composed: true, eventName: 'combobox-select' }) comboboxSelect: EventEmitter<IrComboboxSelectEventDetail>;
+  autoCompleteRef: HTMLIrAutocompleteElement;
 
   componentWillLoad() {
     document.addEventListener('keydown', this.focusInput);
     this.detectShortcutHint();
     if (this.ticket) {
-      console.log(this.ticket);
       this.tokenService.setToken(this.ticket);
     }
   }
-
   disconnectedCallback() {
     document.removeEventListener('keydown', this.focusInput);
   }
@@ -66,15 +66,22 @@ export class IrPmsSearch {
 
     if (isK && isCmdOrCtrl) {
       event.preventDefault();
-      this.pickerInputRef?.focusInput();
+      // this.pickerInputRef?.focusInput();
+      console.log(this.autoCompleteRef)
+      this.autoCompleteRef.focusInput()
     }
   };
+  @Debounce(300)
   private async fetchBookings(event: CustomEvent<string>) {
     // throw new Error('Method not implemented.');
     event.stopImmediatePropagation();
     event.stopPropagation();
     const value = event.detail;
-    const isNumber = !isNaN(Number(value));
+    this.autoCompleteRef.hide()
+    if (!value) {
+      return;
+    }
+    const isNumber = /^(?:-?\d+|.{3}-.*)$/.test(value);
     this.isLoading = true;
     this.bookings = await this.bookingListingService.getExposedBookings(
       {
@@ -100,36 +107,80 @@ export class IrPmsSearch {
       },
       { skipStore: true },
     );
+    this.autoCompleteRef.show()
     this.isLoading = false;
+  }
+  private handleComboboxSelect(event: CustomEvent<string>): void {
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+    this.comboboxSelect.emit({
+      item: {
+        label: "",
+        value: event.detail
+      }
+    });
   }
   render() {
     return (
       <Host>
-        <ir-picker
-          loading={this.isLoading}
+        <ir-autocomplete
+         
+          class="pms-search__autocomplete"
+          placeholder='Search'
+          ref={el => this.autoCompleteRef = el}
+          onCombobox-change={event => this.handleComboboxSelect(event as CustomEvent<string>)}
           onText-change={event => this.fetchBookings(event as CustomEvent<string>)}
-          mode="select-async"
-          ref={el => (this.pickerInputRef = el)}
-          pill
-          appearance="filled"
-          onCombobox-select={event => this.handleComboboxSelect(event as CustomEvent<IrComboboxSelectEventDetail>)}
-        >
-          {this.shortcutHint && <span slot="end">{this.shortcutHint}</span>}
+          pill appearance='filled'>
+          <wa-icon name='magnifying-glass' slot='start'></wa-icon>
+          <div slot='end' class="pms-autocomplete__end-slot">
+            {this.isLoading && <wa-spinner></wa-spinner>}
+            {this.shortcutHint && <span>{this.shortcutHint}</span>}
+          </div>
+          {this.bookings?.length === 0 && !this.isLoading && (
+            <div class="pms-search__empty" role="status" aria-live="polite">
+              <wa-icon name="circle-info" aria-hidden="true"></wa-icon>
+              <div class="pms-search__empty-content">
+                <div class="pms-search__empty-title">No results found</div>
+              </div>
+            </div>
+          )}
           {this.bookings.map(b => {
-            const label = `${b.booking_nbr} ${b.guest.first_name} ${b.guest.last_name}`;
+            const label = `${b.booking_nbr}  ${b.guest.first_name} ${b.guest.last_name}`;
             return (
-              <ir-picker-item value={b.booking_nbr} label={label}>
-                {label}
-              </ir-picker-item>
+              <ir-autocomplete-option class='pms-search__autocomplete-option' value={b.booking_nbr} label={label}>
+                  <img
+                    slot='start'
+                    class="pms-search__option-icon"
+                    src={b.origin.Icon}
+                    alt={b.origin.Label}
+                  />
+                <div class="pms-search__option">
+                  <p class="pms-search__option-bookings">
+                    <span class="pms-search__option-booking">
+                      {b.booking_nbr}
+                    </span>
+                    {b.channel_booking_nbr && (
+                      <span class="pms-search__option-channel-booking">
+                        {b.channel_booking_nbr}
+                      </span>
+                    )}
+                  </p>
+                  <span class="pms-search__option-label">
+                    {b.guest.first_name} {b.guest.last_name}
+                  </span>
+                </div>
+                  <ir-booking-status-tag
+                    slot='end'
+                    class="pms-search__option-status"
+                    status={b.status}
+                  ></ir-booking-status-tag>
+
+              </ir-autocomplete-option>
             );
           })}
-        </ir-picker>
+        </ir-autocomplete>
       </Host>
     );
   }
-  private handleComboboxSelect(event: CustomEvent<IrComboboxSelectEventDetail>): void {
-    event.stopImmediatePropagation();
-    event.stopPropagation();
-    this.comboboxSelect.emit(event.detail);
-  }
+
 }

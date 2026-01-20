@@ -1,6 +1,7 @@
 :host {
   display: block;
 }
+
 .property-switcher__trigger {
   width: 200px;
   padding: 0;
@@ -8,7 +9,23 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: start;
 }
+
 .property-switcher__dialog::part(body) {
   padding: 0;
+}
+
+.property-switcher__loader,
+.property-switcher__dropdown-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  min-width: 100px;
+}
+
+.property-switcher__loader {
+  min-height: 150px;
 }

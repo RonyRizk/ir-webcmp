@@ -4,22 +4,26 @@
   width: fit-content;
   height: fit-content;
 }
+
 .notification__bell-icon {
   display: inline-flex;
   transform-origin: top center;
 }
+
 .header-notification-badge {
   position: absolute;
   top: -5px;
   right: -5px;
   z-index: 1;
 }
+
 .notification__popover::part(body) {
   padding: 0;
   padding-bottom: 1rem;
   max-height: 300px;
   overflow-y: auto;
 }
+
 .notification-item {
   display: flex;
   align-items: center;
@@ -29,11 +33,14 @@
   transition-property: background, border, box-shadow, color;
   transition-duration: var(--wa-transition-fast);
   transition-timing-function: var(--wa-transition-easing);
+  color: var(--wa-color-text-normal);
 }
+
 .notification-item:hover {
   color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
   background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet));
 }
+
 .notification-item:active {
   color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
   background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active));
@@ -47,23 +54,28 @@
   outline: var(--wa-focus-ring);
   outline-offset: var(--wa-focus-ring-offset);
 }
+
 .notification-item__content {
   display: flex;
   flex-direction: column;
   flex: 1 1 0%;
 }
+
 .notification-item {
   border-bottom: 1px solid var(--wa-color-surface-border);
 }
+
 .notification-item:last-child {
   border-bottom: 0;
 }
+
 .notification__popover-title,
 .notification-item__title,
 .notification-item__time {
   margin: 0;
   padding: 0;
 }
+
 .notification-item__title,
 .notification__popover-title {
   font-family: var(--wa-font-family-heading);
@@ -71,6 +83,7 @@
   line-height: var(--wa-line-height-condensed);
   text-wrap: balance;
 }
+
 .notification__popover-title {
   font-size: var(--wa-font-size-m);
   padding: 1rem;
@@ -78,13 +91,16 @@
   top: 0;
   background-color: var(--wa-color-surface-default);
 }
+
 .notification-item__title,
 .notification-item__time {
   font-size: var(--wa-font-size-s);
 }
+
 .notification-item__time {
   color: var(--wa-color-text-quiet);
 }
+
 .notification-item__unread-indicator {
   display: block;
   height: 0.5rem;

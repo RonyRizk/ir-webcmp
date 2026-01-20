@@ -31,6 +31,7 @@
  - [ir-invoice-form](../../ir-invoice/ir-invoice-form)
  - [ir-otp-modal](../../ir-otp-modal)
  - [ir-pms-logs](../../ir-booking-details/ir-booking-header/ir-pms-logs)
+ - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
 
@@ -49,6 +50,7 @@ graph TD;
   ir-invoice-form --> ir-spinner
   ir-otp-modal --> ir-spinner
   ir-pms-logs --> ir-spinner
+  ir-property-switcher --> ir-spinner
   ir-reallocation-form --> ir-spinner
   ir-room-guests-form --> ir-spinner
   style ir-spinner fill:#f9f,stroke:#333,stroke-width:4px

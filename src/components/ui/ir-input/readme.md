@@ -87,6 +87,7 @@ Type: `Promise<void>`
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [ir-arrivals-filters](../../ir-arrivals/ir-arrivals-filters)
+ - [ir-autocomplete](../ir-autocomplete)
  - [ir-booking-company-form](../../ir-booking-company-dialog/ir-booking-company-form)
  - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
  - [ir-custom-date-picker](../../ir-custom-date-picker)
@@ -102,6 +103,8 @@ Type: `Promise<void>`
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-secure-tasks](../../ir-secure-tasks)
+ - [ir-unbookable-rooms-data](../../ir-unbookable-rooms/ir-unbookable-rooms-data)
+ - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Graph
@@ -111,6 +114,7 @@ graph TD;
   igl-property-booked-by --> ir-input
   igl-rate-plan --> ir-input
   ir-arrivals-filters --> ir-input
+  ir-autocomplete --> ir-input
   ir-booking-company-form --> ir-input
   ir-booking-editor-guest-form --> ir-input
   ir-custom-date-picker --> ir-input
@@ -126,6 +130,8 @@ graph TD;
   ir-reset-password --> ir-input
   ir-room-guests-form --> ir-input
   ir-secure-tasks --> ir-input
+  ir-unbookable-rooms-data --> ir-input
+  ir-unbookable-rooms-filters --> ir-input
   ir-user-form-panel --> ir-input
   style ir-input fill:#f9f,stroke:#333,stroke-width:4px
 ```

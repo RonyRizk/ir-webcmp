@@ -34,7 +34,6 @@
  - [ir-booking-editor-form](../../../igloo-calendar/ir-booking-editor/ir-booking-editor-form)
  - [ir-booking-editor-header](../../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-country-picker](../../ir-country-picker)
- - [ir-pms-search](../../../pms-header/ir-pms-search)
 
 ### Graph
 ```mermaid
@@ -45,7 +44,6 @@ graph TD;
   ir-booking-editor-form --> ir-picker-item
   ir-booking-editor-header --> ir-picker-item
   ir-country-picker --> ir-picker-item
-  ir-pms-search --> ir-picker-item
   style ir-picker-item fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -1,6 +1,7 @@
-import { Component, Host, h, Prop, Element, Watch, Event, EventEmitter } from '@stencil/core';
+import { Component, Host, h, Prop, Element, Watch, Event, EventEmitter, State } from '@stencil/core';
 import { Notification } from './types';
-import moment from 'moment';
+import { FetchNotificationsResult as Notifications, PropertyService } from '@/services/property.service';
+import Token from '@/models/Token';
 import WaAnimation from '@awesome.me/webawesome/dist/components/animation/animation';
 @Component({
   tag: 'ir-notifications',
@@ -10,11 +11,16 @@ import WaAnimation from '@awesome.me/webawesome/dist/components/animation/animat
 export class IrNotifications {
   @Element() el: HTMLElement;
 
+  @Prop() ticket: string;
+  @Prop() propertyid: number;
+
   // Make notifications reactive;
-  @Prop({ mutable: true }) notifications: Notification[] = [];
+  @State() notifications: Notifications = [];
 
   @Event() notificationCleared: EventEmitter<Notification>;
 
+  private tokenService = new Token();
+  private propertyService = new PropertyService();
   private buttonRef: HTMLIrCustomButtonElement;
   private animationRef: WaAnimation;
   private readonly bellKeyframes: Keyframe[] = [
@@ -26,6 +32,13 @@ export class IrNotifications {
     { offset: 0.75, transform: 'rotate(-5deg)' },
     { offset: 1, transform: 'rotate(0deg)' },
   ];
+
+  componentWillLoad() {
+    if (this.ticket) {
+      this.tokenService.setToken(this.ticket);
+      this.fetchNotifications();
+    }
+  }
 
   componentDidLoad() {
     this.updateNotificationBadge();
@@ -42,6 +55,38 @@ export class IrNotifications {
     }
   }
 
+  @Watch('ticket')
+  handleTicketChange(newValue: string, oldValue: string) {
+    if (newValue === oldValue || !newValue) {
+      return;
+    }
+    this.tokenService.setToken(newValue);
+    this.fetchNotifications();
+  }
+
+  @Watch('propertyid')
+  handlePropertyChange(newValue: number, oldValue: number) {
+    if (newValue === oldValue) {
+      return;
+    }
+    this.fetchNotifications();
+  }
+
+
+  private async fetchNotifications() {
+    if (!this.propertyid) {
+      this.notifications = [];
+      return;
+    }
+    try {
+      const notifications = await this.propertyService.fetchNotifications(this.propertyid);
+      this.notifications = notifications.filter(n => n.type !== "financial")
+    } catch (error) {
+      console.log(error);
+      this.notifications = [];
+    }
+  }
+
   private updateNotificationBadge() {
     if (this.buttonRef) {
       this.buttonRef.setAttribute('data-notifications', this.notifications.length.toString());
@@ -54,27 +99,27 @@ export class IrNotifications {
     this.animationRef.play = true;
   }
 
-  private getRelativeTimeFromParts(date: string, hour: number, minute: number): string {
-    const now = moment();
-    const then = moment(date, 'YYYY-MM-DD').hour(hour).minute(minute).second(0);
-    if (!then.isValid()) return '';
-    const diffSeconds = now.diff(then, 'seconds');
-    if (diffSeconds < 60) return 'just now';
-    const diffMinutes = now.diff(then, 'minutes');
-    if (diffMinutes < 60) {
-      return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-    }
-    const diffHours = now.diff(then, 'hours');
-    if (diffHours < 24) {
-      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    }
-    const diffDays = now.diff(then, 'days');
-    if (diffDays < 7) {
-      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-    }
-    const diffWeeks = now.diff(then, 'weeks');
-    return `${diffWeeks} week${diffWeeks !== 1 ? 's' : ''} ago`;
-  }
+  // private getRelativeTimeFromParts(date: string, hour: number, minute: number): string {
+  //   const now = moment();
+  //   const then = moment(date, 'YYYY-MM-DD').hour(hour).minute(minute).second(0);
+  //   if (!then.isValid()) return '';
+  //   const diffSeconds = now.diff(then, 'seconds');
+  //   if (diffSeconds < 60) return 'just now';
+  //   const diffMinutes = now.diff(then, 'minutes');
+  //   if (diffMinutes < 60) {
+  //     return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+  //   }
+  //   const diffHours = now.diff(then, 'hours');
+  //   if (diffHours < 24) {
+  //     return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  //   }
+  //   const diffDays = now.diff(then, 'days');
+  //   if (diffDays < 7) {
+  //     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  //   }
+  //   const diffWeeks = now.diff(then, 'weeks');
+  //   return `${diffWeeks} week${diffWeeks !== 1 ? 's' : ''} ago`;
+  // }
 
   // private dismissNotification(notification: Notification) {
   //   this.notificationCleared.emit(notification);
@@ -97,9 +142,9 @@ export class IrNotifications {
             </ir-custom-button>
           </wa-animation>
         </div>
-        <wa-popover class="notification__popover" for="notifications-button">
+        <wa-popover distance={15} class="notification__popover" for="notifications-button">
           <p class="notification__popover-title">Notifications</p>
-          {this.notifications?.map(notification => (
+          {/*this.notifications?.map(notification => (
             <div class="notification-item">
               <div class="notification-item__content">
                 <p class="notification-item__title">{notification.title}</p>
@@ -108,9 +153,19 @@ export class IrNotifications {
 
               <span class="notification-item__unread-indicator"></span>
             </div>
-          ))}
+          ))*/}
+          {this.notifications.map((notification) => {
+            if (notification.type === "availability_alert") {
+              return <a href='AcAvailabilityAlert.aspx' class="notification-item">
+                <div class="notification-item__content">
+                  <p class="notification-item__title">{notification.message} rooms types are not bookable for 14 consecutive nights within the next 2 months. More...</p>
+                  {/* <p class="notification-item__time">{this.getRelativeTimeFromParts(notification.date, notification.hour, notification.minute)}</p> */}
+                </div>
+              </a>
+            }
+          })}
           {this.notifications?.length === 0 && (
-            <ir-empty-state style={{ width: '250px', height: '150px' }}>
+            <ir-empty-state message="All caught up!" style={{ width: '250px', height: '150px' }}>
               <wa-icon slot="icon" name="inbox"></wa-icon>
             </ir-empty-state>
           )}

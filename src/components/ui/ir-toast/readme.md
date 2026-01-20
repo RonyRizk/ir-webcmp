@@ -36,6 +36,7 @@
  - [ir-reset-password](../../ir-reset-password)
  - [ir-sales-by-channel](../../ir-sales-by-channel)
  - [ir-sales-by-country](../../ir-sales-by-country)
+ - [ir-unbookable-rooms](../../ir-unbookable-rooms)
  - [ir-user-management](../../ir-user-management)
 
 ### Depends on
@@ -67,6 +68,7 @@ graph TD;
   ir-reset-password --> ir-toast
   ir-sales-by-channel --> ir-toast
   ir-sales-by-country --> ir-toast
+  ir-unbookable-rooms --> ir-toast
   ir-user-management --> ir-toast
   style ir-toast fill:#f9f,stroke:#333,stroke-width:4px
 ```

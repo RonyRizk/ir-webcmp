@@ -256,36 +256,36 @@ export class IrTestCmp {
       ],
     },
   ];
-  private notifications = [
-    {
-      id: '1',
-      type: 'info',
-      title: 'Welcome!',
-      message: 'Your account has been created successfully.',
-      createdAt: Date.now(),
-      read: false,
-      dismissible: true,
-    },
-    {
-      id: '2',
-      type: 'warning',
-      title: 'Storage Almost Full',
-      message: 'You have used 90% of your storage. Please upgrade.',
-      createdAt: Date.now(),
-      read: false,
-      dismissible: true,
-      link: { href: '#', text: 'Upgrade now' },
-    },
-    {
-      id: '3',
-      type: 'success',
-      title: 'Payment Received',
-      message: 'Your invoice has been paid. Thank you!',
-      createdAt: Date.now(),
-      read: true,
-      dismissible: true,
-    },
-  ];
+  // private notifications = [
+  //   {
+  //     id: '1',
+  //     type: 'info',
+  //     title: 'Welcome!',
+  //     message: 'Your account has been created successfully.',
+  //     createdAt: Date.now(),
+  //     read: false,
+  //     dismissible: true,
+  //   },
+  //   {
+  //     id: '2',
+  //     type: 'warning',
+  //     title: 'Storage Almost Full',
+  //     message: 'You have used 90% of your storage. Please upgrade.',
+  //     createdAt: Date.now(),
+  //     read: false,
+  //     dismissible: true,
+  //     link: { href: '#', text: 'Upgrade now' },
+  //   },
+  //   {
+  //     id: '3',
+  //     type: 'success',
+  //     title: 'Payment Received',
+  //     message: 'Your invoice has been paid. Thank you!',
+  //     createdAt: Date.now(),
+  //     read: true,
+  //     dismissible: true,
+  //   },
+  // ];
   @State() showMegaMenu: boolean;
 
   render() {
@@ -315,7 +315,8 @@ export class IrTestCmp {
               </div>
               <div class="hotel-name d-none d-md-block">Hotel Name</div>
               <div class="ml-auto d-md-none">
-                <ir-notifications notifications={this.notifications as any}></ir-notifications>
+                <ir-notifications
+                ></ir-notifications>
               </div>
             </div>
 
@@ -460,7 +461,7 @@ export class IrTestCmp {
                 </li>
                 <li class="nav-item">
                   <div class="d-flex align-items-center justify-content-center" style={{ marginTop: '2px' }}>
-                    <ir-notifications notifications={this.notifications as any}></ir-notifications>
+                    <ir-notifications ></ir-notifications>
                   </div>
                 </li>
               </ul>

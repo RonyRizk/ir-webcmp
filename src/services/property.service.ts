@@ -69,6 +69,36 @@ export const SetRoomCalendarExtraParamsSchema = z.object({
   value: z.string(),
 });
 export type SetRoomCalendarExtraParams = z.infer<typeof SetRoomCalendarExtraParamsSchema>;
+export const FetchNotificationsParamsSchema = z.object({
+  property_id: z.coerce.number(),
+});
+export const FetchNotificationsResultSchema = z.array(z.object({ message: z.string(), type: z.enum(['financial', 'availability_alert']) }));
+export type FetchNotificationsResult = z.infer<typeof FetchNotificationsResultSchema>;
+
+export const FetchUnBookableRoomsSchema = z.object({
+  property_ids: z.array(z.number()),
+  period_to_check: z.coerce.number(),
+  consecutive_period: z.coerce.number(),
+});
+export type FetchUnBookableRooms = z.infer<typeof FetchUnBookableRoomsSchema>;
+
+export type FetchUnBookableRoomsResult = {
+  first_night_not_bookable: string;
+  property_id: number;
+  room_type_id: number;
+  room_type_name: string;
+  country: {
+    cities: null;
+    code: null;
+    currency: null;
+    flag: null;
+    gmt_offset: number;
+    id: number;
+    market_places: null;
+    name: string;
+    phone_prefix: null;
+  };
+}[];
 export class PropertyService {
   public async getExposedProperty(params: {
     id: number | null;
@@ -193,6 +223,23 @@ export class PropertyService {
     }
     if (params.is_export_to_excel) {
       downloadFile(data.My_Params_Get_Monthly_Stats.Link_excel);
+    }
+    return data.My_Result;
+  }
+
+  public async fetchNotifications(property_id: number): Promise<FetchNotificationsResult> {
+    const payload = FetchNotificationsParamsSchema.parse({ property_id });
+    const { data } = await axios.post('/Fetch_Notifications', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return FetchNotificationsResultSchema.parse(data.My_Result);
+  }
+  public async fetchUnBookableRooms(params: FetchUnBookableRooms): Promise<FetchUnBookableRoomsResult | null> {
+    const payload = FetchUnBookableRoomsSchema.parse(params);
+    const { data } = await axios.post('/Fetch_UnBookable_Rooms', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
     }
     return data.My_Result;
   }

@@ -19,17 +19,14 @@ class Token extends Auth {
     return Token.token;
   }
   public setBaseUrl(url: string) {
-    console.log(this.baseUrl);
     this.baseUrl = url;
-    // axios.defaults.baseURL = this.baseUrl;
+    axios.defaults.baseURL = this.baseUrl;
   }
   private initialize() {
     if (Token.isInterceptorAdded) {
       return;
     }
-
     axios.interceptors.request.use(config => {
-      config.baseURL = this.baseUrl;
       if (!Token.token) {
         throw new MissingTokenError();
       }

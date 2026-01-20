@@ -12,6 +12,13 @@
 | `open`   | `open`    |             | `boolean` | `undefined` |
 
 
+## Events
+
+| Event             | Description | Type                   |
+| ----------------- | ----------- | ---------------------- |
+| `menuOpenChanged` |             | `CustomEvent<boolean>` |
+
+
 ## Methods
 
 ### `openDrawer() => Promise<void>`

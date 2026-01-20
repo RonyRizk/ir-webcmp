@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.unbookable-rooms__filters-card {
+  min-width: 300px;
+}
+
+.unbookable-rooms__filters-card::part(body) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filters-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filters-card__title {
+  margin: 0;
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  font-size: var(--wa-font-size-l);
+}
+
+.filter__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

@@ -14,27 +14,17 @@ export class IrMenu {
   @Prop({ reflect: true, mutable: true }) selectedHref?: string;
 
   componentWillLoad() {
-    if (!this.selectedHref) {
-      this.selectedHref = this.getCurrentLocation();
-    } else {
-      this.selectedHref = this.normalizeHref(this.selectedHref);
-    }
+    const initialHref = this.selectedHref ?? this.getCurrentLocation();
+    this.selectedHref = this.normalizeHref(initialHref);
   }
 
   componentDidLoad() {
     this.handleSlotChange();
   }
 
-  connectedCallback() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('popstate', this.handleLocationChange);
-    }
-  }
-
-  disconnectedCallback() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('popstate', this.handleLocationChange);
-    }
+  @Listen('popstate', { target: 'window' })
+  handleLocationChange() {
+    this.updateSelectedHref(this.getCurrentLocation());
   }
 
   @Method()
@@ -53,10 +43,6 @@ export class IrMenu {
     this.applySelection(this.selectedHref);
   };
 
-  private handleLocationChange = () => {
-    this.updateSelectedHref(this.getCurrentLocation());
-  };
-
   private updateSelectedHref(href?: string) {
     const normalized = this.normalizeHref(href);
     if (normalized !== this.selectedHref) {
@@ -66,7 +52,13 @@ export class IrMenu {
 
   private getCurrentLocation(): string | undefined {
     if (typeof window === 'undefined') return undefined;
-    return this.normalizeHref(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+    const { pathname, search, hash } = window.location;
+    const cleanPath = pathname.replace(/\/+$/, '') || '/';
+    let lastSegment = cleanPath.split('/').pop() ?? cleanPath;
+    if (lastSegment === '') {
+      lastSegment = '/';
+    }
+    return `${lastSegment}${search}${hash}`;
   }
 
   private normalizeHref(href?: string): string | undefined {
@@ -92,6 +84,22 @@ export class IrMenu {
         item.selected = shouldSelect;
       }
     });
+  }
+
+  private openGroupForSelectedHref(targetHref?: string) {
+    const normalizedTarget = this.normalizeHref(targetHref);
+    if (!normalizedTarget) return;
+
+    for (const item of this.menuItems) {
+      const itemHref = this.normalizeHref(item.href);
+      if (itemHref === normalizedTarget) {
+        const group = item.closest('ir-menu-group') as HTMLIrMenuGroupElement | null;
+        if (group && !group.open) {
+          group.open = true;
+        }
+        break;
+      }
+    }
   }
 
   @Listen('click', { capture: true })
@@ -120,6 +128,18 @@ export class IrMenu {
       }
     }
   }
+
+  @Listen('menuOpenChanged', { target: 'body' })
+  handleOpenChange(e: CustomEvent<boolean>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    if (e.detail) {
+      const href = this.selectedHref ?? this.getCurrentLocation();
+      this.openGroupForSelectedHref(href);
+
+    }
+  }
+
 
   render() {
     return (

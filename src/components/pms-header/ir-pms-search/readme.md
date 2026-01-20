@@ -28,14 +28,17 @@
 
 ### Depends on
 
-- [ir-picker](../../ui/ir-picker)
-- [ir-picker-item](../../ui/ir-picker/ir-picker-item)
+- [ir-autocomplete](../../ui/ir-autocomplete)
+- [ir-autocomplete-option](../../ui/ir-autocomplete/ir-autocomplete-option)
+- [ir-booking-status-tag](../../ui/ir-booking-status-tag)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-pms-search --> ir-picker
-  ir-pms-search --> ir-picker-item
+  ir-pms-search --> ir-autocomplete
+  ir-pms-search --> ir-autocomplete-option
+  ir-pms-search --> ir-booking-status-tag
+  ir-autocomplete --> ir-input
   ir-pms-page --> ir-pms-search
   style ir-pms-search fill:#f9f,stroke:#333,stroke-width:4px
 ```

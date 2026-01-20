@@ -1,0 +1,202 @@
+:host {
+  display: block;
+  flex: 1 1 0%;
+}
+
+.unbookable-rooms__empty-state {
+  flex: 1 1 0%;
+}
+
+.unbookable-rooms__empty-state::part(body) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  height: 100%;
+}
+
+.unbookable-rooms__empty-state--icon {
+  font-size: 1.5rem;
+  color: var(--wa-color-success-fill-loud);
+}
+
+.unbookable-rooms__card-container {
+  flex: 1 1 0%;
+}
+
+.property-card__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.property-card__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.property-card__body {
+  display: grid;
+}
+
+.issue {
+  display: grid;
+  gap: 1rem;
+  padding: 0.875rem 0;
+}
+
+.issue__info {
+  display: grid;
+  gap: 4px;
+  width: fit-content;
+}
+
+.issue__progress-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 0%;
+  width: 100%;
+  max-width: 600px;
+}
+
+.issue__progress-bar {
+  flex: 1 1 0%;
+}
+
+.issue__detail::part(header),
+.issue__detail::part(content) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.issue__detail::part(content) {
+  padding-bottom: 0;
+}
+
+:host([mode='default']) .issue__detail::part(icon) {
+  display: none;
+}
+
+.issue__detail::part(header) {
+  padding: 0;
+}
+
+:host([mode='default']) .issue__detail::part(header) {
+  cursor: default;
+}
+
+:host([mode='default']) .issue__detail::part(header):focus-visible {
+  outline: none !important;
+}
+
+:host([mode='mpo']) .issue__detail::part(content) {
+  padding-inline-start: 0.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .issue {
+    grid-template-columns: minmax(max-content, 300px) 1fr;
+  }
+}
+/* =========================================================
+   Period Chart (Timeline)
+   ========================================================= */
+
+.period-chart {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.period-chart__track {
+  position: relative;
+  height: 4px;
+  background: var(--wa-color-danger-fill-loud);
+  border-radius: 2px;
+}
+
+.period-chart__marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.period-chart__marker::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--wa-color-brand-fill-loud);
+  border-radius: 50%;
+  display: block;
+}
+
+.period-chart__label {
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--wa-color-danger-fill-loud);
+}
+
+.period-chart__start,
+.period-chart__end {
+  color: var(--wa-color-text-quiet);
+}
+
+.period-chart__fill {
+  position: absolute;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: var(--wa-color-brand-fill-loud);
+  border-radius: 2px;
+}
+
+.period-chart__fill {
+  border-radius: 2px 0 0 2px;
+}
+
+.period-chart__fill,
+.period-chart__marker {
+  transition: width 0.3s ease, left 0.3s ease;
+}
+/* =========================================================
+   Period Chart Legend
+   ========================================================= */
+
+.period-chart__legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.period-chart__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.period-chart__legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.period-chart__legend-swatch--bookable {
+  background: var(--wa-color-brand-fill-loud);
+}
+
+.period-chart__legend-swatch--blocked {
+  background: var(--wa-color-danger-fill-loud);
+}

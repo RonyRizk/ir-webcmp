@@ -8,6 +8,13 @@ import WaDropdownItem from '@awesome.me/webawesome/dist/components/dropdown-item
 
 type SwitcherMode = 'dropdown' | 'dialog' | 'read-only';
 
+// Unified property state
+interface PropertyState {
+  selected: FetchedProperty | null;
+  linked: LinkedProperty[];
+  source: 'storage' | 'external' | 'user-selection';
+}
+
 @Component({
   tag: 'ir-property-switcher',
   styleUrl: 'ir-property-switcher.css',
@@ -20,38 +27,49 @@ export class IrPropertySwitcher {
   @Prop() ticket: string;
   @Prop() baseUrl: string;
 
+  // NEW: Allow external property binding
+  @Prop({ mutable: true }) propertyId?: number;
+  @Prop({ mutable: true }) selectedLinkedPropertyId?: number;
+
   @State() open = false;
-  @State() selectedProperty?: FetchedProperty;
-  @State() linkedProperties: LinkedProperty[] = [];
+  @State() isLinkedLoading = false;
+  @State() linkedLoaded = false;
+  @State() hasPool = false;
+  @State() propertyState: PropertyState = {
+    selected: null,
+    linked: [],
+    source: 'storage',
+  };
   @State() displayMode: SwitcherMode = 'read-only';
 
   private token = new Token();
 
-  /** Emits whenever the user selects a new property */
+  /** Single unified event - emitted when dialog confirms selection OR dropdown selects linked property */
   @Event({ bubbles: true, composed: true })
-  propertyChange: EventEmitter<FetchedProperty>;
-  @Event({ bubbles: true, composed: true })
-  linkedPropertyChange: EventEmitter<{ linkedProperty: LinkedProperty; property: FetchedProperty }>;
+  propertyChange: EventEmitter<{
+    property: GetACByACID;
+    linkedProperty: LinkedProperty | null;
+    allLinkedProperties: LinkedProperty[];
+  }>;
 
   private storagePoller?: number;
   private userInfoPoller?: number;
   private lastSelectedAcRaw: string | null = null;
   private lastUserInfoRaw: string | null = null;
+  private isUpdating = false; // Prevent circular updates
 
   async componentWillLoad() {
     if (this.baseUrl) this.token.setBaseUrl(this.baseUrl);
     if (this.ticket) {
       this.token.setToken(this.ticket);
-      this.init();
+      await this.init();
     }
 
-    // Listen for cross-tab updates
     window.addEventListener('storage', this.handleStorageEvent);
   }
 
   disconnectedCallback() {
-    this.stopSelectedAcPolling();
-    this.stopUserInfoPolling();
+    this.stopPolling();
     window.removeEventListener('storage', this.handleStorageEvent);
   }
 
@@ -59,7 +77,25 @@ export class IrPropertySwitcher {
   async handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.token.setToken(newValue);
-      this.init();
+      await this.init();
+    }
+  }
+
+  // NEW: React to external property ID changes
+  @Watch('propertyId')
+  async handlePropertyIdChange(newId: number | undefined) {
+    if (this.isUpdating) return;
+    if (newId && newId !== this.propertyState.selected?.PROPERTY_ID) {
+      // External changes don't emit propertyChange event
+      await this.loadPropertyById(newId, 'external', undefined, false);
+    }
+  }
+
+  @Watch('selectedLinkedPropertyId')
+  handleLinkedPropertyIdChange(newId: number | undefined) {
+    // Validate that the linked property exists
+    if (newId && !this.propertyState.linked.find(p => p.property_id === newId)) {
+      console.warn(`Linked property ${newId} not found in available properties`);
     }
   }
 
@@ -67,34 +103,24 @@ export class IrPropertySwitcher {
     await this.pollSelectedAcStorage();
     this.pollUserInfoStorage();
 
-    if (!this.selectedProperty) {
-      this.startSelectedAcPolling();
-    }
-    if (!this.lastUserInfoRaw) {
-      this.startUserInfoPolling();
+    if (!this.propertyState.selected) {
+      this.startPolling();
     }
   }
 
-  private startSelectedAcPolling() {
+  private startPolling() {
     if (this.storagePoller) return;
-
-    this.storagePoller = window.setInterval(this.pollSelectedAcStorage, 300);
+    this.storagePoller = window.setInterval(() => {
+      this.pollSelectedAcStorage();
+      this.pollUserInfoStorage();
+    }, 300);
   }
 
-  private stopSelectedAcPolling() {
+  private stopPolling() {
     if (this.storagePoller) {
       clearInterval(this.storagePoller);
       this.storagePoller = undefined;
     }
-  }
-
-  private startUserInfoPolling() {
-    if (this.userInfoPoller) return;
-
-    this.userInfoPoller = window.setInterval(this.pollUserInfoStorage, 300);
-  }
-
-  private stopUserInfoPolling() {
     if (this.userInfoPoller) {
       clearInterval(this.userInfoPoller);
       this.userInfoPoller = undefined;
@@ -102,71 +128,114 @@ export class IrPropertySwitcher {
   }
 
   private handleStorageEvent = () => {
-    // Cross-tab change - re-enable polling briefly
-    this.startSelectedAcPolling();
-    this.startUserInfoPolling();
+    this.startPolling();
   };
 
   private pollSelectedAcStorage = async () => {
     const selectedAcRaw = localStorage.getItem('_Selected_Ac');
 
-    // Nothing changed - skip work
-    if (selectedAcRaw === this.lastSelectedAcRaw) {
-      return;
-    }
-
+    if (selectedAcRaw === this.lastSelectedAcRaw) return;
     this.lastSelectedAcRaw = selectedAcRaw;
 
-    if (!selectedAcRaw) {
-      return;
-    }
+    if (!selectedAcRaw) return;
 
     let selectedAc: GetACByACID;
-
     try {
       selectedAc = JSON.parse(selectedAcRaw);
     } catch {
       return;
     }
 
-    // ? Storage is now valid
-    this.updateSelectedProperty(selectedAc);
-    await this.fetchLinkedProperties(selectedAc.AC_ID);
-    this.resolveDisplayMode(true);
-
-    // ?? Stop polling once initialized
-    this.stopSelectedAcPolling();
+    await this.updatePropertyState(selectedAc, null, 'storage');
+    this.stopPolling();
   };
 
   private pollUserInfoStorage = () => {
     const userInfoRaw = localStorage.getItem('UserInfo_b');
 
-    if (userInfoRaw === this.lastUserInfoRaw) {
-      return;
-    }
-
+    if (userInfoRaw === this.lastUserInfoRaw) return;
     this.lastUserInfoRaw = userInfoRaw;
 
-    if (!userInfoRaw) {
-      return;
-    }
+    if (!userInfoRaw) return;
 
-    this.resolveDisplayMode(!!this.selectedProperty);
-    this.stopUserInfoPolling();
+    this.resolveDisplayMode();
+    if (this.userInfoPoller) {
+      clearInterval(this.userInfoPoller);
+      this.userInfoPoller = undefined;
+    }
   };
 
-  private updateSelectedProperty(selectedAc: GetACByACID) {
-    this.selectedProperty = {
+  // NEW: Unified state update method
+  private async updatePropertyState(
+    selectedAc: GetACByACID,
+    linkedProperty: LinkedProperty | null,
+    source: PropertyState['source'],
+    emitEvent: boolean = false, // Control when to emit propertyChange
+  ) {
+    this.isUpdating = true;
+
+    const selected: FetchedProperty = {
       A_NAME: selectedAc.My_User?.USERNAME ?? '',
       COUNTRY_CODE: selectedAc.COUNTRY_ID as any,
       COUNTRY_NAME: selectedAc.My_Country?.L1_NAME_REF ?? '',
       PROPERTY_ID: selectedAc.AC_ID,
       PROPERTY_NAME: selectedAc.NAME,
     };
-    this.propertyChange.emit(this.selectedProperty);
+
+    const hasPool = Boolean(selectedAc.POOL);
+    const sameProperty = this.propertyState.selected?.PROPERTY_ID === selectedAc.AC_ID;
+    const keepLinked = sameProperty && this.linkedLoaded && hasPool;
+    const linked = keepLinked ? this.propertyState.linked : [];
+
+    // Update state atomically
+    this.propertyState = {
+      selected,
+      linked,
+      source,
+    };
+    this.hasPool = hasPool;
+    this.linkedLoaded = keepLinked;
+    if (!keepLinked) {
+      this.isLinkedLoading = false;
+    }
+
+    // Sync external props
+    this.propertyId = selected.PROPERTY_ID;
+    this.selectedLinkedPropertyId = linkedProperty?.property_id;
+
+    this.resolveDisplayMode();
+
+    // Only emit event when explicitly requested (user selection from dialog)
+    if (emitEvent) {
+      this.propertyChange.emit({
+        property: selectedAc,
+        linkedProperty,
+        allLinkedProperties: linked,
+      });
+    }
+
+    if (this.open) {
+      this.ensureLinkedPropertiesLoaded();
+    }
+
+    this.isUpdating = false;
   }
 
-  private async fetchLinkedProperties(acId: number) {
+  private async ensureLinkedPropertiesLoaded() {
+    if (!this.hasPool || this.linkedLoaded || this.isLinkedLoading) return;
+    if (!this.propertyState.selected?.PROPERTY_ID) return;
+
+    this.isLinkedLoading = true;
+    const linked = await this.fetchLinkedProperties(this.propertyState.selected.PROPERTY_ID);
+    this.propertyState = {
+      ...this.propertyState,
+      linked,
+    };
+    this.linkedLoaded = true;
+    this.isLinkedLoading = false;
+  }
+
+  private async fetchLinkedProperties(acId: number): Promise<LinkedProperty[]> {
     try {
       const { data } = await axios.post(`${this.baseUrl ?? ''}/Fetch_Linked_Properties`, {
         property_id: acId,
@@ -176,14 +245,14 @@ export class IrPropertySwitcher {
         throw new Error(data.ExceptionMsg);
       }
 
-      this.linkedProperties = Array.isArray(data.My_Result) ? data.My_Result : [];
+      return Array.isArray(data.My_Result) ? data.My_Result : [];
     } catch (error) {
       console.error('Failed to fetch linked properties', error);
-      this.linkedProperties = [];
+      return [];
     }
   }
 
-  private resolveDisplayMode(hasSelectedAc: boolean) {
+  private resolveDisplayMode() {
     const userInfoRaw = localStorage.getItem('UserInfo_b');
 
     let userInfo: any = null;
@@ -200,7 +269,7 @@ export class IrPropertySwitcher {
       return;
     }
 
-    if (!hasSelectedAc || !this.linkedProperties.length) {
+    if (!this.propertyState?.selected || !this.hasPool) {
       this.displayMode = 'read-only';
       return;
     }
@@ -211,19 +280,31 @@ export class IrPropertySwitcher {
   private handlePropertySelected = async (event: CustomEvent<FetchedProperty['PROPERTY_ID']>) => {
     event.stopImmediatePropagation();
     event.stopPropagation();
-    await this.applySelectedProperty(event.detail);
+    // This is the ONLY place where propertyChange event is emitted
+    // Only fired when dialog content confirms selection
+    await this.loadPropertyById(event.detail, 'user-selection', undefined, true);
   };
 
   private handleDropdownSelect = async (selectedProperty: LinkedProperty['property_id']) => {
     const selectedId = Number(selectedProperty);
-    const property = this.linkedProperties.find(p => p.property_id === selectedId);
-    if (!property) return;
+    const linkedProperty = this.propertyState.linked.find(p => p.property_id === selectedId);
+    if (!linkedProperty) return;
 
-    await this.applySelectedProperty(property.property_id, property);
+    // Dropdown selection also emits propertyChange with linkedProperty context
+    await this.loadPropertyById(linkedProperty.property_id, 'user-selection', linkedProperty, true);
   };
 
-  private async applySelectedProperty(propertyId: FetchedProperty['PROPERTY_ID'], linkedProperty?: LinkedProperty) {
+  // NEW: Consolidated loading method
+  private async loadPropertyById(
+    propertyId: number,
+    source: PropertyState['source'],
+    linkedProperty?: LinkedProperty,
+    emitEvent: boolean = false, // Only emit when true
+  ) {
+    if (this.isUpdating) return;
+
     this.open = false;
+
     try {
       const { data } = await axios.post(`${this.baseUrl ?? ''}/Get_Ac_By_AC_ID_Adv`, {
         AC_ID: propertyId,
@@ -235,36 +316,30 @@ export class IrPropertySwitcher {
         throw new Error(data.ExceptionMsg);
       }
 
-      const property = data.My_Result;
-      if (linkedProperty) {
-        this.linkedPropertyChange.emit({ linkedProperty, property });
-      }
-      // localStorage.setItem('_Selected_Ac', JSON.stringify(property));
-      this.propertyChange.emit({
-        A_NAME: property.My_User?.USERNAME ?? '',
-        COUNTRY_CODE: property.COUNTRY_ID as any,
-        COUNTRY_NAME: property.My_Country?.L1_NAME_REF ?? '',
-        PROPERTY_ID: property.AC_ID,
-        PROPERTY_NAME: property.NAME,
-      });
-      this.updateSelectedProperty(property);
+      await this.updatePropertyState(data.My_Result, linkedProperty ?? null, source, emitEvent);
     } catch (error) {
       console.error('Failed to fetch selected property details', error);
     }
-
-    // Re-init via polling-safe path
-    this.startSelectedAcPolling();
-    this.startUserInfoPolling();
   }
 
   private renderReadOnly() {
-    return <p class="property-switcher__trigger">{this.selectedProperty?.PROPERTY_NAME ?? 'Property'}</p>;
+    return <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? 'Property'}</p>;
   }
 
   private trigger() {
     return (
-      <ir-custom-button withCaret variant="neutral" appearance="plain" onClickHandler={() => (this.open = !this.open)}>
-        <p class="property-switcher__trigger">{this.selectedProperty?.PROPERTY_NAME ?? 'Select property'}</p>
+      <ir-custom-button
+        withCaret
+        variant="neutral"
+        appearance="outlined"
+        onClickHandler={() => {
+          this.open = !this.open;
+          if (this.open) {
+            this.ensureLinkedPropertiesLoaded();
+          }
+        }}
+      >
+        <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? 'Select property'}</p>
       </ir-custom-button>
     );
   }
@@ -276,6 +351,9 @@ export class IrPropertySwitcher {
 
         {this.displayMode === 'dropdown' && (
           <wa-dropdown
+            onwa-show={() => {
+              this.ensureLinkedPropertiesLoaded();
+            }}
             onwa-hide={e => {
               e.stopPropagation();
               e.stopImmediatePropagation();
@@ -286,10 +364,15 @@ export class IrPropertySwitcher {
               this.handleDropdownSelect(Number(e.detail.item.value));
             }}
           >
-            <ir-custom-button slot="trigger" withCaret variant="neutral" appearance="plain">
-              {this.selectedProperty?.PROPERTY_NAME}
+            <ir-custom-button slot="trigger" withCaret variant="neutral" appearance="outlined">
+              <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME}</p>
             </ir-custom-button>
-            {this.linkedProperties?.map(property => (
+            {this.isLinkedLoading && (
+              <wa-dropdown-item disabled class="property-switcher__dropdown-loader">
+                <wa-spinner></wa-spinner>
+              </wa-dropdown-item>
+            )}
+            {this.propertyState.linked?.map(property => (
               <wa-dropdown-item value={property.property_id?.toString()} key={`dropdown-item-${property.property_id}`}>
                 {property.name}
               </wa-dropdown-item>
@@ -305,25 +388,31 @@ export class IrPropertySwitcher {
               open={this.open}
               label="Find property"
               class="property-switcher__dialog"
+              style={{ '--ir-dialog-width': '40rem' }}
               onIrDialogAfterHide={e => {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
                 this.open = false;
               }}
             >
-              {this.open && (
-                <ir-property-switcher-dialog-content
-                  onLinkedPropertyChange={e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    this.handleDropdownSelect(Number(e.detail.property_id));
-                  }}
-                  open={this.open}
-                  selectedPropertyId={this.selectedProperty?.PROPERTY_ID}
-                  properties={this.linkedProperties}
-                  onPropertySelected={this.handlePropertySelected}
-                />
-              )}
+              {this.open &&
+                (this.isLinkedLoading ? (
+                  <div class="property-switcher__loader">
+                    <ir-spinner></ir-spinner>
+                  </div>
+                ) : (
+                  <ir-property-switcher-dialog-content
+                    onLinkedPropertyChange={e => {
+                      e.stopImmediatePropagation();
+                      e.stopPropagation();
+                      this.handleDropdownSelect(Number(e.detail.property_id));
+                    }}
+                    open={this.open}
+                    selectedPropertyId={this.propertyState.selected?.PROPERTY_ID}
+                    properties={this.propertyState.linked}
+                    onPropertySelected={this.handlePropertySelected}
+                  />
+                ))}
             </ir-dialog>
           </div>
         )}

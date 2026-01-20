@@ -34,20 +34,29 @@ export class IrPropertySwitcherDialogContent {
   @State() private highlightedIndex: number = -1;
 
   private inputRef?: HTMLIrInputElement;
+  private resetOnOpenFrame: number;
+  private focusOnLoadFrame: number;
 
   @Watch('open')
   handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
       return;
     }
-    requestAnimationFrame(() => {
-      this.inputRef?.focusInput();
+    this.resetOnOpenFrame = requestAnimationFrame(() => {
+      // this.inputRef?.focusInput();
       this.resetSearch();
     });
   }
 
   componentDidLoad() {
-    this.inputRef?.focusInput();
+    this.focusOnLoadFrame = requestAnimationFrame(() => {
+      this.inputRef?.focusInput();
+    });
+  }
+
+  disconnectedCallback() {
+    if (this.resetOnOpenFrame) cancelAnimationFrame(this.resetOnOpenFrame);
+    if (this.focusOnLoadFrame) cancelAnimationFrame(this.focusOnLoadFrame);
   }
 
   @Watch('selectedPropertyId')
@@ -171,7 +180,7 @@ export class IrPropertySwitcherDialogContent {
         <ir-input
           autofocus
           ref={el => (this.inputRef = el)}
-          placeholder="Find property"
+          placeholder="Select property"
           class="property-switcher__search-input"
           value={this.searchTerm}
           onText-change={this.handleSearchChange}
@@ -182,7 +191,7 @@ export class IrPropertySwitcherDialogContent {
           {!this.searchTerm && this.properties?.length > 0 && (
             <div>
               <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>
-                <small>Linked Properties</small>
+                Linked Properties
               </p>
               {this.properties.map(property => {
                 const label = `${property.name}`;
@@ -200,12 +209,11 @@ export class IrPropertySwitcherDialogContent {
                   </wa-option>
                 );
               })}
-              <wa-divider></wa-divider>
             </div>
           )}
           {this.searchTerm && this.filteredProperties.length === 0 && this.renderStatus('No properties found')}
           {this.filteredProperties.map((property, index) => {
-            const label = `${property.PROPERTY_NAME} ${property.COUNTRY_NAME}`;
+            const label = `${property.COUNTRY_CODE}: ${property.PROPERTY_NAME} - ${property.A_NAME}`;
             return (
               <wa-option
                 onClick={() => this.selectProperty(property)}

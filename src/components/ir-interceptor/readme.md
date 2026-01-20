@@ -44,6 +44,7 @@
  - [ir-reset-password](../ir-reset-password)
  - [ir-sales-by-channel](../ir-sales-by-channel)
  - [ir-sales-by-country](../ir-sales-by-country)
+ - [ir-unbookable-rooms](../ir-unbookable-rooms)
  - [ir-user-management](../ir-user-management)
 
 ### Depends on
@@ -80,6 +81,7 @@ graph TD;
   ir-reset-password --> ir-interceptor
   ir-sales-by-channel --> ir-interceptor
   ir-sales-by-country --> ir-interceptor
+  ir-unbookable-rooms --> ir-interceptor
   ir-user-management --> ir-interceptor
   style ir-interceptor fill:#f9f,stroke:#333,stroke-width:4px
 ```

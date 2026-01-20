@@ -966,10 +966,11 @@ export class IglBookingEvent {
     const isDepartureAfterHotelCheckout = this.isDepartureAfterHotelCheckout();
     backgroundColor = this.bookingEvent.STATUS === 'CHECKED-OUT' ? legend.color : backgroundColor;
     const splitRole = this.computeSplitRole();
-    const pending = this.bookingEvent.STATUS === 'PENDING-CONFIRMATION';
+    const pending = this.bookingEvent.STATUS === 'PENDING-CONFIRMATION' && this.bookingEvent.ID !== 'NEW_TEMP_EVENT';
     return (
       <Host class={`bookingEvent  ${this.isNewEvent() || this.isHighlightEventType() ? 'newEvent' : ''} ${legend.clsName} `} style={this.getPosition()} id={bar}>
         <div
+          data-status={this.bookingEvent.STATUS}
           class={{
             'bookingEventBase': true,
             'pending': pending,

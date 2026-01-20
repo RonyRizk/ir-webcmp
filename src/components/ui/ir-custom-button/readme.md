@@ -96,6 +96,7 @@
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-test2-cmp](../../ir-test-cmp)
+ - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
@@ -156,6 +157,7 @@ graph TD;
   ir-room-guests --> ir-custom-button
   ir-secure-tasks --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
+  ir-unbookable-rooms-filters --> ir-custom-button
   ir-user-form-panel-drawer --> ir-custom-button
   ir-user-management-table --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px

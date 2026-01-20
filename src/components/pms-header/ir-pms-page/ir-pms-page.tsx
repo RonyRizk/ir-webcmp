@@ -102,7 +102,7 @@ export class IrPmsPage {
             </ir-custom-button>
             <wa-tooltip for="arrivals-btn">Check-ins</wa-tooltip>
 
-            <ir-notifications notifications={this.notifications as any}></ir-notifications>
+            <ir-notifications propertyid={this.propertyid as any} ticket={this.ticket} ></ir-notifications>
 
             <wa-dropdown>
               <wa-avatar slot="trigger" style={{ '--size': '2rem', 'marginLeft': '0.5rem' }}></wa-avatar>
@@ -146,6 +146,8 @@ export class IrPmsPage {
             <img style={{ height: '24px' }} src="	https://x.igloorooms.com/app-assets/images/logo/logo-dark.png" alt="" />
           </div>
           <ir-menu>
+            <ir-property-switcher ticket={this.ticket}></ir-property-switcher>
+
             {/* <div>
               <ir-custom-button data-dialog="open dialog-opening" size="small" appearance="plain" class="header-property-switcher">
                 <img class="logo" src="https://gateway.igloorooms.com/irimages/aclogo/AcLogo_229.png?t=1597509988143" />
@@ -199,7 +201,6 @@ export class IrPmsPage {
 
             <ir-menu-group groupName="sub-property">
               <ir-menu-item slot="summary">Reports</ir-menu-item>
-
               <ir-menu-item href="ACHousekeepingTasks.aspx">Housekeeping Tasks</ir-menu-item>
               <ir-menu-item href="acmemberlist.aspx">Guests</ir-menu-item>
               <ir-menu-item href="acsalesstatistics.aspx">Sales Statistics</ir-menu-item>
@@ -207,6 +208,7 @@ export class IrPmsPage {
               <ir-menu-item href="acsalesbycountry.aspx">Sales by Country</ir-menu-item>
               <ir-menu-item href="ACDailyOccupancy.aspx">Daily Occupancy</ir-menu-item>
               <ir-menu-item href="acaccountingreport.aspx">Accounting Report</ir-menu-item>
+              <ir-menu-item href='/' selected id='hello'>Hello</ir-menu-item>
             </ir-menu-group>
             {/* </ir-menu-group> */}
           </ir-menu>
@@ -217,6 +219,7 @@ export class IrPmsPage {
           {/* <ir-dialog open={this.open}>{this.open && <ir-input ref={el => (this.input = el)}></ir-input>}</ir-dialog> */}
         </ir-menu-drawer>
         <div>
+          <ir-pms-payment-due-alert propertyid={this.propertyid ? Number(this.propertyid) : null} ticket={this.ticket}></ir-pms-payment-due-alert>
           <div style={{ height: '200vh' }}></div>
         </div>
       </div>

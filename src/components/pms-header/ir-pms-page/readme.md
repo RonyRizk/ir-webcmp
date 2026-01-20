@@ -25,6 +25,7 @@
 - [ir-menu](../ir-menu)
 - [ir-menu-item](../ir-menu-item)
 - [ir-menu-group](../ir-menu-group)
+- [ir-pms-payment-due-alert](../ir-pms-payment-due-alert)
 
 ### Graph
 ```mermaid
@@ -37,12 +38,16 @@ graph TD;
   ir-pms-page --> ir-menu
   ir-pms-page --> ir-menu-item
   ir-pms-page --> ir-menu-group
+  ir-pms-page --> ir-pms-payment-due-alert
   ir-property-switcher --> ir-custom-button
   ir-property-switcher --> ir-dialog
+  ir-property-switcher --> ir-spinner
   ir-property-switcher --> ir-property-switcher-dialog-content
   ir-property-switcher-dialog-content --> ir-input
-  ir-pms-search --> ir-picker
-  ir-pms-search --> ir-picker-item
+  ir-pms-search --> ir-autocomplete
+  ir-pms-search --> ir-autocomplete-option
+  ir-pms-search --> ir-booking-status-tag
+  ir-autocomplete --> ir-input
   ir-notifications --> ir-custom-button
   ir-notifications --> ir-empty-state
   ir-menu-drawer --> ir-drawer

@@ -30,6 +30,7 @@
  - [ir-room-nights](../igloo-calendar/ir-room-nights)
  - [ir-sales-by-channel](../ir-sales-by-channel)
  - [ir-sales-by-country](../ir-sales-by-country)
+ - [ir-unbookable-rooms](../ir-unbookable-rooms)
  - [ir-user-management](../ir-user-management)
 
 ### Graph
@@ -49,6 +50,7 @@ graph TD;
   ir-room-nights --> ir-loading-screen
   ir-sales-by-channel --> ir-loading-screen
   ir-sales-by-country --> ir-loading-screen
+  ir-unbookable-rooms --> ir-loading-screen
   ir-user-management --> ir-loading-screen
   style ir-loading-screen fill:#f9f,stroke:#333,stroke-width:4px
 ```
