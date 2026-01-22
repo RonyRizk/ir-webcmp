@@ -5,7 +5,10 @@
 .property-switcher__search-input {
   padding: 1rem;
 }
-
+.property-switcher__search-input::part(base) {
+  font-size: 16px;
+  height: 32px;
+}
 /* .property-switcher__results {
   max-height: 250px;
   min-height: 150px;

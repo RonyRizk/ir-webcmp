@@ -57,8 +57,10 @@
 
 .notification-item__content {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   flex: 1 1 0%;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .notification-item {

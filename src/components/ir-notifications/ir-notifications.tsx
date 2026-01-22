@@ -72,7 +72,6 @@ export class IrNotifications {
     this.fetchNotifications();
   }
 
-
   private async fetchNotifications() {
     if (!this.propertyid) {
       this.notifications = [];
@@ -80,7 +79,7 @@ export class IrNotifications {
     }
     try {
       const notifications = await this.propertyService.fetchNotifications(this.propertyid);
-      this.notifications = notifications.filter(n => n.type !== "financial")
+      this.notifications = notifications.filter(n => n.type !== 'financial');
     } catch (error) {
       console.log(error);
       this.notifications = [];
@@ -154,14 +153,17 @@ export class IrNotifications {
               <span class="notification-item__unread-indicator"></span>
             </div>
           ))*/}
-          {this.notifications.map((notification) => {
-            if (notification.type === "availability_alert") {
-              return <a href='AcAvailabilityAlert.aspx' class="notification-item">
-                <div class="notification-item__content">
-                  <p class="notification-item__title">{notification.message} rooms types are not bookable for 14 consecutive nights within the next 2 months. More...</p>
-                  {/* <p class="notification-item__time">{this.getRelativeTimeFromParts(notification.date, notification.hour, notification.minute)}</p> */}
-                </div>
-              </a>
+          {this.notifications.map(notification => {
+            if (notification.type === 'availability_alert') {
+              return (
+                <a href="AcAvailabilityAlert.aspx" class="notification-item">
+                  <div class="notification-item__content">
+                    <p class="notification-item__title">{notification.message} rooms types are not bookable for 14 consecutive nights within the next 2 months. More...</p>
+                    <wa-icon name="angle-right"></wa-icon>
+                    {/* <p class="notification-item__time">{this.getRelativeTimeFromParts(notification.date, notification.hour, notification.minute)}</p> */}
+                  </div>
+                </a>
+              );
             }
           })}
           {this.notifications?.length === 0 && (
