@@ -328,11 +328,13 @@ export class IrPropertySwitcher {
 
   private trigger() {
     return (
-      <ir-custom-button
+      <wa-button
+        size="small"
         withCaret
+        class="property-switcher__trigger-btn"
         variant="neutral"
         appearance="outlined"
-        onClickHandler={() => {
+        onClick={() => {
           this.open = !this.open;
           if (this.open) {
             this.ensureLinkedPropertiesLoaded();
@@ -340,7 +342,7 @@ export class IrPropertySwitcher {
         }}
       >
         <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? 'Select property'}</p>
-      </ir-custom-button>
+      </wa-button>
     );
   }
 
@@ -364,9 +366,9 @@ export class IrPropertySwitcher {
               this.handleDropdownSelect(Number(e.detail.item.value));
             }}
           >
-            <ir-custom-button slot="trigger" withCaret variant="neutral" appearance="outlined">
+            <wa-button size="small" class="property-switcher__trigger-btn" slot="trigger" withCaret variant="neutral" appearance="outlined">
               <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME}</p>
-            </ir-custom-button>
+            </wa-button>
             {this.isLinkedLoading && (
               <wa-dropdown-item disabled class="property-switcher__dropdown-loader">
                 <wa-spinner></wa-spinner>
@@ -384,7 +386,7 @@ export class IrPropertySwitcher {
           <div>
             {this.trigger()}
             <ir-dialog
-              withoutHeader
+              // withoutHeader
               open={this.open}
               label="Find property"
               class="property-switcher__dialog"

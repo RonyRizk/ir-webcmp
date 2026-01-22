@@ -180,7 +180,7 @@ export class IrPropertySwitcherDialogContent {
         <ir-input
           autofocus
           ref={el => (this.inputRef = el)}
-          placeholder="Select property"
+          placeholder="Enter name or A number"
           class="property-switcher__search-input"
           value={this.searchTerm}
           onText-change={this.handleSearchChange}
@@ -190,9 +190,7 @@ export class IrPropertySwitcherDialogContent {
         <div tabIndex={-1} class="property-switcher__results">
           {!this.searchTerm && this.properties?.length > 0 && (
             <div>
-              <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>
-                Linked Properties
-              </p>
+              <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>Linked Properties</p>
               {this.properties.map(property => {
                 const label = `${property.name}`;
                 return (

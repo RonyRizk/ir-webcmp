@@ -39,7 +39,6 @@ graph TD;
   ir-pms-page --> ir-menu-item
   ir-pms-page --> ir-menu-group
   ir-pms-page --> ir-pms-payment-due-alert
-  ir-property-switcher --> ir-custom-button
   ir-property-switcher --> ir-dialog
   ir-property-switcher --> ir-spinner
   ir-property-switcher --> ir-property-switcher-dialog-content
