@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h, Prop } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, h, Prop } from '@stencil/core';
 
 @Component({
   tag: 'ir-menu-group',
@@ -6,9 +6,19 @@ import { Component, Event, EventEmitter, h, Prop } from '@stencil/core';
   shadow: true,
 })
 export class IrMenuGroup {
+  @Element() el: HTMLIrMenuGroupElement;
+
   @Prop({ reflect: true, mutable: true }) open: boolean;
   @Prop({ reflect: true }) groupName: string;
   @Event() openChanged: EventEmitter<boolean>;
+
+  componentWillLoad() {
+    this.el.addEventListener('mouseenter', this.handleShow);
+  }
+
+  disconnectedCallback() {
+    this.el.removeEventListener('mouseenter', this.handleShow);
+  }
 
   private handleHide = (event: Event) => {
     event.stopImmediatePropagation();
