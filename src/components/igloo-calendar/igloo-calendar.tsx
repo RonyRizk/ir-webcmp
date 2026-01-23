@@ -1322,7 +1322,8 @@ export class IglooCalendar {
     // 3) Open for sidebar-based flows (but not room-guests, which uses <ir-room-guests>)
     if (this.calendarSidebarState) {
       const type = this.calendarSidebarState.type;
-      return type === 'split' || type === 'bulk-blocks';
+      // return type === 'split' || type === 'bulk-blocks';
+      return type === 'split';
     }
 
     // 4) Default: closed
@@ -1452,10 +1453,10 @@ export class IglooCalendar {
               onCloseModal={() => (this.calendarSidebarState = null)}
             ></igl-split-booking>
           )}
-          {this.calendarSidebarState?.type === 'bulk-blocks' && (
+          {/* {this.calendarSidebarState?.type === 'bulk-blocks' && (
             <igl-bulk-operations slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-operations>
             // <igl-bulk-stop-sale slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-stop-sale>
-          )}
+          )} */}
         </ir-sidebar>
         <ir-booking-details-drawer
           open={this.editBookingItem?.event_type === 'EDIT_BOOKING'}
@@ -1537,6 +1538,11 @@ export class IglooCalendar {
           }}
           checkOut={this.bookingItem?.TO_DATE}
         ></ir-booking-editor-drawer>
+        <igl-bulk-operations-drawer
+          property_id={this.property_id}
+          onCloseDrawer={() => (this.calendarSidebarState = null)}
+          open={this.calendarSidebarState?.type === 'bulk-blocks'}
+        ></igl-bulk-operations-drawer>
         <igl-blocked-date-drawer
           onBlockedDateDrawerClosed={e => {
             e.stopImmediatePropagation();

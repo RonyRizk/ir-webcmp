@@ -17,3 +17,9 @@
 .days-checkbox {
   gap: 0.5rem;
 }
+.bulk-stop-sale__date-label {
+  font-size: 0.857rem;
+  color: var(--wa-form-control-label-color);
+  font-weight: var(--wa-form-control-label-font-weight);
+  line-height: var(--wa-form-control-label-line-height);
+}

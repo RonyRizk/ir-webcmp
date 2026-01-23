@@ -9,16 +9,18 @@
 
 | Property         | Attribute          | Description | Type     | Default     |
 | ---------------- | ------------------ | ----------- | -------- | ----------- |
+| `formId`         | `form-id`          |             | `string` | `undefined` |
 | `maxDatesLength` | `max-dates-length` |             | `number` | `8`         |
 | `property_id`    | `property_id`      |             | `number` | `undefined` |
 
 
 ## Events
 
-| Event        | Description | Type                                                                                                 |
-| ------------ | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `closeModal` |             | `CustomEvent<null>`                                                                                  |
-| `toast`      |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event            | Description | Type                                                                                                 |
+| ---------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `closeDrawer`    |             | `CustomEvent<null>`                                                                                  |
+| `loadingChanged` |             | `CustomEvent<boolean>`                                                                               |
+| `toast`          |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
 ## Dependencies
@@ -26,23 +28,21 @@
 ### Used by
 
  - [igl-bulk-operations](..)
+ - [igl-bulk-operations-drawer](../igl-bulk-operations-drawer)
 
 ### Depends on
 
-- [ir-select](../../../ui/ir-select)
-- [ir-radio](../../../ui/ir-radio)
-- [ir-button](../../../ui/ir-button)
-- [ir-date-picker](../../../ui/ir-date-picker)
+- [ir-custom-button](../../../ui/ir-custom-button)
+- [ir-custom-date-picker](../../../ir-custom-date-picker)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-bulk-block --> ir-select
-  igl-bulk-block --> ir-radio
-  igl-bulk-block --> ir-button
-  igl-bulk-block --> ir-date-picker
-  ir-button --> ir-icons
+  igl-bulk-block --> ir-custom-button
+  igl-bulk-block --> ir-custom-date-picker
+  ir-custom-date-picker --> ir-input
   igl-bulk-operations --> igl-bulk-block
+  igl-bulk-operations-drawer --> igl-bulk-block
   style igl-bulk-block fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

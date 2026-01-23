@@ -53,8 +53,6 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-book-property](../../igloo-calendar/igl-book-property)
- - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
- - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [igl-tba-booking-view](../../igloo-calendar/igl-to-be-assigned/igl-tba-booking-view)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
@@ -107,8 +105,6 @@ Type: `Promise<void>`
 graph TD;
   ir-button --> ir-icons
   igl-book-property --> ir-button
-  igl-bulk-block --> ir-button
-  igl-bulk-stop-sale --> ir-button
   igl-split-booking --> ir-button
   igl-tba-booking-view --> ir-button
   ir-booking-email-logs --> ir-button

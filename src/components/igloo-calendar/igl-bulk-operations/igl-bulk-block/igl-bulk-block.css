@@ -4,31 +4,83 @@
   flex: 1 1 0%;
   height: 100%;
 }
-.bulk-sheet-container {
+
+.igl-bulk-block__form {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   gap: 1rem;
-}
-.animated-container {
-  transition: all 0.5s ease;
-}
-.physical-room {
-  margin-left: 1rem !important;
-  padding-top: 0.5rem;
-}
-/* target only the last <td> in each .physical-room row */
-.physical-room > td:last-child {
-  padding-left: 1rem; /* or whatever indent you like */
-}
-.room-type-list {
-  padding: 0;
-  margin: 0;
+  padding: 0 1.5rem;
 }
 
-.room-type-list > li,
-.physical-room,
-.room-type-row {
+.igl-bulk-block__action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0;
+  padding-bottom: 0.25rem;
+  color: var(--wa-color-neutral-60);
+}
+
+.igl-bulk-block__action-label {
+  margin: 0;
+  padding: 0;
+  color: inherit;
+}
+
+.igl-bulk-block__error {
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  color: var(--wa-color-danger-60, #d64545);
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.igl-bulk-block__roomtype-row,
+.igl-bulk-block__unit-row {
   list-style: none;
+}
+.igl-bulk-block__roomtype-name {
+  margin-block: 0.5rem;
+}
+
+.igl-bulk-block__roomtype-choice,
+.igl-bulk-block__unit-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.igl-bulk-block__roomtype-name {
+  text-align: left;
+}
+
+.igl-bulk-block__unit-row {
+  margin-left: 1rem;
+  /* padding-top: 0.5rem; */
+}
+
+.igl-bulk-block__unit-row--last {
+  padding-bottom: 0.25rem;
+}
+
+.igl-bulk-block__dates-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.igl-bulk-block__date-cell {
+  padding: 0 0.5rem 0.5rem 0;
+}
+
+.igl-bulk-block__date-action-cell {
+  padding-bottom: 0.5rem;
+}
+.igl-bulk-block__dates-header {
+  text-align: left;
+  font-size: 0.857rem;
+  color: var(--wa-form-control-label-color);
+  font-weight: var(--wa-form-control-label-font-weight);
+  line-height: var(--wa-form-control-label-line-height);
 }

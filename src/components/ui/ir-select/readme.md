@@ -58,8 +58,6 @@
 
 ### Used by
 
- - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
- - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
@@ -79,8 +77,6 @@
 ### Graph
 ```mermaid
 graph TD;
-  igl-bulk-block --> ir-select
-  igl-bulk-stop-sale --> ir-select
   igl-split-booking --> ir-select
   ir-delete-modal --> ir-select
   ir-financial-filters --> ir-select

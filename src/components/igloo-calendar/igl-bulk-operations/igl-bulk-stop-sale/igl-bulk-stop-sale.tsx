@@ -15,12 +15,12 @@ export type SelectedRooms = { id: string | number; result: 'open' | 'closed' };
   scoped: true,
 })
 export class IglBulkStopSale {
+  @Prop() formId: string;
   @Prop() maxDatesLength = 8;
   @Prop() property_id: number;
 
   @State() selectedRoomTypes: SelectedRooms[] = [];
   @State() errors: 'dates' | 'rooms' | 'weekdays';
-  @State() isLoading: boolean;
   @State() dates: {
     from: Moment | null;
     to: Moment | null;
@@ -32,8 +32,9 @@ export class IglBulkStopSale {
       .map((_, i) => i),
   );
 
-  @Event() closeModal: EventEmitter<null>;
+  @Event() closeDrawer: EventEmitter<null>;
   @Event() toast: EventEmitter<IToast>;
+  @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
   private dateRefs: { from?: HTMLIrDatePickerElement; to?: HTMLIrDatePickerElement }[] = [];
@@ -163,7 +164,7 @@ export class IglBulkStopSale {
     };
     try {
       this.errors = null;
-      this.isLoading = true;
+      this.loadingChanged.emit(true);
       const periods = this.datesSchema.parse(this.dates);
       if (this.selectedRoomTypes.length === 0) {
         this.unitSections.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -206,8 +207,8 @@ export class IglBulkStopSale {
         title: locales.entries.Lcz_RequestSubmittedSuccessfully,
         description: '',
       });
-      this.isLoading = false;
-      this.closeModal.emit();
+      this.loadingChanged.emit(false);
+      this.closeDrawer.emit();
     } catch (error) {
       console.log(error);
       if (error instanceof ZodError) {
@@ -215,7 +216,7 @@ export class IglBulkStopSale {
         this.errors = 'dates';
       }
     } finally {
-      this.isLoading = false;
+      this.loadingChanged.emit(false);
     }
   }
 
@@ -279,6 +280,7 @@ export class IglBulkStopSale {
   render() {
     return (
       <form
+        id={this.formId}
         class={'bulk-sheet-container'}
         onSubmit={e => {
           e.preventDefault();
@@ -293,7 +295,7 @@ export class IglBulkStopSale {
               if (this.isLoading) {
                 return;
               }
-              this.closeModal.emit(null);
+              this.closeDrawer.emit(null);
             }}
             class="px-1 mb-0"
             label={locales.entries.Lcz_BulkStopOpenSale}
@@ -328,7 +330,7 @@ export class IglBulkStopSale {
                     <tr key={roomType.id}>
                       <td class={`choice-row ${row_style}`}>
                         <div class={'d-flex justify-content-end'}>
-                          <ir-select
+                          {/* <ir-select
                             firstOption={`${locales.entries.Lcz_Select}...`}
                             data={[
                               { value: 'open', text: locales.entries.Lcz_Open },
@@ -344,7 +346,25 @@ export class IglBulkStopSale {
                               }
                               this.selectedRoomTypes = rest;
                             }}
-                          ></ir-select>
+                          ></ir-select> */}
+                          <wa-select
+                            onchange={e => {
+                              const { value } = e.target as any;
+                              const choice = value as 'open' | 'closed' | undefined;
+                              // drop any existing entry for this roomType
+                              const rest = this.selectedRoomTypes.filter(entry => entry.id !== roomType.id);
+                              // if they actually picked something, append it
+                              if (choice) {
+                                rest.push({ id: roomType.id, result: choice });
+                              }
+                              this.selectedRoomTypes = rest;
+                            }}
+                            size="small"
+                            placeholder={`${locales.entries.Lcz_Select}...`}
+                          >
+                            <wa-option value="open">{locales.entries.Lcz_Open}</wa-option>
+                            <wa-option value="closed">{locales.entries.Lcz_StopSale}</wa-option>
+                          </wa-select>
                         </div>
                       </td>
                       <td class={`pl-1 text-left ${row_style}`}>{roomType.name}</td>
@@ -369,17 +389,19 @@ export class IglBulkStopSale {
           <table class="mt-1" ref={el => (this.datesSections = el)}>
             <thead>
               <tr>
-                <th class="text-left">{locales.entries.Lcz_From}</th>
-                <th class="text-left">{locales.entries.Lcz_ToExclusive}</th>
+                <td class="text-left bulk-stop-sale__date-label">{locales.entries.Lcz_From}</td>
+                <td class="text-left bulk-stop-sale__date-label">{locales.entries.Lcz_ToExclusive}</td>
                 <td>
                   {this.dates.length !== this.maxDatesLength && (
-                    <ir-button
-                      variant="icon"
-                      icon_name="plus"
+                    <ir-custom-button
+                      appearance="plain"
+                      variant="neutral"
                       onClickHandler={() => {
                         this.addDateRow();
                       }}
-                    ></ir-button>
+                    >
+                      <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                    </ir-custom-button>
                   )}
                 </td>
               </tr>
@@ -395,7 +417,7 @@ export class IglBulkStopSale {
                 return (
                   <tr key={`date_${i}`}>
                     <td class="pr-1 pb-1">
-                      <ir-date-picker
+                      <ir-custom-date-picker
                         ref={el => {
                           this.dateRefs[i].from = el;
                         }}
@@ -426,19 +448,12 @@ export class IglBulkStopSale {
                             this.dateRefs[index].to.openDatePicker();
                           }
                         }}
-                      >
-                        <input
-                          type="text"
-                          slot="trigger"
-                          value={d.from ? d.from.format('MMM DD, YYYY') : null}
-                          class={`form-control input-sm ${this.errors === 'dates' && !d.to ? 'border-danger' : ''} text-center`}
-                          style={{ width: '100%' }}
-                        ></input>
-                      </ir-date-picker>
+                      ></ir-custom-date-picker>
                     </td>
                     <td class="pr-1 pb-1">
-                      <ir-date-picker
+                      <ir-custom-date-picker
                         forceDestroyOnUpdate
+                        disabled={!d.from}
                         ref={el => {
                           this.dateRefs[i].to = el;
                         }}
@@ -465,27 +480,19 @@ export class IglBulkStopSale {
                             this.dateRefs[index].to.openDatePicker();
                           }
                         }}
-                      >
-                        <input
-                          type="text"
-                          slot="trigger"
-                          value={d.to ? d.to.format('MMM DD, YYYY') : null}
-                          class={`form-control input-sm 
-                          ${this.errors === 'dates' && !d.to ? 'border-danger' : ''}
-                          text-center`}
-                          style={{ width: '100%' }}
-                        ></input>
-                      </ir-date-picker>
+                      ></ir-custom-date-picker>
                     </td>
                     {i > 0 && (
                       <td class="pb-1">
-                        <ir-button
-                          variant="icon"
-                          icon_name="minus"
+                        <ir-custom-button
+                          appearance="plain"
+                          variant="neutral"
                           onClickHandler={() => {
                             this.dates = this.dates.filter((_, j) => j !== i);
                           }}
-                        ></ir-button>
+                        >
+                          <wa-icon name="minus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                        </ir-custom-button>
                       </td>
                     )}
                   </tr>
@@ -493,10 +500,6 @@ export class IglBulkStopSale {
               })}
             </tbody>
           </table>
-        </div>
-        <div class={'sheet-footer'}>
-          <ir-button text={locales.entries.Lcz_Cancel} btn_color="secondary" class={'flex-fill'} onClickHandler={() => this.closeModal.emit(null)}></ir-button>
-          <ir-button isLoading={this.isLoading} text={locales.entries.Lcz_Save} btn_type="submit" class="flex-fill"></ir-button>
         </div>
       </form>
     );

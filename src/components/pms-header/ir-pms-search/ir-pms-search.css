@@ -73,18 +73,14 @@
 .pms-search__option {
   display: grid;
   grid-template-columns:
-    120px   /* booking numbers */
-    1fr           /* guest name (max width) */
-;
+    120px /* booking numbers */
+    1fr /* guest name (max width) */;
   align-items: center;
   gap: 1rem;
 }
 
-
-
-
 .pms-search__option-icon {
-  width: 1.5625rem; 
+  width: 1.5625rem;
   flex-shrink: 0;
 }
 
@@ -97,7 +93,7 @@
 }
 
 .pms-search__option-booking {
-  font-size: 0.875rem; 
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -114,30 +110,33 @@
 .pms-search__option-status {
   margin-left: auto;
 }
-.pms-search__option-icon{
+.pms-search__option-icon {
   width: 1rem;
 }
 .pms-search__option-status,
-.pms-search__autocomplete-option::part(checked-icon){
-  display:none
+.pms-search__autocomplete-option::part(checked-icon) {
+  display: none;
+}
+.pms-search__autocomplete-option::part(start) {
+  padding-inline-start: 0.5rem;
 }
 .pms-search__option-label,
-.pms-search__option-booking{
+.pms-search__option-booking {
   font-size: 1rem;
 }
 
-@media (width >= 40rem){
+@media (width >= 40rem) {
   .pms-search__option-icon {
-    width: 1.5625rem; 
+    width: 1.5625rem;
     flex-shrink: 0;
   }
 }
-@media (min-width: 768px){
+@media (min-width: 768px) {
   .pms-search__autocomplete::part(listbox) {
     width: auto;
     max-width: var(--auto-size-available-width);
   }
-  .pms-search__option-status{
+  .pms-search__option-status {
     display: inline-flex;
   }
 }

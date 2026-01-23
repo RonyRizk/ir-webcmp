@@ -47,6 +47,9 @@
  - [igl-book-property-footer](../../igloo-calendar/igl-book-property/igl-book-property-footer)
  - [igl-book-property-header](../../igloo-calendar/igl-book-property/igl-book-property-header)
  - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
+ - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
+ - [igl-bulk-operations-drawer](../../igloo-calendar/igl-bulk-operations/igl-bulk-operations-drawer)
+ - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-cal-header](../../igloo-calendar/igl-cal-header)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-legends](../../igloo-calendar/igl-legends)
@@ -107,6 +110,9 @@ graph TD;
   igl-book-property-footer --> ir-custom-button
   igl-book-property-header --> ir-custom-button
   igl-booking-event-hover --> ir-custom-button
+  igl-bulk-block --> ir-custom-button
+  igl-bulk-operations-drawer --> ir-custom-button
+  igl-bulk-stop-sale --> ir-custom-button
   igl-cal-header --> ir-custom-button
   igl-housekeeping-dialog --> ir-custom-button
   igl-legends --> ir-custom-button

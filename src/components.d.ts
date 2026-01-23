@@ -276,6 +276,7 @@ export namespace Components {
         "wasBlockedUnit": boolean;
     }
     interface IglBulkBlock {
+        "formId": string;
         "maxDatesLength": number;
         "property_id": number;
     }
@@ -283,7 +284,13 @@ export namespace Components {
         "maxDatesLength": number;
         "property_id": number;
     }
+    interface IglBulkOperationsDrawer {
+        "maxDatesLength": number;
+        "open": boolean;
+        "property_id": number;
+    }
     interface IglBulkStopSale {
+        "formId": string;
         "maxDatesLength": number;
         "property_id": number;
     }
@@ -3289,6 +3296,9 @@ export namespace Components {
         "identifier": string;
         "pool": string;
     }
+    interface IrRectifier {
+        "formId": string;
+    }
     interface IrReservationInformation {
         "booking": Booking;
         "countries": ICountry[];
@@ -4000,6 +4010,10 @@ export interface IglBulkOperationsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglBulkOperationsElement;
 }
+export interface IglBulkOperationsDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglBulkOperationsDrawerElement;
+}
 export interface IglBulkStopSaleCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglBulkStopSaleElement;
@@ -4468,6 +4482,10 @@ export interface IrReallocationFormCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrReallocationFormElement;
 }
+export interface IrRectifierCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrRectifierElement;
+}
 export interface IrReservationInformationCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrReservationInformationElement;
@@ -4816,8 +4834,9 @@ declare global {
         new (): HTMLIglBookingOverviewPageElement;
     };
     interface HTMLIglBulkBlockElementEventMap {
-        "closeModal": null;
+        "closeDrawer": null;
         "toast": IToast;
+        "loadingChanged": boolean;
     }
     interface HTMLIglBulkBlockElement extends Components.IglBulkBlock, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBulkBlockElementEventMap>(type: K, listener: (this: HTMLIglBulkBlockElement, ev: IglBulkBlockCustomEvent<HTMLIglBulkBlockElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -4851,9 +4870,28 @@ declare global {
         prototype: HTMLIglBulkOperationsElement;
         new (): HTMLIglBulkOperationsElement;
     };
+    interface HTMLIglBulkOperationsDrawerElementEventMap {
+        "closeDrawer": null;
+        "toast": IrToast;
+    }
+    interface HTMLIglBulkOperationsDrawerElement extends Components.IglBulkOperationsDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglBulkOperationsDrawerElementEventMap>(type: K, listener: (this: HTMLIglBulkOperationsDrawerElement, ev: IglBulkOperationsDrawerCustomEvent<HTMLIglBulkOperationsDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglBulkOperationsDrawerElementEventMap>(type: K, listener: (this: HTMLIglBulkOperationsDrawerElement, ev: IglBulkOperationsDrawerCustomEvent<HTMLIglBulkOperationsDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglBulkOperationsDrawerElement: {
+        prototype: HTMLIglBulkOperationsDrawerElement;
+        new (): HTMLIglBulkOperationsDrawerElement;
+    };
     interface HTMLIglBulkStopSaleElementEventMap {
-        "closeModal": null;
+        "closeDrawer": null;
         "toast": IToast;
+        "loadingChanged": boolean;
     }
     interface HTMLIglBulkStopSaleElement extends Components.IglBulkStopSale, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglBulkStopSaleElementEventMap>(type: K, listener: (this: HTMLIglBulkStopSaleElement, ev: IglBulkStopSaleCustomEvent<HTMLIglBulkStopSaleElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -7347,6 +7385,25 @@ declare global {
         prototype: HTMLIrReallocationFormElement;
         new (): HTMLIrReallocationFormElement;
     };
+    interface HTMLIrRectifierElementEventMap {
+        "loadingChanged": boolean;
+        "closeDrawer": void;
+        "toast": IToast;
+    }
+    interface HTMLIrRectifierElement extends Components.IrRectifier, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrRectifierElementEventMap>(type: K, listener: (this: HTMLIrRectifierElement, ev: IrRectifierCustomEvent<HTMLIrRectifierElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrRectifierElementEventMap>(type: K, listener: (this: HTMLIrRectifierElement, ev: IrRectifierCustomEvent<HTMLIrRectifierElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrRectifierElement: {
+        prototype: HTMLIrRectifierElement;
+        new (): HTMLIrRectifierElement;
+    };
     interface HTMLIrReservationInformationElementEventMap {
         "openSidebar": OpenSidebarEvent<any>;
     }
@@ -8037,6 +8094,7 @@ declare global {
         "igl-booking-overview-page": HTMLIglBookingOverviewPageElement;
         "igl-bulk-block": HTMLIglBulkBlockElement;
         "igl-bulk-operations": HTMLIglBulkOperationsElement;
+        "igl-bulk-operations-drawer": HTMLIglBulkOperationsDrawerElement;
         "igl-bulk-stop-sale": HTMLIglBulkStopSaleElement;
         "igl-cal-body": HTMLIglCalBodyElement;
         "igl-cal-footer": HTMLIglCalFooterElement;
@@ -8212,6 +8270,7 @@ declare global {
         "ir-range-picker": HTMLIrRangePickerElement;
         "ir-reallocation-drawer": HTMLIrReallocationDrawerElement;
         "ir-reallocation-form": HTMLIrReallocationFormElement;
+        "ir-rectifier": HTMLIrRectifierElement;
         "ir-reservation-information": HTMLIrReservationInformationElement;
         "ir-reset-password": HTMLIrResetPasswordElement;
         "ir-revenue-row": HTMLIrRevenueRowElement;
@@ -8445,8 +8504,10 @@ declare namespace LocalJSX {
         "wasBlockedUnit"?: boolean;
     }
     interface IglBulkBlock {
+        "formId"?: string;
         "maxDatesLength"?: number;
-        "onCloseModal"?: (event: IglBulkBlockCustomEvent<null>) => void;
+        "onCloseDrawer"?: (event: IglBulkBlockCustomEvent<null>) => void;
+        "onLoadingChanged"?: (event: IglBulkBlockCustomEvent<boolean>) => void;
         "onToast"?: (event: IglBulkBlockCustomEvent<IToast>) => void;
         "property_id"?: number;
     }
@@ -8456,9 +8517,18 @@ declare namespace LocalJSX {
         "onToast"?: (event: IglBulkOperationsCustomEvent<IrToast>) => void;
         "property_id"?: number;
     }
-    interface IglBulkStopSale {
+    interface IglBulkOperationsDrawer {
         "maxDatesLength"?: number;
-        "onCloseModal"?: (event: IglBulkStopSaleCustomEvent<null>) => void;
+        "onCloseDrawer"?: (event: IglBulkOperationsDrawerCustomEvent<null>) => void;
+        "onToast"?: (event: IglBulkOperationsDrawerCustomEvent<IrToast>) => void;
+        "open"?: boolean;
+        "property_id"?: number;
+    }
+    interface IglBulkStopSale {
+        "formId"?: string;
+        "maxDatesLength"?: number;
+        "onCloseDrawer"?: (event: IglBulkStopSaleCustomEvent<null>) => void;
+        "onLoadingChanged"?: (event: IglBulkStopSaleCustomEvent<boolean>) => void;
         "onToast"?: (event: IglBulkStopSaleCustomEvent<IToast>) => void;
         "property_id"?: number;
     }
@@ -11819,6 +11889,12 @@ declare namespace LocalJSX {
         "onCloseModal"?: (event: IrReallocationFormCustomEvent<null>) => void;
         "pool"?: string;
     }
+    interface IrRectifier {
+        "formId"?: string;
+        "onCloseDrawer"?: (event: IrRectifierCustomEvent<void>) => void;
+        "onLoadingChanged"?: (event: IrRectifierCustomEvent<boolean>) => void;
+        "onToast"?: (event: IrRectifierCustomEvent<IToast>) => void;
+    }
     interface IrReservationInformation {
         "booking"?: Booking;
         "countries"?: ICountry[];
@@ -12562,6 +12638,7 @@ declare namespace LocalJSX {
         "igl-booking-overview-page": IglBookingOverviewPage;
         "igl-bulk-block": IglBulkBlock;
         "igl-bulk-operations": IglBulkOperations;
+        "igl-bulk-operations-drawer": IglBulkOperationsDrawer;
         "igl-bulk-stop-sale": IglBulkStopSale;
         "igl-cal-body": IglCalBody;
         "igl-cal-footer": IglCalFooter;
@@ -12737,6 +12814,7 @@ declare namespace LocalJSX {
         "ir-range-picker": IrRangePicker;
         "ir-reallocation-drawer": IrReallocationDrawer;
         "ir-reallocation-form": IrReallocationForm;
+        "ir-rectifier": IrRectifier;
         "ir-reservation-information": IrReservationInformation;
         "ir-reset-password": IrResetPassword;
         "ir-revenue-row": IrRevenueRow;
@@ -12813,6 +12891,7 @@ declare module "@stencil/core" {
             "igl-booking-overview-page": LocalJSX.IglBookingOverviewPage & JSXBase.HTMLAttributes<HTMLIglBookingOverviewPageElement>;
             "igl-bulk-block": LocalJSX.IglBulkBlock & JSXBase.HTMLAttributes<HTMLIglBulkBlockElement>;
             "igl-bulk-operations": LocalJSX.IglBulkOperations & JSXBase.HTMLAttributes<HTMLIglBulkOperationsElement>;
+            "igl-bulk-operations-drawer": LocalJSX.IglBulkOperationsDrawer & JSXBase.HTMLAttributes<HTMLIglBulkOperationsDrawerElement>;
             "igl-bulk-stop-sale": LocalJSX.IglBulkStopSale & JSXBase.HTMLAttributes<HTMLIglBulkStopSaleElement>;
             "igl-cal-body": LocalJSX.IglCalBody & JSXBase.HTMLAttributes<HTMLIglCalBodyElement>;
             "igl-cal-footer": LocalJSX.IglCalFooter & JSXBase.HTMLAttributes<HTMLIglCalFooterElement>;
@@ -12998,6 +13077,7 @@ declare module "@stencil/core" {
             "ir-range-picker": LocalJSX.IrRangePicker & JSXBase.HTMLAttributes<HTMLIrRangePickerElement>;
             "ir-reallocation-drawer": LocalJSX.IrReallocationDrawer & JSXBase.HTMLAttributes<HTMLIrReallocationDrawerElement>;
             "ir-reallocation-form": LocalJSX.IrReallocationForm & JSXBase.HTMLAttributes<HTMLIrReallocationFormElement>;
+            "ir-rectifier": LocalJSX.IrRectifier & JSXBase.HTMLAttributes<HTMLIrRectifierElement>;
             "ir-reservation-information": LocalJSX.IrReservationInformation & JSXBase.HTMLAttributes<HTMLIrReservationInformationElement>;
             "ir-reset-password": LocalJSX.IrResetPassword & JSXBase.HTMLAttributes<HTMLIrResetPasswordElement>;
             "ir-revenue-row": LocalJSX.IrRevenueRow & JSXBase.HTMLAttributes<HTMLIrRevenueRowElement>;

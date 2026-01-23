@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.bulk-operations__drawer::part(body) {
+  padding: 0;
+  padding-inline: 0.1rem;
+}
+.bulk-operations__tab-group::part(nav) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--wa-color-surface-default);
+}

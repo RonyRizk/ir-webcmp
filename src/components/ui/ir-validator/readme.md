@@ -47,6 +47,7 @@
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
+ - [ir-rectifier](../../igloo-calendar/igl-bulk-operations/ir-rectifier)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
@@ -64,6 +65,7 @@ graph TD;
   ir-payment-folio-form --> ir-validator
   ir-pickup-form --> ir-validator
   ir-reallocation-form --> ir-validator
+  ir-rectifier --> ir-validator
   ir-reset-password --> ir-validator
   ir-room-guests-form --> ir-validator
   ir-user-form-panel --> ir-validator

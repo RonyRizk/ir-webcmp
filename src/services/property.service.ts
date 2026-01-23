@@ -2,6 +2,7 @@ import { type ChannelReportResult, type ChannelSalesParams, parseChannelReportRe
 import calendar_data from '@/stores/calendar-data';
 import { downloadFile } from '@/utils/utils';
 import axios from 'axios';
+import moment from 'moment';
 import { z } from 'zod';
 
 export type FetchedProperty = {
@@ -75,6 +76,26 @@ export const FetchNotificationsParamsSchema = z.object({
 export const FetchNotificationsResultSchema = z.array(z.object({ message: z.string(), type: z.enum(['financial', 'availability_alert']) }));
 export type FetchNotificationsResult = z.infer<typeof FetchNotificationsResultSchema>;
 
+export const ExposedRectifierParamsSchema = z.object({
+  property_id: z.coerce.number(),
+  room_type_ids: z.array(z.number()).min(1),
+  from: z.string().refine(date => {
+    const _date = moment(date, 'YYYY-MM-DD');
+    if (!moment.isMoment(_date)) {
+      return false;
+    }
+    return true;
+  }),
+  to: z.string().refine(date => {
+    const _date = moment(date, 'YYYY-MM-DD');
+    if (!moment.isMoment(_date)) {
+      return false;
+    }
+    return true;
+  }),
+});
+export type ExposedRectifierParams = z.infer<typeof ExposedRectifierParamsSchema>;
+
 export const FetchUnBookableRoomsSchema = z.object({
   property_ids: z.array(z.number()),
   period_to_check: z.coerce.number(),
@@ -142,6 +163,14 @@ export class PropertyService {
       console.log(error);
       throw new Error(error);
     }
+  }
+  public async exposedRectifier(params: ExposedRectifierParams) {
+    const payload = ExposedRectifierParamsSchema.parse(params);
+    const { data } = await axios.post('/Exposed_Rectifier', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
   }
   public async setPropertyCalendarExtra(params: SetPropertyCalendarExtraParams) {
     const payload = SetPropertyCalendarExtraParamsSchema.parse(params);

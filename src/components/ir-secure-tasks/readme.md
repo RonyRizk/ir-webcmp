@@ -276,7 +276,6 @@ graph TD;
   igloo-calendar --> ir-sidebar
   igloo-calendar --> ir-room-nights
   igloo-calendar --> igl-split-booking
-  igloo-calendar --> igl-bulk-operations
   igloo-calendar --> ir-booking-details-drawer
   igloo-calendar --> ir-room-guests
   igloo-calendar --> ir-reallocation-drawer
@@ -285,6 +284,7 @@ graph TD;
   igloo-calendar --> ir-checkout-dialog
   igloo-calendar --> ir-invoice
   igloo-calendar --> ir-booking-editor-drawer
+  igloo-calendar --> igl-bulk-operations-drawer
   igloo-calendar --> igl-blocked-date-drawer
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
@@ -322,18 +322,6 @@ graph TD;
   igl-split-booking --> ir-button
   igl-split-booking --> ir-radio
   igl-split-booking --> ir-select
-  igl-bulk-operations --> ir-title
-  igl-bulk-operations --> ir-tabs
-  igl-bulk-operations --> igl-bulk-stop-sale
-  igl-bulk-operations --> igl-bulk-block
-  igl-bulk-stop-sale --> ir-select
-  igl-bulk-stop-sale --> ir-weekday-selector
-  igl-bulk-stop-sale --> ir-button
-  igl-bulk-stop-sale --> ir-date-picker
-  igl-bulk-block --> ir-select
-  igl-bulk-block --> ir-radio
-  igl-bulk-block --> ir-button
-  igl-bulk-block --> ir-date-picker
   ir-booking-details-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-booking-details
   ir-reallocation-drawer --> ir-drawer
@@ -345,6 +333,18 @@ graph TD;
   ir-reallocation-form --> ir-validator
   igl-reallocation-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-custom-button
+  igl-bulk-operations-drawer --> ir-drawer
+  igl-bulk-operations-drawer --> igl-bulk-stop-sale
+  igl-bulk-operations-drawer --> igl-bulk-block
+  igl-bulk-operations-drawer --> ir-rectifier
+  igl-bulk-operations-drawer --> ir-custom-button
+  igl-bulk-stop-sale --> ir-weekday-selector
+  igl-bulk-stop-sale --> ir-custom-button
+  igl-bulk-stop-sale --> ir-custom-date-picker
+  igl-bulk-block --> ir-custom-button
+  igl-bulk-block --> ir-custom-date-picker
+  ir-rectifier --> ir-validator
+  ir-rectifier --> ir-custom-date-picker
   igl-blocked-date-drawer --> ir-drawer
   igl-blocked-date-drawer --> igl-block-dates-view
   igl-blocked-date-drawer --> ir-custom-button

@@ -15,10 +15,11 @@ export type SelectedRooms = {
 
 @Component({
   tag: 'igl-bulk-block',
-  styleUrls: ['igl-bulk-block.css', '../../../../common/sheet.css'],
+  styleUrls: ['igl-bulk-block.css'],
   scoped: true,
 })
 export class IglBulkBlock {
+  @Prop() formId: string;
   @Prop() maxDatesLength = 8;
   @Prop() property_id: number;
 
@@ -28,15 +29,15 @@ export class IglBulkBlock {
     unit_id: number;
   } | null = null;
   @State() errors: 'dates' | 'rooms';
-  @State() isLoading: boolean;
   @State() blockState: 'block' | 'unblock' = 'block';
   @State() dates: {
     from: Moment | null;
     to: Moment | null;
   }[] = [{ from: null, to: null }];
 
-  @Event() closeModal: EventEmitter<null>;
+  @Event() closeDrawer: EventEmitter<null>;
   @Event() toast: EventEmitter<IToast>;
+  @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
   private dateRefs: { from?: HTMLIrDatePickerElement; to?: HTMLIrDatePickerElement }[] = [];
@@ -61,7 +62,7 @@ export class IglBulkBlock {
     }),
   );
 
-  private unitSections: HTMLUListElement;
+  private unitSections: HTMLElement;
   private datesSections: HTMLTableElement;
 
   componentDidLoad() {
@@ -76,7 +77,7 @@ export class IglBulkBlock {
   private async addBlockDates() {
     try {
       this.errors = null;
-      this.isLoading = true;
+      this.loadingChanged.emit(true);
       const periods = this.datesSchema.parse(this.dates);
       if (!this.selectedUnit) {
         this.unitSections.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -108,8 +109,8 @@ export class IglBulkBlock {
         title: locales.entries.Lcz_RequestSubmittedSuccessfully,
         description: '',
       });
-      this.isLoading = false;
-      this.closeModal.emit();
+      this.loadingChanged.emit(false);
+      this.closeDrawer.emit();
     } catch (error) {
       console.log(error);
       if (error instanceof ZodError) {
@@ -117,7 +118,7 @@ export class IglBulkBlock {
         this.errors = 'dates';
       }
     } finally {
-      this.isLoading = false;
+      this.loadingChanged.emit(false);
     }
   }
 
@@ -181,201 +182,195 @@ export class IglBulkBlock {
   render() {
     return (
       <form
-        class={'bulk-sheet-container'}
+        id={this.formId}
+        class="igl-bulk-block__form"
         onSubmit={e => {
           e.preventDefault();
           this.addBlockDates();
         }}
       >
-        <div class="sheet-body px-1">
-          <div class="text-muted text-left pt-0 my-0 d-flex align-items-center pb-1" style={{ gap: '0.5rem' }}>
-            <p class="m-0 p-0">Select the unit to</p>
-            <ir-select
-              showFirstOption={false}
-              selectedValue={this.blockState}
-              data={[
-                { text: 'Block', value: 'block' },
-                { text: 'Unblock', value: 'unblock' },
-              ]}
-              onSelectChange={e => {
-                this.blockState = e.detail;
-              }}
-            ></ir-select>
-          </div>
-          <div>
-            {this.errors === 'rooms' && (
-              <p class={'text-danger text-left smaller p-0 '} style={{ 'margin-bottom': '0.5rem' }}>
-                {calendar_data.is_vacation_rental ? locales.entries.Lcz_PlzSelectOneListing : locales.entries.Lcz_PlzSelectOneUnit}
-              </p>
-            )}
-            <ul class="room-type-list" ref={el => (this.unitSections = el)}>
-              {calendar_data.roomsInfo.map(roomType => {
-                return (
-                  <Fragment>
-                    <li key={`roomTypeRow-${roomType.id}`} class={`room-type-row`}>
-                      <div class={'d-flex choice-row'}>
-                        <span class="pl-1 text-left room-type-name">{roomType.name}</span>
+        {/* <div class="igl-bulk-block__action-row">
+          <p class="igl-bulk-block__action-label">Select the unit to</p>
+          <ir-select
+            showFirstOption={false}
+            selectedValue={this.blockState}
+            data={[
+              { text: 'Block', value: 'block' },
+              { text: 'Unblock', value: 'unblock' },
+            ]}
+            onSelectChange={e => {
+              this.blockState = e.detail;
+            }}
+          ></ir-select>
+        </div> */}
+        <wa-radio-group size="small" label="Block or unblock a unit" orientation="horizontal" name="action">
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="block">
+            Block
+          </wa-radio>
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="unblock">
+            Unblock
+          </wa-radio>
+        </wa-radio-group>
+        <div>
+          {this.errors === 'rooms' && (
+            <p class="igl-bulk-block__error">{calendar_data.is_vacation_rental ? locales.entries.Lcz_PlzSelectOneListing : locales.entries.Lcz_PlzSelectOneUnit}</p>
+          )}
+          <wa-radio-group
+            name="unit"
+            ref={el => (this.unitSections = el)}
+            onchange={e => {
+              const [roomtypeId, unitId] = (e.target as any).value?.toString().split('-');
+              this.selectedUnit = {
+                roomtype_id: roomtypeId,
+                unit_id: unitId,
+              };
+            }}
+          >
+            {calendar_data.roomsInfo.map(roomType => {
+              return (
+                <Fragment>
+                  <div key={`roomTypeRow-${roomType.id}`} class="igl-bulk-block__roomtype-row">
+                    <div class="igl-bulk-block__roomtype-choice">
+                      <span class="igl-bulk-block__roomtype-name">{roomType.name}</span>
+                    </div>
+                  </div>
+                  {roomType.physicalrooms.map((room, j) => {
+                    const rowStyle = j === roomType.physicalrooms.length - 1 ? 'igl-bulk-block__unit-row--last' : '';
+                    return (
+                      <div key={`physicalRoom-${room.id}-${j}`} class={`igl-bulk-block__unit-row ${rowStyle}`}>
+                        <div class="igl-bulk-block__unit-choice">
+                          <wa-radio value={`${roomType.id}-${room.id}`} data-roomtype={roomType.id} checked={this.selectedUnit?.unit_id === room.id}>
+                            {room.name}
+                          </wa-radio>
+                        </div>
                       </div>
-                    </li>
-                    {roomType.physicalrooms.map((room, j) => {
-                      const row_style = j === roomType.physicalrooms.length - 1 ? 'pb-1' : '';
-                      return (
-                        <li key={`physicalRoom-${room.id}-${j}`} class={`physical-room ${row_style}`}>
-                          <div class={'d-flex choice-row'}>
-                            <ir-radio
-                              class="pl-1 "
-                              name="unit"
-                              checked={this.selectedUnit?.unit_id === room.id}
-                              onCheckChange={() =>
-                                (this.selectedUnit = {
-                                  roomtype_id: roomType.id,
-                                  unit_id: room.id,
-                                })
-                              }
-                              label={room.name}
-                            ></ir-radio>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </Fragment>
-                );
-              })}
-            </ul>
-          </div>
-          {/* Dates */}
-          <table class="mt-1" ref={el => (this.datesSections = el)}>
-            <thead>
-              <tr>
-                <th class="text-left">{locales.entries.Lcz_From}</th>
-                <th class="text-left">{locales.entries.Lcz_ToExclusive}</th>
-                <td>
-                  {this.dates.length !== this.maxDatesLength && this.blockState === 'block' && (
-                    <ir-button
-                      variant="icon"
-                      icon_name="plus"
-                      onClickHandler={() => {
-                        this.addDateRow();
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+          </wa-radio-group>
+        </div>
+        {/* Dates */}
+        <table class="igl-bulk-block__dates-table" ref={el => (this.datesSections = el)}>
+          <thead>
+            <tr>
+              <td class="igl-bulk-block__dates-header">{locales.entries.Lcz_From}</td>
+              <td class="igl-bulk-block__dates-header">{locales.entries.Lcz_ToExclusive}</td>
+              <td>
+                {this.dates.length !== this.maxDatesLength && this.blockState === 'block' && (
+                  <ir-custom-button
+                    appearance="plain"
+                    variant="neutral"
+                    onClickHandler={() => {
+                      this.addDateRow();
+                    }}
+                  >
+                    <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                  </ir-custom-button>
+                )}
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            {this.dates.map((d, i) => {
+              if (!this.dateRefs[i]) {
+                this.dateRefs[i] = {};
+              }
+              const fromDateMinDate = i > 0 ? this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate : this.minDate;
+              const toDateMinDate = this.dates[i].from ? this.dates[i]?.from.clone().add(1, 'days')?.format('YYYY-MM-DD') : this.minDate;
+              return (
+                <tr key={`date_${i}`}>
+                  <td class="igl-bulk-block__date-cell">
+                    <ir-custom-date-picker
+                      ref={el => {
+                        this.dateRefs[i].from = el;
                       }}
-                    ></ir-button>
+                      forceDestroyOnUpdate
+                      minDate={fromDateMinDate}
+                      data-testid="pickup_arrival_date"
+                      date={d.from?.format('YYYY-MM-DD')}
+                      emitEmptyDate={true}
+                      aria-invalid={String(this.errors === 'dates' && !d.from)}
+                      onDateChanged={evt => {
+                        evt.stopImmediatePropagation();
+                        evt.stopPropagation();
+                        this.handleDateChange({ index: i, date: evt.detail.start, key: 'from' });
+                      }}
+                      onDatePickerFocus={e => {
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                        if (i === 0) {
+                          return;
+                        }
+                        const index = this.dates.findIndex(d => !d.from || !d.to);
+
+                        if (!this.dates[index]?.from) {
+                          this.dateRefs[index]?.from.openDatePicker();
+                          return;
+                        }
+                        if (!this.dates[index]?.to) {
+                          this.dateRefs[index].to.openDatePicker();
+                        }
+                      }}
+                    ></ir-custom-date-picker>
+                  </td>
+                  <td class="igl-bulk-block__date-cell">
+                    <ir-custom-date-picker
+                      forceDestroyOnUpdate
+                      disabled={!d.from}
+                      ref={el => {
+                        this.dateRefs[i].to = el;
+                      }}
+                      data-testid="pickup_arrival_date"
+                      date={d.to?.format('YYYY-MM-DD')}
+                      emitEmptyDate={true}
+                      minDate={toDateMinDate}
+                      aria-invalid={String(this.errors === 'dates' && !d.to)}
+                      onDateChanged={evt => {
+                        evt.stopImmediatePropagation();
+                        evt.stopPropagation();
+                        this.handleDateChange({ index: i, date: evt.detail.start, key: 'to' });
+                      }}
+                      maxDate={d.from ? moment(d.from).add(3, 'months').format('YYYY-MM-DD') : undefined}
+                      onDatePickerFocus={e => {
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                        const index = this.dates.findIndex(d => !d.from || !d.to);
+
+                        if (!this.dates[index]?.from) {
+                          this.dateRefs[index]?.from?.openDatePicker();
+                          return;
+                        }
+                        if (!this.dates[index]?.to) {
+                          this.dateRefs[index].to.openDatePicker();
+                        }
+                      }}
+                    ></ir-custom-date-picker>
+                  </td>
+                  {i > 0 && (
+                    <td class="igl-bulk-block__date-action-cell">
+                      <ir-custom-button
+                        appearance="plain"
+                        variant="neutral"
+                        onClickHandler={() => {
+                          this.dates = this.dates.filter((_, j) => j !== i);
+                        }}
+                      >
+                        <wa-icon name="minus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                      </ir-custom-button>
+                    </td>
                   )}
-                </td>
-              </tr>
-            </thead>
-            <tbody>
-              {this.dates.map((d, i) => {
-                if (!this.dateRefs[i]) {
-                  this.dateRefs[i] = {};
-                }
-                const fromDateMinDate = i > 0 ? this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate : this.minDate;
-                const toDateMinDate = this.dates[i].from ? this.dates[i]?.from.clone().add(1, 'days')?.format('YYYY-MM-DD') : this.minDate;
-                return (
-                  <tr key={`date_${i}`}>
-                    <td class="pr-1 pb-1">
-                      <ir-date-picker
-                        ref={el => {
-                          this.dateRefs[i].from = el;
-                        }}
-                        forceDestroyOnUpdate
-                        minDate={fromDateMinDate}
-                        data-testid="pickup_arrival_date"
-                        date={d.from?.format('YYYY-MM-DD')}
-                        emitEmptyDate={true}
-                        aria-invalid={String(this.errors === 'dates' && !d.from)}
-                        onDateChanged={evt => {
-                          evt.stopImmediatePropagation();
-                          evt.stopPropagation();
-                          this.handleDateChange({ index: i, date: evt.detail.start, key: 'from' });
-                        }}
-                        onDatePickerFocus={e => {
-                          e.stopImmediatePropagation();
-                          e.stopPropagation();
-                          if (i === 0) {
-                            return;
-                          }
-                          const index = this.dates.findIndex(d => !d.from || !d.to);
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
-                          if (!this.dates[index]?.from) {
-                            this.dateRefs[index]?.from.openDatePicker();
-                            return;
-                          }
-                          if (!this.dates[index]?.to) {
-                            this.dateRefs[index].to.openDatePicker();
-                          }
-                        }}
-                      >
-                        <input
-                          type="text"
-                          slot="trigger"
-                          value={d.from ? d.from.format('MMM DD, YYYY') : null}
-                          class={`form-control input-sm ${this.errors === 'dates' && !d.to ? 'border-danger' : ''} text-center`}
-                          style={{ width: '100%' }}
-                        ></input>
-                      </ir-date-picker>
-                    </td>
-                    <td class="pr-1 pb-1">
-                      <ir-date-picker
-                        forceDestroyOnUpdate
-                        ref={el => {
-                          this.dateRefs[i].to = el;
-                        }}
-                        data-testid="pickup_arrival_date"
-                        date={d.to?.format('YYYY-MM-DD')}
-                        emitEmptyDate={true}
-                        minDate={toDateMinDate}
-                        aria-invalid={String(this.errors === 'dates' && !d.to)}
-                        onDateChanged={evt => {
-                          evt.stopImmediatePropagation();
-                          evt.stopPropagation();
-                          this.handleDateChange({ index: i, date: evt.detail.start, key: 'to' });
-                        }}
-                        maxDate={d.from ? moment(d.from).add(3, 'months').format('YYYY-MM-DD') : undefined}
-                        onDatePickerFocus={e => {
-                          e.stopImmediatePropagation();
-                          e.stopPropagation();
-                          const index = this.dates.findIndex(d => !d.from || !d.to);
-
-                          if (!this.dates[index]?.from) {
-                            this.dateRefs[index]?.from?.openDatePicker();
-                            return;
-                          }
-                          if (!this.dates[index]?.to) {
-                            this.dateRefs[index].to.openDatePicker();
-                          }
-                        }}
-                      >
-                        <input
-                          type="text"
-                          slot="trigger"
-                          value={d.to ? d.to.format('MMM DD, YYYY') : null}
-                          class={`form-control input-sm 
-                          ${this.errors === 'dates' && !d.to ? 'border-danger' : ''}
-                          text-center`}
-                          style={{ width: '100%' }}
-                        ></input>
-                      </ir-date-picker>
-                    </td>
-                    {i > 0 && (
-                      <td class="pb-1">
-                        <ir-button
-                          variant="icon"
-                          icon_name="minus"
-                          onClickHandler={() => {
-                            this.dates = this.dates.filter((_, j) => j !== i);
-                          }}
-                        ></ir-button>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div class={'sheet-footer'}>
-          <ir-button text={locales.entries.Lcz_Cancel} btn_color="secondary" class={'flex-fill'} onClickHandler={() => this.closeModal.emit(null)}></ir-button>
+        {/*  <div class={'sheet-footer'}>
+           <ir-button text={locales.entries.Lcz_Cancel} btn_color="secondary" class={'flex-fill'} onClickHandler={() => this.closeDrawer.emit(null)}></ir-button>
           <ir-button isLoading={this.isLoading} text={locales.entries.Lcz_Confirm} btn_type="submit" class="flex-fill"></ir-button>
-        </div>
+        </div> */}
       </form>
     );
   }

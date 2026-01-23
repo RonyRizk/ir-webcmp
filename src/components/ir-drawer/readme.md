@@ -29,6 +29,7 @@
 ### Used by
 
  - [igl-blocked-date-drawer](../igloo-calendar/igl-blocked-date-drawer)
+ - [igl-bulk-operations-drawer](../igloo-calendar/igl-bulk-operations/igl-bulk-operations-drawer)
  - [ir-billing-drawer](../ir-billing/ir-billing-drawer)
  - [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
  - [ir-booking-editor-drawer](../igloo-calendar/ir-booking-editor/ir-booking-editor-drawer)
@@ -46,6 +47,7 @@
 ```mermaid
 graph TD;
   igl-blocked-date-drawer --> ir-drawer
+  igl-bulk-operations-drawer --> ir-drawer
   ir-billing-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-drawer
   ir-booking-editor-drawer --> ir-drawer

@@ -23,10 +23,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [igloo-calendar](..)
-
 ### Depends on
 
 - [ir-title](../../ir-title)
@@ -42,16 +38,12 @@ graph TD;
   igl-bulk-operations --> igl-bulk-stop-sale
   igl-bulk-operations --> igl-bulk-block
   ir-title --> ir-icon
-  igl-bulk-stop-sale --> ir-select
   igl-bulk-stop-sale --> ir-weekday-selector
-  igl-bulk-stop-sale --> ir-button
-  igl-bulk-stop-sale --> ir-date-picker
-  ir-button --> ir-icons
-  igl-bulk-block --> ir-select
-  igl-bulk-block --> ir-radio
-  igl-bulk-block --> ir-button
-  igl-bulk-block --> ir-date-picker
-  igloo-calendar --> igl-bulk-operations
+  igl-bulk-stop-sale --> ir-custom-button
+  igl-bulk-stop-sale --> ir-custom-date-picker
+  ir-custom-date-picker --> ir-input
+  igl-bulk-block --> ir-custom-button
+  igl-bulk-block --> ir-custom-date-picker
   style igl-bulk-operations fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

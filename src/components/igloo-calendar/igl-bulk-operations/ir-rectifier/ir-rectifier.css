@@ -1,0 +1,17 @@
+.ir-rectifier__form {
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ir-rectifier__roomtypes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ir-rectifier__date-range {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
