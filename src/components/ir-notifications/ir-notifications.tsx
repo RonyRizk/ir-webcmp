@@ -137,7 +137,7 @@ export class IrNotifications {
           )}
           <wa-animation duration={1200} iterations={1} keyframes={this.bellKeyframes} ref={el => (this.animationRef = el as WaAnimation)}>
             <ir-custom-button id="notifications-button" size="small" appearance="plain" ref={el => (this.buttonRef = el)}>
-              <wa-icon class="notification__bell-icon" name="bell" style={{ fontSize: '1.2rem' }}></wa-icon>
+              <wa-icon class="notification__bell-icon" name="bell" style={{ fontSize: '1.4rem' }}></wa-icon>
             </ir-custom-button>
           </wa-animation>
         </div>

@@ -1,6 +1,9 @@
 :host {
   display: block;
 }
+.pms-payment-due-alert__callout {
+  border-radius: 0;
+}
 .pms-payment-due-alert__callout-message {
   width: 100%;
   display: flex;
