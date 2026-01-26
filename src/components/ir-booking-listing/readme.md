@@ -179,7 +179,6 @@ graph TD;
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-custom-button
   ir-booking-header --> ir-booking-status-tag
-  ir-booking-header --> ir-popover
   ir-booking-header --> ir-dialog
   ir-pms-logs --> ir-spinner
   ir-pms-logs --> ir-custom-button

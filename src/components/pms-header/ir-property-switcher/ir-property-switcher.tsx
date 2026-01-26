@@ -388,7 +388,7 @@ export class IrPropertySwitcher {
             <ir-dialog
               // withoutHeader
               open={this.open}
-              label="Find property"
+              label="Search"
               class="property-switcher__dialog"
               style={{ '--ir-dialog-width': '40rem' }}
               onIrDialogAfterHide={e => {

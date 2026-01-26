@@ -180,7 +180,7 @@ export class IrPropertySwitcherDialogContent {
         <ir-input
           autofocus
           ref={el => (this.inputRef = el)}
-          placeholder="Enter name or A number"
+          placeholder="Property name or A number"
           class="property-switcher__search-input"
           value={this.searchTerm}
           onText-change={this.handleSearchChange}

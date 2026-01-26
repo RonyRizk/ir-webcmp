@@ -40,7 +40,6 @@
 - [ir-events-log](events-log)
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-booking-status-tag](../../ui/ir-booking-status-tag)
-- [ir-popover](../../ui/ir-popover)
 - [ir-dialog](../../ui/ir-dialog)
 
 ### Graph
@@ -50,7 +49,6 @@ graph TD;
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-custom-button
   ir-booking-header --> ir-booking-status-tag
-  ir-booking-header --> ir-popover
   ir-booking-header --> ir-dialog
   ir-pms-logs --> ir-spinner
   ir-pms-logs --> ir-custom-button

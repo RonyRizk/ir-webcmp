@@ -5,7 +5,6 @@ import Token from '@/models/Token';
 import { BookingListingService } from '@/services/booking_listing.service';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 
-
 @Component({
   tag: 'ir-pms-search',
   styleUrl: 'ir-pms-search.css',
@@ -18,7 +17,6 @@ export class IrPmsSearch {
   @State() shortcutHint: string | null = null;
   @State() bookings: Booking[] = [];
   @State() isLoading: boolean;
-
 
   private tokenService = new Token();
   private bookingListingService = new BookingListingService();
@@ -67,8 +65,8 @@ export class IrPmsSearch {
     if (isK && isCmdOrCtrl) {
       event.preventDefault();
       // this.pickerInputRef?.focusInput();
-      console.log(this.autoCompleteRef)
-      this.autoCompleteRef.focusInput()
+      console.log(this.autoCompleteRef);
+      this.autoCompleteRef.focusInput();
     }
   };
   @Debounce(300)
@@ -77,7 +75,7 @@ export class IrPmsSearch {
     event.stopImmediatePropagation();
     event.stopPropagation();
     const value = event.detail;
-    this.autoCompleteRef.hide()
+    this.autoCompleteRef.hide();
     if (!value) {
       return;
     }
@@ -107,7 +105,7 @@ export class IrPmsSearch {
       },
       { skipStore: true },
     );
-    this.autoCompleteRef.show()
+    this.autoCompleteRef.show();
     this.isLoading = false;
   }
   private handleComboboxSelect(event: CustomEvent<string>): void {
@@ -115,24 +113,25 @@ export class IrPmsSearch {
     event.stopPropagation();
     this.comboboxSelect.emit({
       item: {
-        label: "",
-        value: event.detail
-      }
+        label: '',
+        value: event.detail,
+      },
     });
   }
   render() {
     return (
       <Host>
         <ir-autocomplete
-         
           class="pms-search__autocomplete"
-          placeholder='Search'
-          ref={el => this.autoCompleteRef = el}
+          placeholder="Search"
+          ref={el => (this.autoCompleteRef = el)}
           onCombobox-change={event => this.handleComboboxSelect(event as CustomEvent<string>)}
           onText-change={event => this.fetchBookings(event as CustomEvent<string>)}
-          pill appearance='filled'>
-          <wa-icon name='magnifying-glass' slot='start'></wa-icon>
-          <div slot='end' class="pms-autocomplete__end-slot">
+          pill
+          appearance="filled"
+        >
+          <wa-icon name="magnifying-glass" slot="start"></wa-icon>
+          <div slot="end" class="pms-autocomplete__end-slot">
             {this.isLoading && <wa-spinner></wa-spinner>}
             {this.shortcutHint && <span>{this.shortcutHint}</span>}
           </div>
@@ -147,34 +146,18 @@ export class IrPmsSearch {
           {this.bookings.map(b => {
             const label = `${b.booking_nbr}  ${b.guest.first_name} ${b.guest.last_name}`;
             return (
-              <ir-autocomplete-option class='pms-search__autocomplete-option' value={b.booking_nbr} label={label}>
-                  <img
-                    slot='start'
-                    class="pms-search__option-icon"
-                    src={b.origin.Icon}
-                    alt={b.origin.Label}
-                  />
+              <ir-autocomplete-option class="pms-search__autocomplete-option" value={b.booking_nbr} label={label}>
+                <img slot="start" class="pms-search__option-icon" src={b.origin.Icon} alt={b.origin.Label} />
                 <div class="pms-search__option">
                   <p class="pms-search__option-bookings">
-                    <span class="pms-search__option-booking">
-                      {b.booking_nbr}
-                    </span>
-                    {b.channel_booking_nbr && (
-                      <span class="pms-search__option-channel-booking">
-                        {b.channel_booking_nbr}
-                      </span>
-                    )}
+                    <span class="pms-search__option-booking">{b.booking_nbr}</span>
+                    {b.channel_booking_nbr && <span class="pms-search__option-channel-booking">{b.channel_booking_nbr}</span>}
                   </p>
                   <span class="pms-search__option-label">
                     {b.guest.first_name} {b.guest.last_name}
                   </span>
                 </div>
-                  <ir-booking-status-tag
-                    slot='end'
-                    class="pms-search__option-status"
-                    status={b.status}
-                  ></ir-booking-status-tag>
-
+                <ir-booking-status-tag slot="end" class="pms-search__option-status" status={b.status}></ir-booking-status-tag>
               </ir-autocomplete-option>
             );
           })}
@@ -182,5 +165,4 @@ export class IrPmsSearch {
       </Host>
     );
   }
-
 }

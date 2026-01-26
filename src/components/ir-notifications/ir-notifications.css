@@ -85,6 +85,9 @@
   line-height: var(--wa-line-height-condensed);
   text-wrap: balance;
 }
+.notification-item__title {
+  font-weight: 400;
+}
 
 .notification__popover-title {
   font-size: var(--wa-font-size-m);

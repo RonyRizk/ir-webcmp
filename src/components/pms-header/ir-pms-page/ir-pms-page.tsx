@@ -73,7 +73,14 @@ export class IrPmsPage {
               <wa-icon name="magnifying-glass" slot="start"></wa-icon>
               <span slot="end">⌘K</span>
             </ir-input> */}
-            <ir-pms-search ticket={this.ticket} propertyid={this.propertyid} class="header-search"></ir-pms-search>
+            <ir-pms-search
+              onCombobox-select={e => {
+                console.log(e.detail);
+              }}
+              ticket={this.ticket}
+              propertyid={this.propertyid}
+              class="header-search"
+            ></ir-pms-search>
           </div>
 
           <div class="app-header__right">
@@ -102,7 +109,7 @@ export class IrPmsPage {
             </ir-custom-button>
             <wa-tooltip for="arrivals-btn">Check-ins</wa-tooltip>
 
-            <ir-notifications propertyid={this.propertyid as any} ticket={this.ticket} ></ir-notifications>
+            <ir-notifications propertyid={this.propertyid as any} ticket={this.ticket}></ir-notifications>
 
             <wa-dropdown>
               <wa-avatar slot="trigger" style={{ '--size': '2rem', 'marginLeft': '0.5rem' }}></wa-avatar>
@@ -208,7 +215,9 @@ export class IrPmsPage {
               <ir-menu-item href="acsalesbycountry.aspx">Sales by Country</ir-menu-item>
               <ir-menu-item href="ACDailyOccupancy.aspx">Daily Occupancy</ir-menu-item>
               <ir-menu-item href="acaccountingreport.aspx">Accounting Report</ir-menu-item>
-              <ir-menu-item href='/' selected id='hello'>Hello</ir-menu-item>
+              <ir-menu-item href="/" selected id="hello">
+                Hello
+              </ir-menu-item>
             </ir-menu-group>
             {/* </ir-menu-group> */}
           </ir-menu>

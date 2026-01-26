@@ -12,7 +12,7 @@ type AutocompleteOptionElement = HTMLIrAutocompleteOptionElement & {
   label?: string;
 };
 
-type AutocompletePopupElement = WaPopup
+type AutocompletePopupElement = WaPopup;
 
 @Component({
   tag: 'ir-autocomplete',
@@ -20,12 +20,24 @@ type AutocompletePopupElement = WaPopup
   shadow: true,
 })
 export class IrAutocomplete {
-
   @Element() el: HTMLIrAutocompleteElement;
 
+  /**
+   * Emits `combobox-change` even when the selected value does not change.
+   *
+   * @default true
+   */
+  @Prop() emitOnSameValue: boolean = true;
+
+  /** Whether the autocomplete dropdown is open. */
   @Prop({ reflect: true, mutable: true }) open: boolean = false;
-  @Prop({ reflect: true }) placement: AutocompletePopupElement["placement"] = "bottom"
+
+  /** Placement of the autocomplete dropdown relative to the input. */
+  @Prop({ reflect: true }) placement: AutocompletePopupElement['placement'] = 'bottom';
+
+  /** Name attribute forwarded to the underlying input element. */
   @Prop() name: string;
+
   /** The value of the input. */
   @Prop({ reflect: true, mutable: true }) value: string = '';
 
@@ -164,13 +176,7 @@ export class IrAutocomplete {
   private currentOption?: AutocompleteOptionElement;
   private listboxRef?: HTMLElement;
   private inputRef?: HTMLIrInputElement;
-  private readonly SLOT_NAMES = [
-    "label",
-    "start",
-    "end",
-    "clear-icon",
-    "hint",
-  ] as const;
+  private readonly SLOT_NAMES = ['label', 'start', 'end', 'clear-icon', 'hint'] as const;
 
   private slotManager = createSlotManager(
     null as any, // Will be set in componentWillLoad
@@ -244,12 +250,7 @@ export class IrAutocomplete {
       left: Math.round(element.getBoundingClientRect().left - parent.getBoundingClientRect().left),
     };
   }
-  private scrollIntoView(
-    element: HTMLElement,
-    container: HTMLElement,
-    direction: 'horizontal' | 'vertical' | 'both' = 'vertical',
-    behavior: 'smooth' | 'auto' = 'smooth',
-  ) {
+  private scrollIntoView(element: HTMLElement, container: HTMLElement, direction: 'horizontal' | 'vertical' | 'both' = 'vertical', behavior: 'smooth' | 'auto' = 'smooth') {
     const offset = this.getOffset(element, container);
     const offsetTop = offset.top + container.scrollTop;
     const offsetLeft = offset.left + container.scrollLeft;
@@ -369,10 +370,12 @@ export class IrAutocomplete {
     this.currentOption = option;
 
     const nextValue = this.getOptionValue(option);
-    if (nextValue !== this.value) {
+    if (this.emitOnSameValue || (!this.emitOnSameValue && nextValue !== this.value)) {
       this.value = nextValue;
       this.comboboxChange.emit(nextValue);
     }
+    // if (nextValue !== this.value && !this.emitOnSameValue) {
+    // }
     this.hide();
     requestAnimationFrame(() => this.inputRef?.focusInput());
   }
@@ -461,21 +464,12 @@ export class IrAutocomplete {
 
       this.setCurrentOption(allOptions[newIndex], { scroll: true });
     }
-  }
+  };
 
   render() {
     return (
       <Host>
-        <wa-popup
-          active={this.open}
-          flip
-          shift
-          sync="width"
-          auto-size="vertical"
-          auto-size-padding={10}
-          placement={this.placement}
-          exportparts="popup, arrow, hover-bridge"
-        >
+        <wa-popup active={this.open} flip shift sync="width" auto-size="vertical" auto-size-padding={10} placement={this.placement} exportparts="popup, arrow, hover-bridge">
           <ir-input
             slot="anchor"
             ref={el => (this.inputRef = el)}
@@ -525,7 +519,8 @@ export class IrAutocomplete {
             {this.slotManager.hasSlot('clear-icon') && <slot name="clear-icon" slot="clear-icon"></slot>}
             {this.slotManager.hasSlot('hint') && <slot name="hint" slot="hint"></slot>}
           </ir-input>
-          <div id="listbox"
+          <div
+            id="listbox"
             ref={el => (this.listboxRef = el)}
             role="listbox"
             aria-expanded={this.open ? 'true' : 'false'}

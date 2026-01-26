@@ -580,6 +580,11 @@ export namespace Components {
          */
         "disabled": boolean;
         /**
+          * Emits `combobox-change` even when the selected value does not change.
+          * @default true
+         */
+        "emitOnSameValue": boolean;
+        /**
           * Used to customize the label or icon of the Enter key on virtual keyboards.
          */
         "enterkeyhint": NativeWaInput['enterkeyhint'];
@@ -625,7 +630,13 @@ export namespace Components {
           * The minimum length of input that will be considered valid.
          */
         "minlength": NativeWaInput['minlength'];
+        /**
+          * Name attribute forwarded to the underlying input element.
+         */
         "name": string;
+        /**
+          * Whether the autocomplete dropdown is open.
+         */
         "open": boolean;
         /**
           * Adds a button to toggle the password's visibility. Only applies to password types.
@@ -647,7 +658,10 @@ export namespace Components {
           * Placeholder text to show as a hint when the input is empty.
          */
         "placeholder": NativeWaInput['placeholder'];
-        "placement": AutocompletePopupElement["placement"];
+        /**
+          * Placement of the autocomplete dropdown relative to the input.
+         */
+        "placement": AutocompletePopupElement['placement'];
         /**
           * Makes the input readonly.
          */
@@ -8883,6 +8897,11 @@ declare namespace LocalJSX {
          */
         "disabled"?: boolean;
         /**
+          * Emits `combobox-change` even when the selected value does not change.
+          * @default true
+         */
+        "emitOnSameValue"?: boolean;
+        /**
           * Used to customize the label or icon of the Enter key on virtual keyboards.
          */
         "enterkeyhint"?: NativeWaInput['enterkeyhint'];
@@ -8926,9 +8945,15 @@ declare namespace LocalJSX {
           * The minimum length of input that will be considered valid.
          */
         "minlength"?: NativeWaInput['minlength'];
+        /**
+          * Name attribute forwarded to the underlying input element.
+         */
         "name"?: string;
         "onCombobox-change"?: (event: IrAutocompleteCustomEvent<string>) => void;
         "onText-change"?: (event: IrAutocompleteCustomEvent<string>) => void;
+        /**
+          * Whether the autocomplete dropdown is open.
+         */
         "open"?: boolean;
         /**
           * Adds a button to toggle the password's visibility. Only applies to password types.
@@ -8950,7 +8975,10 @@ declare namespace LocalJSX {
           * Placeholder text to show as a hint when the input is empty.
          */
         "placeholder"?: NativeWaInput['placeholder'];
-        "placement"?: AutocompletePopupElement["placement"];
+        /**
+          * Placement of the autocomplete dropdown relative to the input.
+         */
+        "placement"?: AutocompletePopupElement['placement'];
         /**
           * Makes the input readonly.
          */

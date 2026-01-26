@@ -95,98 +95,90 @@ export class IrBookingHeader {
     const lastManipulation = this.booking.ota_manipulations ? this.booking.ota_manipulations[this.booking.ota_manipulations.length - 1] : null;
     const showPms = calendar_data.property?.linked_pms?.findIndex(lp => lp?.is_active && lp?.bookings_integration_mode?.code === '001') !== -1;
     return (
-      <div class="fluid-container px-1">
-        <div class="d-flex flex-column p-0 mx-0 flex-lg-row align-items-md-center justify-content-between">
-          <div class="m-0 p-0 mb-1 mb-lg-0 mt-md-0">
-            <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-              <p style={{ color: 'black' }} class="font-size-large m-0 p-0">{`${locales.entries.Lcz_Booking}#${this.booking.booking_nbr}`}</p>
-              {/* <wa-select
-                onchange={e => {
-                  this.bookingStatus = (e.target as any).value;
-                }}
-                style={{ width: '140px' }}
-                size="small"
-                placeholder="Change status..."
-                value={this.bookingStatus ?? ''}
-              >
-                <wa-option value="">Change status...</wa-option>
-                {this.booking.allowed_actions.map(option => (
-                  <wa-option value={option.code}>{option.description}</wa-option>
-                ))}
-              </wa-select> */}
-              <wa-dropdown
-                onwa-hide={e => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                }}
-                onwa-select={e => {
-                  this.bookingStatus = (e.detail as any).item.value;
-                  this.modalEl.openModal();
-                }}
-              >
-                <ir-custom-button
-                  slot="trigger"
-                  // onClickHandler={() => {
-                  //   if (!this.booking.is_direct) {
-                  //     this.modalEl.openModal();
-                  //     return;
-                  //   }
-                  //   this.updateStatus();
-                  // }}
-                  withCaret
-                  // loading={isRequestPending('/Change_Exposed_Booking_Status')}
-                  appearance={'outlined'}
-                  size="small"
-                  variant="brand"
-                >
-                  <ir-booking-status-tag slot="start" status={this.booking.status} isRequestToCancel={this.booking.is_requested_to_cancel}></ir-booking-status-tag>
-                  <span>Update status</span>
-                </ir-custom-button>
-                {this.booking.allowed_actions.map(option => (
-                  <wa-dropdown-item variant={['CANC_RA', 'NOSHOW_RA'].includes(option.code) ? 'danger' : 'default'} value={option.code}>
-                    {option.description}
-                  </wa-dropdown-item>
-                ))}
-              </wa-dropdown>
-            </div>
+      <div class="booking-header">
+        <div class="booking-header__row">
+          <div class="booking-header__info">
+            <div class="booking-header__title">
+              <div class="booking-header__label-container">
+                {this.hasMenu && (
+                  <Fragment>
+                    <wa-tooltip for="menu">Go back</wa-tooltip>
+                    <ir-custom-button id="menu" variant="neutral" size="small" appearance="plain">
+                      {/* <wa-icon name="list" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon> */}
+                      <wa-icon name="arrow-left" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon>
+                    </ir-custom-button>
+                  </Fragment>
+                )}
+                <div class={'booking-header__label'}>
+                  <h4 class="booking-header__label-number">{`${locales.entries.Lcz_Booking}#${this.booking.booking_nbr}`}</h4>
+                  <div class="booking-header__meta">
+                    {!this.booking.is_direct && <p class="booking-header__channel-number">{this.booking.channel_booking_nbr}</p>}
+                    {lastManipulation && (
+                      <Fragment>
+                        <p id={`booking-${this.booking.booking_nbr}-modified`} class="booking-header__modified">
+                          Modified
+                        </p>
 
-            <p class="m-0 p-0">{!this.booking.is_direct && <span class="mr-1 m-0">{this.booking.channel_booking_nbr}</span>}</p>
+                        <wa-tooltip for={`booking-${this.booking.booking_nbr}-modified`}>
+                          <div>
+                            <p class="m-0">
+                              Modified by {lastManipulation?.user} at {lastManipulation?.date} {lastManipulation?.hour}:{lastManipulation?.minute}.
+                            </p>
+                            <p class="m-0">{this.alertMessage}</p>
+                          </div>
+                        </wa-tooltip>
+                      </Fragment>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                {this.booking.allowed_actions.length > 0 && this.booking.is_editable ? (
+                  <wa-dropdown
+                    onwa-hide={e => {
+                      e.stopImmediatePropagation();
+                      e.stopPropagation();
+                    }}
+                    onwa-select={e => {
+                      this.bookingStatus = (e.detail as any).item.value;
+                      this.modalEl.openModal();
+                    }}
+                  >
+                    <wa-button
+                      slot="trigger"
+                      // onClickHandler={() => {
+                      //   if (!this.booking.is_direct) {
+                      //     this.modalEl.openModal();
+                      //     return;
+                      //   }
+                      //   this.updateStatus();
+                      // }}
+
+                      withCaret
+                      // loading={isRequestPending('/Change_Exposed_Booking_Status')}
+                      appearance={'outlined'}
+                      size="small"
+                      variant="brand"
+                      class="booking-header__status-trigger"
+                    >
+                      <ir-booking-status-tag slot="start" status={this.booking.status} isRequestToCancel={this.booking.is_requested_to_cancel}></ir-booking-status-tag>
+
+                      <span>Update status</span>
+                    </wa-button>
+                    {this.booking.allowed_actions.map(option => (
+                      <wa-dropdown-item variant={['CANC_RA', 'NOSHOW_RA'].includes(option.code) ? 'danger' : 'default'} value={option.code}>
+                        {option.description}
+                      </wa-dropdown-item>
+                    ))}
+                  </wa-dropdown>
+                ) : (
+                  <ir-booking-status-tag status={this.booking.status} isRequestToCancel={this.booking.is_requested_to_cancel}></ir-booking-status-tag>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div class="d-flex justify-content-end align-items-center" style={{ gap: '1rem', flexWrap: 'wrap' }}>
-            <div class="d-flex flex-column align-items-center">
-              {/* <span class={`confirmed btn-sm m-0  ${this.confirmationBG[this.booking.is_requested_to_cancel ? '003' : this.booking.status.code]}`}>
-                {this.booking.is_requested_to_cancel ? locales.entries.Lcz_CancellationRequested : this.booking.status.description}
-              </span> */}
-              {lastManipulation && (
-                <ir-popover
-                  trigger="hover"
-                  renderContentAsHtml
-                  content={`<div><p>Modified by ${lastManipulation.user} at ${lastManipulation.date} ${lastManipulation.hour}:${lastManipulation.minute}.</p>
-                <p>${this.alertMessage}</p></div>`}
-                >
-                  <p class="mx-0 p-0 small text-danger" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                    <b>Modified</b>
-                  </p>
-                </ir-popover>
-              )}
-            </div>
-            {this.booking.allowed_actions.length > 0 && this.booking.is_editable && (
-              <div class="m-0 p-0 d-flex align-items-center" style={{ gap: '0.25rem' }}>
-                {/* <ir-select
-                  selectContainerStyle="h-28"
-                  selectStyles="d-flex status-select align-items-center h-28"
-                  firstOption={locales.entries.Lcz_Select}
-                  id="update-status"
-                  size="sm"
-                  label-available="false"
-                  data={this.booking.allowed_actions.map(b => ({ text: b.description, value: b.code }))}
-                  textSize="sm"
-                  class="sm-padding-right m-0 "
-                  selectedValue={this.bookingStatus}
-                ></ir-select> */}
-              </div>
-            )}
+          <div class="booking-header__actions">
             <ir-custom-button
               onClickHandler={e => {
                 e.stopImmediatePropagation();
@@ -194,6 +186,7 @@ export class IrBookingHeader {
                 this.openDialog({ type: 'events-log' });
               }}
               appearance={'outlined'}
+              class="booking-header__stretched-btn"
               size="small"
               variant="brand"
             >
@@ -201,6 +194,7 @@ export class IrBookingHeader {
             </ir-custom-button>
             {showPms && (
               <ir-custom-button
+                class="booking-header__stretched-btn"
                 onClickHandler={e => {
                   e.stopImmediatePropagation();
                   e.stopPropagation();
@@ -216,7 +210,7 @@ export class IrBookingHeader {
 
             {this.hasReceipt && (
               <Fragment>
-                <ir-custom-button id="invoice" variant="brand" size="small" appearance="outlined">
+                <ir-custom-button class="booking-header__stretched-btn" id="invoice" variant="brand" size="small" appearance="outlined">
                   Billing
                 </ir-custom-button>
               </Fragment>
@@ -243,14 +237,6 @@ export class IrBookingHeader {
                 <wa-tooltip for="book-delete">Delete this booking</wa-tooltip>
                 <ir-custom-button id="book-delete" variant="danger" size="small" appearance="plain">
                   <wa-icon name="envelope" style={{ fontSize: '1.2rem' }} label="Delete this booking"></wa-icon>
-                </ir-custom-button>
-              </Fragment>
-            )}
-            {this.hasMenu && (
-              <Fragment>
-                <wa-tooltip for="menu">Go back</wa-tooltip>
-                <ir-custom-button id="menu" variant="neutral" size="small" appearance="plain">
-                  <wa-icon name="list" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon>
                 </ir-custom-button>
               </Fragment>
             )}
