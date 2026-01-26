@@ -1,8 +1,7 @@
 import { SharedPerson } from '@/models/booking.dto';
-import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
 import locales from '@/stores/locales.store';
-import { isRequestPending } from '@/stores/ir-interceptor.store';
 @Component({
   tag: 'ir-room-guests',
   styleUrl: 'ir-room-guests.css',
@@ -60,6 +59,8 @@ export class IrRoomGuests {
 
   @Event() closeModal: EventEmitter<null>;
 
+  @State() isLoading: string;
+
   render() {
     return (
       <ir-drawer
@@ -71,7 +72,7 @@ export class IrRoomGuests {
           '--ir-drawer-padding-top': 'var(--spacing)',
           '--ir-drawer-padding-bottom': 'var(--spacing)',
         }}
-        label={`Room ${this.roomName}`}
+        label={this.roomName ? `Room ${this.roomName}` : 'Guest Details'}
         open={this.open}
         onDrawerHide={e => {
           e.stopImmediatePropagation();
@@ -89,6 +90,11 @@ export class IrRoomGuests {
             bookingNumber={this.bookingNumber}
             checkIn={this.checkIn}
             language={this.language}
+            onLoadingChange={e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              this.isLoading = e.detail;
+            }}
           ></ir-room-guests-form>
         )}
         <div slot="footer" class="ir__drawer-footer">
@@ -96,9 +102,14 @@ export class IrRoomGuests {
             {locales?.entries?.Lcz_Cancel ?? 'Save'}
           </ir-custom-button>
 
-          <ir-custom-button loading={isRequestPending('/Handle_Exposed_Room_Guests')} size="medium" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
-            {this.checkIn ? locales.entries?.Lcz_CheckIn ?? 'Check in' : locales?.entries?.Lcz_Save ?? 'Save'}
+          <ir-custom-button value="save" loading={this.isLoading === 'save'} size="medium" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
+            {locales?.entries?.Lcz_Save ?? 'Save'}
           </ir-custom-button>
+          {this.checkIn && (
+            <ir-custom-button value="save_checkin" loading={this.isLoading === 'save_checkin'} size="medium" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
+              {locales.entries?.Lcz_CheckIn ?? 'Check in'}
+            </ir-custom-button>
+          )}
         </div>
       </ir-drawer>
     );

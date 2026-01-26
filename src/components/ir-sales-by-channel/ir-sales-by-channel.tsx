@@ -57,6 +57,7 @@ export class IrSalesByChannel {
 
   private async initializeApp() {
     try {
+      this.isPageLoading = true;
       if (!this.mode) {
         throw new Error("Missing required 'mode'. Please set it to either 'property' or 'mpo'.");
       }
@@ -77,8 +78,9 @@ export class IrSalesByChannel {
         requests.unshift(this.propertyService.getExposedAllowedProperties());
         const [properties] = await Promise.all(requests);
         this.allowedProperties = [...(properties as any)];
+      } else {
+        await Promise.all(requests);
       }
-
       this.baseFilters = { ...this.baseFilters, LIST_AC_ID: this.allowedProperties?.map(p => p.id) };
       this.channelSalesFilters = { ...this.baseFilters };
 

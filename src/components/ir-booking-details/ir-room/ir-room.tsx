@@ -397,18 +397,6 @@ export class IrRoom {
                 <p class="booking-room__text-reset booking-room__guest-name">{`${this.mainGuest.first_name || ''} ${this.mainGuest.last_name || ''}`}</p>
                 {this.room.rateplan.selected_variation.adult_nbr > 0 &&
                   (this.room.unit ? (
-                    // <ir-tooltip message={'View guests'} class="m-0 p-0" customSlot>
-                    //   <ir-button
-                    //     class="m-0 p-0"
-                    //     slot="tooltip-trigger"
-                    //     btn_color="link"
-                    //     renderContentAsHtml
-                    //     onClickHandler={() => this.showGuestModal()}
-                    //     size="sm"
-                    //     btnStyle={{ width: 'fit-content', margin: '0', padding: '0', fontSize: 'inherit', textAlign: 'center', lineHeight: '1.2' }}
-                    //     text={this.formatVariation(this.room.occupancy)}
-                    //   ></ir-button>
-                    // </ir-tooltip>
                     <Fragment>
                       <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>View guests</wa-tooltip>
                       <ir-custom-button link onClickHandler={() => this.showGuestModal()} id={`view-guest-btn-${this.room.identifier}`} variant="brand" appearance="plain">

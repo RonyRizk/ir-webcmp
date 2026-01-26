@@ -7517,6 +7517,7 @@ declare global {
         "closeModal": null;
         "resetBookingEvt": null;
         "updateRoomGuests": { identifier: string; guests: SharedPerson[] };
+        "loadingChange": string;
     }
     interface HTMLIrRoomGuestsFormElement extends Components.IrRoomGuestsForm, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrRoomGuestsFormElementEventMap>(type: K, listener: (this: HTMLIrRoomGuestsFormElement, ev: IrRoomGuestsFormCustomEvent<HTMLIrRoomGuestsFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -12018,6 +12019,7 @@ declare namespace LocalJSX {
          */
         "language"?: string;
         "onCloseModal"?: (event: IrRoomGuestsFormCustomEvent<null>) => void;
+        "onLoadingChange"?: (event: IrRoomGuestsFormCustomEvent<string>) => void;
         "onResetBookingEvt"?: (event: IrRoomGuestsFormCustomEvent<null>) => void;
         "onUpdateRoomGuests"?: (event: IrRoomGuestsFormCustomEvent<{ identifier: string; guests: SharedPerson[] }>) => void;
         /**

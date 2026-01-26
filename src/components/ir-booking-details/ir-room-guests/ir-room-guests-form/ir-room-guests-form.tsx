@@ -71,6 +71,7 @@ export class IrRoomGuestsForm {
   @Event({ composed: true, bubbles: true }) closeModal: EventEmitter<null>;
   @Event({ composed: true, bubbles: true }) resetBookingEvt: EventEmitter<null>;
   @Event({ composed: true, bubbles: true }) updateRoomGuests: EventEmitter<{ identifier: string; guests: SharedPerson[] }>;
+  @Event({ composed: true, bubbles: true }) loadingChange: EventEmitter<string>;
 
   private bookingService = new BookingService();
 
@@ -127,9 +128,10 @@ export class IrRoomGuestsForm {
     this.guests = [...tempGuests];
   }
 
-  private async saveGuests() {
+  private async saveGuests(submitter: string) {
     try {
       this.error = {};
+      this.loadingChange.emit(submitter);
       this.autoValidate = true;
       console.log({
         sharedPersons: this.sharedPersons,
@@ -151,7 +153,7 @@ export class IrRoomGuestsForm {
           })
           .filter(Boolean),
       });
-      if (this.checkIn) {
+      if (submitter === 'save_checkin') {
         await this.bookingService.handleExposedRoomInOut({
           booking_nbr: this.bookingNumber,
           room_identifier: this.identifier,
@@ -170,6 +172,8 @@ export class IrRoomGuestsForm {
         });
         this.error = { ...errors };
       }
+    } finally {
+      this.loadingChange.emit(null);
     }
   }
 
@@ -188,7 +192,8 @@ export class IrRoomGuestsForm {
         style={{ minWidth: '300px' }}
         onSubmit={e => {
           e.preventDefault();
-          this.saveGuests();
+          const submitter = (e as SubmitEvent).submitter as any | null;
+          this.saveGuests(submitter.value);
         }}
       >
         <section class={'sheet-body'}>

@@ -24,6 +24,7 @@
 | Event              | Description | Type                                                           |
 | ------------------ | ----------- | -------------------------------------------------------------- |
 | `closeModal`       |             | `CustomEvent<null>`                                            |
+| `loadingChange`    |             | `CustomEvent<string>`                                          |
 | `resetBookingEvt`  |             | `CustomEvent<null>`                                            |
 | `updateRoomGuests` |             | `CustomEvent<{ identifier: string; guests: SharedPerson[]; }>` |
 

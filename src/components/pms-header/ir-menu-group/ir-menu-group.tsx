@@ -12,13 +12,13 @@ export class IrMenuGroup {
   @Prop({ reflect: true }) groupName: string;
   @Event() openChanged: EventEmitter<boolean>;
 
-  componentWillLoad() {
-    this.el.addEventListener('mouseenter', this.handleShow);
-  }
+  // componentWillLoad() {
+  //   this.el.addEventListener('mouseenter', this.handleShow);
+  // }
 
-  disconnectedCallback() {
-    this.el.removeEventListener('mouseenter', this.handleShow);
-  }
+  // disconnectedCallback() {
+  //   this.el.removeEventListener('mouseenter', this.handleShow);
+  // }
 
   private handleHide = (event: Event) => {
     event.stopImmediatePropagation();
