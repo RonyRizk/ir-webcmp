@@ -123,7 +123,7 @@ export class IrPmsSearch {
       <Host>
         <ir-autocomplete
           class="pms-search__autocomplete"
-          placeholder="Search"
+          placeholder="Booking# or guest name"
           ref={el => (this.autoCompleteRef = el)}
           onCombobox-change={event => this.handleComboboxSelect(event as CustomEvent<string>)}
           onText-change={event => this.fetchBookings(event as CustomEvent<string>)}

@@ -52,47 +52,8 @@ graph TD;
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-listing-header --> ir-booking-new-form
-  ir-listing-header --> ir-input
   ir-listing-header --> ir-range-picker
   ir-listing-header --> ir-custom-button
-  ir-booking-new-form --> ir-custom-button
-  ir-booking-new-form --> ir-booking-editor-drawer
-  ir-booking-editor-drawer --> ir-custom-button
-  ir-booking-editor-drawer --> ir-drawer
-  ir-booking-editor-drawer --> ir-booking-editor
-  ir-booking-editor --> ir-spinner
-  ir-booking-editor --> ir-interceptor
-  ir-booking-editor --> ir-booking-editor-header
-  ir-booking-editor --> igl-room-type
-  ir-booking-editor --> ir-booking-editor-form
-  ir-booking-editor-header --> ir-validator
-  ir-booking-editor-header --> ir-picker
-  ir-booking-editor-header --> ir-picker-item
-  ir-booking-editor-header --> igl-date-range
-  ir-booking-editor-header --> ir-custom-button
-  igl-date-range --> ir-date-select
-  ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
-  igl-room-type --> igl-rate-plan
-  igl-rate-plan --> ir-input
-  igl-rate-plan --> ir-custom-button
-  ir-booking-editor-form --> ir-date-view
-  ir-booking-editor-form --> igl-application-info
-  ir-booking-editor-form --> ir-picker
-  ir-booking-editor-form --> ir-picker-item
-  ir-booking-editor-form --> ir-custom-button
-  ir-booking-editor-form --> ir-booking-editor-guest-form
-  igl-application-info --> ir-validator
-  igl-application-info --> ir-input
-  ir-booking-editor-guest-form --> ir-input
-  ir-booking-editor-guest-form --> ir-validator
-  ir-booking-editor-guest-form --> ir-country-picker
-  ir-booking-editor-guest-form --> ir-mobile-input
-  ir-country-picker --> ir-picker
-  ir-country-picker --> ir-picker-item
-  ir-country-picker --> ir-input-text
-  ir-mobile-input --> ir-input
   ir-range-picker --> ir-date-picker
   ir-booking-listing-table --> ir-booking-number-cell
   ir-booking-listing-table --> ir-booked-on-cell
@@ -220,6 +181,9 @@ graph TD;
   ir-room-guests-form --> ir-validator
   ir-room-guests-form --> ir-input
   ir-room-guests-form --> ir-country-picker
+  ir-country-picker --> ir-picker
+  ir-country-picker --> ir-picker-item
+  ir-country-picker --> ir-input-text
   ir-extra-service-config --> ir-drawer
   ir-extra-service-config --> ir-extra-service-config-form
   ir-extra-service-config --> ir-custom-button
@@ -247,12 +211,44 @@ graph TD;
   ir-guest-info-form --> ir-input
   ir-guest-info-form --> ir-country-picker
   ir-guest-info-form --> ir-mobile-input
+  ir-mobile-input --> ir-input
   ir-payment-folio --> ir-drawer
   ir-payment-folio --> ir-payment-folio-form
   ir-payment-folio --> ir-custom-button
   ir-payment-folio-form --> ir-custom-date-picker
   ir-payment-folio-form --> ir-validator
   ir-payment-folio-form --> ir-input
+  ir-booking-editor-drawer --> ir-custom-button
+  ir-booking-editor-drawer --> ir-drawer
+  ir-booking-editor-drawer --> ir-booking-editor
+  ir-booking-editor --> ir-spinner
+  ir-booking-editor --> ir-interceptor
+  ir-booking-editor --> ir-booking-editor-header
+  ir-booking-editor --> igl-room-type
+  ir-booking-editor --> ir-booking-editor-form
+  ir-booking-editor-header --> ir-validator
+  ir-booking-editor-header --> ir-picker
+  ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> igl-date-range
+  ir-booking-editor-header --> ir-custom-button
+  igl-date-range --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
+  igl-room-type --> igl-rate-plan
+  igl-rate-plan --> ir-input
+  igl-rate-plan --> ir-custom-button
+  ir-booking-editor-form --> ir-date-view
+  ir-booking-editor-form --> igl-application-info
+  ir-booking-editor-form --> ir-picker
+  ir-booking-editor-form --> ir-picker-item
+  ir-booking-editor-form --> ir-custom-button
+  ir-booking-editor-form --> ir-booking-editor-guest-form
+  igl-application-info --> ir-validator
+  igl-application-info --> ir-input
+  ir-booking-editor-guest-form --> ir-input
+  ir-booking-editor-guest-form --> ir-validator
+  ir-booking-editor-guest-form --> ir-country-picker
+  ir-booking-editor-guest-form --> ir-mobile-input
   ir-secure-tasks --> ir-booking-listing
   style ir-booking-listing fill:#f9f,stroke:#333,stroke-width:4px
 ```

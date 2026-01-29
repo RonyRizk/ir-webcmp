@@ -95,7 +95,6 @@ Type: `Promise<void>`
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
- - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
@@ -122,7 +121,6 @@ graph TD;
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
   ir-guest-info-form --> ir-input
-  ir-listing-header --> ir-input
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input

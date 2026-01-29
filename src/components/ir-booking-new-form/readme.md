@@ -16,10 +16,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-listing-header](../ir-booking-listing/ir-listing-header)
-
 ### Depends on
 
 - [ir-custom-button](../ui/ir-custom-button)
@@ -71,7 +67,6 @@ graph TD;
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
   ir-mobile-input --> ir-input
-  ir-listing-header --> ir-booking-new-form
   style ir-booking-new-form fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

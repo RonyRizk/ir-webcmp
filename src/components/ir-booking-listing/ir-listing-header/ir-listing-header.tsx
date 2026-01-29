@@ -66,14 +66,14 @@ export class IrListingHeader {
     await this.bookingListingService.getExposedBookings({ ...booking_listing.userSelection, start_row: 0, end_row: 20, is_to_export: false });
   }
   render() {
-    const havePrivilege = isPrivilegedUser(booking_listing.userSelection.userTypeCode);
+    //const havePrivilege = isPrivilegedUser(booking_listing.userSelection.userTypeCode);
     return (
       <Host>
         <section class="d-flex align-items-center ">
           <div class="d-flex flex-fill flex-column flex-md-row align-items-md-center booking-container">
             <div class="d-flex mb-1 d-md-none align-items-center justify-content-bettween width-fill">
               <h3 class="page-title">{locales.entries?.Lcz_Bookings}</h3>
-              <div>
+              {/* <div>
                 {!havePrivilege && (
                   // <igl-book-property-container
                   //   p={this.p}
@@ -83,17 +83,17 @@ export class IrListingHeader {
                   //   title={locales.entries.Lcz_CreateNewBooking}
                   //   ticket={booking_listing.token}
                   // >
-                  //   {/* <ir-button slot="trigger"  variant="icon" icon_name="square_plus"></ir-button> */}
+         
                   //   <ir-custom-button id="new-booking" class={'new-booking-btn'} variant="brand" appearance="plain" slot="trigger">
                   //     <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
                   //   </ir-custom-button>
                   // </igl-book-property-container>
                   <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
                 )}
-              </div>
+              </div>*/}
             </div>
             <h3 class="d-none d-md-block page-title">{locales.entries?.Lcz_Bookings}</h3>
-            <div
+            {/* <div
               // onSubmit={e => {
               //   e.preventDefault();
               //   console.log(this.inputValue);
@@ -117,32 +117,15 @@ export class IrListingHeader {
                 <wa-icon name="magnifying-glass" slot="start"></wa-icon>
               </ir-input>
               <h5 class="m-0 font-weight-bold d-none d-sm-block">{locales.entries?.Lcz_Or}</h5>
-            </div>
+            </div> */}
           </div>
-          <div class="d-none d-md-block">
+          {/* <div class="d-none d-md-block">
             <wa-tooltip for="new-booking">Create new booking</wa-tooltip>
             {!havePrivilege && (
-              // <igl-book-property-container
-              //   p={this.p}
-              //   withIrToastAndInterceptor={false}
-              //   propertyid={this.propertyId}
-              //   language={this.language}
-              //   title={locales.entries.Lcz_CreateNewBooking}
-              //   ticket={booking_listing.token}
-              // >
-              //   <ir-custom-button id="new-booking" variant="brand" appearance="plain" slot="trigger">
-              //     <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
-              //   </ir-custom-button>
-              //   {/* <ir-button slot="trigger" class={'new-booking-btn'} variant="icon" icon_name="square_plus"></ir-button> */}
-              // </igl-book-property-container>
+             
               <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
             )}
-          </div>
-        </section>
-        <section class="d-flex align-items-center justify-evenly seperator-container d-sm-none">
-          <span></span>
-          <h5 class="m-0 font-weight-bold">{locales.entries?.Lcz_Or}</h5>
-          <span></span>
+          </div> */}
         </section>
         <section class="d-flex flex-column align-items-sm-center flex-sm-row flex-sm-wrap filters-container justify-content-lg-start mt-1">
           {/* <fieldset class="d-flex align-items-center flex-sm-column align-items-sm-start flex-fill-sm-none">

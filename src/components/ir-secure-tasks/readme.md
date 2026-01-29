@@ -456,12 +456,8 @@ graph TD;
   ir-booking-listing --> ir-booking-details-drawer
   ir-booking-listing --> ir-guest-info-drawer
   ir-booking-listing --> ir-payment-folio
-  ir-listing-header --> ir-booking-new-form
-  ir-listing-header --> ir-input
   ir-listing-header --> ir-range-picker
   ir-listing-header --> ir-custom-button
-  ir-booking-new-form --> ir-custom-button
-  ir-booking-new-form --> ir-booking-editor-drawer
   ir-booking-listing-table --> ir-booking-number-cell
   ir-booking-listing-table --> ir-booked-on-cell
   ir-booking-listing-table --> ir-booked-by-cell
