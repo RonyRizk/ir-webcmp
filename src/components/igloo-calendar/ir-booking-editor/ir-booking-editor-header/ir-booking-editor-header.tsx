@@ -224,7 +224,7 @@ export class IrBookingEditorHeader {
     const today = moment();
     switch (this.mode) {
       case 'EDIT_BOOKING':
-        return today.add(-2, 'weeks').format('YYYY-MM-DD');
+        return moment(this.booking.from_date, 'YYYY-MM-DD').add(-2, 'weeks').format('YYYY-MM-DD');
       case 'ADD_ROOM':
         return this.booking?.from_date;
       case 'SPLIT_BOOKING':
