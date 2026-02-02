@@ -471,6 +471,7 @@ export class IglooCalendar {
       ROOM_TYPE_OPEN: r => this.salesQueue.offer({ ...r, is_available_to_book: true }),
       HK_SKIP: this.handleHkSkip,
       SET_ROOM_CALENDAR_EXTRA: this.handleRoomCalendarExtra,
+      UPDATE_CALENDAR_RATE: this.handleUpdateCalendarRate,
     };
 
     const handler = reasonHandlers[REASON];
@@ -480,6 +481,11 @@ export class IglooCalendar {
       console.warn(`Unhandled REASON: ${REASON}`);
     }
   }
+
+  private handleUpdateCalendarRate(result: any) {
+    this.salesQueue.offer({ ...result, night: result.date, is_available_to_book: !result.is_closed });
+  }
+
   private handleRoomCalendarExtra(result: SetRoomCalendarExtraParams) {
     this.calendarData = {
       ...this.calendarData,

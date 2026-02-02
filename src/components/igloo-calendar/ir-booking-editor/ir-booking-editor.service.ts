@@ -150,6 +150,7 @@ export class IRBookingEditorService {
     override_unit,
     unit,
     auto_check_in,
+    room,
   }: {
     identifier: string | null;
     check_in: Moment;
@@ -158,8 +159,16 @@ export class IRBookingEditorService {
     unit: string;
     notes: string | null;
     auto_check_in: boolean;
+    room: Room | null;
   }) {
     const rooms = [];
+    const toUnitId = (value: string | number | null) => {
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
 
     for (const roomTypeId in booking_store.ratePlanSelections) {
       const roomtype = booking_store.ratePlanSelections[roomTypeId];
@@ -169,17 +178,19 @@ export class IRBookingEditorService {
           for (let i = 0; i < rateplan.reserved; i++) {
             const { first_name, last_name } = rateplan.guest[i];
             const days = await this.generateDailyRates(rateplan, i);
-            rooms.push({
+            let newRoom = {
+              ...(room ?? {}),
               identifier,
               roomtype: rateplan.roomtype,
               rateplan: rateplan.ratePlan,
               prepayment_amount_gross: 0,
-              unit: override_unit ? { id: unit } : rateplan.guest[i].unit ? { id: rateplan.guest[i].unit } : null,
+              unit: override_unit ? (toUnitId(unit) !== null ? { id: toUnitId(unit) } : null) : rateplan.guest[i].unit ? { id: toUnitId(rateplan.guest[i].unit) } : null,
               occupancy: {
                 adult_nbr: rateplan.selected_variation.adult_nbr,
                 children_nbr: Number(rateplan.selected_variation.child_nbr ?? 0) - Math.max(Number(rateplan.guest[i].infant_nbr ?? 0), 0),
                 infant_nbr: rateplan.guest[i].infant_nbr,
               },
+
               bed_preference: rateplan.guest[i].bed_preference,
               from_date: moment(check_in).format('YYYY-MM-DD'),
               to_date: moment(check_out).format('YYYY-MM-DD'),
@@ -198,7 +209,18 @@ export class IRBookingEditorService {
                 subscribe_to_news_letter: null,
                 cci: null,
               },
-            });
+            };
+            if (room) {
+              const newSharingPersons = Array.isArray(newRoom.sharing_persons) ? [...newRoom.sharing_persons] : [];
+              const mainGuestIndex = newSharingPersons.findIndex(r => r.is_main);
+              let mainGuest = newSharingPersons[mainGuestIndex];
+              if (mainGuest) {
+                mainGuest = { ...mainGuest, first_name, last_name };
+                newSharingPersons[mainGuestIndex] = { ...mainGuest };
+                newRoom = { ...newRoom, sharing_persons: newSharingPersons };
+              }
+            }
+            rooms.push(newRoom);
           }
         }
       }
@@ -223,7 +245,7 @@ export class IRBookingEditorService {
       const fromDate = dates.checkIn;
       const toDate = dates.checkOut;
 
-      const generateNewRooms = async (identifier = null, check_in: boolean = false) => {
+      const generateNewRooms = async (identifier = null, check_in: boolean = false, room: Room = null) => {
         return await this.getBookedRooms({
           check_in: fromDate,
           check_out: toDate,
@@ -232,6 +254,7 @@ export class IRBookingEditorService {
           override_unit: this.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? true : false,
           unit: this.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? unitId?.toString() ?? null : null,
           auto_check_in: check_in,
+          room: identifier ? room : null,
         });
       };
 
@@ -258,7 +281,7 @@ export class IRBookingEditorService {
       switch (this.mode) {
         case 'EDIT_BOOKING': {
           const filteredRooms = booking.rooms.filter(r => r.identifier !== room.identifier);
-          const newRooms = await generateNewRooms(room.identifier, room.in_out?.code === '001');
+          const newRooms = await generateNewRooms(room.identifier, room.in_out?.code === '001', room);
           newBooking = modifyBookingDetails(booking, [...filteredRooms, ...newRooms]);
           break;
         }

@@ -274,24 +274,25 @@ export class IglCalBody {
         this.fromRoomId = roomId;
         this.renderElement();
       } else {
-        const keys = Object.keys(this.selectedRooms);
-        const startDate = moment(this.selectedRooms[keys[0]].value, 'YYYY-MM-DD');
-        const endDate = moment(selectedDay.value, 'YYYY-MM-DD');
-        let cursor = startDate.clone().add(1, 'days');
-        let disabledCount = 0;
-        while (cursor.isBefore(endDate, 'day')) {
-          const dateKey = cursor.format('YYYY-MM-DD');
-          if (this.isCellDisabled(roomId, dateKey)) {
-            disabledCount++;
-          }
-          cursor.add(1, 'days');
-        }
-        if (disabledCount >= 1) {
-          this.selectedRooms = {};
-          this.fromRoomId = roomId;
-          this.renderElement();
-          return;
-        }
+        // const keys = Object.keys(this.selectedRooms);
+        // const startDate = moment(this.selectedRooms[keys[0]].value, 'YYYY-MM-DD');
+        // const endDate = moment(selectedDay.value, 'YYYY-MM-DD');
+        // let cursor = startDate.clone().add(1, 'days');
+        // let disabledCount = 0;
+
+        // while (cursor.isBefore(endDate, 'day')) {
+        //   const dateKey = cursor.format('YYYY-MM-DD');
+        //   if (this.isCellDisabled(roomId, dateKey)) {
+        //     disabledCount++;
+        //   }
+        //   cursor.add(1, 'days');
+        // }
+        // if (disabledCount >= 1) {
+        //   this.selectedRooms = {};
+        //   this.fromRoomId = roomId;
+        //   this.renderElement();
+        //   return;
+        // }
 
         this.selectedRooms[refKey] = { ...selectedDay, roomId };
         this.addNewEvent(roomCategory);
@@ -371,11 +372,12 @@ export class IglCalBody {
           class={`cellData position-relative roomCell ${isCellDisabled ? 'disabled' : ''} ${'room_' + roomId + '_' + dayInfo.day} ${isCurrentDate ? 'currentDay' : ''} ${
             this.dragOverElement === roomId + '_' + dayInfo.day ? 'dragOverHighlight' : ''
           } ${isSelected ? 'selectedDay' : ''}`}
-          style={!isDisabled && { '--cell-cursor': 'default' }}
+          // style={!isDisabled && { '--cell-cursor': 'default' }}
+          style={{ '--cell-cursor': 'default' }}
           onClick={() => {
-            if (isDisabled) {
-              return;
-            }
+            // if (isDisabled) {
+            //   return;
+            // }
             this.clickCell(Number(roomId), dayInfo, roomCategory);
           }}
           aria-label={roomName}

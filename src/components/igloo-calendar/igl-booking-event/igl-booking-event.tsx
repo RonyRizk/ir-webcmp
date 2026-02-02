@@ -8,7 +8,7 @@ import { IToast } from '@components/ui/ir-toast/toast';
 import { EventsService } from '@/services/events.service';
 import locales from '@/stores/locales.store';
 import { ICountry } from '@/models/IBooking';
-import calendar_dates from '@/stores/calendar-dates.store';
+// import calendar_dates from '@/stores/calendar-dates.store';
 import calendar_data from '@/stores/calendar-data';
 
 @Component({
@@ -159,13 +159,13 @@ export class IglBookingEvent {
           }
         } else {
           const { pool, to_date, from_date, toRoomId } = event.detail as any;
-          const previousToDate = moment(to_date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD');
+          // const previousToDate = moment(to_date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD');
           console.log(this.findRoomType(Number(this.bookingEvent.PR_ID)), this.findRoomType(Number(toRoomId)));
           if (
             (!moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').isSame(moment(to_date, 'YYYY-MM-DD'), 'dates') ||
               this.findRoomType(Number(this.bookingEvent.PR_ID)) !== this.findRoomType(Number(toRoomId))) &&
-            (calendar_dates.disabled_cells.get(`${toRoomId}_${from_date}`)?.disabled ||
-              (calendar_dates.disabled_cells.get(`${toRoomId}_${to_date}`)?.disabled && calendar_dates.disabled_cells.get(`${toRoomId}_${previousToDate}`)?.disabled)) &&
+            // &&(calendar_dates.disabled_cells.get(`${toRoomId}_${from_date}`)?.disabled ||
+            //   (calendar_dates.disabled_cells.get(`${toRoomId}_${to_date}`)?.disabled && calendar_dates.disabled_cells.get(`${toRoomId}_${previousToDate}`)?.disabled))
             !this.isStretch
           ) {
             this.reset('This room isn’t available for the entire selected period. Please choose different dates or a different room.');
@@ -255,8 +255,8 @@ export class IglBookingEvent {
                 // } else {
 
                 // let stretchDirection: "left" | "right"
-                const oldFromDate = this.bookingEvent.defaultDates.from_date;
-                const oldToDate = this.bookingEvent.defaultDates.to_date;
+                // const oldFromDate = this.bookingEvent.defaultDates.from_date;
+                // const oldToDate = this.bookingEvent.defaultDates.to_date;
                 // const diffDays = calculateDaysBetweenDates(oldFromDate, oldToDate);
 
                 // let fromDate = oldFromDate;
@@ -269,25 +269,26 @@ export class IglBookingEvent {
                 //   toDate = to_date;
                 //   fromDate = moment(to_date, 'YYYY-MM-DD').subtract(diffDays, 'days').format('YYYY-MM-DD');
                 // }
-                const validateDates = (base_date: string, to_date: string) => {
-                  let cursor = base_date;
-                  let counter = 0;
-                  while (cursor !== to_date) {
-                    if (calendar_dates.disabled_cells.get(`${toRoomId}_${cursor}`)?.disabled) {
-                      counter++;
-                    }
-                    cursor = moment(cursor, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD');
-                  }
-                  if (counter >= 1) {
-                    this.reset(locales.entries.Lcz_ThisUnitIsNotAvailable);
-                  }
-                };
+                // TODO: validate dates
+                // const validateDates = (base_date: string, to_date: string) => {
+                //   let cursor = base_date;
+                //   let counter = 0;
+                //   while (cursor !== to_date) {
+                //     if (calendar_dates.disabled_cells.get(`${toRoomId}_${cursor}`)?.disabled) {
+                //       counter++;
+                //     }
+                //     cursor = moment(cursor, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD');
+                //   }
+                //   if (counter >= 1) {
+                //     this.reset(locales.entries.Lcz_ThisUnitIsNotAvailable);
+                //   }
+                // };
 
-                if (moment(oldToDate, 'YYYY-MM-DD').isBefore(moment(to_date), 'dates')) {
-                  validateDates(oldToDate, to_date);
-                } else if (moment(oldFromDate, 'YYYY-MM-DD').isAfter(moment(from_date, 'YYYY-MM-DD'), 'dates')) {
-                  validateDates(from_date, oldFromDate);
-                }
+                // if (moment(oldToDate, 'YYYY-MM-DD').isBefore(moment(to_date), 'dates')) {
+                //   validateDates(oldToDate, to_date);
+                // } else if (moment(oldFromDate, 'YYYY-MM-DD').isAfter(moment(from_date, 'YYYY-MM-DD'), 'dates')) {
+                //   validateDates(from_date, oldFromDate);
+                // }
                 const payload: IRoomNightsData = {
                   booking: this.bookingEvent,
                   bookingNumber: this.bookingEvent.BOOKING_NUMBER,
@@ -972,6 +973,7 @@ export class IglBookingEvent {
     return (
       <Host class={`bookingEvent  ${this.isNewEvent() || this.isHighlightEventType() ? 'newEvent' : ''} ${legend.clsName} `} style={this.getPosition()} id={bar}>
         <div
+          data-identifier={this.bookingEvent?.IDENTIFIER}
           data-status={this.bookingEvent.STATUS}
           class={{
             'bookingEventBase': true,
