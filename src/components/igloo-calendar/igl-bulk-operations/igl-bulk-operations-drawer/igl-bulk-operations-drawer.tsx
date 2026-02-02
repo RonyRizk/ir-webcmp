@@ -50,7 +50,7 @@ export class IglBulkOperationsDrawer {
     const formId = `${this.formId}-${this.selectedTab}`;
     return (
       <Host>
-        <ir-drawer label="Bulk Availability Operations" open={this.open} class="bulk-operations__drawer">
+        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label="Bulk Availability Operations" open={this.open} class="bulk-operations__drawer">
           {this.open && (
             <wa-tab-group class="bulk-operations__tab-group" active={this.selectedTab} activation="manual" onwa-tab-show={e => (this.selectedTab = e.detail.name?.toString())}>
               {this.tabs.map(tab => (

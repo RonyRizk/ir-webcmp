@@ -80,6 +80,7 @@ export class IrBookingDetails {
   private roomService = new RoomService();
   private paymentService = new PaymentService();
   private token = new Token();
+  private arrivalTime: IEntries[];
 
   private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing?id=%2';
   // private printingBaseUrl = 'http://localhost:5863/%1/printing?id=%2';
@@ -247,10 +248,10 @@ export class IrBookingDetails {
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
         this.bookingService.getExposedBooking(this.bookingNumber, this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
+        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD', '_ARRIVAL_TIME']),
       ]);
       this.property_id = roomResponse?.My_Result?.id;
-      const { bed_preference_type, departure_time, pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
+      const { bed_preference_type, departure_time, pay_type, pay_type_group, pay_method, arrival_time } = this.bookingService.groupEntryTablesResult(setupEntries);
       this.bedPreference = bed_preference_type;
       this.departureTime = departure_time;
       this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
@@ -264,6 +265,7 @@ export class IrBookingDetails {
       //       this.paymentActions = res;
       //     });
       // }
+      this.arrivalTime = arrival_time;
       if (!locales?.entries) {
         locales.entries = languageTexts.entries;
         locales.direction = languageTexts.direction;
@@ -550,7 +552,7 @@ export class IrBookingDetails {
       ></ir-booking-header>,
       <div class="booking-details__booking-info">
         <div class="booking-details__info-column">
-          <ir-reservation-information countries={this.countries} booking={this.booking}></ir-reservation-information>
+          <ir-reservation-information arrivalTime={this.arrivalTime} countries={this.countries} booking={this.booking}></ir-reservation-information>
           <wa-card>
             <ir-date-view class="booking-details__date-view-header" slot="header" from_date={this.booking.from_date} to_date={this.booking.to_date}></ir-date-view>
             {this.hasRoomAdd && this.booking.is_editable && (

@@ -506,14 +506,16 @@ export class IglBookingEvent {
   checkIfSlotOccupied(toRoomId, from_date, to_date) {
     const fromTime = moment(from_date, 'YYYY-MM-DD');
     const toTime = moment(to_date, 'YYYY-MM-DD');
-    const isOccupied = this.allBookingEvents.some(event => {
-      if (event.POOL === this.bookingEvent.POOL) {
-        return false;
-      }
-      const eventFromTime = moment(event.FROM_DATE, 'YYYY-MM-DD').add(1, 'days');
-      const eventToTime = moment(event.TO_DATE, 'YYYY-MM-DD');
-      return event.PR_ID === +toRoomId && toTime.isSameOrAfter(eventFromTime) && fromTime.isBefore(eventToTime);
-    });
+    const isOccupied = this.allBookingEvents
+      .filter(event => event.ID !== 'NEW_TEMP_EVENT')
+      .some(event => {
+        if (event.POOL === this.bookingEvent.POOL) {
+          return false;
+        }
+        const eventFromTime = moment(event.FROM_DATE, 'YYYY-MM-DD').add(1, 'days');
+        const eventToTime = moment(event.TO_DATE, 'YYYY-MM-DD');
+        return event.PR_ID === +toRoomId && toTime.isSameOrAfter(eventFromTime) && fromTime.isBefore(eventToTime);
+      });
     return isOccupied;
   }
 

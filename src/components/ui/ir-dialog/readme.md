@@ -54,6 +54,7 @@ Type: `Promise<void>`
 
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
+ - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
  - [ir-billing](../../ir-billing)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
  - [ir-booking-details](../../ir-booking-details)
@@ -73,6 +74,7 @@ Type: `Promise<void>`
 graph TD;
   igl-housekeeping-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-dialog
+  ir-arrival-time-dialog --> ir-dialog
   ir-billing --> ir-dialog
   ir-booking-company-dialog --> ir-dialog
   ir-booking-details --> ir-dialog

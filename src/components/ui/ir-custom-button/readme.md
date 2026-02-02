@@ -58,6 +58,7 @@
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
+ - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
  - [ir-arrivals-table](../../ir-arrivals/ir-arrivals-table)
  - [ir-balance-cell](../../table-cells/booking/ir-balance-cell)
  - [ir-billing](../../ir-billing)
@@ -121,6 +122,7 @@ graph TD;
   igl-to-be-assigned --> ir-custom-button
   ir-actions-cell --> ir-custom-button
   ir-applicable-policies --> ir-custom-button
+  ir-arrival-time-dialog --> ir-custom-button
   ir-arrivals-table --> ir-custom-button
   ir-balance-cell --> ir-custom-button
   ir-billing --> ir-custom-button

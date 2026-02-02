@@ -28,6 +28,10 @@ payload.json
 bun.lockb
 pnpm-lock.yaml
 
+IR_Admin.js
+IR_Admin.Master
+IR_Admin--current.Master
+
 
 payloads
 

@@ -524,6 +524,12 @@ export namespace Components {
         "language": string;
         "propertyId": number;
     }
+    interface IrArrivalTimeDialog {
+        "arrivalTime": IEntries[];
+        "booking": Booking;
+        "closeDialog": () => Promise<void>;
+        "openDialog": () => Promise<void>;
+    }
     interface IrArrivals {
         /**
           * Two-letter language code (ISO) used for translations and API locale. Defaults to `'en'`.
@@ -3314,6 +3320,7 @@ export namespace Components {
         "formId": string;
     }
     interface IrReservationInformation {
+        "arrivalTime": IEntries[];
         "booking": Booking;
         "countries": ICountry[];
     }
@@ -4103,6 +4110,10 @@ export interface IrAirDatePickerCustomEvent<T> extends CustomEvent<T> {
 export interface IrApplicablePoliciesCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrApplicablePoliciesElement;
+}
+export interface IrArrivalTimeDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrArrivalTimeDialogElement;
 }
 export interface IrArrivalsTableCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -5271,6 +5282,23 @@ declare global {
     var HTMLIrApplicablePoliciesElement: {
         prototype: HTMLIrApplicablePoliciesElement;
         new (): HTMLIrApplicablePoliciesElement;
+    };
+    interface HTMLIrArrivalTimeDialogElementEventMap {
+        "resetBookingEvt": Booking | null;
+    }
+    interface HTMLIrArrivalTimeDialogElement extends Components.IrArrivalTimeDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrArrivalTimeDialogElementEventMap>(type: K, listener: (this: HTMLIrArrivalTimeDialogElement, ev: IrArrivalTimeDialogCustomEvent<HTMLIrArrivalTimeDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrArrivalTimeDialogElementEventMap>(type: K, listener: (this: HTMLIrArrivalTimeDialogElement, ev: IrArrivalTimeDialogCustomEvent<HTMLIrArrivalTimeDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrArrivalTimeDialogElement: {
+        prototype: HTMLIrArrivalTimeDialogElement;
+        new (): HTMLIrArrivalTimeDialogElement;
     };
     interface HTMLIrArrivalsElement extends Components.IrArrivals, HTMLStencilElement {
     }
@@ -8131,6 +8159,7 @@ declare global {
         "ir-actions-cell": HTMLIrActionsCellElement;
         "ir-air-date-picker": HTMLIrAirDatePickerElement;
         "ir-applicable-policies": HTMLIrApplicablePoliciesElement;
+        "ir-arrival-time-dialog": HTMLIrArrivalTimeDialogElement;
         "ir-arrivals": HTMLIrArrivalsElement;
         "ir-arrivals-filters": HTMLIrArrivalsFiltersElement;
         "ir-arrivals-table": HTMLIrArrivalsTableElement;
@@ -8837,6 +8866,11 @@ declare namespace LocalJSX {
         "language"?: string;
         "onGeneratePayment"?: (event: IrApplicablePoliciesCustomEvent<IPaymentAction>) => void;
         "propertyId"?: number;
+    }
+    interface IrArrivalTimeDialog {
+        "arrivalTime"?: IEntries[];
+        "booking"?: Booking;
+        "onResetBookingEvt"?: (event: IrArrivalTimeDialogCustomEvent<Booking | null>) => void;
     }
     interface IrArrivals {
         /**
@@ -11925,6 +11959,7 @@ declare namespace LocalJSX {
         "onToast"?: (event: IrRectifierCustomEvent<IToast>) => void;
     }
     interface IrReservationInformation {
+        "arrivalTime"?: IEntries[];
         "booking"?: Booking;
         "countries"?: ICountry[];
         "onOpenSidebar"?: (event: IrReservationInformationCustomEvent<OpenSidebarEvent<any>>) => void;
@@ -12690,6 +12725,7 @@ declare namespace LocalJSX {
         "ir-actions-cell": IrActionsCell;
         "ir-air-date-picker": IrAirDatePicker;
         "ir-applicable-policies": IrApplicablePolicies;
+        "ir-arrival-time-dialog": IrArrivalTimeDialog;
         "ir-arrivals": IrArrivals;
         "ir-arrivals-filters": IrArrivalsFilters;
         "ir-arrivals-table": IrArrivalsTable;
@@ -12943,6 +12979,7 @@ declare module "@stencil/core" {
             "ir-actions-cell": LocalJSX.IrActionsCell & JSXBase.HTMLAttributes<HTMLIrActionsCellElement>;
             "ir-air-date-picker": LocalJSX.IrAirDatePicker & JSXBase.HTMLAttributes<HTMLIrAirDatePickerElement>;
             "ir-applicable-policies": LocalJSX.IrApplicablePolicies & JSXBase.HTMLAttributes<HTMLIrApplicablePoliciesElement>;
+            "ir-arrival-time-dialog": LocalJSX.IrArrivalTimeDialog & JSXBase.HTMLAttributes<HTMLIrArrivalTimeDialogElement>;
             "ir-arrivals": LocalJSX.IrArrivals & JSXBase.HTMLAttributes<HTMLIrArrivalsElement>;
             "ir-arrivals-filters": LocalJSX.IrArrivalsFilters & JSXBase.HTMLAttributes<HTMLIrArrivalsFiltersElement>;
             "ir-arrivals-table": LocalJSX.IrArrivalsTable & JSXBase.HTMLAttributes<HTMLIrArrivalsTableElement>;

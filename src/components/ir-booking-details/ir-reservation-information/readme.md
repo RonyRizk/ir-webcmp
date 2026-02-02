@@ -7,10 +7,11 @@
 
 ## Properties
 
-| Property    | Attribute | Description | Type         | Default     |
-| ----------- | --------- | ----------- | ------------ | ----------- |
-| `booking`   | --        |             | `Booking`    | `undefined` |
-| `countries` | --        |             | `ICountry[]` | `undefined` |
+| Property      | Attribute | Description | Type         | Default     |
+| ------------- | --------- | ----------- | ------------ | ----------- |
+| `arrivalTime` | --        |             | `IEntries[]` | `undefined` |
+| `booking`     | --        |             | `Booking`    | `undefined` |
+| `countries`   | --        |             | `ICountry[]` | `undefined` |
 
 
 ## Events
@@ -33,6 +34,7 @@
 - [ota-label](../../ui/ota-label)
 - [ir-booking-extra-note](../ir-booking-extra-note)
 - [ir-booking-company-dialog](../../ir-booking-company-dialog)
+- [ir-arrival-time-dialog](../ir-arrival-time-dialog/ir-arrival-time-dialog)
 
 ### Graph
 ```mermaid
@@ -42,12 +44,15 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-reservation-information --> ir-booking-extra-note
   ir-reservation-information --> ir-booking-company-dialog
+  ir-reservation-information --> ir-arrival-time-dialog
   ir-booking-extra-note --> ir-dialog
   ir-booking-extra-note --> ir-custom-button
   ir-booking-company-dialog --> ir-dialog
   ir-booking-company-dialog --> ir-booking-company-form
   ir-booking-company-dialog --> ir-custom-button
   ir-booking-company-form --> ir-input
+  ir-arrival-time-dialog --> ir-dialog
+  ir-arrival-time-dialog --> ir-custom-button
   ir-booking-details --> ir-reservation-information
   style ir-reservation-information fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -149,8 +149,11 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-reservation-information --> ir-booking-extra-note
   ir-reservation-information --> ir-booking-company-dialog
+  ir-reservation-information --> ir-arrival-time-dialog
   ir-booking-extra-note --> ir-dialog
   ir-booking-extra-note --> ir-custom-button
+  ir-arrival-time-dialog --> ir-dialog
+  ir-arrival-time-dialog --> ir-custom-button
   ir-pickup-view --> ir-custom-button
   ir-pickup-view --> ir-label
   ir-pickup-view --> ir-empty-state
