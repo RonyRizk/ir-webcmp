@@ -7,14 +7,15 @@
 
 ## Properties
 
-| Property          | Attribute          | Description | Type       | Default          |
-| ----------------- | ------------------ | ----------- | ---------- | ---------------- |
-| `bookingType`     | `booking-type`     |             | `string`   | `'PLUS_BOOKING'` |
-| `currency`        | `currency`         |             | `any`      | `undefined`      |
-| `isBookDisabled`  | `is-book-disabled` |             | `boolean`  | `undefined`      |
-| `ratePricingMode` | --                 |             | `any[]`    | `[]`             |
-| `roomType`        | --                 |             | `RoomType` | `undefined`      |
-| `roomTypeId`      | `room-type-id`     |             | `number`   | `null`           |
+| Property                 | Attribute          | Description | Type          | Default          |
+| ------------------------ | ------------------ | ----------- | ------------- | ---------------- |
+| `bookingType`            | `booking-type`     |             | `string`      | `'PLUS_BOOKING'` |
+| `currency`               | `currency`         |             | `any`         | `undefined`      |
+| `isBookDisabled`         | `is-book-disabled` |             | `boolean`     | `undefined`      |
+| `ratePricingMode`        | --                 |             | `any[]`       | `[]`             |
+| `roomType`               | --                 |             | `RoomType`    | `undefined`      |
+| `roomTypeId`             | `room-type-id`     |             | `number`      | `null`           |
+| `unavailableRatePlanIds` | --                 |             | `Set<number>` | `new Set()`      |
 
 
 ## Dependencies

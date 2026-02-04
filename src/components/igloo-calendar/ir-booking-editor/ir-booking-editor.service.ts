@@ -280,9 +280,17 @@ export class IRBookingEditorService {
       const sourceOption = booking_store.bookingDraft.source;
       switch (this.mode) {
         case 'EDIT_BOOKING': {
-          const filteredRooms = booking.rooms.filter(r => r.identifier !== room.identifier);
+          const rooms = [...booking.rooms];
+          const toBeEditedRoomIndex = rooms.findIndex(r => r.identifier === room.identifier);
+          if (toBeEditedRoomIndex === -1) {
+            console.warn('Missing room', room.identifier);
+            return;
+          }
           const newRooms = await generateNewRooms(room.identifier, room.in_out?.code === '001', room);
-          newBooking = modifyBookingDetails(booking, [...filteredRooms, ...newRooms]);
+          rooms[toBeEditedRoomIndex] = { ...newRooms[0] };
+
+          newBooking = modifyBookingDetails(booking, rooms);
+
           break;
         }
         case 'ADD_ROOM':

@@ -13,6 +13,7 @@
 | `checkIn`           | `check-in`            | Fixed check-in date (YYYY-MM-DD), if applicable          | `string`                                                                             | `undefined`      |
 | `checkOut`          | `check-out`           | Fixed check-out date (YYYY-MM-DD), if applicable         | `string`                                                                             | `undefined`      |
 | `isBlockConversion` | `is-block-conversion` |                                                          | `boolean`                                                                            | `undefined`      |
+| `isLoading`         | `is-loading`          |                                                          | `boolean`                                                                            | `undefined`      |
 | `mode`              | `mode`                | Controls header behavior and date constraints            | `"ADD_ROOM" \| "BAR_BOOKING" \| "EDIT_BOOKING" \| "PLUS_BOOKING" \| "SPLIT_BOOKING"` | `'PLUS_BOOKING'` |
 
 

@@ -365,6 +365,7 @@ export namespace Components {
         "ratePricingMode": Array<{ CODE_NAME: string; CODE_VALUE_EN: string }>;
         "roomTypeId": number;
         "shouldBeDisabled": boolean;
+        "unavailableRatePlanIds": Set<number>;
         "visibleInventory": IRatePlanSelection;
     }
     interface IglReallocationDialog {
@@ -377,6 +378,7 @@ export namespace Components {
         "ratePricingMode": any[];
         "roomType": RoomType;
         "roomTypeId": number | null;
+        "unavailableRatePlanIds": Set<number>;
     }
     interface IglSplitBooking {
         "booking": Booking;
@@ -947,6 +949,7 @@ export namespace Components {
          */
         "checkOut": string;
         "isBlockConversion": boolean;
+        "isLoading": boolean;
         /**
           * Controls header behavior and date constraints
          */
@@ -8669,6 +8672,7 @@ declare namespace LocalJSX {
         "ratePricingMode"?: Array<{ CODE_NAME: string; CODE_VALUE_EN: string }>;
         "roomTypeId"?: number;
         "shouldBeDisabled": boolean;
+        "unavailableRatePlanIds"?: Set<number>;
         "visibleInventory": IRatePlanSelection;
     }
     interface IglReallocationDialog {
@@ -8684,6 +8688,7 @@ declare namespace LocalJSX {
         "ratePricingMode"?: any[];
         "roomType"?: RoomType;
         "roomTypeId"?: number | null;
+        "unavailableRatePlanIds"?: Set<number>;
     }
     interface IglSplitBooking {
         "booking"?: Booking;
@@ -9319,6 +9324,7 @@ declare namespace LocalJSX {
          */
         "checkOut"?: string;
         "isBlockConversion"?: boolean;
+        "isLoading"?: boolean;
         /**
           * Controls header behavior and date constraints
          */

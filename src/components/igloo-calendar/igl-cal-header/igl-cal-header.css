@@ -12,6 +12,9 @@
 .darkGrey {
   background: #ececec;
 }
+.topLeftCell {
+  border-inline-end: 1px solid var(--wa-color-surface-border);
+}
 .btn {
   pointer-events: auto;
 }

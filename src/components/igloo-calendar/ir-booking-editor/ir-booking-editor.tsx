@@ -7,7 +7,7 @@ import locales from '@/stores/locales.store';
 import booking_store, { BookingDraft, getReservedRooms, resetBookingStore, setBookingDraft, setBookingSelectOptions, updateBookedByGuest } from '@/stores/booking.store';
 import { BookingSource } from '@/models/igl-book-property';
 import calendar_data from '@/stores/calendar-data';
-import { ISetupEntries } from '@/models/IBooking';
+import { BookingDetails, ISetupEntries } from '@/models/IBooking';
 import moment from 'moment';
 import { IRBookingEditorService } from './ir-booking-editor.service';
 
@@ -30,6 +30,8 @@ export class IrBookingEditor {
   @Prop() unitId: string;
 
   @State() isLoading: boolean = true;
+  @State() isFetchingAvailability = false;
+  @State() unavailableRatePlanIds: Set<number> = new Set();
 
   @Event({ composed: true, bubbles: true }) resetBookingEvt: EventEmitter<void>;
   @Event() loadingChanged: EventEmitter<{ cause: string | null }>;
@@ -114,7 +116,7 @@ export class IrBookingEditor {
   handleCheckAvailability(e: CustomEvent) {
     e.stopImmediatePropagation();
     e.stopPropagation();
-    this.checkBookingAvailability();
+    this.checkBookingAvailability(true);
   }
   /**
    * Initializes booking draft and guest data
@@ -167,7 +169,8 @@ export class IrBookingEditor {
     setBookingDraft(draft);
   }
 
-  private async checkBookingAvailability() {
+  private async checkBookingAvailability(checkBe = false) {
+    this.isFetchingAvailability = true;
     // resetBookingStore(false);
     const { source, occupancy, dates } = booking_store.bookingDraft;
     const from_date = dates.checkIn.format('YYYY-MM-DD');
@@ -176,8 +179,7 @@ export class IrBookingEditor {
     try {
       const room_type_ids_to_update = this.bookingEditorService.isEventType('EDIT_BOOKING') ? [this.room.roomtype?.id] : [];
       const room_type_ids = this.bookingEditorService.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? this.roomTypeIds.map(r => Number(r)) : [];
-
-      await this.bookingService.getBookingAvailability({
+      const params = {
         from_date,
         to_date,
         propertyid: calendar_data.property.id,
@@ -191,16 +193,42 @@ export class IrBookingEditor {
         agent_id: is_in_agent_mode ? source?.tag : null,
         is_in_agent_mode,
         room_type_ids_to_update,
-      });
+      };
+      await this.bookingService.getBookingAvailability(params);
       if (this.mode !== 'EDIT_BOOKING') {
         await this.assignCountryCode();
       }
       if (this.bookingEditorService.isEventType('EDIT_BOOKING')) {
         this.bookingEditorService.updateBooking(this.room);
       }
+      if (checkBe) {
+        const beResults = await this.bookingService.getBookingAvailability({ ...params, is_backend: false, skip_store: true });
+        this.compareResults(beResults);
+      }
+      this.isFetchingAvailability = false;
     } catch (error) {
       console.error('Error initializing booking availability:', error);
     }
+  }
+
+  private compareResults(beResults: BookingDetails) {
+    const beRoomTypes = Array.isArray(beResults) ? beResults : beResults?.roomtypes ?? [];
+    const unavailableRatePlanIds = new Set<number>();
+    const beRoomTypeMap = new Map<number, any>(beRoomTypes.map(roomType => [roomType.id, roomType]) as any);
+
+    for (const roomType of booking_store.roomTypes ?? []) {
+      const beRoomType = beRoomTypeMap.get(roomType.id);
+      const beRatePlanMap = new Map<number, any>(beRoomType?.rateplans?.map(ratePlan => [ratePlan.id, ratePlan]) ?? []);
+
+      for (const ratePlan of roomType.rateplans ?? []) {
+        if (!ratePlan?.is_available_to_book) continue;
+        const beRatePlan = beRatePlanMap.get(ratePlan.id);
+        if (!beRatePlan || !beRatePlan.is_available_to_book) {
+          unavailableRatePlanIds.add(ratePlan.id);
+        }
+      }
+    }
+    this.unavailableRatePlanIds = unavailableRatePlanIds;
   }
 
   private async doReservation(source: string) {
@@ -322,6 +350,7 @@ export class IrBookingEditor {
           {this.step === 'details' && (
             <Fragment>
               <ir-booking-editor-header
+                isLoading={this.isFetchingAvailability}
                 isBlockConversion={!!this.blockedUnit?.STATUS_CODE}
                 booking={this.booking}
                 checkIn={this.checkIn}
@@ -329,17 +358,19 @@ export class IrBookingEditor {
                 mode={this.mode}
               ></ir-booking-editor-header>
               <div class={'booking-editor__roomtype-container'}>
-                {booking_store.roomTypes?.map(roomType => (
-                  <igl-room-type
-                    key={`room-type-${roomType.id}`}
-                    id={roomType.id.toString()}
-                    roomType={roomType}
-                    bookingType={this.mode}
-                    ratePricingMode={booking_store.selects?.ratePricingMode}
-                    roomTypeId={this.room?.roomtype?.id}
-                    currency={calendar_data.property.currency}
-                  ></igl-room-type>
-                ))}
+                {!this.isFetchingAvailability &&
+                  booking_store.roomTypes?.map(roomType => (
+                    <igl-room-type
+                      unavailableRatePlanIds={this.unavailableRatePlanIds}
+                      key={`room-type-${roomType.id}`}
+                      id={roomType.id.toString()}
+                      roomType={roomType}
+                      bookingType={this.mode}
+                      ratePricingMode={booking_store.selects?.ratePricingMode}
+                      roomTypeId={this.room?.roomtype?.id}
+                      currency={calendar_data.property.currency}
+                    ></igl-room-type>
+                  ))}
               </div>
             </Fragment>
           )}

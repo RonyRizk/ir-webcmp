@@ -1,3 +1,4 @@
+import { SetDepartureTimeProps, SetDepartureTimePropsSchema } from './types';
 // import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 // import { DayData } from '../../models/DayType';
 // import axios from 'axios';
@@ -871,23 +872,27 @@ export class BookingService {
     currency: { id: number; code: string };
     is_in_agent_mode?: boolean;
     agent_id?: string | number;
+    is_backend?: boolean;
+    skip_store?: boolean;
   }): Promise<BookingDetails> {
     try {
-      const { adultChildCount, currency, ...rest } = props;
+      const { adultChildCount, currency, is_backend = true, skip_store, ...rest } = props;
       const { data } = await axios.post(`/Check_Availability`, {
         ...rest,
         adult_nbr: adultChildCount.adult,
         child_nbr: adultChildCount.child,
         currency_ref: currency.code,
         skip_getting_assignable_units: !calendar_data.is_frontdesk_enabled,
-        is_backend: true,
+        is_backend: is_backend,
       });
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
       const results = this.modifyRateplans(this.sortRoomTypes(data['My_Result'], { adult_nbr: Number(adultChildCount.adult), child_nbr: Number(adultChildCount.child) }));
-      booking_store.roomTypes = [...results];
-      booking_store.tax_statement = { message: data.My_Result.tax_statement };
+      if (!skip_store) {
+        booking_store.roomTypes = [...results];
+        booking_store.tax_statement = { message: data.My_Result.tax_statement };
+      }
       return results;
     } catch (error) {
       console.error(error);
@@ -959,7 +964,7 @@ export class BookingService {
       throw new Error(error);
     }
   }
-  public async getSetupEntriesByTableName(TBL_NAME: string): Promise<IEntries[]> {
+  public async getSetupEntriesByTableName(TBL_NAME: TableEntries): Promise<IEntries[]> {
     const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME`, {
       TBL_NAME,
     });
@@ -1062,8 +1067,9 @@ export class BookingService {
       throw new Error(error);
     }
   }
-  public async setDepartureTime(params: { property_id: number; room_identifier: string; code: string }) {
-    const { data } = await axios.post('/Set_Departure_Time', params);
+  public async setDepartureTime(props: SetDepartureTimeProps) {
+    const payload = SetDepartureTimePropsSchema.parse(props);
+    const { data } = await axios.post('/Set_Departure_Time', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

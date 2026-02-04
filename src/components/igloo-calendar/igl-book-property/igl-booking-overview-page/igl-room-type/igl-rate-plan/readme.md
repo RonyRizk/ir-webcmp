@@ -16,6 +16,7 @@
 | `ratePricingMode`               | --                   |             | `{ CODE_NAME: string; CODE_VALUE_EN: string; }[]` | `[]`             |
 | `roomTypeId`                    | `room-type-id`       |             | `number`                                          | `undefined`      |
 | `shouldBeDisabled` _(required)_ | `should-be-disabled` |             | `boolean`                                         | `undefined`      |
+| `unavailableRatePlanIds`        | --                   |             | `Set<number>`                                     | `new Set()`      |
 | `visibleInventory` _(required)_ | --                   |             | `IRatePlanSelection`                              | `undefined`      |
 
 

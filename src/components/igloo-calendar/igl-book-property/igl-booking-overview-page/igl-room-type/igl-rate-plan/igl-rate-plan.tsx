@@ -19,6 +19,7 @@ export class IglRatePlan {
   @Prop() bookingType: string = 'PLUS_BOOKING';
   @Prop() isBookDisabled: boolean = false;
   @Prop() visibleInventory!: IRatePlanSelection;
+  @Prop() unavailableRatePlanIds: Set<number> = new Set();
 
   @Event() buttonClicked!: EventEmitter<{ [key: string]: any }>;
   @Event() bookingStepChange!: EventEmitter<{ direction: 'next' | 'prev' }>;
@@ -185,6 +186,12 @@ export class IglRatePlan {
                   <span innerHTML={this.getTooltipMessages()}></span>
                 </wa-tooltip>
                 <wa-icon name="circle-info" id={`rateplan-${this.ratePlan.id}`}></wa-icon>
+              </Fragment>
+            )}
+            {this.unavailableRatePlanIds.has(this.ratePlan.id) && (
+              <Fragment>
+                <wa-tooltip for={`rateplan-warning-${this.ratePlan.id}`}>You are forcing a stop-sale restriction.</wa-tooltip>
+                <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-warning-fill-loud)' }} id={`rateplan-warning-${this.ratePlan.id}`}></wa-icon>
               </Fragment>
             )}
           </div>

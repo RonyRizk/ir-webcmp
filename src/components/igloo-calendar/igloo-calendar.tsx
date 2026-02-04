@@ -4,7 +4,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
 import io, { Socket } from 'socket.io-client';
 import { EventsService } from '@/services/events.service';
-import { ICountry, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '@/models/IBooking';
+import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '@/services/toBeAssigned.service';
 import { bookingStatus, calculateDaysBetweenDates, formatName, getPrivateNote, getRoomStatus, transformNewBLockedRooms, transformNewBooking } from '@/utils/booking';
@@ -22,6 +22,7 @@ import housekeeping_store from '@/stores/housekeeping.store';
 import { SetRoomCalendarExtraParams } from '@/services/property.service';
 import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dialog';
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
+import { SetDepartureTimeProps } from '@/services/booking-service/types';
 // import Auth from '@/models/Auth';
 export interface UnitHkStatusChangePayload {
   PR_ID: number;
@@ -125,6 +126,7 @@ export class IglooCalendar {
   private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
   private tasksEndDate: string;
   dialogEl: HTMLIrDialogElement;
+  private departureTimes: IEntries[];
 
   componentWillLoad() {
     if (this.baseUrl) {
@@ -363,6 +365,7 @@ export class IglooCalendar {
         this.housekeepingService.getExposedHKSetup(this.property_id),
       ];
 
+      this.fetchSetupEntries();
       if (this.propertyid) {
         requests.push(
           this.roomService.getExposedProperty({
@@ -376,6 +379,7 @@ export class IglooCalendar {
       }
 
       const results = await Promise.all(requests);
+
       // this.tasksEndDate=housekeeping_store?.hk_criteria?.cleaning_periods[housekeeping_store?.hk_criteria?.cleaning_periods.length - 1].code
       this.tasksEndDate = moment().add(30, 'days').format('YYYY-MM-DD');
       this.getHousekeepingTasks({
@@ -420,6 +424,10 @@ export class IglooCalendar {
     } catch (error) {
       console.error('Initializing Calendar Error', error);
     }
+  }
+  private async fetchSetupEntries() {
+    const d = await this.bookingService.getSetupEntriesByTableName('_DEPARTURE_TIME');
+    this.departureTimes = d;
   }
   private async getHousekeepingTasks({ from_date, to_date }: { from_date: string; to_date: string }) {
     const { tasks } = await this.housekeepingService.getHkTasks({
@@ -472,6 +480,7 @@ export class IglooCalendar {
       HK_SKIP: this.handleHkSkip,
       SET_ROOM_CALENDAR_EXTRA: this.handleRoomCalendarExtra,
       UPDATE_CALENDAR_RATE: this.handleUpdateCalendarRate,
+      SET_DEPARTURE_TIME: this.handleSetDepartureTime,
     };
 
     const handler = reasonHandlers[REASON];
@@ -484,6 +493,27 @@ export class IglooCalendar {
 
   private handleUpdateCalendarRate(result: any) {
     this.salesQueue.offer({ ...result, night: result.date, is_available_to_book: !result.is_closed });
+  }
+
+  private handleSetDepartureTime(result: SetDepartureTimeProps) {
+    this.calendarData = {
+      ...this.calendarData,
+      bookingEvents: [
+        ...this.calendarData.bookingEvents.map(e => {
+          if (e.IDENTIFIER === result.room_identifier) {
+            const departure_time = this.departureTimes.find(d => d.CODE_NAME === result.code);
+            return {
+              ...e,
+              DEPARTURE_TIME: {
+                code: result.code,
+                description: departure_time.CODE_VALUE_EN,
+              },
+            };
+          }
+          return e;
+        }),
+      ],
+    };
   }
 
   private handleRoomCalendarExtra(result: SetRoomCalendarExtraParams) {

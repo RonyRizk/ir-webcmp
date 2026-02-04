@@ -14,6 +14,7 @@ export class IglRoomType {
   @Prop() roomTypeId: number | null = null;
   @Prop() currency;
   @Prop() isBookDisabled: boolean;
+  @Prop() unavailableRatePlanIds: Set<number> = new Set();
 
   private validBookingTypes = ['PLUS_BOOKING', 'ADD_ROOM', 'EDIT_BOOKING', 'SPLIT_BOOKING'];
 
@@ -29,6 +30,7 @@ export class IglRoomType {
             const visibleInventory = getVisibleInventory(this.roomType.id, ratePlan.id);
             return (
               <igl-rate-plan
+                unavailableRatePlanIds={this.unavailableRatePlanIds}
                 isBookDisabled={this.isBookDisabled}
                 visibleInventory={visibleInventory}
                 key={`rate-plan-${ratePlan.id}`}

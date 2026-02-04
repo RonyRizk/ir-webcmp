@@ -8,7 +8,6 @@ import locales from '@/stores/locales.store';
 import booking_store, { resetAvailability, setBookingDraft } from '@/stores/booking.store';
 import { z, ZodSchema } from 'zod';
 import { DateRangeChangeEvent } from '@/components';
-import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { IRBookingEditorService } from '../ir-booking-editor.service';
 
 @Component({
@@ -19,7 +18,7 @@ import { IRBookingEditorService } from '../ir-booking-editor.service';
 export class IrBookingEditorHeader {
   /** Booking context used for edit, add-room, and split flows */
   @Prop() booking: Booking;
-
+  @Prop() isLoading: boolean;
   @Prop() isBlockConversion: boolean;
 
   /** Controls header behavior and date constraints */
@@ -31,7 +30,7 @@ export class IrBookingEditorHeader {
   /** Fixed check-out date (YYYY-MM-DD), if applicable */
   @Prop() checkOut: string;
 
-  @State() isLoading: boolean;
+  @State() _isLoading: boolean;
   @State() bookings: Booking[] = [];
   @State() datesSchema: ZodSchema;
 
@@ -148,7 +147,7 @@ export class IrBookingEditorHeader {
   }
   private async handleBookingSearch(value: string) {
     try {
-      this.isLoading = true;
+      this._isLoading = true;
       if (!value) {
         this.pickerRef.clearInput();
         return;
@@ -157,7 +156,7 @@ export class IrBookingEditorHeader {
     } catch (error) {
       console.error(error);
     } finally {
-      this.isLoading = false;
+      this._isLoading = false;
     }
   }
 
@@ -284,7 +283,7 @@ export class IrBookingEditorHeader {
                 // defaultValue={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
                 // value={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
                 placeholder={locales.entries.Lcz_BookingNumber}
-                loading={this.isLoading}
+                loading={this._isLoading}
                 onText-change={e => this.handleBookingSearch(e.detail)}
                 onCombobox-select={this.selectGuest.bind(this)}
               >
@@ -368,11 +367,11 @@ export class IrBookingEditorHeader {
               </Fragment>
             )}
 
-            <ir-custom-button loading={isRequestPending('/Check_Availability')} type="submit" variant="brand">
+            <ir-custom-button loading={this.isLoading} type="submit" variant="brand">
               Check
             </ir-custom-button>
           </div>
-          {booking_store.roomTypes?.length > 0 && (
+          {booking_store.roomTypes?.length > 0 && !this.isLoading && (
             <wa-callout size="small" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
               {/* Including taxes and fees. */}
               {calendar_data.tax_statement}
