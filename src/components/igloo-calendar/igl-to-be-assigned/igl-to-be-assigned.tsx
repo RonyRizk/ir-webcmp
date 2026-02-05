@@ -357,9 +357,9 @@ export class IglToBeAssigned {
             </ir-custom-button>
           </div>
           {Object.keys(this.data).length === 0 ? (
-            <p>{locales.entries.Lcz_AllBookingsAreAssigned}</p>
+            <p style={{ padding: '1.5rem' }}>{locales.entries.Lcz_AllBookingsAreAssigned}</p>
           ) : this.isLoading ? (
-            <p class="d-flex align-items-center">
+            <p class="d-flex align-items-center" style={{ padding: '1.5rem' }}>
               <span class="p-0">{this.loadingMessage}</span>
               <div class="dots">
                 <div class="dot"></div>
@@ -398,7 +398,7 @@ export class IglToBeAssigned {
                   </div>
                 </div>
               ) : (
-                locales.entries.Lcz_AllBookingsAreAssigned
+                <span style={{ padding: '1.5rem' }}>{locales.entries.Lcz_AllBookingsAreAssigned}</span>
               )}
             </div>
           )}

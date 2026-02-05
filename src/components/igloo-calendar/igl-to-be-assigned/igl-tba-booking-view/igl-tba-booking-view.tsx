@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import locales from '@/stores/locales.store';
 import { CalendarSidebarState } from '@/components/igloo-calendar/igloo-calendar';
 import { canCheckIn } from '@/utils/utils';
-import { IUnit } from '@/models/booking.dto';
+import { IUnit, Occupancy } from '@/models/booking.dto';
 
 @Component({
   tag: 'igl-tba-booking-view',
@@ -198,17 +198,52 @@ export class IglTbaBookingView {
     });
   }
 
+  private formatVariation({ infant_nbr, adult_nbr, children_nbr }: Occupancy) {
+    const adultCount = adult_nbr > 0 ? adult_nbr : 0;
+    const childCount = children_nbr > 0 ? children_nbr : 0;
+    const infantCount = infant_nbr > 0 ? infant_nbr : 0;
+
+    const adultLabel = 'A';
+    const childLabel = 'C';
+    const infantLabel = 'I';
+
+    const parts = [];
+    if (adultCount > 0) {
+      parts.push(`${adultCount}${adultLabel}`);
+    }
+    if (childCount > 0) {
+      parts.push(`${childCount}${childLabel}`);
+    }
+    if (infantCount > 0) {
+      parts.push(`${infantCount}${infantLabel}`);
+    }
+
+    return parts.join('-');
+  }
+
   render() {
     return (
       <Host>
         <div class="bookingContainer" onClick={() => this.handleHighlightAvailability()}>
           <div
-            class={`guestTitle ${this.highlightSection ? 'selectedOrder' : ''} pointer font-small-3`}
+            class={`guestTitle booking-guest-title tba-guest-title pointer font-small-3 ${this.highlightSection ? 'selectedOrder is-active' : ''}`}
             data-toggle="tooltip"
             data-placement="top"
             data-original-title="Click to assign unit"
           >
-            {`Book# ${this.eventData.BOOKING_NUMBER} - ${this.eventData.NAME}`}
+            <p class="guest-booking-number">{this.eventData.BOOKING_NUMBER}</p>
+
+            <span class="guest-separator">-</span>
+
+            <p class="guest-name truncate">{this.eventData.NAME}</p>
+
+            {this.eventData.occupancy && (
+              <p class="guest-occupancy">
+                <span class="guest-occupancy-wrapper">( </span>
+                <span class="guest-occupancy-values" innerHTML={this.formatVariation(this.eventData.occupancy)}></span>
+                <span class="guest-occupancy-wrapper"> )</span>
+              </p>
+            )}
           </div>
           <div class="row m-0 p-0 actionsContainer">
             <select class="form-control input-sm room-select flex-grow-1" id={v4()} onChange={evt => this.onSelectRoom(evt)}>

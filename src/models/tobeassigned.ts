@@ -1,3 +1,5 @@
+import { Occupancy } from './booking.dto';
+
 export interface InnerRecord {
   categories: any;
   dateStr: string;
@@ -8,6 +10,7 @@ export interface IUnassignedDates {
 }
 export interface IRoomCategory {
   roomTypeName: string;
+  occupancy: Occupancy;
   ID: string;
   NAME: string;
   identifier: string;

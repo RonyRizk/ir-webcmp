@@ -70,6 +70,7 @@ export class ToBeAssignedService {
           TO_DATE: room.unassigned_date,
           BOOKING_NUMBER: room.book_nbr,
           STATUS: 'IN-HOUSE',
+          occupancy: room.occupancy,
           defaultDateRange: {
             fromDate: undefined,
             toDate: undefined,

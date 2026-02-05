@@ -55,3 +55,20 @@ hr {
   margin: 0;
   gap: 0.5rem;
 }
+
+.booking-guest-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guest-booking-number,
+.guest-name,
+.guest-occupancy {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.guest-name {
+  max-width: 120px;
+}
