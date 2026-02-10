@@ -17,6 +17,9 @@
   height: 100%;
   gap: 0 !important;
 }
+ir-agents .ir-page__container {
+  gap: var(--wa-space-l, 1.5rem) !important;
+}
 .secure-header {
   background: #fff;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);

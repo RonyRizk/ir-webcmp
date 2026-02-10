@@ -157,13 +157,13 @@
   border-radius: 4px;
 
   /* clean, seamless repeating tile */
-  /* background: repeating-linear-gradient(
+  background: repeating-linear-gradient(
     var(--stripe-angle, 45deg),
     var(--ir-event-bg) 0,
     var(--ir-event-bg) calc(var(--stripe-period) / 2),
     var(--ir-event-bg-stripe-color) calc(var(--stripe-period) / 2),
     var(--ir-event-bg-stripe-color) var(--stripe-period)
-  ); */
+  );
   backface-visibility: hidden;
 }
 .bookingEventBase.skewedRight.striped-bar::after,

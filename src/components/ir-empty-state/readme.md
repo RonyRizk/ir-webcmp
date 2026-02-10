@@ -23,6 +23,7 @@
 
 ### Used by
 
+ - [ir-agents-table](../ir-agents/ir-agents-table)
  - [ir-arrivals-table](../ir-arrivals/ir-arrivals-table)
  - [ir-billing](../ir-billing)
  - [ir-departures-table](../ir-departures/ir-departures-table)
@@ -37,6 +38,7 @@
 ### Graph
 ```mermaid
 graph TD;
+  ir-agents-table --> ir-empty-state
   ir-arrivals-table --> ir-empty-state
   ir-billing --> ir-empty-state
   ir-departures-table --> ir-empty-state

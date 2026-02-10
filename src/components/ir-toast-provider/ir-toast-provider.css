@@ -10,6 +10,9 @@
   white-space: nowrap;
   border-width: 0;
 }
+[popover] {
+  all: unset;
+}
 /* Container positioning */
 .toast-container {
   position: fixed;

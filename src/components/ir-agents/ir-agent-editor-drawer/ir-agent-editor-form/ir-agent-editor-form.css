@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+.agent-editor__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.agent-editor__profile,
+.agent-editor__contract {
+  flex: 1 1 0%;
+}
+/*sm*/
+@media (min-width: 640px) {
+}
+
+/*md*/
+@media (min-width: 768px) {
+  .agent-editor__content {
+    flex-direction: row;
+    gap: 4rem;
+  }
+}
+
+/*lg*/
+@media (min-width: 1024px) {
+}
+
+/*xl*/
+@media (min-width: 1280px) {
+}
+
+/*2xl*/
+@media (min-width: 1536px) {
+}

@@ -17,6 +17,7 @@
 ### Used by
 
  - [igloo-calendar](../igloo-calendar)
+ - [ir-agents](../ir-agents)
  - [ir-arrivals](../ir-arrivals)
  - [ir-booking-listing](../ir-booking-listing)
  - [ir-channel](../ir-channel)
@@ -37,6 +38,7 @@
 ```mermaid
 graph TD;
   igloo-calendar --> ir-loading-screen
+  ir-agents --> ir-loading-screen
   ir-arrivals --> ir-loading-screen
   ir-booking-listing --> ir-loading-screen
   ir-channel --> ir-loading-screen

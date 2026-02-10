@@ -18,6 +18,7 @@
 
  - [igl-book-property-container](../../igl-book-property-container)
  - [igloo-calendar](../../igloo-calendar)
+ - [ir-agents](../../ir-agents)
  - [ir-arrivals](../../ir-arrivals)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
@@ -50,6 +51,7 @@ graph TD;
   ir-toast-provider --> ir-toast-alert
   igl-book-property-container --> ir-toast
   igloo-calendar --> ir-toast
+  ir-agents --> ir-toast
   ir-arrivals --> ir-toast
   ir-booking-details --> ir-toast
   ir-booking-email-logs --> ir-toast

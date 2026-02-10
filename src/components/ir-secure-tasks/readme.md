@@ -32,6 +32,7 @@
 - [ir-sales-by-channel](../ir-sales-by-channel)
 - [ir-arrivals](../ir-arrivals)
 - [ir-departures](../ir-departures)
+- [ir-agents](../ir-agents)
 
 ### Graph
 ```mermaid
@@ -51,6 +52,7 @@ graph TD;
   ir-secure-tasks --> ir-sales-by-channel
   ir-secure-tasks --> ir-arrivals
   ir-secure-tasks --> ir-departures
+  ir-secure-tasks --> ir-agents
   ir-login --> ir-interceptor
   ir-login --> ir-toast
   ir-login --> ir-input-text
@@ -534,6 +536,25 @@ graph TD;
   ir-departures-table --> ir-custom-button
   ir-departures-table --> ir-empty-state
   ir-departures-table --> ir-pagination
+  ir-agents --> ir-loading-screen
+  ir-agents --> ir-toast
+  ir-agents --> ir-interceptor
+  ir-agents --> ir-agents-table
+  ir-agents --> ir-agent-editor-drawer
+  ir-agents --> ir-dialog
+  ir-agents --> ir-custom-button
+  ir-agents-table --> ir-custom-button
+  ir-agents-table --> ir-empty-state
+  ir-agent-editor-drawer --> ir-drawer
+  ir-agent-editor-drawer --> ir-agent-editor-form
+  ir-agent-editor-drawer --> ir-custom-button
+  ir-agent-editor-form --> ir-agent-profile
+  ir-agent-editor-form --> ir-agent-contract
+  ir-agent-profile --> ir-validator
+  ir-agent-profile --> ir-input
+  ir-agent-profile --> ir-country-picker
+  ir-agent-contract --> ir-validator
+  ir-agent-contract --> ir-input
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

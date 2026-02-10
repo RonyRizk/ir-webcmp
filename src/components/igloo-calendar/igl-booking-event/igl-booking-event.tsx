@@ -213,8 +213,8 @@ export class IglBookingEvent {
                     shrinkingDirection = moment(from_date, 'YYYY-MM-DD').isAfter(moment(oldFromDate, 'YYYY-MM-DD'))
                       ? 'left'
                       : moment(to_date, 'YYYY-MM-DD').isBefore(moment(oldToDate, 'YYYY-MM-DD'))
-                      ? 'right'
-                      : null;
+                        ? 'right'
+                        : null;
                     if (shrinkingDirection === 'left') {
                       fromDate = from_date;
                     }
@@ -960,7 +960,7 @@ export class IglBookingEvent {
     let noteNode = this.getNoteNode();
     let balanceNode = this.getBalanceNode();
     const { balance, bar, lateCheckout } = this.buildBarIds();
-    let backgroundColor = this.bookingEvent.ROOM_INFO?.calendar_extra ? this.bookingEvent.ROOM_INFO.calendar_extra?.booking_color?.color ?? legend.color : legend.color;
+    let backgroundColor = this.bookingEvent.ROOM_INFO?.calendar_extra ? (this.bookingEvent.ROOM_INFO.calendar_extra?.booking_color?.color ?? legend.color) : legend.color;
 
     const { foreground, stripe } = calendar_data.colorsForegrounds?.[backgroundColor] ?? {
       foreground: '',
@@ -980,7 +980,7 @@ export class IglBookingEvent {
             'pending': pending,
             'skewedLeft': !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)),
             'skewedRight': !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.to_date)).isAfter(new Date(this.bookingEvent.TO_DATE)),
-            'striped-bar vertical': this.bookingEvent.STATUS === 'IN-HOUSE',
+            // 'striped-bar vertical': this.bookingEvent.STATUS === 'IN-HOUSE',
             'striped-bar animated': isBlockUnit(this.bookingEvent.STATUS_CODE) && this.bookingEvent.STATUS_CODE === '003',
             'border border-dark ota-booking-event':
               !this.bookingEvent.is_direct && !isBlockUnit(this.bookingEvent.STATUS_CODE) && this.bookingEvent.STATUS !== 'TEMP-EVENT' && this.bookingEvent.ID !== 'NEW_TEMP_EVENT',

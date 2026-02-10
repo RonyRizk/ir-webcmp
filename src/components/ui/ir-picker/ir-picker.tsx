@@ -573,7 +573,7 @@ export class IrPicker {
             label={this.label}
             pill={this.pill}
             onblur={() => this.inputPickerBlurred.emit()}
-            autocomplete="off"
+            autocomplete="nope"
             placeholder={this.placeholder || 'Search'}
             oninput={this.handleInput}
             onfocus={this.handleInputFocus}

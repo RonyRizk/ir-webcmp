@@ -31,6 +31,7 @@ import '@awesome.me/webawesome/dist/components/callout/callout.js';
 import '@awesome.me/webawesome/dist/components/animation/animation.js';
 import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
+import '@awesome.me/webawesome/dist/components/copy-button/copy-button.js';
 export default () => {
   /* The side-effect imports above define the custom elements; nothing else to execute at runtime. */
 };

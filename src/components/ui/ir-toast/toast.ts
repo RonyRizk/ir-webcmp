@@ -7,6 +7,7 @@ interface IBaseToast {
   title?: string;
   duration?: number;
   style?: Partial<CSSStyleDeclaration>;
+  dismissible?: boolean;
 }
 
 interface IToastCallback {

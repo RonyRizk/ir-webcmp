@@ -533,3 +533,8 @@ export function isWeekend(date: string, format: MomentFormatSpecification = 'YYY
   const d = moment(date, format);
   return d.day() === 0 || d.day() === 6;
 }
+
+export function getFormSubmitter(e: Event): string {
+  const submitter = (e as SubmitEvent).submitter as any | null;
+  return submitter.value;
+}

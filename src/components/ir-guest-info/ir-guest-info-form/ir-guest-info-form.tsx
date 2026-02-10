@@ -71,7 +71,16 @@ export class IrGuestInfoForm {
       }
 
       this.countries = countries;
-      let _g = { ...guest, email: guest.email.replace(/\s+(?=@)/g, '').trim() };
+      let _g = {
+        ...guest,
+        email: guest.email
+          .toLowerCase()
+          .replace(/\s+/g, '') // remove all whitespace
+          .replace(/[^a-z0-9@._'+\-]/g, '') // remove chars not allowed by EMAIL_REGEX
+          .replace(/\.{2,}/g, '.') // collapse multiple dots
+          .replace(/@\./, '@') // remove dot right after @
+          .trim(),
+      };
       if (_g && !_g.country_phone_prefix) {
         const country = this.countries.find(c => c.id === _g.country_id);
         console.log({ country });
@@ -169,9 +178,9 @@ export class IrGuestInfoForm {
             defaultValue={this.guest?.email}
             value={this.guest?.email}
             required
+            mask="email"
             onText-change={e => {
-              const email = e.detail.replace(/(?<=^[^@]*)\s+(?=[^@]*@noemail\.com$)/g, '').trim();
-              this.handleInputChange({ email });
+              this.handleInputChange({ email: e.detail });
             }}
           ></ir-input>
         </ir-validator>
@@ -186,9 +195,9 @@ export class IrGuestInfoForm {
             label={locales.entries?.Lcz_AlternativeEmail}
             id="altEmail"
             value={this.guest?.alternative_email}
+            mask="email"
             onText-change={e => {
-              const email = e.detail.replace(/(?<=^[^@]*)\s+(?=[^@]*@noemail\.com$)/g, '').trim();
-              this.handleInputChange({ alternative_email: email });
+              this.handleInputChange({ alternative_email: e.detail });
             }}
           ></ir-input>
         </ir-validator>

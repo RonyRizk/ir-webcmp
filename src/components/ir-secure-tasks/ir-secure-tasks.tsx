@@ -13,7 +13,8 @@ export type SecureScreens =
   | 'country-sales'
   | 'daily-occupancy'
   | 'booking-listing'
-  | 'channel-sales';
+  | 'channel-sales'
+  | 'agents';
 @Component({
   tag: 'ir-secure-tasks',
   styleUrl: 'ir-secure-tasks.css',
@@ -84,6 +85,7 @@ export class IrSecureTasks {
     { name: 'Sales by Channel', value: 'channel-sales' },
     { name: 'Arrivals', value: 'arrivals' },
     { name: 'Departures', value: 'departures' },
+    { name: 'Agents', value: 'agents' },
   ];
   private handleAuthFinish(e: CustomEvent) {
     const token = e.detail.token;
@@ -199,6 +201,12 @@ export class IrSecureTasks {
         return <ir-arrivals p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-arrivals>;
       case 'departures':
         return <ir-departures p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-departures>;
+      case 'agents':
+        return (
+          <div>
+            <ir-agents style={{ gap: '1.5rem' }} p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-agents>
+          </div>
+        );
       default:
         return null;
     }

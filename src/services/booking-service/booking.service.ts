@@ -602,6 +602,9 @@ export type TableEntries =
   | '_PAY_TYPE'
   | '_PAY_TYPE_GROUP'
   | '_PAY_METHOD'
+  | '_AGENT_RATE_TYPE'
+  | '_AGENT_TYPE'
+  | '_TA_PAYMENT_METHOD'
   | (string & {});
 
 export type GroupedTableEntries = {

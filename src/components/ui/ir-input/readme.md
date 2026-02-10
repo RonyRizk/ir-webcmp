@@ -22,7 +22,7 @@
 | `inputClass`         | `input-class`          | Custom CSS classes applied to the inner `<wa-input>` element.  You can also target the exposed parts `::part(input)` and `::part(base)` for deeper styling of the native input and container.                                                                                          | `string`                                                                                                            | `undefined` |
 | `inputmode`          | `inputmode`            | Tells the browser what type of data will be entered by the user, allowing it to display the appropriate virtual keyboard on supportive devices.                                                                                                                                        | `"decimal" \| "email" \| "none" \| "numeric" \| "search" \| "tel" \| "text" \| "url"`                               | `undefined` |
 | `label`              | `label`                | The input's label. If you need to display HTML, use the `label` slot instead.                                                                                                                                                                                                          | `string`                                                                                                            | `undefined` |
-| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"date" \| "time" \| "price" \| "url"> \| FactoryArg`                                                    | `undefined` |
+| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"email" \| "date" \| "time" \| "price" \| "url"> \| FactoryArg`                                         | `undefined` |
 | `max`                | `max`                  | The input's maximum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
 | `maxlength`          | `maxlength`            | The maximum length of input that will be considered valid.                                                                                                                                                                                                                             | `number`                                                                                                            | `undefined` |
 | `min`                | `min`                  | The input's minimum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
@@ -86,6 +86,8 @@ Type: `Promise<void>`
  - [igl-application-info](../../igloo-calendar/igl-book-property/igl-booking-form/igl-application-info)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
+ - [ir-agent-contract](../../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
+ - [ir-agent-profile](../../ir-agents/ir-agent-editor-drawer/ir-agent-profile)
  - [ir-arrivals-filters](../../ir-arrivals/ir-arrivals-filters)
  - [ir-autocomplete](../ir-autocomplete)
  - [ir-booking-company-form](../../ir-booking-company-dialog/ir-booking-company-form)
@@ -112,6 +114,8 @@ graph TD;
   igl-application-info --> ir-input
   igl-property-booked-by --> ir-input
   igl-rate-plan --> ir-input
+  ir-agent-contract --> ir-input
+  ir-agent-profile --> ir-input
   ir-arrivals-filters --> ir-input
   ir-autocomplete --> ir-input
   ir-booking-company-form --> ir-input

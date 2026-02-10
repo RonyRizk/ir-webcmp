@@ -8,6 +8,7 @@ import { NativeWaInput } from '../ir-input/ir-input';
   scoped: true,
 })
 export class IrCountryPicker {
+  @Prop() placeholder: string;
   /** The input's size. */
   @Prop({ reflect: true }) size: NativeWaInput['size'];
 
@@ -133,6 +134,7 @@ export class IrCountryPicker {
           size={this.size}
           label={this.label}
           mode="select"
+          placeholder={this.placeholder}
           value={this.selectedCountry?.id?.toString()}
           onCombobox-select={e => {
             const country = this.filteredCountries.find(c => c.id.toString() === e.detail.item.value);

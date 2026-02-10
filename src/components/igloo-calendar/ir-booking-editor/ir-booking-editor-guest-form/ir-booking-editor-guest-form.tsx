@@ -74,7 +74,7 @@ export class IrBookingEditorGuestForm {
           <ir-input
             label="Email address"
             onText-change={e => updateBookedByGuest({ email: e.detail })}
-            type="email"
+            mask={'email'}
             value={bookedByGuest.email}
             defaultValue={bookedByGuest.email}
             placeholder="Email (leave empty if not available)"

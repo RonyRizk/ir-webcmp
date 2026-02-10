@@ -26,6 +26,7 @@
 
  - [igl-book-property-container](../igl-book-property-container)
  - [igloo-calendar](../igloo-calendar)
+ - [ir-agents](../ir-agents)
  - [ir-arrivals](../ir-arrivals)
  - [ir-booking-details](../ir-booking-details)
  - [ir-booking-editor](../igloo-calendar/ir-booking-editor)
@@ -63,6 +64,7 @@ graph TD;
   ir-button --> ir-icons
   igl-book-property-container --> ir-interceptor
   igloo-calendar --> ir-interceptor
+  ir-agents --> ir-interceptor
   ir-arrivals --> ir-interceptor
   ir-booking-details --> ir-interceptor
   ir-booking-editor --> ir-interceptor

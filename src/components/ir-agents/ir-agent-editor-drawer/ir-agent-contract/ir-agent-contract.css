@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.contract-card::part(body) {
+  padding-inline: 0;
+  padding-bottom: 0;
+  /* padding-inline-start: 0.5rem; */
+}
+
+.contract-card::part(header) {
+  border-bottom: 0;
+  padding-inline: 0;
+  padding-bottom: 0;
+  padding-top: var(--wa-space-l, 1.5rem);
+}
+
+.contract-card:first-of-type::part(header) {
+  padding-top: 0 !important;
+}
+
+.contract-card::part(body),
+.contract {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.contract-card::part(body) {
+  padding-top: 1rem;
+}
+
+.contract-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contract-card p {
+  padding: 0;
+  margin: 0;
+}
+
+.contract-card--horizontal::part(body) {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.contract-hint,
+.radio-hint {
+  font-size: 0.75rem;
+  color: var(--wa-color-text-quiet);
+  margin-top: 0.25rem;
+}
+
+.contract-row__text {
+  flex: 1 1 0%;
+}
+
+.contract-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rate-mode::part(form-control-input) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ============================= */
+/* Rates – Reduce BAR extras     */
+/* ============================= */
+.rates-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-left: 2rem;
+  /* padding: 0.5rem 1rem;
+  border-inline-start: 1px solid var(--wa-color-surface-border); */
+  /* aligns under radio label */
+}
+
+.rates-extra__slider {
+  max-width: 320px;
+}
+
+.rates-extra__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.rates-extra__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rates-extra__title {
+  font-weight: 500;
+  margin: 0;
+}
+
+.rates-extra__hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0;
+}
+.rates-extra__slider-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.rates-extra__slider-label p {
+  margin: 0;
+  padding: 0;
+}
+
+.rates-extra__switch {
+  flex-shrink: 0;
+}
+/*md*/
+@media (min-width: 768px) {
+  .contract-card::part(body) {
+    padding-inline-start: 0.5rem;
+  }
+  .rates-extra {
+    padding: 0.5rem 1rem;
+    border-inline-start: 1px solid var(--wa-color-surface-border);
+    /* aligns under radio label */
+  }
+}

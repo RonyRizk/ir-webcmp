@@ -57,6 +57,9 @@
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
+ - [ir-agent-editor-drawer](../../ir-agents/ir-agent-editor-drawer)
+ - [ir-agents](../../ir-agents)
+ - [ir-agents-table](../../ir-agents/ir-agents-table)
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
  - [ir-arrivals-table](../../ir-arrivals/ir-arrivals-table)
@@ -121,6 +124,9 @@ graph TD;
   igl-reallocation-dialog --> ir-custom-button
   igl-to-be-assigned --> ir-custom-button
   ir-actions-cell --> ir-custom-button
+  ir-agent-editor-drawer --> ir-custom-button
+  ir-agents --> ir-custom-button
+  ir-agents-table --> ir-custom-button
   ir-applicable-policies --> ir-custom-button
   ir-arrival-time-dialog --> ir-custom-button
   ir-arrivals-table --> ir-custom-button

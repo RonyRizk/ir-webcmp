@@ -14,6 +14,7 @@
 | `country`         | --              | Currently selected country.                                    | `ICountry`                       | `undefined` |
 | `error`           | `error`         | Whether to show an error state on the input.                   | `boolean`                        | `undefined` |
 | `label`           | `label`         | The label to display for the input.                            | `string`                         | `undefined` |
+| `placeholder`     | `placeholder`   |                                                                | `string`                         | `undefined` |
 | `propertyCountry` | --              | The property-associated country, shown separately if relevant. | `ICountry`                       | `undefined` |
 | `size`            | `size`          | The input's size.                                              | `"large" \| "medium" \| "small"` | `undefined` |
 | `testId`          | `test-id`       | Test ID for automated testing.                                 | `string`                         | `undefined` |
@@ -32,6 +33,7 @@
 ### Used by
 
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
+ - [ir-agent-profile](../../ir-agents/ir-agent-editor-drawer/ir-agent-profile)
  - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
@@ -50,6 +52,7 @@ graph TD;
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
   igl-property-booked-by --> ir-country-picker
+  ir-agent-profile --> ir-country-picker
   ir-booking-editor-guest-form --> ir-country-picker
   ir-guest-info --> ir-country-picker
   ir-guest-info-form --> ir-country-picker

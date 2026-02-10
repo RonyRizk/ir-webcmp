@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+/* .agent__drawer::part(body) {
+  padding-left: 0.01rem;
+  padding-right: 0.01rem;
+  padding-top: 0;
+} */
+
+.agent-form__tab-group::part(nav) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--wa-color-surface-default);
+}
