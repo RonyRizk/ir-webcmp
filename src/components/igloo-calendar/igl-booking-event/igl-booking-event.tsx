@@ -160,16 +160,15 @@ export class IglBookingEvent {
         } else {
           const { pool, to_date, from_date, toRoomId } = event.detail as any;
           // const previousToDate = moment(to_date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD');
-          console.log(this.findRoomType(Number(this.bookingEvent.PR_ID)), this.findRoomType(Number(toRoomId)));
-          if (
-            (!moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').isSame(moment(to_date, 'YYYY-MM-DD'), 'dates') ||
-              this.findRoomType(Number(this.bookingEvent.PR_ID)) !== this.findRoomType(Number(toRoomId))) &&
-            // &&(calendar_dates.disabled_cells.get(`${toRoomId}_${from_date}`)?.disabled ||
-            //   (calendar_dates.disabled_cells.get(`${toRoomId}_${to_date}`)?.disabled && calendar_dates.disabled_cells.get(`${toRoomId}_${previousToDate}`)?.disabled))
-            !this.isStretch
-          ) {
-            this.reset('This room isn’t available for the entire selected period. Please choose different dates or a different room.');
-          }
+          // if (
+          //   (!moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').isSame(moment(to_date, 'YYYY-MM-DD'), 'dates') ||
+          //     this.findRoomType(Number(this.bookingEvent.PR_ID)) !== this.findRoomType(Number(toRoomId))) &&
+          //   // &&(calendar_dates.disabled_cells.get(`${toRoomId}_${from_date}`)?.disabled ||
+          //   //   (calendar_dates.disabled_cells.get(`${toRoomId}_${to_date}`)?.disabled && calendar_dates.disabled_cells.get(`${toRoomId}_${previousToDate}`)?.disabled))
+          //   !this.isStretch
+          // ) {
+          //   this.reset('This room isn’t available for the entire selected period. Please choose different dates or a different room.');
+          // }
           if (this.checkIfSlotOccupied(toRoomId, from_date, to_date)) {
             this.reset('Overlapping Dates');
           }

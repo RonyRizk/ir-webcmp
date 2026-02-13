@@ -72,11 +72,14 @@ export class IrAgentProfile {
                   this.updateField(payload);
                 }}
               >
-                {this.setupEntries.agent_type?.filter(t=>t.CODE_NAME!=='004').map(agent => (
-                  <wa-option key={agent.CODE_NAME} value={agent.CODE_NAME} data-testid={`agent-profile-agent-type-option-${agent.CODE_NAME}`}>
-                    {agent.CODE_VALUE_EN}
-                  </wa-option>
-                ))}
+                {this.setupEntries.agent_type
+                  ?.filter(t => t.CODE_NAME !== '004')
+                  ?.sort((a, b) => a.CODE_VALUE_EN.toLowerCase().localeCompare(b.CODE_VALUE_EN.toLowerCase()))
+                  ?.map(agent => (
+                    <wa-option key={agent.CODE_NAME} value={agent.CODE_NAME} data-testid={`agent-profile-agent-type-option-${agent.CODE_NAME}`}>
+                      {agent.CODE_VALUE_EN}
+                    </wa-option>
+                  ))}
               </wa-select>
             </ir-validator>
 
