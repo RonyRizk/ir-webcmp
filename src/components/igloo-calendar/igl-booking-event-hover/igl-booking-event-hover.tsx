@@ -252,7 +252,7 @@ export class IglBookingEventHover {
   private handleCustomerCheckIn() {
     const room = this.bookingEvent.booking.rooms.find(r => r.identifier === this.bookingEvent.IDENTIFIER);
     const { adult_nbr, children_nbr, infant_nbr } = this.bookingEvent.ROOM_INFO.occupancy;
-    const unitName = room ? room.unit.name : this.bookingEvent.ROOM_INFO.unit?.name ?? '';
+    const unitName = room ? room.unit.name : (this.bookingEvent.ROOM_INFO.unit?.name ?? '');
     this.showDialog.emit({
       reason: 'checkin',
       bookingNumber: this.bookingEvent.BOOKING_NUMBER,
@@ -491,7 +491,12 @@ export class IglBookingEventHover {
         )}
         <div class="row p-0 m-0">
           <div class="px-0 pr-0 col-12">
-            <ir-date-view from_date={this.bookingEvent.defaultDates.from_date} to_date={this.bookingEvent.defaultDates.to_date} showDateDifference={false}></ir-date-view>
+            <ir-date-view
+              format={'ddd, MMM DD, YYYY'}
+              from_date={this.bookingEvent.defaultDates.from_date}
+              to_date={this.bookingEvent.defaultDates.to_date}
+              showDateDifference={false}
+            ></ir-date-view>
           </div>
         </div>
         {this.bookingEvent.NAME && <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`Guest name:`} content={this.bookingEvent.NAME}></ir-label>}

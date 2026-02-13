@@ -1715,6 +1715,7 @@ export namespace Components {
     }
     interface IrDateView {
         "dateOption": string;
+        "format": string;
         "from_date": string | Date | moment.Moment;
         "showDateDifference": boolean;
         "to_date": string | Date | moment.Moment;
@@ -10338,6 +10339,7 @@ declare namespace LocalJSX {
     }
     interface IrDateView {
         "dateOption"?: string;
+        "format"?: string;
         "from_date"?: string | Date | moment.Moment;
         "showDateDifference"?: boolean;
         "to_date"?: string | Date | moment.Moment;

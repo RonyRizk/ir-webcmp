@@ -7,12 +7,13 @@
 
 ## Properties
 
-| Property             | Attribute              | Description | Type                       | Default        |
-| -------------------- | ---------------------- | ----------- | -------------------------- | -------------- |
-| `dateOption`         | `date-option`          |             | `string`                   | `'YYYY-MM-DD'` |
-| `from_date`          | `from_date`            |             | `Date \| Moment \| string` | `undefined`    |
-| `showDateDifference` | `show-date-difference` |             | `boolean`                  | `true`         |
-| `to_date`            | `to_date`              |             | `Date \| Moment \| string` | `undefined`    |
+| Property             | Attribute              | Description | Type                       | Default          |
+| -------------------- | ---------------------- | ----------- | -------------------------- | ---------------- |
+| `dateOption`         | `date-option`          |             | `string`                   | `'YYYY-MM-DD'`   |
+| `format`             | `format`               |             | `string`                   | `'MMM DD, YYYY'` |
+| `from_date`          | `from_date`            |             | `Date \| Moment \| string` | `undefined`      |
+| `showDateDifference` | `show-date-difference` |             | `boolean`                  | `true`           |
+| `to_date`            | `to_date`              |             | `Date \| Moment \| string` | `undefined`      |
 
 
 ## Dependencies

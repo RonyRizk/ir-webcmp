@@ -364,7 +364,13 @@ export class IrRoom {
                 </div>
               </div>
               <div class="booking-room__dates-row">
-                <ir-date-view class="booking-room__date-view" from_date={this.room.from_date} to_date={this.room.to_date} showDateDifference={false}></ir-date-view>
+                <ir-date-view
+                  format={'ddd, MMM DD, YYYY'}
+                  class="booking-room__date-view"
+                  from_date={this.room.from_date}
+                  to_date={this.room.to_date}
+                  showDateDifference={false}
+                ></ir-date-view>
                 {!isSingleUnit(this.room.roomtype.id) && calendar_data.is_frontdesk_enabled && this.room.unit && (
                   // <div class={'d-flex justify-content-center align-items-center'}>
                   //   <ir-tooltip message={(this.room.unit as IUnit).name} customSlot>

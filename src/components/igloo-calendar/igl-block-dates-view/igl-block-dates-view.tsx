@@ -95,7 +95,7 @@ export class IglBlockDatesView {
       <Host>
         <div class={`m-0 p-0 mb-1`}>
           <div class="text-left p-0">
-            <ir-date-view from_date={this.fromDate} dateOption="YYYY-MM-DD" showDateDifference={false} to_date={this.toDate}></ir-date-view>
+            <ir-date-view format={'ddd, MMM DD, YYYY'} from_date={this.fromDate} dateOption="YYYY-MM-DD" showDateDifference={false} to_date={this.toDate}></ir-date-view>
           </div>
         </div>
         <div class={` mb-1 text-left ${this.isEventHover && 'p-0'}`}>

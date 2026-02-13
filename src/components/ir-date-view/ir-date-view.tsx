@@ -13,6 +13,7 @@ export class IrDateView {
   @Prop() to_date: string | Date | moment.Moment;
   @Prop() showDateDifference: boolean = true;
   @Prop() dateOption: string = 'YYYY-MM-DD';
+  @Prop() format = 'MMM DD, YYYY';
 
   @State() dates: { from_date: string; to_date: string; date_difference: number };
 
@@ -52,11 +53,11 @@ export class IrDateView {
       return;
     }
     if (typeof date === 'string') {
-      this.dates[key] = moment(date, this.dateOption).format('MMM DD, YYYY');
+      this.dates[key] = moment(date, this.dateOption).format(this.format);
     } else if (date instanceof Date) {
-      this.dates[key] = moment(date).format('MMM DD, YYYY');
+      this.dates[key] = moment(date).format(this.format);
     } else if (moment.isMoment(date)) {
-      this.dates[key] = date.format('MMM DD, YYYY');
+      this.dates[key] = date.format(this.format);
     } else {
       console.error('Unsupported date type');
     }
