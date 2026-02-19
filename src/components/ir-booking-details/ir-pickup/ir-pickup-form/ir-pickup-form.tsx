@@ -335,7 +335,17 @@ export class IrPickupForm {
                 ))}
               </wa-select>
             </ir-validator>
-            <ir-input mask={'price'} readonly label={`${locales.entries.Lcz_DueUponBooking}`} value={this.pickupData.due_upon_booking}>
+            <ir-input
+              mask={'price'}
+              label={`${locales.entries.Lcz_DueUponBooking}`}
+              onText-change={e => {
+                this.pickupData = {
+                  ...this.pickupData,
+                  due_upon_booking: e.detail,
+                };
+              }}
+              value={this.pickupData.due_upon_booking}
+            >
               <span slot="start">{this.pickupData.currency?.symbol}</span>
             </ir-input>
           </div>
