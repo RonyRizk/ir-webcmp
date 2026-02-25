@@ -76,12 +76,10 @@ export class IrUnbookableRoomsData {
       entries,
       name: this.getPropertyName(propertyId),
     }));
-    const sortedEntries = groupedEntries.sort(
-      (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.propertyId - b.propertyId,
-    );
+    const sortedEntries = groupedEntries.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.propertyId - b.propertyId);
     const filteredEntries =
       this.mode === 'mpo' && this.propertyNameFilter ? sortedEntries.filter(item => item.name.toLowerCase().includes(this.propertyNameFilter)) : sortedEntries;
-
+    console.log(filteredEntries);
     return (
       <Host>
         {!this.isLoading && !this.errorMessage && totalIssues === 0 && (
@@ -121,8 +119,12 @@ export class IrUnbookableRoomsData {
                 >
                   {this.mode === 'mpo' && (
                     <header slot="summary" class="property-card__header">
+                      <span>{entries[0].aname}</span>
                       <span>{this.getPropertyName(propertyId)}</span>
-                      <b>({entries.length}) </b>
+
+                      <b>
+                        ({entries.length}/{entries[0].total_room_types_nbr})
+                      </b>
                     </header>
                   )}
                   <div class="property-card__body">

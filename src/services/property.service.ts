@@ -108,6 +108,8 @@ export type FetchUnBookableRoomsResult = {
   property_id: number;
   room_type_id: number;
   room_type_name: string;
+  total_room_types_nbr: number;
+  aname: string;
   country: {
     cities: null;
     code: null;

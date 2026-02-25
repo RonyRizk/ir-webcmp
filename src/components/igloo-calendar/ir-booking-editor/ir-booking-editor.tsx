@@ -143,7 +143,7 @@ export class IrBookingEditor {
     };
 
     if (this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM'])) {
-      const source = booking_store.selects.sources.find(s => s.code === this.booking.source.code);
+      const source = this.resolveSourceOption(booking_store.selects.sources, booking_store.selects.sources);
 
       draft = {
         ...draft,
@@ -212,7 +212,7 @@ export class IrBookingEditor {
   }
 
   private compareResults(beResults: BookingDetails) {
-    const beRoomTypes = Array.isArray(beResults) ? beResults : beResults?.roomtypes ?? [];
+    const beRoomTypes = Array.isArray(beResults) ? beResults : (beResults?.roomtypes ?? []);
     const unavailableRatePlanIds = new Set<number>();
     const beRoomTypeMap = new Map<number, any>(beRoomTypes.map(roomType => [roomType.id, roomType]) as any);
 
@@ -284,20 +284,24 @@ export class IrBookingEditor {
     });
   }
 
+  private resolveSourceOption(bookingSource: BookingSource[], filteredSourceOptions: BookingSource[]): BookingSource {
+    if (this.bookingEditorService.isEventType('EDIT_BOOKING') && this.booking) {
+      if (this.booking.agent) {
+        return bookingSource.find(option => this.booking.agent?.id?.toString() === option.tag?.toString());
+      } else {
+        return bookingSource.find(option => this.booking.source?.code === option.code);
+      }
+    }
+    return filteredSourceOptions.find(o => o.type !== 'LABEL');
+  }
+
   private setSourceOptions(bookingSource: BookingSource[]) {
     const _sourceOptions = this.bookingEditorService.isEventType('BAR_BOOKING') ? this.getFilteredSourceOptions(bookingSource) : bookingSource;
     setBookingSelectOptions({
       sources: _sourceOptions,
     });
-    let sourceOption: BookingSource;
-    if (this.bookingEditorService.isEventType('EDIT_BOOKING') && this.booking) {
-      const option = bookingSource.find(option => this.booking.source?.code === option.code);
-      sourceOption = option;
-    } else {
-      sourceOption = _sourceOptions.find(o => o.type !== 'LABEL');
-    }
     setBookingDraft({
-      source: sourceOption,
+      source: this.resolveSourceOption(bookingSource, _sourceOptions),
     });
   }
 
