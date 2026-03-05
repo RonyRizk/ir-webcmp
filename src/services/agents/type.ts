@@ -22,6 +22,9 @@ export type AgentTypeCode = z.infer<typeof AgentTypeCodeSchema>;
 export const PaymentModeSchema = CodeDescriptionSchema;
 export type PaymentMode = z.infer<typeof PaymentModeSchema>;
 
+export const ClPostTimingSchema = CodeDescriptionSchema;
+export type ClPostTiming = z.infer<typeof ClPostTimingSchema>;
+
 export const AgentBaseSchema = z.object({
   address: z.string(),
   agent_rate_type_code: AgentRateTypeCodeSchema,
@@ -49,6 +52,7 @@ export const AgentBaseSchema = z.object({
   tax_nbr: z.string(),
   reference: z.string().nullable().optional(),
   verification_mode: z.string().nullable().default(null),
+  cl_post_timing: ClPostTimingSchema,
 });
 
 export const AgentSchema = AgentBaseSchema.superRefine((value, ctx) => {

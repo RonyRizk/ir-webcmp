@@ -93,7 +93,7 @@ export class IrAgents {
       }
       const [countries, setupEntries] = await Promise.all([
         this.bookingService.getCountries(this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_AGENT_RATE_TYPE', '_AGENT_TYPE', '_TA_PAYMENT_METHOD']),
+        this.bookingService.getSetupEntriesByTableNameMulti(['_AGENT_RATE_TYPE', '_AGENT_TYPE', '_TA_PAYMENT_METHOD', '_CL_POST_TIMING']),
         calendar_data?.property
           ? Promise.resolve(null)
           : this.propertyService.getExposedProperty({
@@ -103,11 +103,12 @@ export class IrAgents {
             }),
         this.fetchAgents(),
       ]);
-      const { agent_rate_type, agent_type, ta_payment_method } = this.bookingService.groupEntryTablesResult(setupEntries);
+      const { agent_rate_type, agent_type, ta_payment_method, cl_post_timing } = this.bookingService.groupEntryTablesResult(setupEntries);
       this.setupEntries = {
         agent_rate_type,
         agent_type,
         ta_payment_method,
+        cl_post_timing,
       };
       this.countries = countries;
       this.isLoading = false;

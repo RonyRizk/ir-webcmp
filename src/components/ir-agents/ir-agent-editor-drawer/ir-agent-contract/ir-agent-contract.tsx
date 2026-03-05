@@ -5,6 +5,7 @@ import WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/rad
 import WaSlider from '@awesome.me/webawesome/dist/components/slider/slider';
 import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
 import { z } from 'zod';
+import WaSelect from '@awesome.me/webawesome/dist/components/select/select';
 
 @Component({
   tag: 'ir-agent-contract',
@@ -296,6 +297,29 @@ export class IrAgentContract {
               </wa-radio>
             </wa-radio-group>
           )}
+        </wa-card>
+        {/* Post Timing */}
+        <wa-card appearance="plain" class="contract-card" data-testid="agent-contract-collection-card">
+          <p slot="header" class="contract-card__title" data-testid="agent-contract-collection-title">
+            Post Timing
+          </p>
+          <ir-validator value={this.agent?.cl_post_timing?.code} schema={z.string().nonempty()}>
+            <wa-select
+              value={this.agent?.cl_post_timing?.code}
+              defaultValue={this.agent?.cl_post_timing?.code}
+              placeholder="Select ..."
+              onchange={e =>
+                this.updateField({
+                  cl_post_timing: { code: (e.target as WaSelect).value?.toString() },
+                })
+              }
+              size="small"
+            >
+              {this.setupEntries?.cl_post_timing?.map(t => (
+                <wa-option value={t.CODE_NAME}>{t.CODE_VALUE_EN}</wa-option>
+              ))}
+            </wa-select>
+          </ir-validator>
         </wa-card>
       </Host>
     );

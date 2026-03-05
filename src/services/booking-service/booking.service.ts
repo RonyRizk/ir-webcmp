@@ -605,6 +605,7 @@ export type TableEntries =
   | '_AGENT_RATE_TYPE'
   | '_AGENT_TYPE'
   | '_TA_PAYMENT_METHOD'
+  | '_CL_POST_TIMING'
   | (string & {});
 
 export type GroupedTableEntries = {

@@ -1,6 +1,6 @@
 import { IEntries } from '@/models/IBooking';
 
-export type AgentSetupEntries = { agent_rate_type: IEntries[]; agent_type: IEntries[]; ta_payment_method: IEntries[] };
+export type AgentSetupEntries = { agent_rate_type: IEntries[]; agent_type: IEntries[]; ta_payment_method: IEntries[]; cl_post_timing: IEntries[] };
 
 export const AgentsTypes = {
   TRAVEL_AGENT: '001',

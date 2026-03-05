@@ -34,7 +34,7 @@ export class IrAgentEditorForm {
     try {
       this.loadingChanged.emit(submitter);
       AgentSchema.parse(this.agent);
-      await this.agentService.handleExposedAgent({ agent: this.agent });
+      await this.agentService.handleExposedAgent({ agent: { ...this.agent, code: this.agent.code ?? '' } });
       this.upsertAgent.emit(this.agent);
       if (submitter === 'save&close') {
         this.closeDrawer.emit();
