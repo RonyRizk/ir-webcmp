@@ -59,6 +59,7 @@ graph TD;
   ir-booking-listing-table --> ir-booked-on-cell
   ir-booking-listing-table --> ir-booked-by-cell
   ir-booking-listing-table --> ir-dates-cell
+  ir-booking-listing-table --> ir-arrival-time-cell
   ir-booking-listing-table --> ir-unit-cell
   ir-booking-listing-table --> ir-balance-cell
   ir-booking-listing-table --> ir-status-activity-cell
@@ -77,6 +78,7 @@ graph TD;
   ir-booking-listing-mobile-card --> ir-booked-by-cell
   ir-booking-listing-mobile-card --> ir-booked-on-cell
   ir-booking-listing-mobile-card --> ir-dates-cell
+  ir-booking-listing-mobile-card --> ir-arrival-time-cell
   ir-booking-listing-mobile-card --> ir-balance-cell
   ir-booking-listing-mobile-card --> ir-custom-button
   ir-pagination --> ir-select
@@ -236,7 +238,7 @@ graph TD;
   ir-booking-editor-header --> ir-custom-button
   igl-date-range --> ir-date-select
   ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
+  ir-date-select --> ir-custom-date-range
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button

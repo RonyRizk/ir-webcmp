@@ -105,6 +105,40 @@ export class IrCustomDateRange {
     this.displayedDaysArr = [this.getMonthDays(newFirstMonth), this.displayedDaysArr[0]];
   }
 
+  handleMonthChange(e: Event, index: number) {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    const newMonth = parseInt((e.target as HTMLSelectElement).value);
+    const current = this.displayedDaysArr[index].month.clone().month(newMonth);
+    if (index === 0) {
+      this.displayedDaysArr = [this.getMonthDays(current), this.getMonthDays(current.clone().add(1, 'month'))];
+    } else {
+      this.displayedDaysArr = [this.getMonthDays(current.clone().subtract(1, 'month')), this.getMonthDays(current)];
+    }
+  }
+
+  handleYearChange(e: Event, index: number) {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    const newYear = parseInt((e.target as HTMLSelectElement).value);
+    const current = this.displayedDaysArr[index].month.clone().year(newYear);
+    if (index === 0) {
+      this.displayedDaysArr = [this.getMonthDays(current), this.getMonthDays(current.clone().add(1, 'month'))];
+    } else {
+      this.displayedDaysArr = [this.getMonthDays(current.clone().subtract(1, 'month')), this.getMonthDays(current)];
+    }
+  }
+
+  getYearRange(): number[] {
+    const start = this.minDate.year();
+    const end = this.maxDate.year();
+    const years: number[] = [];
+    for (let y = start; y <= end; y++) {
+      years.push(y);
+    }
+    return years;
+  }
+
   selectDay(day: Moment) {
     let isDateDisabled = false;
     if (this.dateModifiers) {
@@ -224,7 +258,32 @@ export class IrCustomDateRange {
                         </svg>
                       </button>
                     )}
-                    <span class={'capitalize'}>{month.month.locale(this.locale ?? 'en').format('MMMM YYYY')}</span>
+                    <span class="month-year-selectors">
+                      <select
+                        class="month-year-select"
+                        onChange={e => this.handleMonthChange(e, index)}
+                        onClick={e => e.stopPropagation()}
+                        aria-label="Select month"
+                      >
+                        {Array.from({ length: 12 }, (_, i) => (
+                          <option key={i} value={i} selected={i === month.month.month()}>
+                            {moment().month(i).locale(this.locale ?? 'en').format('MMMM')}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        class="month-year-select"
+                        onChange={e => this.handleYearChange(e, index)}
+                        onClick={e => e.stopPropagation()}
+                        aria-label="Select year"
+                      >
+                        {this.getYearRange().map(y => (
+                          <option key={y} value={y} selected={y === month.month.year()}>
+                            {y}
+                          </option>
+                        ))}
+                      </select>
+                    </span>
                     {index === 0 && (
                       <button name="next month" class="navigation-buttons button-next" type="button" onClick={this.goToNextMonth.bind(this)}>
                         <p slot="icon" class="sr-only">

@@ -58,7 +58,7 @@ graph TD;
   igl-book-property-header --> ir-custom-button
   igl-date-range --> ir-date-select
   ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
+  ir-date-select --> ir-custom-date-range
   igl-booking-overview-page --> igl-book-property-header
   style igl-book-property-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -3,9 +3,9 @@ import channels_data from '@/stores/channel.store';
 import axios from 'axios';
 
 export class ChannelService {
-  public async getExposedChannels() {
+  public async getExposedChannels(property_id: number) {
     try {
-      const { data } = await axios.post(`/Get_Exposed_Channels`, {});
+      const { data } = await axios.post(`/Get_Exposed_Channels`, { property_id });
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }

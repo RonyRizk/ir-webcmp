@@ -1,5 +1,6 @@
 import { IrActionButton } from '@/components/table-cells/booking/ir-actions-cell/ir-actions-cell';
 import { Booking } from '@/models/booking.dto';
+import booking_listing from '@/stores/booking_listing.store';
 import { getPrivateNote } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 
@@ -30,7 +31,7 @@ export class IrBookingListingMobileCard {
 
     return this.booking.rooms.map((room, idx) => (
       <div class="mobile-card__room" key={room.identifier ?? idx}>
-        <ir-unit-cell room={room}></ir-unit-cell>
+        <ir-unit-cell showDeparture={booking_listing.userSelection?.filter_type === '3'} room={room}></ir-unit-cell>
         {idx < this.booking.rooms.length - 1 && <span class="mobile-card__room-divider">,</span>}
       </div>
     ));
@@ -89,6 +90,10 @@ export class IrBookingListingMobileCard {
           <div class="mobile-card__dates">
             <ir-dates-cell display="inline" checkInLabel="Check-in" checkoutLabel="Check-out" checkIn={this.booking.from_date} checkOut={this.booking.to_date}></ir-dates-cell>
           </div>
+
+          {booking_listing.userSelection?.filter_type === '2' && (
+            <ir-arrival-time-cell display="inline" arrival={this.booking.arrival} arrivalTimeLabel={'Arrival time'}></ir-arrival-time-cell>
+          )}
 
           <ir-balance-cell
             display="inline"

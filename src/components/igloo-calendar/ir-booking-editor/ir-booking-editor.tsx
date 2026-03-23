@@ -125,41 +125,39 @@ export class IrBookingEditor {
    * Throws if required booking data is missing.
    */
   private initializeDraftFromBooking() {
-    if (this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM'])) {
-      if (!this.booking || (!this.identifier && this.bookingEditorService.isEventType('EDIT_BOOKING'))) {
-        throw new Error('Missing booking or identifier');
-      }
+    const isEdit = this.bookingEditorService.isEventType('EDIT_BOOKING');
+    const isEditOrAdd = this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM']);
+
+    if (isEditOrAdd && (!this.booking || (!this.identifier && isEdit))) {
+      throw new Error('Missing booking or identifier');
     }
 
-    if (this.bookingEditorService.isEventType('EDIT_BOOKING')) {
+    if (isEdit) {
       this.room = this.bookingEditorService.getRoom(this.booking, this.identifier);
     }
 
-    let draft: Partial<BookingDraft> = {
-      dates: {
-        checkIn: this.checkIn ? moment(this.checkIn, 'YYYY-MM-DD') : moment(),
-        checkOut: this.checkOut ? moment(this.checkOut, 'YYYY-MM-DD') : moment().add(1, 'day'),
-      },
+    const dates = isEdit
+      ? {
+          checkIn: moment(this.room.from_date, 'YYYY-MM-DD'),
+          checkOut: moment(this.room.to_date, 'YYYY-MM-DD'),
+        }
+      : {
+          checkIn: this.checkIn ? moment(this.checkIn, 'YYYY-MM-DD') : moment(),
+          checkOut: this.checkOut ? moment(this.checkOut, 'YYYY-MM-DD') : moment().add(1, 'day'),
+        };
+
+    const draft: Partial<BookingDraft> = {
+      dates,
+      ...(isEditOrAdd && { source: this.resolveSourceOption(booking_store.selects.sources, booking_store.selects.sources) }),
+      ...(isEdit && {
+        occupancy: {
+          adults: this.booking.occupancy.adult_nbr,
+          children: this.booking.occupancy.children_nbr,
+        },
+      }),
     };
 
-    if (this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM'])) {
-      const source = this.resolveSourceOption(booking_store.selects.sources, booking_store.selects.sources);
-
-      draft = {
-        ...draft,
-        source,
-      };
-
-      if (this.bookingEditorService.isEventType('EDIT_BOOKING')) {
-        draft = {
-          ...draft,
-          occupancy: {
-            adults: this.booking.occupancy.adult_nbr,
-            children: this.booking.occupancy.children_nbr,
-          },
-        };
-      }
-
+    if (isEditOrAdd) {
       updateBookedByGuest({
         firstName: this.booking.guest.first_name,
         lastName: this.booking.guest.last_name,

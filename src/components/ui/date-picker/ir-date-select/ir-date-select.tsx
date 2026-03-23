@@ -121,6 +121,8 @@ export class IrDateSelect {
 
   @State() isActive: boolean = false;
   @State() currentDate: Moment;
+  @State() selectedStart: Moment | null = null;
+  @State() selectedEnd: Moment | null = null;
   @State() private slotManagerHasSlot = 0;
   @State() isValid: string;
 
@@ -155,6 +157,20 @@ export class IrDateSelect {
     if (this.el.hasAttribute('aria-invalid')) {
       this.isValid = this.el.getAttribute('aria-invalid');
     }
+    // Initialize internal selection state from props
+    if (this.range && this.dates?.length) {
+      this.selectedStart = this.dates[0] ? moment(this.dates[0]) : null;
+      this.selectedEnd = this.dates[1] ? moment(this.dates[1]) : null;
+    } else if (this.date) {
+      this.selectedStart = moment(this.date);
+      this.currentDate = this.selectedStart;
+    }
+  }
+
+  @Watch('date')
+  handleDatePropChange(newVal: string | Date | null) {
+    this.selectedStart = newVal ? moment(newVal) : null;
+    this.currentDate = this.selectedStart;
   }
 
   componentDidLoad() {
@@ -172,7 +188,12 @@ export class IrDateSelect {
 
   @Method()
   async clearDatePicker() {
-    this.airDatePickerRef?.clearDatePicker();
+    this.selectedStart = null;
+    this.selectedEnd = null;
+    this.currentDate = null;
+    if (this.emitEmptyDate) {
+      this.dateChanged.emit({ start: null, end: null });
+    }
   }
 
   @Method()
@@ -208,7 +229,10 @@ export class IrDateSelect {
 
   private get _label(): string {
     if (this.range) {
-      return this.dates.map(d => moment(d).format('MMM DD, YYYY')).join(' → ');
+      if (!this.selectedStart) return null;
+      const start = this.selectedStart.format('MMM DD, YYYY');
+      const end = this.selectedEnd ? this.selectedEnd.format('MMM DD, YYYY') : '...';
+      return `${start} → ${end}`;
     }
     if (!this.currentDate) {
       return null;
@@ -226,7 +250,18 @@ export class IrDateSelect {
           'ir-date-select--disabled': this.disabled,
         }}
       >
-        <wa-popup arrow part="base" placement="bottom" flip shift auto-size="vertical" auto-size-padding={10} active={this.isActive} class="ir-date-select__popup">
+        <wa-popup
+          style={{ '--max-width': 'auto' }}
+          arrow
+          part="base"
+          placement="bottom"
+          flip
+          shift
+          auto-size="vertical"
+          auto-size-padding={10}
+          active={this.isActive}
+          class="ir-date-select__popup"
+        >
           {/* Trigger */}
           <div slot="anchor" part="anchor" class="ir-date-select__trigger">
             <div
@@ -269,39 +304,27 @@ export class IrDateSelect {
 
           {/* Popup */}
           <div part="body" id={this.popupId} class="ir-date-select__calendar" role="dialog" aria-modal="false" aria-label="Date selection dialog">
-            <ir-air-date-picker
-              ref={el => (this.airDatePickerRef = el)}
-              withClear={this.withClear}
-              placeholder={this.placeholder}
-              label={this.label}
-              dates={this.dates}
-              inline={this.inline}
-              date={this.date}
-              multipleDates={this.multipleDates}
-              range={this.range}
-              dateFormat={this.dateFormat}
-              timepicker={this.timepicker}
-              minDate={this.minDate}
-              maxDate={this.maxDate}
-              disabled={this.disabled}
-              autoClose={this.autoClose}
-              showOtherMonths={this.showOtherMonths}
-              selectOtherMonths={this.selectOtherMonths}
-              customPicker={this.customPicker}
-              container={this.container}
-              forceDestroyOnUpdate={this.forceDestroyOnUpdate}
-              emitEmptyDate={this.emitEmptyDate}
-              onDateChanged={e => {
+            <ir-custom-date-range
+              style={{ '--cal-button-size': '35px' }}
+              fromDate={this.selectedStart}
+              toDate={this.selectedEnd}
+              minDate={this.minDate ? moment(this.minDate) : undefined}
+              maxDate={this.maxDate ? moment(this.maxDate) : undefined}
+              onDateChange={e => {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
-                this.currentDate = e.detail?.start;
-                this.dateChanged.emit(e.detail);
-                const shouldClose = this.autoClose && (!this.range || (this.range && (e.detail.dates as any).length > 1));
+                const start = e.detail.start ? moment(e.detail.start) : null;
+                const end = e.detail.end ? moment(e.detail.end) : null;
+                this.selectedStart = start;
+                this.selectedEnd = end;
+                this.currentDate = start;
+                this.dateChanged.emit({ start, end });
+                const shouldClose = this.autoClose && (!this.range || (this.range && end !== null));
                 if (shouldClose) {
-                  this.togglePicker();
+                  this.closeDatePicker();
                 }
               }}
-            />
+            ></ir-custom-date-range>
             <slot></slot>
           </div>
         </wa-popup>

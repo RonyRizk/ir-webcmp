@@ -45,7 +45,7 @@
 graph TD;
   igl-date-range --> ir-date-select
   ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
+  ir-date-select --> ir-custom-date-range
   igl-book-property-header --> igl-date-range
   ir-booking-editor-header --> igl-date-range
   style igl-date-range fill:#f9f,stroke:#333,stroke-width:4px

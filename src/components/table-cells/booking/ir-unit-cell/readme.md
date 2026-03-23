@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property | Attribute | Description | Type   | Default     |
-| -------- | --------- | ----------- | ------ | ----------- |
-| `room`   | --        |             | `Room` | `undefined` |
+| Property        | Attribute        | Description | Type      | Default     |
+| --------------- | ---------------- | ----------- | --------- | ----------- |
+| `room`          | --               |             | `Room`    | `undefined` |
+| `showDeparture` | `show-departure` |             | `boolean` | `false`     |
 
 
 ## Dependencies

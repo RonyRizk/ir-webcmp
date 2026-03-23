@@ -8,11 +8,13 @@ import { Component, Host, Prop, h } from '@stencil/core';
 })
 export class IrUnitCell {
   @Prop() room: Room;
+  @Prop() showDeparture: boolean = false;
   render() {
     return (
       <Host>
         <p>{this.room.roomtype.name}</p>
         {this.room.unit && <ir-unit-tag unit={(this.room.unit as IUnit).name}></ir-unit-tag>}
+        {this.showDeparture && this.room?.departure_time?.description && <span>{this.room?.departure_time?.description}</span>}
       </Host>
     );
   }

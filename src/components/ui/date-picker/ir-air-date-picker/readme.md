@@ -54,19 +54,6 @@ Type: `Promise<void>`
 
 
 
-## Dependencies
-
-### Used by
-
- - [ir-date-select](../ir-date-select)
-
-### Graph
-```mermaid
-graph TD;
-  ir-date-select --> ir-air-date-picker
-  style ir-air-date-picker fill:#f9f,stroke:#333,stroke-width:4px
-```
-
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

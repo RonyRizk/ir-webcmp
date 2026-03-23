@@ -135,10 +135,15 @@ export class IrBookingListingTable {
         <td>
           <ir-dates-cell checkIn={booking.from_date} checkOut={booking.to_date}></ir-dates-cell>
         </td>
+        {booking_listing.userSelection?.filter_type === '2' && (
+          <td>
+            <ir-arrival-time-cell arrival={booking.arrival}></ir-arrival-time-cell>
+          </td>
+        )}
         <td>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             {booking.rooms.map(room => (
-              <ir-unit-cell key={room.identifier} room={room}></ir-unit-cell>
+              <ir-unit-cell showDeparture={booking_listing?.userSelection?.filter_type === '3'} key={room.identifier} room={room}></ir-unit-cell>
             ))}
             {booking.extra_services && <p style={{ fontSize: '0.93rem' }}>{locales.entries.Lcz_ExtraServices}</p>}
           </div>
@@ -198,6 +203,7 @@ export class IrBookingListingTable {
                   </div>
                 </th>
                 <th>Dates</th>
+                {booking_listing.userSelection?.filter_type === '2' && <th>Arrival time</th>}
                 <th>Services</th>
                 <th class="text-center">
                   <p>Amount </p>

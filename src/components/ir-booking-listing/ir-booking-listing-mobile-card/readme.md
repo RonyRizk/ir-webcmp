@@ -36,6 +36,7 @@
 - [ir-booked-by-cell](../../table-cells/booking/ir-booked-by-cell)
 - [ir-booked-on-cell](../../table-cells/booking/ir-booked-on-cell)
 - [ir-dates-cell](../../table-cells/booking/ir-dates-cell)
+- [ir-arrival-time-cell](../../table-cells/booking/ir-arrival-time-cell)
 - [ir-balance-cell](../../table-cells/booking/ir-balance-cell)
 - [ir-custom-button](../../ui/ir-custom-button)
 
@@ -48,6 +49,7 @@ graph TD;
   ir-booking-listing-mobile-card --> ir-booked-by-cell
   ir-booking-listing-mobile-card --> ir-booked-on-cell
   ir-booking-listing-mobile-card --> ir-dates-cell
+  ir-booking-listing-mobile-card --> ir-arrival-time-cell
   ir-booking-listing-mobile-card --> ir-balance-cell
   ir-booking-listing-mobile-card --> ir-custom-button
   ir-unit-cell --> ir-unit-tag

@@ -94,13 +94,13 @@ Type: `Promise<void>`
 ### Depends on
 
 - [ir-input](../../ir-input)
-- [ir-air-date-picker](../ir-air-date-picker)
+- [ir-custom-date-range](../../ir-custom-date-range)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
+  ir-date-select --> ir-custom-date-range
   igl-cal-header --> ir-date-select
   igl-date-range --> ir-date-select
   style ir-date-select fill:#f9f,stroke:#333,stroke-width:4px

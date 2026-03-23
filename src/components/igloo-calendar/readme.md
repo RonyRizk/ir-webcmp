@@ -104,7 +104,7 @@ graph TD;
   igl-cal-header --> ir-picker
   igl-cal-header --> ir-picker-item
   ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
+  ir-date-select --> ir-custom-date-range
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> igl-housekeeping-dialog
