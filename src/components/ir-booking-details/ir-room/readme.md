@@ -32,15 +32,15 @@
 
 ## Events
 
-| Event            | Description | Type                                                                                                                                                                                                                                 |
-| ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `deleteFinished` |             | `CustomEvent<string>`                                                                                                                                                                                                                |
-| `editInitiated`  |             | `CustomEvent<IglBookPropertyPayloadAddRoom \| IglBookPropertyPayloadBarBooking \| IglBookPropertyPayloadBlockDates \| IglBookPropertyPayloadEditBooking \| IglBookPropertyPayloadPlusBooking \| IglBookPropertyPayloadSplitBooking>` |
-| `openSidebar`    |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: RoomGuestsPayload; }>`                                                                                                                                                   |
-| `pressCheckIn`   |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
-| `pressCheckOut`  |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
-| `resetbooking`   |             | `CustomEvent<null>`                                                                                                                                                                                                                  |
-| `toast`          |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>`                                                                                                                                 |
+| Event             | Description | Type                                                                                                                                                                                                                                 |
+| ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `deleteFinished`  |             | `CustomEvent<string>`                                                                                                                                                                                                                |
+| `editInitiated`   |             | `CustomEvent<IglBookPropertyPayloadAddRoom \| IglBookPropertyPayloadBarBooking \| IglBookPropertyPayloadBlockDates \| IglBookPropertyPayloadEditBooking \| IglBookPropertyPayloadPlusBooking \| IglBookPropertyPayloadSplitBooking>` |
+| `openSidebar`     |             | `CustomEvent<{ type: BookingDetailsSidebarEvents; payload?: RoomGuestsPayload; }>`                                                                                                                                                   |
+| `pressCheckIn`    |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
+| `pressCheckOut`   |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
+| `resetBookingEvt` |             | `CustomEvent<null>`                                                                                                                                                                                                                  |
+| `toast`           |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>`                                                                                                                                 |
 
 
 ## Dependencies

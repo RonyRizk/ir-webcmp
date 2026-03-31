@@ -853,6 +853,12 @@ export interface Bracket {
  * const noShow: RoomInOut   = { code: '000', description: "Didn't arrive" };
  */
 export type RoomInOut = { code: '001' | '002' | '000'; description: string };
+
+export const ROOM_IN_OUT = {
+  CHECKIN: '001',
+  CHECKOUT: '002',
+  NOSHOW: '000',
+};
 export interface Room {
   days: Day[];
   applicable_policies: ExposedApplicablePolicy[];

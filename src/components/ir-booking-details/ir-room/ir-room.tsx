@@ -55,7 +55,7 @@ export class IrRoom {
   @Event({ bubbles: true, composed: true }) pressCheckIn: EventEmitter;
   @Event({ bubbles: true, composed: true }) pressCheckOut: EventEmitter;
   @Event({ bubbles: true, composed: true }) editInitiated: EventEmitter<TIglBookPropertyPayload>;
-  @Event() resetbooking: EventEmitter<null>;
+  @Event() resetBookingEvt: EventEmitter<null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
 
   private modal: HTMLIrDialogElement;
@@ -169,7 +169,7 @@ export class IrRoom {
             room_identifier: this.room.identifier,
             status: this.modalReason === 'checkin' ? '001' : '002',
           });
-          this.resetbooking.emit(null);
+          this.resetBookingEvt.emit(null);
           break;
         default:
           break;
@@ -191,6 +191,7 @@ export class IrRoom {
       check_in: true,
       is_pms: true,
       is_direct: true,
+      agent: this.booking.agent,
       booking: {
         booking_nbr: this.booking.booking_nbr,
         from_date: this.booking.from_date,
@@ -596,6 +597,8 @@ export class IrRoom {
             this.modalReason = null;
             if (e.detail.reason === 'openInvoice') {
               this.isOpen = true;
+            } else if (e.detail.reason === 'checkout') {
+              this.resetBookingEvt.emit();
             }
           }}
           identifier={this.room.identifier}

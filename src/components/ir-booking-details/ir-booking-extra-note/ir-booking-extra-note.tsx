@@ -46,6 +46,7 @@ export class IrBookingExtraNote {
       const res = await this.bookingService.doReservation({
         assign_units: true,
         is_pms: true,
+        agent: this.booking.agent,
         is_direct: true,
         is_in_loyalty_mode: false,
         promo_key: null,

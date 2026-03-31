@@ -75,6 +75,9 @@ export class IrBookingEditorDrawer {
       this.token.setToken(this.ticket);
     }
     this.initializeBlockedUnitState(this.blockedUnit);
+    if (this.mode) {
+      booking_store.event_type = { type: this.mode };
+    }
   }
 
   @Watch('ticket')
@@ -102,6 +105,13 @@ export class IrBookingEditorDrawer {
   @Watch('unitId')
   handleUnitChange() {
     this.initializeBlockedUnitState(this.blockedUnit);
+  }
+
+  @Watch('mode')
+  handleModeChange() {
+    if (this.mode) {
+      booking_store.event_type = { type: this.mode };
+    }
   }
 
   private initializeBlockedUnitState(blockedUnit?: BlockedDatePayload) {

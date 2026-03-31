@@ -1,5 +1,5 @@
 import { Component, Listen, h, Prop, Watch, State, Event, EventEmitter, Element, Fragment } from '@stencil/core';
-import { Booking, ExtraService, Guest, IPmsLog, Room, SharedPerson } from '@/models/booking.dto';
+import { Booking, ExtraService, Guest, IPmsLog, Room, ROOM_IN_OUT, SharedPerson } from '@/models/booking.dto';
 import axios from 'axios';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { IglBookPropertyPayloadAddRoom, TIglBookPropertyPayload } from '@/models/igl-book-property';
@@ -11,9 +11,10 @@ import { IPaymentAction, PaymentService } from '@/services/payment.service';
 import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent, PaymentEntries, PrintScreenOptions } from './types';
 import calendar_data from '@/stores/calendar-data';
-import moment from 'moment';
+// import moment from 'moment';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { buildSplitIndex, SplitIndex } from '@/utils/booking';
+import { canCheckIn, canCheckout } from '@/utils/utils';
 
 @Component({
   tag: 'ir-booking-details',
@@ -723,24 +724,26 @@ export class IrBookingDetails {
     ];
   }
   private handleRoomCheckout(room: Room): boolean {
-    if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
-      return false;
-    }
-    return room.in_out.code === '001';
+    return canCheckout({ to_date: room.to_date, inOutCode: room.in_out?.code });
+    // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
+    //   return false;
+    // }
+    // return room.in_out.code === '001';
   }
   private handleRoomCheckin(room: Room): boolean {
-    if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
-      return false;
-    }
-    if (!room.unit) {
-      return false;
-    }
-    if (room.in_out && room.in_out.code !== '000') {
-      return false;
-    }
-    if (moment().isSameOrAfter(moment(room.from_date, 'YYYY-MM-DD'), 'days') && moment().isBefore(moment(room.to_date, 'YYYY-MM-DD'), 'days')) {
-      return true;
-    }
-    return false;
+    return canCheckIn({ from_date: room.from_date, to_date: room.to_date, isCheckedIn: room.in_out?.code === ROOM_IN_OUT.CHECKIN });
+    // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
+    //   return false;
+    // }
+    // if (!room.unit) {
+    //   return false;
+    // }
+    // if (room.in_out && room.in_out.code !== '000') {
+    //   return false;
+    // }
+    // if (moment().isSameOrAfter(moment(room.from_date, 'YYYY-MM-DD'), 'days') && moment().isBefore(moment(room.to_date, 'YYYY-MM-DD'), 'days')) {
+    //   return true;
+    // }
+    // return false;
   }
 }

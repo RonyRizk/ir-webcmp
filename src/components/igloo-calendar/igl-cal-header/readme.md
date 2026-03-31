@@ -47,7 +47,7 @@ graph TD;
   igl-cal-header --> ir-picker
   igl-cal-header --> ir-picker-item
   ir-date-select --> ir-input
-  ir-date-select --> ir-custom-date-range
+  ir-date-select --> ir-air-date-picker
   igloo-calendar --> igl-cal-header
   style igl-cal-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -85,6 +85,10 @@ export interface BookingDraft {
   };
   source: BookingSource;
   guest?: any;
+  defaultOccupancy?: {
+    adults: number;
+    children: number;
+  };
 }
 
 /**
@@ -270,11 +274,33 @@ function resolveSelectedVariation(variations: Variation[], selected_variation: V
     return null;
   }
   if (!selected_variation || booking_store.resetBooking) {
-    return variations[0];
+    return getDefaultVariation(variations);
   }
   return variations?.find(v => v.adult_nbr === selected_variation.adult_nbr && v.child_nbr === selected_variation.child_nbr) ?? null;
 }
-
+/**
+ * Returns the best matching variation for a rate plan.
+ *
+ * - For **EDIT_BOOKING** events, attempts to match the variation that corresponds
+ *   to the booking's original occupancy (`bookingDraft.defaultOccupancy`).
+ *   Falls back to `variations[0]` if no match is found.
+ * - For all other event types, returns `variations[0]`.
+ *
+ * @param variations - The list of available variations for the rate plan.
+ * @returns The matched `Variation`, or `null` if the list is empty/undefined.
+ */
+function getDefaultVariation(variations: Variation[]) {
+  if (!variations) {
+    return null;
+  }
+  if (booking_store.event_type?.type === 'EDIT_BOOKING') {
+    const { defaultOccupancy } = booking_store.bookingDraft;
+    if (defaultOccupancy) {
+      return variations.find(v => v.adult_nbr === defaultOccupancy.adults && v.child_nbr === defaultOccupancy.children) ?? variations[0];
+    }
+  }
+  return variations[0];
+}
 /**
  * Keeps `ratePlanSelections` in sync when backend refreshes available room types.
  */
@@ -312,7 +338,7 @@ onRoomTypeChange('roomTypes', (newValue: RoomType[]) => {
               view_mode: '001',
               guest: null,
               visibleInventory: roomType.inventory,
-              selected_variation: ratePlan?.variations[0] ?? null,
+              selected_variation: getDefaultVariation(ratePlan?.variations),
               ratePlan,
               guestName: [],
               is_bed_configuration_enabled: roomType.is_bed_configuration_enabled,
@@ -537,7 +563,7 @@ export function calculateTotalCost(gross: boolean = false): { totalAmount: numbe
         return sum + Number(variation[gross ? 'discounted_gross_amount' : 'discounted_amount']);
       }, 0);
     } else if (ratePlan.reserved > 0) {
-      const amount = isPrePayment ? ratePlan.ratePlan.pre_payment_amount ?? 0 : ratePlan.selected_variation[gross ? 'discounted_gross_amount' : 'discounted_amount'];
+      const amount = isPrePayment ? (ratePlan.ratePlan.pre_payment_amount ?? 0) : ratePlan.selected_variation[gross ? 'discounted_gross_amount' : 'discounted_amount'];
       return ratePlan.reserved * (amount ?? 0);
     }
     return 0;

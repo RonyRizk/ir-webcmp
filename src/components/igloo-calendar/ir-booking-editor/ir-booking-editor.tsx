@@ -151,8 +151,12 @@ export class IrBookingEditor {
       ...(isEditOrAdd && { source: this.resolveSourceOption(booking_store.selects.sources, booking_store.selects.sources) }),
       ...(isEdit && {
         occupancy: {
-          adults: this.booking.occupancy.adult_nbr,
-          children: this.booking.occupancy.children_nbr,
+          adults: calendar_data.property.adult_child_constraints.adult_max_nbr,
+          children: calendar_data.property.adult_child_constraints.child_max_nbr,
+        },
+        defaultOccupancy: {
+          adults: this.room.occupancy.adult_nbr,
+          children: this.room.occupancy.children_nbr + this.room.occupancy.infant_nbr,
         },
       }),
     };

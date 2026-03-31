@@ -84,6 +84,7 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-application-info](../../igloo-calendar/igl-book-property/igl-booking-form/igl-application-info)
+ - [igl-date-range](../../igloo-calendar/igl-date-range)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [ir-agent-contract](../../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
@@ -112,6 +113,7 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   igl-application-info --> ir-input
+  igl-date-range --> ir-input
   igl-property-booked-by --> ir-input
   igl-rate-plan --> ir-input
   ir-agent-contract --> ir-input

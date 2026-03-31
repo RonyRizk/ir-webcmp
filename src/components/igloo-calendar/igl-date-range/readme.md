@@ -29,6 +29,39 @@
 | `toast`           |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
 
 
+## Methods
+
+### `closeDatePicker() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `openDatePicker() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+
+## Shadow Parts
+
+| Part         | Description |
+| ------------ | ----------- |
+| `"anchor"`   |             |
+| `"base"`     |             |
+| `"body"`     |             |
+| `"combobox"` |             |
+
+
 ## Dependencies
 
 ### Used by
@@ -38,14 +71,14 @@
 
 ### Depends on
 
-- [ir-date-select](../../ui/date-picker/ir-date-select)
+- [ir-input](../../ui/ir-input)
+- [ir-custom-date-range](../../ui/ir-custom-date-range)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-date-range --> ir-date-select
-  ir-date-select --> ir-input
-  ir-date-select --> ir-custom-date-range
+  igl-date-range --> ir-input
+  igl-date-range --> ir-custom-date-range
   igl-book-property-header --> igl-date-range
   ir-booking-editor-header --> igl-date-range
   style igl-date-range fill:#f9f,stroke:#333,stroke-width:4px

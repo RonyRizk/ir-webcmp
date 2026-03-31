@@ -323,12 +323,14 @@ export namespace Components {
         "unassignedDates": any;
     }
     interface IglDateRange {
+        "closeDatePicker": () => Promise<void>;
         "dateLabel": string;
         "defaultData": { [key: string]: any };
         "disabled": boolean;
         "hint": string;
         "maxDate": string;
         "minDate": string;
+        "openDatePicker": () => Promise<void>;
         "size": 'small' | 'medium' | 'large';
         "variant": 'booking' | 'default';
         "withDateDifference": boolean;
@@ -7717,7 +7719,7 @@ declare global {
         "pressCheckIn": any;
         "pressCheckOut": any;
         "editInitiated": TIglBookPropertyPayload;
-        "resetbooking": null;
+        "resetBookingEvt": null;
         "openSidebar": OpenSidebarEvent<RoomGuestsPayload1>;
     }
     interface HTMLIrRoomElement extends Components.IrRoom, HTMLStencilElement {
@@ -12286,7 +12288,7 @@ declare namespace LocalJSX {
         "onOpenSidebar"?: (event: IrRoomCustomEvent<OpenSidebarEvent<RoomGuestsPayload1>>) => void;
         "onPressCheckIn"?: (event: IrRoomCustomEvent<any>) => void;
         "onPressCheckOut"?: (event: IrRoomCustomEvent<any>) => void;
-        "onResetbooking"?: (event: IrRoomCustomEvent<null>) => void;
+        "onResetBookingEvt"?: (event: IrRoomCustomEvent<null>) => void;
         "onToast"?: (event: IrRoomCustomEvent<IToast>) => void;
         "property_id"?: number;
         "room"?: Room;

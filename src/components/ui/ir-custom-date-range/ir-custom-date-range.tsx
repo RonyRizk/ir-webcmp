@@ -258,31 +258,8 @@ export class IrCustomDateRange {
                         </svg>
                       </button>
                     )}
-                    <span class="month-year-selectors">
-                      <select
-                        class="month-year-select"
-                        onChange={e => this.handleMonthChange(e, index)}
-                        onClick={e => e.stopPropagation()}
-                        aria-label="Select month"
-                      >
-                        {Array.from({ length: 12 }, (_, i) => (
-                          <option key={i} value={i} selected={i === month.month.month()}>
-                            {moment().month(i).locale(this.locale ?? 'en').format('MMMM')}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        class="month-year-select"
-                        onChange={e => this.handleYearChange(e, index)}
-                        onClick={e => e.stopPropagation()}
-                        aria-label="Select year"
-                      >
-                        {this.getYearRange().map(y => (
-                          <option key={y} value={y} selected={y === month.month.year()}>
-                            {y}
-                          </option>
-                        ))}
-                      </select>
+                    <span class="month-year-label">
+                      {month.month.locale(this.locale ?? 'en').format('MMMM YYYY')}
                     </span>
                     {index === 0 && (
                       <button name="next month" class="navigation-buttons button-next" type="button" onClick={this.goToNextMonth.bind(this)}>

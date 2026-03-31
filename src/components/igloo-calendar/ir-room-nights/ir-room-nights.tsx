@@ -210,6 +210,7 @@ export class IrRoomNights {
         is_direct: true,
         pickup_info: this.bookingEvent.pickup_info,
         extra_services: this.bookingEvent.extra_services,
+        agent: this.bookingEvent.agent,
         booking: {
           booking_nbr: this.bookingNumber,
           from_date: moment(this.dates.from_date).format('YYYY-MM-DD'),

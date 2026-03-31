@@ -47,9 +47,8 @@ graph TD;
   ir-booking-editor-header --> ir-picker-item
   ir-booking-editor-header --> igl-date-range
   ir-booking-editor-header --> ir-custom-button
-  igl-date-range --> ir-date-select
-  ir-date-select --> ir-input
-  ir-date-select --> ir-custom-date-range
+  igl-date-range --> ir-input
+  igl-date-range --> ir-custom-date-range
   ir-booking-editor --> ir-booking-editor-header
   style ir-booking-editor-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

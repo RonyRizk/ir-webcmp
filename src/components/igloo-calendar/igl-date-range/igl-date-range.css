@@ -1,108 +1,58 @@
-/* @import url('../../../assets/webawesome/utilities/size.css');
-
 :host {
   display: flex;
-  width: 100%;
-}
-
-.date-range-shell {
-  position: relative;
-  width: 100%;
-  height: var(--wa-form-control-height);
-  padding: 0 var(--wa-form-control-padding-inline);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  box-sizing: border-box;
-  cursor: pointer;
-  color: var(--wa-form-control-value-color);
-  font-size: var(--wa-form-control-value-size);
-  font-family: inherit;
-  font-weight: var(--wa-form-control-value-font-weight);
-  line-height: var(--wa-form-control-value-line-height);
-
-  transition: background-color var(--wa-transition-normal), border var(--wa-transition-normal), outline var(--wa-transition-fast);
-  transition-timing-function: var(--wa-transition-easing);
-}
-.date-range-shell.picker {
-  background-color: var(--wa-form-control-background-color);
-  border-color: var(--wa-form-control-border-color);
-  border-style: var(--wa-form-control-border-style);
-  border-width: var(--wa-form-control-border-width);
-  border-radius: var(--wa-form-control-border-radius);
-}
-
-.date-range-shell.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.date-range-display.date-range-display--disabled {
-  cursor: not-allowed;
-}
-.date-range-shell:focus-within {
-  outline: var(--wa-focus-ring);
-  outline-offset: var(--wa-focus-ring-offset);
-}
-
-.date-range-input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.date-range-input[data-state='disabled'] {
-  cursor: not-allowed;
-}
-
-.date-range-shell.picker .date-range-display {
-  background-color: var(--wa-form-control-background-color);
-  padding: 0 var(--wa-form-control-padding-inline);
-}
-.date-range-display {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-sizing: border-box;
-}
-
-.date-range-icon {
-  margin: 0;
-  padding: 0;
-}
-
-.date-range-date {
-  font-weight: 500;
-}
-
-.date-range-nights {
-  font-weight: 500;
-}
-
-@media (min-width: 768px) {
-  :host {
-    width: fit-content;
-  }
-  .date-range-shell {
-    min-width: 290px;
-    width: fit-content;
-  }
-} */
-:host {
-  display: flex;
-
   min-width: 280px;
 }
-.custom-picker {
+
+.igl-date-range__popup {
+  --arrow-size: 0.375rem;
+  --show-duration: 100ms;
+  --hide-duration: 100ms;
+  pointer-events: auto;
   width: 100%;
+}
+
+.igl-date-range__popup::part(arrow) {
+  background-color: var(--wa-color-surface-default);
+  border-top: none;
+  border-left: none;
+  border-bottom: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
+  border-right: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
+  box-shadow: none;
+}
+
+.igl-date-range__trigger,
+.igl-date-range__input {
+  width: 100%;
+}
+
+.igl-date-range__control {
+  width: 100%;
+  display: flex;
+}
+
+.igl-date-range__control[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.igl-date-range__calendar {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  padding: var(--wa-space-m);
+  background-color: var(--wa-color-surface-default);
+  border: var(--wa-panel-border-width) solid var(--wa-color-surface-border);
+  border-radius: var(--wa-panel-border-radius);
+  border-style: var(--wa-panel-border-style);
+  box-shadow: var(--wa-shadow-l);
+  color: var(--wa-color-text-normal);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.igl-date-range__nights {
+  font-weight: 500;
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-quiet);
 }
