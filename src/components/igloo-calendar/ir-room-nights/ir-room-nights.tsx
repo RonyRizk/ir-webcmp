@@ -60,13 +60,10 @@ export class IrRoomNights {
         const filteredRooms = this.bookingEvent.rooms.filter(room => room.identifier === this.identifier);
         this.selectedRoom = filteredRooms[0];
         const lastDay = this.selectedRoom?.days[this.selectedRoom.days.length - 1];
-        //let first_rate = this.selectedRoom.days[0].amount;
-        if (moment(this.toDate).add(-1, 'days').isSame(moment(lastDay.date))) {
-          console.log('here1');
+        if (!moment(this.selectedRoom.to_date, 'YYYY-MM-DD').isBefore(moment(this.toDate, 'YYYY-MM-DD'))) {
           const amount = await this.fetchBookingAvailability(this.fromDate, this.selectedRoom.days[0].date, this.selectedRoom.rateplan.id);
           const newDatesArr = getDaysArray(this.selectedRoom.days[0].date, this.fromDate);
           this.isEndDateBeforeFromDate = true;
-          this.rates;
           this.rates = [
             ...newDatesArr.map(day => ({
               amount: amount / newDatesArr.length,
@@ -77,9 +74,7 @@ export class IrRoomNights {
           ];
           this.defaultTotalNights = this.rates.length - this.selectedRoom.days.length;
         } else {
-          console.log('here2');
-          console.log(lastDay);
-          const amount = await this.fetchBookingAvailability(this.bookingEvent.to_date, moment(this.toDate, 'YYYY-MM-DD').format('YYYY-MM-DD'), this.selectedRoom.rateplan.id);
+          const amount = await this.fetchBookingAvailability(this.selectedRoom.to_date, moment(this.toDate, 'YYYY-MM-DD').format('YYYY-MM-DD'), this.selectedRoom.rateplan.id);
           const newDatesArr = getDaysArray(lastDay.date, this.toDate);
           this.rates = [
             ...this.selectedRoom.days,
