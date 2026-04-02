@@ -74,8 +74,6 @@ Type: `Promise<void>`
 
  - [igloo-calendar](../../igloo-calendar)
  - [ir-channel](../../ir-channel)
- - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
- - [ir-housekeeping](../../ir-housekeeping)
 
 ### Depends on
 
@@ -88,8 +86,6 @@ graph TD;
   ir-button --> ir-icons
   igloo-calendar --> ir-modal
   ir-channel --> ir-modal
-  ir-hk-tasks --> ir-modal
-  ir-housekeeping --> ir-modal
   style ir-modal fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

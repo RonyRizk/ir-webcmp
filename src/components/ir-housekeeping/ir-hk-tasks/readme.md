@@ -34,7 +34,8 @@
 - [ir-interceptor](../../ir-interceptor)
 - [ir-tasks-filters](ir-tasks-filters)
 - [ir-tasks-table](ir-tasks-table)
-- [ir-modal](../../ui/ir-modal)
+- [ir-dialog](../../ui/ir-dialog)
+- [ir-custom-button](../../ui/ir-custom-button)
 - [ir-sidebar](../../ui/ir-sidebar)
 - [ir-hk-archive](ir-hk-archive)
 
@@ -46,7 +47,8 @@ graph TD;
   ir-hk-tasks --> ir-interceptor
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
-  ir-hk-tasks --> ir-modal
+  ir-hk-tasks --> ir-dialog
+  ir-hk-tasks --> ir-custom-button
   ir-hk-tasks --> ir-sidebar
   ir-hk-tasks --> ir-hk-archive
   ir-toast --> ir-toast-provider
@@ -57,22 +59,19 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
-  ir-tasks-filters --> ir-button
-  ir-tasks-filters --> ir-select
+  ir-tasks-filters --> ir-custom-button
   ir-tasks-table --> ir-tasks-header
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
-  ir-tasks-table --> ir-checkbox
-  ir-tasks-table --> ir-button
-  ir-tasks-header --> ir-input-text
-  ir-tasks-header --> ir-icons
-  ir-tasks-header --> ir-button
-  ir-tasks-card --> ir-button
+  ir-tasks-table --> ir-custom-button
+  ir-tasks-table --> ir-dialog
+  ir-tasks-header --> ir-input
+  ir-tasks-header --> ir-custom-button
+  ir-tasks-card --> ir-custom-button
   ir-tasks-table-pagination --> ir-button
   ir-tasks-table-pagination --> ir-pagination
   ir-pagination --> ir-select
   ir-pagination --> ir-custom-button
-  ir-modal --> ir-button
   ir-sidebar --> ir-icon
   ir-hk-archive --> ir-title
   ir-hk-archive --> ir-select

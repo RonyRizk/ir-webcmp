@@ -1,3 +1,32 @@
+import { z } from 'zod';
+
+export const SetHKTaskLabelsParamsSchema = z.object({
+  property_id: z.number(),
+  t1_label: z.string().optional(),
+  t1_freq: z.string().optional(),
+  t2_label: z.string().optional(),
+  t2_freq: z.string().optional(),
+});
+export type SetHKTaskLabelsParams = z.infer<typeof SetHKTaskLabelsParamsSchema>;
+
+export const ResolveHKIssueParamsSchema = z.object({
+  issue_ids: z.array(z.number().min(0)),
+});
+export type ResolveHKIssueParams = z.infer<typeof ResolveHKIssueParamsSchema>;
+
+export const OverrideHKTaskOwnershipParamsSchema = z.object({
+  property_id: z.number(),
+  is_to_remove: z.boolean().optional().default(false),
+  assignments: z.array(
+    z.object({
+      PR_ID: z.number(),
+      DATE: z.string(),
+      HK_TASK_TYPE_CODE: z.string(),
+      HKM_ID: z.number().nullable(),
+    }),
+  ),
+});
+export type OverrideHKTaskOwnershipParams = z.infer<typeof OverrideHKTaskOwnershipParamsSchema>;
 export interface IExposedHouseKeepingSetup {
   statuses: IHKStatuses[];
   housekeepers: IHouseKeepers[];
@@ -6,6 +35,12 @@ export interface IExposedHouseKeepingSetup {
   cleaning_periods: ExposedHKSetup[];
   dusty_periods: ExposedHKSetup[];
   highlight_checkin_options: ExposedHKSetup[];
+  t1_config: HousekeepingTasksConfig;
+  t2_config: HousekeepingTasksConfig;
+}
+export interface HousekeepingTasksConfig {
+  freq: string;
+  label: string;
 }
 export interface ExposedHKSetup {
   code: string;
@@ -109,6 +144,22 @@ export interface ArchivedTask {
   house_keeper: string;
   unit: string;
 }
+export interface HKIssue {
+  date: string;
+  description: string;
+  hka_id: number;
+  housekeeper_name: string;
+  id: number;
+  unit: Unit;
+  hour: number | null;
+  minute: number | null;
+}
+
+export interface Unit {
+  id: number;
+  name: string;
+}
+
 export interface Task {
   id: string;
   adult: number;
@@ -118,11 +169,16 @@ export interface Task {
   formatted_date: string;
   hint: string;
   hkm_id: number;
+  task_type: {
+    code: 'CLN' | 'T1' | 'T2';
+    description: string;
+  };
   infant: number;
   status: TaskStatus;
   unit: IUnit;
   housekeeper: string;
   booking_nbr: string | null;
+  extra_task: Task[] | null;
 }
 export type TaskStatus = {
   code: string;
@@ -135,3 +191,16 @@ export type CleanTaskEvent = {
   task: Task;
   status?: '001' | '004';
 };
+
+export const SkipHKTasksParamsSchema = z.object({
+  property_id: z.number(),
+  tasks_to_skip: z.array(
+    z.object({
+      unit_id: z.number(),
+      booking_nbr: z.string(),
+      date: z.string(),
+      reason_code: z.string().optional().default('001'),
+    }),
+  ),
+});
+export type SkipHKTasksParams = z.infer<typeof SkipHKTasksParamsSchema>;

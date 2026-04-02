@@ -7,11 +7,11 @@ import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@st
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 @Component({
-  tag: 'igl-legends',
-  styleUrl: 'igl-legends.css',
+  tag: 'igl-legend',
+  styleUrl: 'igl-legend.css',
   scoped: true,
 })
-export class IglLegends {
+export class IglLegend {
   @Prop() legendData: { [key: string]: any };
 
   @State() bookingColors: BookingColor[] = [];
@@ -166,6 +166,12 @@ export class IglLegends {
                 </div>
               );
             })}
+            <div class="fd-legend__row">
+              <div class={'fd-legend__shape'}>
+                <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-danger-fill-loud)', fontSize: '1rem' }}></wa-icon>
+              </div>
+              <p class="fd-legend__row-title">Issue with unit</p>
+            </div>
             <wa-divider></wa-divider>
             <h5 class="fd-legend__section-title">Use custom colors</h5>
             {calendar_data.property.calendar_extra?.booking_colors.map((legendInfo, index) => {

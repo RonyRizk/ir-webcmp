@@ -71,25 +71,23 @@ graph TD;
   ir-hk-tasks --> ir-interceptor
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
-  ir-hk-tasks --> ir-modal
+  ir-hk-tasks --> ir-dialog
+  ir-hk-tasks --> ir-custom-button
   ir-hk-tasks --> ir-sidebar
   ir-hk-tasks --> ir-hk-archive
-  ir-tasks-filters --> ir-button
-  ir-tasks-filters --> ir-select
+  ir-tasks-filters --> ir-custom-button
   ir-tasks-table --> ir-tasks-header
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
-  ir-tasks-table --> ir-checkbox
-  ir-tasks-table --> ir-button
-  ir-tasks-header --> ir-input-text
-  ir-tasks-header --> ir-icons
-  ir-tasks-header --> ir-button
-  ir-tasks-card --> ir-button
+  ir-tasks-table --> ir-custom-button
+  ir-tasks-table --> ir-dialog
+  ir-tasks-header --> ir-input
+  ir-tasks-header --> ir-custom-button
+  ir-tasks-card --> ir-custom-button
   ir-tasks-table-pagination --> ir-button
   ir-tasks-table-pagination --> ir-pagination
   ir-pagination --> ir-select
   ir-pagination --> ir-custom-button
-  ir-modal --> ir-button
   ir-sidebar --> ir-icon
   ir-hk-archive --> ir-title
   ir-hk-archive --> ir-select
@@ -271,7 +269,7 @@ graph TD;
   igloo-calendar --> ir-toast
   igloo-calendar --> ir-interceptor
   igloo-calendar --> igl-to-be-assigned
-  igloo-calendar --> igl-legends
+  igloo-calendar --> igl-legend
   igloo-calendar --> igl-cal-header
   igloo-calendar --> igl-cal-body
   igloo-calendar --> igl-cal-footer
@@ -293,8 +291,8 @@ graph TD;
   igl-to-be-assigned --> ir-custom-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
-  igl-legends --> ir-custom-button
-  igl-legends --> ir-success-loader
+  igl-legend --> ir-custom-button
+  igl-legend --> ir-success-loader
   igl-cal-header --> ir-custom-button
   igl-cal-header --> ir-date-select
   igl-cal-header --> ir-picker
@@ -304,6 +302,7 @@ graph TD;
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> igl-housekeeping-dialog
+  igl-cal-body --> igl-hk-issues-dialog
   igl-booking-event --> igl-booking-event-hover
   igl-booking-event-hover --> ir-dropdown
   igl-booking-event-hover --> ir-icons
@@ -316,6 +315,8 @@ graph TD;
   igl-block-dates-view --> ir-date-view
   igl-housekeeping-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-custom-button
+  igl-hk-issues-dialog --> ir-dialog
+  igl-hk-issues-dialog --> ir-custom-button
   igl-cal-footer --> ir-new-badge
   ir-room-nights --> ir-price-input
   ir-room-nights --> ir-loading-screen
@@ -338,6 +339,7 @@ graph TD;
   ir-reallocation-form --> ir-validator
   igl-reallocation-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-custom-button
+  ir-modal --> ir-button
   igl-bulk-operations-drawer --> ir-drawer
   igl-bulk-operations-drawer --> igl-bulk-stop-sale
   igl-bulk-operations-drawer --> igl-bulk-block
@@ -356,20 +358,19 @@ graph TD;
   ir-housekeeping --> ir-loading-screen
   ir-housekeeping --> ir-interceptor
   ir-housekeeping --> ir-toast
-  ir-housekeeping --> ir-title
-  ir-housekeeping --> ir-select
+  ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
-  ir-housekeeping --> ir-modal
+  ir-hk-operations-card --> ir-input
+  ir-hk-operations-card --> ir-dialog
+  ir-hk-operations-card --> ir-custom-button
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-hk-user
-  ir-hk-team --> ir-title
-  ir-hk-team --> ir-icon
+  ir-hk-team --> ir-custom-button
   ir-hk-team --> ir-popover
   ir-hk-team --> ir-button
   ir-hk-team --> ir-sidebar
   ir-hk-team --> ir-delete-modal
   ir-hk-unassigned-units --> ir-select
-  ir-hk-unassigned-units --> ir-switch
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
   ir-hk-user --> ir-title

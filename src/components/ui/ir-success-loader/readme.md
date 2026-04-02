@@ -33,12 +33,12 @@
 
 ### Used by
 
- - [igl-legends](../../igloo-calendar/igl-legends)
+ - [igl-legend](../../igloo-calendar/igl-legend)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-legends --> ir-success-loader
+  igl-legend --> ir-success-loader
   style ir-success-loader fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

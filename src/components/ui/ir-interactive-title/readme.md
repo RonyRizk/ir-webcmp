@@ -7,13 +7,19 @@
 
 ## Properties
 
-| Property        | Attribute         | Description                                                                                  | Type      | Default     |
-| --------------- | ----------------- | -------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `broomTooltip`  | `broom-tooltip`   | The message shown when hovering over the broom svg if provided.                              | `string`  | `undefined` |
-| `cropSize`      | `crop-size`       | The number of characters to display before cropping the title with ellipsis.                 | `number`  | `20`        |
-| `hkStatus`      | `hk-status`       | Whether to show the housekeeping (HK) status dot.                                            | `boolean` | `false`     |
-| `irPopoverLeft` | `ir-popover-left` | CSS offset for the left position of the popover. Used as a CSS variable `--ir-popover-left`. | `string`  | `'10px'`    |
-| `popoverTitle`  | `popover-title`   | The full title string that may be cropped in the UI.                                         | `string`  | `''`        |
+| Property        | Attribute         | Description                                                                                                                                                                                                           | Type      | Default  |
+| --------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- |
+| `cropSize`      | `crop-size`       | Character-count threshold above which the full-title tooltip is shown. Acts as a fast approximation of visual overflow; the browser independently applies `text-overflow: ellipsis` via CSS regardless of this value. | `number`  | `20`     |
+| `hkStatus`      | `hk-status`       | When `true`, renders the `.hk-dot` container and the `slot[name="end"]` inside it. Must be `true` whenever slot content is provided, otherwise the slotted nodes are silently discarded by the browser.               | `boolean` | `false`  |
+| `irPopoverLeft` | `ir-popover-left` | Horizontal padding of the `.hk-dot` slot container, forwarded as the `--ir-popover-left` CSS custom property on the host element.                                                                                     | `string`  | `'10px'` |
+| `popoverTitle`  | `popover-title`   | The full title string. When its length exceeds `cropSize` the tooltip is activated so the user can read the complete text on hover.                                                                                   | `string`  | `''`     |
+
+
+## Slots
+
+| Slot    | Description                                                                                         |
+| ------- | --------------------------------------------------------------------------------------------------- |
+| `"end"` | Icon(s) placed after the title (broom, alert, etc.).       Only rendered when `hkStatus` is `true`. |
 
 
 ## Dependencies

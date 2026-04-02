@@ -1,142 +1,91 @@
-import { Component, Host, Prop, h, Element } from '@stencil/core';
+import { Component, Host, Prop, h } from '@stencil/core';
 
+/**
+ * Module-level counter — survives HMR but is reset on full page reload.
+ * Guarantees each instance gets a stable, unique DOM id without needing
+ * @Element or lifecycle hooks.
+ */
+let titleIdCounter = 0;
+
+/**
+ * @component ir-interactive-title
+ *
+ * Renders a room/category name inside a flex row that:
+ *  - Truncates via CSS `text-overflow: ellipsis` when the text overflows.
+ *  - Shows a `<wa-tooltip>` with the full title on hover when the title
+ *    exceeds `cropSize` characters (lightweight proxy for overflow detection).
+ *  - Optionally renders a trailing `.hk-dot` container (via `slot[name="end"]`)
+ *    for housekeeping status icons or alert badges.
+ *
+ * The `.hk-dot` participates in the flex layout (`flex-shrink: 0`) so the
+ * title span is guaranteed to truncate *before* reaching the icons — no JS
+ * width measurement needed.
+ *
+ * @slot end - Icon(s) placed after the title (broom, alert, etc.).
+ *             Only rendered when `hkStatus` is `true`.
+ *
+ * @cssvar --ir-popover-left   Horizontal padding of the `.hk-dot` overlay.
+ * @cssvar --ir-interactive-hk-bg  Background fill of `.hk-dot` (used for
+ *                                  hover highlight from the parent row).
+ * @cssvar --dot-color          Icon colour inside `.hk-dot`.
+ */
 @Component({
   tag: 'ir-interactive-title',
   styleUrl: 'ir-interactive-title.css',
   scoped: true,
 })
 export class IrInteractiveTitle {
-  @Element() el: HTMLElement;
-
   /**
-   * The full title string that may be cropped in the UI.
+   * The full title string. When its length exceeds `cropSize` the tooltip
+   * is activated so the user can read the complete text on hover.
    */
   @Prop() popoverTitle: string = '';
 
   /**
-   * CSS offset for the left position of the popover.
-   * Used as a CSS variable `--ir-popover-left`.
+   * Horizontal padding of the `.hk-dot` slot container, forwarded as the
+   * `--ir-popover-left` CSS custom property on the host element.
+   * @default '10px'
    */
   @Prop() irPopoverLeft: string = '10px';
 
   /**
-   * Whether to show the housekeeping (HK) status dot.
+   * When `true`, renders the `.hk-dot` container and the `slot[name="end"]`
+   * inside it. Must be `true` whenever slot content is provided, otherwise
+   * the slotted nodes are silently discarded by the browser.
    */
   @Prop() hkStatus: boolean = false;
 
   /**
-   * The number of characters to display before cropping the title with ellipsis.
+   * Character-count threshold above which the full-title tooltip is shown.
+   * Acts as a fast approximation of visual overflow; the browser independently
+   * applies `text-overflow: ellipsis` via CSS regardless of this value.
+   * @default 20
    */
   @Prop() cropSize: number = 20;
-  /**
-   * The message shown when hovering over the broom svg if provided.
-   * @requires hkStatus to be true
-   */
-  @Prop() broomTooltip: string;
 
   /**
-   * Reference to track if we've initialized popover for current render
+   * Unique DOM id assigned once at instantiation time to the inner `<span>`.
+   * `<wa-tooltip for="…">` references this id to anchor the tooltip.
+   * Declared `readonly` — must never be reassigned after construction.
    */
-  private lastRenderedTitle: string = '';
-  private titleContainerRef: HTMLElement;
-  private popoverInstance: any;
-
-  /**
-   * Initialize popover with overflow detection
-   */
-  private initializePopoverIfNeeded(titleContainer: HTMLElement, title: string) {
-    // Only initialize if title changed or first time
-    if (this.lastRenderedTitle === title && this.popoverInstance) {
-      return;
-    }
-    this.disposePopover();
-
-    const tempSpan = document.createElement('span');
-    tempSpan.style.visibility = 'hidden';
-    tempSpan.style.position = 'absolute';
-    tempSpan.style.whiteSpace = 'nowrap';
-    tempSpan.textContent = title;
-    document.body.appendChild(tempSpan);
-
-    const textWidth = tempSpan.offsetWidth;
-    document.body.removeChild(tempSpan);
-
-    const containerWidth = titleContainer.clientWidth;
-    const iconWidth = this.hkStatus ? 20 : 0;
-
-    const willOverflow = textWidth + iconWidth > containerWidth;
-
-    if (willOverflow && typeof $ !== 'undefined') {
-      try {
-        this.popoverInstance = $(titleContainer).popover({
-          trigger: 'hover',
-          content: title,
-          placement: 'top',
-          html: false,
-          sanitize: true,
-          delay: { show: 300, hide: 100 },
-        });
-      } catch (error) {
-        console.error('Failed to initialize popover:', error);
-      }
-    }
-
-    this.lastRenderedTitle = title;
-  }
-
-  private disposePopover() {
-    if (this.popoverInstance && typeof $ !== 'undefined') {
-      try {
-        $(this.titleContainerRef).popover('dispose');
-        this.popoverInstance = null;
-      } catch (error) {
-        console.error('Failed to dispose popover:', error);
-      }
-    }
-  }
-
-  disconnectedCallback() {
-    this.disposePopover();
-  }
+  private readonly titleId = `ir-title-${++titleIdCounter}`;
 
   render() {
     const title = this.popoverTitle || '';
 
-    const shouldCrop = title.length > this.cropSize;
-    const displayTitle = shouldCrop ? title.slice(0, this.cropSize) + '...' : title;
-
     return (
       <Host style={{ '--ir-popover-left': this.irPopoverLeft }}>
-        <p
-          ref={el => {
-            this.titleContainerRef = el;
-            if (el && title) {
-              setTimeout(() => this.initializePopoverIfNeeded(el, title), 0);
-            }
-          }}
-          class="popover-title"
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-          }}
-        >
-          <span
-            class="cropped-title"
-            style={{
-              flexShrink: '1',
-              minWidth: '0',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {displayTitle}
+        <p class="popover-title">
+          {title.length > this.cropSize && (
+            <wa-tooltip for={this.titleId} placement="top">
+              {title}
+            </wa-tooltip>
+          )}
+          <span id={this.titleId} class="cropped-title">
+            {title}
           </span>
           {this.hkStatus && (
-            <div title={this.broomTooltip} class="hk-dot" style={{ flexShrink: '0' }}>
+            <div class="hk-dot">
               <slot name="end"></slot>
             </div>
           )}

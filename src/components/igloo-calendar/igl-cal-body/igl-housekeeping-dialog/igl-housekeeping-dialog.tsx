@@ -90,6 +90,7 @@ export class IglHousekeepingDialog {
               unit_id: this.selectedRoom?.id,
               booking_nbr: this.bookingNumber,
               status: status as any,
+              hk_task_type_code: 'CLN',
             },
           ],
         });

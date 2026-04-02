@@ -30,10 +30,8 @@
  - [igl-split-booking](../igloo-calendar/igl-split-booking)
  - [ir-guest-info](../ir-guest-info)
  - [ir-hk-archive](../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
- - [ir-hk-team](../ir-housekeeping/ir-hk-team)
  - [ir-hk-unassigned-units](../ir-housekeeping/ir-hk-unassigned-units)
  - [ir-hk-user](../ir-housekeeping/ir-hk-user)
- - [ir-housekeeping](../ir-housekeeping)
  - [ir-option-details](../ir-payment-option/ir-option-details)
  - [ir-reset-password](../ir-reset-password)
  - [ir-room-nights](../igloo-calendar/ir-room-nights)
@@ -51,10 +49,8 @@ graph TD;
   igl-split-booking --> ir-title
   ir-guest-info --> ir-title
   ir-hk-archive --> ir-title
-  ir-hk-team --> ir-title
   ir-hk-unassigned-units --> ir-title
   ir-hk-user --> ir-title
-  ir-housekeeping --> ir-title
   ir-option-details --> ir-title
   ir-reset-password --> ir-title
   ir-room-nights --> ir-title

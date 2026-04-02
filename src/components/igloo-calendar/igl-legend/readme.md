@@ -33,10 +33,10 @@
 ### Graph
 ```mermaid
 graph TD;
-  igl-legends --> ir-custom-button
-  igl-legends --> ir-success-loader
-  igloo-calendar --> igl-legends
-  style igl-legends fill:#f9f,stroke:#333,stroke-width:4px
+  igl-legend --> ir-custom-button
+  igl-legend --> ir-success-loader
+  igloo-calendar --> igl-legend
+  style igl-legend fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

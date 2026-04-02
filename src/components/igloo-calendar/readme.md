@@ -42,7 +42,7 @@
 - [ir-toast](../ui/ir-toast)
 - [ir-interceptor](../ir-interceptor)
 - [igl-to-be-assigned](igl-to-be-assigned)
-- [igl-legends](igl-legends)
+- [igl-legend](igl-legend)
 - [igl-cal-header](igl-cal-header)
 - [igl-cal-body](igl-cal-body)
 - [igl-cal-footer](igl-cal-footer)
@@ -67,7 +67,7 @@ graph TD;
   igloo-calendar --> ir-toast
   igloo-calendar --> ir-interceptor
   igloo-calendar --> igl-to-be-assigned
-  igloo-calendar --> igl-legends
+  igloo-calendar --> igl-legend
   igloo-calendar --> igl-cal-header
   igloo-calendar --> igl-cal-body
   igloo-calendar --> igl-cal-footer
@@ -97,8 +97,8 @@ graph TD;
   igl-to-be-assigned --> ir-custom-button
   igl-tba-category-view --> igl-tba-booking-view
   igl-tba-booking-view --> ir-button
-  igl-legends --> ir-custom-button
-  igl-legends --> ir-success-loader
+  igl-legend --> ir-custom-button
+  igl-legend --> ir-success-loader
   igl-cal-header --> ir-custom-button
   igl-cal-header --> ir-date-select
   igl-cal-header --> ir-picker
@@ -108,6 +108,7 @@ graph TD;
   igl-cal-body --> ir-interactive-title
   igl-cal-body --> igl-booking-event
   igl-cal-body --> igl-housekeeping-dialog
+  igl-cal-body --> igl-hk-issues-dialog
   igl-booking-event --> igl-booking-event-hover
   igl-booking-event-hover --> ir-dropdown
   igl-booking-event-hover --> ir-icons
@@ -120,6 +121,8 @@ graph TD;
   igl-block-dates-view --> ir-date-view
   igl-housekeeping-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-custom-button
+  igl-hk-issues-dialog --> ir-dialog
+  igl-hk-issues-dialog --> ir-custom-button
   igl-cal-footer --> ir-new-badge
   ir-sidebar --> ir-icon
   ir-room-nights --> ir-price-input

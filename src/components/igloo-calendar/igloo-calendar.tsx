@@ -23,6 +23,7 @@ import { SetRoomCalendarExtraParams } from '@/services/property.service';
 import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dialog';
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
 import { SetDepartureTimeProps } from '@/services/booking-service/types';
+import { HKIssue } from '@/models/housekeeping';
 // import Auth from '@/models/Auth';
 export interface UnitHkStatusChangePayload {
   PR_ID: number;
@@ -337,7 +338,7 @@ export class IglooCalendar {
     this.calendarData.toBeAssignedEvents = [];
   }
 
-  async initializeApp() {
+  private async initializeApp() {
     try {
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
@@ -362,7 +363,9 @@ export class IglooCalendar {
         this.bookingService.getCalendarData(propertyId, this.from_date, this.to_date),
         this.bookingService.getCountries(this.language),
         this.roomService.fetchLanguage(this.language),
+        this.getHkIssues(propertyId),
         this.housekeepingService.getExposedHKSetup(this.property_id),
+        //this.housekeepingService.getHkIssues({ property_id: propertyId }),
       ];
 
       this.fetchSetupEntries();
@@ -425,6 +428,15 @@ export class IglooCalendar {
       console.error('Initializing Calendar Error', error);
     }
   }
+  private async getHkIssues(property_id: number) {
+    const issues = await this.housekeepingService.getHkIssues({ property_id });
+    let _issues: Map<HKIssue['unit']['id'], HKIssue[]> = new Map();
+    for (const issue of issues ?? []) {
+      const id = issue.unit.id;
+      _issues.set(id, [...(_issues.get(id) ?? []), issue]);
+    }
+    calendar_data.unitIssues = new Map(_issues);
+  }
   private async fetchSetupEntries() {
     const d = await this.bookingService.getSetupEntriesByTableName('_DEPARTURE_TIME');
     this.departureTimes = d;
@@ -481,6 +493,8 @@ export class IglooCalendar {
       SET_ROOM_CALENDAR_EXTRA: this.handleRoomCalendarExtra,
       UPDATE_CALENDAR_RATE: this.handleUpdateCalendarRate,
       SET_DEPARTURE_TIME: this.handleSetDepartureTime,
+      HK_ISSUE_FOUND: this.handleHKIssueFound,
+      HK_ISSUE_FIXED: this.handleHKIssueFixed,
     };
 
     const handler = reasonHandlers[REASON];
@@ -493,6 +507,42 @@ export class IglooCalendar {
 
   private handleUpdateCalendarRate(result: any) {
     this.salesQueue.offer({ ...result, night: result.date, is_available_to_book: !result.is_closed });
+  }
+  private handleHKIssueFound(result: any) {
+    const issues = new Map(calendar_data.unitIssues);
+    const issue = result.My_Hka;
+    issues.set(issue.PR_ID, [
+      ...(issues.get(issue.PR_ID) ?? []),
+      {
+        date: issue.ENTRY_DATE,
+        description: issue.COMMENT,
+        hka_id: issue.HKA_ID,
+        housekeeper_name: issue?.My_Hkm?.NAME,
+        id: result.HK_ISSUE_ID,
+        hour: issue.HOUR,
+        minute: issue.MINUTE,
+        unit: {
+          id: issue.PR_ID,
+          name: issue?.My_Pr?.NAME,
+        },
+      },
+    ]);
+    calendar_data.unitIssues = new Map(issues);
+  }
+  private handleHKIssueFixed(result: any) {
+    const issues = new Map(calendar_data.unitIssues);
+    const issue = result.My_Hka;
+    const prevIssues = issues.get(issue.PR_ID);
+    if (!prevIssues) {
+      return;
+    }
+    const filteredIssues = prevIssues.filter(i => i.id !== result.HK_ISSUE_ID);
+    if (filteredIssues.length === 0) {
+      issues.delete(issue.PR_ID);
+    } else {
+      issues.set(issue.PR_ID, filteredIssues);
+    }
+    calendar_data.unitIssues = issues;
   }
 
   private handleSetDepartureTime(result: SetDepartureTimeProps) {
@@ -760,7 +810,7 @@ export class IglooCalendar {
     });
   }
   /**
-   * 
+   *
    *private updateBookingEventsDateRange(eventData) {
     const now = moment();
     eventData.forEach(bookingEvent => {
@@ -1408,7 +1458,7 @@ export class IglooCalendar {
                   onOptionEvent={evt => this.onOptionSelect(evt)}
                 ></igl-to-be-assigned>
               )}
-              {this.showLegend && <igl-legends class="legendContainer" legendData={this.calendarData.legendData} onOptionEvent={evt => this.onOptionSelect(evt)}></igl-legends>}
+              {this.showLegend && <igl-legend class="legendContainer" legendData={this.calendarData.legendData} onOptionEvent={evt => this.onOptionSelect(evt)}></igl-legend>}
               <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
                 <div id="calendarContainer">
                   <igl-cal-header

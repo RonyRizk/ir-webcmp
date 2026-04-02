@@ -34,10 +34,8 @@
 - [ir-loading-screen](../ir-loading-screen)
 - [ir-interceptor](../ir-interceptor)
 - [ir-toast](../ui/ir-toast)
-- [ir-title](../ir-title)
-- [ir-select](../ui/ir-select)
+- [ir-hk-operations-card](ir-hk-operations-card)
 - [ir-hk-team](ir-hk-team)
-- [ir-modal](../ui/ir-modal)
 
 ### Graph
 ```mermaid
@@ -45,10 +43,8 @@ graph TD;
   ir-housekeeping --> ir-loading-screen
   ir-housekeeping --> ir-interceptor
   ir-housekeeping --> ir-toast
-  ir-housekeeping --> ir-title
-  ir-housekeeping --> ir-select
+  ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
-  ir-housekeeping --> ir-modal
   ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
@@ -57,19 +53,20 @@ graph TD;
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-title --> ir-icon
+  ir-hk-operations-card --> ir-input
+  ir-hk-operations-card --> ir-dialog
+  ir-hk-operations-card --> ir-custom-button
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-hk-user
-  ir-hk-team --> ir-title
-  ir-hk-team --> ir-icon
+  ir-hk-team --> ir-custom-button
   ir-hk-team --> ir-popover
   ir-hk-team --> ir-button
   ir-hk-team --> ir-sidebar
   ir-hk-team --> ir-delete-modal
   ir-hk-unassigned-units --> ir-select
-  ir-hk-unassigned-units --> ir-switch
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
+  ir-title --> ir-icon
   ir-hk-user --> ir-title
   ir-hk-user --> ir-input-text
   ir-hk-user --> ir-phone-input
@@ -82,7 +79,6 @@ graph TD;
   ir-sidebar --> ir-icon
   ir-delete-modal --> ir-button
   ir-delete-modal --> ir-select
-  ir-modal --> ir-button
   ir-secure-tasks --> ir-housekeeping
   style ir-housekeeping fill:#f9f,stroke:#333,stroke-width:4px
 ```

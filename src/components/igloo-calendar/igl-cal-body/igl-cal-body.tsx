@@ -10,6 +10,7 @@ import calendar_data from '@/stores/calendar-data';
 
 import { PhysicalRoom, RoomType } from '@/models/booking.dto';
 import { ICountry } from '@/models/IBooking';
+import { HKIssue } from '@/models/housekeeping';
 
 export type RoomCategory = RoomType & { expanded: boolean };
 
@@ -32,6 +33,7 @@ export class IglCalBody {
   @State() renderAgain: boolean = false;
   @State() selectedRoom: PhysicalRoom = null;
   @State() selectedRooms: { [key: string]: any } = {};
+  @State() issues: HKIssue[] | null = null;
 
   @Event() addBookingDatasEvent: EventEmitter<any[]>;
   @Event() showBookingPopup: EventEmitter;
@@ -444,6 +446,7 @@ export class IglCalBody {
       const name = haveSingleRooms ? this.getCategoryName(roomType) : this.getRoomName(room);
       const roomId = this.getRoomId(room);
       const roomHasTodayCheckin = this.roomHasTodayCheckin(roomId);
+      // const hasHousekeepingOrIssue = room.hk_status !== '001' || calendar_data.unitIssues.has(Number(room.id));
       return (
         <div class="roomRow" data-room-has-today-checkin={String(roomHasTodayCheckin)}>
           <div
@@ -474,17 +477,36 @@ export class IglCalBody {
                 if (el) this.interactiveTitle[room.id] = el;
               }}
               style={room.hk_status === '003' && { '--dot-color': 'var(--wa-color-neutral-fill-quiet)' }}
-              hkStatus={calendar_data.housekeeping_enabled && room.hk_status !== '001'}
+              hkStatus={calendar_data.housekeeping_enabled && (room.hk_status !== '001' || calendar_data.unitIssues?.has(room.id))}
               popoverTitle={name}
             >
-              {room.hk_status !== '001' && (
+              {(room.hk_status !== '001' || calendar_data.unitIssues.has(Number(room.id))) && (
                 <div slot="end" class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                  {room.hk_status !== '003' && <wa-tooltip for={`${room.id}_hk_status_icon`}>{room.hk_status === '002' ? 'This unit is dirty' : 'Inspected'}</wa-tooltip>}
-                  <wa-icon
-                    id={`${room.id}_hk_status_icon`}
-                    name={room.hk_status === '004' ? 'check' : 'broom'}
-                    style={room.hk_status === '004' && { color: 'var(--wa-color-success-fill-loud)' }}
-                  ></wa-icon>
+                  {calendar_data.unitIssues.has(room.id) && (
+                    <wa-button
+                      appearance="plain"
+                      variant="danger"
+                      class="hk_issue_btn"
+                      onClick={e => {
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                        this.issues = calendar_data.unitIssues.get(Number(room.id));
+                      }}
+                    >
+                      <wa-animation name="heartBeat" easing="ease-in-out" duration={1400} play>
+                        <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-danger-fill-loud)', fontSize: '1.1rem' }}></wa-icon>
+                      </wa-animation>
+                    </wa-button>
+                  )}
+
+                  <div style={{ visibility: room.hk_status !== '001' ? 'visible' : 'hidden' }}>
+                    {room.hk_status !== '003' && <wa-tooltip for={`${room.id}_hk_status_icon`}>{room.hk_status === '002' ? 'This unit is dirty' : 'Inspected'}</wa-tooltip>}
+                    <wa-icon
+                      id={`${room.id}_hk_status_icon`}
+                      name={room.hk_status === '004' ? 'check' : 'broom'}
+                      style={room.hk_status === '004' && { color: 'var(--wa-color-success-fill-loud)' }}
+                    ></wa-icon>
+                  </div>
                 </div>
               )}
             </ir-interactive-title>
@@ -621,6 +643,17 @@ export class IglCalBody {
           selectedRoom={this.selectedRoom}
           open={this.selectedRoom !== null}
         ></igl-housekeeping-dialog>
+        <igl-hk-issues-dialog
+          open={this.issues !== null}
+          issues={this.issues}
+          unitName={this.issues?.length > 0 ? this.issues[0]?.unit?.name : ''}
+          propertyId={this.propertyId}
+          onIrAfterClose={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.issues = null;
+          }}
+        ></igl-hk-issues-dialog>
       </Host>
     );
   }

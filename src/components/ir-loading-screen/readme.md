@@ -24,6 +24,7 @@
  - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-departures](../ir-departures)
  - [ir-financial-actions](../ir-financial-actions)
+ - [ir-hk-staff-tasks](../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
@@ -45,6 +46,7 @@ graph TD;
   ir-daily-revenue --> ir-loading-screen
   ir-departures --> ir-loading-screen
   ir-financial-actions --> ir-loading-screen
+  ir-hk-staff-tasks --> ir-loading-screen
   ir-hk-tasks --> ir-loading-screen
   ir-housekeeping --> ir-loading-screen
   ir-monthly-bookings-report --> ir-loading-screen

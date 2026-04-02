@@ -10,7 +10,7 @@
 | Property | Attribute | Description | Type                                                                                                                                         | Default |
 | -------- | --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `isEdit` | `is-edit` |             | `boolean`                                                                                                                                    | `false` |
-| `user`   | --        |             | `{ name: string; note: string; id: number; mobile: string; password: string; property_id: number; phone_prefix: string; username: string; }` | `null`  |
+| `user`   | --        |             | `{ name: string; note: string; id: number; property_id: number; mobile: string; password: string; phone_prefix: string; username: string; }` | `null`  |
 
 
 ## Events

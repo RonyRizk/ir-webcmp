@@ -110,13 +110,14 @@ export class IrHkUnassignedUnits {
             <td>{physical_room.name}</td>
             <td>{taken ? housekeeper[0]?.name : ''}</td>
             <td>
-              <ir-switch
-                onCheckChange={e => {
-                  const checked = e.detail;
+              <wa-switch
+                defaultChecked={taken && housekeeper[0]?.id === this.user.id}
+                checked={taken && housekeeper[0]?.id === this.user.id}
+                onchange={e => {
+                  const checked = (e.target as HTMLInputElement).checked;
                   this.assignUnit(physical_room.id, this.user.id, checked);
                 }}
-                checked={taken && housekeeper[0]?.id === this.user.id}
-              ></ir-switch>
+              ></wa-switch>
             </td>
           </tr>
         );

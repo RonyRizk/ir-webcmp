@@ -1,15 +1,17 @@
 :host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.hk-owner-select {
+  min-width: 130px;
+}
+
+.hk-dialog-footer {
   display: flex;
-  align-items: center;
-}
-.selected-row {
-  background-color: rgba(0, 0, 255, 0.1);
-}
-.selected-row:hover {
-  background-color: rgba(0, 0, 255, 0.15);
-}
-.header-content {
-  height: 100%;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .highlighted-unit {
@@ -18,65 +20,77 @@
   padding: 0.2rem 0.3rem;
   border-radius: 4px;
 }
-.table-container {
-  height: 100%;
-}
 
-/* .table-container {
-  height: 75vh;
-} */
-/* td,
-th {
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  max-width: max-content !important;
- 
-  text-align: start;
-}
-tr {
-  border-bottom: 1px solid #e0e0e0;
-} */
 .task-table-row td {
   background: white !important;
 }
 .task-table-row:hover td {
   background: #e2e6ea3f !important;
 }
-.table-container {
-  display: none;
+
+/* Sortable th inner layout */
+.th-sort-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-/* .pagination-container {
-  position: sticky;
-  bottom: -1rem;
-  background-color: white;
-  padding: 1rem 0;
-  } */
+
+/* Empty state */
+.table-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+}
+
+/* Empty message (mobile) */
+.empty-msg {
+  text-align: center;
+  color: var(--wa-color-text-quiet);
+}
+
+/* Mobile date grouping */
+.mobile-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobile-date-label {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--wa-color-text-normal);
+  padding: 0 0.25rem;
+}
+
+/* Mobile: show cards, hide table */
 .mobile-tasks-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
-/*sm*/
+
+.table-container {
+  display: none;
+  min-width: 0;
+  width: 100%;
+}
+
+/* >= 640px: show table, hide cards */
 @media (min-width: 640px) {
   .mobile-tasks-container {
     display: none;
   }
+
   .table-container {
-    display: flex;
+    display: block;
+    min-width: 0;
   }
-}
 
-/*md*/
-@media (min-width: 768px) {
-}
-
-/*lg*/
-@media (min-width: 1024px) {
-}
-
-/*xl*/
-@media (min-width: 1280px) {
-}
-
-/*2xl*/
-@media (min-width: 1536px) {
+  .table--container {
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+  }
 }

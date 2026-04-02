@@ -52,6 +52,7 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [igl-hk-issues-dialog](../../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [ir-agents](../../ir-agents)
@@ -64,15 +65,20 @@ Type: `Promise<void>`
  - [ir-booking-listing-table](../../ir-booking-listing/ir-booking-listing-table)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
+ - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
+ - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
+ - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
 
 ### Graph
 ```mermaid
 graph TD;
+  igl-hk-issues-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-dialog
   ir-agents --> ir-dialog
@@ -85,10 +91,14 @@ graph TD;
   ir-booking-listing-table --> ir-dialog
   ir-checkout-dialog --> ir-dialog
   ir-extra-service --> ir-dialog
+  ir-hk-operations-card --> ir-dialog
+  ir-hk-staff-tasks --> ir-dialog
+  ir-hk-tasks --> ir-dialog
   ir-payment-details --> ir-dialog
   ir-preview-screen-dialog --> ir-dialog
   ir-property-switcher --> ir-dialog
   ir-room --> ir-dialog
+  ir-tasks-table --> ir-dialog
   ir-user-management-table --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```

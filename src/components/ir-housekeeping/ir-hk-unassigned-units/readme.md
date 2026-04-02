@@ -29,7 +29,6 @@
 ### Depends on
 
 - [ir-select](../../ui/ir-select)
-- [ir-switch](../../ui/ir-switch)
 - [ir-title](../../ir-title)
 - [ir-button](../../ui/ir-button)
 
@@ -37,7 +36,6 @@
 ```mermaid
 graph TD;
   ir-hk-unassigned-units --> ir-select
-  ir-hk-unassigned-units --> ir-switch
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
   ir-title --> ir-icon

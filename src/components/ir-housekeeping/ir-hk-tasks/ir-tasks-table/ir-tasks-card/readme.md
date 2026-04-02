@@ -18,7 +18,8 @@
 
 | Event               | Description | Type                                                    |
 | ------------------- | ----------- | ------------------------------------------------------- |
-| `cleanSelectedTask` |             | `CustomEvent<{ task: Task; status?: "004" \| "001"; }>` |
+| `assignHousekeeper` |             | `CustomEvent<{ task: Task; hkm_id: number; }>`          |
+| `cleanSelectedTask` |             | `CustomEvent<{ task: Task; status?: "001" \| "004"; }>` |
 | `skipSelectedTask`  |             | `CustomEvent<Task>`                                     |
 
 
@@ -30,13 +31,12 @@
 
 ### Depends on
 
-- [ir-button](../../../../ui/ir-button)
+- [ir-custom-button](../../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-tasks-card --> ir-button
-  ir-button --> ir-icons
+  ir-tasks-card --> ir-custom-button
   ir-tasks-table --> ir-tasks-card
   style ir-tasks-card fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -51,8 +51,9 @@
  - [igl-bulk-operations-drawer](../../igloo-calendar/igl-bulk-operations/igl-bulk-operations-drawer)
  - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-cal-header](../../igloo-calendar/igl-cal-header)
+ - [igl-hk-issues-dialog](../../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
- - [igl-legends](../../igloo-calendar/igl-legends)
+ - [igl-legend](../../igloo-calendar/igl-legend)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
@@ -81,6 +82,11 @@
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
+ - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
+ - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
+ - [ir-hk-staff-tasks-header](../../ir-housekeeping/ir-hk-staff-tasks/ir-hk-staff-tasks-header)
+ - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
+ - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-notifications](../../ir-notifications)
@@ -101,6 +107,10 @@
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
  - [ir-secure-tasks](../../ir-secure-tasks)
+ - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
+ - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
+ - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
+ - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-test2-cmp](../../ir-test-cmp)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
@@ -118,8 +128,9 @@ graph TD;
   igl-bulk-operations-drawer --> ir-custom-button
   igl-bulk-stop-sale --> ir-custom-button
   igl-cal-header --> ir-custom-button
+  igl-hk-issues-dialog --> ir-custom-button
   igl-housekeeping-dialog --> ir-custom-button
-  igl-legends --> ir-custom-button
+  igl-legend --> ir-custom-button
   igl-rate-plan --> ir-custom-button
   igl-reallocation-dialog --> ir-custom-button
   igl-to-be-assigned --> ir-custom-button
@@ -148,6 +159,11 @@ graph TD;
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
+  ir-hk-operations-card --> ir-custom-button
+  ir-hk-staff-tasks --> ir-custom-button
+  ir-hk-staff-tasks-header --> ir-custom-button
+  ir-hk-tasks --> ir-custom-button
+  ir-hk-team --> ir-custom-button
   ir-invoice --> ir-custom-button
   ir-listing-header --> ir-custom-button
   ir-notifications --> ir-custom-button
@@ -168,6 +184,10 @@ graph TD;
   ir-room --> ir-custom-button
   ir-room-guests --> ir-custom-button
   ir-secure-tasks --> ir-custom-button
+  ir-tasks-card --> ir-custom-button
+  ir-tasks-filters --> ir-custom-button
+  ir-tasks-header --> ir-custom-button
+  ir-tasks-table --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
   ir-unbookable-rooms-filters --> ir-custom-button
   ir-user-form-panel-drawer --> ir-custom-button

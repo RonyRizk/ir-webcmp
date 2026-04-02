@@ -98,6 +98,7 @@ Type: `Promise<void>`
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
+ - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
@@ -105,6 +106,7 @@ Type: `Promise<void>`
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-secure-tasks](../../ir-secure-tasks)
+ - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-unbookable-rooms-data](../../ir-unbookable-rooms/ir-unbookable-rooms-data)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
@@ -127,6 +129,7 @@ graph TD;
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
   ir-guest-info-form --> ir-input
+  ir-hk-operations-card --> ir-input
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input
@@ -134,6 +137,7 @@ graph TD;
   ir-reset-password --> ir-input
   ir-room-guests-form --> ir-input
   ir-secure-tasks --> ir-input
+  ir-tasks-header --> ir-input
   ir-unbookable-rooms-data --> ir-input
   ir-unbookable-rooms-filters --> ir-input
   ir-user-form-panel --> ir-input

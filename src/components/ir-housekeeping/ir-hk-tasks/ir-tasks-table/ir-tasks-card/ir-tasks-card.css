@@ -1,0 +1,177 @@
+:host {
+  display: block;
+}
+
+.task-card::part(body) {
+  padding: 0.5rem 0.75rem;
+}
+
+.task-card__body {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 2.75rem;
+}
+
+/* Unit + meta */
+.task-card__unit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-card__unit-name {
+  font-weight: 700;
+  font-size: var(--wa-font-size-m);
+  color: var(--wa-color-text-normal);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.task-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+}
+
+.task-card__status {
+  font-size: var(--wa-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--wa-color-text-quiet);
+  white-space: nowrap;
+}
+
+.task-card__sep,
+.task-card__hint,
+.task-card__date {
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+  white-space: nowrap;
+}
+
+/* Task type badges */
+.task-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Guests */
+.task-card__guests {
+  display: flex;
+  /* flex-direction: column; */
+  /* justify-content: center; */
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.task-card__guest {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.task-card__guest-icon {
+  color: var(--wa-color-text-quiet);
+  flex-shrink: 0;
+}
+
+.task-card__guest-count {
+  font-size: var(--wa-font-size-m);
+  font-weight: 600;
+  color: var(--wa-color-text-normal);
+  line-height: 1;
+  min-width: 1ch;
+}
+
+/* Housekeeper assignment */
+.task-card__assign {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid var(--wa-color-surface-border);
+  padding-left: 0.875rem;
+}
+
+.task-card__assign-icon {
+  flex-shrink: 0;
+  color: var(--wa-color-text-quiet);
+  font-size: 0.875rem;
+}
+
+.task-card__hk-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 11rem;
+}
+
+/* Actions */
+.task-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.task-card__clean-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-card__clean-group ir-custom-button:first-child::part(base) {
+  border-radius: var(--wa-border-radius-m) 0 0 var(--wa-border-radius-m);
+  border-right: none;
+}
+
+.task-card__clean-group ir-custom-button:last-child::part(base) {
+  border-radius: 0 var(--wa-border-radius-m) var(--wa-border-radius-m) 0;
+}
+
+/* Mobile */
+@media (max-width: 639px) {
+  .task-card__body {
+    flex-wrap: wrap;
+    min-height: unset;
+    gap: 0.625rem;
+  }
+
+  .task-card__unit {
+    flex: 1;
+    min-width: 0;
+    max-width: unset;
+  }
+
+  .task-card__unit-name {
+    max-width: 100%;
+  }
+
+  .task-card__assign {
+    border-left: none;
+    padding-left: 0;
+    /* border-top: 1px solid var(--wa-color-surface-border); */
+    padding-top: 0.5rem;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  .task-card__hk-select {
+    max-width: 100%;
+  }
+
+  .task-card__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

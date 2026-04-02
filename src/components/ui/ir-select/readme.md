@@ -63,14 +63,12 @@
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
  - [ir-hk-unassigned-units](../../ir-housekeeping/ir-hk-unassigned-units)
- - [ir-housekeeping](../../ir-housekeeping)
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
  - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
  - [ir-pagination](../../ir-pagination)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
- - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-test-cmp](../../ir-test-cmp)
  - [ir-unit-status](../../ir-housekeeping/ir-unit-status)
 
@@ -82,14 +80,12 @@ graph TD;
   ir-financial-filters --> ir-select
   ir-hk-archive --> ir-select
   ir-hk-unassigned-units --> ir-select
-  ir-housekeeping --> ir-select
   ir-listing-modal --> ir-select
   ir-monthly-bookings-report-filter --> ir-select
   ir-option-details --> ir-select
   ir-pagination --> ir-select
   ir-sales-by-channel-filters --> ir-select
   ir-sales-filters --> ir-select
-  ir-tasks-filters --> ir-select
   ir-test-cmp --> ir-select
   ir-unit-status --> ir-select
   style ir-select fill:#f9f,stroke:#333,stroke-width:4px

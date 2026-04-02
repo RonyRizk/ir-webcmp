@@ -4,12 +4,66 @@
   height: 100%;
   flex: 1;
 }
+
+/* Header row */
+.filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filters__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.filters__card.--collapsed::part(body) {
+  display: none;
+}
+
+.filters__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: var(--wa-color-text-quiet);
+}
+
+.filters__title {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+  font-weight: var(--wa-font-weight-heading);
+  color: var(--wa-color-text-normal);
+}
+
+/* Collapsible body */
+.filters__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.filters__body--collapsed {
+  display: none;
+}
+
+/* Actions row */
+.filters__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+/* Hide toggle on large screens — always show body */
 @media (min-width: 1024px) {
-  .collapse-btn {
+  .filters__collapse-btn {
     display: none;
   }
-  #hkTasksFiltersCollapse.collapse:not(.show) {
+  .filters__card.--collapsed::part(body) {
     display: block;
-    /* height: 75vh; */
+  }
+  .filters__body--collapsed {
+    display: flex;
   }
 }

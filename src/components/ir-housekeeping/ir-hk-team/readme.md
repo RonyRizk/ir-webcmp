@@ -15,8 +15,7 @@
 
 - [ir-hk-unassigned-units](../ir-hk-unassigned-units)
 - [ir-hk-user](../ir-hk-user)
-- [ir-title](../../ir-title)
-- [ir-icon](../../ui/ir-icon)
+- [ir-custom-button](../../ui/ir-custom-button)
 - [ir-popover](../../ui/ir-popover)
 - [ir-button](../../ui/ir-button)
 - [ir-sidebar](../../ui/ir-sidebar)
@@ -27,14 +26,12 @@
 graph TD;
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-hk-user
-  ir-hk-team --> ir-title
-  ir-hk-team --> ir-icon
+  ir-hk-team --> ir-custom-button
   ir-hk-team --> ir-popover
   ir-hk-team --> ir-button
   ir-hk-team --> ir-sidebar
   ir-hk-team --> ir-delete-modal
   ir-hk-unassigned-units --> ir-select
-  ir-hk-unassigned-units --> ir-switch
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
   ir-title --> ir-icon

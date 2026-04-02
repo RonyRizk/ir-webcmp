@@ -1,0 +1,163 @@
+:host {
+  display: block;
+  cursor: pointer;
+  height: 100%;
+}
+:host([future]) {
+  cursor: not-allowed;
+}
+
+:host(.staff-task--future) {
+  opacity: 0.5;
+}
+.staff-task__card {
+  height: 100%;
+}
+.staff-task__card::part(body) {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  padding: 0;
+  gap: 0.75rem;
+  transition-property: background, border, box-shadow, color;
+  transition-duration: var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
+}
+:host([future]) .task-badges {
+  margin-block: auto;
+}
+:host(:not([future])) .staff-task__card::part(body):hover {
+  color: var(--wa-color-on-normal, var(--wa-color-neutral-on-normal));
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-neutral-fill-normal)), var(--wa-color-mix-hover));
+}
+:host(:not([future])) .staff-task__card::part(body):active {
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-neutral-fill-normal)), var(--wa-color-mix-active));
+}
+
+/* Unit label column */
+.unit-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  flex-shrink: 0;
+  background-color: var(--wa-color-surface-lowered);
+  padding: 0 0.25rem;
+}
+.unit-label:dir(ltr) {
+  border-top-left-radius: var(--wa-panel-border-radius);
+  border-bottom-left-radius: var(--wa-panel-border-radius);
+}
+.unit-label:dir(rtl) {
+  border-top-right-radius: var(--wa-panel-border-radius);
+  border-bottom-right-radius: var(--wa-panel-border-radius);
+}
+
+.unit-label__name {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--wa-color-text-normal);
+  text-align: center;
+  overflow-wrap: break-word;
+  line-height: 1.25;
+}
+
+.unit-label__name--lg {
+  font-size: 1.5rem;
+}
+
+.unit-label__name--md {
+  font-size: 0.875rem;
+}
+
+.unit-label__name--sm {
+  font-size: 0.75rem;
+}
+
+/* Main content */
+.task-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+/* Status + hint row */
+.task-status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.task-status__label {
+  font-size: 0.875rem;
+  /* font-weight: 600; */
+  text-transform: uppercase;
+  /* letter-spacing: 0.05em; */
+  /* color: var(--wa-color-text-quiet); */
+}
+
+.task-status__hint {
+  font-size: 0.75rem;
+  color: var(--wa-color-text-quiet);
+}
+
+/* Badges row */
+.task-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+/* Guest counts */
+.task-guests {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-guest {
+  display: flex;
+  align-items: baseline;
+  gap: 0rem;
+}
+
+.task-guest__count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--wa-color-text-normal);
+  line-height: 1;
+}
+
+.task-guest__label {
+  font-size: 0.875rem;
+  color: var(--wa-color-text-quiet);
+}
+
+/* Action area */
+.task-action {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.task-icon {
+  width: 1rem;
+  height: 1rem;
+}
+.staff-task__button {
+  all: unset;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--wa-form-control-border-radius);
+}
+.staff-task__button:focus {
+  outline: none;
+}
+.staff-task__button:focus-visible {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+}

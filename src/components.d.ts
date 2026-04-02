@@ -17,6 +17,7 @@ import { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar
 import { IPageTwoDataUpdateProps } from "./models/models";
 import { IrToast } from "./components/ui/ir-toast/ir-toast";
 import { DateRangeChangeEvent } from "./components/igloo-calendar/igl-date-range/igl-date-range";
+import { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 import { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom, Property, Room, SharedPerson } from "./models/booking.dto";
 import { Currency, RatePlan, RoomType } from "./models/property";
 import { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
@@ -41,7 +42,6 @@ import { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button"
 import { Moment } from "moment/min/moment-with-locales";
 import { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
 import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from "./components/ir-daily-revenue/types";
-import { CleanTaskEvent, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 import { CheckoutRoomEvent } from "./components/ir-departures/ir-departures-table/ir-departures-table";
 import { Element } from "@stencil/core";
 import { NativeDrawer } from "./components/ir-drawer/ir-drawer";
@@ -49,6 +49,7 @@ import { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 import { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
 import { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
 import { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
+import { ConnectedHK } from "./services/housekeeping.service";
 import { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
 import { FactoryArg } from "imask";
 import { ZodType, ZodTypeAny } from "zod";
@@ -86,6 +87,7 @@ export { CalendarSidebarState } from "./components/igloo-calendar/igloo-calendar
 export { IPageTwoDataUpdateProps } from "./models/models";
 export { IrToast } from "./components/ui/ir-toast/ir-toast";
 export { DateRangeChangeEvent } from "./components/igloo-calendar/igl-date-range/igl-date-range";
+export { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 export { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom, Property, Room, SharedPerson } from "./models/booking.dto";
 export { Currency, RatePlan, RoomType } from "./models/property";
 export { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
@@ -110,7 +112,6 @@ export { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button"
 export { Moment } from "moment/min/moment-with-locales";
 export { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
 export { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from "./components/ir-daily-revenue/types";
-export { CleanTaskEvent, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 export { CheckoutRoomEvent } from "./components/ir-departures/ir-departures-table/ir-departures-table";
 export { Element } from "@stencil/core";
 export { NativeDrawer } from "./components/ir-drawer/ir-drawer";
@@ -118,6 +119,7 @@ export { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 export { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
 export { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
 export { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
+export { ConnectedHK } from "./services/housekeeping.service";
 export { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
 export { FactoryArg } from "imask";
 export { ZodType, ZodTypeAny } from "zod";
@@ -335,6 +337,13 @@ export namespace Components {
         "variant": 'booking' | 'default';
         "withDateDifference": boolean;
     }
+    interface IglHkIssuesDialog {
+        "issues": HKIssue[];
+        "open": boolean;
+        "propertyId": number;
+        "unitId": number;
+        "unitName": string;
+    }
     interface IglHousekeepingDialog {
         /**
           * Booking number associated with the selected room (if any). Used for housekeeping action tracking.
@@ -353,7 +362,7 @@ export namespace Components {
          */
         "selectedRoom": PhysicalRoom;
     }
-    interface IglLegends {
+    interface IglLegend {
         "legendData": { [key: string]: any };
     }
     interface IglPropertyBookedBy {
@@ -1971,6 +1980,22 @@ export namespace Components {
         "propertyId": string | number;
         "ticket": string;
     }
+    interface IrHkOperationsCard {
+        "frequencies": IEntries[];
+    }
+    interface IrHkStaffTask {
+        "future": boolean;
+        "task": Task;
+    }
+    interface IrHkStaffTasks {
+        "baseurl": string;
+        "language": string;
+        "ticket": string;
+    }
+    interface IrHkStaffTasksHeader {
+        "connectedHK": ConnectedHK;
+        "language": string;
+    }
     interface IrHkTasks {
         "baseUrl": string;
         "language": string;
@@ -2305,26 +2330,39 @@ export namespace Components {
          */
         "zod"?: ZodType<any, any>;
     }
+    /**
+     * @component ir-interactive-title
+     * Renders a room/category name inside a flex row that:
+     * - Truncates via CSS `text-overflow: ellipsis` when the text overflows.
+     * - Shows a `<wa-tooltip>` with the full title on hover when the title
+     * exceeds `cropSize` characters (lightweight proxy for overflow detection).
+     * - Optionally renders a trailing `.hk-dot` container (via `slot[name="end"]`)
+     * for housekeeping status icons or alert badges.
+     * The `.hk-dot` participates in the flex layout (`flex-shrink: 0`) so the
+     * title span is guaranteed to truncate *before* reaching the icons — no JS
+     * width measurement needed.
+     * @cssvar --ir-popover-left   Horizontal padding of the `.hk-dot` overlay.
+     * @cssvar --ir-interactive-hk-bg  Background fill of `.hk-dot` (used for
+     *                          hover highlight from the parent row).
+     * @cssvar --dot-color          Icon colour inside `.hk-dot`.
+     */
     interface IrInteractiveTitle {
         /**
-          * The message shown when hovering over the broom svg if provided.
-          * @requires hkStatus to be true
-         */
-        "broomTooltip": string;
-        /**
-          * The number of characters to display before cropping the title with ellipsis.
+          * Character-count threshold above which the full-title tooltip is shown. Acts as a fast approximation of visual overflow; the browser independently applies `text-overflow: ellipsis` via CSS regardless of this value.
+          * @default 20
          */
         "cropSize": number;
         /**
-          * Whether to show the housekeeping (HK) status dot.
+          * When `true`, renders the `.hk-dot` container and the `slot[name="end"]` inside it. Must be `true` whenever slot content is provided, otherwise the slotted nodes are silently discarded by the browser.
          */
         "hkStatus": boolean;
         /**
-          * CSS offset for the left position of the popover. Used as a CSS variable `--ir-popover-left`.
+          * Horizontal padding of the `.hk-dot` slot container, forwarded as the `--ir-popover-left` CSS custom property on the host element.
+          * @default '10px'
          */
         "irPopoverLeft": string;
         /**
-          * The full title string that may be cropped in the UI.
+          * The full title string. When its length exceeds `cropSize` the tooltip is activated so the user can read the complete text on hover.
          */
         "popoverTitle": string;
     }
@@ -4117,13 +4155,17 @@ export interface IglDateRangeCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglDateRangeElement;
 }
+export interface IglHkIssuesDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglHkIssuesDialogElement;
+}
 export interface IglHousekeepingDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglHousekeepingDialogElement;
 }
-export interface IglLegendsCustomEvent<T> extends CustomEvent<T> {
+export interface IglLegendCustomEvent<T> extends CustomEvent<T> {
     detail: T;
-    target: HTMLIglLegendsElement;
+    target: HTMLIglLegendElement;
 }
 export interface IglPropertyBookedByCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -4408,6 +4450,18 @@ export interface IrGuestInfoDrawerCustomEvent<T> extends CustomEvent<T> {
 export interface IrGuestInfoFormCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrGuestInfoFormElement;
+}
+export interface IrHkOperationsCardCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkOperationsCardElement;
+}
+export interface IrHkStaffTaskCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkStaffTaskElement;
+}
+export interface IrHkStaffTasksHeaderCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkStaffTasksHeaderElement;
 }
 export interface IrHkTasksCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -5096,6 +5150,23 @@ declare global {
         prototype: HTMLIglDateRangeElement;
         new (): HTMLIglDateRangeElement;
     };
+    interface HTMLIglHkIssuesDialogElementEventMap {
+        "irAfterClose": void;
+    }
+    interface HTMLIglHkIssuesDialogElement extends Components.IglHkIssuesDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglHkIssuesDialogElementEventMap>(type: K, listener: (this: HTMLIglHkIssuesDialogElement, ev: IglHkIssuesDialogCustomEvent<HTMLIglHkIssuesDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglHkIssuesDialogElementEventMap>(type: K, listener: (this: HTMLIglHkIssuesDialogElement, ev: IglHkIssuesDialogCustomEvent<HTMLIglHkIssuesDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglHkIssuesDialogElement: {
+        prototype: HTMLIglHkIssuesDialogElement;
+        new (): HTMLIglHkIssuesDialogElement;
+    };
     interface HTMLIglHousekeepingDialogElementEventMap {
         "irAfterClose": void;
     }
@@ -5113,22 +5184,22 @@ declare global {
         prototype: HTMLIglHousekeepingDialogElement;
         new (): HTMLIglHousekeepingDialogElement;
     };
-    interface HTMLIglLegendsElementEventMap {
+    interface HTMLIglLegendElementEventMap {
         "optionEvent": { [key: string]: any };
     }
-    interface HTMLIglLegendsElement extends Components.IglLegends, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglLegendsElementEventMap>(type: K, listener: (this: HTMLIglLegendsElement, ev: IglLegendsCustomEvent<HTMLIglLegendsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+    interface HTMLIglLegendElement extends Components.IglLegend, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglLegendElementEventMap>(type: K, listener: (this: HTMLIglLegendElement, ev: IglLegendCustomEvent<HTMLIglLegendElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglLegendsElementEventMap>(type: K, listener: (this: HTMLIglLegendsElement, ev: IglLegendsCustomEvent<HTMLIglLegendsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglLegendElementEventMap>(type: K, listener: (this: HTMLIglLegendElement, ev: IglLegendCustomEvent<HTMLIglLegendElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
-    var HTMLIglLegendsElement: {
-        prototype: HTMLIglLegendsElement;
-        new (): HTMLIglLegendsElement;
+    var HTMLIglLegendElement: {
+        prototype: HTMLIglLegendElement;
+        new (): HTMLIglLegendElement;
     };
     interface HTMLIglPropertyBookedByElementEventMap {
         "dataUpdateEvent": { [key: string]: any };
@@ -6608,6 +6679,63 @@ declare global {
         prototype: HTMLIrHkArchiveElement;
         new (): HTMLIrHkArchiveElement;
     };
+    interface HTMLIrHkOperationsCardElementEventMap {
+        "toast": IToast;
+    }
+    interface HTMLIrHkOperationsCardElement extends Components.IrHkOperationsCard, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkOperationsCardElementEventMap>(type: K, listener: (this: HTMLIrHkOperationsCardElement, ev: IrHkOperationsCardCustomEvent<HTMLIrHkOperationsCardElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkOperationsCardElementEventMap>(type: K, listener: (this: HTMLIrHkOperationsCardElement, ev: IrHkOperationsCardCustomEvent<HTMLIrHkOperationsCardElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkOperationsCardElement: {
+        prototype: HTMLIrHkOperationsCardElement;
+        new (): HTMLIrHkOperationsCardElement;
+    };
+    interface HTMLIrHkStaffTaskElementEventMap {
+        "taskClick": Task;
+    }
+    interface HTMLIrHkStaffTaskElement extends Components.IrHkStaffTask, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkStaffTaskElementEventMap>(type: K, listener: (this: HTMLIrHkStaffTaskElement, ev: IrHkStaffTaskCustomEvent<HTMLIrHkStaffTaskElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkStaffTaskElementEventMap>(type: K, listener: (this: HTMLIrHkStaffTaskElement, ev: IrHkStaffTaskCustomEvent<HTMLIrHkStaffTaskElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkStaffTaskElement: {
+        prototype: HTMLIrHkStaffTaskElement;
+        new (): HTMLIrHkStaffTaskElement;
+    };
+    interface HTMLIrHkStaffTasksElement extends Components.IrHkStaffTasks, HTMLStencilElement {
+    }
+    var HTMLIrHkStaffTasksElement: {
+        prototype: HTMLIrHkStaffTasksElement;
+        new (): HTMLIrHkStaffTasksElement;
+    };
+    interface HTMLIrHkStaffTasksHeaderElementEventMap {
+        "languageChanged": string;
+    }
+    interface HTMLIrHkStaffTasksHeaderElement extends Components.IrHkStaffTasksHeader, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkStaffTasksHeaderElementEventMap>(type: K, listener: (this: HTMLIrHkStaffTasksHeaderElement, ev: IrHkStaffTasksHeaderCustomEvent<HTMLIrHkStaffTasksHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkStaffTasksHeaderElementEventMap>(type: K, listener: (this: HTMLIrHkStaffTasksHeaderElement, ev: IrHkStaffTasksHeaderCustomEvent<HTMLIrHkStaffTasksHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkStaffTasksHeaderElement: {
+        prototype: HTMLIrHkStaffTasksHeaderElement;
+        new (): HTMLIrHkStaffTasksHeaderElement;
+    };
     interface HTMLIrHkTasksElementEventMap {
         "clearSelectedHkTasks": void;
     }
@@ -6745,6 +6873,22 @@ declare global {
         prototype: HTMLIrInputTextElement;
         new (): HTMLIrInputTextElement;
     };
+    /**
+     * @component ir-interactive-title
+     * Renders a room/category name inside a flex row that:
+     * - Truncates via CSS `text-overflow: ellipsis` when the text overflows.
+     * - Shows a `<wa-tooltip>` with the full title on hover when the title
+     * exceeds `cropSize` characters (lightweight proxy for overflow detection).
+     * - Optionally renders a trailing `.hk-dot` container (via `slot[name="end"]`)
+     * for housekeeping status icons or alert badges.
+     * The `.hk-dot` participates in the flex layout (`flex-shrink: 0`) so the
+     * title span is guaranteed to truncate *before* reaching the icons — no JS
+     * width measurement needed.
+     * @cssvar --ir-popover-left   Horizontal padding of the `.hk-dot` overlay.
+     * @cssvar --ir-interactive-hk-bg  Background fill of `.hk-dot` (used for
+     *                          hover highlight from the parent row).
+     * @cssvar --dot-color          Icon colour inside `.hk-dot`.
+     */
     interface HTMLIrInteractiveTitleElement extends Components.IrInteractiveTitle, HTMLStencilElement {
     }
     var HTMLIrInteractiveTitleElement: {
@@ -7979,6 +8123,7 @@ declare global {
     interface HTMLIrTasksCardElementEventMap {
         "cleanSelectedTask": CleanTaskEvent;
         "skipSelectedTask": Task;
+        "assignHousekeeper": { task: Task; hkm_id: number };
     }
     interface HTMLIrTasksCardElement extends Components.IrTasksCard, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrTasksCardElementEventMap>(type: K, listener: (this: HTMLIrTasksCardElement, ev: IrTasksCardCustomEvent<HTMLIrTasksCardElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -8033,6 +8178,7 @@ declare global {
         "rowSelectChange": Task[];
         "sortingChanged": { field: string; direction: 'ASC' | 'DESC' };
         "skipSelectedTask": Task;
+        "toast": IToast;
     }
     interface HTMLIrTasksTableElement extends Components.IrTasksTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrTasksTableElementEventMap>(type: K, listener: (this: HTMLIrTasksTableElement, ev: IrTasksTableCustomEvent<HTMLIrTasksTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -8341,8 +8487,9 @@ declare global {
         "igl-cal-footer": HTMLIglCalFooterElement;
         "igl-cal-header": HTMLIglCalHeaderElement;
         "igl-date-range": HTMLIglDateRangeElement;
+        "igl-hk-issues-dialog": HTMLIglHkIssuesDialogElement;
         "igl-housekeeping-dialog": HTMLIglHousekeepingDialogElement;
-        "igl-legends": HTMLIglLegendsElement;
+        "igl-legend": HTMLIglLegendElement;
         "igl-property-booked-by": HTMLIglPropertyBookedByElement;
         "igl-rate-plan": HTMLIglRatePlanElement;
         "igl-reallocation-dialog": HTMLIglReallocationDialogElement;
@@ -8444,6 +8591,10 @@ declare global {
         "ir-guest-info-form": HTMLIrGuestInfoFormElement;
         "ir-guest-name-cell": HTMLIrGuestNameCellElement;
         "ir-hk-archive": HTMLIrHkArchiveElement;
+        "ir-hk-operations-card": HTMLIrHkOperationsCardElement;
+        "ir-hk-staff-task": HTMLIrHkStaffTaskElement;
+        "ir-hk-staff-tasks": HTMLIrHkStaffTasksElement;
+        "ir-hk-staff-tasks-header": HTMLIrHkStaffTasksHeaderElement;
         "ir-hk-tasks": HTMLIrHkTasksElement;
         "ir-hk-team": HTMLIrHkTeamElement;
         "ir-hk-unassigned-units": HTMLIrHkUnassignedUnitsElement;
@@ -8830,6 +8981,14 @@ declare namespace LocalJSX {
         "variant"?: 'booking' | 'default';
         "withDateDifference"?: boolean;
     }
+    interface IglHkIssuesDialog {
+        "issues"?: HKIssue[];
+        "onIrAfterClose"?: (event: IglHkIssuesDialogCustomEvent<void>) => void;
+        "open"?: boolean;
+        "propertyId"?: number;
+        "unitId"?: number;
+        "unitName"?: string;
+    }
     interface IglHousekeepingDialog {
         /**
           * Booking number associated with the selected room (if any). Used for housekeeping action tracking.
@@ -8852,9 +9011,9 @@ declare namespace LocalJSX {
          */
         "selectedRoom"?: PhysicalRoom;
     }
-    interface IglLegends {
+    interface IglLegend {
         "legendData"?: { [key: string]: any };
-        "onOptionEvent"?: (event: IglLegendsCustomEvent<{ [key: string]: any }>) => void;
+        "onOptionEvent"?: (event: IglLegendCustomEvent<{ [key: string]: any }>) => void;
     }
     interface IglPropertyBookedBy {
         "countries"?: ICountry[];
@@ -10668,6 +10827,25 @@ declare namespace LocalJSX {
         "propertyId"?: string | number;
         "ticket"?: string;
     }
+    interface IrHkOperationsCard {
+        "frequencies"?: IEntries[];
+        "onToast"?: (event: IrHkOperationsCardCustomEvent<IToast>) => void;
+    }
+    interface IrHkStaffTask {
+        "future"?: boolean;
+        "onTaskClick"?: (event: IrHkStaffTaskCustomEvent<Task>) => void;
+        "task"?: Task;
+    }
+    interface IrHkStaffTasks {
+        "baseurl"?: string;
+        "language"?: string;
+        "ticket"?: string;
+    }
+    interface IrHkStaffTasksHeader {
+        "connectedHK"?: ConnectedHK;
+        "language"?: string;
+        "onLanguageChanged"?: (event: IrHkStaffTasksHeaderCustomEvent<string>) => void;
+    }
     interface IrHkTasks {
         "baseUrl"?: string;
         "language"?: string;
@@ -11013,26 +11191,39 @@ declare namespace LocalJSX {
          */
         "zod"?: ZodType<any, any>;
     }
+    /**
+     * @component ir-interactive-title
+     * Renders a room/category name inside a flex row that:
+     * - Truncates via CSS `text-overflow: ellipsis` when the text overflows.
+     * - Shows a `<wa-tooltip>` with the full title on hover when the title
+     * exceeds `cropSize` characters (lightweight proxy for overflow detection).
+     * - Optionally renders a trailing `.hk-dot` container (via `slot[name="end"]`)
+     * for housekeeping status icons or alert badges.
+     * The `.hk-dot` participates in the flex layout (`flex-shrink: 0`) so the
+     * title span is guaranteed to truncate *before* reaching the icons — no JS
+     * width measurement needed.
+     * @cssvar --ir-popover-left   Horizontal padding of the `.hk-dot` overlay.
+     * @cssvar --ir-interactive-hk-bg  Background fill of `.hk-dot` (used for
+     *                          hover highlight from the parent row).
+     * @cssvar --dot-color          Icon colour inside `.hk-dot`.
+     */
     interface IrInteractiveTitle {
         /**
-          * The message shown when hovering over the broom svg if provided.
-          * @requires hkStatus to be true
-         */
-        "broomTooltip"?: string;
-        /**
-          * The number of characters to display before cropping the title with ellipsis.
+          * Character-count threshold above which the full-title tooltip is shown. Acts as a fast approximation of visual overflow; the browser independently applies `text-overflow: ellipsis` via CSS regardless of this value.
+          * @default 20
          */
         "cropSize"?: number;
         /**
-          * Whether to show the housekeeping (HK) status dot.
+          * When `true`, renders the `.hk-dot` container and the `slot[name="end"]` inside it. Must be `true` whenever slot content is provided, otherwise the slotted nodes are silently discarded by the browser.
          */
         "hkStatus"?: boolean;
         /**
-          * CSS offset for the left position of the popover. Used as a CSS variable `--ir-popover-left`.
+          * Horizontal padding of the `.hk-dot` slot container, forwarded as the `--ir-popover-left` CSS custom property on the host element.
+          * @default '10px'
          */
         "irPopoverLeft"?: string;
         /**
-          * The full title string that may be cropped in the UI.
+          * The full title string. When its length exceeds `cropSize` the tooltip is activated so the user can read the complete text on hover.
          */
         "popoverTitle"?: string;
     }
@@ -12600,6 +12791,7 @@ declare namespace LocalJSX {
     interface IrTasksCard {
         "isCheckable"?: boolean;
         "isSkippable"?: boolean;
+        "onAssignHousekeeper"?: (event: IrTasksCardCustomEvent<{ task: Task; hkm_id: number }>) => void;
         "onCleanSelectedTask"?: (event: IrTasksCardCustomEvent<CleanTaskEvent>) => void;
         "onSkipSelectedTask"?: (event: IrTasksCardCustomEvent<Task>) => void;
         "task"?: Task;
@@ -12616,6 +12808,7 @@ declare namespace LocalJSX {
         "onRowSelectChange"?: (event: IrTasksTableCustomEvent<Task[]>) => void;
         "onSkipSelectedTask"?: (event: IrTasksTableCustomEvent<Task>) => void;
         "onSortingChanged"?: (event: IrTasksTableCustomEvent<{ field: string; direction: 'ASC' | 'DESC' }>) => void;
+        "onToast"?: (event: IrTasksTableCustomEvent<IToast>) => void;
         "tasks"?: Task[];
     }
     interface IrTasksTablePagination {
@@ -12980,8 +13173,9 @@ declare namespace LocalJSX {
         "igl-cal-footer": IglCalFooter;
         "igl-cal-header": IglCalHeader;
         "igl-date-range": IglDateRange;
+        "igl-hk-issues-dialog": IglHkIssuesDialog;
         "igl-housekeeping-dialog": IglHousekeepingDialog;
-        "igl-legends": IglLegends;
+        "igl-legend": IglLegend;
         "igl-property-booked-by": IglPropertyBookedBy;
         "igl-rate-plan": IglRatePlan;
         "igl-reallocation-dialog": IglReallocationDialog;
@@ -13083,6 +13277,10 @@ declare namespace LocalJSX {
         "ir-guest-info-form": IrGuestInfoForm;
         "ir-guest-name-cell": IrGuestNameCell;
         "ir-hk-archive": IrHkArchive;
+        "ir-hk-operations-card": IrHkOperationsCard;
+        "ir-hk-staff-task": IrHkStaffTask;
+        "ir-hk-staff-tasks": IrHkStaffTasks;
+        "ir-hk-staff-tasks-header": IrHkStaffTasksHeader;
         "ir-hk-tasks": IrHkTasks;
         "ir-hk-team": IrHkTeam;
         "ir-hk-unassigned-units": IrHkUnassignedUnits;
@@ -13241,8 +13439,9 @@ declare module "@stencil/core" {
             "igl-cal-footer": LocalJSX.IglCalFooter & JSXBase.HTMLAttributes<HTMLIglCalFooterElement>;
             "igl-cal-header": LocalJSX.IglCalHeader & JSXBase.HTMLAttributes<HTMLIglCalHeaderElement>;
             "igl-date-range": LocalJSX.IglDateRange & JSXBase.HTMLAttributes<HTMLIglDateRangeElement>;
+            "igl-hk-issues-dialog": LocalJSX.IglHkIssuesDialog & JSXBase.HTMLAttributes<HTMLIglHkIssuesDialogElement>;
             "igl-housekeeping-dialog": LocalJSX.IglHousekeepingDialog & JSXBase.HTMLAttributes<HTMLIglHousekeepingDialogElement>;
-            "igl-legends": LocalJSX.IglLegends & JSXBase.HTMLAttributes<HTMLIglLegendsElement>;
+            "igl-legend": LocalJSX.IglLegend & JSXBase.HTMLAttributes<HTMLIglLegendElement>;
             "igl-property-booked-by": LocalJSX.IglPropertyBookedBy & JSXBase.HTMLAttributes<HTMLIglPropertyBookedByElement>;
             "igl-rate-plan": LocalJSX.IglRatePlan & JSXBase.HTMLAttributes<HTMLIglRatePlanElement>;
             "igl-reallocation-dialog": LocalJSX.IglReallocationDialog & JSXBase.HTMLAttributes<HTMLIglReallocationDialogElement>;
@@ -13350,6 +13549,10 @@ declare module "@stencil/core" {
             "ir-guest-info-form": LocalJSX.IrGuestInfoForm & JSXBase.HTMLAttributes<HTMLIrGuestInfoFormElement>;
             "ir-guest-name-cell": LocalJSX.IrGuestNameCell & JSXBase.HTMLAttributes<HTMLIrGuestNameCellElement>;
             "ir-hk-archive": LocalJSX.IrHkArchive & JSXBase.HTMLAttributes<HTMLIrHkArchiveElement>;
+            "ir-hk-operations-card": LocalJSX.IrHkOperationsCard & JSXBase.HTMLAttributes<HTMLIrHkOperationsCardElement>;
+            "ir-hk-staff-task": LocalJSX.IrHkStaffTask & JSXBase.HTMLAttributes<HTMLIrHkStaffTaskElement>;
+            "ir-hk-staff-tasks": LocalJSX.IrHkStaffTasks & JSXBase.HTMLAttributes<HTMLIrHkStaffTasksElement>;
+            "ir-hk-staff-tasks-header": LocalJSX.IrHkStaffTasksHeader & JSXBase.HTMLAttributes<HTMLIrHkStaffTasksHeaderElement>;
             "ir-hk-tasks": LocalJSX.IrHkTasks & JSXBase.HTMLAttributes<HTMLIrHkTasksElement>;
             "ir-hk-team": LocalJSX.IrHkTeam & JSXBase.HTMLAttributes<HTMLIrHkTeamElement>;
             "ir-hk-unassigned-units": LocalJSX.IrHkUnassignedUnits & JSXBase.HTMLAttributes<HTMLIrHkUnassignedUnitsElement>;
@@ -13359,6 +13562,22 @@ declare module "@stencil/core" {
             "ir-icons": LocalJSX.IrIcons & JSXBase.HTMLAttributes<HTMLIrIconsElement>;
             "ir-input": LocalJSX.IrInput & JSXBase.HTMLAttributes<HTMLIrInputElement>;
             "ir-input-text": LocalJSX.IrInputText & JSXBase.HTMLAttributes<HTMLIrInputTextElement>;
+            /**
+             * @component ir-interactive-title
+             * Renders a room/category name inside a flex row that:
+             * - Truncates via CSS `text-overflow: ellipsis` when the text overflows.
+             * - Shows a `<wa-tooltip>` with the full title on hover when the title
+             * exceeds `cropSize` characters (lightweight proxy for overflow detection).
+             * - Optionally renders a trailing `.hk-dot` container (via `slot[name="end"]`)
+             * for housekeeping status icons or alert badges.
+             * The `.hk-dot` participates in the flex layout (`flex-shrink: 0`) so the
+             * title span is guaranteed to truncate *before* reaching the icons — no JS
+             * width measurement needed.
+             * @cssvar --ir-popover-left   Horizontal padding of the `.hk-dot` overlay.
+             * @cssvar --ir-interactive-hk-bg  Background fill of `.hk-dot` (used for
+             *                          hover highlight from the parent row).
+             * @cssvar --dot-color          Icon colour inside `.hk-dot`.
+             */
             "ir-interactive-title": LocalJSX.IrInteractiveTitle & JSXBase.HTMLAttributes<HTMLIrInteractiveTitleElement>;
             "ir-interceptor": LocalJSX.IrInterceptor & JSXBase.HTMLAttributes<HTMLIrInterceptorElement>;
             "ir-invoice": LocalJSX.IrInvoice & JSXBase.HTMLAttributes<HTMLIrInvoiceElement>;

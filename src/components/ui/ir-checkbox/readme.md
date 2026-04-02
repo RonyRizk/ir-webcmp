@@ -33,7 +33,6 @@
  - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
- - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
 
 ### Graph
 ```mermaid
@@ -42,7 +41,6 @@ graph TD;
   ir-monthly-bookings-report-filter --> ir-checkbox
   ir-sales-by-channel-filters --> ir-checkbox
   ir-sales-filters --> ir-checkbox
-  ir-tasks-table --> ir-checkbox
   style ir-checkbox fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

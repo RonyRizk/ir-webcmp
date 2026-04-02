@@ -1,10 +1,12 @@
 import { Property } from '@/models/booking.dto';
 import { CalendarDataDetails } from '@/models/calendarData';
+import { HKIssue } from '@/models/housekeeping';
 import { createStore } from '@stencil/store';
 
 type CalendarStore = CalendarDataDetails & {
   roomHistory: Record<string, boolean>;
   property: Property;
+  unitIssues: Map<HKIssue['unit']['id'], HKIssue[]> | null;
   housekeeping_enabled: boolean;
   checkin_enabled: boolean;
   checkin_checkout_hours: {
@@ -20,6 +22,7 @@ const initialState: CalendarStore = {
     child_max_nbr: 0,
     child_max_age: 0,
   },
+  unitIssues: null,
   cleaning_frequency: null,
   checkin_checkout_hours: null,
   allowedBookingSources: [],

@@ -20,17 +20,14 @@
 
 ### Depends on
 
-- [ir-input-text](../../../ui/ir-input-text)
-- [ir-icons](../../../ui/ir-icons)
-- [ir-button](../../../ui/ir-button)
+- [ir-input](../../../ui/ir-input)
+- [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-tasks-header --> ir-input-text
-  ir-tasks-header --> ir-icons
-  ir-tasks-header --> ir-button
-  ir-button --> ir-icons
+  ir-tasks-header --> ir-input
+  ir-tasks-header --> ir-custom-button
   ir-tasks-table --> ir-tasks-header
   style ir-tasks-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

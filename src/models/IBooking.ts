@@ -65,7 +65,9 @@ export type bookingReasons =
   | 'HK_SKIP'
   | 'SET_ROOM_CALENDAR_EXTRA'
   | 'UPDATE_CALENDAR_RATE'
-  | 'SET_DEPARTURE_TIME';
+  | 'SET_DEPARTURE_TIME'
+  | 'HK_ISSUE_FOUND'
+  | 'HK_ISSUE_FIXED';
 export const validReasons = new Set<bookingReasons>([
   'DORESERVATION',
   'BLOCK_EXPOSED_UNIT',

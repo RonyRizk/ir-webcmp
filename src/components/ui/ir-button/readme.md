@@ -88,10 +88,6 @@ Type: `Promise<void>`
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
- - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
- - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
- - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
- - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
  - [ir-test-cmp](../../ir-test-cmp)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
@@ -140,10 +136,6 @@ graph TD;
   ir-sales-by-country --> ir-button
   ir-sales-filters --> ir-button
   ir-sales-table --> ir-button
-  ir-tasks-card --> ir-button
-  ir-tasks-filters --> ir-button
-  ir-tasks-header --> ir-button
-  ir-tasks-table --> ir-button
   ir-tasks-table-pagination --> ir-button
   ir-test-cmp --> ir-button
   ir-user-form-panel --> ir-button

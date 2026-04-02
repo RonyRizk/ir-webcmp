@@ -20,7 +20,11 @@
   user-select: none;
   -webkit-user-drag: none;
 }
-
+.hk_issue_btn::part(base) {
+  height: auto;
+  width: fit-content;
+  padding: 0.25rem;
+}
 /* .cellData[data-dirty-room='true'] { 
   border-bottom: 5px solid rgb(80, 80, 80) !important;
 } */
@@ -43,11 +47,19 @@
 .cellData.disabled {
   background: var(--wa-color-neutral-fill-quiet);
   cursor: var(--cell-cursor, not-allowed);
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 .roomRow .room {
   cursor: pointer;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 .roomRow .room:hover {
   background: var(--wa-color-neutral-fill-quiet);

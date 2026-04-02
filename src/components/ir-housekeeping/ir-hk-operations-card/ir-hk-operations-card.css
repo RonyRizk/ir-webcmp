@@ -1,0 +1,272 @@
+:host {
+  display: block;
+}
+
+/* ── Card header ───────────────────────────────────────────── */
+.ops-header__title {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+  font-weight: var(--wa-font-weight-heading);
+  color: var(--wa-color-text-normal);
+}
+
+.ops-header__subtitle {
+  display: block;
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+  margin-top: 0.125rem;
+}
+
+/* ── Setting items ─────────────────────────────────────────── */
+.ops-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Mobile-first: icon + label in row 1, select drops to row 2 */
+.ops-setting-item {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.ops-setting-item__icon {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background: var(--wa-color-neutral-fill-quiet);
+  color: var(--wa-color-neutral-on-quiet);
+  font-size: 0.875rem;
+}
+
+.ops-setting-item__info {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.ops-setting-item__title {
+  font-size: 0.875rem;
+  font-weight: var(--wa-font-weight-heading);
+  color: var(--wa-color-text-normal);
+}
+
+.ops-setting-item__subtitle {
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+}
+
+/* Mobile: select sits below the label, indented to align with info text */
+.ops-setting-item__controls {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.ops-setting-item__controls wa-select {
+  width: 100%;
+  max-width: 330px;
+}
+
+/* ── Tablet+ layout ────────────────────────────────────────── */
+@media (min-width: 521px) {
+  .ops-setting-item {
+    display: flex;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .ops-setting-item__icon {
+    grid-column: unset;
+    grid-row: unset;
+    flex-shrink: 0;
+  }
+
+  .ops-setting-item__info {
+    grid-column: unset;
+    grid-row: unset;
+    flex-shrink: 0;
+  }
+
+  .ops-setting-item__controls {
+    grid-column: unset;
+    grid-row: unset;
+    flex-shrink: 0;
+  }
+
+  .ops-setting-item__controls wa-select {
+    width: 200px;
+    max-width: none;
+  }
+}
+
+/* ── Recurring Tasks ───────────────────────────────────────── */
+.ops-tasks__header {
+  margin-bottom: 0.75rem;
+}
+
+.ops-tasks__title {
+  margin: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: var(--wa-font-weight-heading);
+  color: var(--wa-color-text-normal);
+}
+
+.ops-tasks__subtitle {
+  margin: 0.125rem 0 0;
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+}
+
+.ops-tasks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Task rows — mobile-first ──────────────────────────────── */
+/* Row 1: badge | input (grows) | delete
+   Row 2: (gap) | select (same column as input) */
+.ops-task-row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1.75rem;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.ops-task-badge {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--wa-color-success-fill-quiet);
+  color: var(--wa-color-success-text-loud);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.ops-task-badge--locked {
+  background: var(--wa-color-neutral-fill-quiet);
+  color: var(--wa-color-neutral-text-quiet);
+  font-size: 0.75rem;
+}
+
+.ops-task-locked-label {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--wa-color-neutral-text-loud);
+  min-width: 0;
+}
+
+.ops-task-input {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+}
+
+/* Mobile: select drops to row 2, aligns under input */
+.ops-task-select {
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+}
+
+.ops-task-delete {
+  grid-column: 3;
+  grid-row: 1;
+  color: var(--wa-color-neutral-text-quiet);
+  font-size: 0.75rem;
+}
+
+/* Locked row has no delete col — only badge | label | select */
+.ops-task-row--locked {
+  grid-template-columns: 1.5rem 1fr 1.75rem;
+  opacity: 0.85;
+}
+
+/* ── Dialog footer ─────────────────────────────────────────── */
+.ir-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ── Tablet+ task rows ─────────────────────────────────────── */
+@media (min-width: 521px) {
+  .ops-task-select {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .ops-task-row {
+    display: flex;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ops-task-badge {
+    grid-column: unset;
+    grid-row: unset;
+    flex-shrink: 0;
+  }
+
+  .ops-task-input {
+    grid-column: unset;
+    grid-row: unset;
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  .ops-task-select {
+    grid-column: unset;
+    grid-row: unset;
+    width: 200px;
+    max-width: none;
+    flex-shrink: 0;
+  }
+
+  .ops-task-delete {
+    grid-column: unset;
+    grid-row: unset;
+    margin-left: auto;
+  }
+
+  .ops-task-row--locked {
+    grid-template-columns: none;
+  }
+
+  .ops-task-locked-label {
+    grid-column: unset;
+    grid-row: unset;
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+
+  .ops-task-row--locked .ops-task-select {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}

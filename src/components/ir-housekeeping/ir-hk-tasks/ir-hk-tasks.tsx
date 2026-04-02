@@ -1,9 +1,8 @@
-import { CleanTaskEvent, IPendingActions } from '@/models/housekeeping';
+import { CleanTaskEvent, IPendingActions, Task } from '@/models/housekeeping';
 import Token from '@/models/Token';
 import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
 import housekeeping_store from '@/stores/housekeeping.store';
-// import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
 import { Component, Host, Prop, State, h, Element, Watch, Event, EventEmitter, Listen } from '@stencil/core';
 import moment from 'moment';
@@ -46,7 +45,7 @@ export class IrHkTasks {
   private houseKeepingService = new HouseKeepingService();
   private token = new Token();
   private table_sorting: Map<string, 'ASC' | 'DESC'> = new Map();
-  private modal: HTMLIrModalElement;
+  private modal: HTMLIrDialogElement;
 
   componentWillLoad() {
     if (this.baseUrl) {
@@ -158,23 +157,56 @@ export class IrHkTasks {
     });
   }
 
+  private groupTasks(tasks: Task[]): Task[] {
+    const groups = new Map<string, Task[]>();
+
+    for (const task of tasks) {
+      const key = `${task.date}__${task.unit.id}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(task);
+    }
+
+    const result: Task[] = [];
+
+    for (const group of groups.values()) {
+      const cln = group.find(t => t.task_type?.code === 'CLN');
+      const t1 = group.find(t => t.task_type?.code === 'T1');
+      const t2 = group.find(t => t.task_type?.code === 'T2');
+
+      if (cln) {
+        const extra: Task[] = [];
+        if (t1) extra.push(t1);
+        if (t2) extra.push(t2);
+        result.push({ ...cln, extra_task: extra.length > 0 ? extra : null });
+      } else if (t1) {
+        result.push({ ...t1, extra_task: t2 ? [t2] : null });
+      } else if (t2) {
+        result.push({ ...t2, extra_task: null });
+      }
+    }
+
+    return result;
+  }
+
   private updateTasks(tasks: any[]) {
     this.buildHousekeeperNameCache();
-    updateTasksStore(
-      tasks.map(t => ({
-        ...t,
-        id: v4(),
-        housekeeper: (() => {
-          const name = this.hkNameCache[t.hkm_id];
-          if (name) {
-            return name;
-          }
-          const hkName = housekeeping_store.hk_criteria?.housekeepers?.find(hk => hk.id === t.hkm_id)?.name;
-          this.hkNameCache[t.hkm_id] = hkName;
-          return hkName;
-        })(),
-      })),
-    );
+    const mapped: Task[] = tasks.map(t => ({
+      ...t,
+      id: v4(),
+      housekeeper: (() => {
+        const name = this.hkNameCache[t.hkm_id];
+        if (name) {
+          return name;
+        }
+        const hkName = housekeeping_store.hk_criteria?.housekeepers?.find(hk => hk.id === t.hkm_id)?.name;
+        this.hkNameCache[t.hkm_id] = hkName;
+        return hkName;
+      })(),
+    }));
+    console.log(this.groupTasks(mapped));
+    updateTasksStore([...this.groupTasks(mapped)]);
   }
   @Listen('headerButtonPress')
   async handleHeaderButtonPress(e: CustomEvent) {
@@ -213,33 +245,30 @@ export class IrHkTasks {
     this.modal?.openModal();
   }
 
-  private async handleModalConfirmation(e: CustomEvent) {
+  private async handleModalConfirmation() {
     try {
-      e.stopImmediatePropagation();
-      e.stopPropagation();
       if (hkTasksStore.selectedTasks.length === 0) {
         return;
       }
       this.isCleaningLoading = true;
       if (this.modalCauses?.cause === 'skip') {
-        const { booking_nbr, date, unit } = this.modalCauses.task;
-        await this.houseKeepingService.editHkSkip({
-          BOOK_NBR: booking_nbr,
-          DATE: date,
-          COMMENT: '',
-          HK_SKIP_ID: -1,
-          HK_SKIP_REASON_CODE: '001',
-          PR_ID: unit.id,
+        const { booking_nbr, date, unit, extra_task } = this.modalCauses.task;
+        await this.houseKeepingService.skipHKTasks({
+          property_id: calendar_data.property.id,
+          tasks_to_skip: [{ unit_id: unit.id, booking_nbr, date }, ...(extra_task ?? []).map(t => ({ unit_id: t.unit.id, booking_nbr: t.booking_nbr, date: t.date }))],
         });
       } else {
         await this.houseKeepingService.executeHKAction({
-          actions: hkTasksStore.selectedTasks.map(t => ({
-            description: 'Cleaned',
-            hkm_id: t.hkm_id === 0 ? null : t.hkm_id,
-            unit_id: t.unit.id,
-            booking_nbr: t.booking_nbr,
-            status: this.modalCauses?.status ?? '001',
-          })),
+          actions: hkTasksStore.selectedTasks
+            .flatMap(t => [t, ...(t.extra_task ?? [])])
+            .map(t => ({
+              description: 'Cleaned',
+              hkm_id: t.hkm_id === 0 ? null : t.hkm_id,
+              unit_id: t.unit.id,
+              booking_nbr: t.booking_nbr,
+              status: this.modalCauses?.status ?? '001',
+              hk_task_type_code: t.task_type.code,
+            })),
         });
       }
       await this.fetchTasksWithFilters();
@@ -296,56 +325,57 @@ export class IrHkTasks {
       <Host data-testid="hk_tasks_base">
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
-        <section class="p-1 d-flex flex-column" style={{ gap: '1rem' }}>
-          <h3>Housekeeping Tasks</h3>
-          <div class="tasks-view " style={{ gap: '1rem' }}>
+        <section class="ir-page__container ">
+          <h3 class="page-title">Housekeeping Tasks</h3>
+          <div class="tasks-view">
             <ir-tasks-filters
               isLoading={this.isApplyFiltersLoading}
               onApplyFilters={e => {
                 this.applyFilters(e);
               }}
             ></ir-tasks-filters>
-            <div class="d-flex w-100 flex-column" style={{ gap: '1rem' }}>
+            <div class="tasks-table-wrapper">
               <ir-tasks-table
                 onRowSelectChange={e => {
                   e.stopImmediatePropagation();
                   e.stopPropagation();
                   updateSelectedTasks(e.detail);
                 }}
-                class="flex-grow-1 w-100"
               ></ir-tasks-table>
               {/* <ir-tasks-table-pagination></ir-tasks-table-pagination> */}
             </div>
           </div>
         </section>
-        <ir-modal
-          autoClose={false}
-          ref={el => (this.modal = el)}
-          isLoading={this.isCleaningLoading}
-          onConfirmModal={this.handleModalConfirmation.bind(this)}
-          onCancelModal={() => {
-            if (this.modalCauses) {
-              clearSelectedTasks();
-              this.modalCauses = null;
-            }
-          }}
-          iconAvailable={true}
-          icon="ft-alert-triangle danger h1"
-          leftBtnText={locales.entries.Lcz_Cancel}
-          rightBtnText={locales.entries.Lcz_Confirm}
-          leftBtnColor="secondary"
-          rightBtnColor={'primary'}
-          modalTitle={locales.entries.Lcz_Confirmation}
-          modalBody={
-            this.modalCauses
+        <ir-dialog ref={el => (this.modal = el)} label={locales.entries.Lcz_Confirmation} lightDismiss={false}>
+          <span>
+            {this.modalCauses
               ? this.modalCauses?.cause === 'clean'
                 ? this.modalCauses.task
                   ? `Update ${this.modalCauses?.task?.unit?.name} to Clean`
                   : 'Update selected unit(s) to Clean'
                 : 'Skip cleaning and reschedule for tomorrow.'
-              : 'Update selected unit(s) to Clean'
-          }
-        ></ir-modal>
+              : 'Update selected unit(s) to Clean'}
+          </span>
+          <div slot="footer" class="ir-dialog__footer">
+            <ir-custom-button
+              size="medium"
+              appearance="filled"
+              variant="neutral"
+              onClickHandler={() => {
+                if (this.modalCauses) {
+                  clearSelectedTasks();
+                  this.modalCauses = null;
+                }
+                this.modal.closeModal();
+              }}
+            >
+              {locales.entries.Lcz_Cancel}
+            </ir-custom-button>
+            <ir-custom-button size="medium" appearance="accent" variant="brand" loading={this.isCleaningLoading} onClickHandler={this.handleModalConfirmation.bind(this)}>
+              {locales.entries.Lcz_Confirm}
+            </ir-custom-button>
+          </div>
+        </ir-dialog>
         <ir-sidebar
           open={this.isSidebarOpen}
           id="editGuestInfo"

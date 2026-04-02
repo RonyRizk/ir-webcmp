@@ -101,7 +101,7 @@ export function updateSearchField(searchField: string) {
 
 export function updateTasks(tasks: Task[]) {
   // const wasEmpty = hkTasksStore.tasks.length === 0;
-  hkTasksStore.tasks = tasks;
+  hkTasksStore.tasks = [...tasks];
 
   // Update task list if significantly changed or was empty
   // if (wasEmpty || shouldUpdateTaskList(tasks.length)) {
@@ -216,7 +216,7 @@ export function resetHkTasksStore() {
   hkTasksStore.tasks = [];
   hkTasksStore.filteredTasks = [];
   hkTasksStore.selectedTasks = [];
-  (hkTasksStore.pagination = getPaginationInitialParams()), (hkTasksStore.filters = null);
+  ((hkTasksStore.pagination = getPaginationInitialParams()), (hkTasksStore.filters = null));
   hkTasksStore.isLoading = false;
   hkTasksStore.isFiltersLoading = false;
   hkTasksStore.isExportLoading = false;
