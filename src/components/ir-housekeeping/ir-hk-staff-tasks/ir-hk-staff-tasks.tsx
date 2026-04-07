@@ -327,7 +327,7 @@ export class IrHkStaffTasks {
         <ir-hk-staff-tasks-header connectedHK={this.connectedHk} language={this.activeLanguage} onLanguageChanged={e => this.applyLanguage(e.detail)}></ir-hk-staff-tasks-header>
         <div class="tasks__container">
           {this.tasksByDate.map(group => (
-            <section key={group.date} class="tasks__section" aria-label={`Tasks for ${group.formattedDate}`}>
+            <section key={group.date} class={`tasks__section${group.isFuture ? ' tasks__section--future' : ''}`} aria-label={`Tasks for ${group.formattedDate}`}>
               <header class="tasks__header">
                 <h3 class="tasks__date">{group.formattedDate}</h3>
                 <wa-badge
