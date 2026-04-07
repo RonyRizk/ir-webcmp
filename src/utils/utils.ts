@@ -383,7 +383,7 @@ export interface CheckInParams {
  * @returns True if check-in is allowed; otherwise, false.
  */
 export function canCheckIn({ from_date, to_date, isCheckedIn }: CheckInParams): boolean {
-  if (!calendarData.checkin_enabled || calendarData.is_automatic_check_in_out) {
+  if (!calendarData.checkin_enabled || calendarData.is_automatic_check_in_out || !calendarData.property.is_frontdesk_enabled) {
     return false;
   }
   if (isCheckedIn) {

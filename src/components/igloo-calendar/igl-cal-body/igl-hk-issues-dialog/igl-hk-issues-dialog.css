@@ -108,7 +108,9 @@
   color: var(--wa-color-neutral-on-quiet);
   white-space: nowrap;
 }
-
+.ticket-time {
+  padding-inline-start: 0.25rem;
+}
 .ticket-date wa-icon {
   font-size: 0.65rem;
 }

@@ -170,7 +170,7 @@ export class IglLegend {
               <div class={'fd-legend__shape'}>
                 <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-danger-fill-loud)', fontSize: '1rem' }}></wa-icon>
               </div>
-              <p class="fd-legend__row-title">Issue with unit</p>
+              <p class="fd-legend__row-title">Housekeeping reported issue</p>
             </div>
             <wa-divider></wa-divider>
             <h5 class="fd-legend__section-title">Use custom colors</h5>

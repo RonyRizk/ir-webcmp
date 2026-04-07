@@ -1745,11 +1745,6 @@ export namespace Components {
         "overdueCheckin": boolean;
         "overdueCheckout": boolean;
     }
-    interface IrDeleteModal {
-        "closeModal": () => Promise<void>;
-        "openModal": () => Promise<void>;
-        "user": IHouseKeepers;
-    }
     interface IrDepartures {
         "language": string;
         "p": string;
@@ -1980,6 +1975,11 @@ export namespace Components {
         "propertyId": string | number;
         "ticket": string;
     }
+    interface IrHkDeleteDialog {
+        "closeModal": () => Promise<void>;
+        "openModal": () => Promise<void>;
+        "user": IHouseKeepers;
+    }
     interface IrHkOperationsCard {
         "frequencies": IEntries[];
     }
@@ -2008,7 +2008,25 @@ export namespace Components {
     interface IrHkUnassignedUnits {
         "user": IHouseKeepers | null;
     }
+    interface IrHkUnassignedUnitsDrawer {
+        "open": boolean;
+        "user": IHouseKeepers | null;
+    }
+    interface IrHkUnassignedUnitsDrawerForm {
+        "formId": string;
+        "user": IHouseKeepers | null;
+    }
     interface IrHkUser {
+        "isEdit": boolean;
+        "user": THKUser | null;
+    }
+    interface IrHkUserDrawer {
+        "isEdit": boolean;
+        "open": boolean;
+        "user": THKUser | null;
+    }
+    interface IrHkUserDrawerForm {
+        "formId": string;
         "isEdit": boolean;
         "user": THKUser | null;
     }
@@ -4391,10 +4409,6 @@ export interface IrDateSelectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrDateSelectElement;
 }
-export interface IrDeleteModalCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLIrDeleteModalElement;
-}
 export interface IrDeparturesTableCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrDeparturesTableElement;
@@ -4451,6 +4465,10 @@ export interface IrGuestInfoFormCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrGuestInfoFormElement;
 }
+export interface IrHkDeleteDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkDeleteDialogElement;
+}
 export interface IrHkOperationsCardCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrHkOperationsCardElement;
@@ -4471,9 +4489,25 @@ export interface IrHkUnassignedUnitsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrHkUnassignedUnitsElement;
 }
+export interface IrHkUnassignedUnitsDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkUnassignedUnitsDrawerElement;
+}
+export interface IrHkUnassignedUnitsDrawerFormCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkUnassignedUnitsDrawerFormElement;
+}
 export interface IrHkUserCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrHkUserElement;
+}
+export interface IrHkUserDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkUserDrawerElement;
+}
+export interface IrHkUserDrawerFormCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrHkUserDrawerFormElement;
 }
 export interface IrHousekeepingCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -6349,24 +6383,6 @@ declare global {
         prototype: HTMLIrDatesCellElement;
         new (): HTMLIrDatesCellElement;
     };
-    interface HTMLIrDeleteModalElementEventMap {
-        "modalClosed": null;
-        "resetData": string;
-    }
-    interface HTMLIrDeleteModalElement extends Components.IrDeleteModal, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrDeleteModalElementEventMap>(type: K, listener: (this: HTMLIrDeleteModalElement, ev: IrDeleteModalCustomEvent<HTMLIrDeleteModalElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrDeleteModalElementEventMap>(type: K, listener: (this: HTMLIrDeleteModalElement, ev: IrDeleteModalCustomEvent<HTMLIrDeleteModalElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLIrDeleteModalElement: {
-        prototype: HTMLIrDeleteModalElement;
-        new (): HTMLIrDeleteModalElement;
-    };
     interface HTMLIrDeparturesElement extends Components.IrDepartures, HTMLStencilElement {
     }
     var HTMLIrDeparturesElement: {
@@ -6679,6 +6695,24 @@ declare global {
         prototype: HTMLIrHkArchiveElement;
         new (): HTMLIrHkArchiveElement;
     };
+    interface HTMLIrHkDeleteDialogElementEventMap {
+        "modalClosed": null;
+        "resetData": string;
+    }
+    interface HTMLIrHkDeleteDialogElement extends Components.IrHkDeleteDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkDeleteDialogElementEventMap>(type: K, listener: (this: HTMLIrHkDeleteDialogElement, ev: IrHkDeleteDialogCustomEvent<HTMLIrHkDeleteDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkDeleteDialogElementEventMap>(type: K, listener: (this: HTMLIrHkDeleteDialogElement, ev: IrHkDeleteDialogCustomEvent<HTMLIrHkDeleteDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkDeleteDialogElement: {
+        prototype: HTMLIrHkDeleteDialogElement;
+        new (): HTMLIrHkDeleteDialogElement;
+    };
     interface HTMLIrHkOperationsCardElementEventMap {
         "toast": IToast;
     }
@@ -6777,6 +6811,41 @@ declare global {
         prototype: HTMLIrHkUnassignedUnitsElement;
         new (): HTMLIrHkUnassignedUnitsElement;
     };
+    interface HTMLIrHkUnassignedUnitsDrawerElementEventMap {
+        "closeSideBar": null;
+    }
+    interface HTMLIrHkUnassignedUnitsDrawerElement extends Components.IrHkUnassignedUnitsDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkUnassignedUnitsDrawerElementEventMap>(type: K, listener: (this: HTMLIrHkUnassignedUnitsDrawerElement, ev: IrHkUnassignedUnitsDrawerCustomEvent<HTMLIrHkUnassignedUnitsDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkUnassignedUnitsDrawerElementEventMap>(type: K, listener: (this: HTMLIrHkUnassignedUnitsDrawerElement, ev: IrHkUnassignedUnitsDrawerCustomEvent<HTMLIrHkUnassignedUnitsDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkUnassignedUnitsDrawerElement: {
+        prototype: HTMLIrHkUnassignedUnitsDrawerElement;
+        new (): HTMLIrHkUnassignedUnitsDrawerElement;
+    };
+    interface HTMLIrHkUnassignedUnitsDrawerFormElementEventMap {
+        "closeSideBar": null;
+        "resetData": null;
+    }
+    interface HTMLIrHkUnassignedUnitsDrawerFormElement extends Components.IrHkUnassignedUnitsDrawerForm, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkUnassignedUnitsDrawerFormElementEventMap>(type: K, listener: (this: HTMLIrHkUnassignedUnitsDrawerFormElement, ev: IrHkUnassignedUnitsDrawerFormCustomEvent<HTMLIrHkUnassignedUnitsDrawerFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkUnassignedUnitsDrawerFormElementEventMap>(type: K, listener: (this: HTMLIrHkUnassignedUnitsDrawerFormElement, ev: IrHkUnassignedUnitsDrawerFormCustomEvent<HTMLIrHkUnassignedUnitsDrawerFormElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkUnassignedUnitsDrawerFormElement: {
+        prototype: HTMLIrHkUnassignedUnitsDrawerFormElement;
+        new (): HTMLIrHkUnassignedUnitsDrawerFormElement;
+    };
     interface HTMLIrHkUserElementEventMap {
         "resetData": null;
         "closeSideBar": null;
@@ -6794,6 +6863,42 @@ declare global {
     var HTMLIrHkUserElement: {
         prototype: HTMLIrHkUserElement;
         new (): HTMLIrHkUserElement;
+    };
+    interface HTMLIrHkUserDrawerElementEventMap {
+        "closeSideBar": null;
+    }
+    interface HTMLIrHkUserDrawerElement extends Components.IrHkUserDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkUserDrawerElementEventMap>(type: K, listener: (this: HTMLIrHkUserDrawerElement, ev: IrHkUserDrawerCustomEvent<HTMLIrHkUserDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkUserDrawerElementEventMap>(type: K, listener: (this: HTMLIrHkUserDrawerElement, ev: IrHkUserDrawerCustomEvent<HTMLIrHkUserDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkUserDrawerElement: {
+        prototype: HTMLIrHkUserDrawerElement;
+        new (): HTMLIrHkUserDrawerElement;
+    };
+    interface HTMLIrHkUserDrawerFormElementEventMap {
+        "resetData": null;
+        "closeSideBar": null;
+        "loadingChanged": boolean;
+    }
+    interface HTMLIrHkUserDrawerFormElement extends Components.IrHkUserDrawerForm, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrHkUserDrawerFormElementEventMap>(type: K, listener: (this: HTMLIrHkUserDrawerFormElement, ev: IrHkUserDrawerFormCustomEvent<HTMLIrHkUserDrawerFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrHkUserDrawerFormElementEventMap>(type: K, listener: (this: HTMLIrHkUserDrawerFormElement, ev: IrHkUserDrawerFormCustomEvent<HTMLIrHkUserDrawerFormElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrHkUserDrawerFormElement: {
+        prototype: HTMLIrHkUserDrawerFormElement;
+        new (): HTMLIrHkUserDrawerFormElement;
     };
     interface HTMLIrHousekeepingElementEventMap {
         "toast": IToast;
@@ -8567,7 +8672,6 @@ declare global {
         "ir-date-select": HTMLIrDateSelectElement;
         "ir-date-view": HTMLIrDateViewElement;
         "ir-dates-cell": HTMLIrDatesCellElement;
-        "ir-delete-modal": HTMLIrDeleteModalElement;
         "ir-departures": HTMLIrDeparturesElement;
         "ir-departures-filter": HTMLIrDeparturesFilterElement;
         "ir-departures-table": HTMLIrDeparturesTableElement;
@@ -8591,6 +8695,7 @@ declare global {
         "ir-guest-info-form": HTMLIrGuestInfoFormElement;
         "ir-guest-name-cell": HTMLIrGuestNameCellElement;
         "ir-hk-archive": HTMLIrHkArchiveElement;
+        "ir-hk-delete-dialog": HTMLIrHkDeleteDialogElement;
         "ir-hk-operations-card": HTMLIrHkOperationsCardElement;
         "ir-hk-staff-task": HTMLIrHkStaffTaskElement;
         "ir-hk-staff-tasks": HTMLIrHkStaffTasksElement;
@@ -8598,7 +8703,11 @@ declare global {
         "ir-hk-tasks": HTMLIrHkTasksElement;
         "ir-hk-team": HTMLIrHkTeamElement;
         "ir-hk-unassigned-units": HTMLIrHkUnassignedUnitsElement;
+        "ir-hk-unassigned-units-drawer": HTMLIrHkUnassignedUnitsDrawerElement;
+        "ir-hk-unassigned-units-drawer-form": HTMLIrHkUnassignedUnitsDrawerFormElement;
         "ir-hk-user": HTMLIrHkUserElement;
+        "ir-hk-user-drawer": HTMLIrHkUserDrawerElement;
+        "ir-hk-user-drawer-form": HTMLIrHkUserDrawerFormElement;
         "ir-housekeeping": HTMLIrHousekeepingElement;
         "ir-icon": HTMLIrIconElement;
         "ir-icons": HTMLIrIconsElement;
@@ -10532,11 +10641,6 @@ declare namespace LocalJSX {
         "overdueCheckin"?: boolean;
         "overdueCheckout"?: boolean;
     }
-    interface IrDeleteModal {
-        "onModalClosed"?: (event: IrDeleteModalCustomEvent<null>) => void;
-        "onResetData"?: (event: IrDeleteModalCustomEvent<string>) => void;
-        "user"?: IHouseKeepers;
-    }
     interface IrDepartures {
         "language"?: string;
         "p"?: string;
@@ -10827,6 +10931,11 @@ declare namespace LocalJSX {
         "propertyId"?: string | number;
         "ticket"?: string;
     }
+    interface IrHkDeleteDialog {
+        "onModalClosed"?: (event: IrHkDeleteDialogCustomEvent<null>) => void;
+        "onResetData"?: (event: IrHkDeleteDialogCustomEvent<string>) => void;
+        "user"?: IHouseKeepers;
+    }
     interface IrHkOperationsCard {
         "frequencies"?: IEntries[];
         "onToast"?: (event: IrHkOperationsCardCustomEvent<IToast>) => void;
@@ -10861,10 +10970,35 @@ declare namespace LocalJSX {
         "onResetData"?: (event: IrHkUnassignedUnitsCustomEvent<null>) => void;
         "user"?: IHouseKeepers | null;
     }
+    interface IrHkUnassignedUnitsDrawer {
+        "onCloseSideBar"?: (event: IrHkUnassignedUnitsDrawerCustomEvent<null>) => void;
+        "open"?: boolean;
+        "user"?: IHouseKeepers | null;
+    }
+    interface IrHkUnassignedUnitsDrawerForm {
+        "formId"?: string;
+        "onCloseSideBar"?: (event: IrHkUnassignedUnitsDrawerFormCustomEvent<null>) => void;
+        "onResetData"?: (event: IrHkUnassignedUnitsDrawerFormCustomEvent<null>) => void;
+        "user"?: IHouseKeepers | null;
+    }
     interface IrHkUser {
         "isEdit"?: boolean;
         "onCloseSideBar"?: (event: IrHkUserCustomEvent<null>) => void;
         "onResetData"?: (event: IrHkUserCustomEvent<null>) => void;
+        "user"?: THKUser | null;
+    }
+    interface IrHkUserDrawer {
+        "isEdit"?: boolean;
+        "onCloseSideBar"?: (event: IrHkUserDrawerCustomEvent<null>) => void;
+        "open"?: boolean;
+        "user"?: THKUser | null;
+    }
+    interface IrHkUserDrawerForm {
+        "formId"?: string;
+        "isEdit"?: boolean;
+        "onCloseSideBar"?: (event: IrHkUserDrawerFormCustomEvent<null>) => void;
+        "onLoadingChanged"?: (event: IrHkUserDrawerFormCustomEvent<boolean>) => void;
+        "onResetData"?: (event: IrHkUserDrawerFormCustomEvent<null>) => void;
         "user"?: THKUser | null;
     }
     interface IrHousekeeping {
@@ -13253,7 +13387,6 @@ declare namespace LocalJSX {
         "ir-date-select": IrDateSelect;
         "ir-date-view": IrDateView;
         "ir-dates-cell": IrDatesCell;
-        "ir-delete-modal": IrDeleteModal;
         "ir-departures": IrDepartures;
         "ir-departures-filter": IrDeparturesFilter;
         "ir-departures-table": IrDeparturesTable;
@@ -13277,6 +13410,7 @@ declare namespace LocalJSX {
         "ir-guest-info-form": IrGuestInfoForm;
         "ir-guest-name-cell": IrGuestNameCell;
         "ir-hk-archive": IrHkArchive;
+        "ir-hk-delete-dialog": IrHkDeleteDialog;
         "ir-hk-operations-card": IrHkOperationsCard;
         "ir-hk-staff-task": IrHkStaffTask;
         "ir-hk-staff-tasks": IrHkStaffTasks;
@@ -13284,7 +13418,11 @@ declare namespace LocalJSX {
         "ir-hk-tasks": IrHkTasks;
         "ir-hk-team": IrHkTeam;
         "ir-hk-unassigned-units": IrHkUnassignedUnits;
+        "ir-hk-unassigned-units-drawer": IrHkUnassignedUnitsDrawer;
+        "ir-hk-unassigned-units-drawer-form": IrHkUnassignedUnitsDrawerForm;
         "ir-hk-user": IrHkUser;
+        "ir-hk-user-drawer": IrHkUserDrawer;
+        "ir-hk-user-drawer-form": IrHkUserDrawerForm;
         "ir-housekeeping": IrHousekeeping;
         "ir-icon": IrIcon;
         "ir-icons": IrIcons;
@@ -13525,7 +13663,6 @@ declare module "@stencil/core" {
             "ir-date-select": LocalJSX.IrDateSelect & JSXBase.HTMLAttributes<HTMLIrDateSelectElement>;
             "ir-date-view": LocalJSX.IrDateView & JSXBase.HTMLAttributes<HTMLIrDateViewElement>;
             "ir-dates-cell": LocalJSX.IrDatesCell & JSXBase.HTMLAttributes<HTMLIrDatesCellElement>;
-            "ir-delete-modal": LocalJSX.IrDeleteModal & JSXBase.HTMLAttributes<HTMLIrDeleteModalElement>;
             "ir-departures": LocalJSX.IrDepartures & JSXBase.HTMLAttributes<HTMLIrDeparturesElement>;
             "ir-departures-filter": LocalJSX.IrDeparturesFilter & JSXBase.HTMLAttributes<HTMLIrDeparturesFilterElement>;
             "ir-departures-table": LocalJSX.IrDeparturesTable & JSXBase.HTMLAttributes<HTMLIrDeparturesTableElement>;
@@ -13549,6 +13686,7 @@ declare module "@stencil/core" {
             "ir-guest-info-form": LocalJSX.IrGuestInfoForm & JSXBase.HTMLAttributes<HTMLIrGuestInfoFormElement>;
             "ir-guest-name-cell": LocalJSX.IrGuestNameCell & JSXBase.HTMLAttributes<HTMLIrGuestNameCellElement>;
             "ir-hk-archive": LocalJSX.IrHkArchive & JSXBase.HTMLAttributes<HTMLIrHkArchiveElement>;
+            "ir-hk-delete-dialog": LocalJSX.IrHkDeleteDialog & JSXBase.HTMLAttributes<HTMLIrHkDeleteDialogElement>;
             "ir-hk-operations-card": LocalJSX.IrHkOperationsCard & JSXBase.HTMLAttributes<HTMLIrHkOperationsCardElement>;
             "ir-hk-staff-task": LocalJSX.IrHkStaffTask & JSXBase.HTMLAttributes<HTMLIrHkStaffTaskElement>;
             "ir-hk-staff-tasks": LocalJSX.IrHkStaffTasks & JSXBase.HTMLAttributes<HTMLIrHkStaffTasksElement>;
@@ -13556,7 +13694,11 @@ declare module "@stencil/core" {
             "ir-hk-tasks": LocalJSX.IrHkTasks & JSXBase.HTMLAttributes<HTMLIrHkTasksElement>;
             "ir-hk-team": LocalJSX.IrHkTeam & JSXBase.HTMLAttributes<HTMLIrHkTeamElement>;
             "ir-hk-unassigned-units": LocalJSX.IrHkUnassignedUnits & JSXBase.HTMLAttributes<HTMLIrHkUnassignedUnitsElement>;
+            "ir-hk-unassigned-units-drawer": LocalJSX.IrHkUnassignedUnitsDrawer & JSXBase.HTMLAttributes<HTMLIrHkUnassignedUnitsDrawerElement>;
+            "ir-hk-unassigned-units-drawer-form": LocalJSX.IrHkUnassignedUnitsDrawerForm & JSXBase.HTMLAttributes<HTMLIrHkUnassignedUnitsDrawerFormElement>;
             "ir-hk-user": LocalJSX.IrHkUser & JSXBase.HTMLAttributes<HTMLIrHkUserElement>;
+            "ir-hk-user-drawer": LocalJSX.IrHkUserDrawer & JSXBase.HTMLAttributes<HTMLIrHkUserDrawerElement>;
+            "ir-hk-user-drawer-form": LocalJSX.IrHkUserDrawerForm & JSXBase.HTMLAttributes<HTMLIrHkUserDrawerFormElement>;
             "ir-housekeeping": LocalJSX.IrHousekeeping & JSXBase.HTMLAttributes<HTMLIrHousekeepingElement>;
             "ir-icon": LocalJSX.IrIcon & JSXBase.HTMLAttributes<HTMLIrIconElement>;
             "ir-icons": LocalJSX.IrIcons & JSXBase.HTMLAttributes<HTMLIrIconsElement>;

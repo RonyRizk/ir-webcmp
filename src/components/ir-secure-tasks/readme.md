@@ -364,26 +364,32 @@ graph TD;
   ir-hk-operations-card --> ir-dialog
   ir-hk-operations-card --> ir-custom-button
   ir-hk-team --> ir-hk-unassigned-units
-  ir-hk-team --> ir-hk-user
   ir-hk-team --> ir-custom-button
   ir-hk-team --> ir-popover
   ir-hk-team --> ir-button
-  ir-hk-team --> ir-sidebar
-  ir-hk-team --> ir-delete-modal
+  ir-hk-team --> ir-hk-user-drawer
+  ir-hk-team --> ir-hk-unassigned-units-drawer
+  ir-hk-team --> ir-hk-delete-dialog
   ir-hk-unassigned-units --> ir-select
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
-  ir-hk-user --> ir-title
-  ir-hk-user --> ir-input-text
-  ir-hk-user --> ir-phone-input
-  ir-hk-user --> ir-textarea
-  ir-hk-user --> ir-password-validator
-  ir-hk-user --> ir-button
-  ir-phone-input --> ir-combobox
+  ir-hk-user-drawer --> ir-drawer
+  ir-hk-user-drawer --> ir-hk-user-drawer-form
+  ir-hk-user-drawer --> ir-custom-button
+  ir-hk-user-drawer-form --> ir-custom-button
+  ir-hk-user-drawer-form --> ir-validator
+  ir-hk-user-drawer-form --> ir-input
+  ir-hk-user-drawer-form --> ir-password-validator
+  ir-hk-user-drawer-form --> ir-spinner
+  ir-hk-user-drawer-form --> ir-mobile-input
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
-  ir-delete-modal --> ir-button
-  ir-delete-modal --> ir-select
+  ir-hk-unassigned-units-drawer --> ir-drawer
+  ir-hk-unassigned-units-drawer --> ir-hk-unassigned-units-drawer-form
+  ir-hk-unassigned-units-drawer --> ir-custom-button
+  ir-hk-unassigned-units-drawer-form --> ir-select
+  ir-hk-delete-dialog --> ir-dialog
+  ir-hk-delete-dialog --> ir-custom-button
   ir-user-management --> ir-toast
   ir-user-management --> ir-interceptor
   ir-user-management --> ir-loading-screen

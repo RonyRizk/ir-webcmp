@@ -23,10 +23,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-hk-team](../ir-hk-team)
-
 ### Depends on
 
 - [ir-title](../../ir-title)
@@ -50,7 +46,6 @@ graph TD;
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
   ir-button --> ir-icons
-  ir-hk-team --> ir-hk-user
   style ir-hk-user fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

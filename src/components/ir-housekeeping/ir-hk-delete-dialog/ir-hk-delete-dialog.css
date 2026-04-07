@@ -1,0 +1,16 @@
+:host {
+  display: contents;
+}
+
+.delete-modal__description {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+  color: var(--wa-color-text-quiet);
+  line-height: var(--wa-line-height-normal);
+}
+
+.delete-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

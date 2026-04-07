@@ -99,6 +99,7 @@ Type: `Promise<void>`
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
+ - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
@@ -130,6 +131,7 @@ graph TD;
   ir-extra-service-config-form --> ir-input
   ir-guest-info-form --> ir-input
   ir-hk-operations-card --> ir-input
+  ir-hk-user-drawer-form --> ir-input
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input

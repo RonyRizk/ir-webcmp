@@ -49,8 +49,8 @@ export class IrHkTeam {
     switch (this.currentTrigger?.type) {
       case 'unassigned_units':
         return <ir-hk-unassigned-units slot="sidebar-body" user={this.currentTrigger.user}></ir-hk-unassigned-units>;
-      case 'user':
-        return <ir-hk-user slot="sidebar-body" user={this.currentTrigger.user} isEdit={this.currentTrigger.isEdit}></ir-hk-user>;
+      // case 'user':
+      //   return <ir-hk-user slot="sidebar-body" user={this.currentTrigger.user} isEdit={this.currentTrigger.isEdit}></ir-hk-user>;
       default:
         return null;
     }
@@ -65,7 +65,7 @@ export class IrHkTeam {
   handleDeletion(user) {
     this.currentTrigger = { type: 'delete', user };
     this.deletionTimout = setTimeout(() => {
-      const modal = this.el.querySelector('ir-delete-modal');
+      const modal = this.el.querySelector('ir-hk-delete-dialog');
       if (!modal) return;
       modal.openModal();
     }, 100);
@@ -106,7 +106,6 @@ export class IrHkTeam {
           </div>
           <p class="hk-team-header__hint">{locales.entries.Lcz_AsAnOption}</p>
         </section>
-
         <section class="table-responsive">
           <table class="table">
             <thead>
@@ -185,17 +184,19 @@ export class IrHkTeam {
             </tbody>
           </table>
         </section>
-        <ir-sidebar
+        {/* <ir-sidebar
           showCloseButton={false}
-          open={this.currentTrigger !== null && this.currentTrigger.type !== 'delete'}
+          open={this.currentTrigger !== null && this.currentTrigger.type !== 'delete' && this.currentTrigger.type !== 'user'}
           onIrSidebarToggle={() => (this.currentTrigger = null)}
           style={{
             '--sidebar-width': this.currentTrigger ? (this.currentTrigger.type === 'unassigned_units' ? 'max-content' : '40rem') : 'max-content',
           }}
         >
           {this.renderCurrentTrigger()}
-        </ir-sidebar>
-        {this.currentTrigger?.type === 'delete' && <ir-delete-modal user={this.currentTrigger.user}></ir-delete-modal>}
+        </ir-sidebar> */}
+        <ir-hk-user-drawer open={this.currentTrigger?.type === 'user'} user={this.currentTrigger?.user} isEdit={(this.currentTrigger as any)?.isEdit}></ir-hk-user-drawer>
+        <ir-hk-unassigned-units-drawer open={this.currentTrigger?.type === 'unassigned_units'} user={(this.currentTrigger as any)?.user}></ir-hk-unassigned-units-drawer>
+        {this.currentTrigger?.type === 'delete' && <ir-hk-delete-dialog user={this.currentTrigger.user}></ir-hk-delete-dialog>}
       </wa-card>
     );
   }

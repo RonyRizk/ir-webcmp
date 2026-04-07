@@ -36,6 +36,8 @@
  - [ir-booking-editor-drawer](../igloo-calendar/ir-booking-editor/ir-booking-editor-drawer)
  - [ir-extra-service-config](../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-guest-info-drawer](../ir-guest-info/ir-guest-info-drawer)
+ - [ir-hk-unassigned-units-drawer](../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
+ - [ir-hk-user-drawer](../ir-housekeeping/ir-hk-user/ir-hk-user-drawer)
  - [ir-invoice](../ir-invoice)
  - [ir-menu-drawer](../pms-header/ir-menu-drawer)
  - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
@@ -55,6 +57,8 @@ graph TD;
   ir-booking-editor-drawer --> ir-drawer
   ir-extra-service-config --> ir-drawer
   ir-guest-info-drawer --> ir-drawer
+  ir-hk-unassigned-units-drawer --> ir-drawer
+  ir-hk-user-drawer --> ir-drawer
   ir-invoice --> ir-drawer
   ir-menu-drawer --> ir-drawer
   ir-payment-folio --> ir-drawer

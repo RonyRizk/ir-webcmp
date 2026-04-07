@@ -343,6 +343,7 @@ export class IrHkStaffTasks {
                 <div class="tasks-grid" role="list">
                   {group.tasks.map(task => (
                     <ir-hk-staff-task
+                      class="task-card"
                       onTaskClick={e => {
                         this.selectedTask = e.detail;
                         this.confirmDialog.openModal();

@@ -94,7 +94,11 @@ export class IglHkIssuesDialog {
           <div class={'ticket-meta'}>
             <span class="ticket-date">
               {moment(issue.date).format('MMM D, YYYY')}
-              {issue.hour != null && issue.minute != null && ` ${String(issue.hour).padStart(2, '0')}:${String(issue.minute).padStart(2, '0')}`}
+              {issue.hour != null && issue.minute != null && (
+                <span class="ticket-time">
+                  {String(issue.hour).padStart(2, '0')}:{String(issue.minute).padStart(2, '0')}
+                </span>
+              )}
             </span>
             {isMultiple && (
               <wa-checkbox
@@ -134,7 +138,7 @@ export class IglHkIssuesDialog {
     const selectedCount = this.selectedIds.size;
 
     return (
-      <ir-dialog ref={el => (this.dialogRef = el)} label={`Reported ${count > 1 ? 'Issues' : 'Issue'} : ${this.unitName}`} onIrDialogAfterHide={() => this.irAfterClose.emit()}>
+      <ir-dialog ref={el => (this.dialogRef = el)} label={`Reported ${count > 1 ? 'Issues' : 'Issue'}: ${this.unitName}`} onIrDialogAfterHide={() => this.irAfterClose.emit()}>
         {this.renderContent()}
 
         <div slot="footer" class="dialog-footer">
