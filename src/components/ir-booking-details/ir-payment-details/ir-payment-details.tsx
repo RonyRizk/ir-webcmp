@@ -132,7 +132,7 @@ export class IrPaymentDetails {
       });
       return;
     }
-    const _number = await this.bookingService.getNextValue({ starter: 'RC' });
+    const _number = await this.bookingService.getNextValue({ starter: `RC-${calendar_data.property.aname}` });
     this.openPrintScreen.emit({
       mode: 'receipt',
       payload: {

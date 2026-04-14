@@ -1,4 +1,4 @@
-import { Booking, Property } from '@/models/booking.dto';
+import { Booking, IUnit, Property } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
 import { Component, Fragment, Prop, h } from '@stencil/core';
 import moment from 'moment';
@@ -146,7 +146,7 @@ export class IrPrintRoom {
         <header class="ir-print-room__header">
           <p class="ir-print-room__room-type">{room?.roomtype?.name}</p>
 
-          {haveMultipleRooms && room?.unit && <p class="ir-print-room__unit">(unit {room.roomtype.id})</p>}
+          {haveMultipleRooms && room?.unit && <p class="ir-print-room__unit">(unit {(room.unit as IUnit).name})</p>}
 
           <p class="ir-print-room__rate-plan">{room?.rateplan?.short_name || room?.rateplan?.name}</p>
         </header>
