@@ -5,7 +5,9 @@ import { Booking, Day, IUnit, Room } from '@/models/booking.dto';
 import { IRoomNightsDataEventPayload } from '@/models/property-types';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
-import { Variation } from '@/models/property';
+import { Night, Variation } from '@/models/property';
+import booking_store from '@/stores/booking.store';
+import calendar_data from '@/stores/calendar-data';
 
 @Component({
   tag: 'ir-room-nights',
@@ -46,7 +48,7 @@ export class IrRoomNights {
   isButtonDisabled() {
     return this.isLoading || this.rates.some(rate => rate.amount === -1) || this.inventory === 0 || this.inventory === null;
   }
-  async init() {
+  private async init() {
     try {
       const { from_date } = this.defaultDates;
       if (moment(from_date, 'YYYY-MM-DD').isBefore(moment(this.fromDate, 'YYYY-MM-DD'))) {
@@ -61,12 +63,14 @@ export class IrRoomNights {
         this.selectedRoom = filteredRooms[0];
         const lastDay = this.selectedRoom?.days[this.selectedRoom.days.length - 1];
         if (!moment(this.selectedRoom.to_date, 'YYYY-MM-DD').isBefore(moment(this.toDate, 'YYYY-MM-DD'))) {
-          const amount = await this.fetchBookingAvailability(this.fromDate, this.selectedRoom.days[0].date, this.selectedRoom.rateplan.id);
+          const variation = await this.fetchBookingAvailability(this.fromDate, this.selectedRoom.days[0].date, this.selectedRoom.rateplan.id);
           const newDatesArr = getDaysArray(this.selectedRoom.days[0].date, this.fromDate);
           this.isEndDateBeforeFromDate = true;
+          let dates: Record<string, Night> = {};
+          variation.nights.forEach(n => (dates[n.night] = n));
           this.rates = [
             ...newDatesArr.map(day => ({
-              amount: amount / newDatesArr.length,
+              amount: dates[day].discounted_amount,
               date: day,
               cost: null,
             })),
@@ -74,12 +78,14 @@ export class IrRoomNights {
           ];
           this.defaultTotalNights = this.rates.length - this.selectedRoom.days.length;
         } else {
-          const amount = await this.fetchBookingAvailability(this.selectedRoom.to_date, moment(this.toDate, 'YYYY-MM-DD').format('YYYY-MM-DD'), this.selectedRoom.rateplan.id);
+          const variation = await this.fetchBookingAvailability(this.selectedRoom.to_date, moment(this.toDate, 'YYYY-MM-DD').format('YYYY-MM-DD'), this.selectedRoom.rateplan.id);
           const newDatesArr = getDaysArray(lastDay.date, this.toDate);
+          let dates: Record<string, Night> = {};
+          variation.nights.forEach(n => (dates[n.night] = n));
           this.rates = [
             ...this.selectedRoom.days,
             ...newDatesArr.map(day => ({
-              amount: amount / newDatesArr.length,
+              amount: dates[day].discounted_amount,
               date: day,
               cost: null,
             })),
@@ -103,7 +109,7 @@ export class IrRoomNights {
     }
     this.rates = days;
   }
-  async fetchBookingAvailability(from_date: string, to_date: string, rate_plan_id: number) {
+  private async fetchBookingAvailability(from_date: string, to_date: string, rate_plan_id: number): Promise<Variation | null> {
     try {
       this.initialLoading = true;
       const bookingAvailability = await this.bookingService.getBookingAvailability({
@@ -133,7 +139,7 @@ export class IrRoomNights {
       if (!selected_variation) {
         return null;
       }
-      return selected_variation.discounted_gross_amount;
+      return selected_variation;
     } catch (error) {
       console.error(error);
     } finally {
@@ -170,7 +176,7 @@ export class IrRoomNights {
       return index < this.selectedRoom.days.length ? this.renderReadOnlyField(currency_symbol, day) : this.renderInputField(index, currency_symbol, day);
     }
   }
-  renderDates() {
+  private renderDates() {
     const currency_symbol = this.bookingEvent.currency.symbol;
     // const currency_symbol = getCurrencySymbol(this.bookingEvent.currency.code);
     return (
@@ -184,7 +190,7 @@ export class IrRoomNights {
       </div>
     );
   }
-  async handleRoomConfirmation() {
+  private async handleRoomConfirmation() {
     try {
       this.isLoading = true;
       let oldRooms = [...this.bookingEvent.rooms];
@@ -260,6 +266,12 @@ export class IrRoomNights {
               {(this.inventory === 0 || this.inventory === null) && <p class="font-medium-1 text danger">{locales.entries.Lcz_NoAvailabilityForAdditionalNights}</p>}
 
               {this.selectedRoom.rateplan.custom_text && <p class={'text-secondary mt-0'}>{this.selectedRoom.rateplan.custom_text}</p>}
+              {booking_store.roomTypes?.length > 0 && (
+                <wa-callout size="small" variant="neutral" appearance="filled" class="mt-1 booking-editor-header__tax_statement">
+                  {/* Including taxes and fees. */}
+                  {calendar_data.tax_statement}
+                </wa-callout>
+              )}
               {this.renderDates()}
             </Fragment>
           )}
