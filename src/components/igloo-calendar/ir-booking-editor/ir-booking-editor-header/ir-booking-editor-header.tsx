@@ -121,7 +121,7 @@ export class IrBookingEditorHeader {
           });
         }
 
-        if (moment.isMoment(data.checkIn) && this.bookingEditorService.isEventType(['SPLIT_BOOKING', 'ADD_ROOM']) && !data.checkIn.isSameOrBefore(this.booking.to_date)) {
+        if (moment.isMoment(data.checkIn) && this.bookingEditorService.isEventType(['SPLIT_BOOKING', 'ADD_ROOM']) && !data.checkIn.isSameOrBefore(this.booking.to_date, 'date')) {
           ctx.addIssue({
             path: ['checkIn'],
             code: z.ZodIssueCode.custom,
