@@ -36,6 +36,9 @@ export class IrPaymentsFolio {
   }
 
   private renderPaymentItem(payment: IPayment, index: number) {
+    if (payment.is_city_ledger) {
+      return null;
+    }
     return [
       <ir-payment-item
         key={payment.id}

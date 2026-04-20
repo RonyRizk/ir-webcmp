@@ -356,6 +356,7 @@ export interface IPayment {
   payment_method?: PaymentType;
   receipt_nbr?: string;
   is_receipt_issued?: boolean;
+  is_city_ledger?: boolean;
   time_stamp: {
     date: string;
     hour: number;
