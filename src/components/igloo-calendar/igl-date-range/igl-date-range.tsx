@@ -167,6 +167,7 @@ export class IglDateRange {
               class="igl-date-range__input"
               readonly
               value={this.label}
+              label={this.dateLabel}
               aria-invalid={this.isInvalid}
               aria-expanded={String(this.isActive)}
               aria-disabled={this.disabled ? 'true' : undefined}

@@ -1,5 +1,5 @@
 import { Component, Host, Prop, h } from '@stencil/core';
-import { FolioPayment, GroupedFolioPayment } from '../types';
+import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from '../types';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 import { PaymentEntries } from '@/components/ir-booking-details/types';
@@ -10,6 +10,7 @@ import { PaymentEntries } from '@/components/ir-booking-details/types';
   scoped: true,
 })
 export class IrRevenueSummary {
+  @Prop() filters: DailyPaymentFilter;
   @Prop() groupedPayments: GroupedFolioPayment = new Map();
   @Prop() previousDateGroupedPayments: GroupedFolioPayment = new Map();
   @Prop() paymentEntries: PaymentEntries;
@@ -78,7 +79,7 @@ export class IrRevenueSummary {
             icon={'arrow-trend-up'}
             value={formatAmount(calendar_data.currency.symbol, paymentsTotal)}
             cardTitle="Payments"
-            subtitle={`Previous day  ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}`}
+            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : ''}
           >
             <p class="stats-card__payments-value" slot="value">
               {formatAmount(calendar_data.currency.symbol, paymentsTotal)}
@@ -89,7 +90,7 @@ export class IrRevenueSummary {
             class="refunds-card"
             icon={'arrow-trend-down'}
             cardTitle="Refunds"
-            subtitle={`Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}`}
+            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : ''}
           >
             <p class="stats-card__refund-value" slot="value">
               {formatAmount(calendar_data.currency.symbol, refundAmount)}
@@ -99,7 +100,7 @@ export class IrRevenueSummary {
             icon={this.getTrendIcon(totalAmount, previousDateTotalAmount)}
             value={formatAmount(calendar_data.currency.symbol, totalAmount)}
             cardTitle="Difference"
-            subtitle={`Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}`}
+            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : ''}
           ></ir-stats-card>
         </div>
       </Host>

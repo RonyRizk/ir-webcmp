@@ -22,7 +22,8 @@ export type CountrySalesParams = {
   is_export_to_excel: boolean;
 };
 export type DailyRevenueReportParams = {
-  date: string;
+  from_date: string;
+  to_date: string;
   property_id: string;
   is_export_to_excel: boolean;
 };

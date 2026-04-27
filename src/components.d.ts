@@ -3462,6 +3462,7 @@ export namespace Components {
         "payment": FolioPayment;
     }
     interface IrRevenueSummary {
+        "filters": DailyPaymentFilter;
         "groupedPayments": GroupedFolioPayment;
         "paymentEntries": PaymentEntries;
         "previousDateGroupedPayments": GroupedFolioPayment;
@@ -12582,6 +12583,7 @@ declare namespace LocalJSX {
         "payment"?: FolioPayment;
     }
     interface IrRevenueSummary {
+        "filters"?: DailyPaymentFilter;
         "groupedPayments"?: GroupedFolioPayment;
         "paymentEntries"?: PaymentEntries;
         "previousDateGroupedPayments"?: GroupedFolioPayment;

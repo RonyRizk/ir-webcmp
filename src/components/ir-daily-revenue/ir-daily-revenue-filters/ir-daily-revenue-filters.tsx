@@ -17,6 +17,8 @@ export class IrDailyRevenueFilters {
   @State() filters: DailyPaymentFilter;
   private baseFilters: DailyPaymentFilter = {
     date: moment().format('YYYY-MM-DD'),
+    from_date: moment().add(-1, 'days').format('YYYY-MM-DD'),
+    to_date: moment().format('YYYY-MM-DD'),
     users: null,
   };
 
@@ -56,6 +58,15 @@ export class IrDailyRevenueFilters {
   private updateFilter(params: Partial<DailyPaymentFilter>) {
     this.filters = { ...this.filters, ...params };
   }
+
+  private getLast30Days(): { label: string; value: string }[] {
+    return Array.from({ length: 30 }, (_, i) => {
+      const date = moment().subtract(i, 'days');
+      const label = i === 0 ? 'Today' : i === 1 ? 'Yesterday' : i < 7 ? `${i} days ago` : date.format('MMM DD, YYYY');
+      return { label, value: date.format('YYYY-MM-DD') };
+    });
+  }
+
   render() {
     return (
       <div class="card mb-0 p-1 d-flex flex-column sales-filters-card">
@@ -87,10 +98,10 @@ export class IrDailyRevenueFilters {
         <div class="m-0 p-0 collapse filters-section" id="dailyRevenueFiltersCollapse">
           <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
             <fieldset class="pt-1 filter-group">
-              <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
+              {/* <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
                 Select a date
-              </label>
-              <div class="w-100 d-flex">
+              </label> */}
+              {/*   <div class="w-100 d-flex">
                 <style>
                   {`
                   .ir-date-picker-trigger{
@@ -118,7 +129,46 @@ export class IrDailyRevenueFilters {
                     style={{ width: '100%' }}
                   ></input>
                 </ir-date-picker>
+              </div>*/}
+              <wa-select
+                onchange={e => {
+                  const value = (e.target as HTMLSelectElement).value;
+                  this.updateFilter({
+                    date: value,
+                    from_date: moment(value, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
+                    to_date: moment(value, 'YYYY-MM-DD').format('YYYY-MM-DD'),
+                  });
+                }}
+                placeholder="Select a date"
+                size="small"
+                value={this.filters?.date}
+                defaultValue={this.filters?.date}
+              >
+                {this.getLast30Days().map(({ label, value }) => (
+                  <wa-option key={value} value={value}>
+                    {label}
+                  </wa-option>
+                ))}
+              </wa-select>
+              <div class="or-divider">
+                <span class="or-divider__line"></span>
+                <span class="or-divider__text">Or</span>
+                <span class="or-divider__line"></span>
               </div>
+              <igl-date-range
+                dateLabel="Select a date range"
+                withDateDifference={false}
+                defaultData={{ fromDate: this.filters?.from_date, toDate: this.filters?.to_date }}
+                onDateRangeChange={e => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  this.updateFilter({
+                    date: null,
+                    from_date: e.detail.checkIn.format('YYYY-MM-DD'),
+                    to_date: e.detail.checkOut.format('YYYY-MM-DD'),
+                  });
+                }}
+              ></igl-date-range>
             </fieldset>
             {/* <fieldset class=" filter-group">
               <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>

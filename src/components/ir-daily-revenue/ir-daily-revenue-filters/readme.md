@@ -15,9 +15,9 @@
 
 ## Events
 
-| Event             | Description | Type                                            |
-| ----------------- | ----------- | ----------------------------------------------- |
-| `fetchNewReports` |             | `CustomEvent<{ date: string; users: string; }>` |
+| Event             | Description | Type                                                                                   |
+| ----------------- | ----------- | -------------------------------------------------------------------------------------- |
+| `fetchNewReports` |             | `CustomEvent<{ from_date?: string; to_date?: string; date?: string; users: string; }>` |
 
 
 ## Dependencies
@@ -29,14 +29,16 @@
 ### Depends on
 
 - [ir-button](../../ui/ir-button)
-- [ir-date-picker](../../ui/ir-date-picker)
+- [igl-date-range](../../igloo-calendar/igl-date-range)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-date-picker
+  ir-daily-revenue-filters --> igl-date-range
   ir-button --> ir-icons
+  igl-date-range --> ir-input
+  igl-date-range --> ir-custom-date-range
   ir-daily-revenue --> ir-daily-revenue-filters
   style ir-daily-revenue-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

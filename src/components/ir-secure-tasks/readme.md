@@ -451,7 +451,7 @@ graph TD;
   ir-daily-revenue --> ir-sidebar
   ir-revenue-summary --> ir-stats-card
   ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-date-picker
+  ir-daily-revenue-filters --> igl-date-range
   ir-revenue-table --> ir-revenue-row
   ir-revenue-row --> ir-accordion
   ir-revenue-row --> ir-revenue-row-details

@@ -25,7 +25,14 @@ export class IrDailyRevenue {
   @State() groupedPayment: GroupedFolioPayment;
   @State() previousDateGroupedPayments: GroupedFolioPayment;
   @State() isLoading: string;
-  @State() filters: DailyPaymentFilter = { date: moment().format('YYYY-MM-DD'), users: null };
+  @State() filters: DailyPaymentFilter = {
+    date: moment().format('YYYY-MM-DD'),
+    from_date: null,
+    to_date: null,
+    // from_date: moment().add(-1, 'days').format('YYYY-MM-DD'),
+    // to_date: moment().format('YYYY-MM-DD'),
+    users: null,
+  };
   @State() sideBarEvent: SidebarOpenEvent | null;
 
   private tokenService = new Token();
@@ -197,15 +204,17 @@ export class IrDailyRevenue {
 
       const requests = [
         this.propertyService.getDailyRevenueReport({
-          date: this.filters.date,
+          from_date: this.filters.date ? this.filters.date : this.filters.from_date,
+          to_date: this.filters.date ? this.filters.date : this.filters.to_date,
           property_id: this.property_id?.toString(),
           is_export_to_excel: isExportToExcel,
         }),
       ];
-      if (!isExportToExcel && !excludeYesterday) {
+      if (!isExportToExcel && !excludeYesterday && this.filters.date) {
         requests.push(
           this.propertyService.getDailyRevenueReport({
-            date: moment(this.filters.date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
+            from_date: moment(this.filters.date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
+            to_date: moment(this.filters.date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
             property_id: this.property_id?.toString(),
             is_export_to_excel: isExportToExcel,
           }),
@@ -256,6 +265,7 @@ export class IrDailyRevenue {
             ></ir-button>
           </div>
           <ir-revenue-summary
+            filters={this.filters}
             previousDateGroupedPayments={this.previousDateGroupedPayments}
             groupedPayments={this.groupedPayment}
             paymentEntries={this.paymentEntries}

@@ -65,7 +65,6 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
- - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
  - [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
 
@@ -73,7 +72,6 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   igl-split-booking --> ir-date-picker
-  ir-daily-revenue-filters --> ir-date-picker
   ir-financial-filters --> ir-date-picker
   ir-range-picker --> ir-date-picker
   style ir-date-picker fill:#f9f,stroke:#333,stroke-width:4px

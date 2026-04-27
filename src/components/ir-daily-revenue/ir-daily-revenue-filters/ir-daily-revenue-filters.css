@@ -15,6 +15,27 @@
   display: block;
   height: 100%;
 }
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.or-divider__line {
+  flex: 1;
+  height: 1px;
+  background-color: #dee2e6;
+}
+
+.or-divider__text {
+  font-size: 0.75rem;
+  color: #6c757d;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 @media (min-width: 768px) {
   :host {
     width: 300px;

@@ -20,6 +20,8 @@ export type SidebarOpenEvent = {
   };
 };
 export type DailyPaymentFilter = {
-  date: string;
+  from_date?: string;
+  to_date?: string;
+  date?: string;
   users: string | null;
 };
