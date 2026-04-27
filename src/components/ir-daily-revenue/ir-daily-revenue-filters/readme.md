@@ -29,16 +29,17 @@
 ### Depends on
 
 - [ir-button](../../ui/ir-button)
-- [igl-date-range](../../igloo-calendar/igl-date-range)
+- [ir-select](../../ui/ir-select)
+- [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> igl-date-range
+  ir-daily-revenue-filters --> ir-select
+  ir-daily-revenue-filters --> ir-range-picker
   ir-button --> ir-icons
-  igl-date-range --> ir-input
-  igl-date-range --> ir-custom-date-range
+  ir-range-picker --> ir-date-picker
   ir-daily-revenue --> ir-daily-revenue-filters
   style ir-daily-revenue-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

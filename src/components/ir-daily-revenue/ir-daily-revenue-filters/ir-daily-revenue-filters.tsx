@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/
 import moment from 'moment';
 import { DailyPaymentFilter, GroupedFolioPayment } from '../types';
 import locales from '@/stores/locales.store';
+import { calculateDaysBetweenDates } from '@/utils/booking';
 
 @Component({
   tag: 'ir-daily-revenue-filters',
@@ -17,7 +18,7 @@ export class IrDailyRevenueFilters {
   @State() filters: DailyPaymentFilter;
   private baseFilters: DailyPaymentFilter = {
     date: moment().format('YYYY-MM-DD'),
-    from_date: moment().add(-1, 'days').format('YYYY-MM-DD'),
+    from_date: moment().format('YYYY-MM-DD'),
     to_date: moment().format('YYYY-MM-DD'),
     users: null,
   };
@@ -59,11 +60,11 @@ export class IrDailyRevenueFilters {
     this.filters = { ...this.filters, ...params };
   }
 
-  private getLast30Days(): { label: string; value: string }[] {
+  private getLast30Days(): { text: string; value: string }[] {
     return Array.from({ length: 30 }, (_, i) => {
       const date = moment().subtract(i, 'days');
-      const label = i === 0 ? 'Today' : i === 1 ? 'Yesterday' : i < 7 ? `${i} days ago` : date.format('MMM DD, YYYY');
-      return { label, value: date.format('YYYY-MM-DD') };
+      const label = i === 0 ? 'Today' : date.format('MMM DD, YYYY');
+      return { text: label, value: date.format('YYYY-MM-DD') };
     });
   }
 
@@ -97,11 +98,11 @@ export class IrDailyRevenueFilters {
         </div>
         <div class="m-0 p-0 collapse filters-section" id="dailyRevenueFiltersCollapse">
           <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
-            <fieldset class="pt-1 filter-group">
-              {/* <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
+            {/* <fieldset class="pt-1 filter-group"> */}
+            {/* <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
                 Select a date
               </label> */}
-              {/*   <div class="w-100 d-flex">
+            {/*   <div class="w-100 d-flex">
                 <style>
                   {`
                   .ir-date-picker-trigger{
@@ -130,7 +131,7 @@ export class IrDailyRevenueFilters {
                   ></input>
                 </ir-date-picker>
               </div>*/}
-              <wa-select
+            {/* <wa-select
                 onchange={e => {
                   const value = (e.target as HTMLSelectElement).value;
                   this.updateFilter({
@@ -168,7 +169,53 @@ export class IrDailyRevenueFilters {
                     to_date: e.detail.checkOut.format('YYYY-MM-DD'),
                   });
                 }}
-              ></igl-date-range>
+              ></igl-date-range> */}
+            {/* </fieldset> */}
+            <fieldset class="pt-1 filter-group">
+              <label htmlFor="period" class="px-0 m-0" style={{ paddingBottom: '0.25rem' }}>
+                Selected period
+              </label>
+              <div class="d-flex flex-column date-filter-group" style={{ gap: '0.5rem' }}>
+                <ir-select
+                  selectedValue={this.filters?.date?.toString()}
+                  onSelectChange={e => {
+                    const value = e.detail;
+                    const today = moment();
+                    const dateDiff = calculateDaysBetweenDates(value, moment().format('YYYY-MM-DD'));
+                    const nd = today.add(-dateDiff, 'days').format('YYYY-MM-DD');
+                    this.updateFilter({
+                      date: value,
+                      to_date: nd,
+                      from_date: nd,
+                    });
+                  }}
+                  selectId="period"
+                  // showFirstOption={false}
+                  firstOption="..."
+                  data={this.getLast30Days()}
+                ></ir-select>
+                <p class="m-0 p-0 text-center">Or</p>
+                <ir-range-picker
+                  onDateRangeChanged={e => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    const { fromDate, toDate, wasFocused } = e.detail;
+                    let params: any = {
+                      from_date: fromDate.format('YYYY-MM-DD'),
+                      to_date: toDate.format('YYYY-MM-DD'),
+                    };
+                    if (wasFocused) {
+                      params = { ...params, date: null };
+                    }
+                    this.updateFilter(params);
+                    // this.dates = { from: fromDate, to: toDate };
+                  }}
+                  fromDate={moment(this.filters?.from_date, 'YYYY-MM-DD')}
+                  toDate={moment(this.filters?.to_date, 'YYYY-MM-DD')}
+                  maxDate={moment().format('YYYY-MM-DD')}
+                  withOverlay={false}
+                ></ir-range-picker>
+              </div>
             </fieldset>
             {/* <fieldset class=" filter-group">
               <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>

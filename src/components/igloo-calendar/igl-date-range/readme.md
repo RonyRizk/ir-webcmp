@@ -68,7 +68,6 @@ Type: `Promise<void>`
 
  - [igl-book-property-header](../igl-book-property/igl-book-property-header)
  - [ir-booking-editor-header](../ir-booking-editor/ir-booking-editor-header)
- - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
 
 ### Depends on
 
@@ -82,7 +81,6 @@ graph TD;
   igl-date-range --> ir-custom-date-range
   igl-book-property-header --> igl-date-range
   ir-booking-editor-header --> igl-date-range
-  ir-daily-revenue-filters --> igl-date-range
   style igl-date-range fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
