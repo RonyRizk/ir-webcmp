@@ -24,6 +24,7 @@ export class IglDateRange {
   @Prop() withDateDifference: boolean = true;
   @Prop() variant: 'booking' | 'default' = 'default';
   @Prop() hint: string;
+  @Prop() maxSpanDays: number = 365;
 
   @State() renderAgain: boolean = false;
   @State() isActive: boolean = false;
@@ -185,6 +186,7 @@ export class IglDateRange {
         {/* Popup body */}
         <div part="body" id={this.popupId} class="igl-date-range__calendar" role="dialog" aria-modal="false" aria-label="Date range selection dialog">
           <ir-custom-date-range
+            maxSpanDays={this.maxSpanDays}
             style={{ '--cal-button-size': '35px' }}
             fromDate={moment(this.fromDate)}
             toDate={moment(this.toDate)}

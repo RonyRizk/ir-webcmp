@@ -2,7 +2,6 @@ import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/
 import moment from 'moment';
 import { DailyPaymentFilter, GroupedFolioPayment } from '../types';
 import locales from '@/stores/locales.store';
-import { calculateDaysBetweenDates } from '@/utils/booking';
 
 @Component({
   tag: 'ir-daily-revenue-filters',
@@ -180,13 +179,10 @@ export class IrDailyRevenueFilters {
                   selectedValue={this.filters?.date?.toString()}
                   onSelectChange={e => {
                     const value = e.detail;
-                    const today = moment();
-                    const dateDiff = calculateDaysBetweenDates(value, moment().format('YYYY-MM-DD'));
-                    const nd = today.add(-dateDiff, 'days').format('YYYY-MM-DD');
                     this.updateFilter({
                       date: value,
-                      to_date: nd,
-                      from_date: nd,
+                      to_date: value,
+                      from_date: value,
                     });
                   }}
                   selectId="period"

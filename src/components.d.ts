@@ -331,6 +331,7 @@ export namespace Components {
         "disabled": boolean;
         "hint": string;
         "maxDate": string;
+        "maxSpanDays": number;
         "minDate": string;
         "openDatePicker": () => Promise<void>;
         "size": 'small' | 'medium' | 'large';
@@ -9083,6 +9084,7 @@ declare namespace LocalJSX {
         "disabled"?: boolean;
         "hint"?: string;
         "maxDate"?: string;
+        "maxSpanDays"?: number;
         "minDate"?: string;
         "onDateRangeChange"?: (event: IglDateRangeCustomEvent<DateRangeChangeEvent>) => void;
         "onDateSelectEvent"?: (event: IglDateRangeCustomEvent<{ [key: string]: any }>) => void;
