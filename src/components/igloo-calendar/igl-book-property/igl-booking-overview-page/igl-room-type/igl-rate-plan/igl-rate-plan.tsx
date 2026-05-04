@@ -168,18 +168,21 @@ export class IglRatePlan {
       <Host data-testid={`rp-${this.ratePlan.id}`}>
         <div class={`rate-plan ${isAvailableToBook ? 'rate-plan--available' : 'rate-plan--unavailable'}`}>
           <div data-testid={'rp_name'} class="rateplan-name-container">
-            {bookingType === 'BAR_BOOKING' ? (
-              <p>
-                {/* <span class="font-weight-bold">{ratePlan.name.split('/')[0]}</span> */}
-                <span>
-                  {ratePlan.name.split('/')[1]} {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
-                </span>
-              </p>
-            ) : (
-              <span>
-                {ratePlan.short_name} {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
-              </span>
-            )}
+            <div>
+              {bookingType === 'BAR_BOOKING' ? (
+                <Fragment>
+                  {/* <span class="font-weight-bold">{ratePlan.name.split('/')[0]}</span> */}
+                  <span class={'rateplan-name'}>{ratePlan.name.split('/')[1]} </span>
+                  {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <span class={'rateplan-name'}>{ratePlan.short_name} </span>
+                  {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
+                </Fragment>
+              )}
+              {ratePlan.custom_text && <span class="custom-text-span">{ratePlan.custom_text}</span>}
+            </div>
             {isAvailableToBook && (
               <Fragment>
                 <wa-tooltip for={`rateplan-${this.ratePlan.id}`}>

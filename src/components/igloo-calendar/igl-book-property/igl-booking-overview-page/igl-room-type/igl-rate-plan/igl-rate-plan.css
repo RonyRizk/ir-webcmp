@@ -1,7 +1,7 @@
 :host {
   display: block;
   margin-bottom: 1rem;
-  color: var(--wa-color-text-quiet);
+  color: var(--wa-color-text-normal);
 }
 
 .rate-plan {
@@ -108,9 +108,26 @@
 
 .non-ref-span {
   font-size: 12px;
+  padding-inline: 0.25rem;
   color: var(--wa-color-success-fill-loud);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
 }
-
+.rateplan-name {
+  font-family: var(--wa-font-family-heading);
+  font-weight: 400;
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
+}
+.custom-text-span {
+  color: var(--wa-color-text-quiet);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
+}
 .nightBorder {
   border-left-width: 0;
   border-top-right-radius: 3px !important;

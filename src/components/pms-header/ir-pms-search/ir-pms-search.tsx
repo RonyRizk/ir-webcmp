@@ -1,9 +1,10 @@
 import { IrComboboxSelectEventDetail } from '@/components';
-import { Debounce } from '@/decorators/debounce';
 import { Booking } from '@/models/booking.dto';
 import Token from '@/models/Token';
 import { BookingListingService } from '@/services/booking_listing.service';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, from, of, switchMap, tap } from 'rxjs';
 
 @Component({
   tag: 'ir-pms-search',
@@ -20,6 +21,8 @@ export class IrPmsSearch {
 
   private tokenService = new Token();
   private bookingListingService = new BookingListingService();
+  private search$ = new Subject<string>();
+  private subscription: Subscription;
 
   @Event({ bubbles: true, composed: true, eventName: 'combobox-select' }) comboboxSelect: EventEmitter<IrComboboxSelectEventDetail>;
   autoCompleteRef: HTMLIrAutocompleteElement;
@@ -30,9 +33,56 @@ export class IrPmsSearch {
     if (this.ticket) {
       this.tokenService.setToken(this.ticket);
     }
+
+    this.subscription = this.search$
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        filter(value => value.length >= 2),
+        tap(() => {
+          this.isLoading = true;
+          this.autoCompleteRef?.hide();
+        }),
+        switchMap(value => {
+          const isNumber = /^(?:-?\d+|.{3}-.*)$/.test(value);
+          return from(
+            this.bookingListingService.getExposedBookings(
+              {
+                book_nbr: isNumber ? value : null,
+                name: isNumber ? null : value,
+                property_id: this.propertyid as any,
+                filter_type: 1,
+                from: null,
+                to: null,
+                balance_filter: '0',
+                start_row: 0,
+                end_row: 20,
+                total_count: 0,
+                booking_status: '',
+                affiliate_id: 0,
+                is_mpo_managed: false,
+                is_mpo_used: false,
+                is_for_mobile: false,
+                is_combined_view: false,
+                is_to_export: false,
+                property_ids: null,
+                channel: '',
+              },
+              { skipStore: true },
+            ),
+          ).pipe(catchError(() => of([] as Booking[])));
+        }),
+      )
+      .subscribe(bookings => {
+        this.bookings = bookings;
+        this.isLoading = false;
+        this.autoCompleteRef?.show();
+      });
   }
+
   disconnectedCallback() {
     document.removeEventListener('keydown', this.focusInput);
+    this.subscription?.unsubscribe();
   }
 
   @Watch('ticket')
@@ -69,44 +119,16 @@ export class IrPmsSearch {
       this.autoCompleteRef.focusInput();
     }
   };
-  @Debounce(300)
-  private async fetchBookings(event: CustomEvent<string>) {
-    // throw new Error('Method not implemented.');
+  private fetchBookings(event: CustomEvent<string>) {
     event.stopImmediatePropagation();
     event.stopPropagation();
     const value = event.detail;
-    this.autoCompleteRef.hide();
     if (!value) {
+      this.bookings = [];
+      this.autoCompleteRef?.hide();
       return;
     }
-    const isNumber = /^(?:-?\d+|.{3}-.*)$/.test(value);
-    this.isLoading = true;
-    this.bookings = await this.bookingListingService.getExposedBookings(
-      {
-        book_nbr: isNumber ? value : null,
-        name: isNumber ? null : value,
-        property_id: this.propertyid as any,
-        filter_type: 1,
-        from: '2026-01-01',
-        to: '2026-01-08',
-        balance_filter: '0',
-        start_row: 0,
-        end_row: 20,
-        total_count: 0,
-        booking_status: '',
-        affiliate_id: 0,
-        is_mpo_managed: false,
-        is_mpo_used: false,
-        is_for_mobile: false,
-        is_combined_view: false,
-        is_to_export: false,
-        property_ids: null,
-        channel: '',
-      },
-      { skipStore: true },
-    );
-    this.autoCompleteRef.show();
-    this.isLoading = false;
+    this.search$.next(value);
   }
   private handleComboboxSelect(event: CustomEvent<string>): void {
     event.stopImmediatePropagation();
