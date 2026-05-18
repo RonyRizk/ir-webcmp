@@ -132,12 +132,13 @@ export class IrPaymentDetails {
       });
       return;
     }
-    const _number = await this.bookingService.getNextValue({ starter: `RC-${calendar_data.property.aname}` });
+    const starter = calendar_data?.property?.company?.receipt_prefix ? calendar_data.property.company?.receipt_prefix + '-' : '';
+    const _number = await this.bookingService.getNextValue({ starter: `${starter}${calendar_data.property.aname}` });
     this.openPrintScreen.emit({
       mode: 'receipt',
       payload: {
         pid: detail.system_id?.toString(),
-        rnb: `RC-${_number.My_Result}`,
+        rnb: `${starter}${_number.My_Result}`,
       },
     });
   }

@@ -37,6 +37,15 @@ export class IrRevenueTable {
    * - Never throws on bad input (null/undefined, non-Map, malformed keys, non-array values).
    * - Keys are parsed defensively; unknown parts fall back to "UNKNOWN".
    */
+  private sortByDateTime(list: FolioPayment[]): FolioPayment[] {
+    return [...list].sort((a, b) => {
+      const dateCmp = a.date.localeCompare(b.date);
+      if (dateCmp !== 0) return dateCmp;
+      if (a.hour !== b.hour) return a.hour - b.hour;
+      return a.minute - b.minute;
+    });
+  }
+
   private regroupPaymentsByMethod(): Map<string, Map<string, FolioPayment[]>> {
     const result = new Map<string, Map<string, FolioPayment[]>>();
 
@@ -93,6 +102,7 @@ export class IrRevenueTable {
             </div>
             {this.groupType === 'type' &&
               Array.from((this.payments as Map<string, FolioPayment[]>).entries()).map(([key, list]) => {
+                list = this.sortByDateTime(list);
                 const [paymentType, paymentMethod] = key.split('_');
                 const groupName = PAYMENT_TYPES_WITH_METHOD.includes(paymentType)
                   ? `${this.payTypesObj[paymentType] ?? paymentType}: ${this.payMethodObj[paymentMethod] ?? paymentMethod}`
@@ -110,6 +120,7 @@ export class IrRevenueTable {
                       <p>{formatAmount(calendar_data.currency.symbol, total)}</p>
                     </div>
                     {Array.from(byType.entries()).map(([typeKey, list]) => {
+                      list = this.sortByDateTime(list);
                       const groupName = PAYMENT_TYPES_WITH_METHOD.includes(typeKey) ? `${this.payTypesObj[typeKey] ?? typeKey}` : this.payTypesObj[typeKey] ?? typeKey;
 
                       return (

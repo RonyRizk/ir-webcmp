@@ -83,7 +83,7 @@ export class IrBookingDetails {
   private token = new Token();
   private arrivalTime: IEntries[];
 
-  private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing?id=%2';
+  private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2';
   // private printingBaseUrl = 'http://localhost:5863/%1/printing?id=%2';
   private modalRef: HTMLIrDialogElement;
   private paymentFolioRef: HTMLIrPaymentFolioElement;

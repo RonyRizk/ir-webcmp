@@ -566,6 +566,10 @@ export interface Company {
   invoice_footer_notes: string;
   invoice_prefix: string;
   invoice_start_nbr: number;
+  receipt_prefix: string | null;
+  receipt_start_nbr: string | null;
+  debit_note_prefix: string | null;
+  debit_note_start_nbr: string | null;
   name: string;
   phone: string;
   postal: string;
