@@ -229,9 +229,7 @@ graph TD;
   ir-revenue-summary --> ir-stats-card
   ir-stats-card --> ir-icons
   ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-select
-  ir-daily-revenue-filters --> ir-range-picker
-  ir-range-picker --> ir-date-picker
+  ir-daily-revenue-filters --> ir-date-picker
   ir-revenue-table --> ir-revenue-row
   ir-revenue-row --> ir-accordion
   ir-revenue-row --> ir-revenue-row-details

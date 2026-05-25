@@ -84,3 +84,9 @@
   color: var(--wa-color-on-quiet, var(--wa-color-brand-on-quiet));
   background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-brand-fill-quiet)), var(--wa-color-mix-active));
 }
+/* sm */
+@media (width >= 640px) {
+  .booked-by-cell__button.--mobile-only {
+    display: none;
+  }
+}

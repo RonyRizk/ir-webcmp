@@ -113,12 +113,12 @@ export class IrBookedByCell {
         </div>
         {this.showContactIcons && this.guest.country_phone_prefix && this.guest.mobile_without_prefix && (
           <div class="booked-by-source__container booked-by-source__contact">
-            <a class="booked-by-cell__button" href={`tel:${this.guest.country_phone_prefix}${this.guest.mobile_without_prefix}`}>
+            <a class="booked-by-cell__button --mobile-only" href={`tel:${this.guest.country_phone_prefix}${this.guest.mobile_without_prefix.replace(/\s+/g, '')}`}>
               <wa-icon name="phone"></wa-icon>
             </a>
             <a
               class="booked-by-cell__button"
-              href={`https://wa.me/${this.guest.country_phone_prefix.replace('+', '')}${this.guest.mobile_without_prefix}`}
+              href={`https://wa.me/${this.guest.country_phone_prefix.replace('+', '')}${this.guest.mobile_without_prefix.replace(/\s+/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
             >

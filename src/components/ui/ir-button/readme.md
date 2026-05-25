@@ -62,6 +62,7 @@ Type: `Promise<void>`
  - [ir-channel-mapping](../../ir-channel/ir-channel-mapping)
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
+ - [ir-delete-modal](../../ir-housekeeping/ir-delete-modal)
  - [ir-filters-panel](../ir-filters-panel)
  - [ir-financial-actions](../../ir-financial-actions)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
@@ -109,6 +110,7 @@ graph TD;
   ir-channel-mapping --> ir-button
   ir-daily-revenue --> ir-button
   ir-daily-revenue-filters --> ir-button
+  ir-delete-modal --> ir-button
   ir-filters-panel --> ir-button
   ir-financial-actions --> ir-button
   ir-financial-filters --> ir-button
