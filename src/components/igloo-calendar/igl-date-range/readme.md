@@ -14,7 +14,6 @@
 | `disabled`           | `disabled`             |             | `boolean`                        | `false`     |
 | `hint`               | `hint`                 |             | `string`                         | `undefined` |
 | `maxDate`            | `max-date`             |             | `string`                         | `undefined` |
-| `maxSpanDays`        | `max-span-days`        |             | `number`                         | `365`       |
 | `minDate`            | `min-date`             |             | `string`                         | `undefined` |
 | `size`               | `size`                 |             | `"large" \| "medium" \| "small"` | `'small'`   |
 | `variant`            | `variant`              |             | `"booking" \| "default"`         | `'default'` |

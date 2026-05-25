@@ -836,6 +836,10 @@ export namespace Components {
          */
         "promoKey": string;
         /**
+          * Show phone and WhatsApp contact icons. When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`.
+         */
+        "showContactIcons": boolean;
+        /**
           * Show loyalty discount icon (pink heart-outline).
          */
         "showLoyaltyIcon": boolean;
@@ -9660,6 +9664,10 @@ declare namespace LocalJSX {
           * Promo key if a promo/coupon was applied.
          */
         "promoKey"?: string;
+        /**
+          * Show phone and WhatsApp contact icons. When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`.
+         */
+        "showContactIcons"?: boolean;
         /**
           * Show loyalty discount icon (pink heart-outline).
          */

@@ -51,16 +51,17 @@ Type: `Promise<void>`
 
 ### Depends on
 
-- [ir-dialog](../../ui/ir-dialog)
-- [ir-custom-button](../../ui/ir-custom-button)
+- [ir-button](../../ui/ir-button)
+- [ir-select](../../ui/ir-select)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-hk-delete-dialog --> ir-dialog
-  ir-hk-delete-dialog --> ir-custom-button
-  ir-hk-team --> ir-hk-delete-dialog
-  style ir-hk-delete-dialog fill:#f9f,stroke:#333,stroke-width:4px
+  ir-delete-modal --> ir-button
+  ir-delete-modal --> ir-select
+  ir-button --> ir-icons
+  ir-hk-team --> ir-delete-modal
+  style ir-delete-modal fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

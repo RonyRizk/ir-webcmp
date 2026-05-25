@@ -65,6 +65,7 @@ export class IrBookingListingMobileCard {
         <div class="mobile-card__body">
           <ir-booked-by-cell
             display="inline"
+            showContactIcons={this.booking.agent === null}
             class="mobile-card__text-center"
             label="Booked by"
             clickableGuest

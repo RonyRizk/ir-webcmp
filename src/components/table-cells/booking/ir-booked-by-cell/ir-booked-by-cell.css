@@ -74,7 +74,19 @@
   color: var(--wa-color-on-quiet, var(--wa-color-brand-on-quiet));
   background-color: var(--wa-color-fill-quiet, var(--wa-color-brand-fill-quiet));
 }
+.booked-by-source__contact wa-icon {
+  font-size: 1.25rem;
+}
+.booked-by-source__contact a:first-child wa-icon {
+  font-size: 1rem;
+}
 .booked-by-cell__button:active {
   color: var(--wa-color-on-quiet, var(--wa-color-brand-on-quiet));
   background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-brand-fill-quiet)), var(--wa-color-mix-active));
+}
+/* sm */
+@media (width >= 640px) {
+  .booked-by-cell__button.--mobile-only {
+    display: none;
+  }
 }
