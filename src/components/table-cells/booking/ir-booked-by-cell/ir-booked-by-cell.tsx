@@ -57,6 +57,12 @@ export class IrBookedByCell {
   @Prop() showPromoIcon: boolean = false;
 
   /**
+   * Show phone and WhatsApp contact icons.
+   * When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`.
+   */
+  @Prop() showContactIcons: boolean = false;
+
+  /**
    * Makes the guest name clickable.
    * Emits `openGuestDetails` when clicked.
    */
@@ -105,6 +111,21 @@ export class IrBookedByCell {
           )}
           {this.showPrivateNoteDot && <span class="booked-by-source__private-note"></span>}
         </div>
+        {this.showContactIcons && this.guest.country_phone_prefix && this.guest.mobile_without_prefix && (
+          <div class="booked-by-source__container booked-by-source__contact">
+            <a class="booked-by-cell__button" href={`tel:${this.guest.country_phone_prefix}${this.guest.mobile_without_prefix}`}>
+              <wa-icon name="phone"></wa-icon>
+            </a>
+            <a
+              class="booked-by-cell__button"
+              href={`https://wa.me/${this.guest.country_phone_prefix.replace('+', '')}${this.guest.mobile_without_prefix}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <wa-icon name="whatsapp" family="brands"></wa-icon>
+            </a>
+          </div>
+        )}
         <div class="booked-by-source__container">
           {this.showLoyaltyIcon && (
             <Fragment>

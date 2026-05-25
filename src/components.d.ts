@@ -836,6 +836,10 @@ export namespace Components {
          */
         "promoKey": string;
         /**
+          * Show phone and WhatsApp contact icons. When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`.
+         */
+        "showContactIcons": boolean;
+        /**
           * Show loyalty discount icon (pink heart-outline).
          */
         "showLoyaltyIcon": boolean;
@@ -2579,17 +2583,6 @@ export namespace Components {
           * Required value for the option
          */
         "value": string;
-    }
-    interface IrMealCountSummary {
-    }
-    interface IrMealGuestList {
-        "propertyid": number;
-        "ticket": string;
-    }
-    interface IrMealReport {
-        "language": string;
-        "propertyid": number;
-        "ticket": string;
     }
     interface IrMenu {
         "selectedHref"?: string;
@@ -4569,10 +4562,6 @@ export interface IrMComboboxCustomEvent<T> extends CustomEvent<T> {
 export interface IrMComboboxItemCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrMComboboxItemElement;
-}
-export interface IrMealGuestListCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLIrMealGuestListElement;
 }
 export interface IrMenuDrawerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -7183,35 +7172,6 @@ declare global {
         prototype: HTMLIrMComboboxItemElement;
         new (): HTMLIrMComboboxItemElement;
     };
-    interface HTMLIrMealCountSummaryElement extends Components.IrMealCountSummary, HTMLStencilElement {
-    }
-    var HTMLIrMealCountSummaryElement: {
-        prototype: HTMLIrMealCountSummaryElement;
-        new (): HTMLIrMealCountSummaryElement;
-    };
-    interface HTMLIrMealGuestListElementEventMap {
-        "preferenceChanged": void;
-    }
-    interface HTMLIrMealGuestListElement extends Components.IrMealGuestList, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrMealGuestListElementEventMap>(type: K, listener: (this: HTMLIrMealGuestListElement, ev: IrMealGuestListCustomEvent<HTMLIrMealGuestListElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrMealGuestListElementEventMap>(type: K, listener: (this: HTMLIrMealGuestListElement, ev: IrMealGuestListCustomEvent<HTMLIrMealGuestListElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLIrMealGuestListElement: {
-        prototype: HTMLIrMealGuestListElement;
-        new (): HTMLIrMealGuestListElement;
-    };
-    interface HTMLIrMealReportElement extends Components.IrMealReport, HTMLStencilElement {
-    }
-    var HTMLIrMealReportElement: {
-        prototype: HTMLIrMealReportElement;
-        new (): HTMLIrMealReportElement;
-    };
     interface HTMLIrMenuElement extends Components.IrMenu, HTMLStencilElement {
     }
     var HTMLIrMenuElement: {
@@ -8771,9 +8731,6 @@ declare global {
         "ir-m-combobox": HTMLIrMComboboxElement;
         "ir-m-combobox-booking-item": HTMLIrMComboboxBookingItemElement;
         "ir-m-combobox-item": HTMLIrMComboboxItemElement;
-        "ir-meal-count-summary": HTMLIrMealCountSummaryElement;
-        "ir-meal-guest-list": HTMLIrMealGuestListElement;
-        "ir-meal-report": HTMLIrMealReportElement;
         "ir-menu": HTMLIrMenuElement;
         "ir-menu-drawer": HTMLIrMenuDrawerElement;
         "ir-menu-group": HTMLIrMenuGroupElement;
@@ -9707,6 +9664,10 @@ declare namespace LocalJSX {
           * Promo key if a promo/coupon was applied.
          */
         "promoKey"?: string;
+        /**
+          * Show phone and WhatsApp contact icons. When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`.
+         */
+        "showContactIcons"?: boolean;
         /**
           * Show loyalty discount icon (pink heart-outline).
          */
@@ -11641,18 +11602,6 @@ declare namespace LocalJSX {
          */
         "value": string;
     }
-    interface IrMealCountSummary {
-    }
-    interface IrMealGuestList {
-        "onPreferenceChanged"?: (event: IrMealGuestListCustomEvent<void>) => void;
-        "propertyid"?: number;
-        "ticket"?: string;
-    }
-    interface IrMealReport {
-        "language"?: string;
-        "propertyid"?: number;
-        "ticket"?: string;
-    }
     interface IrMenu {
         "selectedHref"?: string;
     }
@@ -13503,9 +13452,6 @@ declare namespace LocalJSX {
         "ir-m-combobox": IrMCombobox;
         "ir-m-combobox-booking-item": IrMComboboxBookingItem;
         "ir-m-combobox-item": IrMComboboxItem;
-        "ir-meal-count-summary": IrMealCountSummary;
-        "ir-meal-guest-list": IrMealGuestList;
-        "ir-meal-report": IrMealReport;
         "ir-menu": IrMenu;
         "ir-menu-drawer": IrMenuDrawer;
         "ir-menu-group": IrMenuGroup;
@@ -13798,9 +13744,6 @@ declare module "@stencil/core" {
             "ir-m-combobox": LocalJSX.IrMCombobox & JSXBase.HTMLAttributes<HTMLIrMComboboxElement>;
             "ir-m-combobox-booking-item": LocalJSX.IrMComboboxBookingItem & JSXBase.HTMLAttributes<HTMLIrMComboboxBookingItemElement>;
             "ir-m-combobox-item": LocalJSX.IrMComboboxItem & JSXBase.HTMLAttributes<HTMLIrMComboboxItemElement>;
-            "ir-meal-count-summary": LocalJSX.IrMealCountSummary & JSXBase.HTMLAttributes<HTMLIrMealCountSummaryElement>;
-            "ir-meal-guest-list": LocalJSX.IrMealGuestList & JSXBase.HTMLAttributes<HTMLIrMealGuestListElement>;
-            "ir-meal-report": LocalJSX.IrMealReport & JSXBase.HTMLAttributes<HTMLIrMealReportElement>;
             "ir-menu": LocalJSX.IrMenu & JSXBase.HTMLAttributes<HTMLIrMenuElement>;
             "ir-menu-drawer": LocalJSX.IrMenuDrawer & JSXBase.HTMLAttributes<HTMLIrMenuDrawerElement>;
             "ir-menu-group": LocalJSX.IrMenuGroup & JSXBase.HTMLAttributes<HTMLIrMenuGroupElement>;

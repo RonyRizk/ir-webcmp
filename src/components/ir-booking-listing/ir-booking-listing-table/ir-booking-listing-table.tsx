@@ -124,6 +124,7 @@ export class IrBookingListingTable {
             showRepeatGuestBadge={booking.guest.nbr_confirmed_bookings > 1 && !booking.agent}
             guest={booking.guest}
             identifier={booking.booking_nbr}
+            showContactIcons={booking.agent === null}
             showPersons
             showPrivateNoteDot={getPrivateNote(booking.extras)}
             totalPersons={totalPersons?.toString()}
