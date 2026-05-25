@@ -46,6 +46,7 @@
  - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
+ - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
@@ -66,6 +67,7 @@ graph TD;
   ir-booking-editor-header --> ir-validator
   ir-extra-service-config-form --> ir-validator
   ir-guest-info-form --> ir-validator
+  ir-hk-user-drawer-form --> ir-validator
   ir-payment-folio-form --> ir-validator
   ir-pickup-form --> ir-validator
   ir-reallocation-form --> ir-validator

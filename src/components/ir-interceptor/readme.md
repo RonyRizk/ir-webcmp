@@ -39,6 +39,7 @@
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-login](../ir-login)
+ - [ir-meal-report](../ir-meal-report)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
  - [ir-payment-option](../ir-payment-option)
  - [ir-queue-manager](../ir-queue-manager)
@@ -77,6 +78,7 @@ graph TD;
   ir-hk-tasks --> ir-interceptor
   ir-housekeeping --> ir-interceptor
   ir-login --> ir-interceptor
+  ir-meal-report --> ir-interceptor
   ir-monthly-bookings-report --> ir-interceptor
   ir-payment-option --> ir-interceptor
   ir-queue-manager --> ir-interceptor

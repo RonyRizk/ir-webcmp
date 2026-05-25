@@ -82,13 +82,18 @@
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
+ - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-staff-tasks-header](../../ir-housekeeping/ir-hk-staff-tasks/ir-hk-staff-tasks-header)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
+ - [ir-hk-unassigned-units-drawer](../../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
+ - [ir-hk-user-drawer](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer)
+ - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
+ - [ir-meal-report](../../ir-meal-report)
  - [ir-notifications](../../ir-notifications)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
@@ -159,13 +164,18 @@ graph TD;
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
+  ir-hk-delete-dialog --> ir-custom-button
   ir-hk-operations-card --> ir-custom-button
   ir-hk-staff-tasks --> ir-custom-button
   ir-hk-staff-tasks-header --> ir-custom-button
   ir-hk-tasks --> ir-custom-button
   ir-hk-team --> ir-custom-button
+  ir-hk-unassigned-units-drawer --> ir-custom-button
+  ir-hk-user-drawer --> ir-custom-button
+  ir-hk-user-drawer-form --> ir-custom-button
   ir-invoice --> ir-custom-button
   ir-listing-header --> ir-custom-button
+  ir-meal-report --> ir-custom-button
   ir-notifications --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button
