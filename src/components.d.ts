@@ -1950,6 +1950,9 @@ export namespace Components {
     }
     interface IrFinancialTable {
     }
+    interface IrGhsOnboarding {
+        "ticket": string;
+    }
     interface IrGuestInfo {
         "booking_nbr": string;
         "email": string;
@@ -6641,6 +6644,12 @@ declare global {
         prototype: HTMLIrFinancialTableElement;
         new (): HTMLIrFinancialTableElement;
     };
+    interface HTMLIrGhsOnboardingElement extends Components.IrGhsOnboarding, HTMLStencilElement {
+    }
+    var HTMLIrGhsOnboardingElement: {
+        prototype: HTMLIrGhsOnboardingElement;
+        new (): HTMLIrGhsOnboardingElement;
+    };
     interface HTMLIrGuestInfoElementEventMap {
         "closeSideBar": null;
         "resetBookingEvt": null;
@@ -8725,6 +8734,7 @@ declare global {
         "ir-financial-filters": HTMLIrFinancialFiltersElement;
         "ir-financial-summary": HTMLIrFinancialSummaryElement;
         "ir-financial-table": HTMLIrFinancialTableElement;
+        "ir-ghs-onboarding": HTMLIrGhsOnboardingElement;
         "ir-guest-info": HTMLIrGuestInfoElement;
         "ir-guest-info-drawer": HTMLIrGuestInfoDrawerElement;
         "ir-guest-info-form": HTMLIrGuestInfoFormElement;
@@ -10932,6 +10942,9 @@ declare namespace LocalJSX {
     }
     interface IrFinancialTable {
         "onFinancialActionsOpenSidebar"?: (event: IrFinancialTableCustomEvent<SidebarOpenEvent>) => void;
+    }
+    interface IrGhsOnboarding {
+        "ticket"?: string;
     }
     interface IrGuestInfo {
         "booking_nbr"?: string;
@@ -13460,6 +13473,7 @@ declare namespace LocalJSX {
         "ir-financial-filters": IrFinancialFilters;
         "ir-financial-summary": IrFinancialSummary;
         "ir-financial-table": IrFinancialTable;
+        "ir-ghs-onboarding": IrGhsOnboarding;
         "ir-guest-info": IrGuestInfo;
         "ir-guest-info-drawer": IrGuestInfoDrawer;
         "ir-guest-info-form": IrGuestInfoForm;
@@ -13739,6 +13753,7 @@ declare module "@stencil/core" {
             "ir-financial-filters": LocalJSX.IrFinancialFilters & JSXBase.HTMLAttributes<HTMLIrFinancialFiltersElement>;
             "ir-financial-summary": LocalJSX.IrFinancialSummary & JSXBase.HTMLAttributes<HTMLIrFinancialSummaryElement>;
             "ir-financial-table": LocalJSX.IrFinancialTable & JSXBase.HTMLAttributes<HTMLIrFinancialTableElement>;
+            "ir-ghs-onboarding": LocalJSX.IrGhsOnboarding & JSXBase.HTMLAttributes<HTMLIrGhsOnboardingElement>;
             "ir-guest-info": LocalJSX.IrGuestInfo & JSXBase.HTMLAttributes<HTMLIrGuestInfoElement>;
             "ir-guest-info-drawer": LocalJSX.IrGuestInfoDrawer & JSXBase.HTMLAttributes<HTMLIrGuestInfoDrawerElement>;
             "ir-guest-info-form": LocalJSX.IrGuestInfoForm & JSXBase.HTMLAttributes<HTMLIrGuestInfoFormElement>;
