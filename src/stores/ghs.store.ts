@@ -6,7 +6,7 @@ interface GHSStore {
   properties: GHS_Candidate_Property[];
   countries: ICountry[];
   selectedCountryId: number | null;
-  selectedPropertyIds: number[];
+  selectedProperties: GHS_Candidate_Property[];
   isLoading: boolean;
 }
 
@@ -14,7 +14,7 @@ const { state: ghsStore, reset } = createStore<GHSStore>({
   properties: [],
   countries: [],
   selectedCountryId: null,
-  selectedPropertyIds: [],
+  selectedProperties: [],
   isLoading: false,
 });
 
@@ -30,24 +30,34 @@ export function setGhsSelectedCountry(countryId: number | null) {
   ghsStore.selectedCountryId = countryId;
 }
 
-export function toggleGhsPropertySelection(acId: number) {
-  if (ghsStore.selectedPropertyIds.includes(acId)) {
-    ghsStore.selectedPropertyIds = ghsStore.selectedPropertyIds.filter(id => id !== acId);
+export function toggleGhsPropertySelection(property: GHS_Candidate_Property) {
+  const index = ghsStore.selectedProperties.findIndex(p => p.AC_ID === property.AC_ID);
+  if (index !== -1) {
+    ghsStore.selectedProperties = ghsStore.selectedProperties.filter(p => p.AC_ID !== property.AC_ID);
   } else {
-    ghsStore.selectedPropertyIds = [...ghsStore.selectedPropertyIds, acId];
+    ghsStore.selectedProperties = [...ghsStore.selectedProperties, property];
   }
+}
+
+export function removeGhsPropertySelection(acId: number) {
+  ghsStore.selectedProperties = ghsStore.selectedProperties.filter(p => p.AC_ID !== acId);
 }
 
 export function toggleAllGhsProperties(selectAll: boolean) {
   if (selectAll) {
-    ghsStore.selectedPropertyIds = ghsStore.properties.map(p => p.AC_ID);
+    // Add only those not already selected to avoid duplicates
+    const currentSelectedIds = ghsStore.selectedProperties.map(p => p.AC_ID);
+    const newSelections = ghsStore.properties.filter(p => !currentSelectedIds.includes(p.AC_ID));
+    ghsStore.selectedProperties = [...ghsStore.selectedProperties, ...newSelections];
   } else {
-    ghsStore.selectedPropertyIds = [];
+    // Remove all properties that are currently in the candidate list from the selection
+    const candidateIds = ghsStore.properties.map(p => p.AC_ID);
+    ghsStore.selectedProperties = ghsStore.selectedProperties.filter(p => !candidateIds.includes(p.AC_ID));
   }
 }
 
 export function clearGhsPropertySelections() {
-  ghsStore.selectedPropertyIds = [];
+  ghsStore.selectedProperties = [];
 }
 
 export function setGhsLoading(isLoading: boolean) {
