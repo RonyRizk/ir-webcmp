@@ -39,9 +39,22 @@ export class IrGhsOnboarding {
   private async init() {
     setGhsLoading(true);
     try {
-      const countries = await this.bookingService.getCountries('EN');
-      setGhsCountries(countries);
-      await this.fetchProperties();
+      // 1. Fetch all countries and all properties (pre-flight)
+      const [allCountries, allProperties] = await Promise.all([
+        this.bookingService.getCountries('EN'),
+        this.ghsService.Get_GHS_Candidate_Properties({ COUNTRY_ID: null }),
+      ]);
+
+      // 2. Identify distinct COUNTRY_IDs that actually have candidates
+      const validCountryIds = new Set(allProperties.map(p => p.COUNTRY_ID));
+
+      // 3. Filter the global countries list to only include those with candidates and sort them alphabetically
+      const filteredCountries = allCountries
+        .filter(c => validCountryIds.has(c.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setGhsCountries(filteredCountries);
+      setGhsProperties(allProperties);
     } catch (error) {
       console.error('Initialization error:', error);
     } finally {
@@ -138,6 +151,28 @@ export class IrGhsOnboarding {
                     />
                   </svg>
                   <h4 class="m-0 p-0 flex-grow-1 font-weight-bold" style={{ fontSize: '13px' }}>Filters</h4>
+                  <ir-popover
+                      placement="right"
+                      trigger="click"
+                      renderContentAsHtml={true}
+                      content={`
+                        <div class="p-3 shadow-sm border rounded bg-white text-dark" style="width: 600px; text-align: left; z-index: 9999;">
+                          <h6 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--wa-color-brand-fill); font-size: 15px;">Google Hotels Onboarding Workflow Guide</h6>
+                          <ul class="ps-3 mb-0" style="list-style-type: disc; font-size: 13px; line-height: 1.8;">
+                            <li class="mb-2"><b>Step 1 - Selection:</b> Select candidate properties and click <b>Generate request</b> to download the onboarding XML listing.</li>
+                            <li class="mb-2"><b>Step 2 - Upload:</b> Log in to the <b>Google Hotel Center</b> portal and upload the generated XML file to the property feed section.</li>
+                            <li class="mb-2"><b>Step 3 - Processing:</b> Wait for Google's automated processing confirmation email (this confirms the XML is valid).</li>
+                            <li class="mb-2"><b>Step 4 - Publication:</b> Once the confirmation email is received, return to the GHS portal and click <b>Publish</b> to initiate review.</li>
+                            <li class="mb-2"><b>Step 5 - Final Approval:</b> Wait <b>1-2 working days</b> for Google to complete the manual verification and approval process.</li>
+                            <li><b>Step 6 - Live Sync:</b> Only enable the "GOOGLE_HOTEL_ENABLED" flag in IR <b>after</b> you have received final approval from Google.</li>
+                          </ul>
+                        </div>
+                      `}
+                    >
+                       <span style={{ cursor: 'pointer', display: 'inline-flex' }}>
+                          <wa-icon name="circle-info" style={{ fontSize: '18px', color: 'var(--wa-color-brand-fill)' }}></wa-icon>
+                       </span>
+                    </ir-popover>
                 </div>
               </div>
 
@@ -299,16 +334,18 @@ export class IrGhsOnboarding {
                         {ghsStore.selectedProperties.length}
                     </span>
                   </div>
-                  <ir-custom-button 
-                    size="small" 
-                    variant="brand" 
-                    appearance="filled"
-                    onClickHandler={() => this.handleGenerateRequest()} 
-                    loading={this.isGenerating}
-                    disabled={ghsStore.selectedProperties.length === 0}
-                  >
-                    Generate request
-                  </ir-custom-button>
+                  <div class="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                    <ir-custom-button 
+                      size="small" 
+                      variant="brand" 
+                      appearance="filled"
+                      onClickHandler={() => this.handleGenerateRequest()} 
+                      loading={this.isGenerating}
+                      disabled={ghsStore.selectedProperties.length === 0}
+                    >
+                      Generate request
+                    </ir-custom-button>
+                  </div>
                </div>
 
                <div class="card-body p-0 position-relative overflow-auto" style={{ maxHeight: '600px', minHeight: '400px' }}>
