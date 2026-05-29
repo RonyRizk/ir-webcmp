@@ -27,6 +27,7 @@
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-departures](../../ir-departures)
  - [ir-financial-actions](../../ir-financial-actions)
+ - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../../ir-housekeeping)
@@ -61,6 +62,7 @@ graph TD;
   ir-daily-revenue --> ir-toast
   ir-departures --> ir-toast
   ir-financial-actions --> ir-toast
+  ir-ghs-onboarding --> ir-toast
   ir-guest-info --> ir-toast
   ir-hk-tasks --> ir-toast
   ir-housekeeping --> ir-toast

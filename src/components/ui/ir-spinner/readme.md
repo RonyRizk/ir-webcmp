@@ -25,6 +25,7 @@
  - [ir-booking-editor](../../igloo-calendar/ir-booking-editor)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
  - [ir-events-log](../../ir-booking-details/ir-booking-header/events-log)
+ - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
@@ -46,6 +47,7 @@ graph TD;
   ir-booking-editor --> ir-spinner
   ir-checkout-dialog --> ir-spinner
   ir-events-log --> ir-spinner
+  ir-ghs-candidate-table --> ir-spinner
   ir-guest-info --> ir-spinner
   ir-guest-info-form --> ir-spinner
   ir-hk-user-drawer-form --> ir-spinner

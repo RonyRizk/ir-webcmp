@@ -81,6 +81,9 @@
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
+ - [ir-ghs-filters](../../ir-ghs-onboarding)
+ - [ir-ghs-onboarding](../../ir-ghs-onboarding)
+ - [ir-ghs-selection-bucket](../../ir-ghs-onboarding)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
  - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
@@ -163,6 +166,9 @@ graph TD;
   ir-extra-service --> ir-custom-button
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button
+  ir-ghs-filters --> ir-custom-button
+  ir-ghs-onboarding --> ir-custom-button
+  ir-ghs-selection-bucket --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
   ir-hk-delete-dialog --> ir-custom-button
   ir-hk-operations-card --> ir-custom-button

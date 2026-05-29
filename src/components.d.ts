@@ -37,7 +37,7 @@ import { TIcons } from "./components/ui/ir-icons/icons";
 import { checkboxes, selectOption } from "./common/models";
 import { CheckoutDialogCloseEvent } from "./components/ir-checkout-dialog/ir-checkout-dialog";
 import { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
-import { FolioPayment as FolioPayment1, unknown as GuestChangedEvent, ICountry as ICountry1, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast2 } from "./components.d";
+import { FolioPayment as FolioPayment1, unknown as GuestChangedEvent, ICountry as ICountry2, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast2 } from "./components.d";
 import { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
 import { Moment } from "moment/min/moment-with-locales";
 import { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
@@ -48,6 +48,8 @@ import { NativeDrawer } from "./components/ir-drawer/ir-drawer";
 import { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 import { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
 import { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
+import { GHS_Candidate_Property } from "./services/ghs/types";
+import { ICountry as ICountry1 } from "./models/IBooking";
 import { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
 import { ConnectedHK } from "./services/housekeeping.service";
 import { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
@@ -107,7 +109,7 @@ export { TIcons } from "./components/ui/ir-icons/icons";
 export { checkboxes, selectOption } from "./common/models";
 export { CheckoutDialogCloseEvent } from "./components/ir-checkout-dialog/ir-checkout-dialog";
 export { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
-export { FolioPayment as FolioPayment1, unknown as GuestChangedEvent, ICountry as ICountry1, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast2 } from "./components.d";
+export { FolioPayment as FolioPayment1, unknown as GuestChangedEvent, ICountry as ICountry2, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast2 } from "./components.d";
 export { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
 export { Moment } from "moment/min/moment-with-locales";
 export { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
@@ -118,6 +120,8 @@ export { NativeDrawer } from "./components/ir-drawer/ir-drawer";
 export { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 export { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
 export { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
+export { GHS_Candidate_Property } from "./services/ghs/types";
+export { ICountry as ICountry1 } from "./models/IBooking";
 export { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
 export { ConnectedHK } from "./services/housekeeping.service";
 export { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
@@ -1950,8 +1954,25 @@ export namespace Components {
     }
     interface IrFinancialTable {
     }
+    interface IrGhsCandidateTable {
+        "countries": ICountry1[];
+        "isLoading": boolean;
+        "properties": GHS_Candidate_Property[];
+        "selectedCountryId": number | null;
+        "selectedProperties": GHS_Candidate_Property[];
+    }
+    interface IrGhsFilters {
+        "countries": ICountry1[];
+        "isLoading": boolean;
+        "selectedCountryId": number | null;
+    }
     interface IrGhsOnboarding {
+        "baseurl": string;
         "ticket": string;
+    }
+    interface IrGhsSelectionBucket {
+        "isGenerating": boolean;
+        "selectedProperties": GHS_Candidate_Property[];
     }
     interface IrGuestInfo {
         "booking_nbr": string;
@@ -4473,6 +4494,22 @@ export interface IrFinancialTableCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrFinancialTableElement;
 }
+export interface IrGhsCandidateTableCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrGhsCandidateTableElement;
+}
+export interface IrGhsFiltersCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrGhsFiltersElement;
+}
+export interface IrGhsOnboardingCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrGhsOnboardingElement;
+}
+export interface IrGhsSelectionBucketCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrGhsSelectionBucketElement;
+}
 export interface IrGuestInfoCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrGuestInfoElement;
@@ -6644,11 +6681,78 @@ declare global {
         prototype: HTMLIrFinancialTableElement;
         new (): HTMLIrFinancialTableElement;
     };
+    interface HTMLIrGhsCandidateTableElementEventMap {
+        "toggleSelection": GHS_Candidate_Property;
+        "toggleAll": boolean;
+    }
+    interface HTMLIrGhsCandidateTableElement extends Components.IrGhsCandidateTable, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrGhsCandidateTableElementEventMap>(type: K, listener: (this: HTMLIrGhsCandidateTableElement, ev: IrGhsCandidateTableCustomEvent<HTMLIrGhsCandidateTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrGhsCandidateTableElementEventMap>(type: K, listener: (this: HTMLIrGhsCandidateTableElement, ev: IrGhsCandidateTableCustomEvent<HTMLIrGhsCandidateTableElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrGhsCandidateTableElement: {
+        prototype: HTMLIrGhsCandidateTableElement;
+        new (): HTMLIrGhsCandidateTableElement;
+    };
+    interface HTMLIrGhsFiltersElementEventMap {
+        "filterApply": void;
+        "filterReset": void;
+        "countryChange": number | null;
+    }
+    interface HTMLIrGhsFiltersElement extends Components.IrGhsFilters, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrGhsFiltersElementEventMap>(type: K, listener: (this: HTMLIrGhsFiltersElement, ev: IrGhsFiltersCustomEvent<HTMLIrGhsFiltersElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrGhsFiltersElementEventMap>(type: K, listener: (this: HTMLIrGhsFiltersElement, ev: IrGhsFiltersCustomEvent<HTMLIrGhsFiltersElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrGhsFiltersElement: {
+        prototype: HTMLIrGhsFiltersElement;
+        new (): HTMLIrGhsFiltersElement;
+    };
+    interface HTMLIrGhsOnboardingElementEventMap {
+        "toast": IToast1;
+    }
     interface HTMLIrGhsOnboardingElement extends Components.IrGhsOnboarding, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrGhsOnboardingElementEventMap>(type: K, listener: (this: HTMLIrGhsOnboardingElement, ev: IrGhsOnboardingCustomEvent<HTMLIrGhsOnboardingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrGhsOnboardingElementEventMap>(type: K, listener: (this: HTMLIrGhsOnboardingElement, ev: IrGhsOnboardingCustomEvent<HTMLIrGhsOnboardingElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrGhsOnboardingElement: {
         prototype: HTMLIrGhsOnboardingElement;
         new (): HTMLIrGhsOnboardingElement;
+    };
+    interface HTMLIrGhsSelectionBucketElementEventMap {
+        "generateRequest": void;
+        "removeAll": void;
+        "removeProperty": number;
+    }
+    interface HTMLIrGhsSelectionBucketElement extends Components.IrGhsSelectionBucket, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrGhsSelectionBucketElementEventMap>(type: K, listener: (this: HTMLIrGhsSelectionBucketElement, ev: IrGhsSelectionBucketCustomEvent<HTMLIrGhsSelectionBucketElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrGhsSelectionBucketElementEventMap>(type: K, listener: (this: HTMLIrGhsSelectionBucketElement, ev: IrGhsSelectionBucketCustomEvent<HTMLIrGhsSelectionBucketElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrGhsSelectionBucketElement: {
+        prototype: HTMLIrGhsSelectionBucketElement;
+        new (): HTMLIrGhsSelectionBucketElement;
     };
     interface HTMLIrGuestInfoElementEventMap {
         "closeSideBar": null;
@@ -8734,7 +8838,10 @@ declare global {
         "ir-financial-filters": HTMLIrFinancialFiltersElement;
         "ir-financial-summary": HTMLIrFinancialSummaryElement;
         "ir-financial-table": HTMLIrFinancialTableElement;
+        "ir-ghs-candidate-table": HTMLIrGhsCandidateTableElement;
+        "ir-ghs-filters": HTMLIrGhsFiltersElement;
         "ir-ghs-onboarding": HTMLIrGhsOnboardingElement;
+        "ir-ghs-selection-bucket": HTMLIrGhsSelectionBucketElement;
         "ir-guest-info": HTMLIrGuestInfoElement;
         "ir-guest-info-drawer": HTMLIrGuestInfoDrawerElement;
         "ir-guest-info-form": HTMLIrGuestInfoFormElement;
@@ -10943,8 +11050,34 @@ declare namespace LocalJSX {
     interface IrFinancialTable {
         "onFinancialActionsOpenSidebar"?: (event: IrFinancialTableCustomEvent<SidebarOpenEvent>) => void;
     }
+    interface IrGhsCandidateTable {
+        "countries"?: ICountry1[];
+        "isLoading"?: boolean;
+        "onToggleAll"?: (event: IrGhsCandidateTableCustomEvent<boolean>) => void;
+        "onToggleSelection"?: (event: IrGhsCandidateTableCustomEvent<GHS_Candidate_Property>) => void;
+        "properties"?: GHS_Candidate_Property[];
+        "selectedCountryId"?: number | null;
+        "selectedProperties"?: GHS_Candidate_Property[];
+    }
+    interface IrGhsFilters {
+        "countries"?: ICountry1[];
+        "isLoading"?: boolean;
+        "onCountryChange"?: (event: IrGhsFiltersCustomEvent<number | null>) => void;
+        "onFilterApply"?: (event: IrGhsFiltersCustomEvent<void>) => void;
+        "onFilterReset"?: (event: IrGhsFiltersCustomEvent<void>) => void;
+        "selectedCountryId"?: number | null;
+    }
     interface IrGhsOnboarding {
+        "baseurl"?: string;
+        "onToast"?: (event: IrGhsOnboardingCustomEvent<IToast1>) => void;
         "ticket"?: string;
+    }
+    interface IrGhsSelectionBucket {
+        "isGenerating"?: boolean;
+        "onGenerateRequest"?: (event: IrGhsSelectionBucketCustomEvent<void>) => void;
+        "onRemoveAll"?: (event: IrGhsSelectionBucketCustomEvent<void>) => void;
+        "onRemoveProperty"?: (event: IrGhsSelectionBucketCustomEvent<number>) => void;
+        "selectedProperties"?: GHS_Candidate_Property[];
     }
     interface IrGuestInfo {
         "booking_nbr"?: string;
@@ -13473,7 +13606,10 @@ declare namespace LocalJSX {
         "ir-financial-filters": IrFinancialFilters;
         "ir-financial-summary": IrFinancialSummary;
         "ir-financial-table": IrFinancialTable;
+        "ir-ghs-candidate-table": IrGhsCandidateTable;
+        "ir-ghs-filters": IrGhsFilters;
         "ir-ghs-onboarding": IrGhsOnboarding;
+        "ir-ghs-selection-bucket": IrGhsSelectionBucket;
         "ir-guest-info": IrGuestInfo;
         "ir-guest-info-drawer": IrGuestInfoDrawer;
         "ir-guest-info-form": IrGuestInfoForm;
@@ -13753,7 +13889,10 @@ declare module "@stencil/core" {
             "ir-financial-filters": LocalJSX.IrFinancialFilters & JSXBase.HTMLAttributes<HTMLIrFinancialFiltersElement>;
             "ir-financial-summary": LocalJSX.IrFinancialSummary & JSXBase.HTMLAttributes<HTMLIrFinancialSummaryElement>;
             "ir-financial-table": LocalJSX.IrFinancialTable & JSXBase.HTMLAttributes<HTMLIrFinancialTableElement>;
+            "ir-ghs-candidate-table": LocalJSX.IrGhsCandidateTable & JSXBase.HTMLAttributes<HTMLIrGhsCandidateTableElement>;
+            "ir-ghs-filters": LocalJSX.IrGhsFilters & JSXBase.HTMLAttributes<HTMLIrGhsFiltersElement>;
             "ir-ghs-onboarding": LocalJSX.IrGhsOnboarding & JSXBase.HTMLAttributes<HTMLIrGhsOnboardingElement>;
+            "ir-ghs-selection-bucket": LocalJSX.IrGhsSelectionBucket & JSXBase.HTMLAttributes<HTMLIrGhsSelectionBucketElement>;
             "ir-guest-info": LocalJSX.IrGuestInfo & JSXBase.HTMLAttributes<HTMLIrGuestInfoElement>;
             "ir-guest-info-drawer": LocalJSX.IrGuestInfoDrawer & JSXBase.HTMLAttributes<HTMLIrGuestInfoDrawerElement>;
             "ir-guest-info-form": LocalJSX.IrGuestInfoForm & JSXBase.HTMLAttributes<HTMLIrGuestInfoFormElement>;

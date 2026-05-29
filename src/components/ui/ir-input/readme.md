@@ -97,6 +97,7 @@ Type: `Promise<void>`
  - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
+ - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
@@ -129,6 +130,7 @@ graph TD;
   ir-date-select --> ir-input
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
+  ir-ghs-candidate-table --> ir-input
   ir-guest-info-form --> ir-input
   ir-hk-operations-card --> ir-input
   ir-hk-user-drawer-form --> ir-input
