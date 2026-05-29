@@ -175,11 +175,13 @@ export class IrGhsOnboarding {
   }
 
   render() {
+    if (this.isLoading && this.properties.length === 0) {
+        return <ir-loading-screen></ir-loading-screen>;
+    }
     return (
       <Host>
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
-        {this.isLoading && this.properties.length === 0 && <ir-loading-screen></ir-loading-screen>}
         <ir-dialog
           ref={el => (this.removeAllModal = el)}
           label="Confirmation"
@@ -190,18 +192,34 @@ export class IrGhsOnboarding {
           </div>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button 
+                type="button"
                 variant="neutral" 
                 appearance="filled" 
                 size="medium" 
-                onClickHandler={() => this.removeAllModal.closeModal()}
+                onClickHandler={(e: CustomEvent) => {
+                    const ev = e.detail as MouseEvent;
+                    if (ev && typeof ev.preventDefault === 'function') {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                    }
+                    this.removeAllModal.closeModal()
+                }}
             >
               Cancel
             </ir-custom-button>
             <ir-custom-button 
+                type="button"
                 variant="danger" 
                 appearance="accent" 
                 size="medium" 
-                onClickHandler={() => this.handleConfirmRemoveAll()}
+                onClickHandler={(e: CustomEvent) => {
+                    const ev = e.detail as MouseEvent;
+                    if (ev && typeof ev.preventDefault === 'function') {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                    }
+                    this.handleConfirmRemoveAll()
+                }}
             >
               Confirm
             </ir-custom-button>

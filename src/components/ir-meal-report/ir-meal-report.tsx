@@ -1,9 +1,12 @@
 import { Component, Host, h, Prop, State, Watch } from '@stencil/core';
 import { MealReportService } from '../../services/meal-report/meal-report.service';
-import { mealReportStore, setMealReportData, setMealReportFilters, setMealReportLoading, setMealReportSetupEntries, clearMealReportData } from '../../stores/meal-report.store';
 import Token from '../../models/Token';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
+import axios from 'axios';
+import { groupEntryTablesResult } from '../../utils/utils';
+import { IEntries } from '@/models/IBooking';
+import { MealCountDaySummary, MealGuestEntry } from '@/services/meal-report/types';
 
 @Component({
   tag: 'ir-meal-report',
@@ -13,24 +16,44 @@ import locales from '@/stores/locales.store';
 export class IrMealReport {
   @Prop() ticket: string;
   @Prop() propertyid: number;
+  @Prop() baseurl: string;
   @Prop() language: string = 'en';
 
   @State() isPageLoading: boolean = true;
   @State() isExporting: boolean = false;
+  @State() isDataLoading: boolean = false;
   
   @State() localReportType: 'GUEST_LIST' | 'MEAL_COUNT' = 'GUEST_LIST';
   @State() localFrom: string = moment().format('YYYY-MM-DD');
   @State() localTo: string = moment().format('YYYY-MM-DD');
   @State() localMealType: string | null = null;
 
+  @State() guestList: MealGuestEntry[] = [];
+  @State() mealCountSummary: MealCountDaySummary[] = [];
+  @State() setupEntries: { meal_type: IEntries[]; hb_preference: IEntries[] } = {
+    meal_type: [],
+    hb_preference: []
+  };
+
   private mealReportService = new MealReportService();
   private tokenService = new Token();
 
+  @Watch('ticket')
+  ticketChanged(newValue: string) {
+    if (newValue) {
+      this.tokenService.setToken(newValue);
+      this.init();
+    }
+  }
+
   async componentWillLoad() {
+    if (this.baseurl) {
+      this.tokenService.setBaseUrl(this.baseurl);
+    }
     if (this.ticket) {
       this.tokenService.setToken(this.ticket);
+      await this.init();
     }
-    await this.init();
   }
 
   @Watch('propertyid')
@@ -41,27 +64,24 @@ export class IrMealReport {
   async init() {
     try {
       this.isPageLoading = true;
-      setMealReportLoading(true);
+      this.isDataLoading = true;
 
       const setupEntries = await this.mealReportService.getSetupEntriesByTableNameMulti(['_MEAL_TYPE', '_HB_PREFERENCE'] as any);
-      console.log('Meal Report Setup Entries Raw:', setupEntries);
       
-      const grouped = this.mealReportService.groupEntryTablesResult(setupEntries);
-      console.log('Meal Report Setup Entries Grouped:', grouped);
+      const grouped = groupEntryTablesResult(setupEntries);
       
       const meal_type = (grouped as any).meal_type || [];
       const hb_preference = (grouped as any).hb_preference || [];
 
-      setMealReportSetupEntries({
+      this.setupEntries = {
         meal_type,
         hb_preference,
-      });
+      };
 
       if (meal_type.length > 0) {
           if (!this.localMealType) {
               this.localMealType = meal_type[0].CODE_NAME;
           }
-          setMealReportFilters({ meal_type_code: this.localMealType });
       }
 
       await this.applyFilters();
@@ -69,21 +89,14 @@ export class IrMealReport {
       console.error('Meal Report Init Error:', error);
     } finally {
       this.isPageLoading = false;
-      setMealReportLoading(false);
+      this.isDataLoading = false;
     }
   }
 
   async applyFilters() {
     try {
-      setMealReportLoading(true);
+      this.isDataLoading = true;
       
-      setMealReportFilters({
-        report_type: this.localReportType,
-        from: this.localFrom,
-        to: this.localTo,
-        meal_type_code: this.localMealType
-      });
-
       const response = await this.mealReportService.getMealReport({
         property_id: this.propertyid,
         from: this.localFrom,
@@ -93,11 +106,12 @@ export class IrMealReport {
         is_export_to_excel: false,
       });
       
-      setMealReportData(response.My_Result);
+      this.guestList = response.My_Result.Guest_List || [];
+      this.mealCountSummary = response.My_Result.Meal_Count_Summary || [];
     } catch (error) {
       console.error('Fetch Report Error:', error);
     } finally {
-      setMealReportLoading(false);
+      this.isDataLoading = false;
     }
   }
 
@@ -105,17 +119,19 @@ export class IrMealReport {
     this.localReportType = 'GUEST_LIST';
     this.localFrom = moment().format('YYYY-MM-DD');
     this.localTo = moment().format('YYYY-MM-DD');
-    if (mealReportStore.setupEntries.meal_type.length > 0) {
-        this.localMealType = mealReportStore.setupEntries.meal_type[0].CODE_NAME;
+    if (this.setupEntries.meal_type.length > 0) {
+        this.localMealType = this.setupEntries.meal_type[0].CODE_NAME;
     }
-    clearMealReportData();
+    this.guestList = [];
+    this.mealCountSummary = [];
     this.applyFilters();
   }
 
   async setPresetDate(type: 'today' | 'tomorrow') {
     const date = type === 'today' ? moment() : moment().add(1, 'day');
     this.localFrom = date.format('YYYY-MM-DD');
-    clearMealReportData();
+    this.guestList = [];
+    this.mealCountSummary = [];
     
     if (type === 'today' && this.localReportType === 'MEAL_COUNT') {
         this.localTo = moment().add(14, 'days').format('YYYY-MM-DD');
@@ -125,35 +141,39 @@ export class IrMealReport {
     await this.applyFilters();
   }
 
-  handleReportTypeChange(e: any) {
-    const value = e.target.value as 'GUEST_LIST' | 'MEAL_COUNT';
-    this.localReportType = value;
-    if (value === 'GUEST_LIST') {
-        this.localTo = this.localFrom;
-    }
-  }
-
   async handleExport() {
     try {
       this.isExporting = true;
       const response = await this.mealReportService.getMealReport({
         property_id: this.propertyid,
-        from: mealReportStore.from,
-        to: mealReportStore.to,
-        report_type: mealReportStore.report_type,
-        meal_type_code: mealReportStore.meal_type_code,
+        from: this.localFrom,
+        to: this.localTo,
+        report_type: this.localReportType,
+        meal_type_code: this.localMealType,
         is_export_to_excel: true,
       });
 
       const link = response.My_Params_Get_Meal_Report?.Link_excel;
 
       if (link) {
+          // Use clean axios to bypass interceptors (avoiding network errors)
+          const cleanAxios = axios.create();
+          const responseBlob = await cleanAxios.get(link, { responseType: 'blob' });
+          
+          // Force download via local blob URL
+          const blob = new Blob([responseBlob.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = window.URL.createObjectURL(blob);
+          
           const a = document.createElement('a');
-          a.href = link;
-          a.setAttribute('download', '');
+          a.href = url;
+          const filename = link.split('/').pop() || 'meal_report.xlsx';
+          a.setAttribute('download', filename);
           document.body.appendChild(a);
           a.click();
+          
+          // Cleanup
           document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
       }
     } catch (error) {
       console.error('Export Error:', error);
@@ -167,7 +187,7 @@ export class IrMealReport {
       return <ir-loading-screen></ir-loading-screen>;
     }
 
-    const mealType = mealReportStore.setupEntries?.meal_type || [];
+    const mealType = this.setupEntries?.meal_type || [];
     
     const headerTitle = this.localReportType === 'GUEST_LIST' 
         ? 'Guest list'
@@ -185,7 +205,7 @@ export class IrMealReport {
     const formattedFrom = formatDate(this.localFrom);
     const formattedTo = formatDate(this.localTo);
 
-    const lcz = locales.entries || ({} as any);
+    const lcz = (locales.entries as any) || {};
 
     return (
       <Host>
@@ -195,10 +215,18 @@ export class IrMealReport {
           <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-1 mb-md-0">Meal report</h3>
             <ir-custom-button
+              type="button"
               size="small"
               appearance="outlined"
               loading={this.isExporting}
-              onClickHandler={() => this.handleExport()}
+              onClickHandler={(e: CustomEvent) => {
+                const ev = e.detail as MouseEvent;
+                if (ev && typeof ev.preventDefault === 'function') {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                this.handleExport();
+              }}
               style={{ height: '100%' }}
             >
               <wa-icon name="file" slot="end" style={{ fontSize: '14px' }}></wa-icon>
@@ -208,7 +236,16 @@ export class IrMealReport {
 
           <div class="d-flex flex-column flex-lg-row mt-1" style={{ gap: '1rem' }}>
             {/* Filter Card */}
-            <div class="card mb-0 p-1 d-flex flex-column sales-filters-card shadow-sm border" style={{ width: '300px', flexShrink: '0' }}>
+            <div 
+                class="card mb-0 p-1 d-flex flex-column sales-filters-card shadow-sm border" 
+                style={{ width: '300px', flexShrink: '0' }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }}
+            >
               <div class="d-flex align-items-center justify-content-between sales-filters-header p-2 border-bottom mb-2">
                 <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={18} width={18}>
@@ -229,7 +266,8 @@ export class IrMealReport {
                     onchange={e => {
                         const val = (e.target as any).value;
                         this.localReportType = val;
-                        clearMealReportData();
+                        this.guestList = [];
+                        this.mealCountSummary = [];
                         if (val === 'GUEST_LIST') {
                             this.localTo = this.localFrom;
                         }
@@ -247,17 +285,33 @@ export class IrMealReport {
                     <div class="d-flex flex-column gap-2">
                       <div class="d-flex gap-2">
                         <ir-custom-button 
+                          type="button"
                           size="small" 
                           variant={this.localFrom === moment().format('YYYY-MM-DD') ? 'brand' : 'neutral'}
                           appearance={this.localFrom === moment().format('YYYY-MM-DD') ? 'filled' : 'outlined'}
-                          onClickHandler={() => this.setPresetDate('today')}
+                          onClickHandler={(e: CustomEvent) => {
+                            const ev = e.detail as MouseEvent;
+                            if (ev && typeof ev.preventDefault === 'function') {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                            }
+                            this.setPresetDate('today')
+                          }}
                           style={{flex: '1'}}
                         >Today</ir-custom-button>
                         <ir-custom-button 
+                          type="button"
                           size="small" 
                           variant={this.localFrom === moment().add(1, 'day').format('YYYY-MM-DD') ? 'brand' : 'neutral'}
                           appearance={this.localFrom === moment().add(1, 'day').format('YYYY-MM-DD') ? 'filled' : 'outlined'}
-                          onClickHandler={() => this.setPresetDate('tomorrow')}
+                          onClickHandler={(e: CustomEvent) => {
+                            const ev = e.detail as MouseEvent;
+                            if (ev && typeof ev.preventDefault === 'function') {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                            }
+                            this.setPresetDate('tomorrow')
+                          }}
                           style={{flex: '1'}}
                         >Tomorrow</ir-custom-button>
                       </div>
@@ -273,7 +327,8 @@ export class IrMealReport {
                             const { fromDate, toDate } = e.detail;
                             this.localFrom = fromDate.format('YYYY-MM-DD');
                             this.localTo = toDate.format('YYYY-MM-DD');
-                            clearMealReportData();
+                            this.guestList = [];
+                            this.mealCountSummary = [];
                         }}
                         withOverlay={false}
                       ></ir-range-picker>
@@ -288,12 +343,19 @@ export class IrMealReport {
                         <div class="d-flex flex-wrap gap-1">
                            {mealType.map(type => (
                              <ir-custom-button
+                               type="button"
                                size="small"
                                variant={this.localMealType === type.CODE_NAME ? 'brand' : 'neutral'}
                                appearance={this.localMealType === type.CODE_NAME ? 'filled' : 'outlined'}
-                               onClickHandler={async () => {
+                               onClickHandler={async (e: CustomEvent) => {
+                                 const ev = e.detail as MouseEvent;
+                                 if (ev && typeof ev.preventDefault === 'function') {
+                                     ev.preventDefault();
+                                     ev.stopPropagation();
+                                 }
                                  this.localMealType = type.CODE_NAME;
-                                 clearMealReportData();
+                                 this.guestList = [];
+                                 this.mealCountSummary = [];
                                  await this.applyFilters();
                                }}
                                style={{ fontSize: '10px', '--ir-button-padding': '0.2rem 0.4rem' }}
@@ -310,16 +372,33 @@ export class IrMealReport {
 
                 <div class="d-flex align-items-center justify-content-end gap-2 mt-auto pt-3 border-top filter-actions">
                     <ir-custom-button
+                        type="button"
                         size="small"
                         variant="neutral"
                         appearance="filled"
-                        onClickHandler={() => this.resetFilters()}
+                        onClickHandler={(e: CustomEvent) => {
+                            const ev = e.detail as MouseEvent;
+                            if (ev && typeof ev.preventDefault === 'function') {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                            }
+                            this.resetFilters()
+                        }}
+                        style={{ display: 'inline-block', marginRight: '1rem' }}
                     >{lcz.Lcz_Reset || 'Reset'}</ir-custom-button>
                     <ir-custom-button
+                        type="button"
                         size="small"
                         variant="brand"
-                        loading={mealReportStore.isLoading}
-                        onClickHandler={() => this.applyFilters()}
+                        loading={this.isDataLoading}
+                        onClickHandler={(e: CustomEvent) => {
+                            const ev = e.detail as MouseEvent;
+                            if (ev && typeof ev.preventDefault === 'function') {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                            }
+                            this.applyFilters()
+                        }}
                     >{lcz.Lcz_Apply || 'Apply'}</ir-custom-button>
                 </div>
               </div>
@@ -335,20 +414,20 @@ export class IrMealReport {
                         {this.localReportType === 'GUEST_LIST' && mealTypeLabel && ` - ${mealTypeLabel}`}
                     </span>
                   </h3>
-                  {this.localReportType === 'GUEST_LIST' && mealReportStore.guestList?.length > 0 && (
-                      <span class="badge bg-light text-dark border extra-small">{mealReportStore.guestList.length} Units</span>
+                  {this.localReportType === 'GUEST_LIST' && this.guestList?.length > 0 && (
+                      <span class="badge bg-light text-dark border extra-small">{this.guestList.length} Units</span>
                   )}
                </div>
                <div class="card-body p-0 position-relative" style={{ minHeight: '400px' }}>
-                  {mealReportStore.isLoading && (
+                  {this.isDataLoading && (
                     <div class="loading-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 z-index-2">
                         <ir-spinner></ir-spinner>
                     </div>
                   )}
                   {this.localReportType === 'GUEST_LIST' ? (
-                    <ir-meal-guest-list propertyid={this.propertyid} ticket={this.ticket}></ir-meal-guest-list>
+                    <ir-meal-guest-list guestList={this.guestList}></ir-meal-guest-list>
                   ) : (
-                    <ir-meal-count-summary></ir-meal-count-summary>
+                    <ir-meal-count-summary mealCountSummary={this.mealCountSummary}></ir-meal-count-summary>
                   )}
                </div>
             </div>

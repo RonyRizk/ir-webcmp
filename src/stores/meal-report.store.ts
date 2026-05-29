@@ -22,7 +22,7 @@ const initialState: MealReportStore = {
   property_id: null,
   report_type: 'GUEST_LIST',
   from: moment().format('YYYY-MM-DD'),
-  to: moment().add(1, 'day').format('YYYY-MM-DD'),
+  to: moment().format('YYYY-MM-DD'),
   meal_type_code: null,
   guestList: [],
   mealCountSummary: [],
@@ -36,13 +36,15 @@ const initialState: MealReportStore = {
 export const { state: mealReportStore, onChange: onMealReportStoreChange } = createStore<MealReportStore>(initialState);
 
 export function setMealReportFilters(filters: Partial<Pick<MealReportStore, 'from' | 'to' | 'report_type' | 'meal_type_code'>>) {
-  Object.assign(mealReportStore, filters);
+  if (filters.from !== undefined) mealReportStore.from = filters.from;
+  if (filters.to !== undefined) mealReportStore.to = filters.to;
+  if (filters.report_type !== undefined) mealReportStore.report_type = filters.report_type;
+  if (filters.meal_type_code !== undefined) mealReportStore.meal_type_code = filters.meal_type_code;
 }
 
 export function setMealReportData(data: GetMealReportResult) {
-  const d = data as any;
-  mealReportStore.guestList = d.Guest_List || d.guest_List || d.guestList || [];
-  mealReportStore.mealCountSummary = d.Meal_Count_Summary || d.meal_Count_Summary || d.mealCountSummary || [];
+  mealReportStore.guestList = data.My_Result.Guest_List || [];
+  mealReportStore.mealCountSummary = data.My_Result.Meal_Count_Summary || [];
 }
 
 export function clearMealReportData() {

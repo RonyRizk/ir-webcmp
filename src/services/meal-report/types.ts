@@ -43,6 +43,12 @@ export interface MealCountDaySummary {
 }
 
 export interface GetMealReportResult {
-  Guest_List: MealGuestEntry[];
-  Meal_Count_Summary: MealCountDaySummary[];
+  My_Result: {
+      Guest_List: MealGuestEntry[];
+      Meal_Count_Summary: MealCountDaySummary[];
+  };
+  My_Params_Get_Meal_Report?: {
+      Link_excel: string;
+  };
+  ExceptionMsg: string;
 }

@@ -1,6 +1,6 @@
-import { Component, Host, h } from '@stencil/core';
-import { mealReportStore } from '../../stores/meal-report.store';
+import { Component, Host, h, Prop } from '@stencil/core';
 import moment from 'moment';
+import { MealCountDaySummary } from '@/services/meal-report/types';
 
 @Component({
   tag: 'ir-meal-count-summary',
@@ -8,8 +8,10 @@ import moment from 'moment';
   scoped: true,
 })
 export class IrMealCountSummary {
+  @Prop() mealCountSummary: MealCountDaySummary[] = [];
+
   render() {
-    const list = mealReportStore.mealCountSummary;
+    const list = this.mealCountSummary;
 
     if (!list || list.length === 0) {
       return (
@@ -19,26 +21,13 @@ export class IrMealCountSummary {
       );
     }
 
-    const getVal = (obj: any, key: string) => {
-        if (!obj) return 0;
-        const lowerKey = key.toLowerCase();
-        const actualKey = Object.keys(obj).find(k => k.toLowerCase() === lowerKey);
-        const val = actualKey ? obj[actualKey] : 0;
-        return typeof val === 'number' ? val : (parseInt(val) || 0);
-    };
-
-    const getDateVal = (obj: any) => {
-        if (!obj) return null;
-        return obj.Date || obj.DATE || obj.date || null;
-    };
-
     const totals = {
-      bAd: list.reduce((s, d) => s + getVal(d, 'Breakfast_Ad'), 0),
-      bCh: list.reduce((s, d) => s + getVal(d, 'Breakfast_Ch'), 0),
-      lAd: list.reduce((s, d) => s + getVal(d, 'Lunch_Ad'), 0),
-      lCh: list.reduce((s, d) => s + getVal(d, 'Lunch_Ch'), 0),
-      dAd: list.reduce((s, d) => s + getVal(d, 'Dinner_Ad'), 0),
-      dCh: list.reduce((s, d) => s + getVal(d, 'Dinner_Ch'), 0),
+      bAd: list.reduce((s, d) => s + (d.Breakfast_Ad || 0), 0),
+      bCh: list.reduce((s, d) => s + (d.Breakfast_Ch || 0), 0),
+      lAd: list.reduce((s, d) => s + (d.Lunch_Ad || 0), 0),
+      lCh: list.reduce((s, d) => s + (d.Lunch_Ch || 0), 0),
+      dAd: list.reduce((s, d) => s + (d.Dinner_Ad || 0), 0),
+      dCh: list.reduce((s, d) => s + (d.Dinner_Ch || 0), 0),
     };
 
     return (
@@ -121,13 +110,13 @@ export class IrMealCountSummary {
             <tbody>
               {list.map(day => (
                 <tr class="ir-table-row">
-                  <td class="ps-3 text-start fw-medium text-dark" style={{ fontSize: '11px' }}>{moment(getDateVal(day)).format('ddd MMM DD, YYYY')}</td>
-                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Breakfast_Ad')}</td>
-                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Breakfast_Ch')}</td>
-                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Lunch_Ad')}</td>
-                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Lunch_Ch')}</td>
-                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Dinner_Ad')}</td>
-                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{getVal(day, 'Dinner_Ch')}</td>
+                  <td class="ps-3 text-start fw-medium text-dark" style={{ fontSize: '11px' }}>{moment(day.Date).format('ddd MMM DD, YYYY')}</td>
+                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Breakfast_Ad}</td>
+                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Breakfast_Ch}</td>
+                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Lunch_Ad}</td>
+                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Lunch_Ch}</td>
+                  <td class="border-start fw-bold text-primary" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Dinner_Ad}</td>
+                  <td class="text-muted" style={{ backgroundColor: '#fdfdfd', fontSize: '12px' }}>{day.Dinner_Ch}</td>
                 </tr>
               ))}
             </tbody>

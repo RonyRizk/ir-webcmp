@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { ParamsGetMealReport, ParamsGetMealReportSchema, ParamsSetHBPreference, ParamsSetHBPreferenceSchema } from './types';
-import { GroupedTableEntries, TableEntries } from '../booking-service/types';
+import { ParamsGetMealReport, ParamsGetMealReportSchema, ParamsSetHBPreference, ParamsSetHBPreferenceSchema, GetMealReportResult } from './types';
+import { TableEntries } from '../booking-service/types';
 import { IEntries } from '@/models/IBooking';
 
 export class MealReportService {
-  public async getMealReport(props: ParamsGetMealReport): Promise<any> {
+  public async getMealReport(props: ParamsGetMealReport): Promise<GetMealReportResult> {
     const payload = ParamsGetMealReportSchema.parse(props);
     const { data } = await axios.post(`/Get_Meal_Report`, payload);
     if (data.ExceptionMsg !== '') {
@@ -27,21 +27,5 @@ export class MealReportService {
       throw new Error(data.ExceptionMsg);
     }
     return data.My_Result;
-  }
-
-  public groupEntryTablesResult(entries: IEntries[]): GroupedTableEntries {
-    let result: any = {};
-    for (const entry of entries) {
-      if (!entry.TBL_NAME) continue;
-      const key = entry.TBL_NAME.startsWith('_') 
-        ? entry.TBL_NAME.substring(1).toLowerCase() 
-        : entry.TBL_NAME.toLowerCase();
-        
-      if (!result[key]) {
-        result[key] = [];
-      }
-      result[key] = [...result[key], entry];
-    }
-    return result as GroupedTableEntries;
   }
 }

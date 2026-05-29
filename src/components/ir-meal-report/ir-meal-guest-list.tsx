@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop } from '@stencil/core';
-import { mealReportStore } from '../../stores/meal-report.store';
+import { MealGuestEntry } from '@/services/meal-report/types';
 
 @Component({
   tag: 'ir-meal-guest-list',
@@ -7,11 +7,10 @@ import { mealReportStore } from '../../stores/meal-report.store';
   scoped: true,
 })
 export class IrMealGuestList {
-  @Prop() propertyid: number;
-  @Prop() ticket: string;
+  @Prop() guestList: MealGuestEntry[] = [];
 
   render() {
-    const list = mealReportStore.guestList;
+    const list = this.guestList;
 
     if (!list || list.length === 0) {
       return (

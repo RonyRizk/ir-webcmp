@@ -58,6 +58,7 @@ import { ZodType, ZodTypeAny } from "zod";
 import { BookingInvoiceInfo, ViewMode } from "./components/ir-invoice/types";
 import { IssueInvoiceProps } from "./services/booking-service/types";
 import { ComboboxOption, DataMode } from "./components/ir-m-combobox/types";
+import { MealCountDaySummary, MealGuestEntry } from "./services/meal-report/types";
 import { IrMobileInputChangeDetail } from "./components/ui/ir-mobile-input/ir-mobile-input";
 import { DailyReport, DailyReportFilter } from "./components/ir-monthly-bookings-report/types";
 import { Notification } from "./components/ir-notifications/types";
@@ -130,6 +131,7 @@ export { ZodType, ZodTypeAny } from "zod";
 export { BookingInvoiceInfo, ViewMode } from "./components/ir-invoice/types";
 export { IssueInvoiceProps } from "./services/booking-service/types";
 export { ComboboxOption, DataMode } from "./components/ir-m-combobox/types";
+export { MealCountDaySummary, MealGuestEntry } from "./services/meal-report/types";
 export { IrMobileInputChangeDetail } from "./components/ui/ir-mobile-input/ir-mobile-input";
 export { DailyReport, DailyReportFilter } from "./components/ir-monthly-bookings-report/types";
 export { Notification } from "./components/ir-notifications/types";
@@ -2609,12 +2611,13 @@ export namespace Components {
         "value": string;
     }
     interface IrMealCountSummary {
+        "mealCountSummary": MealCountDaySummary[];
     }
     interface IrMealGuestList {
-        "propertyid": number;
-        "ticket": string;
+        "guestList": MealGuestEntry[];
     }
     interface IrMealReport {
+        "baseurl": string;
         "language": string;
         "propertyid": number;
         "ticket": string;
@@ -11781,12 +11784,13 @@ declare namespace LocalJSX {
         "value": string;
     }
     interface IrMealCountSummary {
+        "mealCountSummary"?: MealCountDaySummary[];
     }
     interface IrMealGuestList {
-        "propertyid"?: number;
-        "ticket"?: string;
+        "guestList"?: MealGuestEntry[];
     }
     interface IrMealReport {
+        "baseurl"?: string;
         "language"?: string;
         "propertyid"?: number;
         "ticket"?: string;
