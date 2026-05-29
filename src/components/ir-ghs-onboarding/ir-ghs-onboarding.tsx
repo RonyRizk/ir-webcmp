@@ -29,6 +29,8 @@ export class IrGhsOnboarding {
   private bookingService = new BookingService();
   private tokenService = new Token();
 
+  private removeAllModal: HTMLIrDialogElement;
+
   async componentWillLoad() {
     if (this.ticket) {
       this.tokenService.setToken(this.ticket);
@@ -90,6 +92,16 @@ export class IrGhsOnboarding {
     toggleAllGhsProperties(target.checked);
   }
 
+  private handleRemoveAll() {
+    if (ghsStore.selectedProperties.length === 0) return;
+    this.removeAllModal.openModal();
+  }
+
+  private handleConfirmRemoveAll() {
+    clearGhsPropertySelections();
+    this.removeAllModal.closeModal();
+  }
+
   private async handleGenerateRequest() {
     if (ghsStore.selectedProperties.length === 0) {
       alert('Please select at least one property.');
@@ -132,6 +144,33 @@ export class IrGhsOnboarding {
       <Host>
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
+        <ir-dialog
+          ref={el => (this.removeAllModal = el)}
+          label="Confirmation"
+          onIrDialogHide={() => this.removeAllModal.closeModal()}
+        >
+          <div class="p-0 d-flex flex-column align-items-center justify-content-center">
+            <p class="m-0 text-center">Are you sure you want to remove all selected properties from the list?</p>
+          </div>
+          <div slot="footer" class="ir-dialog__footer">
+            <ir-custom-button 
+                variant="neutral" 
+                appearance="filled" 
+                size="medium" 
+                onClickHandler={() => this.removeAllModal.closeModal()}
+            >
+              Cancel
+            </ir-custom-button>
+            <ir-custom-button 
+                variant="danger" 
+                appearance="accent" 
+                size="medium" 
+                onClickHandler={() => this.handleConfirmRemoveAll()}
+            >
+              Confirm
+            </ir-custom-button>
+          </div>
+        </ir-dialog>
         <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
           
           <div class="d-flex align-items-center justify-content-between">
@@ -284,13 +323,23 @@ export class IrGhsOnboarding {
                             })
                             .map(p => {
                               return (
-                                <tr class="ir-table-row border-bottom">
+                                <tr 
+                                  class="ir-table-row border-bottom" 
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={() => {
+                                      console.log('Toggling property via row click:', p.AC_ID);
+                                      toggleGhsPropertySelection(p);
+                                  }}
+                                >
                                   <td class="text-center py-1">
-                                    <div class="d-flex align-items-center justify-content-center">
+                                    <div 
+                                      class="d-flex align-items-center justify-content-center"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
                                         <wa-checkbox
                                           checked={selectedIds.includes(p.AC_ID)}
-                                          onchange={() => {
-                                              console.log('Toggling property:', p.AC_ID);
+                                          onchange={(e) => {
+                                              e.stopPropagation();
                                               toggleGhsPropertySelection(p);
                                           }}
                                         ></wa-checkbox>
@@ -354,7 +403,20 @@ export class IrGhsOnboarding {
                       <thead>
                         <tr class="table-header bg-light">
                           <th class="ps-3 text-start py-2 small fw-bold">Property name</th>
-                          <th class="pe-3 text-end py-2 small fw-bold" style={{ width: '50px' }}></th>
+                          <th class="pe-3 text-end py-2 small fw-bold" style={{ width: '50px' }}>
+                            {ghsStore.selectedProperties.length > 0 && (
+                              <button 
+                                  class="btn btn-sm btn-link text-danger p-0 d-inline-flex align-items-center justify-content-end" 
+                                  onClick={() => this.handleRemoveAll()}
+                                  title="Remove all"
+                              >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                      <polyline points="3 6 5 6 21 6"></polyline>
+                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                              </button>
+                            )}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -366,7 +428,7 @@ export class IrGhsOnboarding {
                             </td>
                             <td class="pe-3 text-end py-2">
                                 <button 
-                                    class="btn btn-sm btn-link text-danger p-0" 
+                                    class="btn btn-sm btn-link text-danger p-0 d-inline-flex align-items-center justify-content-end" 
                                     onClick={() => removeGhsPropertySelection(p.AC_ID)}
                                     title="Remove from list"
                                 >
