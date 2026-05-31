@@ -1,35 +1,104 @@
 :host {
   display: block;
-  width: 100%;
 }
-.table th,
-.table td {
-  white-space: nowrap;
-  padding: 0.5rem 1rem !important;
-  vertical-align: middle;
+
+.ir-meal-count-summary__stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wa-space-m);
+  margin-bottom: var(--wa-space-xl);
+  justify-content: space-between;
 }
-.table thead th {
-  background: color-mix(in oklab, var(--wa-color-neutral-fill-quiet, #f1f2f3) 60%, transparent) !important;
-  font-size: 13px;
-  font-weight: bold !important;
-  color: #212529 !important;
-  border-bottom: 1px solid #dee2e6 !important;
+
+.ir-meal-count-summary__stat-card {
+  flex: 1 1 0;
+  min-width: 200px;
+  padding: var(--wa-space-m);
+  border: 1px solid var(--wa-color-neutral-200);
+  border-radius: var(--wa-border-radius-m);
+  text-align: center;
+  background: var(--wa-color-neutral-0);
+  box-shadow: var(--wa-shadow-s);
 }
-.ir-table-row td {
-  font-size: 13px;
-  border-bottom: 1px solid #f1f2f3;
+
+.ir-meal-count-summary__stat-title {
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-500);
+  margin-bottom: var(--wa-space-xs);
+  letter-spacing: 0.5px;
+  font-size: 10px;
 }
-.total-row td {
-  font-weight: bold;
-  background-color: color-mix(in oklab, var(--wa-color-neutral-fill-quiet, #f1f2f3) 30%, transparent) !important;
-  border-top: 2px solid #dee2e6 !important;
+
+.ir-meal-count-summary__stat-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--wa-space-m);
 }
-.bg-light-bf {
-  background-color: rgba(0, 123, 255, 0.03);
+
+.ir-meal-count-summary__stat-divider {
+  width: 1px;
+  background-color: var(--wa-color-neutral-200);
+  height: 30px;
 }
-.bg-light-ln {
-  background-color: rgba(40, 167, 69, 0.03);
+
+.ir-meal-count-summary__stat-value {
+  font-weight: var(--wa-font-weight-bold);
+  margin-bottom: 0;
+  display: block;
+  font-size: 20px;
 }
-.bg-light-dn {
-  background-color: rgba(255, 193, 7, 0.03);
+
+.ir-meal-count-summary__stat-value--primary {
+  color: var(--wa-color-brand-fill);
+}
+
+.ir-meal-count-summary__stat-value--dark {
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-count-summary__stat-label {
+  font-size: 10px;
+  color: var(--wa-color-neutral-500);
+}
+
+.ir-meal-count-summary__container {
+  background: var(--wa-color-neutral-0);
+  border: 1px solid var(--wa-color-neutral-200);
+  border-radius: var(--wa-border-radius-m);
+  overflow: hidden;
+}
+
+.ir-meal-count-summary__header-group {
+  background-color: var(--wa-color-neutral-100);
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-count-summary__header-sub {
+  background-color: var(--wa-color-neutral-50);
+  color: var(--wa-color-neutral-500);
+}
+
+.ir-meal-count-summary__cell-date {
+  font-size: 11px;
+  font-weight: var(--wa-font-weight-medium);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-count-summary__cell-data {
+  background-color: var(--wa-color-neutral-0);
+  font-size: 12px;
+}
+
+.ir-meal-count-summary__cell--primary {
+  color: var(--wa-color-brand-fill);
+  font-weight: var(--wa-font-weight-bold);
+}
+
+.ir-meal-count-summary__empty-state {
+  text-align: center;
+  padding: var(--wa-space-xl);
+  color: var(--wa-color-neutral-500);
+  background: var(--wa-color-neutral-0);
 }

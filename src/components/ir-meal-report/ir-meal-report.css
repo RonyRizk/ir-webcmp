@@ -1,78 +1,88 @@
 :host {
   display: block;
+}
+
+.ir-meal-report__container {
+  padding: var(--wa-space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+.ir-meal-report__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ir-meal-report__title {
+  margin-bottom: var(--wa-space-xs);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-report__export-btn {
   height: 100%;
-  font-family: var(--wa-font-sans, system-ui, sans-serif);
 }
 
-.meal-report-layout {
-  min-height: 100vh;
+.ir-meal-report__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  margin-top: var(--wa-space-xs);
 }
 
-.filter-sidebar {
-  flex-shrink: 0;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
-  z-index: 10;
+@media (min-width: 992px) {
+  .ir-meal-report__layout {
+    flex-direction: row;
+  }
 }
 
-.report-main-content {
-  background-color: #f9fafb;
+.ir-meal-report__results-card {
+  flex-grow: 1;
+  background: var(--wa-color-neutral-0);
+  border: 1px solid var(--wa-color-neutral-200);
+  border-radius: var(--wa-border-radius-m);
+  box-shadow: var(--wa-shadow-s);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.dashboard-section {
-  border-color: #e5e7eb !important;
+.ir-meal-report__results-header {
+  display: flex;
+  align-items: center;
+  padding: var(--wa-space-s) var(--wa-space-m);
+  border-bottom: 1px solid var(--wa-color-neutral-200);
+  background: var(--wa-color-neutral-0);
 }
 
-/* Standard Filter Header Styling from IrSalesFilters */
-.sales-filters-header {
-  color: var(--wa-color-neutral-800);
-}
-
-.sales-filters-header h4 {
-  font-size: 0.875rem;
-  letter-spacing: 0.025em;
-}
-
-/* Fieldset styling */
-.filter-group {
-  border: none;
-  padding: 0;
+.ir-meal-report__results-title {
   margin: 0;
+  flex-grow: 1;
+  font-size: var(--wa-font-size-medium);
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
 }
 
-/* Date group styling */
-.date-filter-group {
-  background-color: var(--wa-color-neutral-50, #f8f9fa);
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--wa-color-neutral-200, #e9ecef);
+.ir-meal-report__results-subtitle {
+  margin-inline-start: var(--wa-space-xs);
+  font-weight: var(--wa-font-weight-normal);
+  font-size: var(--wa-font-size-small);
+  color: var(--wa-color-neutral-500);
 }
 
-.filter-field label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--wa-color-neutral-600);
+.ir-meal-report__results-body {
+  position: relative;
+  flex-grow: 1;
+  min-height: 400px;
 }
 
-/* Specific styling for the Radio Groups in sidebar */
-wa-radio-group::part(label) {
-  display: none;
-}
-
-wa-radio {
-  margin-bottom: 0.5rem;
-  font-size: 13px;
-}
-
-.extra-small {
-  font-size: 10px;
-  letter-spacing: 0.025em;
-}
-
-/* Web Awesome Input overrides for search */
-wa-input::part(base) {
-  border-radius: 6px;
-}
-
-.font-weight-medium {
-  font-weight: 500;
+.ir-meal-report__loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 0.5);
+  z-index: 2;
 }

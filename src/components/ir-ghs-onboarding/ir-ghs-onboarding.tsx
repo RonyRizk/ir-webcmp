@@ -21,7 +21,8 @@ export class IrGhsOnboarding {
   @State() countries: ICountry[] = [];
   @State() selectedCountryId: number | null = null;
   @State() selectedProperties: GHS_Candidate_Property[] = [];
-  @State() isLoading: boolean = false;
+  @State() isPageLoading: boolean = false;
+  @State() isDataLoading: boolean = false;
   @State() isGenerating: boolean = false;
   @State() isActivating: boolean = false;
   @State() propertyToActivate: GHS_Candidate_Property | null = null;
@@ -54,7 +55,7 @@ export class IrGhsOnboarding {
   }
 
   private async init() {
-    this.isLoading = true;
+    this.isPageLoading = true;
     try {
       const [allCountries, allProperties] = await Promise.all([
         this.bookingService.getCountries('EN'),
@@ -70,12 +71,12 @@ export class IrGhsOnboarding {
     } catch (error) {
       this.showToast('error', 'Initialization Error', error.message || 'Failed to load properties');
     } finally {
-      this.isLoading = false;
+      this.isPageLoading = false;
     }
   }
 
   private async fetchProperties() {
-    this.isLoading = true;
+    this.isDataLoading = true;
     this.properties = [];
     try {
       const props = await this.ghsService.Get_GHS_Candidate_Properties({
@@ -85,7 +86,7 @@ export class IrGhsOnboarding {
     } catch (error) {
       this.showToast('error', 'Error', error.message || 'Failed to fetch properties');
     } finally {
-      this.isLoading = false;
+      this.isDataLoading = false;
     }
   }
 
@@ -188,7 +189,6 @@ export class IrGhsOnboarding {
         this.showToast('success', 'Success', 'GHS onboarding request downloaded.');
       }
     } catch (error) {
-      console.error('Download Error Details:', error);
       this.showToast('error', 'Generation Error', error.message || 'An error occurred while generating the request.');
     } finally {
       this.isGenerating = false;
@@ -205,7 +205,7 @@ export class IrGhsOnboarding {
   }
 
   render() {
-    if (this.isLoading && this.properties.length === 0) {
+    if (this.isPageLoading) {
         return <ir-loading-screen></ir-loading-screen>;
     }
     return (
@@ -220,14 +220,14 @@ export class IrGhsOnboarding {
             this.activateModal.closeModal();
           }}
         >
-          <div class="p-0 d-flex flex-column align-items-center justify-content-center">
+          <div class="ir-ghs-onboarding__dialog-body">
             <p class="m-0 text-center">
               Are you sure you want to <strong>activate</strong> GHS for{' '}
               <span class="text-primary">{this.propertyToActivate?.NAME}</span>?
             </p>
             <p class="small text-muted mt-2 mb-0">This will enable real-time synchronization with Google.</p>
           </div>
-          <div slot="footer" class="ir-dialog__footer">
+          <div slot="footer" class="ir-ghs-onboarding__dialog-footer">
             <ir-custom-button
               type="button"
               variant="neutral"
@@ -269,10 +269,10 @@ export class IrGhsOnboarding {
           label="Confirmation"
           onIrDialogHide={() => this.removeAllModal.closeModal()}
         >
-          <div class="p-0 d-flex flex-column align-items-center justify-content-center">
+          <div class="ir-ghs-onboarding__dialog-body">
             <p class="m-0 text-center">Are you sure you want to remove all selected properties from the list?</p>
           </div>
-          <div slot="footer" class="ir-dialog__footer">
+          <div slot="footer" class="ir-ghs-onboarding__dialog-footer">
             <ir-custom-button 
                 type="button"
                 variant="neutral" 
@@ -307,18 +307,18 @@ export class IrGhsOnboarding {
             </ir-custom-button>
           </div>
         </ir-dialog>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
+        <section class="ir-ghs-onboarding__container">
           
-          <div class="d-flex align-items-center justify-content-between">
-             <h3 class="mb-1 mb-md-0">Google hotels request</h3>
+          <div class="ir-ghs-onboarding__header">
+             <h3 class="ir-ghs-onboarding__title">Google hotels request</h3>
           </div>
 
-          <div class="d-flex flex-column flex-lg-row mt-1" style={{ gap: '1rem' }}>
+          <div class="ir-ghs-onboarding__layout">
             
             <ir-ghs-filters
                 countries={this.countries}
                 selectedCountryId={this.selectedCountryId}
-                isLoading={this.isLoading}
+                isLoading={this.isDataLoading}
                 onCountryChange={(e) => {
                     this.selectedCountryId = e.detail;
                     this.fetchProperties();
@@ -336,7 +336,7 @@ export class IrGhsOnboarding {
                 selectedCountryId={this.selectedCountryId}
                 selectedProperties={this.selectedProperties}
                 propertyToActivate={this.propertyToActivate}
-                isLoading={this.isLoading}
+                isLoading={this.isDataLoading}
                 onToggleSelection={(e) => this.togglePropertySelection(e.detail)}
                 onToggleAll={(e) => this.handleToggleAll(e.detail)}
                 onActivateProperty={(e) => this.handleActivateProperty(e.detail)}

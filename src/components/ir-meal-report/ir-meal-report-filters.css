@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+.ir-meal-report-filters__container {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--wa-color-neutral-0);
+  border: 1px solid var(--wa-color-neutral-200);
+  border-radius: var(--wa-border-radius-m);
+  box-shadow: var(--wa-shadow-s);
+  display: flex;
+  flex-direction: column;
+}
+
+.ir-meal-report-filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--wa-space-s) var(--wa-space-m);
+  border-bottom: 1px solid var(--wa-color-neutral-200);
+  margin-bottom: var(--wa-space-xs);
+}
+
+.ir-meal-report-filters__header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-xs);
+}
+
+.ir-meal-report-filters__title {
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+  font-weight: var(--wa-font-weight-bold);
+  font-size: 13px;
+}
+
+.ir-meal-report-filters__body {
+  padding: var(--wa-space-s) var(--wa-space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  flex-grow: 1;
+}
+
+.ir-meal-report-filters__group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ir-meal-report-filters__label {
+  margin-bottom: var(--wa-space-xs);
+  display: block;
+  font-size: var(--wa-font-size-small);
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-report-filters__date-presets {
+  display: flex;
+  gap: var(--wa-space-xs);
+}
+
+.ir-meal-report-filters__preset-btn {
+  flex: 1;
+}
+
+.ir-meal-report-filters__range-picker-wrapper {
+  padding: var(--wa-space-xs);
+  background: var(--wa-color-neutral-50);
+  border: 1px solid var(--wa-color-neutral-200);
+  border-radius: var(--wa-border-radius-m);
+}
+
+.ir-meal-report-filters__meal-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wa-space-xs);
+}
+
+.ir-meal-report-filters__meal-btn {
+  font-size: 10px;
+  --ir-button-padding: 0.2rem 0.4rem;
+}
+
+.ir-meal-report-filters__warning {
+  padding: var(--wa-space-xs);
+  border: 1px solid var(--wa-color-warning-200);
+  border-radius: var(--wa-border-radius-m);
+  background: var(--wa-color-warning-50);
+  color: var(--wa-color-warning-700);
+  font-size: var(--wa-font-size-x-small);
+}
+
+.ir-meal-report-filters__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--wa-space-xs);
+  margin-top: auto;
+  padding-top: var(--wa-space-m);
+  border-top: 1px solid var(--wa-color-neutral-200);
+}
+
+.ir-meal-report-filters__reset-btn {
+  margin-inline-end: var(--wa-space-m);
+}

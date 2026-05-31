@@ -86,7 +86,7 @@ export class IrMealReport {
 
       await this.applyFilters();
     } catch (error) {
-      console.error('Meal Report Init Error:', error);
+      // Meal Report Init Error handled silently or via UI
     } finally {
       this.isPageLoading = false;
       this.isDataLoading = false;
@@ -109,7 +109,7 @@ export class IrMealReport {
       this.guestList = response.My_Result.Guest_List || [];
       this.mealCountSummary = response.My_Result.Meal_Count_Summary || [];
     } catch (error) {
-      console.error('Fetch Report Error:', error);
+        // Fetch Report Error handled silently or via UI
     } finally {
       this.isDataLoading = false;
     }
@@ -176,7 +176,7 @@ export class IrMealReport {
           window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Export Error:', error);
+        // Export Error handled silently or via UI
     } finally {
         this.isExporting = false;
     }
@@ -211,9 +211,9 @@ export class IrMealReport {
       <Host>
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">Meal report</h3>
+        <section class="ir-meal-report__container">
+          <div class="ir-meal-report__header">
+            <h3 class="ir-meal-report__title">Meal report</h3>
             <ir-custom-button
               type="button"
               size="small"
@@ -227,200 +227,64 @@ export class IrMealReport {
                 }
                 this.handleExport();
               }}
-              style={{ height: '100%' }}
+              class="ir-meal-report__export-btn"
             >
               <wa-icon name="file" slot="end" style={{ fontSize: '14px' }}></wa-icon>
               {lcz.Lcz_Export || 'Export'}
             </ir-custom-button>
           </div>
 
-          <div class="d-flex flex-column flex-lg-row mt-1" style={{ gap: '1rem' }}>
-            {/* Filter Card */}
-            <div 
-                class="card mb-0 p-1 d-flex flex-column sales-filters-card shadow-sm border" 
-                style={{ width: '300px', flexShrink: '0' }}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
+          <div class="ir-meal-report__layout">
+            
+            <ir-meal-report-filters
+                reportType={this.localReportType}
+                fromDate={this.localFrom}
+                toDate={this.localTo}
+                mealType={this.localMealType}
+                setupEntries={this.setupEntries}
+                isLoading={this.isDataLoading}
+                lcz={lcz}
+                onReportTypeChange={e => {
+                    this.localReportType = e.detail;
+                    this.guestList = [];
+                    this.mealCountSummary = [];
+                    if (e.detail === 'GUEST_LIST') {
+                        this.localTo = this.localFrom;
                     }
                 }}
-            >
-              <div class="d-flex align-items-center justify-content-between sales-filters-header p-2 border-bottom mb-2">
-                <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={18} width={18}>
-                    <path
-                      fill="currentColor"
-                      d="M3.9 54.9C10.5 40.9 24.5 32 40 32l432 0c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9 320 448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6l0-79.1L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"
-                    />
-                  </svg>
-                  <h4 class="m-0 p-0 flex-grow-1 font-weight-bold" style={{ fontSize: '13px' }}>{lcz.Lcz_Filters || 'Filters'}</h4>
-                </div>
-              </div>
+                onDateChange={e => {
+                    this.localFrom = e.detail.from;
+                    this.localTo = e.detail.to;
+                    this.guestList = [];
+                    this.mealCountSummary = [];
+                }}
+                onMealTypeChange={async e => {
+                    this.localMealType = e.detail;
+                    this.guestList = [];
+                    this.mealCountSummary = [];
+                    await this.applyFilters();
+                }}
+                onFilterApply={() => this.applyFilters()}
+                onFilterReset={() => this.resetFilters()}
+                onPresetDate={e => this.setPresetDate(e.detail)}
+            ></ir-meal-report-filters>
 
-              <div class="p-2 d-flex flex-column" style={{ gap: '1.25rem' }}>
-                <fieldset class="filter-group">
-                  <label class="mb-2 d-block small font-weight-bold text-dark">Report type</label>
-                  <wa-radio-group 
-                    value={this.localReportType}
-                    onchange={e => {
-                        const val = (e.target as any).value;
-                        this.localReportType = val;
-                        this.guestList = [];
-                        this.mealCountSummary = [];
-                        if (val === 'GUEST_LIST') {
-                            this.localTo = this.localFrom;
-                        }
-                    }}
-                  >
-                    <wa-radio value="GUEST_LIST">Guest list</wa-radio>
-                    <wa-radio value="MEAL_COUNT">Meal count</wa-radio>
-                  </wa-radio-group>
-                </fieldset>
-
-                <fieldset class="filter-group">
-                  <label class="mb-2 d-block small font-weight-bold text-dark">Stay date</label>
-                  
-                  {this.localReportType === 'GUEST_LIST' ? (
-                    <div class="d-flex flex-column gap-2">
-                      <div class="d-flex gap-2">
-                        <ir-custom-button 
-                          type="button"
-                          size="small" 
-                          variant={this.localFrom === moment().format('YYYY-MM-DD') ? 'brand' : 'neutral'}
-                          appearance={this.localFrom === moment().format('YYYY-MM-DD') ? 'filled' : 'outlined'}
-                          onClickHandler={(e: CustomEvent) => {
-                            const ev = e.detail as MouseEvent;
-                            if (ev && typeof ev.preventDefault === 'function') {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                            }
-                            this.setPresetDate('today')
-                          }}
-                          style={{flex: '1'}}
-                        >Today</ir-custom-button>
-                        <ir-custom-button 
-                          type="button"
-                          size="small" 
-                          variant={this.localFrom === moment().add(1, 'day').format('YYYY-MM-DD') ? 'brand' : 'neutral'}
-                          appearance={this.localFrom === moment().add(1, 'day').format('YYYY-MM-DD') ? 'filled' : 'outlined'}
-                          onClickHandler={(e: CustomEvent) => {
-                            const ev = e.detail as MouseEvent;
-                            if (ev && typeof ev.preventDefault === 'function') {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                            }
-                            this.setPresetDate('tomorrow')
-                          }}
-                          style={{flex: '1'}}
-                        >Tomorrow</ir-custom-button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div class="d-flex flex-column gap-2 date-filter-group p-2 bg-light border rounded">
-                      <ir-range-picker
-                        fromDate={moment(this.localFrom, 'YYYY-MM-DD')}
-                        toDate={moment(this.localTo, 'YYYY-MM-DD')}
-                        minDate={moment().format('YYYY-MM-DD')}
-                        maxDate={moment().add(14, 'days').format('YYYY-MM-DD')}
-                        onDateRangeChanged={e => {
-                            const { fromDate, toDate } = e.detail;
-                            this.localFrom = fromDate.format('YYYY-MM-DD');
-                            this.localTo = toDate.format('YYYY-MM-DD');
-                            this.guestList = [];
-                            this.mealCountSummary = [];
-                        }}
-                        withOverlay={false}
-                      ></ir-range-picker>
-                    </div>
-                  )}
-                </fieldset>
-
-                {this.localReportType === 'GUEST_LIST' && (
-                  <fieldset class="filter-group">
-                    <label class="mb-2 d-block small font-weight-bold text-dark">Meal type</label>
-                    {mealType.length > 0 ? (
-                        <div class="d-flex flex-wrap gap-1">
-                           {mealType.map(type => (
-                             <ir-custom-button
-                               type="button"
-                               size="small"
-                               variant={this.localMealType === type.CODE_NAME ? 'brand' : 'neutral'}
-                               appearance={this.localMealType === type.CODE_NAME ? 'filled' : 'outlined'}
-                               onClickHandler={async (e: CustomEvent) => {
-                                 const ev = e.detail as MouseEvent;
-                                 if (ev && typeof ev.preventDefault === 'function') {
-                                     ev.preventDefault();
-                                     ev.stopPropagation();
-                                 }
-                                 this.localMealType = type.CODE_NAME;
-                                 this.guestList = [];
-                                 this.mealCountSummary = [];
-                                 await this.applyFilters();
-                               }}
-                               style={{ fontSize: '10px', '--ir-button-padding': '0.2rem 0.4rem' }}
-                             >{type.CODE_VALUE_EN}</ir-custom-button>
-                           ))}
-                        </div>
-                    ) : (
-                        <div class="p-2 border rounded bg-warning bg-opacity-10 text-warning extra-small">
-                            No meal types found.
-                        </div>
-                    )}
-                  </fieldset>
-                )}
-
-                <div class="d-flex align-items-center justify-content-end gap-2 mt-auto pt-3 border-top filter-actions">
-                    <ir-custom-button
-                        type="button"
-                        size="small"
-                        variant="neutral"
-                        appearance="filled"
-                        onClickHandler={(e: CustomEvent) => {
-                            const ev = e.detail as MouseEvent;
-                            if (ev && typeof ev.preventDefault === 'function') {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                            }
-                            this.resetFilters()
-                        }}
-                        style={{ display: 'inline-block', marginRight: '1rem' }}
-                    >{lcz.Lcz_Reset || 'Reset'}</ir-custom-button>
-                    <ir-custom-button
-                        type="button"
-                        size="small"
-                        variant="brand"
-                        loading={this.isDataLoading}
-                        onClickHandler={(e: CustomEvent) => {
-                            const ev = e.detail as MouseEvent;
-                            if (ev && typeof ev.preventDefault === 'function') {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                            }
-                            this.applyFilters()
-                        }}
-                    >{lcz.Lcz_Apply || 'Apply'}</ir-custom-button>
-                </div>
-              </div>
-            </div>
-
-            {/* Results Card */}
-            <div class="flex-grow-1 card mb-0 overflow-hidden shadow-sm border-0">
-               <div class="card-header bg-white py-2 px-3 border-bottom d-flex align-items-center">
-                  <h3 class="h6 fw-bold mb-0 text-dark flex-grow-1">
+            <div class="ir-meal-report__results-card">
+               <div class="ir-meal-report__results-header">
+                  <h3 class="ir-meal-report__results-title">
                     {headerTitle}
-                    <span class="text-muted small ms-2 fw-normal">
+                    <span class="ir-meal-report__results-subtitle">
                         ({formattedFrom}{this.localReportType === 'MEAL_COUNT' ? ` - ${formattedTo}` : ''})
                         {this.localReportType === 'GUEST_LIST' && mealTypeLabel && ` - ${mealTypeLabel}`}
                     </span>
                   </h3>
                   {this.localReportType === 'GUEST_LIST' && this.guestList?.length > 0 && (
-                      <span class="badge bg-light text-dark border extra-small">{this.guestList.length} Units</span>
+                      <wa-tag>{this.guestList.length} Units</wa-tag>
                   )}
                </div>
-               <div class="card-body p-0 position-relative" style={{ minHeight: '400px' }}>
+               <div class="ir-meal-report__results-body">
                   {this.isDataLoading && (
-                    <div class="loading-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 z-index-2">
+                    <div class="ir-meal-report__loading-overlay">
                         <ir-spinner></ir-spinner>
                     </div>
                   )}
@@ -433,7 +297,6 @@ export class IrMealReport {
             </div>
           </div>
         </section>
-        <ir-toast-provider></ir-toast-provider>
       </Host>
     );
   }

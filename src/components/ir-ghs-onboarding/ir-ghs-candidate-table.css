@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.ir-ghs-candidate-table__container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--wa-border-radius-m);
+  box-shadow: var(--wa-shadow-s);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ir-ghs-candidate-table__header {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-m);
+  padding: var(--wa-space-s) var(--wa-space-m);
+  border-bottom: 1px solid var(--wa-color-neutral-200);
+  background: var(--wa-color-neutral-0);
+}
+
+.ir-ghs-candidate-table__title {
+  margin: 0;
+  flex-grow: 1;
+  font-size: var(--wa-font-size-medium);
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
+  white-space: nowrap;
+}
+
+.ir-ghs-candidate-table__subtitle {
+  margin-inline-start: var(--wa-space-xs);
+  font-weight: var(--wa-font-weight-normal);
+  font-size: var(--wa-font-size-x-small);
+  color: var(--wa-color-neutral-500);
+}
+
+.ir-ghs-candidate-table__search-wrapper {
+  width: 180px;
+}
+
+.ir-ghs-candidate-table__body {
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
+  max-height: 600px;
+  min-height: 400px;
+}
+
+.ir-ghs-candidate-table__loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 0.5);
+  z-index: 2;
+}
+
+.ir-ghs-candidate-table__table-wrapper {
+  margin: 0;
+  padding: 0;
+  background: var(--wa-color-neutral-0);
+  flex-grow: 1;
+}
+
+.ir-ghs-candidate-table__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ir-ghs-candidate-table__header-row {
+  background-color: var(--wa-color-neutral-50);
+}
+
+.ir-ghs-candidate-table__header-cell {
+  padding: var(--wa-space-s) var(--wa-space-m);
+  font-size: var(--wa-font-size-small);
+  font-weight: var(--wa-font-weight-bold);
+  text-align: start;
+  border: none;
+}
+
+.ir-ghs-candidate-table__header-cell--center {
+  text-align: center;
+}
+
+.ir-ghs-candidate-table__cell {
+  padding: var(--wa-space-s) var(--wa-space-m);
+  font-size: var(--wa-font-size-small);
+  text-align: start;
+  border-bottom: 1px solid var(--wa-color-neutral-200);
+}
+
+.ir-ghs-candidate-table__cell--center {
+  text-align: center;
+}
+
+.ir-ghs-candidate-table__cell--muted {
+  color: var(--wa-color-neutral-500);
+}
+
+.ir-ghs-candidate-table__cell--bold {
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-ghs-candidate-table__cell--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ir-ghs-candidate-table__checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ir-ghs-candidate-table__empty-state {
+  text-align: center;
+  padding: var(--wa-space-xl);
+  color: var(--wa-color-neutral-500);
+}

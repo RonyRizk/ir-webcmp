@@ -2623,6 +2623,15 @@ export namespace Components {
         "propertyid": number;
         "ticket": string;
     }
+    interface IrMealReportFilters {
+        "fromDate": string;
+        "isLoading": boolean;
+        "lcz": any;
+        "mealType": string | null;
+        "reportType": 'GUEST_LIST' | 'MEAL_COUNT';
+        "setupEntries": { meal_type: IEntries[]; hb_preference: IEntries[] };
+        "toDate": string;
+    }
     interface IrMenu {
         "selectedHref"?: string;
         "setSelectedHref": (href?: string) => Promise<void>;
@@ -4617,6 +4626,10 @@ export interface IrMComboboxCustomEvent<T> extends CustomEvent<T> {
 export interface IrMComboboxItemCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrMComboboxItemElement;
+}
+export interface IrMealReportFiltersCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrMealReportFiltersElement;
 }
 export interface IrMenuDrawerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -7319,6 +7332,28 @@ declare global {
         prototype: HTMLIrMealReportElement;
         new (): HTMLIrMealReportElement;
     };
+    interface HTMLIrMealReportFiltersElementEventMap {
+        "reportTypeChange": 'GUEST_LIST' | 'MEAL_COUNT';
+        "dateChange": { from: string; to: string };
+        "mealTypeChange": string;
+        "filterApply": void;
+        "filterReset": void;
+        "presetDate": 'today' | 'tomorrow';
+    }
+    interface HTMLIrMealReportFiltersElement extends Components.IrMealReportFilters, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrMealReportFiltersElementEventMap>(type: K, listener: (this: HTMLIrMealReportFiltersElement, ev: IrMealReportFiltersCustomEvent<HTMLIrMealReportFiltersElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrMealReportFiltersElementEventMap>(type: K, listener: (this: HTMLIrMealReportFiltersElement, ev: IrMealReportFiltersCustomEvent<HTMLIrMealReportFiltersElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrMealReportFiltersElement: {
+        prototype: HTMLIrMealReportFiltersElement;
+        new (): HTMLIrMealReportFiltersElement;
+    };
     interface HTMLIrMenuElement extends Components.IrMenu, HTMLStencilElement {
     }
     var HTMLIrMenuElement: {
@@ -8885,6 +8920,7 @@ declare global {
         "ir-meal-count-summary": HTMLIrMealCountSummaryElement;
         "ir-meal-guest-list": HTMLIrMealGuestListElement;
         "ir-meal-report": HTMLIrMealReportElement;
+        "ir-meal-report-filters": HTMLIrMealReportFiltersElement;
         "ir-menu": HTMLIrMenuElement;
         "ir-menu-drawer": HTMLIrMenuDrawerElement;
         "ir-menu-group": HTMLIrMenuGroupElement;
@@ -11799,6 +11835,21 @@ declare namespace LocalJSX {
         "propertyid"?: number;
         "ticket"?: string;
     }
+    interface IrMealReportFilters {
+        "fromDate"?: string;
+        "isLoading"?: boolean;
+        "lcz"?: any;
+        "mealType"?: string | null;
+        "onDateChange"?: (event: IrMealReportFiltersCustomEvent<{ from: string; to: string }>) => void;
+        "onFilterApply"?: (event: IrMealReportFiltersCustomEvent<void>) => void;
+        "onFilterReset"?: (event: IrMealReportFiltersCustomEvent<void>) => void;
+        "onMealTypeChange"?: (event: IrMealReportFiltersCustomEvent<string>) => void;
+        "onPresetDate"?: (event: IrMealReportFiltersCustomEvent<'today' | 'tomorrow'>) => void;
+        "onReportTypeChange"?: (event: IrMealReportFiltersCustomEvent<'GUEST_LIST' | 'MEAL_COUNT'>) => void;
+        "reportType"?: 'GUEST_LIST' | 'MEAL_COUNT';
+        "setupEntries"?: { meal_type: IEntries[]; hb_preference: IEntries[] };
+        "toDate"?: string;
+    }
     interface IrMenu {
         "selectedHref"?: string;
     }
@@ -13656,6 +13707,7 @@ declare namespace LocalJSX {
         "ir-meal-count-summary": IrMealCountSummary;
         "ir-meal-guest-list": IrMealGuestList;
         "ir-meal-report": IrMealReport;
+        "ir-meal-report-filters": IrMealReportFilters;
         "ir-menu": IrMenu;
         "ir-menu-drawer": IrMenuDrawer;
         "ir-menu-group": IrMenuGroup;
@@ -13955,6 +14007,7 @@ declare module "@stencil/core" {
             "ir-meal-count-summary": LocalJSX.IrMealCountSummary & JSXBase.HTMLAttributes<HTMLIrMealCountSummaryElement>;
             "ir-meal-guest-list": LocalJSX.IrMealGuestList & JSXBase.HTMLAttributes<HTMLIrMealGuestListElement>;
             "ir-meal-report": LocalJSX.IrMealReport & JSXBase.HTMLAttributes<HTMLIrMealReportElement>;
+            "ir-meal-report-filters": LocalJSX.IrMealReportFilters & JSXBase.HTMLAttributes<HTMLIrMealReportFiltersElement>;
             "ir-menu": LocalJSX.IrMenu & JSXBase.HTMLAttributes<HTMLIrMenuElement>;
             "ir-menu-drawer": LocalJSX.IrMenuDrawer & JSXBase.HTMLAttributes<HTMLIrMenuDrawerElement>;
             "ir-menu-group": LocalJSX.IrMenuGroup & JSXBase.HTMLAttributes<HTMLIrMenuGroupElement>;

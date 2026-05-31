@@ -4,6 +4,7 @@ import { ICountry } from '../../models/IBooking';
 
 @Component({
   tag: 'ir-ghs-candidate-table',
+  styleUrls: ['ir-ghs-candidate-table.css', '../../common/table.css'],
   scoped: true,
 })
 export class IrGhsCandidateTable {
@@ -26,17 +27,15 @@ export class IrGhsCandidateTable {
     const allVisibleSelected = this.properties.length > 0 && this.properties.every(p => selectedIds.includes(p.AC_ID));
 
     return (
-      <div class="card mb-0 overflow-hidden shadow-sm border-0 position-relative" style={{ flex: '1 1 0', minWidth: '0' }}>
-         <div class="card-header bg-white py-2 px-3 border-bottom d-flex align-items-center gap-3">
-            <h3 class="h6 fw-bold mb-0 text-dark flex-grow-1 text-nowrap">
+      <div class="ir-ghs-candidate-table__container">
+         <div class="ir-ghs-candidate-table__header">
+            <h3 class="ir-ghs-candidate-table__title">
               Candidate properties
-              <span class="text-muted extra-small ms-2 fw-normal">
+              <span class="ir-ghs-candidate-table__subtitle">
                   ({countryName})
               </span>
             </h3>
-            <div 
-              style={{ width: '180px' }}
-            >
+            <div class="ir-ghs-candidate-table__search-wrapper">
               <ir-input 
                   size="small" 
                   placeholder="Search aname..." 
@@ -50,25 +49,20 @@ export class IrGhsCandidateTable {
             </div>
          </div>
 
-         <div class="card-body p-0 position-relative overflow-auto" style={{ maxHeight: '600px', minHeight: '400px' }}>
+         <div class="ir-ghs-candidate-table__body">
             {this.isLoading && (
-              <div class="loading-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 z-index-2">
+              <div class="ir-ghs-candidate-table__loading-overlay">
                   <ir-spinner></ir-spinner>
               </div>
             )}
 
-            <div class="table-container p-0 m-0 table-responsive bg-white overflow-auto">
-              {this.isLoading && this.properties.length === 0 ? (
-                <div class="d-flex align-items-center justify-content-center p-5" style={{ minHeight: '300px' }}>
-                  <ir-spinner></ir-spinner>
-                </div>
-              ) : (
-                <table class="table align-middle mb-0 w-100" style={{ tableLayout: 'fixed', minWidth: '380px' }}>
+            <div class="ir-ghs-candidate-table__table-wrapper table--container">
+                <table class="ir-ghs-candidate-table__table table align-middle mb-0 w-100" style={{ tableLayout: 'fixed', minWidth: '380px' }}>
                   <thead>
-                    <tr class="table-header bg-light">
-                      <th class="text-center py-1" style={{ width: '30px' }}>
+                    <tr class="ir-ghs-candidate-table__header-row table-header">
+                      <th class="ir-ghs-candidate-table__header-cell ir-ghs-candidate-table__header-cell--center" style={{ width: '30px' }}>
                         {this.properties.length > 0 && (
-                          <div class="d-flex align-items-center justify-content-center">
+                          <div class="ir-ghs-candidate-table__checkbox-wrapper">
                               <wa-checkbox 
                                 checked={allVisibleSelected}
                                 indeterminate={this.selectedProperties.length > 0 && !allVisibleSelected}
@@ -80,11 +74,11 @@ export class IrGhsCandidateTable {
                           </div>
                         )}
                       </th>
-                      <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '70px' }}>Country</th>
-                      <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '60px' }}>Level2</th>
-                      <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '60px' }}>Username</th>
-                      <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '140px' }}>Property name</th>
-                      <th class="px-1 text-center py-1 extra-small fw-bold" style={{ width: '50px' }}>Activate?</th>
+                      <th class="ir-ghs-candidate-table__header-cell" style={{ width: '70px' }}>Country</th>
+                      <th class="ir-ghs-candidate-table__header-cell" style={{ width: '60px' }}>Level2</th>
+                      <th class="ir-ghs-candidate-table__header-cell" style={{ width: '60px' }}>Username</th>
+                      <th class="ir-ghs-candidate-table__header-cell" style={{ width: '140px' }}>Property name</th>
+                      <th class="ir-ghs-candidate-table__header-cell ir-ghs-candidate-table__header-cell--center" style={{ width: '65px' }}>Activate?</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -102,15 +96,15 @@ export class IrGhsCandidateTable {
                       .map(p => {
                         return (
                           <tr 
-                            class="ir-table-row border-bottom" 
+                            class="ir-ghs-candidate-table__row ir-table-row" 
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
                                 this.toggleSelection.emit(p);
                             }}
                           >
-                            <td class="text-center py-1">
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--center">
                               <div 
-                                class="d-flex align-items-center justify-content-center"
+                                class="ir-ghs-candidate-table__checkbox-wrapper"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                   <wa-checkbox
@@ -122,20 +116,20 @@ export class IrGhsCandidateTable {
                                   ></wa-checkbox>
                               </div>
                             </td>
-                            <td class="px-1 text-muted text-start py-1 extra-small text-truncate" title={p.countryName}>
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--muted ir-ghs-candidate-table__cell--truncate" title={p.countryName}>
                               {p.countryName}
                             </td>
-                            <td class="px-1 text-muted text-start py-1 extra-small text-truncate" title={p.level2}>
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--muted ir-ghs-candidate-table__cell--truncate" title={p.level2}>
                               {p.level2}
                             </td>
-                            <td class="px-1 text-muted text-start py-1 extra-small text-truncate" title={p.aname}>
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--muted ir-ghs-candidate-table__cell--truncate" title={p.aname}>
                               {p.aname}
                             </td>
-                            <td class="px-1 text-dark fw-bold text-start py-1 extra-small text-truncate" title={p.NAME}>
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--bold ir-ghs-candidate-table__cell--truncate" title={p.NAME}>
                               {p.NAME}
                             </td>
-                            <td class="px-1 text-center py-1">
-                                <div class="d-flex align-items-center justify-content-center" onClick={(e) => e.stopPropagation()}>
+                            <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--center">
+                                <div class="ir-ghs-candidate-table__checkbox-wrapper" onClick={(e) => e.stopPropagation()}>
                                     <ir-switch
                                         key={`switch-${p.AC_ID}-${this.propertyToActivate?.AC_ID === p.AC_ID}`}
                                         checked={this.propertyToActivate?.AC_ID === p.AC_ID}
@@ -150,16 +144,15 @@ export class IrGhsCandidateTable {
                           </tr>
                         );
                       })}
-                    {this.properties.length === 0 && (
+                    {!this.isLoading && this.properties.length === 0 && (
                       <tr>
-                        <td colSpan={5} class="text-center p-4 text-muted border-0 bg-white">
+                        <td colSpan={6} class="ir-ghs-candidate-table__empty-state border-0 bg-white">
                           <p class="mb-0 small">No candidate properties found.</p>
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
-              )}
             </div>
          </div>
       </div>

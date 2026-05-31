@@ -3,6 +3,7 @@ import { GHS_Candidate_Property } from '../../services/ghs/types';
 
 @Component({
   tag: 'ir-ghs-selection-bucket',
+  styleUrls: ['ir-ghs-selection-bucket.css', '../../common/table.css'],
   scoped: true,
 })
 export class IrGhsSelectionBucket {
@@ -15,15 +16,13 @@ export class IrGhsSelectionBucket {
 
   render() {
     return (
-      <div class="card mb-0 overflow-hidden shadow-sm border-0 position-relative" style={{ flex: '0 0 350px' }}>
-          <div class="card-header bg-white py-2 px-3 border-bottom d-flex align-items-center justify-content-between flex-nowrap" style={{ gap: '0.5rem' }}>
-            <div class="d-flex align-items-center flex-nowrap overflow-hidden" style={{ gap: '0.5rem' }}>
-              <h3 class="h6 fw-bold mb-0 text-dark text-nowrap">To be added</h3>
-              <span class="badge bg-primary text-white extra-small" style={{ minWidth: '20px' }}>
-                  {this.selectedProperties.length}
-              </span>
+      <div class="ir-ghs-selection-bucket__container">
+          <div class="ir-ghs-selection-bucket__header">
+            <div class="ir-ghs-selection-bucket__header-left">
+              <h3 class="ir-ghs-selection-bucket__title">To be added</h3>
+              <wa-badge variant="brand">{this.selectedProperties.length}</wa-badge>
             </div>
-            <div class="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+            <div class="ir-ghs-selection-bucket__header-right">
               <ir-custom-button 
                 type="button"
                 size="small" 
@@ -45,55 +44,51 @@ export class IrGhsSelectionBucket {
             </div>
          </div>
 
-         <div class="card-body p-0 position-relative overflow-auto" style={{ maxHeight: '600px', minHeight: '400px' }}>
-            <div class="table-container p-0 m-0 table-responsive bg-white">
-              <table class="table align-middle mb-0">
+         <div class="ir-ghs-selection-bucket__body">
+            <div class="ir-ghs-selection-bucket__table-wrapper table--container">
+              <table class="ir-ghs-selection-bucket__table table align-middle mb-0">
                 <thead>
-                  <tr class="table-header bg-light">
-                    <th class="ps-3 text-start py-2 small fw-bold">Property name</th>
-                    <th class="pe-3 text-end py-2 small fw-bold" style={{ width: '50px' }}>
+                  <tr class="ir-ghs-selection-bucket__header-row table-header">
+                    <th class="ir-ghs-selection-bucket__header-cell">Property name</th>
+                    <th class="ir-ghs-selection-bucket__header-cell ir-ghs-selection-bucket__header-cell--end" style={{ width: '50px' }}>
                       {this.selectedProperties.length > 0 && (
-                        <button 
-                            type="button"
-                            class="btn btn-sm btn-link text-danger p-0 d-inline-flex align-items-center justify-content-end" 
+                        <wa-button 
+                            variant="danger" 
+                            appearance="plain" 
+                            size="small"
                             onClick={() => this.removeAll.emit()}
                             title="Remove all"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
+                            <wa-icon name="trash"></wa-icon>
+                        </wa-button>
                       )}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {this.selectedProperties.map(p => (
-                    <tr class="ir-table-row border-bottom">
-                      <td class="ps-3 text-dark text-start py-2 small font-weight-bold">
+                    <tr class="ir-ghs-selection-bucket__row ir-table-row">
+                      <td class="ir-ghs-selection-bucket__cell ir-ghs-selection-bucket__cell--bold">
                           {p.NAME}
-                          <div class="text-muted extra-small fw-normal">{p.aname}</div>
+                          <div class="ir-ghs-selection-bucket__property-aname">{p.aname}</div>
                       </td>
-                      <td class="pe-3 text-end py-2">
-                          <button 
-                              type="button"
-                              class="btn btn-sm btn-link text-danger p-0 d-inline-flex align-items-center justify-content-end" 
+                      <td class="ir-ghs-selection-bucket__cell ir-ghs-selection-bucket__cell--end">
+                          <wa-button 
+                              variant="danger" 
+                              appearance="plain" 
+                              size="small"
                               onClick={() => this.removeProperty.emit(p.AC_ID)}
                               title="Remove from list"
                           >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <polyline points="3 6 5 6 21 6"></polyline>
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
-                          </button>
+                              <wa-icon name="trash"></wa-icon>
+                          </wa-button>
                       </td>
                     </tr>
                   ))}
                   {this.selectedProperties.length === 0 && (
                     <tr>
-                      <td colSpan={2} class="text-center p-4 text-muted border-0 bg-white">
-                        <p class="mb-0 small italic">No properties selected yet.</p>
+                      <td colSpan={2} class="ir-ghs-selection-bucket__empty-state">
+                        <p class="ir-ghs-selection-bucket__empty-text">No properties selected yet.</p>
                       </td>
                     </tr>
                   )}
