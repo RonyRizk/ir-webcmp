@@ -86,7 +86,7 @@ export class IrMealReport {
 
       await this.applyFilters();
     } catch (error) {
-      // Meal Report Init Error handled silently or via UI
+        // Handling handled via UI
     } finally {
       this.isPageLoading = false;
       this.isDataLoading = false;
@@ -109,7 +109,7 @@ export class IrMealReport {
       this.guestList = response.My_Result.Guest_List || [];
       this.mealCountSummary = response.My_Result.Meal_Count_Summary || [];
     } catch (error) {
-        // Fetch Report Error handled silently or via UI
+        // Handling handled via UI
     } finally {
       this.isDataLoading = false;
     }
