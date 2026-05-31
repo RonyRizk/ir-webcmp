@@ -23,6 +23,8 @@ export class IrGhsOnboarding {
   @State() selectedProperties: GHS_Candidate_Property[] = [];
   @State() isLoading: boolean = false;
   @State() isGenerating: boolean = false;
+  @State() isActivating: boolean = false;
+  @State() propertyToActivate: GHS_Candidate_Property | null = null;
 
   @Event() toast: EventEmitter<IToast>;
 
@@ -31,6 +33,7 @@ export class IrGhsOnboarding {
   private tokenService = new Token();
 
   private removeAllModal: HTMLIrDialogElement;
+  private activateModal: HTMLIrDialogElement;
 
   @Watch('ticket')
   ticketChanged(newValue: string) {
@@ -120,6 +123,33 @@ export class IrGhsOnboarding {
     this.removeAllModal.closeModal();
   }
 
+  private handleActivateProperty(property: GHS_Candidate_Property) {
+    this.propertyToActivate = property;
+    this.activateModal.openModal();
+  }
+
+  private async handleConfirmActivate() {
+    if (!this.propertyToActivate) return;
+    this.isActivating = true;
+    try {
+      await this.ghsService.Update_GHS_Enablement({
+        AC_ID: this.propertyToActivate.AC_ID,
+        IS_ENABLED: true,
+      });
+      this.showToast('success', 'Success', `${this.propertyToActivate.NAME} GHS has been activated.`);
+      
+      const activatedId = this.propertyToActivate.AC_ID;
+      this.properties = this.properties.filter(p => p.AC_ID !== activatedId);
+      this.selectedProperties = this.selectedProperties.filter(p => p.AC_ID !== activatedId);
+    } catch (error) {
+      this.showToast('error', 'Activation Error', error.message || 'Failed to activate property');
+    } finally {
+      this.isActivating = false;
+      this.propertyToActivate = null;
+      this.activateModal.closeModal();
+    }
+  }
+
   private async handleGenerateRequest() {
     if (this.selectedProperties.length === 0) {
       this.showToast('error', 'Selection Required', 'Please select at least one property.');
@@ -182,6 +212,58 @@ export class IrGhsOnboarding {
       <Host>
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
+        <ir-dialog
+          ref={el => (this.activateModal = el)}
+          label="Activation Confirmation"
+          onIrDialogHide={() => {
+            this.propertyToActivate = null;
+            this.activateModal.closeModal();
+          }}
+        >
+          <div class="p-0 d-flex flex-column align-items-center justify-content-center">
+            <p class="m-0 text-center">
+              Are you sure you want to <strong>activate</strong> GHS for{' '}
+              <span class="text-primary">{this.propertyToActivate?.NAME}</span>?
+            </p>
+            <p class="small text-muted mt-2 mb-0">This will enable real-time synchronization with Google.</p>
+          </div>
+          <div slot="footer" class="ir-dialog__footer">
+            <ir-custom-button
+              type="button"
+              variant="neutral"
+              appearance="filled"
+              size="medium"
+              onClickHandler={(e: CustomEvent) => {
+                const ev = e.detail as MouseEvent;
+                if (ev && typeof ev.preventDefault === 'function') {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                }
+                this.propertyToActivate = null;
+                this.activateModal.closeModal();
+              }}
+            >
+              Cancel
+            </ir-custom-button>
+            <ir-custom-button
+              type="button"
+              variant="success"
+              appearance="accent"
+              size="medium"
+              loading={this.isActivating}
+              onClickHandler={(e: CustomEvent) => {
+                const ev = e.detail as MouseEvent;
+                if (ev && typeof ev.preventDefault === 'function') {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                }
+                this.handleConfirmActivate();
+              }}
+            >
+              Activate
+            </ir-custom-button>
+          </div>
+        </ir-dialog>
         <ir-dialog
           ref={el => (this.removeAllModal = el)}
           label="Confirmation"
@@ -253,9 +335,11 @@ export class IrGhsOnboarding {
                 countries={this.countries}
                 selectedCountryId={this.selectedCountryId}
                 selectedProperties={this.selectedProperties}
+                propertyToActivate={this.propertyToActivate}
                 isLoading={this.isLoading}
                 onToggleSelection={(e) => this.togglePropertySelection(e.detail)}
                 onToggleAll={(e) => this.handleToggleAll(e.detail)}
+                onActivateProperty={(e) => this.handleActivateProperty(e.detail)}
             ></ir-ghs-candidate-table>
 
             <ir-ghs-selection-bucket

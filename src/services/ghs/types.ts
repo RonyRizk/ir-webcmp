@@ -21,3 +21,10 @@ export const Params_Generate_GHS_Listing_For_Selection_Schema = z.object({
 });
 
 export type Params_Generate_GHS_Listing_For_Selection = z.infer<typeof Params_Generate_GHS_Listing_For_Selection_Schema>;
+
+export const Params_Update_GHS_Enablement_Schema = z.object({
+  AC_ID: z.number(),
+  IS_ENABLED: z.boolean(),
+});
+
+export type Params_Update_GHS_Enablement = z.infer<typeof Params_Update_GHS_Enablement_Schema>;

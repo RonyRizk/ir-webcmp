@@ -5,6 +5,8 @@ import {
   Params_Generate_GHS_Listing_For_Selection,
   Params_Get_GHS_Candidate_Properties_Schema,
   Params_Generate_GHS_Listing_For_Selection_Schema,
+  Params_Update_GHS_Enablement,
+  Params_Update_GHS_Enablement_Schema,
 } from './types';
 
 export class GHSService {
@@ -28,5 +30,14 @@ export class GHSService {
     }
 
     return data.My_Result;
+  }
+
+  public async Update_GHS_Enablement(params: Params_Update_GHS_Enablement): Promise<void> {
+    const validatedParams = Params_Update_GHS_Enablement_Schema.parse(params);
+    const { data } = await axios.post(`/Update_GHS_Enablement`, validatedParams);
+
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
   }
 }

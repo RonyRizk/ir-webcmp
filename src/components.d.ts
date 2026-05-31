@@ -1960,6 +1960,7 @@ export namespace Components {
         "countries": ICountry1[];
         "isLoading": boolean;
         "properties": GHS_Candidate_Property[];
+        "propertyToActivate": GHS_Candidate_Property | null;
         "selectedCountryId": number | null;
         "selectedProperties": GHS_Candidate_Property[];
     }
@@ -6687,6 +6688,7 @@ declare global {
     interface HTMLIrGhsCandidateTableElementEventMap {
         "toggleSelection": GHS_Candidate_Property;
         "toggleAll": boolean;
+        "activateProperty": GHS_Candidate_Property;
     }
     interface HTMLIrGhsCandidateTableElement extends Components.IrGhsCandidateTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrGhsCandidateTableElementEventMap>(type: K, listener: (this: HTMLIrGhsCandidateTableElement, ev: IrGhsCandidateTableCustomEvent<HTMLIrGhsCandidateTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -11056,9 +11058,11 @@ declare namespace LocalJSX {
     interface IrGhsCandidateTable {
         "countries"?: ICountry1[];
         "isLoading"?: boolean;
+        "onActivateProperty"?: (event: IrGhsCandidateTableCustomEvent<GHS_Candidate_Property>) => void;
         "onToggleAll"?: (event: IrGhsCandidateTableCustomEvent<boolean>) => void;
         "onToggleSelection"?: (event: IrGhsCandidateTableCustomEvent<GHS_Candidate_Property>) => void;
         "properties"?: GHS_Candidate_Property[];
+        "propertyToActivate"?: GHS_Candidate_Property | null;
         "selectedCountryId"?: number | null;
         "selectedProperties"?: GHS_Candidate_Property[];
     }

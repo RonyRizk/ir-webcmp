@@ -11,12 +11,14 @@ export class IrGhsCandidateTable {
   @Prop() countries: ICountry[] = [];
   @Prop() selectedCountryId: number | null = null;
   @Prop() selectedProperties: GHS_Candidate_Property[] = [];
+  @Prop() propertyToActivate: GHS_Candidate_Property | null = null;
   @Prop() isLoading: boolean = false;
 
   @State() searchQuery: string = '';
 
   @Event() toggleSelection: EventEmitter<GHS_Candidate_Property>;
   @Event() toggleAll: EventEmitter<boolean>;
+  @Event() activateProperty: EventEmitter<GHS_Candidate_Property>;
 
   render() {
     const countryName = this.countries.find(c => c.id === this.selectedCountryId)?.name || 'All';
@@ -82,6 +84,7 @@ export class IrGhsCandidateTable {
                       <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '60px' }}>Level2</th>
                       <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '60px' }}>Username</th>
                       <th class="px-1 text-start py-1 extra-small fw-bold" style={{ width: '140px' }}>Property name</th>
+                      <th class="px-1 text-center py-1 extra-small fw-bold" style={{ width: '50px' }}>Activate?</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -130,6 +133,19 @@ export class IrGhsCandidateTable {
                             </td>
                             <td class="px-1 text-dark fw-bold text-start py-1 extra-small text-truncate" title={p.NAME}>
                               {p.NAME}
+                            </td>
+                            <td class="px-1 text-center py-1">
+                                <div class="d-flex align-items-center justify-content-center" onClick={(e) => e.stopPropagation()}>
+                                    <ir-switch
+                                        key={`switch-${p.AC_ID}-${this.propertyToActivate?.AC_ID === p.AC_ID}`}
+                                        checked={this.propertyToActivate?.AC_ID === p.AC_ID}
+                                        onCheckChange={(e) => {
+                                            if (e.detail) {
+                                                this.activateProperty.emit(p);
+                                            }
+                                        }}
+                                    ></ir-switch>
+                                </div>
                             </td>
                           </tr>
                         );
