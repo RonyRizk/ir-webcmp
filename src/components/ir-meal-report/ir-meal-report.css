@@ -39,8 +39,8 @@
 
 .ir-meal-report__results-card {
   flex-grow: 1;
-  background: var(--wa-color-neutral-0);
-  border: 1px solid var(--wa-color-neutral-200);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: var(--wa-border-radius-m);
   box-shadow: var(--wa-shadow-s);
   overflow: hidden;
