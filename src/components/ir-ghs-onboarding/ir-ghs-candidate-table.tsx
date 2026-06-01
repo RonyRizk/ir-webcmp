@@ -27,8 +27,8 @@ export class IrGhsCandidateTable {
     const allVisibleSelected = this.properties.length > 0 && this.properties.every(p => selectedIds.includes(p.AC_ID));
 
     return (
-      <div class="ir-ghs-candidate-table__container">
-         <div class="ir-ghs-candidate-table__header">
+      <wa-card class="ir-ghs-candidate-table__container">
+         <div slot="header" class="ir-ghs-candidate-table__header">
             <h3 class="ir-ghs-candidate-table__title">
               Candidate properties
               <span class="ir-ghs-candidate-table__subtitle">
@@ -78,7 +78,9 @@ export class IrGhsCandidateTable {
                       <th class="ir-ghs-candidate-table__header-cell" style={{ width: '60px' }}>Level2</th>
                       <th class="ir-ghs-candidate-table__header-cell" style={{ width: '60px' }}>Username</th>
                       <th class="ir-ghs-candidate-table__header-cell" style={{ width: '140px' }}>Property name</th>
-                      <th class="ir-ghs-candidate-table__header-cell ir-ghs-candidate-table__header-cell--center" style={{ width: '65px' }}>Activate?</th>
+                      <th class="ir-ghs-candidate-table__header-cell ir-ghs-candidate-table__header-cell--center" style={{ width: '65px' }}>
+                        <div class="ir-ghs-candidate-table__header-center-wrapper">Activate?</div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -130,15 +132,19 @@ export class IrGhsCandidateTable {
                             </td>
                             <td class="ir-ghs-candidate-table__cell ir-ghs-candidate-table__cell--center">
                                 <div class="ir-ghs-candidate-table__checkbox-wrapper" onClick={(e) => e.stopPropagation()}>
-                                    <ir-switch
+                                    <wa-switch
                                         key={`switch-${p.AC_ID}-${this.propertyToActivate?.AC_ID === p.AC_ID}`}
                                         checked={this.propertyToActivate?.AC_ID === p.AC_ID}
-                                        onCheckChange={(e) => {
-                                            if (e.detail) {
+                                        onchange={(e: Event) => {
+                                            const checked = (e.target as HTMLInputElement).checked;
+                                            if (checked) {
                                                 this.activateProperty.emit(p);
+                                            } else {
+                                                // Prevent default toggle off visually if we only allow activation
+                                                // Actually the parent component controls state via propertyToActivate
                                             }
                                         }}
-                                    ></ir-switch>
+                                    ></wa-switch>
                                 </div>
                             </td>
                           </tr>
@@ -155,7 +161,7 @@ export class IrGhsCandidateTable {
                 </table>
             </div>
          </div>
-      </div>
+      </wa-card>
     );
   }
 }

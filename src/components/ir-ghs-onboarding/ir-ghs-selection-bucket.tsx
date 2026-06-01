@@ -16,8 +16,8 @@ export class IrGhsSelectionBucket {
 
   render() {
     return (
-      <div class="ir-ghs-selection-bucket__container">
-          <div class="ir-ghs-selection-bucket__header">
+      <wa-card class="ir-ghs-selection-bucket__container">
+          <div slot="header" class="ir-ghs-selection-bucket__header">
             <div class="ir-ghs-selection-bucket__header-left">
               <h3 class="ir-ghs-selection-bucket__title">To be added</h3>
               <wa-badge variant="brand">{this.selectedProperties.length}</wa-badge>
@@ -68,9 +68,9 @@ export class IrGhsSelectionBucket {
                 <tbody>
                   {this.selectedProperties.map(p => (
                     <tr class="ir-ghs-selection-bucket__row ir-table-row">
-                      <td class="ir-ghs-selection-bucket__cell ir-ghs-selection-bucket__cell--bold">
+                      <td class="ir-ghs-selection-bucket__cell ir-ghs-selection-bucket__cell--bold" title={p.NAME}>
                           {p.NAME}
-                          <div class="ir-ghs-selection-bucket__property-aname">{p.aname}</div>
+                          <div class="ir-ghs-selection-bucket__property-aname" title={p.aname}>{p.aname}</div>
                       </td>
                       <td class="ir-ghs-selection-bucket__cell ir-ghs-selection-bucket__cell--end">
                           <wa-button 
@@ -96,7 +96,7 @@ export class IrGhsSelectionBucket {
               </table>
             </div>
          </div>
-      </div>
+      </wa-card>
     );
   }
 }
