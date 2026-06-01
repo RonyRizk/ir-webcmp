@@ -28,6 +28,7 @@
 
 ### Used by
 
+ - [ir-daily-revenue-filters](../../../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-hk-archive](..)
  - [ir-listing-header](../../../../ir-booking-listing/ir-listing-header)
  - [ir-sales-by-channel-filters](../../../../ir-sales-by-channel/ir-sales-by-channel-filters)
@@ -41,6 +42,7 @@
 ```mermaid
 graph TD;
   ir-range-picker --> ir-date-picker
+  ir-daily-revenue-filters --> ir-range-picker
   ir-hk-archive --> ir-range-picker
   ir-listing-header --> ir-range-picker
   ir-sales-by-channel-filters --> ir-range-picker

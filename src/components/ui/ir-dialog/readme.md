@@ -65,6 +65,7 @@ Type: `Promise<void>`
  - [ir-booking-listing-table](../../ir-booking-listing/ir-booking-listing-table)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
+ - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
@@ -91,6 +92,7 @@ graph TD;
   ir-booking-listing-table --> ir-dialog
   ir-checkout-dialog --> ir-dialog
   ir-extra-service --> ir-dialog
+  ir-hk-delete-dialog --> ir-dialog
   ir-hk-operations-card --> ir-dialog
   ir-hk-staff-tasks --> ir-dialog
   ir-hk-tasks --> ir-dialog

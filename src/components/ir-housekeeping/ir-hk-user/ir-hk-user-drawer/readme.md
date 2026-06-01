@@ -1,4 +1,4 @@
-# ir-hk-user
+# ir-hk-user-drawer
 
 
 
@@ -10,6 +10,7 @@
 | Property | Attribute | Description | Type                                                                                                                                         | Default |
 | -------- | --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `isEdit` | `is-edit` |             | `boolean`                                                                                                                                    | `false` |
+| `open`   | `open`    |             | `boolean`                                                                                                                                    | `false` |
 | `user`   | --        |             | `{ name: string; note: string; id: number; property_id: number; mobile: string; password: string; phone_prefix: string; username: string; }` | `null`  |
 
 
@@ -18,35 +19,37 @@
 | Event          | Description | Type                |
 | -------------- | ----------- | ------------------- |
 | `closeSideBar` |             | `CustomEvent<null>` |
-| `resetData`    |             | `CustomEvent<null>` |
 
 
 ## Dependencies
 
+### Used by
+
+ - [ir-hk-team](../../ir-hk-team)
+
 ### Depends on
 
-- [ir-title](../../ir-title)
-- [ir-input-text](../../ui/ir-input-text)
-- [ir-phone-input](../../ui/ir-phone-input)
-- [ir-textarea](../../ui/ir-textarea)
-- [ir-password-validator](../../ir-password-validator)
-- [ir-button](../../ui/ir-button)
+- [ir-drawer](../../../ir-drawer)
+- [ir-hk-user-drawer-form](ir-hk-user-drawer-form)
+- [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-hk-user --> ir-title
-  ir-hk-user --> ir-input-text
-  ir-hk-user --> ir-phone-input
-  ir-hk-user --> ir-textarea
-  ir-hk-user --> ir-password-validator
-  ir-hk-user --> ir-button
-  ir-title --> ir-icon
-  ir-phone-input --> ir-combobox
+  ir-hk-user-drawer --> ir-drawer
+  ir-hk-user-drawer --> ir-hk-user-drawer-form
+  ir-hk-user-drawer --> ir-custom-button
+  ir-hk-user-drawer-form --> ir-custom-button
+  ir-hk-user-drawer-form --> ir-validator
+  ir-hk-user-drawer-form --> ir-input
+  ir-hk-user-drawer-form --> ir-password-validator
+  ir-hk-user-drawer-form --> ir-spinner
+  ir-hk-user-drawer-form --> ir-mobile-input
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
-  ir-button --> ir-icons
-  style ir-hk-user fill:#f9f,stroke:#333,stroke-width:4px
+  ir-mobile-input --> ir-input
+  ir-hk-team --> ir-hk-user-drawer
+  style ir-hk-user-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

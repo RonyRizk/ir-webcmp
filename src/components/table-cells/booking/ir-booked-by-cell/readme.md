@@ -7,21 +7,22 @@
 
 ## Properties
 
-| Property               | Attribute                 | Description                                                            | Type                  | Default     |
-| ---------------------- | ------------------------- | ---------------------------------------------------------------------- | --------------------- | ----------- |
-| `cellId`               | `cell-id`                 |                                                                        | `string`              | `undefined` |
-| `clickableGuest`       | `clickable-guest`         | Makes the guest name clickable. Emits `openGuestDetails` when clicked. | `boolean`             | `false`     |
-| `display`              | `display`                 |                                                                        | `"block" \| "inline"` | `'block'`   |
-| `guest`                | --                        | Guest associated with this booking.                                    | `Guest`               | `undefined` |
-| `identifier`           | `identifier`              | Unique identifier for this cell. Used for tooltip scoping.             | `string`              | `undefined` |
-| `label`                | `label`                   |                                                                        | `string`              | `undefined` |
-| `promoKey`             | `promo-key`               | Promo key if a promo/coupon was applied.                               | `string`              | `undefined` |
-| `showLoyaltyIcon`      | `show-loyalty-icon`       | Show loyalty discount icon (pink heart-outline).                       | `boolean`             | `false`     |
-| `showPersons`          | `show-persons`            | Show total persons count (e.g. "3P").                                  | `boolean`             | `false`     |
-| `showPrivateNoteDot`   | `show-private-note-dot`   | Show yellow dot indicating the booking has a private note.             | `boolean`             | `false`     |
-| `showPromoIcon`        | `show-promo-icon`         | Show promo/coupon icon.                                                | `boolean`             | `false`     |
-| `showRepeatGuestBadge` | `show-repeat-guest-badge` | Show pink heart icon if guest has repeated bookings.                   | `boolean`             | `false`     |
-| `totalPersons`         | `total-persons`           | Total number of persons staying (adults + children).                   | `string`              | `undefined` |
+| Property               | Attribute                 | Description                                                                                                  | Type                  | Default     |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- | ----------- |
+| `cellId`               | `cell-id`                 |                                                                                                              | `string`              | `undefined` |
+| `clickableGuest`       | `clickable-guest`         | Makes the guest name clickable. Emits `openGuestDetails` when clicked.                                       | `boolean`             | `false`     |
+| `display`              | `display`                 |                                                                                                              | `"block" \| "inline"` | `'block'`   |
+| `guest`                | --                        | Guest associated with this booking.                                                                          | `Guest`               | `undefined` |
+| `identifier`           | `identifier`              | Unique identifier for this cell. Used for tooltip scoping.                                                   | `string`              | `undefined` |
+| `label`                | `label`                   |                                                                                                              | `string`              | `undefined` |
+| `promoKey`             | `promo-key`               | Promo key if a promo/coupon was applied.                                                                     | `string`              | `undefined` |
+| `showContactIcons`     | `show-contact-icons`      | Show phone and WhatsApp contact icons. When shown, phone links via `tel:` and WhatsApp via `https://wa.me/`. | `boolean`             | `false`     |
+| `showLoyaltyIcon`      | `show-loyalty-icon`       | Show loyalty discount icon (pink heart-outline).                                                             | `boolean`             | `false`     |
+| `showPersons`          | `show-persons`            | Show total persons count (e.g. "3P").                                                                        | `boolean`             | `false`     |
+| `showPrivateNoteDot`   | `show-private-note-dot`   | Show yellow dot indicating the booking has a private note.                                                   | `boolean`             | `false`     |
+| `showPromoIcon`        | `show-promo-icon`         | Show promo/coupon icon.                                                                                      | `boolean`             | `false`     |
+| `showRepeatGuestBadge` | `show-repeat-guest-badge` | Show pink heart icon if guest has repeated bookings.                                                         | `boolean`             | `false`     |
+| `totalPersons`         | `total-persons`           | Total number of persons staying (adults + children).                                                         | `string`              | `undefined` |
 
 
 ## Events

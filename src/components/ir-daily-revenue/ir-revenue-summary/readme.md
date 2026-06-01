@@ -7,11 +7,12 @@
 
 ## Properties
 
-| Property                      | Attribute | Description | Type                                                              | Default     |
-| ----------------------------- | --------- | ----------- | ----------------------------------------------------------------- | ----------- |
-| `groupedPayments`             | --        |             | `Map<string, FolioPayment[]>`                                     | `new Map()` |
-| `paymentEntries`              | --        |             | `{ types: IEntries[]; groups: IEntries[]; methods: IEntries[]; }` | `undefined` |
-| `previousDateGroupedPayments` | --        |             | `Map<string, FolioPayment[]>`                                     | `new Map()` |
+| Property                      | Attribute | Description | Type                                                                      | Default     |
+| ----------------------------- | --------- | ----------- | ------------------------------------------------------------------------- | ----------- |
+| `filters`                     | --        |             | `{ from_date?: string; to_date?: string; date?: string; users: string; }` | `undefined` |
+| `groupedPayments`             | --        |             | `Map<string, FolioPayment[]>`                                             | `new Map()` |
+| `paymentEntries`              | --        |             | `{ types: IEntries[]; groups: IEntries[]; methods: IEntries[]; }`         | `undefined` |
+| `previousDateGroupedPayments` | --        |             | `Map<string, FolioPayment[]>`                                             | `new Map()` |
 
 
 ## Dependencies
