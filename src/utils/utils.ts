@@ -1,9 +1,10 @@
 import moment, { MomentFormatSpecification } from 'moment';
-import IBooking, { ICountry, PhysicalRoomType, PropertyRoomType } from '../models/IBooking';
+import IBooking, { ICountry, PhysicalRoomType, PropertyRoomType, IEntries } from '../models/IBooking';
 import { z } from 'zod';
 import calendarData from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { ROOM_IN_OUT } from '@/models/booking.dto';
+import { GroupedTableEntries } from '@/services/booking-service/types';
 
 export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string, format: string = 'D_M_YYYY'): string {
   const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
@@ -542,3 +543,19 @@ export function getFormSubmitter(e: Event): string {
   const submitter = (e as SubmitEvent).submitter as any | null;
   return submitter.value;
 }
+
+export function groupEntryTablesResult(entries: IEntries[]): GroupedTableEntries {
+    let result: any = {};
+    for (const entry of entries) {
+      if (!entry.TBL_NAME) continue;
+      const key = entry.TBL_NAME.startsWith('_') 
+        ? entry.TBL_NAME.substring(1).toLowerCase() 
+        : entry.TBL_NAME.toLowerCase();
+        
+      if (!result[key]) {
+        result[key] = [];
+      }
+      result[key] = [...result[key], entry];
+    }
+    return result as GroupedTableEntries;
+  }

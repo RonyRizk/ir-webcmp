@@ -22,7 +22,7 @@
 | `inputClass`         | `input-class`          | Custom CSS classes applied to the inner `<wa-input>` element.  You can also target the exposed parts `::part(input)` and `::part(base)` for deeper styling of the native input and container.                                                                                          | `string`                                                                                                            | `undefined` |
 | `inputmode`          | `inputmode`            | Tells the browser what type of data will be entered by the user, allowing it to display the appropriate virtual keyboard on supportive devices.                                                                                                                                        | `"decimal" \| "email" \| "none" \| "numeric" \| "search" \| "tel" \| "text" \| "url"`                               | `undefined` |
 | `label`              | `label`                | The input's label. If you need to display HTML, use the `label` slot instead.                                                                                                                                                                                                          | `string`                                                                                                            | `undefined` |
-| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"email" \| "date" \| "time" \| "price" \| "url"> \| FactoryArg`                                         | `undefined` |
+| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"email" \| "date" \| "price" \| "time" \| "url"> \| FactoryArg`                                         | `undefined` |
 | `max`                | `max`                  | The input's maximum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
 | `maxlength`          | `maxlength`            | The maximum length of input that will be considered valid.                                                                                                                                                                                                                             | `number`                                                                                                            | `undefined` |
 | `min`                | `min`                  | The input's minimum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
@@ -97,6 +97,7 @@ Type: `Promise<void>`
  - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
+ - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
@@ -129,6 +130,7 @@ graph TD;
   ir-date-select --> ir-input
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
+  ir-ghs-candidate-table --> ir-input
   ir-guest-info-form --> ir-input
   ir-hk-operations-card --> ir-input
   ir-hk-user-drawer-form --> ir-input

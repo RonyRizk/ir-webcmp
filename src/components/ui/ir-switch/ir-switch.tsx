@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, h, Watch } from '@stencil/core';
 
 @Component({
   tag: 'ir-switch',
@@ -11,6 +11,13 @@ export class IrSwitch {
    * This is mutable and can be toggled internally.
    */
   @Prop({ mutable: true }) checked = false;
+
+  @Watch('checked')
+  handleCheckedChange(newValue: boolean) {
+    if (this.switchRoot) {
+      this.switchRoot.setAttribute('aria-checked', newValue ? 'true' : 'false');
+    }
+  }
 
   /**
    * Optional ID for the switch.

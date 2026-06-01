@@ -11,7 +11,7 @@
 | --------- | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
 | `booking` | --        |             | `{ currency: Currency; booking_nbr: string; from_date: string; to_date: string; }`                                                                                       | `undefined` |
 | `open`    | `open`    |             | `boolean`                                                                                                                                                                | `undefined` |
-| `service` | --        |             | `{ system_id?: number; cost?: number; description?: string; booking_system_id?: number; currency_id?: number; end_date?: string; start_date?: string; price?: number; }` | `undefined` |
+| `service` | --        |             | `{ system_id?: number; description?: string; currency_id?: number; booking_system_id?: number; cost?: number; end_date?: string; start_date?: string; price?: number; }` | `undefined` |
 
 
 ## Events
