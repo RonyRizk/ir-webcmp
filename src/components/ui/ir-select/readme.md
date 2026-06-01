@@ -61,7 +61,6 @@
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
- - [ir-ghs-filters](../../ir-ghs-onboarding)
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
  - [ir-hk-unassigned-units](../../ir-housekeeping/ir-hk-unassigned-units)
  - [ir-hk-unassigned-units-drawer-form](../../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer/ir-hk-unassigned-units-drawer-form)
@@ -80,7 +79,6 @@ graph TD;
   igl-split-booking --> ir-select
   ir-daily-revenue-filters --> ir-select
   ir-financial-filters --> ir-select
-  ir-ghs-filters --> ir-select
   ir-hk-archive --> ir-select
   ir-hk-unassigned-units --> ir-select
   ir-hk-unassigned-units-drawer-form --> ir-select

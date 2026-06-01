@@ -97,6 +97,7 @@
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-meal-report](../../ir-meal-report)
+ - [ir-meal-report-filters](../../ir-meal-report)
  - [ir-notifications](../../ir-notifications)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
@@ -182,6 +183,7 @@ graph TD;
   ir-invoice --> ir-custom-button
   ir-listing-header --> ir-custom-button
   ir-meal-report --> ir-custom-button
+  ir-meal-report-filters --> ir-custom-button
   ir-notifications --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button

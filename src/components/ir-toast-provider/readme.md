@@ -63,7 +63,6 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [ir-meal-report](../ir-meal-report)
  - [ir-toast](../ui/ir-toast)
 
 ### Depends on
@@ -74,7 +73,6 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   ir-toast-provider --> ir-toast-alert
-  ir-meal-report --> ir-toast-provider
   ir-toast --> ir-toast-provider
   style ir-toast-provider fill:#f9f,stroke:#333,stroke-width:4px
 ```

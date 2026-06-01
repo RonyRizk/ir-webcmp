@@ -20,13 +20,11 @@
 
 ### Used by
 
- - [ir-ghs-filters](../../ir-ghs-onboarding)
  - [ir-hk-team](../../ir-housekeeping/ir-hk-team)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-ghs-filters --> ir-popover
   ir-hk-team --> ir-popover
   style ir-popover fill:#f9f,stroke:#333,stroke-width:4px
 ```
