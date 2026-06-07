@@ -27,12 +27,10 @@
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-departures](../../ir-departures)
  - [ir-financial-actions](../../ir-financial-actions)
- - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../../ir-housekeeping)
  - [ir-login](../../ir-login)
- - [ir-meal-report](../../ir-meal-report)
  - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-queue-manager](../../ir-queue-manager)
@@ -62,12 +60,10 @@ graph TD;
   ir-daily-revenue --> ir-toast
   ir-departures --> ir-toast
   ir-financial-actions --> ir-toast
-  ir-ghs-onboarding --> ir-toast
   ir-guest-info --> ir-toast
   ir-hk-tasks --> ir-toast
   ir-housekeeping --> ir-toast
   ir-login --> ir-toast
-  ir-meal-report --> ir-toast
   ir-monthly-bookings-report --> ir-toast
   ir-payment-option --> ir-toast
   ir-queue-manager --> ir-toast

@@ -1,4 +1,4 @@
-import { Component, Host, Prop, h, Element, Listen } from '@stencil/core';
+import { Component, Host, Prop, h, Element } from '@stencil/core';
 
 @Component({
   tag: 'ir-popover',
@@ -47,54 +47,12 @@ export class IrPopover {
    */
   private popoverTrigger: HTMLElement;
 
-  @Listen('keydown', { target: 'window' })
-  handleKeyDown(ev: KeyboardEvent) {
-    if (ev.key === 'Escape') {
-      this.closePopover();
-    }
-  }
-
-  @Listen('click', { target: 'window' })
-  handleWindowClick(ev: MouseEvent) {
-    if (this.trigger !== 'click') return;
-    
-    const target = ev.target as HTMLElement;
-    
-    // 1. If we clicked the trigger itself, let Bootstrap's native toggle logic handle it.
-    if (this.popoverTrigger && this.popoverTrigger.contains(target)) {
-      return;
-    }
-    
-    // 2. Check if the click was inside any active popover element (usually appended to body).
-    // Bootstrap 4 uses the '.popover' class.
-    const activePopovers = document.querySelectorAll('.popover.show');
-    let clickedInsidePopover = false;
-    activePopovers.forEach(p => {
-      if (p.contains(target)) {
-        clickedInsidePopover = true;
-      }
-    });
-
-    // 3. If we clicked outside both the trigger AND the popover content, hide it.
-    if (!clickedInsidePopover) {
-      this.closePopover();
-    }
-  }
-
   componentDidLoad() {
     if (this.initialized) {
       return;
     }
     this.initializePopover();
   }
-
-  private closePopover() {
-    if (this.popoverTrigger) {
-      // Use jQuery to hide the Bootstrap popover
-      $(this.popoverTrigger).popover('hide');
-    }
-  }
-
   /**
    * Initializes the jQuery popover on the trigger element using configured props.
    */
