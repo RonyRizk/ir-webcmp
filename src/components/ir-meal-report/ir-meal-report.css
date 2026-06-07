@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+.ir-meal-report__container {
+  padding: var(--wa-space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+.ir-meal-report__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ir-meal-report__title {
+  margin-bottom: var(--wa-space-xs);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-report__export-btn {
+  height: 100%;
+}
+
+.ir-meal-report__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  margin-top: var(--wa-space-xs);
+}
+
+@media (min-width: 992px) {
+  .ir-meal-report__layout {
+    flex-direction: row;
+  }
+}
+
+.ir-meal-report__results-card {
+  flex-grow: 1;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--wa-border-radius-m);
+  box-shadow: var(--wa-shadow-s);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ir-meal-report__results-header {
+  display: flex;
+  align-items: center;
+  padding: var(--wa-space-s) var(--wa-space-m);
+  border-bottom: 1px solid var(--wa-color-neutral-200);
+  background: var(--wa-color-neutral-0);
+}
+
+.ir-meal-report__results-title {
+  margin: 0;
+  flex-grow: 1;
+  font-size: var(--wa-font-size-medium);
+  font-weight: var(--wa-font-weight-bold);
+  color: var(--wa-color-neutral-900);
+}
+
+.ir-meal-report__results-subtitle {
+  margin-inline-start: var(--wa-space-xs);
+  font-weight: var(--wa-font-weight-normal);
+  font-size: var(--wa-font-size-small);
+  color: var(--wa-color-neutral-500);
+}
+
+.ir-meal-report__results-body {
+  position: relative;
+  flex-grow: 1;
+  min-height: 400px;
+}
+
+.ir-meal-report__loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 0.5);
+  z-index: 2;
+}
