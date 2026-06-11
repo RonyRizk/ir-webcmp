@@ -1,5 +1,5 @@
 import { Component, h, Prop, Event, EventEmitter } from '@stencil/core';
-import { IPayment } from '@/models/booking.dto';
+import { Booking, IPayment } from '@/models/booking.dto';
 import { HelpDocButton } from '@/components/HelpButton';
 
 @Component({
@@ -9,6 +9,8 @@ import { HelpDocButton } from '@/components/HelpButton';
 })
 export class IrPaymentsFolio {
   @Prop() payments: IPayment[] = [];
+  @Prop() booking: Booking;
+  @Prop() isAddPaymentDisabled: boolean = false;
 
   @Event({ bubbles: true }) addPayment: EventEmitter<void>;
   @Event({ bubbles: true }) editPayment: EventEmitter<IPayment>;
@@ -64,9 +66,8 @@ export class IrPaymentsFolio {
   }
 
   private renderEmptyState() {
-    return <ir-empty-state></ir-empty-state>;
+    return <ir-empty-state showIcon={false}></ir-empty-state>;
   }
-
   render() {
     return (
       <wa-card class=" payments-container">
@@ -74,8 +75,16 @@ export class IrPaymentsFolio {
           <p class="font-size-large p-0 m-0">Guest Folio</p>
           <HelpDocButton message="Help" href="https://help.igloorooms.com/extranet/booking-details/guest-folio" />
         </div>
-        <wa-tooltip for="create-payment">Add Payment</wa-tooltip>
-        <ir-custom-button slot="header-actions" id="create-payment" size="small" variant="neutral" appearance="plain" onClickHandler={this.handleAddPayment}>
+        {!this.isAddPaymentDisabled && <wa-tooltip for="create-payment">Add folio entry</wa-tooltip>}
+        <ir-custom-button
+          disabled={this.isAddPaymentDisabled}
+          slot="header-actions"
+          id="create-payment"
+          size="small"
+          variant="neutral"
+          appearance="plain"
+          onClickHandler={this.handleAddPayment}
+        >
           <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
         </ir-custom-button>
 

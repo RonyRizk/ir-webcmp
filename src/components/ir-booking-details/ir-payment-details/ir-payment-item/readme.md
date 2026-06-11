@@ -35,14 +35,9 @@
 
  - [ir-payments-folio](../ir-payments-folio)
 
-### Depends on
-
-- [ir-custom-button](../../../ui/ir-custom-button)
-
 ### Graph
 ```mermaid
 graph TD;
-  ir-payment-item --> ir-custom-button
   ir-payments-folio --> ir-payment-item
   style ir-payment-item fill:#f9f,stroke:#333,stroke-width:4px
 ```

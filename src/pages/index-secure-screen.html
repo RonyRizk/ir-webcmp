@@ -30,7 +30,8 @@
         const secureScreensEl = document.querySelector("ir-secure-tasks");
         (async () => {
             const ticket = await getToken();
-            secureScreensEl.propertyid = getId();
+            //secureScreensEl.propertyid = getId();
+            secureScreensEl.p = "A35";
             secureScreensEl.ticket = ticket;
         })()
     </script>

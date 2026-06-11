@@ -1,0 +1,97 @@
+@import url('../../assets/webawesome/component/host.css');
+
+:host {
+  display: block;
+  position: relative;
+  width: 794px;
+  min-height: 200px;
+  max-width: 100%;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  border-radius: 2px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+canvas.hidden {
+  visibility: hidden;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(243, 244, 246, 0.7);
+  z-index: 1;
+}
+
+.error-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wa-space-s);
+  color: var(--wa-color-danger-text-loud, #b91c1c);
+  font-size: 0.9rem;
+  padding: var(--wa-space-xl);
+  background: var(--wa-color-neutral-fill-quiet, #f3f4f6);
+  z-index: 1;
+}
+
+.error-state wa-icon {
+  font-size: 2rem;
+}
+
+.pagination {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-s);
+  padding: 0.375rem 0.625rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--wa-color-neutral-border-normal, #d1d5db);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 2;
+}
+
+.page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  color: var(--wa-color-text-normal, #111827);
+  transition: background 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--wa-color-neutral-fill-quiet, #f3f4f6);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-label {
+  font-size: 0.875rem;
+  color: var(--wa-color-text-normal, #111827);
+  min-width: 4rem;
+  text-align: center;
+}

@@ -30,10 +30,14 @@
 
  - [igl-blocked-date-drawer](../igloo-calendar/igl-blocked-date-drawer)
  - [igl-bulk-operations-drawer](../igloo-calendar/igl-bulk-operations/igl-bulk-operations-drawer)
+ - [igl-rate-extender-drawer](../igloo-calendar/igl-rate-extender-drawer)
+ - [igl-split-booking-drawer](../igloo-calendar/igl-split-booking-drawer)
  - [ir-agent-editor-drawer](../ir-agents/ir-agent-editor-drawer)
  - [ir-billing-drawer](../ir-billing/ir-billing-drawer)
  - [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
  - [ir-booking-editor-drawer](../igloo-calendar/ir-booking-editor/ir-booking-editor-drawer)
+ - [ir-booking-pricing-drawer](../ir-booking-details/ir-room/ir-booking-pricing-drawer)
+ - [ir-city-ledger-transaction-drawer](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
  - [ir-extra-service-config](../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-guest-info-drawer](../ir-guest-info/ir-guest-info-drawer)
  - [ir-hk-unassigned-units-drawer](../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
@@ -44,6 +48,7 @@
  - [ir-pickup](../ir-booking-details/ir-pickup)
  - [ir-reallocation-drawer](../ir-reallocation-drawer)
  - [ir-room-guests](../ir-booking-details/ir-room-guests)
+ - [ir-test-cmp](../ir-test-cmp)
  - [ir-user-form-panel-drawer](../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
 
 ### Graph
@@ -51,10 +56,14 @@
 graph TD;
   igl-blocked-date-drawer --> ir-drawer
   igl-bulk-operations-drawer --> ir-drawer
+  igl-rate-extender-drawer --> ir-drawer
+  igl-split-booking-drawer --> ir-drawer
   ir-agent-editor-drawer --> ir-drawer
   ir-billing-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-drawer
   ir-booking-editor-drawer --> ir-drawer
+  ir-booking-pricing-drawer --> ir-drawer
+  ir-city-ledger-transaction-drawer --> ir-drawer
   ir-extra-service-config --> ir-drawer
   ir-guest-info-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-drawer
@@ -65,6 +74,7 @@ graph TD;
   ir-pickup --> ir-drawer
   ir-reallocation-drawer --> ir-drawer
   ir-room-guests --> ir-drawer
+  ir-test-cmp --> ir-drawer
   ir-user-form-panel-drawer --> ir-drawer
   style ir-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -31,7 +31,7 @@
  - [ir-print-room](../ir-print-room)
  - [ir-printing-extra-service](../ir-printing-extra-service)
  - [ir-printing-pickup](../ir-printing-pickup)
- - [ir-proforma-invoice-preview](../ir-proforma-invoice-preview)
+ - [ir-proforma-invoice-preview](../previews/ir-proforma-invoice-preview)
 
 ### Graph
 ```mermaid

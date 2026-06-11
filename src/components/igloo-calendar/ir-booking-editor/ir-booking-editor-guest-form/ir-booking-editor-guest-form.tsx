@@ -67,7 +67,8 @@ export class IrBookingEditorGuestForm {
   }
 
   render() {
-    const { bookedByGuest, selects } = booking_store;
+    const { bookedByGuest, selects, bookingDraft } = booking_store;
+    const { agent } = bookingDraft;
     return (
       <Host>
         <section class="booking-editor__form-control">
@@ -110,13 +111,23 @@ export class IrBookingEditorGuestForm {
               ></ir-input>
             </ir-validator>
           </div>
-          <ir-input
-            label="Company name"
-            placeholder="Company name"
-            value={bookedByGuest.company}
-            defaultValue={bookedByGuest.company}
-            onText-change={e => updateBookedByGuest({ company: e.detail })}
-          ></ir-input>
+          {booking_store.bookingDraft.agent ? (
+            <ir-input
+              label="Booking code"
+              placeholder=""
+              value={bookedByGuest.agent_booking_nbr}
+              defaultValue={bookedByGuest.agent_booking_nbr}
+              onText-change={e => updateBookedByGuest({ agent_booking_nbr: e.detail })}
+            ></ir-input>
+          ) : (
+            <ir-input
+              label="Company name"
+              placeholder="Company name"
+              value={bookedByGuest.company}
+              defaultValue={bookedByGuest.company}
+              onText-change={e => updateBookedByGuest({ company: e.detail })}
+            ></ir-input>
+          )}
           <ir-country-picker
             label={locales.entries.Lcz_Country}
             variant="modern"
@@ -136,6 +147,8 @@ export class IrBookingEditorGuestForm {
             countryCode={selects.countries.find(c => c.phone_prefix === bookedByGuest.phone_prefix)?.code}
             countries={selects.countries}
           ></ir-mobile-input>
+        </section>
+        <section class={'booking-editor__form-control'}>
           <wa-select
             size="small"
             label={locales.entries.Lcz_YourArrivalTime}
@@ -151,8 +164,6 @@ export class IrBookingEditorGuestForm {
               </wa-option>
             ))}
           </wa-select>
-        </section>
-        <section class={'booking-editor__form-control'}>
           <wa-textarea
             onchange={event => updateBookedByGuest({ note: (event.target as HTMLTextAreaElement).value })}
             size="small"
@@ -161,71 +172,75 @@ export class IrBookingEditorGuestForm {
             label={locales.entries.Lcz_AnyMessageForUs}
             rows={3}
           ></wa-textarea>
-          {this.paymentMethods.length > 1 && (
-            <wa-select
-              label={'Payment Method'}
-              size="small"
-              defaultValue={booking_store?.selectedPaymentMethod?.code ?? this.paymentMethods[0].code}
-              value={booking_store?.selectedPaymentMethod?.code}
-              onchange={e =>
-                modifyBookingStore('selectedPaymentMethod', {
-                  code: (e.target as HTMLSelectElement).value,
-                })
-              }
-            >
-              {this.paymentMethods.map(p => (
-                <wa-option value={p.code}>{p.description}</wa-option>
-              ))}
-            </wa-select>
-          )}
-          {booking_store.selectedPaymentMethod?.code === '001' && (
+          {(!agent || agent?.payment_mode?.code === '002') && (
             <Fragment>
-              <ir-input
-                value={bookedByGuest.cardNumber}
-                defaultValue={bookedByGuest.cardNumber}
-                onText-change={e => updateBookedByGuest({ cardNumber: e.detail.trim() })}
-                label={locales.entries.Lcz_CardNumber}
-              ></ir-input>
-              <ir-input
-                value={bookedByGuest.cardHolderName}
-                defaultValue={bookedByGuest.cardHolderName}
-                onText-change={e => updateBookedByGuest({ cardHolderName: e.detail.trim() })}
-                label={locales.entries.Lcz_CardHolderName}
-              ></ir-input>
-              <ir-input
-                onText-change={e => {
-                  const [month, year] = e.detail.split('/');
-                  updateBookedByGuest({
-                    expiryMonth: month,
-                    expiryYear: year,
-                  });
-                }}
-                value={this.expiryDate}
-                mask={this.expiryDateMask}
-                label={locales.entries.Lcz_ExpiryDate}
-              ></ir-input>
-            </Fragment>
-          )}
-          {booking_store.selectedPaymentMethod?.code === '005' && (
-            <Fragment>
-              <style>
-                {`p{
+              {this.paymentMethods.length > 1 && (
+                <wa-select
+                  label={'Payment Method'}
+                  size="small"
+                  defaultValue={booking_store?.selectedPaymentMethod?.code ?? this.paymentMethods[0].code}
+                  value={booking_store?.selectedPaymentMethod?.code}
+                  onchange={e =>
+                    modifyBookingStore('selectedPaymentMethod', {
+                      code: (e.target as HTMLSelectElement).value,
+                    })
+                  }
+                >
+                  {this.paymentMethods.map(p => (
+                    <wa-option value={p.code}>{p.description}</wa-option>
+                  ))}
+                </wa-select>
+              )}
+              {booking_store.selectedPaymentMethod?.code === '001' && (
+                <Fragment>
+                  <ir-input
+                    value={bookedByGuest.cardNumber}
+                    defaultValue={bookedByGuest.cardNumber}
+                    onText-change={e => updateBookedByGuest({ cardNumber: e.detail.trim() })}
+                    label={locales.entries.Lcz_CardNumber}
+                  ></ir-input>
+                  <ir-input
+                    value={bookedByGuest.cardHolderName}
+                    defaultValue={bookedByGuest.cardHolderName}
+                    onText-change={e => updateBookedByGuest({ cardHolderName: e.detail.trim() })}
+                    label={locales.entries.Lcz_CardHolderName}
+                  ></ir-input>
+                  <ir-input
+                    onText-change={e => {
+                      const [month, year] = e.detail.split('/');
+                      updateBookedByGuest({
+                        expiryMonth: month,
+                        expiryYear: year,
+                      });
+                    }}
+                    value={this.expiryDate}
+                    mask={this.expiryDateMask}
+                    label={locales.entries.Lcz_ExpiryDate}
+                  ></ir-input>
+                </Fragment>
+              )}
+              {booking_store.selectedPaymentMethod?.code === '005' && (
+                <Fragment>
+                  <style>
+                    {`p{
               margin:0;
               padding:0}`}
-              </style>
-              <div
-                class="booking-editor__payment-info-description"
-                innerHTML={this.paymentMethods.find(p => p.code === '005')?.localizables.find(l => l.language.code.toLowerCase() === 'en')?.description}
-              ></div>
+                  </style>
+                  <div
+                    class="booking-editor__payment-info-description"
+                    innerHTML={this.paymentMethods.find(p => p.code === '005')?.localizables.find(l => l.language.code.toLowerCase() === 'en')?.description}
+                  ></div>
+                </Fragment>
+              )}
+              <wa-checkbox
+                defaultChecked={bookedByGuest.emailGuest}
+                checked={bookedByGuest.emailGuest}
+                onchange={event => updateBookedByGuest({ emailGuest: (event.target as HTMLInputElement).checked })}
+              >
+                {locales.entries.Lcz_EmailTheGuest}
+              </wa-checkbox>
             </Fragment>
           )}
-          <wa-checkbox
-            defaultChecked={bookedByGuest.emailGuest}
-            checked={bookedByGuest.emailGuest}
-            onchange={event => updateBookedByGuest({ emailGuest: (event.target as HTMLInputElement).checked })}
-          >
-            {locales.entries.Lcz_EmailTheGuest}
-          </wa-checkbox>
         </section>
       </Host>
     );

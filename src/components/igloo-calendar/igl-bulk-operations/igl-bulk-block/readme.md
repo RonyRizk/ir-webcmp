@@ -33,14 +33,15 @@
 ### Depends on
 
 - [ir-custom-button](../../../ui/ir-custom-button)
-- [ir-custom-date-picker](../../../ir-custom-date-picker)
+- [ir-date-select](../../../ui/date-picker/ir-date-select)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-bulk-block --> ir-custom-button
-  igl-bulk-block --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-bulk-block --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-bulk-operations --> igl-bulk-block
   igl-bulk-operations-drawer --> igl-bulk-block
   style igl-bulk-block fill:#f9f,stroke:#333,stroke-width:4px

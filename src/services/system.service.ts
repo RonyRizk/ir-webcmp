@@ -1,3 +1,4 @@
+import { ICurrency } from '@/models/property';
 import axios from 'axios';
 
 export class SystemService {
@@ -18,5 +19,12 @@ export class SystemService {
   public async checkOTPNecessity(params: { METHOD_NAME: string }) {
     const { data } = await axios.post('/Check_OTP_Necessity', params);
     return data;
+  }
+  public async getExposedCurrencies(): Promise<ICurrency[]> {
+    const { data } = await axios.post('https://gateway.igloorooms.com/IRBE/Get_Exposed_Currencies', {});
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
   }
 }

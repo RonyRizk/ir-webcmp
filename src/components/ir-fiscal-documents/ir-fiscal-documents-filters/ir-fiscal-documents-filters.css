@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Filter bar — mobile-first
+   ───────────────────────────────────────────────────────────
+   Base (<640px) : every control stacks full-width.
+   sm  (≥640px)  : controls pack into wrapping rows.
+   lg  (≥1024px) : the control group collapses to one row.
+   xl  (≥1280px) : date range joins that row (full single line).
+   ═══════════════════════════════════════════════════════════ */
+.filters-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+/* ── Date range ───────────────────────────────────────────── */
+.filters-bar__dates {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.filters-bar__date_picker {
+  width: 100%;
+}
+
+/* ── Everything-else group (selects + switch + selector + search) ── */
+.filters-bar__search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* ── Document type + Folio type + Taxes switch ────────────── */
+.filters-bar__type-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* Selects sit side-by-side when they fit, stack when they don't. */
+.filters-bar__status-select {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.filters-bar__tax-switch {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.filters-bar__proforma-switch {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ── Folio-scoped selector (agent autocomplete / guest picker) ── */
+.filters-bar__folio-select {
+  width: 100%;
+}
+
+/* ── Search input + submit button (always paired on one row) ── */
+.filters-bar__search-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.filters-bar__search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.filters-bar__search-submit {
+  flex: 0 0 auto;
+}
+
+.filters-bar__search-icon {
+  font-size: 0.875rem;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  flex-shrink: 0;
+}
+
+/* ── sm ≥640px : controls pack into wrapping rows ─────────── */
+@media (min-width: 640px) {
+  .filters-bar__search-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* type-group shrinks back to content width and flows with the rest */
+  .filters-bar__type-group {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  /* wider than folio's status-select to fit "All Document Types" */
+  .filters-bar__status-select {
+    flex: 0 1 180px;
+    min-width: 160px;
+  }
+
+  .filters-bar__folio-select {
+    flex: 1 1 220px;
+    width: auto;
+  }
+
+  .filters-bar__search-actions {
+    flex: 1 1 260px;
+    width: auto;
+  }
+}
+
+/* ── lg ≥1024px : control group collapses to a single row ─── */
+@media (min-width: 1024px) {
+  .filters-bar__search-group {
+    flex-wrap: nowrap;
+  }
+
+  .filters-bar__type-group {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+
+  .filters-bar__folio-select {
+    flex: 0 1 220px;
+  }
+
+  .filters-bar__search-actions {
+    flex: 1 1 auto;
+    max-width: 320px;
+  }
+}
+
+/* ── xl ≥1280px : date range joins the row (full single line) ── */
+@media (min-width: 1280px) {
+  .filters-bar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .filters-bar__dates {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 280px;
+  }
+
+  .filters-bar__search-group {
+    flex: 1;
+    width: auto;
+  }
+}

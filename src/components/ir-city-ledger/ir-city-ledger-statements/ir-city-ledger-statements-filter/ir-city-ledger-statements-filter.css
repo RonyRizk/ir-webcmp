@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.stmt-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.stmt-filters__left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.stmt-filters__date-picker {
+  width: 100%;
+  min-width: 280px;
+}
+.stmt-filters__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

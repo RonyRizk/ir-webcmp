@@ -1,145 +1,77 @@
 :host {
   --spacing: var(--wa-space-l);
+
   display: block;
+  /* The parent (.tobeAssignedContainer) gives the host height: 100% + overflow-y: auto. */
+  height: 100%;
   color: var(--wa-color-text-normal);
   font-size: var(--wa-font-size-s);
+  text-align: left;
   background-color: var(--wa-color-surface-default);
   border-inline-end: 2px solid var(--wa-color-surface-border);
 }
-.fd-to-be-assigned__title {
-  align-self: center;
+
+/* Layout shell — fills the host height so the body (and its loading state)
+can stretch to full height while the header stays pinned at the top. */
+.tba-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Pinned header + toolbar */
+.tba-panel__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-family: var(--wa-font-family-heading);
+  background-color: var(--wa-color-surface-default);
+}
+
+.tba-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  padding-inline: var(--spacing);
+  padding-block: calc(var(--spacing) / 2);
+  border-bottom: 1px solid var(--wa-color-surface-border);
+  background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
+}
+
+.tba-panel__title {
   flex: 1 1 auto;
-  font-style: inherit;
-  font-variant: inherit;
-  font-stretch: inherit;
-  font-family: inherit;
-  font-optical-sizing: inherit;
-  font-size-adjust: inherit;
-  font-kerning: inherit;
-  font-feature-settings: inherit;
-  font-variation-settings: inherit;
-  font-language-override: inherit;
+  margin: 0;
   font-size: var(--wa-font-size-l);
   font-weight: var(--wa-font-weight-heading);
   line-height: var(--wa-line-height-condensed);
-  margin: 0px;
-  padding: 0;
-  color: var(--wa-color-text-normal, black);
+  font-family: var(--wa-font-family-heading);
+  color: var(--wa-color-text-normal);
 }
-.fd-to-be-assigned__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline-start: var(--spacing);
-  padding-block-end: 0;
-  padding-inline-end: calc(var(--spacing) - var(--wa-form-control-padding-block));
-  padding-block-start: calc(var(--spacing) - var(--wa-form-control-padding-block));
-  border-bottom: 1px solid var(--wa-color-surface-border);
-  padding-bottom: calc(var(--spacing) / 2);
-  box-sizing: border-box;
-  background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
-}
-.fd-to-be-assigned__header-container {
-  position: sticky;
-  top: 0;
-  background-color: var(--wa-color-surface-default);
-  z-index: 1;
-}
-.to-be-assigned__body {
+
+.tba-panel__toolbar {
   padding: var(--spacing);
+  padding-block-end: 0;
 }
-.to-be-assigned__body .scrollabledArea {
+
+/* Body fills the remaining space below the header. */
+.tba-panel__body {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 1rem;
-}
-.custom-dropdown {
-  cursor: pointer;
-  padding: 5px 10px;
-  width: min-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-.dropdown-toggle {
-  all: unset;
-  display: flex;
-  width: max-content;
-  align-items: center;
-  gap: 10px;
-}
-.close_btn_style {
-  padding: 0.4rem;
-}
-.close_btn_style:hover {
-  background-color: #f6f6f6;
-}
-.dropdown-menu {
-  max-height: 250px;
-  overflow-y: auto;
-}
-.tobeAssignedHeader {
-  font-weight: 500;
-  letter-spacing: 0.05rem;
-  font-size: 1.12rem;
-  padding: 0;
-  margin: 0;
-}
-.assignment_header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 5px;
-  margin-bottom: 1rem;
-}
-.dropdown-toggle::after {
-  content: none;
-  display: none;
-}
-.dropdown-toggle .caret-icon {
-  transition: transform 0.2s ease;
-}
-.show .caret-icon {
-  transform: rotate(-180deg);
-}
-.stickyHeader {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  background-color: #ffffff;
-  z-index: 1;
-}
-.pointer {
-  cursor: pointer;
+  padding: var(--spacing);
 }
 
-.dots {
+/* Centered loading state that fills the available height. */
+.tba-panel__loading {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   justify-content: center;
-  margin: 0 3px;
-  padding: 0;
-}
-.dot {
-  width: 5px;
-  height: 5px;
-  margin: 5px 4px 0;
-  background-color: #6b6f82;
-  border-radius: 50%;
-  animation: dotFlashing 1s infinite linear alternate;
-}
-.dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.dot:nth-child(3) {
-  animation-delay: 0.4s;
 }
 
-@keyframes dotFlashing {
-  0% {
-    opacity: 0;
-  }
-  50%,
-  100% {
-    opacity: 1;
-  }
+.tba-panel__empty {
+  margin: 0;
 }

@@ -97,6 +97,7 @@ export class IrBookingListingMobileCard {
           )}
 
           <ir-balance-cell
+            guestFinancial={this.booking.guest_financial}
             display="inline"
             label="Amount"
             bookingNumber={this.booking.booking_nbr}

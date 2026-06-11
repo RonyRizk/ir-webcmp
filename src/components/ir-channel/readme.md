@@ -18,6 +18,10 @@
 
 ## Dependencies
 
+### Used by
+
+ - [ir-secure-tasks](../ir-secure-tasks)
+
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
@@ -53,6 +57,7 @@ graph TD;
   ir-channel-mapping --> ir-button
   ir-channel-mapping --> ir-combobox
   ir-modal --> ir-button
+  ir-secure-tasks --> ir-channel
   style ir-channel fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

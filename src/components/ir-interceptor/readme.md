@@ -35,28 +35,30 @@
  - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-departures](../ir-departures)
  - [ir-financial-actions](../ir-financial-actions)
+ - [ir-ghs-onboarding](../ir-ghs-onboarding)
  - [ir-guest-info](../ir-guest-info)
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../ir-housekeeping)
  - [ir-login](../ir-login)
+ - [ir-meal-report](../ir-meal-report)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
+ - [ir-page](../ui/ir-page)
  - [ir-payment-option](../ir-payment-option)
  - [ir-queue-manager](../ir-queue-manager)
  - [ir-reset-password](../ir-reset-password)
  - [ir-sales-by-channel](../ir-sales-by-channel)
  - [ir-sales-by-country](../ir-sales-by-country)
+ - [ir-tax-service-categories](../ir-tax-service-categories)
  - [ir-unbookable-rooms](../ir-unbookable-rooms)
  - [ir-user-management](../ir-user-management)
 
 ### Depends on
 
-- [ir-spinner](../ui/ir-spinner)
 - [ir-otp-modal](../ir-otp-modal)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -73,16 +75,20 @@ graph TD;
   ir-daily-revenue --> ir-interceptor
   ir-departures --> ir-interceptor
   ir-financial-actions --> ir-interceptor
+  ir-ghs-onboarding --> ir-interceptor
   ir-guest-info --> ir-interceptor
   ir-hk-tasks --> ir-interceptor
   ir-housekeeping --> ir-interceptor
   ir-login --> ir-interceptor
+  ir-meal-report --> ir-interceptor
   ir-monthly-bookings-report --> ir-interceptor
+  ir-page --> ir-interceptor
   ir-payment-option --> ir-interceptor
   ir-queue-manager --> ir-interceptor
   ir-reset-password --> ir-interceptor
   ir-sales-by-channel --> ir-interceptor
   ir-sales-by-country --> ir-interceptor
+  ir-tax-service-categories --> ir-interceptor
   ir-unbookable-rooms --> ir-interceptor
   ir-user-management --> ir-interceptor
   style ir-interceptor fill:#f9f,stroke:#333,stroke-width:4px

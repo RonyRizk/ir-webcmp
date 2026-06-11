@@ -1,8 +1,10 @@
 /* Web Awesome core styles */
 /* @import url('../assets/webawesome/themes/webawesome.css'); */
 @import url('../assets/webawesome/themes/default.css');
+@import url('../common/error.css');
 @import url('../components/ui/ir-dialog/ir-dialog.css');
 @import url('../components/ir-drawer/ir-drawer.css');
+
 /* Place project-wide overrides below. */
 .my-custom-style {
   background: #000;
@@ -11,9 +13,23 @@
 /* body {
   background-color: var(--wa-color-surface-default) !important;
 } */
+:root {
+  --ir-color-muted-background: #f2f3f8;
+  --ir-color-loader: rgba(255, 255, 255, 0.2);
+  --error-border-width: 2px;
+  --ir-color-border-error: var(--wa-color-danger-border-loud);
+}
+.wa-dark {
+  --ir-color-loader: rgba(0, 0, 0, 0.2);
+  --ir-color-muted-background: #12141a;
+}
+body {
+  background-color: var(--ir-color-muted-background) !important;
+}
 html {
   font-size: 14px !important;
 }
+
 /* body {
   background-color: var(---wa-color-surface-default) !important;
   color: var(--wa-color-text-normal) !important;
@@ -63,13 +79,6 @@ html {
 }
 wa-card::part(base) {
   box-sizing: border-box;
-}
-wa-input[aria-invalid='true']::part(base),
-wa-textarea[aria-invalid='true']::part(base),
-wa-select[aria-invalid='true']::part(combobox) {
-  border-color: var(--wa-color-danger-border-loud);
-  outline-color: var(--wa-color-danger-border-loud);
-  border-width: 2px;
 }
 
 /* Shared layout for form controls inside wa-select, wa-input, wa-textarea */
@@ -121,7 +130,17 @@ wa-select[aria-invalid='true']::part(combobox) {
   pointer-events: none;
   z-index: -1;
 }
-
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
 @media print {
   body.ir-preview-dialog-print-mode {
     background: #fff !important;

@@ -37,15 +37,15 @@
 
 - [igl-tba-category-view](igl-tba-category-view)
 - [ir-custom-button](../../ui/ir-custom-button)
+- [ir-spinner](../../ui/ir-spinner)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
+  igl-to-be-assigned --> ir-spinner
   igl-tba-category-view --> igl-tba-booking-view
-  igl-tba-booking-view --> ir-button
-  ir-button --> ir-icons
   igloo-calendar --> igl-to-be-assigned
   style igl-to-be-assigned fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.column-autocomplete__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.column-autocomplete__empty {
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-s);
+}
+.column-autocomplete__list,
+.column-autocomplete__input-container {
+  padding: 1rem;
+}
+.column-autocomplete__input-container {
+  padding-bottom: 0;
+}
+.column-autocomplete__popover::part(body) {
+  padding: 0;
+}

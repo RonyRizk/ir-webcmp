@@ -7,9 +7,9 @@
 
 ## Events
 
-| Event                         | Description | Type                                                                                                                                                    |
-| ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `financialActionsOpenSidebar` |             | `CustomEvent<{ type: "booking"; payload: { bookingNumber: number; }; } \| { type: "payment"; payload: { payment: Payment; bookingNumber: number; }; }>` |
+| Event                         | Description | Type                                                                                                                                                                      |
+| ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `financialActionsOpenSidebar` |             | `CustomEvent<{ type: "booking"; payload: { bookingNumber: number; }; } \| { type: "payment"; payload: { payment: Payment; bookingNumber: number; booking: Booking; }; }>` |
 
 
 ## Dependencies

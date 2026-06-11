@@ -50,13 +50,11 @@ Type: `Promise<void>`
 ### Used by
 
  - [ir-sales-by-channel-filters](../ir-sales-by-channel/ir-sales-by-channel-filters)
- - [ir-test-cmp](../ir-test-cmp)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-sales-by-channel-filters --> ir-m-combobox
-  ir-test-cmp --> ir-m-combobox
   style ir-m-combobox fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

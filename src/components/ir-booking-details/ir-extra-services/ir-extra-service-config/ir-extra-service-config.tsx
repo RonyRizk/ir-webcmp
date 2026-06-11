@@ -1,4 +1,6 @@
 import { Booking, ExtraService } from '@/models/booking.dto';
+import { Agent } from '@/services/agents/type';
+import { IEntries } from '@/models/property';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
@@ -9,8 +11,11 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
   scoped: true,
 })
 export class IrExtraServiceConfig {
-  @Prop() booking: Pick<Booking, 'from_date' | 'to_date' | 'currency' | 'booking_nbr'>;
+  @Prop() booking: Booking;
+  @Prop() agent: Agent;
+  @Prop() svcCategories: IEntries[] = [];
   @Prop() service: ExtraService;
+  @Prop() language: string;
   @Prop({ reflect: true }) open: boolean;
 
   @Event() closeModal: EventEmitter<null>;
@@ -40,12 +45,15 @@ export class IrExtraServiceConfig {
       >
         {this.open && (
           <ir-extra-service-config-form
+            language={this.language ?? 'en'}
+            svcCategories={this.svcCategories}
             onCloseModal={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();
               this.closeDialog();
             }}
             booking={this.booking}
+            agent={this.agent}
             service={this.service}
           ></ir-extra-service-config-form>
         )}

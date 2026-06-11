@@ -1,5 +1,6 @@
 import { Component, h, Prop, State, Event, EventEmitter, Listen } from '@stencil/core';
 import { Booking, IPayment } from '@/models/booking.dto';
+import { Agent } from '@/services/agents/type';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { PaymentService, IPaymentAction } from '@/services/payment.service';
 import locales from '@/stores/locales.store';
@@ -8,6 +9,10 @@ import { Payment, PaymentEntries, PaymentSidebarEvent, PrintScreenOptions } from
 import moment from 'moment';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
+import { IEntries } from '@/models/property';
+import { isAgentMode } from '../functions';
+import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { ClTx } from '@/services/city-ledger/types';
 
 @Component({
   styleUrl: 'ir-payment-details.css',
@@ -19,6 +24,14 @@ export class IrPaymentDetails {
   @Prop() paymentActions: IPaymentAction[];
   @Prop() propertyId: number;
   @Prop() paymentEntries: PaymentEntries;
+  @Prop() language: string = 'en';
+  @Prop() svcCategories: IEntries[];
+  @Prop() isAllServicesAgentOwned: boolean = false;
+  @Prop() agent: Agent;
+  @Prop() folioRows: FolioRow[] = [];
+  @Prop() clLoading: boolean = false;
+  @Prop() clError: string | null = null;
+  @Prop() clTransactions: ClTx[] = [];
 
   @State() confirmModal: boolean = false;
   @State() toBeDeletedItem: IPayment | null = null;
@@ -132,7 +145,7 @@ export class IrPaymentDetails {
       });
       return;
     }
-    const starter = calendar_data?.property?.company?.receipt_prefix ? calendar_data.property.company?.receipt_prefix + '-' : '';
+    const starter = calendar_data.property.company?.receipt_prefix ? calendar_data.property.company?.receipt_prefix + '-' : '';
     const _number = await this.bookingService.getNextValue({ starter: `${starter}${calendar_data.property.aname}` });
     this.openPrintScreen.emit({
       mode: 'receipt',
@@ -215,7 +228,7 @@ export class IrPaymentDetails {
     if (!this.booking.is_direct) {
       return false;
     }
-    if (this.booking.financial.due_amount === 0) {
+    if (this.booking.guest_financial.due_amount === 0) {
       return false;
     }
     if (this.booking.financial.cancelation_penality_as_if_today === 0) {
@@ -237,10 +250,14 @@ export class IrPaymentDetails {
     return [
       <wa-card>
         <ir-payment-summary
+          clTransactions={this.clTransactions}
+          isAllServicesAgentOwned={this.isAllServicesAgentOwned}
+          booking={this.booking}
+          agent={this.agent}
           isBookingCancelled={['003', '004'].includes(this.booking.status.code)}
           totalCost={financial.gross_cost}
           balance={financial.due_amount}
-          collected={this.booking.financial.collected + this.booking.financial.refunds}
+          collected={financial.collected + financial.refunds}
           currency={currency}
         />
         <ir-booking-guarantee booking={this.booking} bookingService={this.bookingService} />
@@ -276,8 +293,20 @@ export class IrPaymentDetails {
           </div>
         )}
       </wa-card>,
+      isAgentMode(this.agent) && (
+        <ir-booking-city-ledger
+          booking={this.booking}
+          language={this.language}
+          svcCategories={this.svcCategories}
+          folioRows={this.folioRows}
+          isLoading={this.clLoading}
+          error={this.clError}
+        ></ir-booking-city-ledger>
+      ),
       <ir-payments-folio
-        payments={financial.payments || []}
+        booking={this.booking}
+        payments={(financial.payments || []).filter(p => !p.is_city_ledger)}
+        isAddPaymentDisabled={this.isAllServicesAgentOwned}
         onAddPayment={() => this.handleAddPayment()}
         onEditPayment={e => this.handleEditPayment(e.detail)}
         onDeletePayment={e => this.handleDeletePayment(e.detail)}

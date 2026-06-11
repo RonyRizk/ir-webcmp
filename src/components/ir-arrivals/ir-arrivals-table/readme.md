@@ -49,7 +49,6 @@ graph TD;
   ir-unit-cell --> ir-unit-tag
   ir-balance-cell --> ir-custom-button
   ir-actions-cell --> ir-custom-button
-  ir-pagination --> ir-select
   ir-pagination --> ir-custom-button
   ir-arrivals --> ir-arrivals-table
   style ir-arrivals-table fill:#f9f,stroke:#333,stroke-width:4px

@@ -16,7 +16,7 @@
 
 ### Used by
 
- - [ir-proforma-invoice-preview](../ir-proforma-invoice-preview)
+ - [ir-proforma-invoice-preview](../previews/ir-proforma-invoice-preview)
 
 ### Depends on
 

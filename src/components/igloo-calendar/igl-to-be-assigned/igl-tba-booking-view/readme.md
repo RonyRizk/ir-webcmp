@@ -35,15 +35,9 @@
 
  - [igl-tba-category-view](../igl-tba-category-view)
 
-### Depends on
-
-- [ir-button](../../../ui/ir-button)
-
 ### Graph
 ```mermaid
 graph TD;
-  igl-tba-booking-view --> ir-button
-  ir-button --> ir-icons
   igl-tba-category-view --> igl-tba-booking-view
   style igl-tba-booking-view fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -50,7 +50,6 @@ graph TD;
   ir-agents --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

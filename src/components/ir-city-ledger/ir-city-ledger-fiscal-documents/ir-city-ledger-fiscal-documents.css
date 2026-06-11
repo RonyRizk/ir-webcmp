@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+/* #region layout */
+.fiscal-documents {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+/* #endregion */

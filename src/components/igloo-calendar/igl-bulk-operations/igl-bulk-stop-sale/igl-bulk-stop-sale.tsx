@@ -37,7 +37,7 @@ export class IglBulkStopSale {
   @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
-  private dateRefs: { from?: HTMLIrDatePickerElement; to?: HTMLIrDatePickerElement }[] = [];
+  private dateRefs: { from?: HTMLIrDateSelectElement; to?: HTMLIrDateSelectElement }[] = [];
   // private allRoomTypes: SelectedRooms[] = [];
   private reloadInterceptor: ReloadInterceptor;
   private minDate = moment().format('YYYY-MM-DD');
@@ -412,12 +412,12 @@ export class IglBulkStopSale {
                   this.dateRefs[i] = {};
                 }
 
-                const fromDateMinDate = i > 0 ? this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate : this.minDate;
+                const fromDateMinDate = i > 0 ? (this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate) : this.minDate;
                 const toDateMinDate = this.dates[i].from ? this.dates[i]?.from.clone()?.format('YYYY-MM-DD') : this.minDate;
                 return (
                   <tr key={`date_${i}`}>
                     <td class="pr-1 pb-1">
-                      <ir-custom-date-picker
+                      <ir-date-select
                         ref={el => {
                           this.dateRefs[i].from = el;
                         }}
@@ -448,10 +448,10 @@ export class IglBulkStopSale {
                             this.dateRefs[index].to.openDatePicker();
                           }
                         }}
-                      ></ir-custom-date-picker>
+                      ></ir-date-select>
                     </td>
                     <td class="pr-1 pb-1">
-                      <ir-custom-date-picker
+                      <ir-date-select
                         forceDestroyOnUpdate
                         disabled={!d.from}
                         ref={el => {
@@ -480,7 +480,7 @@ export class IglBulkStopSale {
                             this.dateRefs[index].to.openDatePicker();
                           }
                         }}
-                      ></ir-custom-date-picker>
+                      ></ir-date-select>
                     </td>
                     {i > 0 && (
                       <td class="pb-1">

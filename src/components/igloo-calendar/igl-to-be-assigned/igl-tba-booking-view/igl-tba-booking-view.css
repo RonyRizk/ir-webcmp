@@ -1,74 +1,113 @@
 :host {
   display: block;
+  margin-top: 1rem;
 }
 
-.guestTitle {
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* ---------------------------------------------------------------------------
+   Mobile-first base styles. Larger-screen overrides live in the media
+   queries at the bottom of this file.
+   --------------------------------------------------------------------------- */
+
+.tba {
+  --spacing: 0.5rem;
+  /* background-color: #ececec; */
+}
+
+/* Body lays its rows out vertically with consistent spacing. */
+.tba::part(body) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Guest title / header ----------------------------------------------------- */
+.tba__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
   white-space: nowrap;
-  padding: 2px;
-  margin-bottom: 5px;
-  margin-top: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  /* margin-bottom: 5px; */
+  cursor: pointer;
+  --space-y: 0.1rem;
+  padding-top: var(--space-y);
+  padding-bottom: var(--space-y);
 }
-
-.guestTitle.selectedOrder {
+.tba.--active::part(header) {
+  background-color: var(--wa-color-warning-fill-quiet);
+  color: var(--wa-color-warning-on-quiet);
+}
+.tba__header--active {
   background-color: #f9f9c9;
 }
 
-.pointer {
-  cursor: pointer;
+.tba__booking-number,
+.tba__guest-name,
+.tba__occupancy {
+  margin: 0;
+  padding: 0;
 }
 
-hr {
-  margin-top: 8px;
-  margin-bottom: 0px;
+.tba__separator {
+  flex-shrink: 0;
 }
 
-.bookingContainer {
-  background-color: #ececec;
+.tba__guest-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.actionsContainer {
+/* Actions row: room select + close button ---------------------------------- */
+.tba__actions {
   display: flex;
   align-items: center;
-  padding: 5px !important;
-  width: 100%;
   gap: 16px;
-}
-.room-select {
-  flex: 1;
-}
-.selectContainer {
-  width: 195px;
-  margin-right: 8px;
+  width: 100%;
 }
 
-.buttonsContainer {
-  box-sizing: border-box;
+.tba__select {
+  flex: 1;
+  min-width: 0;
+}
+
+.tba__close {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0;
-  margin: 0;
   gap: 0.5rem;
 }
 
-.booking-guest-title {
+/* Assign buttons ----------------------------------------------------------- */
+.tba__assign {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.guest-booking-number,
-.guest-name,
-.guest-occupancy {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.tba__assign-btn {
+  flex: 1;
 }
-.guest-name {
-  max-width: 120px;
+
+/* sm */
+@media (min-width: 640px) {
+}
+
+/* md */
+@media (min-width: 768px) {
+  .tba__guest-name {
+    max-width: 180px;
+  }
+}
+
+/* lg */
+@media (min-width: 1024px) {
+}
+
+/* xl */
+@media (min-width: 1280px) {
+}
+
+/* 2xl */
+@media (min-width: 1536px) {
 }

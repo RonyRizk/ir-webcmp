@@ -107,9 +107,11 @@ export class IrBookingBillingRecipient {
               </div> */}
             </wa-radio>
           ))}
-          <wa-radio appearance="button" value="company">
-            {this.booking.company_name ? this.booking.company_name : 'Use company name'}
-          </wa-radio>
+          {!this.booking.agent && (
+            <wa-radio appearance="button" value="company">
+              {this.booking.company_name ? this.booking.company_name : 'Use company name'}
+            </wa-radio>
+          )}
         </wa-radio-group>
         <ir-booking-company-dialog
           onCompanyFormClosed={() => {

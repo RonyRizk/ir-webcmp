@@ -278,7 +278,7 @@ export class IrDailyRevenue {
         <ir-sidebar
           sidebarStyles={{
             width: this.sideBarEvent?.type === 'booking' ? '80rem' : 'var(--sidebar-width,40rem)',
-            background: this.sideBarEvent?.type === 'booking' ? '#F2F3F8' : 'white',
+            background: this.sideBarEvent?.type === 'booking' ? 'var(--ir-color-muted-background,#f2f3f8)' : 'white',
           }}
           open={Boolean(this.sideBarEvent)}
           showCloseButton={false}

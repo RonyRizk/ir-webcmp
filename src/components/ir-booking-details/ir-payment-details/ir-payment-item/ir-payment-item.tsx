@@ -61,22 +61,22 @@ export class IrPaymentItem {
                   }
                 }}
               >
-                <ir-custom-button slot="trigger" appearance="plain">
-                  <wa-icon name="ellipsis-vertical"></wa-icon>
-                </ir-custom-button>
+                <wa-button size="small" class="payment-item__action-trigger" slot="trigger" appearance="plain">
+                  <wa-icon name="ellipsis-vertical" class="payment-item__action-trigger-icon"></wa-icon>
+                </wa-button>
 
                 {this.payment.payment_type.code === '001' && (
                   <wa-dropdown-item value="receipt">
-                    <wa-icon name="receipt" slot="icon"></wa-icon>
+                    {/* <wa-icon name="receipt" slot="icon"></wa-icon> */}
                     Print Receipt
                   </wa-dropdown-item>
                 )}
                 <wa-dropdown-item value="edit">
-                  <wa-icon slot="icon" name="edit"></wa-icon>
+                  {/* <wa-icon slot="icon" name="edit"></wa-icon> */}
                   Edit
                 </wa-dropdown-item>
                 <wa-dropdown-item value="delete" variant="danger">
-                  <wa-icon slot="icon" name="trash"></wa-icon>
+                  {/* <wa-icon slot="icon" name="trash"></wa-icon> */}
                   Delete
                 </wa-dropdown-item>
               </wa-dropdown>

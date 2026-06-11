@@ -54,7 +54,6 @@ Type: `Promise<void>`
 
  - [igl-book-property](../../igloo-calendar/igl-book-property)
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
- - [igl-tba-booking-view](../../igloo-calendar/igl-to-be-assigned/igl-tba-booking-view)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-channel](../../ir-channel)
@@ -88,7 +87,6 @@ Type: `Promise<void>`
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
  - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
- - [ir-test-cmp](../../ir-test-cmp)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Depends on
@@ -101,7 +99,6 @@ graph TD;
   ir-button --> ir-icons
   igl-book-property --> ir-button
   igl-split-booking --> ir-button
-  igl-tba-booking-view --> ir-button
   ir-booking-email-logs --> ir-button
   ir-booking-guarantee --> ir-button
   ir-channel --> ir-button
@@ -135,7 +132,6 @@ graph TD;
   ir-sales-filters --> ir-button
   ir-sales-table --> ir-button
   ir-tasks-table-pagination --> ir-button
-  ir-test-cmp --> ir-button
   ir-user-form-panel --> ir-button
   style ir-button fill:#f9f,stroke:#333,stroke-width:4px
 ```

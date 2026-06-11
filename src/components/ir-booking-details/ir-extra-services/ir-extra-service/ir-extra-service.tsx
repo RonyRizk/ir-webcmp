@@ -1,10 +1,15 @@
-import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
-import { ExtraService } from '@/models/booking.dto';
-import { formatAmount } from '@/utils/utils';
+import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import { Booking, ExtraService } from '@/models/booking.dto';
+import { formatAmount, getEntryValue } from '@/utils/utils';
 import locales from '@/stores/locales.store';
 import moment from 'moment';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { isAgentMode } from '../../functions';
+import { IEntries } from '@/models/property';
+import { Agent } from '@/services/agents/type';
+import type { ClTx } from '@/services/city-ledger/types';
+import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 
 @Component({
   tag: 'ir-extra-service',
@@ -13,13 +18,21 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 })
 export class IrExtraService {
   @Prop() service: ExtraService;
+  @Prop() booking: Booking;
+  @Prop() agent: Agent;
   @Prop() bookingNumber: string;
   @Prop() currencySymbol: string;
+  @Prop() language: string = 'en';
+  @Prop() svcCategories: IEntries[];
+  @Prop() clTransactions: ClTx[] = [];
 
   @Event() editExtraService: EventEmitter<ExtraService>;
   @Event() resetBookingEvt: EventEmitter<null>;
 
+  @State() private isToggling = false;
+
   private irModalRef: HTMLIrDialogElement;
+  private toggleDialogRef: HTMLIrAssignmentToggleDialogElement;
   private bookingService = new BookingService();
 
   private async deleteService() {
@@ -35,56 +48,116 @@ export class IrExtraService {
       console.log(error);
     }
   }
+
+  private async toggleServiceAgent() {
+    try {
+      this.isToggling = true;
+      await this.bookingService.doBookingExtraService({
+        service: { ...this.service, agent: this.service.agent ? null : this.booking?.agent },
+        is_remove: false,
+        booking_nbr: this.bookingNumber,
+      });
+      this.toggleDialogRef.closeModal();
+      this.resetBookingEvt.emit(null);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.isToggling = false;
+    }
+  }
+
+  private get description() {
+    const category = this.svcCategories?.find(c => c.CODE_NAME === this.service?.category?.code);
+    if (category) {
+      return (
+        <span>
+          <span>{getEntryValue({ entry: category, language: this.language })}: </span>
+          {this.service.description}
+        </span>
+      );
+    }
+    return this.service.description;
+  }
+
+  private get matchedTx(): ClTx | null {
+    return this.clTransactions.find(tx => tx.REL_ENTITY_KEY === this.service.system_id) ?? null;
+  }
+
   render() {
+    const agentMode = isAgentMode(this.agent);
+    const tx = this.matchedTx;
+    const statusTag = tx ? <ir-cl-status-tag transaction={{ _rowId: '', ...mapClTxToFolioRow(tx), balance: 0 }} size="extra-small"></ir-cl-status-tag> : null;
     return (
       <Host>
-        <div>
-          <div class={'extra-service-container'}>
-            <p class="extra-service-description">{this.service.description}</p>
-            <div class="extra-service-actions">
-              {!!this.service.price && this.service.price > 0 && (
-                <p class="extra-service-price p-0 m-0 font-weight-bold">{formatAmount(this.currencySymbol, this.service.price)}</p>
-              )}
-              <div class="d-flex align-items-center">
-                <wa-tooltip for={`edit-extra-service-${this.service.booking_system_id}`}>Edit service</wa-tooltip>
-                <ir-custom-button
-                  id={`edit-extra-service-${this.service.booking_system_id}`}
-                  onClickHandler={e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    this.editExtraService.emit(this.service);
-                  }}
-                  iconBtn
-                  appearance={'plain'}
-                  variant={'neutral'}
-                >
-                  <wa-icon name="edit" label="Edit" style={{ fontSize: '1rem' }}></wa-icon>
-                </ir-custom-button>
-                <wa-tooltip for={`delete-extra-service-${this.service.booking_system_id}`}>Delete service</wa-tooltip>
-                <ir-custom-button
-                  iconBtn
-                  id={`delete-extra-service-${this.service.booking_system_id}`}
-                  onClickHandler={e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    this.irModalRef.openModal();
-                  }}
-                  appearance={'plain'}
-                  variant={'danger'}
-                >
-                  <wa-icon name="trash-can" label="Edit" style={{ fontSize: '1rem' }}></wa-icon>
-                </ir-custom-button>
+        <div class="es-row">
+          <div class="es-content">
+            <p class="es-description">{this.description}</p>
+            {this.service.start_date ? (
+              <div class="es-date">
+                {/* <wa-icon name="calendar" style={{ fontSize: '0.75rem' }}></wa-icon> */}
+                {this.service.end_date ? (
+                  <ir-date-view from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
+                ) : (
+                  <span>{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')}</span>
+                )}
+                {statusTag}
               </div>
-            </div>
-          </div>
-          <div class="extra-service-conditional-date">
-            {this.service.start_date && this.service.end_date ? (
-              <ir-date-view class="extra-service-date-view mr-1" from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
             ) : (
-              this.service.start_date && <p class="extra-service-date-view">{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')}</p>
+              statusTag
             )}
           </div>
+
+          <div class="es-aside">
+            {!!this.service.price && this.service.price > 0 && (
+              <div class="es-pricing">
+                <p class="es-price">{formatAmount(this.currencySymbol, this.service.price)}</p>
+                {!!this.service.charges?.vat_percent && <p class="es-vat">incl. {this.service.charges.vat_percent}% VAT</p>}
+              </div>
+            )}
+            <wa-dropdown
+              onwa-show={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+              }}
+              onwa-hide={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+              }}
+              onwa-select={e => {
+                switch ((e.detail as any).item.value) {
+                  case 'edit':
+                    this.editExtraService.emit(this.service);
+                    break;
+                  case 'delete':
+                    this.irModalRef.openModal();
+                    break;
+                  case 'toggle':
+                    this.toggleDialogRef.openModal();
+                    break;
+                }
+              }}
+            >
+              <wa-button class="es-action-trigger" slot="trigger" size="small" appearance="plain" id={`actions-room-${this.service.system_id}`} variant="neutral">
+                <wa-icon class="es-action-trigger-icon" label="Actions" name="ellipsis-vertical"></wa-icon>
+              </wa-button>
+              <wa-dropdown-item value="edit">Edit</wa-dropdown-item>
+              {agentMode && <wa-dropdown-item value="toggle">Re-assign to {this.service.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
+              <wa-dropdown-item value="delete" variant="danger">
+                Delete
+              </wa-dropdown-item>
+            </wa-dropdown>
+          </div>
         </div>
+        <ir-assignment-toggle-dialog
+          ref={el => (this.toggleDialogRef = el)}
+          loading={this.isToggling}
+          message={`Switch "${this.service.description}" to ${this.service.agent ? 'guest' : (this.booking?.agent?.name ?? 'agent')}?`}
+          onConfirmToggle={() => this.toggleServiceAgent()}
+        >
+          <span slot="message">
+            Re-assign {this.description} <br /> from {this.service.agent ? 'Agent' : 'Guest'} folio to <b>{this.service.agent ? 'Guest' : 'Agent'} folio</b>.
+          </span>
+        </ir-assignment-toggle-dialog>
         <ir-dialog
           onIrDialogHide={e => {
             e.stopImmediatePropagation();

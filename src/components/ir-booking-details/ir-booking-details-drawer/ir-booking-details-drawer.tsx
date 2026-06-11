@@ -66,8 +66,8 @@ export class IrBookingDetailsDrawer {
         withoutHeader
         open={this.open}
         style={{
-          '--ir-drawer-width': '80rem',
-          '--ir-drawer-background-color': '#F2F3F8',
+          '--ir-drawer-width': '100rem',
+          '--ir-drawer-background-color': 'var(--ir-color-muted-background,#f2f3f8)',
           '--ir-drawer-padding-left': '0',
           '--ir-drawer-padding-right': '0',
           '--ir-drawer-padding-top': '0',

@@ -40,7 +40,7 @@ export class IglBulkBlock {
   @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
-  private dateRefs: { from?: HTMLIrDatePickerElement; to?: HTMLIrDatePickerElement }[] = [];
+  private dateRefs: { from?: HTMLIrDateSelectElement; to?: HTMLIrDateSelectElement }[] = [];
   private reloadInterceptor: ReloadInterceptor;
   private minDate = moment().format('YYYY-MM-DD');
   private bookingService = new BookingService();
@@ -282,7 +282,7 @@ export class IglBulkBlock {
               return (
                 <tr key={`date_${i}`}>
                   <td class="igl-bulk-block__date-cell">
-                    <ir-custom-date-picker
+                    <ir-date-select
                       ref={el => {
                         this.dateRefs[i].from = el;
                       }}
@@ -313,10 +313,10 @@ export class IglBulkBlock {
                           this.dateRefs[index].to.openDatePicker();
                         }
                       }}
-                    ></ir-custom-date-picker>
+                    ></ir-date-select>
                   </td>
                   <td class="igl-bulk-block__date-cell">
-                    <ir-custom-date-picker
+                    <ir-date-select
                       forceDestroyOnUpdate
                       disabled={!d.from}
                       ref={el => {
@@ -346,7 +346,7 @@ export class IglBulkBlock {
                           this.dateRefs[index].to.openDatePicker();
                         }
                       }}
-                    ></ir-custom-date-picker>
+                    ></ir-date-select>
                   </td>
                   {i > 0 && (
                     <td class="igl-bulk-block__date-action-cell">

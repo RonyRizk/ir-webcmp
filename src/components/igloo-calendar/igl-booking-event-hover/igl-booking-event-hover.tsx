@@ -426,6 +426,7 @@ export class IglBookingEventHover {
   }
 
   private getInfoElement() {
+    console.log(this.bookingEvent);
     return (
       <div class={`iglPopOver infoBubble ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
         {this.renderPointer()}
@@ -483,12 +484,25 @@ export class IglBookingEventHover {
             {formatAmount(this.currency.symbol, this.getTotalPrice())}
           </div>
         </div>
-
-        {this.bookingEvent.BALANCE > 1 && (
-          <p class="pr-0 m-0 p-0 text-right balance_amount">
-            {locales.entries.Lcz_Balance}: {formatAmount(this.currency.symbol, this.bookingEvent.BALANCE)}
-          </p>
-        )}
+        <div class="event-hover__origin-row">
+          <span class="event-hover__origin-label">
+            {this.bookingEvent.booking?.agent ? (
+              <span>
+                Agent:{' '}
+                <p class={'truncate p-0 m-0'} style={{ maxWidth: '150px', display: 'inline-flex' }}>
+                  {this.bookingEvent?.booking?.agent?.name} {this.bookingEvent?.booking?.agent?.reference}
+                </p>
+              </span>
+            ) : (
+              this.bookingEvent.origin.Label
+            )}
+          </span>
+          {this.bookingEvent.BALANCE > 1 && (
+            <p class="pr-0 m-0 p-0 text-right balance_amount">
+              {locales.entries.Lcz_Balance}: {formatAmount(this.currency.symbol, this.bookingEvent.BALANCE)}
+            </p>
+          )}
+        </div>
         <div class="row p-0 m-0">
           <div class="px-0 pr-0 col-12">
             <ir-date-view

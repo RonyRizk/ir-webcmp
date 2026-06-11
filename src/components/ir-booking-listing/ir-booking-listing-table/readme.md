@@ -65,7 +65,6 @@ graph TD;
   ir-booking-listing-mobile-card --> ir-arrival-time-cell
   ir-booking-listing-mobile-card --> ir-balance-cell
   ir-booking-listing-mobile-card --> ir-custom-button
-  ir-pagination --> ir-select
   ir-pagination --> ir-custom-button
   ir-booking-listing --> ir-booking-listing-table
   style ir-booking-listing-table fill:#f9f,stroke:#333,stroke-width:4px

@@ -1,4 +1,176 @@
 @import url('../ui/ir-dialog/ir-dialog.css');
+
 :host {
   display: block;
+}
+
+.dialog__loader-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  min-height: 50px;
+}
+
+/* ── Early checkout layout ──────────────────── */
+
+.early-checkout {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.early-checkout ir-input,
+.early-checkout wa-callout,
+.early-checkout wa-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Summary card */
+
+.ec-summary::part(message) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ec-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ec-summary__label {
+  font-size: 0.8125rem;
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+.ec-summary__value {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--wa-color-text-normal, #111827);
+}
+
+.ec-summary__value--accent {
+  color: var(--wa-color-brand-fill-loud, #2563eb);
+  font-weight: 600;
+}
+
+/* Section */
+
+.ec-section {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ec-section__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+/* Nights breakdown */
+
+.ec-nights {
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.ec-nights__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+
+.ec-nights__date {
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+.ec-nights__amount {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-normal, #111827);
+}
+
+.ec-nights__subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--wa-color-text-normal, #111827);
+  background: var(--wa-color-neutral-fill-quiet, #f9fafb);
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+
+/* Penalty */
+
+.ec-penalty__badge {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--wa-color-warning-on-quiet, #92400e);
+}
+
+.ec-penalty__badge--waived {
+  color: var(--wa-color-success-on-quiet, #065f46);
+}
+
+.ec-penalty__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+/* ── Due amount button ──────────────────────── */
+
+.due-amount-btn {
+  all: unset;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: var(--spacing);
+}
+
+.due-amount-btn:focus-visible {
+  outline: 2px solid var(--wa-color-brand-fill-loud);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* ── Footer ─────────────────────────────────── */
+
+.ir-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.ir-dialog__footer > * {
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .ir-dialog__footer {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .ir-dialog__footer > * {
+    flex: 0 0 auto;
+  }
 }

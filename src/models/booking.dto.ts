@@ -4,6 +4,8 @@ import { TSourceOption } from './igl-book-property';
 import { ICountry } from './IBooking';
 import moment from 'moment';
 import { IHouseKeepers } from './housekeeping';
+import { TaxCategory } from '@/services/property.service';
+import { AgentBaseSchema } from '@/services/agents/type';
 
 interface IDType {
   code: string;
@@ -249,13 +251,54 @@ export type BypassedOtaRevisions = {
   date: string;
   revision_type: string;
 };
+
+export const ChargesSchema = z.object({
+  city_tax_amount: z.number(),
+  city_tax_percent: z.number(),
+  net_amount: z.number(),
+  service_charge_amount: z.number(),
+  service_charge_percent: z.number(),
+  tax_amount: z.number(),
+  total_amount: z.number(),
+  vat_amount: z.number(),
+  vat_percent: z.number(),
+});
+
+export type Charges = z.infer<typeof ChargesSchema>;
+export interface FinancialSnapshotEntry {
+  bh_financial_detail_id: number;
+  /** Charge source (0: Accommodation, 1: Pickup, 2: Extra Service) */
+  charge_source: number;
+  city_tax_amount: number;
+  city_tax_percent: number;
+  credit: number;
+  currency_id: number;
+  debit: number;
+  description: string;
+  net_amount: number;
+  rate_plan_id: number;
+  rel_entity: string;
+  room_identifier: string;
+  // system_id
+  rel_entity_key: string;
+  room_type_id: null;
+  service_date: string;
+  tax_amount: number;
+  total_amount: number;
+  vat_amount: number;
+  vat_percent: number;
+}
 export interface Booking {
+  charges: Charges;
+  agent_booking_nbr: string;
   agent: {
     code: string;
     id: number;
     name: string;
     verification_mode: null;
   } | null;
+  agent_financial: IFinancial;
+  guest_financial: IFinancial;
   events: ExposedBookingEvent[];
   company_name: string | null;
   company_tax_nbr: string | null;
@@ -289,22 +332,44 @@ export interface Booking {
   channel_booking_nbr: string | null;
   is_direct: boolean;
   financial: IFinancial;
+  financial_snapshot?: FinancialSnapshot;
   pickup_info: IBookingPickupInfo | null;
   cost: number | null;
   is_pms_enabled: boolean;
   promo_key: string | null;
   is_in_loyalty_mode: boolean;
 }
+export interface FinancialSnapshot {
+  entries: FinancialSnapshotEntry[];
+  total_debit: number;
+}
 
 export const ExtraServiceSchema = z.object({
   booking_system_id: z.number().optional(),
   cost: z.coerce.number().nullable(),
   currency_id: z.number().min(1),
-  description: z.string().min(1),
+  description: z.string().optional().nullable(),
   end_date: z.string().nullable().optional().default(null),
   start_date: z.string().nonempty(),
   price: z.coerce.number().min(0.01),
   system_id: z.number().optional(),
+  category: z.object({ code: z.string().nonempty() }).nullable().optional(),
+  agent: AgentBaseSchema.extend({
+    address: z.string().nullable(),
+    agent_rate_type_code: AgentBaseSchema.shape.agent_rate_type_code.nullable(),
+    agent_type_code: AgentBaseSchema.shape.agent_type_code.nullable(),
+    city: z.string().nullable(),
+    contact_name: z.string().nullable(),
+    email: z.string().email().nullable(),
+    is_active: z.boolean().nullable(),
+    is_send_guest_confirmation_email: z.boolean().nullable(),
+    notes: z.string().nullable(),
+    payment_mode: AgentBaseSchema.shape.payment_mode.nullable(),
+    phone: z.string().nullable(),
+    tax_nbr: z.string().nullable(),
+    cl_post_timing: AgentBaseSchema.shape.cl_post_timing.nullable(),
+  }).nullable(),
+  charges: ChargesSchema.optional(),
 });
 
 export type ExtraService = z.infer<typeof ExtraServiceSchema>;
@@ -316,6 +381,7 @@ export interface IOtaNotes {
   statement: string;
 }
 export interface IBookingPickupInfo {
+  agent: { id: number; name: string; code: string } | null;
   currency: IPickupCurrency;
   date: string;
   details: string;
@@ -324,6 +390,7 @@ export interface IBookingPickupInfo {
   nbr_of_units: number;
   selected_option: IAllowedOptions;
   total: number;
+  charges: Charges;
 }
 export interface IAllowedActions {
   code: string;
@@ -340,7 +407,7 @@ export interface IFinancial {
   gross_cost: number;
   refunds: number;
   invoice_nbr: string;
-  gross_total_with_extras: number;
+  // gross_total_with_extras: number;
 }
 export interface IPayment {
   system_id?: number;
@@ -501,6 +568,7 @@ export interface LinkedPms {
   id: number;
 }
 export interface Property {
+  tax_categories: TaxCategory[];
   address: string;
   adult_child_constraints: Adultchildconstraints;
   affiliates: any[];
@@ -862,9 +930,11 @@ export type RoomInOut = { code: '001' | '002' | '000'; description: string };
 export const ROOM_IN_OUT = {
   CHECKIN: '001',
   CHECKOUT: '002',
-  NOSHOW: '000',
+  IDLE: '000',
 };
 export interface Room {
+  charges: Charges;
+  agent: { id: number; name: string; code: string } | null;
   days: Day[];
   applicable_policies: ExposedApplicablePolicy[];
   from_date: string;
@@ -931,6 +1001,7 @@ export interface Day {
   amount: number;
   date: string;
   cost: number | null;
+  charges?: Charges;
 }
 
 export interface RatePlan {

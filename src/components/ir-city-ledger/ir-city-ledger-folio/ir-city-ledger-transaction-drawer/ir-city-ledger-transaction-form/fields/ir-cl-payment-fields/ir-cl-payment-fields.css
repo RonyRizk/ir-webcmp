@@ -1,0 +1,20 @@
+@import url('../fields.css');
+
+.payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 0.625rem;
+}
+
+.payment-section wa-radio-group {
+  width: 100%;
+}
+
+.payment-section wa-radio-group wa-radio {
+  flex: 1;
+}
+
+.invoice-select {
+  animation: slide-in 0.18s ease;
+}

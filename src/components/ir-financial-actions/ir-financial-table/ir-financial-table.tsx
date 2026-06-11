@@ -61,6 +61,7 @@ export class IrFinancialTable {
                           reference: '',
                         },
                         bookingNumber: 31203720277,
+                        booking: null,
                       },
                     });
                   }}

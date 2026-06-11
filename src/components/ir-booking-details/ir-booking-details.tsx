@@ -1,5 +1,5 @@
-import { Component, Listen, h, Prop, Watch, State, Event, EventEmitter, Element, Fragment } from '@stencil/core';
-import { Booking, ExtraService, Guest, IPmsLog, Room, ROOM_IN_OUT, SharedPerson } from '@/models/booking.dto';
+import { Component, Listen, h, Prop, Watch, State, Event, EventEmitter, Element, Fragment, Host } from '@stencil/core';
+import { Booking, ExtraService, Guest, IPmsLog, SharedPerson } from '@/models/booking.dto';
 import axios from 'axios';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { IglBookPropertyPayloadAddRoom, TIglBookPropertyPayload } from '@/models/igl-book-property';
@@ -11,10 +11,14 @@ import { IPaymentAction, PaymentService } from '@/services/payment.service';
 import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent, PaymentEntries, PrintScreenOptions } from './types';
 import calendar_data from '@/stores/calendar-data';
-// import moment from 'moment';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { buildSplitIndex, SplitIndex } from '@/utils/booking';
-import { canCheckIn, canCheckout } from '@/utils/utils';
+import { AgentsService } from '@/services/agents/agents.service';
+import { Agent } from '@/services/agents/type';
+import { CityLedgerService, type ClTx } from '@/services/city-ledger';
+import { mapClTxToFolioRow, FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { isAgentMode } from './functions';
+import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
 
 @Component({
   tag: 'ir-booking-details',
@@ -22,78 +26,137 @@ import { canCheckIn, canCheckout } from '@/utils/utils';
   scoped: true,
 })
 export class IrBookingDetails {
-  @Element() element: HTMLElement;
-  // Setup Data
-  @Prop() language: string = 'en';
-  @Prop() ticket: string = '';
-  @Prop() bookingNumber: string = '';
-  @Prop() propertyid: number;
-  @Prop() is_from_front_desk = false;
-  @Prop() p: string;
-  // Booleans Conditions
-  @Prop() hasPrint: boolean = false;
-  @Prop() hasReceipt: boolean = false;
-  @Prop() hasDelete: boolean = false;
-  @Prop() hasMenu: boolean = false;
-
-  // Room Booleans
-  @Prop() hasRoomEdit: boolean = false;
-  @Prop() hasRoomDelete: boolean = false;
-  @Prop() hasRoomAdd: boolean = false;
-  @Prop() hasCheckIn: boolean = false;
-  @Prop() hasCheckOut: boolean = false;
-  @Prop() hasCloseButton = false;
-
-  @State() bookingItem: TIglBookPropertyPayload | null = null;
-  @State() statusData = [];
-
-  @State() showPaymentDetails: any;
-  @State() booking: Booking;
-  @State() countries: ICountry[];
-  @State() calendarData: any = {};
-  // Guest Data
-  @State() guestData: Guest = null;
-  // Rerender Flag
-  @State() rerenderFlag = false;
-  @State() sidebarState: BookingDetailsSidebarEvents | null = null;
-  @State() sidebarPayload: any;
-  @State() isUpdateClicked = false;
-
-  @State() pms_status: IPmsLog;
-  @State() isPMSLogLoading: boolean = false;
-  @State() paymentActions: IPaymentAction[];
-  @State() property_id: number;
-  @State() selectedService: ExtraService;
-  @State() bedPreference: IEntries[];
-  @State() roomGuest: any;
-  @State() modalState: { type: 'email' | (string & {}); message: string; loading: boolean } = null;
-  @State() departureTime: IEntries[];
-
-  @State() paymentEntries: PaymentEntries;
-  @State() splitIndex: SplitIndex;
-
-  // Payment Event
-  @Event() toast: EventEmitter<IToast>;
-  @Event() bookingChanged: EventEmitter<Booking>;
-  @Event() closeSidebar: EventEmitter<null>;
-
   private bookingService = new BookingService();
   private roomService = new RoomService();
   private paymentService = new PaymentService();
+  private agentService = new AgentsService();
+  private cityLedgerService = new CityLedgerService();
+  private unsubscribeRealtime: (() => void) | null = null;
+  private clLockingPending = new Map<number, boolean>();
+  private clLockingTimer: ReturnType<typeof setTimeout> | null = null;
+
   private token = new Token();
   private arrivalTime: IEntries[];
+  private svcCategories: IEntries[];
 
   private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2';
   // private printingBaseUrl = 'http://localhost:5863/%1/printing?id=%2';
   private modalRef: HTMLIrDialogElement;
   private paymentFolioRef: HTMLIrPaymentFolioElement;
 
-  componentWillLoad() {
-    if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
-      this.initializeApp();
-    }
-  }
+  @Element() element: HTMLElement;
+
+  @State() bedPreference: IEntries[];
+  @State() booking: Booking;
+  @State() bookingItem: TIglBookPropertyPayload | null = null;
+  @State() calendarData: any = {};
+  @State() countries: ICountry[];
+  @State() departureTime: IEntries[];
+  @State() guestData: Guest = null;
+  @State() isPMSLogLoading: boolean = false;
+  @State() isUpdateClicked = false;
+  @State() modalState: { type: 'email' | (string & {}); message: string; loading: boolean } = null;
+  @State() paymentActions: IPaymentAction[];
+  @State() paymentEntries: PaymentEntries;
+  @State() pms_status: IPmsLog;
+  @State() property_id: number;
+  @State() rerenderFlag = false;
+  @State() roomGuest: any;
+  @State() selectedService: ExtraService;
+  @State() showPaymentDetails: any;
+  @State() sidebarPayload: any;
+  @State() sidebarState: BookingDetailsSidebarEvents | null = null;
+  @State() splitIndex: SplitIndex;
+  @State() statusData = [];
+  @State() agent: Agent;
+  @State() isLoading: boolean = true;
+  @State() folioRows: FolioRow[] = [];
+  @State() rawTransactions: ClTx[] = [];
+  @State() clLoading: boolean = false;
+  @State() clError: string | null = null;
+
+  /**
+   * Booking number used to fetch booking details.
+   */
+  @Prop() bookingNumber: string = '';
+
+  /**
+   * Enables the check-in action in room components.
+   */
+  @Prop() hasCheckIn: boolean = false;
+
+  /**
+   * Enables the check-out action in room components.
+   */
+  @Prop() hasCheckOut: boolean = false;
+
+  /**
+   * Displays the close button in the booking header.
+   */
+  @Prop() hasCloseButton = false;
+
+  /**
+   * Enables the delete booking action.
+   */
+  @Prop() hasDelete: boolean = false;
+
+  /**
+   * Displays the navigation menu button.
+   */
+  @Prop() hasMenu: boolean = false;
+
+  /**
+   * Enables the print booking option.
+   */
+  @Prop() hasPrint: boolean = false;
+
+  /**
+   * Enables the receipt action in the booking header.
+   */
+  @Prop() hasReceipt: boolean = false;
+
+  /**
+   * Allows adding new rooms to the booking.
+   */
+  @Prop() hasRoomAdd: boolean = false;
+
+  /**
+   * Allows deleting rooms from the booking.
+   */
+  @Prop() hasRoomDelete: boolean = false;
+
+  /**
+   * Allows editing existing rooms in the booking.
+   */
+  @Prop() hasRoomEdit: boolean = false;
+
+  /**
+   * Indicates whether the component is rendered from the front desk context.
+   * Disables interceptor and toast rendering when true.
+   */
+  @Prop() is_from_front_desk = false;
+
+  /**
+   * Active language code used for translations and API requests.
+   * Defaults to 'en'.
+   */
+  @Prop() language: string = 'en';
+
+  /**
+   * Property alias or account name used when fetching exposed property data.
+   */
+  @Prop() p: string;
+
+  /**
+   * Property ID used to retrieve property-specific configuration.
+   */
+  @Prop() propertyid: number;
+
+  /**
+   * Authentication token used to initialize the component.
+   * Triggers re-initialization when changed.
+   */
+  @Prop() ticket: string = '';
 
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
@@ -102,6 +165,40 @@ export class IrBookingDetails {
     }
     this.token.setToken(this.ticket);
     this.initializeApp();
+  }
+
+  /**
+   * Emitted whenever the booking object is updated.
+   * Used to notify parent components about booking state changes.
+   */
+  @Event() bookingChanged: EventEmitter<Booking>;
+
+  /**
+   * Emitted when the sidebar should be closed.
+   * Typically triggered by header actions (e.g., close button).
+   */
+  @Event() closeSidebar: EventEmitter<null>;
+
+  /**
+   * Emits toast notifications to the parent context.
+   * Carries toast configuration such as message, type, and duration.
+   */
+  @Event() toast: EventEmitter<IToast>;
+
+  componentWillLoad() {
+    if (this.ticket !== '') {
+      this.token.setToken(this.ticket);
+      this.initializeApp();
+    }
+  }
+
+  disconnectedCallback() {
+    this.unsubscribeRealtime?.();
+    this.unsubscribeRealtime = null;
+    if (this.clLockingTimer !== null) {
+      clearTimeout(this.clLockingTimer);
+      this.clLockingTimer = null;
+    }
   }
 
   @Listen('openSidebar')
@@ -209,11 +306,10 @@ export class IrBookingDetails {
 
   @Listen('resetBookingEvt')
   async handleResetBooking(e: CustomEvent<Booking | null>) {
-    // e.stopPropagation();
-    // e.stopImmediatePropagation();
     if (e.detail) {
       this.booking = e.detail;
       this.splitIndex = buildSplitIndex(this.booking.rooms);
+      await this.loadAgentAndFolio(e.detail);
       return;
     }
     await this.resetBooking();
@@ -229,6 +325,95 @@ export class IrBookingDetails {
     this.openPrintingScreen(e.detail);
   }
 
+  private async fetchCityLedger(booking: Booking = this.booking) {
+    if (!booking?.agent) return;
+    this.clLoading = true;
+    this.clError = null;
+    try {
+      const result = await this.cityLedgerService.fetchCL({
+        AGENCY_ID: booking.agent.id,
+        START_DATE: booking.from_date,
+        END_DATE: booking.to_date,
+        START_ROW: 0,
+        END_ROW: 200,
+        SEARCH_QUERY: booking.booking_nbr,
+      });
+      let runningBalance = 0;
+      this.folioRows = result.My_Cl_tx.map((tx, i) => {
+        runningBalance = runningBalance + tx.DEBIT - tx.CREDIT;
+        return { _rowId: String(i), ...mapClTxToFolioRow(tx), balance: runningBalance };
+      });
+      this.rawTransactions = result.My_Cl_tx;
+    } catch (err) {
+      console.error('[ir-booking-details] fetchCL failed:', err);
+      this.clError = 'Failed to load city ledger.';
+    } finally {
+      this.clLoading = false;
+    }
+  }
+
+  private async loadAgentAndFolio(booking: Booking, propertyId?: number): Promise<void> {
+    this.unsubscribeRealtime?.();
+    this.unsubscribeRealtime = null;
+
+    if (!booking?.agent) {
+      this.agent = null;
+      this.folioRows = [];
+      this.rawTransactions = [];
+      return;
+    }
+    this.agent = await this.agentService.getExposedAgent({ id: booking.agent.id });
+    if (isAgentMode(this.agent)) {
+      await this.fetchCityLedger(booking);
+      const pid = propertyId ?? this.property_id;
+      if (pid) {
+        this.unsubscribeRealtime = realtimeService.subscribe(pid, msg => {
+          this.handleClSocketMessage(msg);
+        });
+      }
+    }
+  }
+
+  private handleClSocketMessage(msg: RealtimeMessage): void {
+    if (msg.reason === 'CL_TX_LOCKING') {
+      const tx = msg.payload;
+      if (tx.TRAVEL_AGENCY_ID !== this.agent?.id) return;
+      // Accumulate — later arrivals for the same ID overwrite earlier ones
+      this.clLockingPending.set(tx.CL_TX_ID, tx.IS_LOCKED);
+      if (this.clLockingTimer !== null) clearTimeout(this.clLockingTimer);
+      this.clLockingTimer = setTimeout(() => {
+        this.clLockingTimer = null;
+        this.applyClLockingUpdates();
+      }, 150);
+    } else if (msg.reason === 'CL_TX_HOLD_TOGGLED') {
+      const { cl_tx_id, agency_id, is_hold } = msg.payload;
+      if (agency_id !== this.agent?.id) return;
+      this.rawTransactions = this.rawTransactions.map(tx => (tx.CL_TX_ID === cl_tx_id ? { ...tx, IS_HOLD: is_hold } : tx));
+      this.folioRows = this.folioRows.map(r =>
+        r._raw.CL_TX_ID === cl_tx_id ? { ...mapClTxToFolioRow({ ...r._raw, IS_HOLD: is_hold }), _rowId: r._rowId, balance: r.balance } : r,
+      );
+    }
+  }
+
+  private applyClLockingUpdates(): void {
+    const pending = this.clLockingPending;
+    this.clLockingPending = new Map();
+    this.rawTransactions = this.rawTransactions.map(tx => {
+      const isLocked = pending.get(tx.CL_TX_ID);
+      return isLocked !== undefined ? { ...tx, IS_LOCKED: isLocked } : tx;
+    });
+    this.folioRows = this.folioRows.map(r => {
+      const isLocked = pending.get(r._raw.CL_TX_ID);
+      if (isLocked === undefined) return r;
+      return { ...mapClTxToFolioRow({ ...r._raw, IS_LOCKED: isLocked }), _rowId: r._rowId, balance: r.balance };
+    });
+  }
+
+  @Listen('clRefreshNeeded')
+  async handleClRefresh() {
+    await this.fetchCityLedger();
+  }
+
   private setRoomsData(roomServiceResp) {
     let roomsData: { [key: string]: any }[] = new Array();
     if (roomServiceResp.My_Result?.roomtypes?.length) {
@@ -239,33 +424,33 @@ export class IrBookingDetails {
     }
     this.calendarData.roomsInfo = roomsData;
   }
-  // private shouldFetchCancellationPenalty(): boolean {
-  //   return this.booking.is_requested_to_cancel || this.booking.status.code === '003';
-  // }
+
   private async initializeApp() {
     try {
+      this.isLoading = true;
       const [roomResponse, languageTexts, countriesList, bookingDetails, setupEntries] = await Promise.all([
         this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
         this.bookingService.getExposedBooking(this.bookingNumber, this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD', '_ARRIVAL_TIME']),
+        this.bookingService.getSetupEntriesByTableNameMulti([
+          '_BED_PREFERENCE_TYPE',
+          '_DEPARTURE_TIME',
+          '_PAY_TYPE',
+          '_PAY_TYPE_GROUP',
+          '_PAY_METHOD',
+          '_ARRIVAL_TIME',
+          '_SVC_CATEGORY',
+        ]),
       ]);
-      this.property_id = roomResponse?.My_Result?.id;
-      const { bed_preference_type, departure_time, pay_type, pay_type_group, pay_method, arrival_time } = this.bookingService.groupEntryTablesResult(setupEntries);
+      const resolvedPropertyId = roomResponse?.My_Result?.id;
+      await this.loadAgentAndFolio(bookingDetails, resolvedPropertyId);
+      this.property_id = resolvedPropertyId;
+      const { bed_preference_type, svc_category, departure_time, pay_type, pay_type_group, pay_method, arrival_time } = this.bookingService.groupEntryTablesResult(setupEntries);
       this.bedPreference = bed_preference_type;
+      this.svcCategories = svc_category;
       this.departureTime = departure_time;
       this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
-      // if (bookingDetails?.booking_nbr && bookingDetails?.currency?.id && bookingDetails.is_direct) {
-      //   this.paymentService
-      //     .GetExposedCancellationDueAmount({
-      //       booking_nbr: bookingDetails.booking_nbr,
-      //       currency_id: bookingDetails.currency.id,
-      //     })
-      //     .then(res => {
-      //       this.paymentActions = res;
-      //     });
-      // }
       this.arrivalTime = arrival_time;
       if (!locales?.entries) {
         locales.entries = languageTexts.entries;
@@ -295,6 +480,8 @@ export class IrBookingDetails {
       this.splitIndex = buildSplitIndex(this.booking.rooms);
     } catch (error) {
       console.error('Error initializing app:', error);
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -350,12 +537,16 @@ export class IrBookingDetails {
 
   private async resetBooking() {
     try {
+      this.isLoading = true;
       const booking = await this.bookingService.getExposedBooking(this.bookingNumber, this.language);
+      this.splitIndex = buildSplitIndex(booking.rooms);
+      await this.loadAgentAndFolio(booking);
       this.booking = { ...booking };
-      this.splitIndex = buildSplitIndex(this.booking.rooms);
       this.bookingChanged.emit(this.booking);
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   }
   private async handleModalConfirm() {
@@ -367,344 +558,194 @@ export class IrBookingDetails {
     this.modalState = null;
     this.modalRef.closeModal();
   }
-
-  private computeRoomGroups(rooms: Room[]) {
-    const indexById = new Map<string, number>();
-    rooms.forEach((room, idx) => indexById.set(room.identifier, idx));
-
-    if (!rooms.length) {
-      return { groups: [], indexById, hasSplitGroups: false };
-    }
-
-    const groupSortKey = (groupRooms: Room[]) => {
-      let min = Number.MAX_SAFE_INTEGER;
-      for (const r of groupRooms) {
-        const ts = Date.parse(r?.from_date ?? '');
-        if (!Number.isNaN(ts)) {
-          min = Math.min(min, ts);
-        }
-      }
-      return min;
-    };
-
-    const splitIndex = this.splitIndex ?? buildSplitIndex(rooms);
-    if (!splitIndex) {
-      const sortedRooms = [...rooms].sort((a, b) => {
-        const diff = Date.parse(a?.from_date ?? '') - Date.parse(b?.from_date ?? '');
-        if (!Number.isNaN(diff) && diff !== 0) {
-          return diff;
-        }
-        return (indexById.get(a.identifier) ?? 0) - (indexById.get(b.identifier) ?? 0);
-      });
-      return { groups: [{ rooms: sortedRooms, order: 0, isSplit: false, sortKey: groupSortKey(sortedRooms) }], indexById, hasSplitGroups: false };
-    }
-
-    const roomsById = new Map<string, Room>(rooms.map(room => [room.identifier, room]));
-    const grouped: { rooms: Room[]; order: number; sortKey: number; isSplit: boolean }[] = [];
-    const visited = new Set<string>();
-
-    for (const head of splitIndex.heads) {
-      const chain = splitIndex.chainOf.get(head) ?? [head];
-      const chainRooms = chain.map(id => roomsById.get(id)).filter((room): room is Room => Boolean(room));
-      if (!chainRooms.length) continue;
-
-      const chainHasSplitLink =
-        chain.some(id => {
-          const parent = splitIndex.parentOf.get(id);
-          const children = splitIndex.childrenOf.get(id) ?? [];
-          return Boolean(parent) || children.length > 0;
-        }) || chainRooms.some(room => Boolean(room?.is_split));
-
-      if (chainHasSplitLink) {
-        chainRooms.forEach(room => visited.add(room.identifier));
-        const order = Math.min(...chainRooms.map(room => indexById.get(room.identifier) ?? Number.MAX_SAFE_INTEGER));
-        grouped.push({ rooms: chainRooms, order, sortKey: groupSortKey(chainRooms), isSplit: true });
-      }
-    }
-
-    for (const room of rooms) {
-      if (!visited.has(room.identifier)) {
-        const order = indexById.get(room.identifier) ?? Number.MAX_SAFE_INTEGER;
-        const singleGroup = [room];
-        grouped.push({ rooms: singleGroup, order, sortKey: groupSortKey(singleGroup), isSplit: false });
-      }
-    }
-
-    grouped.sort((a, b) => {
-      if (a.sortKey !== b.sortKey) {
-        return a.sortKey - b.sortKey;
-      }
-      return a.order - b.order;
-    });
-    const hasSplitGroups = grouped.some(group => group.isSplit);
-
-    if (!hasSplitGroups) {
-      const merged = grouped
-        .map(group => group.rooms)
-        .reduce<Room[]>((acc, curr) => acc.concat(curr), [])
-        .sort((a, b) => {
-          const diff = Date.parse(a?.from_date ?? '') - Date.parse(b?.from_date ?? '');
-          if (!Number.isNaN(diff) && diff !== 0) {
-            return diff;
-          }
-          return (indexById.get(a.identifier) ?? 0) - (indexById.get(b.identifier) ?? 0);
-        });
-      return { groups: [{ rooms: merged, order: 0, sortKey: groupSortKey(merged), isSplit: false }], indexById, hasSplitGroups: false };
-    }
-
-    return { groups: grouped, indexById, hasSplitGroups: true };
-  }
-
-  private renderRoomItem(room: Room, bookingIndex: number, includeDepartureTime: boolean = true) {
-    const showCheckin = this.handleRoomCheckin(room);
-    const showCheckout = this.handleRoomCheckout(room);
-
-    return (
-      <ir-room
-        key={room.identifier}
-        room={room}
-        property_id={this.property_id}
-        language={this.language}
-        departureTime={this.departureTime}
-        bedPreferences={this.bedPreference}
-        isEditable={this.booking.is_editable}
-        legendData={this.calendarData.legendData}
-        roomsInfo={this.calendarData.roomsInfo}
-        myRoomTypeFoodCat={room.roomtype.name}
-        mealCodeName={room.rateplan.short_name}
-        includeDepartureTime={includeDepartureTime}
-        currency={this.booking.currency.symbol}
-        hasRoomEdit={this.hasRoomEdit && this.booking.status.code !== '003' && this.booking.is_direct}
-        hasRoomDelete={this.hasRoomDelete && this.booking.status.code !== '003' && this.booking.is_direct}
-        hasCheckIn={showCheckin}
-        hasCheckOut={showCheckout}
-        booking={this.booking}
-        bookingIndex={bookingIndex}
-        onDeleteFinished={this.handleDeleteFinish}
-      />
-    );
-  }
-
-  private renderRooms() {
-    const rooms = this.booking?.rooms ?? [];
-    if (!rooms.length) {
-      return null;
-    }
-
-    const { groups, indexById, hasSplitGroups } = this.computeRoomGroups(rooms);
-
-    if (!hasSplitGroups) {
-      const groupRooms = groups[0].rooms;
-      return groupRooms.map((room, idx) => (
-        <Fragment>
-          {this.renderRoomItem(room, indexById.get(room.identifier) ?? idx)}
-          {idx < groupRooms.length - 1 ? <wa-divider></wa-divider> : null}
-        </Fragment>
-      ));
-    }
-
-    return (
-      <Fragment>
-        <div class="d-flex flex-column" style={{ gap: '1rem' }}>
-          {groups.map((group, groupIdx) => {
-            const isLastGroup = groupIdx === groups.length - 1;
-            return (
-              <div class={`${isLastGroup ? '' : 'room-group'}`} key={`room-group-${group.order}-${groupIdx}`}>
-                {group.rooms.map((room, roomIdx) => (
-                  <Fragment>
-                    {this.renderRoomItem(room, indexById.get(room.identifier) ?? roomIdx, roomIdx === group.rooms.length - 1)}
-                    {roomIdx < group.rooms.length - 1 ? <wa-divider></wa-divider> : null}
-                  </Fragment>
-                ))}
-                {!isLastGroup && <wa-divider style={{ '--width': '3px' }}></wa-divider>}
-              </div>
-            );
-          })}
-        </div>
-      </Fragment>
-    );
+  private isAllServicesAgentOwned() {
+    const allRoomsHaveAgent = this.booking.rooms.every(r => r.agent !== null);
+    const pickupHasAgent = !this.booking.pickup_info || this.booking.pickup_info.agent !== null;
+    const allExtrasHaveAgent = (this.booking.extra_services ?? []).every(s => s.agent !== null);
+    return allRoomsHaveAgent && pickupHasAgent && allExtrasHaveAgent;
   }
   render() {
-    if (!this.booking) {
+    if (this.isLoading) {
       return (
         <div class={'loading-container'}>
           <ir-spinner></ir-spinner>
         </div>
       );
     }
-    const roomsSection = this.renderRooms();
-    return [
-      <Fragment>
+    const isAllServicesAgentOwned = this.isAllServicesAgentOwned();
+    return (
+      <Host>
         {!this.is_from_front_desk && (
           <Fragment>
             <ir-toast style={{ height: '0' }}></ir-toast>
             <ir-interceptor style={{ height: '0' }}></ir-interceptor>
           </Fragment>
         )}
-      </Fragment>,
-      <ir-booking-header
-        booking={this.booking}
-        hasCloseButton={this.hasCloseButton}
-        hasDelete={this.hasDelete}
-        hasMenu={this.hasMenu}
-        hasPrint={this.hasPrint}
-        hasReceipt={calendar_data.property.is_frontdesk_enabled}
-        hasEmail={['001', '002'].includes(this.booking?.status?.code)}
-      ></ir-booking-header>,
-      <div class="booking-details__booking-info">
-        <div class="booking-details__info-column">
-          <ir-reservation-information arrivalTime={this.arrivalTime} countries={this.countries} booking={this.booking}></ir-reservation-information>
-          <wa-card>
-            <ir-date-view class="booking-details__date-view-header" slot="header" from_date={this.booking.from_date} to_date={this.booking.to_date}></ir-date-view>
-            {this.hasRoomAdd && this.booking.is_editable && (
-              <Fragment>
-                <wa-tooltip for="room-add">Add unit</wa-tooltip>
-                <ir-custom-button slot="header-actions" id="room-add" appearance={'plain'} size={'small'} variant={'neutral'}>
-                  <wa-icon name="plus" style={{ fontSize: '1rem' }} label="Add unit"></wa-icon>
-                </ir-custom-button>
-              </Fragment>
-            )}
 
-            {roomsSection}
-          </wa-card>
-          {/* <ir-ota-services services={this.booking.ota_services}></ir-ota-services> */}
-          <ir-pickup-view booking={this.booking}></ir-pickup-view>
-          <section>
-            <ir-extra-services
-              booking={{ booking_nbr: this.booking.booking_nbr, currency: this.booking.currency, extra_services: this.booking.extra_services }}
-            ></ir-extra-services>
-          </section>
-        </div>
-
-        <ir-payment-details
-          class="booking-details__info-column"
-          propertyId={this.property_id}
-          paymentEntries={this.paymentEntries}
-          paymentActions={this.paymentActions}
+        <ir-booking-header
           booking={this.booking}
-        ></ir-payment-details>
-      </div>,
-      <ir-dialog
-        label="Send Email"
-        onIrDialogHide={e => {
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          this.modalRef.closeModal();
-          this.modalState = null;
-        }}
-        ref={el => (this.modalRef = el)}
-      >
-        <p>{this.modalState?.message}</p>
-        <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
-            {locales.entries.Lcz_Cancel}
-          </ir-custom-button>
-          <ir-custom-button
-            loading={isRequestPending('/Send_Booking_Confirmation_Email')}
-            onClickHandler={e => {
-              e.stopImmediatePropagation();
-              e.stopPropagation();
-              this.handleModalConfirm();
-            }}
-            size="medium"
-            variant="brand"
-          >
-            {locales.entries.Lcz_Confirm}
-          </ir-custom-button>
+          hasCloseButton={this.hasCloseButton}
+          hasDelete={this.hasDelete}
+          hasMenu={this.hasMenu}
+          hasPrint={this.hasPrint}
+          agent={this.agent}
+          folioRows={this.folioRows}
+          hasReceipt={calendar_data.property.is_frontdesk_enabled}
+          hasEmail={['001', '002'].includes(this.booking?.status?.code)}
+        ></ir-booking-header>
+        <div class="booking-details__booking-info">
+          <div class="booking-details__info-column">
+            <ir-reservation-information arrivalTime={this.arrivalTime} countries={this.countries} booking={this.booking}></ir-reservation-information>
+            <ir-booking-rooms
+              booking={this.booking}
+              agent={this.agent}
+              propertyId={this.property_id}
+              language={this.language}
+              departureTime={this.departureTime}
+              bedPreference={this.bedPreference}
+              legendData={this.calendarData.legendData}
+              roomsInfo={this.calendarData.roomsInfo}
+              hasRoomAdd={this.hasRoomAdd}
+              hasRoomEdit={this.hasRoomEdit}
+              hasRoomDelete={this.hasRoomDelete}
+              splitIndex={this.splitIndex}
+              clTransactions={this.rawTransactions}
+              onRoomDeleteFinished={this.handleDeleteFinish}
+            ></ir-booking-rooms>
+            {/* <ir-ota-services services={this.booking.ota_services}></ir-ota-services> */}
+            <section>
+              <ir-extra-services
+                language={this.language}
+                svcCategories={this.svcCategories}
+                booking={this.booking}
+                agent={this.agent}
+                clTransactions={this.rawTransactions}
+              ></ir-extra-services>
+            </section>
+            <ir-pickup-view booking={this.booking} agent={this.agent} clTransactions={this.rawTransactions}></ir-pickup-view>
+          </div>
+
+          <ir-payment-details
+            clTransactions={this.rawTransactions}
+            class="booking-details__info-column"
+            propertyId={this.property_id}
+            paymentEntries={this.paymentEntries}
+            paymentActions={this.paymentActions}
+            booking={this.booking}
+            agent={this.agent}
+            svcCategories={this.svcCategories}
+            isAllServicesAgentOwned={isAllServicesAgentOwned}
+            folioRows={this.folioRows}
+            clLoading={this.clLoading}
+            clError={this.clError}
+          ></ir-payment-details>
         </div>
-      </ir-dialog>,
-      // <ir-sidebar
-      //   open={this.sidebarState === 'room-guest'}
-      //   side={'right'}
-      //   id="editGuestInfo"
-      //   style={{ '--sidebar-width': this.sidebarState === 'room-guest' ? '60rem' : undefined }}
-      //   onIrSidebarToggle={e => {
-      //     e.stopImmediatePropagation();
-      //     e.stopPropagation();
-      //     this.sidebarState = null;
-      //   }}
-      //   showCloseButton={false}
-      // >
-      //   {this.renderSidebarContent()}
-      // </ir-sidebar>,
-      <ir-room-guests
-        open={this.sidebarState === 'room-guest'}
-        countries={this.countries}
-        language={this.language}
-        identifier={this.sidebarPayload?.identifier}
-        bookingNumber={this.booking.booking_nbr}
-        roomName={this.sidebarPayload?.roomName}
-        totalGuests={this.sidebarPayload?.totalGuests}
-        sharedPersons={this.sidebarPayload?.sharing_persons}
-        slot="sidebar-body"
-        checkIn={this.sidebarPayload?.checkin}
-        onCloseModal={() => (this.sidebarState = null)}
-      ></ir-room-guests>,
-      <ir-extra-service-config
-        open={this.sidebarState === 'extra_service'}
-        service={this.selectedService}
-        booking={{ from_date: this.booking.from_date, to_date: this.booking.to_date, booking_nbr: this.booking.booking_nbr, currency: this.booking.currency }}
-        slot="sidebar-body"
-        onCloseModal={e => {
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          this.sidebarState = null;
-          if (this.selectedService) {
-            this.selectedService = null;
-          }
-        }}
-      ></ir-extra-service-config>,
-      <ir-pickup
-        open={this.sidebarState === 'pickup'}
-        bookingDates={{ from: this.booking.from_date, to: this.booking.to_date }}
-        defaultPickupData={this.booking.pickup_info}
-        bookingNumber={this.booking.booking_nbr}
-        numberOfPersons={this.booking.occupancy.adult_nbr + this.booking.occupancy.children_nbr}
-        onCloseModal={() => {
-          this.sidebarState = null;
-        }}
-      ></ir-pickup>,
-      <ir-billing-drawer
-        open={this.sidebarState === 'invoice'}
-        onBillingClose={e => {
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          this.sidebarState = null;
-        }}
-        booking={this.booking}
-      ></ir-billing-drawer>,
-      <ir-guest-info-drawer
-        onGuestInfoDrawerClosed={() => {
-          this.sidebarState = null;
-        }}
-        booking_nbr={this.bookingNumber}
-        email={this.booking?.guest.email}
-        language={this.language}
-        open={this.sidebarState === 'guest'}
-      ></ir-guest-info-drawer>,
-      <ir-payment-folio
-        style={{ height: 'auto' }}
-        bookingNumber={this.booking.booking_nbr}
-        paymentEntries={this.paymentEntries}
-        payment={this.sidebarPayload?.payment}
-        mode={this.sidebarPayload?.mode}
-        ref={el => (this.paymentFolioRef = el)}
-        onCloseModal={() => (this.sidebarState = null)}
-      ></ir-payment-folio>,
-      <Fragment>
-        {/* {this.bookingItem && (
-          <igl-book-property
-            allowedBookingSources={this.calendarData.allowed_booking_sources}
-            adultChildConstraints={this.calendarData.adult_child_constraints}
-            showPaymentDetails={this.showPaymentDetails}
-            countries={this.countries}
-            currency={this.calendarData.currency}
-            language={this.language}
-            propertyid={this.property_id}
-            bookingData={this.bookingItem}
-            onCloseBookingWindow={() => this.handleCloseBookingWindow()}
-          ></igl-book-property>
-        )} */}
+        <ir-dialog
+          label="Send Email"
+          onIrDialogHide={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.modalRef.closeModal();
+            this.modalState = null;
+          }}
+          ref={el => (this.modalRef = el)}
+        >
+          <p>{this.modalState?.message}</p>
+          <div slot="footer" class="ir-dialog__footer">
+            <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
+              {locales.entries.Lcz_Cancel}
+            </ir-custom-button>
+            <ir-custom-button
+              loading={isRequestPending('/Send_Booking_Confirmation_Email')}
+              onClickHandler={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                this.handleModalConfirm();
+              }}
+              size="medium"
+              variant="brand"
+            >
+              {locales.entries.Lcz_Confirm}
+            </ir-custom-button>
+          </div>
+        </ir-dialog>
+        <ir-room-guests
+          open={this.sidebarState === 'room-guest'}
+          countries={this.countries}
+          language={this.language}
+          identifier={this.sidebarPayload?.identifier}
+          bookingNumber={this.booking.booking_nbr}
+          roomName={this.sidebarPayload?.roomName}
+          totalGuests={this.sidebarPayload?.totalGuests}
+          sharedPersons={this.sidebarPayload?.sharing_persons}
+          slot="sidebar-body"
+          checkIn={this.sidebarPayload?.checkin}
+          onCloseModal={() => (this.sidebarState = null)}
+        ></ir-room-guests>
+        <ir-extra-service-config
+          open={this.sidebarState === 'extra_service'}
+          service={this.selectedService}
+          svcCategories={this.svcCategories}
+          language={this.language}
+          booking={this.booking}
+          agent={this.agent}
+          slot="sidebar-body"
+          onCloseModal={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.sidebarState = null;
+            if (this.selectedService) {
+              this.selectedService = null;
+            }
+          }}
+        ></ir-extra-service-config>
+
+        <ir-pickup
+          booking={this.booking}
+          agent={this.agent}
+          open={this.sidebarState === 'pickup'}
+          bookingDates={{ from: this.booking.from_date, to: this.booking.to_date }}
+          defaultPickupData={this.booking.pickup_info}
+          bookingNumber={this.booking.booking_nbr}
+          numberOfPersons={this.booking.occupancy.adult_nbr + this.booking.occupancy.children_nbr}
+          onCloseModal={() => {
+            this.sidebarState = null;
+          }}
+        ></ir-pickup>
+
+        <ir-billing-drawer
+          open={this.sidebarState === 'invoice'}
+          onBillingClose={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.sidebarState = null;
+          }}
+          isAllServicesAgentOwned={isAllServicesAgentOwned}
+          booking={this.booking}
+          agent={this.agent}
+        ></ir-billing-drawer>
+
+        <ir-guest-info-drawer
+          onGuestInfoDrawerClosed={() => {
+            this.sidebarState = null;
+          }}
+          booking_nbr={this.bookingNumber}
+          email={this.booking?.guest.email}
+          language={this.language}
+          open={this.sidebarState === 'guest'}
+        ></ir-guest-info-drawer>
+
+        <ir-payment-folio
+          booking={this.booking}
+          style={{ height: 'auto' }}
+          bookingNumber={this.booking.booking_nbr}
+          paymentEntries={this.paymentEntries}
+          payment={this.sidebarPayload?.payment}
+          mode={this.sidebarPayload?.mode}
+          ref={el => (this.paymentFolioRef = el)}
+          onCloseModal={() => (this.sidebarState = null)}
+        ></ir-payment-folio>
+
         <ir-booking-editor-drawer
           roomTypeIds={(this.bookingItem as any)?.roomsInfo?.map(r => r.id)}
           onBookingEditorClosed={this.handleCloseBookingWindow.bind(this)}
@@ -720,30 +761,7 @@ export class IrBookingDetails {
           checkIn={this.bookingItem?.FROM_DATE}
           checkOut={this.bookingItem?.TO_DATE}
         ></ir-booking-editor-drawer>
-      </Fragment>,
-    ];
-  }
-  private handleRoomCheckout(room: Room): boolean {
-    return canCheckout({ to_date: room.to_date, inOutCode: room.in_out?.code });
-    // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
-    //   return false;
-    // }
-    // return room.in_out.code === '001';
-  }
-  private handleRoomCheckin(room: Room): boolean {
-    return canCheckIn({ from_date: room.from_date, to_date: room.to_date, isCheckedIn: room.in_out?.code === ROOM_IN_OUT.CHECKIN });
-    // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
-    //   return false;
-    // }
-    // if (!room.unit) {
-    //   return false;
-    // }
-    // if (room.in_out && room.in_out.code !== '000') {
-    //   return false;
-    // }
-    // if (moment().isSameOrAfter(moment(room.from_date, 'YYYY-MM-DD'), 'days') && moment().isBefore(moment(room.to_date, 'YYYY-MM-DD'), 'days')) {
-    //   return true;
-    // }
-    // return false;
+      </Host>
+    );
   }
 }

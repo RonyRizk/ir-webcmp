@@ -1,0 +1,163 @@
+@import url('../../../assets/webawesome/utilities/size.css');
+
+:host {
+  display: block;
+}
+
+/* ── Outer container ──────────────────────────────────── */
+.drf-container {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--wa-form-control-height);
+  background-color: var(--wa-form-control-background-color);
+  border-color: var(--wa-form-control-border-color);
+  border-radius: var(--wa-form-control-border-radius);
+  border-style: var(--wa-form-control-border-style);
+  border-width: var(--wa-form-control-border-width);
+  width: 100%;
+  overflow: visible;
+}
+
+:host([aria-invalid='true']) .drf-container {
+  border-color: var(--ir-color-border-error, var(--wa-color-danger-border-loud));
+  outline-color: var(--ir-color-border-error, var(--wa-color-danger-border-loud));
+
+  border-top-width: var(--error-border-width) !important;
+  border-left-width: var(--error-border-width) !important;
+  border-right-width: var(--error-border-width) !important;
+  border-bottom-width: var(--error-border-width) !important;
+}
+
+.drf-container:focus-within {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+}
+
+/* ── Each date field (from / to) ──────────────────────── */
+.drf-field {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.25rem;
+  padding-inline: var(--wa-form-control-padding-inline, 0.75rem);
+  height: 100%;
+  min-width: 0;
+}
+
+/* ── Vertical divider between from and to ─────────────── */
+.drf-divider {
+  display: inline-block;
+  width: 1px;
+  height: 55%;
+  background-color: var(--wa-color-neutral-border-quiet, #e5e7eb);
+  flex-shrink: 0;
+}
+
+/* ── Date text / placeholder button ──────────────────── */
+.drf-text-btn {
+  all: unset;
+  flex: 1;
+  font-size: var(--wa-form-control-value-font-size);
+  font-family: inherit;
+  font-weight: var(--wa-form-control-value-font-weight);
+  color: var(--wa-form-control-value-color, #111827);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  line-height: var(--wa-form-control-value-line-height);
+}
+
+.drf-text-btn--placeholder {
+  color: var(--wa-form-control-placeholder-color);
+
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.drf-text-btn:focus-visible {
+  outline: none;
+}
+
+/* ── Clear (×) button ─────────────────────────────────── */
+.drf-clear-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.75rem;
+  transition: color 0.15s ease;
+}
+
+.drf-clear-btn:hover {
+  color: var(--wa-color-text-normal, #374151);
+}
+
+.drf-clear-btn:focus-visible {
+  outline: var(--wa-focus-ring);
+  border-radius: 50%;
+}
+
+/* ── Calendar icon trigger button ────────────────────── */
+.drf-cal-trigger {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  background-color: var(--wa-color-neutral-fill-quiet, #f0f0f0);
+  cursor: pointer;
+  color: var(--wa-color-text-quiet, #6b7280);
+  transition: background-color 0.15s ease;
+}
+
+.drf-cal-trigger:hover {
+  background-color: var(--wa-color-neutral-fill-normal, #e0e0e0);
+}
+
+.drf-cal-trigger:focus-visible {
+  outline: var(--wa-focus-ring);
+}
+
+/* ── ir-date-select: hide its own input shell ─────────── */
+.drf-date-select::part(input-base) {
+  display: none !important;
+}
+
+/* ── Popup body: calendar + quick actions side-by-side ── */
+.drf-date-select::part(body) {
+  flex-direction: row;
+  gap: 1rem;
+}
+
+/* ── Quick-action preset buttons (inside popup) ───────── */
+.drf-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  width: 200px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}

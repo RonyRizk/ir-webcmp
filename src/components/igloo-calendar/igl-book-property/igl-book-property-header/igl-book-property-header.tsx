@@ -268,7 +268,7 @@ export class IglBookPropertyHeader {
         {this.isEventType('SPLIT_BOOKING') && this.getSplitBookingList()}
         <div class={`fd-book-property__header-container`}>
           {showSourceNode && this.getSourceNode()}
-          <igl-date-range
+          <ir-date-range
             data-testid="date_picker"
             variant="booking"
             dateLabel={locales.entries.Lcz_Dates}
@@ -276,7 +276,7 @@ export class IglBookPropertyHeader {
             minDate={this.getMinDate()}
             disabled={(this.isEventType('BAR_BOOKING') && !this.wasBlockedUnit) || this.isEventType('SPLIT_BOOKING')}
             defaultData={this.bookingDataDefaultDateRange}
-          ></igl-date-range>
+          ></ir-date-range>
 
           {/* <ir-range-picker
             onDateRangeChanged={e => {

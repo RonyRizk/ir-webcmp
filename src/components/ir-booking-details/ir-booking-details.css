@@ -17,10 +17,6 @@
 :host th {
   font-weight: 600;
 }
-.booking-details__date-view-header {
-  font-size: 1.1rem !important;
-}
-
 .booking-details__booking-info {
   display: grid;
   padding: var(--wa-space-m);
@@ -30,6 +26,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--wa-space-l);
+  min-width: 0;
 }
 
 @media (min-width: 890px) {
@@ -44,12 +41,6 @@
   }
 }
 
-.card.room-group {
-  margin-bottom: 1rem !important;
-}
-.card.room-group:last-child {
-  margin-bottom: 1.81rem !important;
-}
 .h-28 {
   height: 2rem;
 }

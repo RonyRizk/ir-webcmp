@@ -1,10 +1,13 @@
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
+import { Agent } from '@/services/agents/type';
 import { Component, Element, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { IAllowedOptions } from '@/models/calendarData';
 import { PickupService } from '../pickup.service';
-import { IBookingPickupInfo } from '@/models/booking.dto';
+import { Booking, IBookingPickupInfo } from '@/models/booking.dto';
 import { TPickupData } from '../types';
+import { IrServiceAssigneeSelectCustomEvent } from '@/components';
+import { isAgentMode } from '../../functions';
 @Component({
   tag: 'ir-pickup-form',
   styleUrl: 'ir-pickup-form.css',
@@ -14,6 +17,8 @@ export class IrPickupForm {
   @Element() el: HTMLElement;
 
   @Prop() formId: string;
+  @Prop() booking!: Booking;
+  @Prop() agent: Agent;
   @Prop() defaultPickupData: IBookingPickupInfo | null;
   @Prop() numberOfPersons: number = 0;
   @Prop() bookingNumber: string;
@@ -21,6 +26,7 @@ export class IrPickupForm {
 
   @State() isLoading = false;
   @State() allowedOptionsByLocation: IAllowedOptions[] = [];
+  @State() assignee: 'agent' | 'guest' = 'guest';
   @State() pickupData: TPickupData = {
     location: -1,
     flight_details: '',
@@ -31,6 +37,7 @@ export class IrPickupForm {
     arrival_time: '',
     arrival_date: null,
     selected_option: undefined,
+    agent: null,
   };
   @State() vehicleCapacity: number[] = [];
   @State() autoValidate = false;
@@ -42,6 +49,7 @@ export class IrPickupForm {
   @Event({ bubbles: true, composed: true }) resetBookingEvt: EventEmitter<null>;
 
   private pickupService = new PickupService();
+
   private pickupSchema: ReturnType<PickupService['createPickupSchema']>;
 
   private get shouldRenderDetails() {
@@ -87,6 +95,9 @@ export class IrPickupForm {
       this.vehicleCapacity = this.pickupService.getNumberOfVehicles(transformedData.selected_option.vehicle.capacity, this.numberOfPersons);
       this.allowedOptionsByLocation = calendar_data.pickup_service.allowed_options.filter(option => option.location.id === transformedData.location);
       this.pickupData = { ...transformedData };
+      this.assignee = transformedData.agent ? 'agent' : 'guest';
+    } else if (isAgentMode(this.agent)) {
+      this.assignee = 'agent';
     }
 
     this.pickupSchema = this.pickupService.createPickupSchema(this.bookingDates.from, this.bookingDates.to, { allowRemoval: this.defaultPickupData !== null });
@@ -201,7 +212,8 @@ export class IrPickupForm {
         }
       }
 
-      await this.pickupService.savePickup(this.pickupData, this.bookingNumber, isRemoval);
+      const agent = this.assignee === 'agent' ? this.booking.agent : null;
+      await this.pickupService.savePickup({ ...this.pickupData, agent }, this.bookingNumber, isRemoval);
       this.resetBookingEvt.emit(null);
       this.closeModal.emit(null);
     } catch (error) {
@@ -252,7 +264,7 @@ export class IrPickupForm {
               valueEvent="dateChanged"
               blurEvent="datePickerBlur blur"
             >
-              <ir-custom-date-picker
+              <ir-date-select
                 date={this.pickupData.arrival_date}
                 minDate={this.bookingDates.from}
                 maxDate={this.bookingDates?.to}
@@ -261,7 +273,7 @@ export class IrPickupForm {
                   this.updatePickupData('arrival_date', evt.detail.start?.format('YYYY-MM-DD') ?? null);
                 }}
                 label={locales.entries.Lcz_ArrivalDate}
-              ></ir-custom-date-picker>
+              ></ir-date-select>
             </ir-validator>
             <ir-validator
               schema={this.pickupSchema.shape.arrival_time}
@@ -348,6 +360,17 @@ export class IrPickupForm {
             >
               <span slot="start">{this.pickupData.currency?.symbol}</span>
             </ir-input>
+            {isAgentMode(this.agent) && (
+              <ir-service-assignee-select
+                agent={this.booking.agent}
+                assigneeType={this.assignee}
+                onAssignmentChange={(e: IrServiceAssigneeSelectCustomEvent<'agent' | 'guest'>) => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  this.assignee = e.detail;
+                }}
+              ></ir-service-assignee-select>
+            )}
           </div>
         )}
       </form>

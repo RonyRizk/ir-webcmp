@@ -151,6 +151,7 @@ export class IrBookingListingTable {
         </td>
         <td class="text-center">
           <ir-balance-cell
+            guestFinancial={booking.guest_financial}
             data-css="center"
             bookingNumber={booking.booking_nbr}
             isDirect={booking.is_direct}
@@ -217,7 +218,7 @@ export class IrBookingListingTable {
                       variant="danger"
                       appearance="outlined"
                     >
-                      Balance
+                      Guest Balance
                     </ir-custom-button>
                   </div>
                 </th>

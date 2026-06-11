@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.toolbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  border-radius: 0.625rem;
+  background: var(--wa-color-surface-default, #fff);
+}
+
+/* Stat strip */
+.toolbar__stats {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.toolbar__stats-placeholder {
+  flex: 1;
+}
+
+.toolbar__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.toolbar__stat-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--wa-color-text-quiet, #6b7280);
+  white-space: nowrap;
+}
+
+.toolbar__stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--wa-color-text-normal, #111827);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.toolbar__stat-value--negative {
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+}
+
+.toolbar__stats-sep {
+  width: 1px;
+  height: 2rem;
+  background: var(--wa-color-neutral-border-quiet, #e5e7eb);
+  flex-shrink: 0;
+}
+
+/* Action buttons */
+.toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}

@@ -29,10 +29,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [igloo-calendar](..)
-
 ### Depends on
 
 - [ir-price-input](../../ui/ir-price-input)
@@ -49,7 +45,6 @@ graph TD;
   ir-room-nights --> ir-button
   ir-title --> ir-icon
   ir-button --> ir-icons
-  igloo-calendar --> ir-room-nights
   style ir-room-nights fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

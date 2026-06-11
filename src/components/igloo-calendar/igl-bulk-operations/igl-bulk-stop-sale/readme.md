@@ -34,15 +34,16 @@
 
 - [ir-weekday-selector](../../../ui/ir-weekday-selector)
 - [ir-custom-button](../../../ui/ir-custom-button)
-- [ir-custom-date-picker](../../../ir-custom-date-picker)
+- [ir-date-select](../../../ui/date-picker/ir-date-select)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-custom-button
-  igl-bulk-stop-sale --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-bulk-stop-sale --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-bulk-operations --> igl-bulk-stop-sale
   igl-bulk-operations-drawer --> igl-bulk-stop-sale
   style igl-bulk-stop-sale fill:#f9f,stroke:#333,stroke-width:4px

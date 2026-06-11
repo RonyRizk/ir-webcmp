@@ -1,243 +1,278 @@
-import { Component, h, Element, Prop, Event, EventEmitter, Host, Watch, Method } from '@stencil/core';
-import moment from 'moment';
+import { ClickOutside } from '@/decorators/ClickOutside';
+import locales from '@/stores/locales.store';
+import { calculateDaysBetweenDates } from '@/utils/booking';
+import { Component, Element, Event, EventEmitter, Method, Prop, State, Watch, h } from '@stencil/core';
+import moment, { Moment } from 'moment';
 
+export type DateRangeChangeEvent = { checkIn: Moment; checkOut: Moment };
+
+/**
+ * @component ir-date-range
+ * @description An accessible, popup-based date-range picker.
+ * Composed of a combobox trigger (ir-input) and a floating calendar panel (ir-custom-date-range).
+ *
+ * @csspart popup      - The `wa-popup` root wrapper.
+ * @csspart anchor     - The trigger wrapper div that holds the combobox.
+ * @csspart combobox   - The clickable/keyboard-accessible control div.
+ * @csspart input      - The read-only `ir-input` element that displays the selected range.
+ * @csspart calendar-icon - The calendar `wa-icon` rendered inside the input start slot.
+ * @csspart nights-badge  - The span showing the number of nights (booking variant only).
+ * @csspart body       - The popup panel that wraps the calendar.
+ * @csspart calendar   - The `ir-custom-date-range` calendar element.
+ *
+ * All CSS parts of `ir-custom-date-range` are re-exported and can be targeted via `::part()` on this host.
+ */
 @Component({
   tag: 'ir-date-range',
   styleUrl: 'ir-date-range.css',
-  scoped: true,
+  shadow: true,
 })
 export class IrDateRange {
-  @Element() private element: HTMLElement;
-  /**
-   * Start date for the date range.
-   */
-  @Prop() fromDate: Date;
+  @Element() el: HTMLIrDateRangeElement;
 
   /**
-   * End date for the date range.
+   * Controls the visual size of the input trigger.
+   * @reflect
    */
-  @Prop() toDate: Date;
+  @Prop({ reflect: true }) size: 'small' | 'medium' | 'large' = 'small';
 
   /**
-   * Single date selection value (used in single date picker mode).
+   * Initial date values. Expects `{ fromDate: string | Date, toDate: string | Date }`.
+   * Re-initializes dates whenever this prop reference changes.
    */
-  @Prop() date: Date;
+  @Prop() defaultData: { [key: string]: any };
 
   /**
-   * Defines which side the calendar opens to.
-   * Options: `'left'`, `'right'`, `'center'`.
+   * When `true`, the picker is disabled and cannot be opened.
+   * @reflect
    */
-  @Prop() opens: 'left' | 'right' | 'center';
+  @Prop({ reflect: true }) disabled: boolean = false;
 
   /**
-   * Whether to apply the selected range automatically without clicking 'Apply'.
+   * ISO date string (YYYY-MM-DD) for the earliest selectable date.
    */
-  @Prop() autoApply: boolean;
+  @Prop() minDate: string;
 
   /**
-   * First day of the week (0 = Sunday, 1 = Monday, ...).
+   * Optional label text shown above the input (forwarded to ir-input).
    */
-  @Prop() firstDay: number = 1;
+  @Prop() dateLabel: string;
 
   /**
-   * Month names shown in the calendar header.
+   * ISO date string (YYYY-MM-DD) for the latest selectable date.
    */
-  @Prop() monthNames: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  @Prop() maxDate: string;
 
   /**
-   * Abbreviated names of the days of the week.
+   * When `true` and `variant="booking"`, a nights badge is shown inside the input.
    */
-  @Prop() daysOfWeek: string[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  @Prop() withDateDifference: boolean = true;
 
   /**
-   * Date format used in the input and picker.
+   * `"booking"` shows the nights badge; `"default"` hides it.
    */
-  @Prop() format: string = 'MMM DD, YYYY';
+  @Prop() variant: 'booking' | 'default' = 'default';
 
   /**
-   * Separator string used between start and end dates.
+   * Optional hint text rendered below the input.
    */
-  @Prop() separator: string = ' - ';
+  @Prop() hint: string;
+
+  /** Whether the calendar popup is open. */
+  @State() private isActive: boolean = false;
+
+  /** Currently selected check-in date. */
+  @State() private fromDate: Date = moment().toDate();
+
+  /** Currently selected check-out date. */
+  @State() private toDate: Date = moment().add(1, 'day').toDate();
+
+  /** Mirrors the `aria-invalid` attribute so the input reflects validity state. */
+  @State() private isInvalid: string;
+
+  /** Computed number of nights between the selected dates. Triggers re-render on change. */
+  @State() private totalNights: number = 0;
 
   /**
-   * Text shown on the Apply button.
+   * Legacy event – emits `{ key, data }` for backward-compatible consumers.
+   * @deprecated Prefer `dateRangeChange`.
    */
-  @Prop() applyLabel: string = 'Apply';
+  @Event() dateSelectEvent: EventEmitter<{ [key: string]: any }>;
 
   /**
-   * Text shown on the Cancel button.
+   * Emits the selected check-in / check-out as Moment objects.
    */
-  @Prop() cancelLabel: string = 'Cancel';
+  @Event({ composed: true, cancelable: true, bubbles: true }) dateRangeChange: EventEmitter<DateRangeChangeEvent>;
 
-  /**
-   * Label for the "From" date input.
-   */
-  @Prop() fromLabel: string = 'Form';
+  /** Fired when the calendar popup opens. */
+  @Event({ composed: true, bubbles: true }) dateRangeShow: EventEmitter<void>;
 
-  /**
-   * Label for the "To" date input.
-   */
-  @Prop() toLabel: string = 'To';
+  /** Fired when the calendar popup closes. */
+  @Event({ composed: true, bubbles: true }) dateRangeHide: EventEmitter<void>;
 
-  /**
-   * Label used for the custom date range option.
-   */
-  @Prop() customRangeLabel: string = 'Custom';
+  private static instanceCounter = 0;
+  private popupId: string;
 
-  /**
-   * Label for the week column in the calendar.
-   */
-  @Prop() weekLabel: string = 'W';
-
-  /**
-   * Disables the date range input when true.
-   */
-  @Prop() disabled: boolean = false;
-
-  /**
-   * Enables single date selection mode.
-   */
-  @Prop() singleDatePicker = false;
-
-  /**
-   * Minimum selectable date.
-   */
-  @Prop() minDate: string | Date;
-
-  /**
-   * Maximum selectable date.
-   */
-  @Prop() maxDate: string | Date;
-
-  /**
-   * Maximum range span (e.g., `{ days: 240 }`).
-   */
-  @Prop() maxSpan: moment.DurationInputArg1 = { days: 240 };
-
-  /**
-   * Emits when a new date range is selected.
-   *
-   * Example:
-   * ```tsx
-   * <ir-date-range onDateChanged={(e) => console.log(e.detail)} />
-   * ```
-   */
-  @Event() dateChanged: EventEmitter<{
-    start: moment.Moment;
-    end: moment.Moment;
-  }>;
-
-  private openDatePickerTimeout: NodeJS.Timeout;
-  private dateRangeInput: HTMLElement;
   componentWillLoad() {
-    if (!document.getElementById('ir-daterangepicker-style')) {
-      const style = document.createElement('style');
-      style.id = 'ir-daterangepicker-style';
-      style.textContent = `
-        .daterangepicker {
-          margin-top: 14px;
-        }
-      `;
-      document.head.appendChild(style);
+    IrDateRange.instanceCounter += 1;
+    this.popupId = `ir-date-range-popup-${IrDateRange.instanceCounter}`;
+    this.initializeDates();
+  }
+
+  /** Re-initializes dates when `defaultData` reference changes. */
+  @Watch('defaultData')
+  handleDataChange(newValue: any, oldValue: any) {
+    if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+      this.initializeDates();
     }
   }
-  componentDidLoad() {
-    this.dateRangeInput = this.element.querySelector('.date-range-input');
-    this.initializeDateRangePicker();
-    this.updateDateRangePickerDates();
+
+  /** Syncs `isInvalid` with the reflected `aria-invalid` attribute. */
+  @Watch('aria-invalid')
+  handleAriaInvalidChange(newValue: string) {
+    this.isInvalid = newValue;
   }
-  disconnectedCallback() {
-    if (this.openDatePickerTimeout) {
-      clearTimeout(this.openDatePickerTimeout);
+
+  private initializeDates() {
+    if (this.defaultData) {
+      if (this.defaultData.fromDate) {
+        this.fromDate = new Date(this.defaultData.fromDate);
+        this.fromDate.setHours(0, 0, 0, 0);
+      }
+      if (this.defaultData.toDate) {
+        this.toDate = new Date(this.defaultData.toDate);
+        this.toDate.setHours(0, 0, 0, 0);
+      }
     }
-    $(this.dateRangeInput).data('daterangepicker').remove();
+    if (this.fromDate && this.toDate) {
+      this.calculateTotalNights();
+    }
   }
-  @Watch('minDate')
-  handleMinDateChange() {
-    $(this.dateRangeInput).data('daterangepicker').remove();
-    this.initializeDateRangePicker();
+
+  private calculateTotalNights() {
+    this.totalNights = calculateDaysBetweenDates(moment(this.fromDate).format('YYYY-MM-DD'), moment(this.toDate).format('YYYY-MM-DD'));
   }
-  @Watch('date')
-  datePropChanged() {
-    this.updateDateRangePickerDates();
+
+  private handleDateSelectEvent(key: string, data: any = '') {
+    this.dateSelectEvent.emit({ key, data });
   }
-  /**
-   * Opens the date picker programmatically.
-   *
-   * Example:
-   * ```ts
-   * const el = document.querySelector('ir-date-range');
-   * await el.openDatePicker();
-   * ```
-   */
+
+  private handleCustomDateChange(evt: CustomEvent<{ start: Date | null; end: Date | null }>) {
+    const { start, end } = evt.detail;
+    if (!start || !end) return;
+
+    this.fromDate = start;
+    this.toDate = end;
+    this.calculateTotalNights();
+
+    const startMoment = moment(start);
+    const endMoment = moment(end);
+
+    this.handleDateSelectEvent('selectedDateRange', {
+      fromDate: start.getTime(),
+      toDate: end.getTime(),
+      fromDateStr: startMoment.format('DD MMM YYYY'),
+      toDateStr: endMoment.format('DD MMM YYYY'),
+      dateDifference: this.totalNights,
+    });
+    this.dateRangeChange.emit({ checkIn: startMoment, checkOut: endMoment });
+
+    this.closeDatePicker();
+  }
+
+  /** Opens the calendar popup. */
   @Method()
   async openDatePicker() {
-    this.openDatePickerTimeout = setTimeout(() => {
-      this.dateRangeInput.click();
-    }, 20);
+    this.isActive = true;
+    this.dateRangeShow.emit();
   }
-  /**
-   * Updates the current dates displayed in the picker
-   * (used when props change externally).
-   */
-  private updateDateRangePickerDates() {
-    const picker = $(this.dateRangeInput).data('daterangepicker');
-    if (!picker) {
-      console.error('Date range picker not initialized.');
-      return;
-    }
 
-    // Adjust how dates are set based on whether it's a single date picker or range picker.
-    if (this.singleDatePicker) {
-      const newDate = this.date ? moment(this.date) : moment();
-      picker.setStartDate(newDate);
-      picker.setEndDate(newDate); // For single date picker, start and end date might be the same.
-    } else {
-      const newStartDate = this.fromDate ? moment(this.fromDate) : moment();
-      const newEndDate = this.toDate ? moment(this.toDate) : newStartDate.clone().add(1, 'days');
-      picker.setStartDate(newStartDate);
-      picker.setEndDate(newEndDate);
+  /** Closes the calendar popup. Also invoked automatically on outside clicks via `@ClickOutside`. */
+  @ClickOutside()
+  @Method()
+  async closeDatePicker() {
+    if (!this.isActive) return;
+    this.isActive = false;
+    this.dateRangeHide.emit();
+  }
+
+  private togglePicker() {
+    this.isActive ? this.closeDatePicker() : this.openDatePicker();
+  }
+
+  private handleKeyDown(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        this.togglePicker();
+        break;
+      case 'Escape':
+        if (this.isActive) {
+          event.preventDefault();
+          this.closeDatePicker();
+        }
+        break;
     }
   }
-  /**
-   * Initializes the date range picker using jQuery plugin with given props.
-   */
-  private initializeDateRangePicker() {
-    $(this.dateRangeInput).daterangepicker(
-      {
-        singleDatePicker: this.singleDatePicker,
-        opens: this.opens,
-        startDate: moment(this.fromDate),
-        endDate: moment(this.toDate),
-        minDate: moment(this.minDate || moment(new Date()).format('YYYY-MM-DD')),
-        maxDate: this.maxDate ? moment(this.maxDate) : undefined,
-        maxSpan: this.maxSpan,
-        autoApply: this.autoApply,
-        locale: {
-          format: this.format,
-          separator: this.separator,
-          applyLabel: this.applyLabel,
-          cancelLabel: this.cancelLabel,
-          fromLabel: this.fromLabel,
-          toLabel: this.toLabel,
-          customRangeLabel: this.customRangeLabel,
-          weekLabel: this.weekLabel,
-          daysOfWeek: this.daysOfWeek,
-          monthNames: this.monthNames,
-          firstDay: this.firstDay,
-        },
-      },
-      (start, end) => {
-        this.dateChanged.emit({ start, end });
-      },
-    );
+
+  private get formattedLabel(): string {
+    const from = moment(this.fromDate).format('MMM DD, YYYY');
+    const to = moment(this.toDate).format('MMM DD, YYYY');
+    return `${from} → ${to}`;
   }
 
   render() {
+    const showNights = this.variant === 'booking' && this.withDateDifference;
     return (
-      <Host>
-        <input class="date-range-input" type="button" disabled={this.disabled} />
-      </Host>
+      <wa-popup part="popup" arrow placement="bottom" flip shift auto-size="vertical" auto-size-padding={10} active={this.isActive} class="igl-date-range__popup">
+        <div slot="anchor" part="anchor" class="igl-date-range__trigger">
+          <div
+            part="combobox"
+            class="igl-date-range__control"
+            role="combobox"
+            tabindex={this.disabled ? -1 : 0}
+            aria-haspopup="dialog"
+            aria-expanded={this.isActive ? 'true' : 'false'}
+            aria-controls={this.popupId}
+            aria-disabled={this.disabled ? 'true' : 'false'}
+            aria-label="Select date range"
+            onClick={!this.disabled ? this.togglePicker.bind(this) : undefined}
+            onKeyDown={!this.disabled ? this.handleKeyDown.bind(this) : undefined}
+          >
+            <ir-input
+              part="input"
+              disabled={this.disabled}
+              class="igl-date-range__input"
+              readonly
+              value={this.formattedLabel}
+              aria-invalid={this.isInvalid}
+              aria-expanded={String(this.isActive)}
+              aria-disabled={this.disabled ? 'true' : undefined}
+            >
+              <wa-icon part="calendar-icon" slot="start" variant="regular" name="calendar"></wa-icon>
+              {showNights && this.totalNights > 0 && (
+                <span part="nights-badge" slot="end" class="igl-date-range__nights">
+                  {this.totalNights} {this.totalNights > 1 ? locales.entries.Lcz_Nights : locales.entries.Lcz_Night}
+                </span>
+              )}
+            </ir-input>
+          </div>
+        </div>
+
+        <div part="body" id={this.popupId} class="igl-date-range__calendar" role="dialog" aria-modal="false" aria-label="Date range selection dialog">
+          <ir-custom-date-range
+            part="calendar"
+            exportparts="base: calendar-base, calendar, calendar-header, month-navigation, nav-prev, nav-next, month-label, weekday-row, weekday, days-grid, week-row, day-cell, day-button"
+            style={{ '--cal-button-size': '35px' }}
+            fromDate={moment(this.fromDate)}
+            toDate={moment(this.toDate)}
+            minDate={this.minDate ? moment(this.minDate) : undefined}
+            maxDate={this.maxDate ? moment(this.maxDate) : undefined}
+            onDateChange={e => this.handleCustomDateChange(e)}
+          ></ir-custom-date-range>
+        </div>
+      </wa-popup>
     );
   }
 }

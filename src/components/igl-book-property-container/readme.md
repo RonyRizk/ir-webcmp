@@ -39,7 +39,6 @@ graph TD;
   igl-book-property-container --> igl-book-property
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -58,10 +57,10 @@ graph TD;
   igl-book-property-header --> ir-picker
   igl-book-property-header --> ir-picker-item
   igl-book-property-header --> ir-validator
-  igl-book-property-header --> igl-date-range
+  igl-book-property-header --> ir-date-range
   igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-input
-  igl-date-range --> ir-custom-date-range
+  ir-date-range --> ir-input
+  ir-date-range --> ir-custom-date-range
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button

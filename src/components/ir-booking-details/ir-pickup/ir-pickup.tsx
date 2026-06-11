@@ -1,6 +1,7 @@
 import locales from '@/stores/locales.store';
+import { Agent } from '@/services/agents/type';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
-import { IBookingPickupInfo } from '@/models/booking.dto';
+import { Booking, IBookingPickupInfo } from '@/models/booking.dto';
 import { v4 } from 'uuid';
 
 @Component({
@@ -9,6 +10,7 @@ import { v4 } from 'uuid';
   scoped: true,
 })
 export class IrPickup {
+  @Prop() booking!: Booking;
   /**
    * Pre-filled pickup information coming from the booking.
    * When provided, the pickup form initializes with this data and
@@ -33,6 +35,7 @@ export class IrPickup {
    * Determines allowed pickup dates and validation rules.
    */
   @Prop() bookingDates: { from: string; to: string };
+  @Prop() agent: Agent;
 
   /**
    * Controls whether the pickup drawer/modal is open.
@@ -74,6 +77,8 @@ export class IrPickup {
       >
         {this.open && (
           <ir-pickup-form
+            booking={this.booking}
+            agent={this.agent}
             onCanSubmitPickupChange={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();

@@ -53,7 +53,6 @@ graph TD;
   ir-booking-editor --> ir-booking-editor-header
   ir-booking-editor --> igl-room-type
   ir-booking-editor --> ir-booking-editor-form
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -62,10 +61,10 @@ graph TD;
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item
-  ir-booking-editor-header --> igl-date-range
+  ir-booking-editor-header --> ir-date-range
   ir-booking-editor-header --> ir-custom-button
-  igl-date-range --> ir-input
-  igl-date-range --> ir-custom-date-range
+  ir-date-range --> ir-input
+  ir-date-range --> ir-custom-date-range
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
@@ -75,6 +74,7 @@ graph TD;
   ir-booking-editor-form --> ir-picker-item
   ir-booking-editor-form --> ir-custom-button
   ir-booking-editor-form --> ir-booking-editor-guest-form
+  ir-booking-editor-form --> ir-service-assignee-select
   igl-application-info --> ir-validator
   igl-application-info --> ir-input
   ir-booking-editor-guest-form --> ir-input

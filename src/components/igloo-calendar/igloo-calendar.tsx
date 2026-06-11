@@ -2,9 +2,9 @@ import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, 
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
-import io, { Socket } from 'socket.io-client';
+import { realtimeService, type RealtimeReason, type UnitHkStatusChangePayload, type SalesBatchPayload, type AvailabilityBatchPayload } from '@/services/realtime/realtime.service';
 import { EventsService } from '@/services/events.service';
-import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '@/models/IBooking';
+import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '@/services/toBeAssigned.service';
 import { bookingStatus, calculateDaysBetweenDates, formatName, getPrivateNote, getRoomStatus, transformNewBLockedRooms, transformNewBooking } from '@/utils/booking';
@@ -15,7 +15,7 @@ import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { addUnassignedDates, handleUnAssignedDatesChange, removeUnassignedDates } from '@/stores/unassigned_dates.store';
 import Token from '@/models/Token';
-import { RoomHkStatus, RoomType } from '@/models/booking.dto';
+import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
 import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
 import housekeeping_store from '@/stores/housekeeping.store';
@@ -25,23 +25,6 @@ import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-depar
 import { SetDepartureTimeProps } from '@/services/booking-service/types';
 import { HKIssue } from '@/models/housekeeping';
 // import Auth from '@/models/Auth';
-export interface UnitHkStatusChangePayload {
-  PR_ID: number;
-  ROOM_CATEGORY_ID: number;
-  NAME: string;
-  DESCRIPTION: string;
-  ENTRY_USER_ID: number;
-  ENTRY_DATE: string;
-  OWNER_ID: number;
-  IS_ACTIVE: boolean;
-  HKS_CODE: RoomHkStatus;
-  HKM_ID: number;
-  CHECKLIST: null;
-  My_Room_category: null;
-  My_Hkm: null;
-}
-export type SalesBatchPayload = { rate_plan_id: number; night: string; is_available_to_book: boolean };
-export type AvailabilityBatchPayload = { room_type_id: number; date: string; availability: number };
 export type CalendarSidebarState = {
   type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer';
   payload: any;
@@ -106,7 +89,7 @@ export class IglooCalendar {
   private today: String = '';
   private reachedEndOfCalendar = false;
 
-  private socket: Socket;
+  private unsubscribeRealtime: (() => void) | null = null;
   private token = new Token();
   private calendarModalEl: HTMLIrModalElement;
 
@@ -138,6 +121,12 @@ export class IglooCalendar {
   componentDidLoad() {
     this.scrollToElement(this.today);
   }
+
+  disconnectedCallback() {
+    this.unsubscribeRealtime?.();
+    this.unsubscribeRealtime = null;
+  }
+
   @Listen('deleteButton')
   async handleDeleteEvent(ev: CustomEvent) {
     try {
@@ -420,9 +409,8 @@ export class IglooCalendar {
         this.calendarData = { ...this.calendarData, unassignedDates: data };
         addUnassignedDates(data);
       }
-      this.socket = io('https://realtime.igloorooms.com/');
-      this.socket.on('MSG', async msg => {
-        await this.handleSocketMessage(msg);
+      this.unsubscribeRealtime = realtimeService.subscribe(this.property_id, async msg => {
+        await this.handleSocketMessage(msg.reason, msg.payload);
       });
     } catch (error) {
       console.error('Initializing Calendar Error', error);
@@ -454,26 +442,9 @@ export class IglooCalendar {
     addCleaningTasks(tasks);
   }
 
-  private async handleSocketMessage(msg: string) {
-    const msgAsObject = JSON.parse(msg);
-    if (!msgAsObject) {
-      return;
-    }
-
-    const { REASON, KEY, PAYLOAD }: { REASON: bookingReasons; KEY: any; PAYLOAD: any } = msgAsObject;
-
-    if (KEY.toString() !== this.property_id.toString()) {
-      return;
-    }
-
-    let result: any;
-    if (['DELETE_CALENDAR_POOL', 'GET_UNASSIGNED_DATES'].includes(REASON)) {
-      result = PAYLOAD;
-    } else {
-      result = JSON.parse(PAYLOAD);
-    }
-    console.log({ [REASON]: result });
-    const reasonHandlers: Partial<Record<bookingReasons, Function>> = {
+  private async handleSocketMessage(reason: RealtimeReason, result: any) {
+    console.log({ [reason]: result });
+    const reasonHandlers: Partial<Record<RealtimeReason, (payload: any) => any>> = {
       DORESERVATION: this.handleDoReservation,
       BLOCK_EXPOSED_UNIT: this.handleBlockExposedUnit,
       ASSIGN_EXPOSED_ROOM: this.handleAssignExposedRoom,
@@ -497,11 +468,11 @@ export class IglooCalendar {
       HK_ISSUE_FIXED: this.handleHKIssueFixed,
     };
 
-    const handler = reasonHandlers[REASON];
+    const handler = reasonHandlers[reason];
     if (handler) {
       await handler.call(this, result);
     } else {
-      console.warn(`Unhandled REASON: ${REASON}`);
+      console.warn(`Unhandled REASON: ${reason}`);
     }
   }
 
@@ -1371,7 +1342,7 @@ export class IglooCalendar {
   }
   private handleRoomNightsDialogClose(e: CustomEvent<IRoomNightsDataEventPayload>) {
     if (e.detail.type === 'cancel') {
-      this.revertBooking.emit(this.roomNightsData.pool);
+      this.revertBooking.emit(this.roomNightsData?.pool);
     }
     this.roomNightsData = null;
   }
@@ -1380,10 +1351,6 @@ export class IglooCalendar {
       this.calendarSidebarState = null;
       if (this.editBookingItem) {
         this.editBookingItem = null;
-      }
-      if (this.roomNightsData) {
-        this.revertBooking.emit(this.roomNightsData.pool);
-        this.roomNightsData = null;
       }
       if (this.dialogData?.reason === 'reallocate') {
         this.revertBooking.emit(this.dialogData.pool);
@@ -1400,19 +1367,13 @@ export class IglooCalendar {
       return false;
     }
 
-    // 2) Open when room nights dialog is showing in the sidebar
-    if (this.roomNightsData) {
-      return true;
-    }
-
-    // 3) Open for sidebar-based flows (but not room-guests, which uses <ir-room-guests>)
+    // 2) Open for sidebar-based flows (but not room-guests, which uses <ir-room-guests>)
     if (this.calendarSidebarState) {
       const type = this.calendarSidebarState.type;
-      // return type === 'split' || type === 'bulk-blocks';
       return type === 'split';
     }
 
-    // 4) Default: closed
+    // 3) Default: closed
     return false;
   }
   private handleInvoiceClose(event: CustomEvent<void>): void {
@@ -1513,24 +1474,9 @@ export class IglooCalendar {
           showCloseButton={false}
           sidebarStyles={{
             width: this.calendarSidebarState?.type === 'room-guests' ? '60rem' : this.editBookingItem ? '80rem' : 'var(--sidebar-width,40rem)',
-            background: this.editBookingItem ? '#F2F3F8' : 'white',
+            background: this.editBookingItem ? 'var(--ir-color-muted-background,#f2f3f8)' : 'white',
           }}
         >
-          {this.roomNightsData && (
-            <ir-room-nights
-              slot="sidebar-body"
-              pool={this.roomNightsData.pool}
-              onCloseRoomNightsDialog={this.handleRoomNightsDialogClose.bind(this)}
-              language={this.language}
-              bookingNumber={this.roomNightsData.bookingNumber}
-              identifier={this.roomNightsData.identifier}
-              toDate={this.roomNightsData.to_date}
-              fromDate={this.roomNightsData.from_date}
-              defaultDates={this.roomNightsData.defaultDates}
-              ticket={this.ticket}
-              propertyId={this.property_id}
-            ></ir-room-nights>
-          )}
           {this.calendarSidebarState?.type === 'split' && (
             <igl-split-booking
               slot="sidebar-body"
@@ -1544,6 +1490,19 @@ export class IglooCalendar {
             // <igl-bulk-stop-sale slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-stop-sale>
           )} */}
         </ir-sidebar>
+        <igl-rate-extender-drawer
+          open={!!this.roomNightsData}
+          bookingNumber={this.roomNightsData?.bookingNumber}
+          identifier={this.roomNightsData?.identifier}
+          toDate={this.roomNightsData?.to_date}
+          fromDate={this.roomNightsData?.from_date}
+          defaultDates={this.roomNightsData?.defaultDates}
+          pool={this.roomNightsData?.pool}
+          ticket={this.ticket}
+          propertyId={this.property_id}
+          language={this.language}
+          onCloseRoomNightsDialog={this.handleRoomNightsDialogClose.bind(this)}
+        ></igl-rate-extender-drawer>
         <ir-booking-details-drawer
           open={this.editBookingItem?.event_type === 'EDIT_BOOKING'}
           propertyId={this.property_id}

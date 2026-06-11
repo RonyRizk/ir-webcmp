@@ -1,0 +1,137 @@
+:host {
+  display: block;
+}
+
+.tax-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-xl);
+}
+
+.tax-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wa-space-m);
+}
+
+.tax-page__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-2xs);
+}
+
+.page-title {
+  margin: 0;
+}
+
+.tax-page__subtitle {
+  margin: 0;
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-s);
+}
+
+/* ── Grid (mobile-first: stacked cards) ─────────────────── */
+
+.tax-grid__header {
+  display: none;
+}
+
+.tax-grid__col-label {
+  font-size: var(--wa-font-size-xs);
+  font-weight: 600;
+  color: var(--wa-color-text-quiet);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.tax-grid__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  padding: var(--wa-space-m) 0;
+}
+
+.tax-grid__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-3xs);
+}
+
+.tax-grid__title {
+  font-size: var(--wa-font-size-m);
+  margin: 0;
+  padding: 0;
+}
+
+.tax-grid__hint {
+  margin: 0;
+  padding: 0;
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+}
+
+.tax-grid__cell[data-label]::before {
+  content: attr(data-label);
+  display: block;
+  font-size: var(--wa-font-size-xs);
+  font-weight: 600;
+  color: var(--wa-color-text-quiet);
+  margin-bottom: var(--wa-space-2xs);
+}
+
+.tax-grid__cell:empty {
+  display: none;
+}
+
+ir-tax-input::part(input) {
+  width: 8ch;
+}
+
+/* ── Grid (desktop: shared-column table layout) ──────────── */
+
+@media (min-width: 768px) {
+  .tax-grid {
+    display: grid;
+    /* name | vat | city-tax | service-charge | taxation-strategy */
+    grid-template-columns: minmax(auto, 320px) repeat(3, auto) auto;
+    column-gap: var(--wa-space-m);
+    align-items: center;
+  }
+
+  .tax-grid__header,
+  .tax-grid__row {
+    display: contents;
+  }
+
+  .tax-grid__divider {
+    grid-column: 1 / -1;
+  }
+
+  /* Bottom-only padding keeps rows flush — no extra space above the first row */
+  .tax-grid__col-label {
+    padding-bottom: 0;
+  }
+
+  .tax-grid__name,
+  .tax-grid__cell {
+    padding-bottom: var(--wa-space-s);
+    align-self: center;
+  }
+
+  .tax-grid__cell:empty {
+    display: block;
+  }
+
+  .tax-grid__cell[data-label]::before {
+    display: none;
+  }
+  .ir-tax-input,
+  .tax-grid__cell {
+    width: fit-content;
+  }
+  /* ir-tax-input::part(select) {
+    width: 140px;
+  } */
+}

@@ -54,18 +54,22 @@
  - [igl-hk-issues-dialog](../../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-legend](../../igloo-calendar/igl-legend)
+ - [igl-rate-extender-drawer](../../igloo-calendar/igl-rate-extender-drawer)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
+ - [igl-split-booking-drawer](../../igloo-calendar/igl-split-booking-drawer)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
+ - [ir-agent-billing](../../ir-billing/ir-agent-billing)
  - [ir-agent-editor-drawer](../../ir-agents/ir-agent-editor-drawer)
  - [ir-agents](../../ir-agents)
  - [ir-agents-table](../../ir-agents/ir-agents-table)
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
  - [ir-arrivals-table](../../ir-arrivals/ir-arrivals-table)
+ - [ir-assignment-toggle-dialog](../../ir-booking-details/ir-assignment-toggle-dialog)
  - [ir-balance-cell](../../table-cells/booking/ir-balance-cell)
- - [ir-billing](../../ir-billing)
+ - [ir-booking-city-ledger](../../ir-booking-details/ir-booking-city-ledger)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-editor-drawer](../../igloo-calendar/ir-booking-editor/ir-booking-editor-drawer)
@@ -76,11 +80,33 @@
  - [ir-booking-listing-mobile-card](../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../ir-booking-listing/ir-booking-listing-table)
  - [ir-booking-new-form](../../ir-booking-new-form)
+ - [ir-booking-pricing-drawer](../../ir-booking-details/ir-room/ir-booking-pricing-drawer)
+ - [ir-booking-rooms](../../ir-booking-details/ir-booking-rooms)
+ - [ir-booking-source-editor-dialog](../../ir-booking-details/ir-booking-source-editor-dialog)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
+ - [ir-city-ledger-fiscal-documents-filters](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-filters)
+ - [ir-city-ledger-fiscal-documents-table](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table)
+ - [ir-city-ledger-folio](../../ir-city-ledger/ir-city-ledger-folio)
+ - [ir-city-ledger-folio-filters](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-filters)
+ - [ir-city-ledger-folio-table](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
+ - [ir-city-ledger-statements](../../ir-city-ledger/ir-city-ledger-statements)
+ - [ir-city-ledger-statements-filter](../../ir-city-ledger/ir-city-ledger-statements/ir-city-ledger-statements-filter)
+ - [ir-city-ledger-toolbar](../../ir-city-ledger/ir-city-ledger-toolbar)
+ - [ir-city-ledger-transaction-drawer](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
+ - [ir-cl-fiscal-document-preview](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
+ - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
+ - [ir-date-range-filter](../ir-date-range-filter)
  - [ir-departures-table](../../ir-departures/ir-departures-table)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
+ - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
+ - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
+ - [ir-fiscal-documents-table](../../ir-fiscal-documents/ir-fiscal-documents-table)
+ - [ir-ghs-filters](../../ir-ghs-onboarding)
+ - [ir-ghs-onboarding](../../ir-ghs-onboarding)
+ - [ir-ghs-selection-bucket](../../ir-ghs-onboarding)
+ - [ir-guest-billing](../../ir-billing/ir-guest-billing)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
  - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
@@ -91,13 +117,15 @@
  - [ir-hk-unassigned-units-drawer](../../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
  - [ir-hk-user-drawer](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
+ - [ir-hold-transaction-dialog](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table/ir-hold-transaction-dialog)
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
+ - [ir-meal-report](../../ir-meal-report)
+ - [ir-meal-report-filters](../../ir-meal-report)
  - [ir-notifications](../../ir-notifications)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
- - [ir-payment-item](../../ir-booking-details/ir-payment-details/ir-payment-item)
  - [ir-payments-folio](../../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup](../../ir-booking-details/ir-pickup)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
@@ -110,11 +138,11 @@
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
- - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
+ - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-test2-cmp](../../ir-test-cmp)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
@@ -135,18 +163,22 @@ graph TD;
   igl-hk-issues-dialog --> ir-custom-button
   igl-housekeeping-dialog --> ir-custom-button
   igl-legend --> ir-custom-button
+  igl-rate-extender-drawer --> ir-custom-button
   igl-rate-plan --> ir-custom-button
   igl-reallocation-dialog --> ir-custom-button
+  igl-split-booking-drawer --> ir-custom-button
   igl-to-be-assigned --> ir-custom-button
   ir-actions-cell --> ir-custom-button
+  ir-agent-billing --> ir-custom-button
   ir-agent-editor-drawer --> ir-custom-button
   ir-agents --> ir-custom-button
   ir-agents-table --> ir-custom-button
   ir-applicable-policies --> ir-custom-button
   ir-arrival-time-dialog --> ir-custom-button
   ir-arrivals-table --> ir-custom-button
+  ir-assignment-toggle-dialog --> ir-custom-button
   ir-balance-cell --> ir-custom-button
-  ir-billing --> ir-custom-button
+  ir-booking-city-ledger --> ir-custom-button
   ir-booking-company-dialog --> ir-custom-button
   ir-booking-details --> ir-custom-button
   ir-booking-editor-drawer --> ir-custom-button
@@ -157,11 +189,33 @@ graph TD;
   ir-booking-listing-mobile-card --> ir-custom-button
   ir-booking-listing-table --> ir-custom-button
   ir-booking-new-form --> ir-custom-button
+  ir-booking-pricing-drawer --> ir-custom-button
+  ir-booking-rooms --> ir-custom-button
+  ir-booking-source-editor-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-custom-button
+  ir-city-ledger-fiscal-documents-filters --> ir-custom-button
+  ir-city-ledger-fiscal-documents-table --> ir-custom-button
+  ir-city-ledger-folio --> ir-custom-button
+  ir-city-ledger-folio-filters --> ir-custom-button
+  ir-city-ledger-folio-table --> ir-custom-button
+  ir-city-ledger-statements --> ir-custom-button
+  ir-city-ledger-statements-filter --> ir-custom-button
+  ir-city-ledger-toolbar --> ir-custom-button
+  ir-city-ledger-transaction-drawer --> ir-custom-button
+  ir-cl-fiscal-document-preview --> ir-custom-button
+  ir-cl-invoice-dialog --> ir-custom-button
+  ir-date-range-filter --> ir-custom-button
   ir-departures-table --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button
+  ir-fd-confirm-dialog --> ir-custom-button
+  ir-fiscal-documents-filters --> ir-custom-button
+  ir-fiscal-documents-table --> ir-custom-button
+  ir-ghs-filters --> ir-custom-button
+  ir-ghs-onboarding --> ir-custom-button
+  ir-ghs-selection-bucket --> ir-custom-button
+  ir-guest-billing --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
   ir-hk-delete-dialog --> ir-custom-button
   ir-hk-operations-card --> ir-custom-button
@@ -172,13 +226,15 @@ graph TD;
   ir-hk-unassigned-units-drawer --> ir-custom-button
   ir-hk-user-drawer --> ir-custom-button
   ir-hk-user-drawer-form --> ir-custom-button
+  ir-hold-transaction-dialog --> ir-custom-button
   ir-invoice --> ir-custom-button
   ir-listing-header --> ir-custom-button
+  ir-meal-report --> ir-custom-button
+  ir-meal-report-filters --> ir-custom-button
   ir-notifications --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button
   ir-payment-folio --> ir-custom-button
-  ir-payment-item --> ir-custom-button
   ir-payments-folio --> ir-custom-button
   ir-pickup --> ir-custom-button
   ir-pickup-view --> ir-custom-button
@@ -191,11 +247,11 @@ graph TD;
   ir-reset-password --> ir-custom-button
   ir-room --> ir-custom-button
   ir-room-guests --> ir-custom-button
-  ir-secure-tasks --> ir-custom-button
   ir-tasks-card --> ir-custom-button
   ir-tasks-filters --> ir-custom-button
   ir-tasks-header --> ir-custom-button
   ir-tasks-table --> ir-custom-button
+  ir-tax-service-categories --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
   ir-unbookable-rooms-filters --> ir-custom-button
   ir-user-form-panel-drawer --> ir-custom-button

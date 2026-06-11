@@ -57,18 +57,26 @@ Type: `Promise<void>`
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [ir-agents](../../ir-agents)
  - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
- - [ir-billing](../../ir-billing)
+ - [ir-assignment-toggle-dialog](../../ir-booking-details/ir-assignment-toggle-dialog)
+ - [ir-booking-city-ledger](../../ir-booking-details/ir-booking-city-ledger)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-extra-note](../../ir-booking-details/ir-booking-extra-note)
  - [ir-booking-header](../../ir-booking-details/ir-booking-header)
  - [ir-booking-listing-table](../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-booking-source-editor-dialog](../../ir-booking-details/ir-booking-source-editor-dialog)
  - [ir-checkout-dialog](../../ir-checkout-dialog)
+ - [ir-city-ledger-folio](../../ir-city-ledger/ir-city-ledger-folio)
+ - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
+ - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
+ - [ir-ghs-onboarding](../../ir-ghs-onboarding)
+ - [ir-guest-billing](../../ir-billing/ir-guest-billing)
  - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
+ - [ir-hold-transaction-dialog](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table/ir-hold-transaction-dialog)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
@@ -84,18 +92,26 @@ graph TD;
   igl-reallocation-dialog --> ir-dialog
   ir-agents --> ir-dialog
   ir-arrival-time-dialog --> ir-dialog
-  ir-billing --> ir-dialog
+  ir-assignment-toggle-dialog --> ir-dialog
+  ir-booking-city-ledger --> ir-dialog
   ir-booking-company-dialog --> ir-dialog
   ir-booking-details --> ir-dialog
   ir-booking-extra-note --> ir-dialog
   ir-booking-header --> ir-dialog
   ir-booking-listing-table --> ir-dialog
+  ir-booking-source-editor-dialog --> ir-dialog
   ir-checkout-dialog --> ir-dialog
+  ir-city-ledger-folio --> ir-dialog
+  ir-cl-invoice-dialog --> ir-dialog
   ir-extra-service --> ir-dialog
+  ir-fd-confirm-dialog --> ir-dialog
+  ir-ghs-onboarding --> ir-dialog
+  ir-guest-billing --> ir-dialog
   ir-hk-delete-dialog --> ir-dialog
   ir-hk-operations-card --> ir-dialog
   ir-hk-staff-tasks --> ir-dialog
   ir-hk-tasks --> ir-dialog
+  ir-hold-transaction-dialog --> ir-dialog
   ir-payment-details --> ir-dialog
   ir-preview-screen-dialog --> ir-dialog
   ir-property-switcher --> ir-dialog

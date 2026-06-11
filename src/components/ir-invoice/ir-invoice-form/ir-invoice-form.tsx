@@ -8,6 +8,7 @@ import { BookingInvoiceInfo, InvoiceableItem, ViewMode } from '../types';
 import { IEntries } from '@/models/IBooking';
 import { IssueInvoiceProps } from '@/services/booking-service/types';
 import calendar_data from '@/stores/calendar-data';
+import axios from 'axios';
 @Component({
   tag: 'ir-invoice-form',
   styleUrl: 'ir-invoice-form.css',
@@ -105,6 +106,7 @@ export class IrInvoiceForm {
   private invoiceTarget: IEntries[];
   private apiDisabledItemKeys: Set<number> = new Set();
   private alreadyInvoicedItemKeys: Set<number> = new Set();
+  private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2&mode=proforma';
 
   componentWillLoad() {
     this.init();
@@ -213,6 +215,19 @@ export class IrInvoiceForm {
    */
   private enforceNonInvoiceableSelections(disabledKeys?: Set<number>) {
     if (this.viewMode === 'proforma') {
+      if (!this.alreadyInvoicedItemKeys.size) {
+        return;
+      }
+      const nextKeys = new Set(this.selectedItemKeys);
+      let changed = false;
+      this.alreadyInvoicedItemKeys.forEach(key => {
+        if (nextKeys.delete(key)) {
+          changed = true;
+        }
+      });
+      if (changed) {
+        this.syncSelectedItems(nextKeys);
+      }
       return;
     }
 
@@ -233,7 +248,31 @@ export class IrInvoiceForm {
       this.syncSelectedItems(nextKeys);
     }
   }
+  private async openProformaInvoice() {
+    const property = calendar_data.property as any;
+    const documentId = moment().format('YYYYMMDDHHmm') + property.id;
 
+    let url = this.printingBaseUrl.replace('%1', encodeURIComponent(property.aname)).replace('%2', encodeURIComponent(this.booking.booking_nbr));
+    url += `&documentId=${encodeURIComponent(documentId)}`;
+
+    const ids = [...this.selectedItemKeys].join('-');
+    if (ids) {
+      url += `&ids=${ids}`;
+    }
+
+    if (this.selectedRecipient === 'company') {
+      url += `&bill_to=company`;
+    } else if (this.selectedRecipient?.startsWith('room__')) {
+      url += `&bill_to=${encodeURIComponent(this.selectedRecipient.replace('room__', '').trim())}`;
+    }
+
+    const { data } = await axios.post(`Get_ShortLiving_Token`);
+    if (!data.ExceptionMsg) {
+      url += `&token=${encodeURIComponent(data.My_Result)}`;
+    }
+
+    window.open(url, '_blank');
+  }
   /**
    * Returns the union of API-disabled keys and client-calculated non-invoiceable keys.
    */
@@ -375,10 +414,8 @@ export class IrInvoiceForm {
   private applyDefaultSelections(items: InvoiceableItem[]) {
     const keysToSelect =
       this.viewMode === 'proforma'
-        ? items.map(item => this.getSelectableKey(item))
-        : items
-            .filter(item => item.is_invoiceable && item.reason?.code !== '001')
-            .map(item => this.getSelectableKey(item));
+        ? items.filter(item => !this.alreadyInvoicedItemKeys.has(this.getSelectableKey(item))).map(item => this.getSelectableKey(item))
+        : items.filter(item => item.is_invoiceable && item.reason?.code !== '001').map(item => this.getSelectableKey(item));
     this.syncSelectedItems(new Set(keysToSelect));
   }
 
@@ -424,7 +461,8 @@ export class IrInvoiceForm {
         billed_to_name,
       };
       if (isProforma) {
-        this.previewProformaInvoice.emit({ invoice });
+        // this.previewProformaInvoice.emit({ invoice });
+        this.openProformaInvoice();
         return;
       }
       await this.bookingService.issueInvoice({
@@ -693,8 +731,11 @@ export class IrInvoiceForm {
    * Determines if any member of a checkbox group should be disabled.
    */
   private isDisabled(systemIds: (number | undefined)[] = []) {
-    if (this.viewMode === 'proforma' || !systemIds?.length) {
+    if (!systemIds?.length) {
       return false;
+    }
+    if (this.viewMode === 'proforma') {
+      return systemIds.some(id => typeof id === 'number' && this.alreadyInvoicedItemKeys.has(id));
     }
     const disabledKeys = this.getCombinedDisabledKeys();
     if (!disabledKeys.size) {
@@ -903,7 +944,7 @@ export class IrInvoiceForm {
           }}
           class="ir-invoice__container"
         >
-          <ir-custom-date-picker
+          <ir-date-select
             onDateChanged={e => {
               this.invoiceDate = e.detail.start;
               this.setUpDisabledItems();
@@ -912,7 +953,7 @@ export class IrInvoiceForm {
             date={this.invoiceDate.format('YYYY-MM-DD')}
             minDate={this.getMinDate()}
             maxDate={this.getMaxDate()}
-          ></ir-custom-date-picker>
+          ></ir-date-select>
           <ir-booking-billing-recipient onRecipientChange={e => (this.selectedRecipient = e.detail)} booking={this.booking}></ir-booking-billing-recipient>
           {this.viewMode === 'invoice' && moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') ? (
             <ir-empty-state message="Invoices cannot be issued before guest arrival"></ir-empty-state>

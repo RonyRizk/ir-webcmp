@@ -5,3 +5,8 @@
   margin: 0;
   padding: 0;
 }
+.payments-container::part(body) {
+  padding: 0;
+  padding-bottom: calc(1.5rem - var(--wa-space-s));
+  padding-top: calc(1.5rem - var(--wa-space-s));
+}

@@ -53,6 +53,22 @@ Type: `Promise<void>`
 
 
 
+### `syncSelection(options?: { date?: string | Date | null; dates?: (string | Date)[] | null; }) => Promise<void>`
+
+
+
+#### Parameters
+
+| Name      | Type                                                     | Description |
+| --------- | -------------------------------------------------------- | ----------- |
+| `options` | `{ date?: string \| Date; dates?: (string \| Date)[]; }` |             |
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 
 ## Dependencies
 

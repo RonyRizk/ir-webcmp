@@ -1,0 +1,16 @@
+:host {
+  display: contents;
+}
+
+.assignment-toggle-dialog__message {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--wa-color-neutral-700, #3f3f46);
+}
+
+.assignment-toggle-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

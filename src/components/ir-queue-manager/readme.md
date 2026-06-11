@@ -30,7 +30,6 @@ graph TD;
   ir-queue-manager --> ir-toast
   ir-queue-manager --> ir-custom-button
   ir-queue-manager --> ir-empty-state
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

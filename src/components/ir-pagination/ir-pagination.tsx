@@ -216,6 +216,7 @@ export class IrPagination {
 
     const isFirstPage = this.currentPage === 1;
     const isLastPage = this.currentPage === this.pages;
+    console.log(this.currentPage);
 
     return (
       <div
@@ -233,20 +234,25 @@ export class IrPagination {
         )}
         <div class="buttons-container">
           {this.allowPageSizeChange && this.pageSizes && (
-            <ir-select
-              class="page-size-select"
-              selectedValue={String(this.pageSize)}
-              data={this.pageSizes.map(size => ({
-                text: `${size} ${this.recordLabel}`,
-                value: String(size),
-              }))}
-              showFirstOption={false}
-              onSelectChange={e => this.handlePageSizeChange(Number(e.detail))}
-            ></ir-select>
+            <wa-select
+              value={String(this.pageSize)}
+              class="pagination__current-page-select"
+              onchange={e => this.handlePageSizeChange(+(e.target as any).value)}
+              aria-label={`Current page ${this.currentPage} of ${this.pages}`}
+              disabled={this.disabled}
+              size="small"
+              defaultValue={String(this.pageSize)}
+            >
+              {this.pageSizes.map(size => (
+                <wa-option value={size.toString()} key={`page-size-${this.recordLabel}-${size}`}>
+                  {size}
+                </wa-option>
+              ))}
+            </wa-select>
           )}
           {this.pages > 1 && (
             <Fragment>
-              <ir-custom-button
+              {/* <ir-custom-button
                 aria-label="Go to first page"
                 onClickHandler={() => this.handlePageChange(1, 'first')}
                 disabled={isFirstPage || this.disabled}
@@ -254,7 +260,7 @@ export class IrPagination {
                 appearance="plain"
               >
                 <wa-icon name="angles-left" label="Go to first page"></wa-icon>
-              </ir-custom-button>
+              </ir-custom-button> */}
               <ir-custom-button
                 onClickHandler={() => this.handlePageChange(this.currentPage - 1, 'previous')}
                 variant="neutral"
@@ -271,7 +277,7 @@ export class IrPagination {
                 aria-label={`Current page ${this.currentPage} of ${this.pages}`}
                 disabled={this.disabled}
                 size="small"
-                defaultValue={'1'}
+                defaultValue={this.currentPage ? this.currentPage?.toString() : '1'}
               >
                 {Array.from(Array(this.pages), (_, i) => i + 1).map(i => (
                   <wa-option value={i.toString()} key={`${this.recordLabel}-${i}`}>
@@ -288,7 +294,7 @@ export class IrPagination {
               >
                 <wa-icon name="angle-right" label="Go to next page"></wa-icon>
               </ir-custom-button>
-              <ir-custom-button
+              {/* <ir-custom-button
                 onClickHandler={() => this.handlePageChange(this.pages, 'last')}
                 variant="neutral"
                 appearance="plain"
@@ -296,7 +302,7 @@ export class IrPagination {
                 aria-label="Go to last page"
               >
                 <wa-icon name="angles-right" label="Go to last page"></wa-icon>
-              </ir-custom-button>
+              </ir-custom-button> */}
             </Fragment>
           )}
         </div>

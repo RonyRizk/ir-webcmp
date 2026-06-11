@@ -1,0 +1,222 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.transaction-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.transaction-form__field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.transaction-form__field--full-width,
+.transaction-form__field--full-width wa-radio-group {
+  width: 100%;
+}
+
+.transaction-form__field--full-width wa-radio-group wa-radio {
+  flex: 1;
+}
+
+.transaction-form__field__entry-type.--credit:state(checked) {
+  background-color: var(--wa-color-success-fill-quiet);
+  color: var(--wa-color-success-on-quiet);
+  border-color: var(--wa-color-success-border-loud);
+}
+
+.transaction-form__field__entry-type.--debit:state(checked) {
+  background-color: var(--wa-color-danger-fill-quiet);
+  color: var(--wa-color-danger-on-quiet);
+  border-color: var(--wa-color-danger-border-loud);
+}
+
+/* ── Amount + Tax merged group ───────────────── */
+.amount-tax-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.amount-tax-group__label {
+  font-size: var(--wa-input-label-font-size-small, 0.875rem);
+  font-weight: var(--wa-font-weight-semibold, 500);
+  color: var(--wa-color-text-normal);
+}
+
+.amount-tax-group__required {
+  color: var(--wa-color-danger-fill-loud);
+}
+
+.amount-tax-group__row {
+  display: flex;
+  align-items: stretch;
+}
+
+.amount-tax-group__amount {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Suppress the label area so the input sits flush with the select */
+.amount-tax-group ir-input::part(label) {
+  display: none;
+}
+
+.amount-tax-group ir-input::part(base) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.amount-tax-group wa-select {
+  flex-shrink: 0;
+  min-width: 8.5rem;
+}
+
+.amount-tax-group wa-select::part(combobox) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* ── Transaction type option row ─────────────── */
+.tx-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.tx-option__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.transaction-form__switch {
+  padding: 0.15rem 0;
+}
+
+.transaction-form__error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--wa-color-danger-fill-loud);
+}
+
+.transaction-form__fiscal-note {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  color: var(--wa-color-neutral-fill-loud);
+}
+
+.transaction-form__payment-type-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* ── Payment section card ────────────────────── */
+.payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 0.625rem;
+}
+
+.payment-section__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+/* ── Payment type selected pill ─────────────── */
+.payment-type-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--wa-color-success-fill-quiet, #f0fdf4);
+  border: 1px solid var(--wa-color-success-border-quiet, #bbf7d0);
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.payment-type-pill__name {
+  font-weight: 500;
+  color: var(--wa-color-text-normal, #111827);
+  flex: 1;
+}
+
+/* ── Payment radio group ─────────────────────── */
+.payment-section wa-radio-group {
+  width: 100%;
+}
+
+.payment-section wa-radio-group wa-radio {
+  flex: 1;
+}
+
+/* ── Invoice selector reveal ─────────────────── */
+.payment-invoice-select {
+  animation: slide-in 0.18s ease;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.transaction-form__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--wa-color-text-quiet, #6b7280);
+}
+
+.transaction-form__textarea-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--wa-color-text-normal, #111827);
+}
+
+.transaction-form__notes {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #d1d5db);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--wa-color-text-normal, #111827);
+  background: var(--wa-color-surface-default, #fff);
+  resize: vertical;
+  min-height: 4.5rem;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.transaction-form__notes:focus {
+  border-color: var(--wa-color-brand-border-loud, #2563eb);
+  box-shadow: 0 0 0 2px var(--wa-color-brand-fill-quiet, #eff6ff);
+}
+
+.transaction-form__notes::placeholder {
+  color: var(--wa-color-text-quiet, #9ca3af);
+}

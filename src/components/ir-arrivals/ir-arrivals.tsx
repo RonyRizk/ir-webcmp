@@ -226,6 +226,7 @@ export class IrArrivals {
             onBookingDetailsDrawerClosed={() => (this.bookingNumber = null)}
           ></ir-booking-details-drawer>
           <ir-payment-folio
+            booking={this.booking}
             style={{ height: 'auto' }}
             bookingNumber={this.booking?.booking_nbr}
             paymentEntries={this.paymentEntries}

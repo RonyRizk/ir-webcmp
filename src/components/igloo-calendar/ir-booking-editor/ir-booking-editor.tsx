@@ -383,6 +383,7 @@ export class IrBookingEditor {
 
           {this.step === 'confirm' && (
             <ir-booking-editor-form
+              booking={this.booking}
               onDoReservation={e => {
                 e.stopImmediatePropagation();
                 e.stopPropagation();

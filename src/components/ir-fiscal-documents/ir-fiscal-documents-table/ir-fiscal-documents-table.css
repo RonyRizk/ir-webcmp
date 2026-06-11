@@ -1,0 +1,103 @@
+@import url('../../../common/table.css');
+:host {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  min-height: 60dvh;
+  max-width: 1920px;
+  background-color: var(--wa-color-surface-default);
+  border: 1px solid var(--wa-color-neutral-border-quiet, #abaeb9);
+}
+
+/* #region head */
+.fiscal-table__heading:last-child {
+  border-right: 0;
+}
+
+.fiscal-table__heading--numeric,
+.fiscal-table__cell--numeric {
+  text-align: right !important;
+}
+.ir-table-row.--is-draft > td {
+  background-color: var(--wa-color-warning-fill-quiet) !important;
+}
+.fd_ss {
+  color: var(--wa-color-text-quiet);
+  margin: 0;
+  padding: 0;
+  font-size: var(--wa-font-size-s);
+}
+/* #endregion */
+
+/* #region status */
+.fiscal-table__status-tag {
+  text-transform: capitalize;
+}
+/* #endregion */
+
+/* #region doc number / actions */
+.fiscal-table__doc-number::part(base) {
+  padding: 0.05rem 0.5rem;
+  height: auto;
+}
+.fiscal-table__cell--doc-number {
+  --ir-cell-padding: 0.5rem;
+}
+.fiscal-table__heading--actions,
+.fiscal-table__cell--actions {
+  text-align: center !important;
+}
+.fiscal-table__action-trigger::part(base) {
+  width: 24px;
+  height: 24px;
+}
+
+.fiscal-table__action-danger {
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+}
+
+.fiscal-table__cell--zero {
+  color: var(--wa-color-text-quiet, #9ca3af);
+}
+/* #endregion */
+
+/* #region empty / prompt */
+.fiscal-table__empty {
+  text-align: center;
+  color: var(--wa-color-text-quiet);
+  font-size: 0.875rem;
+  padding: 1.25rem;
+}
+
+.fiscal-table__date-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.fiscal-table__date-prompt-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+  background: var(--wa-color-brand-fill-quiet, #eff6ff);
+  color: var(--wa-color-brand-fill-loud, #2563eb);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fiscal-table__date-prompt-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--wa-color-text-normal, #111827);
+}
+/* #endregion */

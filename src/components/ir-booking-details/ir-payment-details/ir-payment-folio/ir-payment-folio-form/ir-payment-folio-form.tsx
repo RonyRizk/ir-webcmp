@@ -68,6 +68,7 @@ let folioFormInstanceCounter = 0;
   scoped: true,
 })
 export class IrPaymentFolioForm {
+  @Prop() booking!: Booking;
   @Prop() paymentEntries: PaymentEntries;
   @Prop() bookingNumber: string;
   @Prop() formId: string;
@@ -172,6 +173,7 @@ export class IrPaymentFolioForm {
       this.loadingChanged.emit(this.isLoading);
       this.autoValidate = true;
       this.errors = {};
+      console.log({ ...(this.folioData ?? {}), amount: this.folioData?.amount ?? undefined });
       const parsedData: FolioFormData = folioValidationSchema.parse({ ...(this.folioData ?? {}), amount: this.folioData?.amount ?? undefined });
       const { payment_type, payment_method, ...rest } = parsedData;
       const payload: Payment = {
@@ -273,6 +275,7 @@ export class IrPaymentFolioForm {
       </Fragment>
     ));
   }
+
   render() {
     // const isNewPayment = this.folioData?.payment_type?.code === '001' && this.folioData.id === -1;
     return (
@@ -289,7 +292,7 @@ export class IrPaymentFolioForm {
         class="payment-folio__form"
         id={this.formId}
       >
-        <ir-custom-date-picker
+        <ir-date-select
           id={this.controlIds.date}
           label="Date"
           aria-invalid={this.errors?.date && !this.folioData?.date ? 'true' : 'false'}
@@ -301,7 +304,7 @@ export class IrPaymentFolioForm {
           emitEmptyDate={true}
           maxDate={this.today}
           date={this.folioData?.date}
-        ></ir-custom-date-picker>
+        ></ir-date-select>
         <ir-validator
           value={this.folioData?.payment_type?.code}
           autovalidate={this.autoValidate}

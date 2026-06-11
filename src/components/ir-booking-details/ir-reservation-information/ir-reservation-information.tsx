@@ -102,11 +102,11 @@ export class IrReservationInformation {
       <wa-card>
         <div class="reservation-information" ref={el => (this.reservationInformationEl = el as HTMLDivElement)}>
           <p class="reservation-information__property-name">{this.booking.property.name || ''}</p>
-          <ir-label
+          {/* <ir-label
             labelText={`${locales.entries.Lcz_Source}:`}
             content={this.booking.origin.Label}
             image={{ src: this.booking.origin.Icon, alt: this.booking.origin.Label }}
-          ></ir-label>
+          ></ir-label> */}
           <ir-label
             renderContentAsHtml
             labelText={`${locales.entries.Lcz_BookedOn}:`}
@@ -134,29 +134,32 @@ export class IrReservationInformation {
               <wa-icon name="edit" label="Edit guest details" style={{ fontSize: '1rem' }}></wa-icon>
             </ir-custom-button>
           </div>
-          <div class="reservation-information__row">
-            <ir-label
-              labelText={`Company:`}
-              placeholder={'No company name provided'}
-              content={`${this.booking.company_name ?? ''}${this.booking.company_tax_nbr ? ` - ${this.booking.company_tax_nbr}` : ''}`}
-              display={'flex'}
-              // ignore_content
-            ></ir-label>
-            <wa-tooltip for={`edit_create-company-info`}>Add company info</wa-tooltip>
-            <ir-custom-button
-              iconBtn
-              id={`edit_create-company-info`}
-              onClickHandler={e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                this.irBookingCompanyFormRef.openCompanyForm();
-              }}
-              appearance={'plain'}
-              variant={'neutral'}
-            >
-              <wa-icon name="edit" label="Add or modify company info" style={{ fontSize: '1rem' }}></wa-icon>
-            </ir-custom-button>
-          </div>
+          {!this.booking.agent && (
+            <div class="reservation-information__row">
+              <ir-label
+                labelText={`Company:`}
+                placeholder={'No company name provided'}
+                content={`${this.booking.company_name ?? ''}${this.booking.company_tax_nbr ? ` - ${this.booking.company_tax_nbr}` : ''}`}
+                display={'flex'}
+                // ignore_content
+              ></ir-label>
+
+              <wa-tooltip for={`edit_create-company-info`}>Add company info</wa-tooltip>
+              <ir-custom-button
+                iconBtn
+                id={`edit_create-company-info`}
+                onClickHandler={e => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  this.irBookingCompanyFormRef.openCompanyForm();
+                }}
+                appearance={'plain'}
+                variant={'neutral'}
+              >
+                <wa-icon name="edit" label="Add or modify company info" style={{ fontSize: '1rem' }}></wa-icon>
+              </ir-custom-button>
+            </div>
+          )}
           {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
           {!this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>}
           {this.booking.guest.alternative_email && <ir-label labelText={`${locales.entries.Lcz_AlternativeEmail}:`} content={this.booking.guest.alternative_email}></ir-label>}

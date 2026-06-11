@@ -1,7 +1,5 @@
 # ir-date-select
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -88,7 +86,18 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [igl-bulk-block](../../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
+ - [igl-bulk-stop-sale](../../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
  - [igl-cal-header](../../../igloo-calendar/igl-cal-header)
+ - [ir-arrivals-filters](../../../ir-arrivals/ir-arrivals-filters)
+ - [ir-city-ledger-transaction-form](../../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form)
+ - [ir-date-range-filter](../../ir-date-range-filter)
+ - [ir-departures-filter](../../../ir-departures/ir-departures-filter)
+ - [ir-extra-service-config-form](../../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
+ - [ir-invoice-form](../../../ir-invoice/ir-invoice-form)
+ - [ir-payment-folio-form](../../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
+ - [ir-pickup-form](../../../ir-booking-details/ir-pickup/ir-pickup-form)
+ - [ir-rectifier](../../../igloo-calendar/igl-bulk-operations/ir-rectifier)
 
 ### Depends on
 
@@ -100,7 +109,18 @@ Type: `Promise<void>`
 graph TD;
   ir-date-select --> ir-input
   ir-date-select --> ir-air-date-picker
+  igl-bulk-block --> ir-date-select
+  igl-bulk-stop-sale --> ir-date-select
   igl-cal-header --> ir-date-select
+  ir-arrivals-filters --> ir-date-select
+  ir-city-ledger-transaction-form --> ir-date-select
+  ir-date-range-filter --> ir-date-select
+  ir-departures-filter --> ir-date-select
+  ir-extra-service-config-form --> ir-date-select
+  ir-invoice-form --> ir-date-select
+  ir-payment-folio-form --> ir-date-select
+  ir-pickup-form --> ir-date-select
+  ir-rectifier --> ir-date-select
   style ir-date-select fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

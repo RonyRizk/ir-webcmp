@@ -17,6 +17,19 @@
   font-size: 0.75rem;
 }
 
+.event-hover__origin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.event-hover__origin-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wa-color-text-quiet, #6b7280);
+  letter-spacing: 0.04em;
+}
+
 .user-notes {
   margin-left: 4px;
   display: -webkit-box;
@@ -78,7 +91,9 @@
   padding: var(--wa-space-m);
   border-radius: var(--wa-panel-border-radius);
   border-style: var(--wa-panel-border-style);
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   box-shadow: var(--wa-shadow-l);
   color: var(--wa-color-text-normal);
   user-select: none;

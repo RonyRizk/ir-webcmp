@@ -59,6 +59,7 @@ declare module '@stencil/core' {
   export namespace JSX {
     interface IntrinsicElements {
       'wa-button': WithHTMLEvents<CustomElements['wa-button']>;
+      'wa-card': WithHTMLEvents<CustomElements['wa-card']>;
       'wa-slider': WithHTMLEvents<CustomElements['wa-slider']>;
       'wa-switch': WithHTMLEvents<CustomElements['wa-switch']>;
       'wa-option': WithHTMLEvents<CustomElements['wa-option']>;

@@ -8,6 +8,7 @@ import { createStore } from '@stencil/store';
 import moment, { Moment } from 'moment';
 import calendar_data from './calendar-data';
 import VariationService from '@/services/variation.service';
+import { Agent } from '@/services/agents/type';
 
 // -----------------------------------------------------------------------------
 // Type Definitions
@@ -85,6 +86,8 @@ export interface BookingDraft {
   };
   source: BookingSource;
   guest?: any;
+  agent: Agent;
+  roomAssignee?: 'agent' | 'guest';
   defaultOccupancy?: {
     adults: number;
     children: number;
@@ -110,6 +113,7 @@ export interface BookedByGuest {
   email: string;
   firstName: string;
   lastName: string;
+  agent_booking_nbr: string;
   company: string;
   countryId: string;
   phone_prefix: string;
@@ -156,6 +160,7 @@ export const bookedByGuestBaseData = {
   id: -1,
   email: '',
   company: '',
+  agent_booking_nbr: null,
   firstName: '',
   lastName: '',
   countryId: '',
@@ -177,6 +182,7 @@ const initialState: BookingStore = {
   bookedByGuest: bookedByGuestBaseData,
   bookedByGuestManuallyEdited: false,
   bookingDraft: {
+    agent: null,
     dates: {
       checkIn: moment().startOf('day'),
       checkOut: moment().add(1, 'day'),
@@ -256,6 +262,22 @@ export function setBookingDraft(params: Partial<BookingDraft>) {
       ...params.occupancy,
     },
   };
+  if (params.source) {
+    setBookingDraft({ agent: resolveAgentFromBookingSource(params.source) });
+  }
+}
+/**
+ * Returns the linked travel agent if the source type is TRAVEL_AGENCY.
+ */
+export function resolveAgentFromBookingSource(source: BookingSource): Agent | null {
+  const matchedSource = calendar_data.property.allowed_booking_sources.find(s => s.id.toString() === source.id.toString());
+
+  if (matchedSource?.type === 'TRAVEL_AGENCY') {
+    const agent = calendar_data.property.agents?.find(a => a.id.toString() === matchedSource.tag);
+    return agent ?? null;
+  }
+
+  return null;
 }
 /**
  * Updates dropdown lookup datasets (sources, bed preferences, etc.).
@@ -457,11 +479,11 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   }
   const roomType = booking_store.roomTypes?.find(r => r.id === roomTypeId);
   if (!roomType) {
-    throw new Error('Invalid room type id');
+    throw new Error(`Invalid room type id ${roomTypeId}`);
   }
-  const ratePlan = roomType.rateplans.find(r => r.id === ratePlanId);
+  const ratePlan = roomType.rateplans.find(r => r.id?.toString() === ratePlanId.toString());
   if (!ratePlan) {
-    throw new Error('Invalid rate plan');
+    throw new Error(`Invalid rate plan ${ratePlanId},${roomTypeId}:${JSON.stringify(roomType.rateplans?.map(d => d.id))}`);
   }
   let newGuest = Array.from({ length: rooms }, () => ({ first_name: '', last_name: '', unit: null, bed_preference: null, infant_nbr: null }));
   if (guest) {

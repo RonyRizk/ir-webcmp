@@ -123,7 +123,49 @@ export type FetchUnBookableRoomsResult = {
     phone_prefix: null;
   };
 }[];
+
+export const CategorySchema = z.object({
+  code: z.string(),
+  description: z.string(),
+});
+export type Category = z.infer<typeof CategorySchema>;
+
+export const taxationModes = {
+  INCLUSIVE: '001',
+  EXCLUSIVE: '000',
+  NOT_APPLICABLE: '002',
+};
+
+export const TaxCategorySchema = z.object({
+  category: CategorySchema,
+  taxation_mode: CategorySchema,
+  pct: z.number(),
+  property_id: z.number().optional(),
+});
+export type TaxCategory = z.infer<typeof TaxCategorySchema>;
+
+export const HandleExposedPropertyTaxCategoriesParamsSchema = z.object({
+  property_id: z.number(),
+  VAT_INCLUDED_CODE: z.string(),
+  VAT_PC: z.number(),
+  CITY_TAX_INCLUDED_CODE: z.string(),
+  CITY_TAX_PCT: z.number(),
+  SERVICE_CHARGE_INCLUDED_CODE: z.string(),
+  SERVICE_CHARGE_PCT: z.number(),
+  tax_categories: z.array(TaxCategorySchema),
+  TAXATION_STRATEGY: z.string(),
+});
+export type HandleExposedPropertyTaxCategoriesParams = z.infer<typeof HandleExposedPropertyTaxCategoriesParamsSchema>;
+
 export class PropertyService {
+  public async handleExposedPropertyTaxCategories(params: HandleExposedPropertyTaxCategoriesParams) {
+    const payload = HandleExposedPropertyTaxCategoriesParamsSchema.parse(params);
+    const { data } = await axios.post('/Handle_Exposed_Property_Tax_Categories', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
   public async getExposedProperty(params: {
     id: number | null;
     language: string;

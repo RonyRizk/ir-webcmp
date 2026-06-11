@@ -1,6 +1,7 @@
 import { IAllowedOptions, IPickupCurrency } from '@/models/calendarData';
 
 export type TPickupData = {
+  agent: { id: number; name: string; code: string } | null;
   location: number;
   flight_details: string;
   due_upon_booking: string;

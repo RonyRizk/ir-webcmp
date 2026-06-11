@@ -97,6 +97,7 @@ export class IrArrivalsTable {
         </td>
         <td class="text-center">
           <ir-balance-cell
+            guestFinancial={booking.guest_financial}
             bookingNumber={booking.booking_nbr}
             isDirect={booking.is_direct}
             statusCode={booking.status.code}

@@ -10,7 +10,7 @@
 | Property            | Attribute    | Description | Type                                                                                                                                                                                   | Default     |
 | ------------------- | ------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `allowedProperties` | --           |             | `{ name?: string; id?: number; }[]`                                                                                                                                                    | `undefined` |
-| `baseFilters`       | --           |             | `{ FROM_DATE?: string; TO_DATE?: string; AC_ID?: string; BOOK_CASE?: string; WINDOW?: number; is_export_to_excel?: boolean; LIST_AC_ID?: number[]; include_previous_year?: boolean; }` | `undefined` |
+| `baseFilters`       | --           |             | `{ AC_ID?: string; BOOK_CASE?: string; FROM_DATE?: string; TO_DATE?: string; WINDOW?: number; is_export_to_excel?: boolean; LIST_AC_ID?: number[]; include_previous_year?: boolean; }` | `undefined` |
 | `isLoading`         | `is-loading` |             | `boolean`                                                                                                                                                                              | `undefined` |
 
 
@@ -18,7 +18,7 @@
 
 | Event          | Description | Type                                                                                                                                                                                                |
 | -------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `applyFilters` |             | `CustomEvent<{ FROM_DATE?: string; TO_DATE?: string; AC_ID?: string; BOOK_CASE?: string; WINDOW?: number; is_export_to_excel?: boolean; LIST_AC_ID?: number[]; include_previous_year?: boolean; }>` |
+| `applyFilters` |             | `CustomEvent<{ AC_ID?: string; BOOK_CASE?: string; FROM_DATE?: string; TO_DATE?: string; WINDOW?: number; is_export_to_excel?: boolean; LIST_AC_ID?: number[]; include_previous_year?: boolean; }>` |
 
 
 ## Dependencies

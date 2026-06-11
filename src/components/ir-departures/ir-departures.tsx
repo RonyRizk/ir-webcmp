@@ -200,6 +200,7 @@ export class IrDepartures {
         ></ir-booking-details-drawer>
         <ir-payment-folio
           style={{ height: 'auto' }}
+          booking={this.booking}
           bookingNumber={this.booking?.booking_nbr}
           paymentEntries={this.paymentEntries}
           payment={this.payment}

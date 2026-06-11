@@ -163,6 +163,32 @@ export class IrListingHeader {
             fromDate={moment(booking_listing.userSelection.from, 'YYYY-MM-DD')}
             toDate={moment(booking_listing.userSelection.to, 'YYYY-MM-DD')}
           />
+          {/* <ir-date-range-filter
+            class="filters-bar__date_picker"
+            fromDate={booking_listing.userSelection.from}
+            toDate={booking_listing.userSelection.to}
+            onDatesChanged={e => {
+              // const { from, to } = e.detail;
+              // this.dates = {
+              //   from: from ? moment(from, 'YYYY-MM-DD') : null,
+              //   to: to ? moment(to, 'YYYY-MM-DD') : null,
+              // };
+              // this.emitFilters();
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              const { from, to } = e.detail;
+              let to_date = to;
+              const toDate = moment(to);
+              const fromDate = moment(from);
+              if (
+                toDate.isSame(moment(booking_listing.userSelection.to, 'YYYY-MM-DD'), 'days') ||
+                toDate.isBefore(moment(booking_listing.userSelection.from, 'YYYY-MM-DD'), 'days')
+              ) {
+                to_date = booking_listing.userSelection.to;
+              }
+              booking_listing.userSelection = { ...booking_listing.userSelection, to: to_date, from: fromDate.format('YYYY-MM-DD') };
+            }}
+          ></ir-date-range-filter> */}
 
           <wa-select
             onchange={e => {

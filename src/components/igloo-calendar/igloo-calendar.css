@@ -1,7 +1,7 @@
 :host {
   display: block;
   position: relative;
-  background-color: #ffffff;
+  background: var(--wa-color-surface-default, white);
   height: 100%;
   text-align: center;
 }

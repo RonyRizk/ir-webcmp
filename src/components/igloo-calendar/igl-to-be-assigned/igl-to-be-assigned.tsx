@@ -207,6 +207,10 @@ export class IglToBeAssigned {
     try {
       if (withLoading) {
         this.isLoading = true;
+        // Reflect the picked date immediately and flush a render so the spinner
+        // is visible while updateCategories() is fetching.
+        this.selectedDate = dateStamp;
+        this.renderView();
       }
       if (this.showDatesList) {
         this.showUnassignedDate();
@@ -284,137 +288,52 @@ export class IglToBeAssigned {
 
   render() {
     const selectedDateData = this.selectedDate ? this.data[this.selectedDate] : null;
+    const isEmpty = Object.keys(this.data).length === 0;
+    const hasDates = this.orderedDatesList.length > 0;
+
     return (
-      <Host class="tobeAssignedContainer pr-1 text-left">
-        {/* <div class="stickyHeader pt-1">
-              <div class={'assignment_header'}>
-                <p class="tobeAssignedHeader ">{locales.entries.Lcz_Assignments}</p>
-                <ir-button
-                  class="close_btn"
-                  variant="icon"
-                  btn_styles="close_btn_style"
-                  icon_name="double_caret_left"
-                  style={colorVariants.secondary}
-                  onClickHandler={() => this.handleOptionEvent('closeSideMenu')}
-                  visibleBackgroundOnHover
-                ></ir-button>
-              </div>
-              <hr />
-              {Object.keys(this.data).length === 0 ? (
-                <p>{locales.entries.Lcz_AllBookingsAreAssigned}</p>
-              ) : this.isLoading ? (
-                <p class="d-flex align-items-center">
-                  <span class="p-0">{this.loadingMessage}</span>
-                  <div class="dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                  </div>
-                </p>
-              ) : (
-                <Fragment>
-                  {this.orderedDatesList.length ? (
-                    <div
-                      class={`custom-dropdown border border-light rounded text-center ` + (this.showDatesList ? 'show' : '')}
-                      id="dropdownMenuButton"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      <div
-                        class={'dropdown-toggle'}
-                        //onClick={() => this.showUnassignedDate()}
-                      >
-                        <span class="font-weight-bold">{selectedDateData?.dateStr || this.selectedDateDisplay}</span>
-                        <svg class={'caret-icon'} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height={14} width={14}>
-                          <path
-                            fill="#6b6f82"
-                            d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-                          />
-                        </svg>
-                      </div>
-                      <div class="dropdown-menu dropdown-menu-right full-width" aria-labelledby="dropdownMenuButton">
-                        {this.orderedDatesList?.map(ordDate => (
-                          <div class="dropdown-item pointer" onClick={() => this.showForDate(ordDate)}>
-                            {this.data[ordDate].dateStr}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    locales.entries.Lcz_AllBookingsAreAssigned
-                  )}
-                </Fragment>
-              )}
-            </div> */}
-        <div class={'fd-to-be-assigned__header-container'}>
-          <div class="fd-to-be-assigned__header">
-            <h2 class="fd-to-be-assigned__title" id="to-be-assigned-title">
-              {locales.entries.Lcz_Assignments}
-            </h2>
-            <ir-custom-button size="medium" onClickHandler={() => this.handleOptionEvent('closeSideMenu')} appearance="plain" variant="neutral">
-              <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
-            </ir-custom-button>
-          </div>
-          {Object.keys(this.data).length === 0 ? (
-            <p style={{ padding: '1.5rem' }}>{locales.entries.Lcz_AllBookingsAreAssigned}</p>
-          ) : this.isLoading ? (
-            <p class="d-flex align-items-center" style={{ padding: '1.5rem' }}>
-              <span class="p-0">{this.loadingMessage}</span>
-              <div class="dots">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-              </div>
-            </p>
-          ) : (
-            <div style={{ padding: '0.5rem' }}>
-              {this.orderedDatesList.length ? (
-                <div
-                  class={`custom-dropdown border border-light rounded text-center ` + (this.showDatesList ? 'show' : '')}
-                  id="dropdownMenuButton"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
+      <Host>
+        <div class="tba-panel">
+          <div class="tba-panel__head">
+            <header class="tba-panel__header">
+              <h2 class="tba-panel__title" id="to-be-assigned-title">
+                {locales.entries.Lcz_Assignments}
+              </h2>
+              <ir-custom-button size="medium" appearance="plain" variant="neutral" onClickHandler={() => this.handleOptionEvent('closeSideMenu')}>
+                <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
+              </ir-custom-button>
+            </header>
+
+            {hasDates && (
+              <div class="tba-panel__toolbar">
+                <wa-select
+                  size="small"
+                  aria-label={locales.entries.Lcz_Assignments}
+                  value={this.selectedDate ? this.selectedDate.toString() : ''}
+                  defaultValue={this.selectedDate ? this.selectedDate.toString() : ''}
+                  onchange={evt => this.showForDate((evt.target as HTMLSelectElement).value)}
                 >
-                  <div
-                    class={'dropdown-toggle'}
-                    //onClick={() => this.showUnassignedDate()}
-                  >
-                    <span class="font-weight-bold">{selectedDateData?.dateStr || this.selectedDateDisplay}</span>
-                    <svg class={'caret-icon'} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height={14} width={14}>
-                      <path
-                        fill="#6b6f82"
-                        d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-                      />
-                    </svg>
-                  </div>
-                  <div class="dropdown-menu dropdown-menu-right full-width" aria-labelledby="dropdownMenuButton">
-                    {this.orderedDatesList?.map(ordDate => (
-                      <div class="dropdown-item pointer" onClick={() => this.showForDate(ordDate)}>
-                        {this.data[ordDate].dateStr}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <span style={{ padding: '1.5rem' }}>{locales.entries.Lcz_AllBookingsAreAssigned}</span>
-              )}
-            </div>
-          )}
-        </div>
-        <div class="to-be-assigned__body">
-          {!this.isLoading && (
-            <div class="scrollabledArea">
-              {this.selectedDate ? (
-                selectedDateData && Object.keys(selectedDateData.categories).length ? (
-                  this.getCategoryView()
-                ) : (
-                  <div>{locales.entries.Lcz_AllAssignForThisDay}</div>
-                )
-              ) : null}
-            </div>
-          )}
+                  {this.orderedDatesList.map(ordDate => (
+                    <wa-option value={ordDate.toString()}>{this.data[ordDate].dateStr}</wa-option>
+                  ))}
+                </wa-select>
+              </div>
+            )}
+          </div>
+
+          <div class="tba-panel__body">
+            {isEmpty ? (
+              <p class="tba-panel__empty">{locales.entries.Lcz_AllBookingsAreAssigned}</p>
+            ) : this.isLoading ? (
+              <div class="tba-panel__loading">
+                <ir-spinner></ir-spinner>
+              </div>
+            ) : selectedDateData && Object.keys(selectedDateData.categories).length ? (
+              this.getCategoryView()
+            ) : (
+              <p class="tba-panel__empty">{locales.entries.Lcz_AllAssignForThisDay}</p>
+            )}
+          </div>
         </div>
       </Host>
     );

@@ -152,6 +152,7 @@ export class IrInput {
   @Event({ bubbles: true, composed: true, eventName: 'text-change' }) textChange: EventEmitter<string>;
   @Event({ bubbles: true, composed: true, eventName: 'input-blur' }) inputBlur: EventEmitter<void>;
   @Event({ bubbles: true, composed: true }) inputFocus: EventEmitter<void>;
+  @Event({ bubbles: true, composed: true }) inputCleared: EventEmitter<void>;
 
   @State() private isValid: boolean = true;
   @State() private slotState = new Map<string, boolean>();
@@ -335,6 +336,7 @@ export class IrInput {
   private handleClear = (e: CustomEvent) => {
     e.stopImmediatePropagation();
     e.stopPropagation();
+    this.inputCleared.emit();
     if (this._mask) {
       this._mask.value = '';
     }
@@ -376,6 +378,7 @@ export class IrInput {
     return (
       <Host>
         <wa-input
+          part="wa-input"
           type={this.type}
           name={this.name}
           value={displayValue}

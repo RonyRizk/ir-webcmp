@@ -66,7 +66,6 @@ graph TD;
   ir-reset-password --> ir-input
   ir-reset-password --> ir-password-validator
   ir-reset-password --> ir-custom-button
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

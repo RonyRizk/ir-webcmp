@@ -1,3 +1,20 @@
 :host {
   display: block;
 }
+
+/* Stacks the room-type heading above its booking cards. */
+.tba-category {
+  display: flex;
+  flex-direction: column;
+  /* gap: 0.5rem; */
+}
+
+.tba-category__title {
+  margin: 0;
+  color: var(--wa-color-default-normal);
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  font-size: var(--wa-font-size-m);
+  text-wrap: balance;
+}

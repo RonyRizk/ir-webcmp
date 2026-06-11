@@ -1,0 +1,288 @@
+@import url('../../../../common/table.css');
+
+:host {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  min-height: 60dvh;
+  max-width: 1920px;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  background-color: var(--wa-color-surface-default, #fff);
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.05),
+    0 1px 2px -1px rgb(0 0 0 / 0.05);
+}
+
+/* Header cells */
+.booking_heading .heading_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+}
+.booking_heading .heading_container--between {
+  justify-content: space-between;
+}
+.booking_heading .heading_container--end {
+  justify-content: flex-end;
+}
+
+/* Grouped cell */
+.data-table tbody td.grouped-cell {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Pagination */
+.data-table--pagination {
+  margin-top: auto !important;
+}
+
+/* Header action buttons */
+.header-button::part(start) {
+  display: none;
+}
+.header-button::part(base) {
+  justify-content: space-between;
+  color: var(--wa-color-text-subtle, #6b7280);
+  height: auto !important;
+  width: auto !important;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+.header-button:hover::part(base) {
+  color: var(--wa-color-text-normal);
+  background-color: var(--wa-color-neutral-fill-quiet, #f3f4f6);
+}
+
+/* Input columns */
+.input-column {
+  padding: 0 !important;
+}
+.data-table tbody td.input-column {
+  --input-width: 150px;
+  padding: 0 !important;
+  width: var(--input-width);
+  max-width: var(--input-width);
+  box-sizing: border-box;
+}
+
+/* Group expander */
+.group-expander {
+  height: 100%;
+}
+.group-expander::part(base) {
+  font-size: 1rem;
+  height: 100%;
+  align-items: center;
+  width: auto;
+}
+
+/* Column borders */
+.data-table thead th,
+.data-table tbody td {
+  border-right: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb) !important;
+}
+.data-table tbody td:last-child,
+.data-table thead th:last-child {
+  border-right: 0 !important;
+}
+.data-table thead th.sticky-column,
+.data-table tbody td.sticky-column {
+  border-right: 0 !important;
+}
+.sticky-column::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background-color: var(--wa-color-neutral-border-quiet, #e5e7eb);
+  pointer-events: none;
+}
+
+/* Empty / loading states */
+.folio-table__empty-state,
+.folio-table__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 200px;
+  color: var(--wa-color-text-subtle, #6b7280);
+  font-size: 0.875rem;
+}
+
+/* Date prompt state */
+.folio-table__date-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.folio-table__date-prompt-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+  background: var(--wa-color-brand-fill-quiet, #eff6ff);
+  color: var(--wa-color-brand-fill-loud, #2563eb);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.folio-table__date-prompt-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--wa-color-text-normal, #111827);
+}
+
+.folio-table__date-prompt-subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--wa-color-text-subtle, #6b7280);
+  max-width: 28rem;
+  line-height: 1.5;
+}
+
+.folio-table__no-results {
+  text-align: center;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  font-size: 0.875rem;
+  padding: 2rem 1rem;
+}
+
+/* Checkbox column */
+.folio-table__select-col {
+  width: 40px !important;
+  max-width: 40px !important;
+  min-width: 40px !important;
+  text-align: center !important;
+  padding-inline: 0.5rem !important;
+}
+
+.folio-table__checkbox {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--wa-color-brand-fill-loud);
+}
+
+/* Selected row highlight */
+.folio-table__row--selected td {
+  background-color: var(--wa-color-brand-fill-quiet, #eff6ff) !important;
+}
+
+/* Generate invoice action bar */
+.folio-table__invoice-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: var(--wa-color-brand-fill-quiet, #eff6ff);
+  border-bottom: 1px solid var(--wa-color-brand-border-quiet, #bfdbfe);
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.folio-table__invoice-bar-text {
+  display: flex;
+  align-items: center;
+  color: var(--wa-color-brand-on-quiet);
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Running balance cell */
+.folio-table__balance {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  display: block;
+  text-align: right;
+  padding: var(--ir-cell-padding, 0.5rem 1rem);
+}
+
+.folio-table__balance--negative {
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+}
+
+/* Balance rows */
+.balance-row__label {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+/* Cell alignment */
+.cell--align-end {
+  text-align: right !important;
+}
+.cell--align-center {
+  text-align: center;
+}
+
+/* Status cell */
+.folio-table__status-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Column header label */
+.folio-table__col-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.folio-table__col-label--end {
+  justify-content: flex-end;
+}
+.folio-table__col-label--center {
+  justify-content: center;
+}
+
+/* Description cell */
+.folio-table__description {
+  display: block;
+  width: 100%;
+}
+.folio-table__heading--actions,
+.folio-table__cell--actions {
+  text-align: center !important;
+}
+
+/* Actions cell */
+.fiscal-table__action-trigger.--placeholder {
+  height: calc(24px + 0.02rem);
+}
+.fiscal-table__action-trigger::part(base) {
+  width: 24px;
+  height: 24px;
+}
+
+/* Balance summary rows */
+.balance-row td {
+  background: var(--wa-color-brand-fill-quiet) !important;
+  color: var(--wa-color-brand-on-quiet) !important;
+  border-color: var(--wa-color-brand-border-quiet) !important;
+  padding: 0.75rem 1rem !important;
+}
+.balance-row td.sticky-column {
+  background: var(--wa-color-brand-fill-quiet) !important;
+}

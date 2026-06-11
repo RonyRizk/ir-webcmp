@@ -187,7 +187,7 @@ export class IrReallocationForm {
             </p>
           </wa-callout>
           {/* <div class="date-picker-row">
-          <ir-custom-date-picker
+          <ir-date-select
             data-testid="pickup_arrival_date"
             date={this.date?.format('YYYY-MM-DD')}
             // maxDate={this.defaultDates?.to_date.format('YYYY-MM-DD')}
@@ -198,7 +198,7 @@ export class IrReallocationForm {
             onDateChanged={evt => {
               this.date = evt.detail.start;
             }}
-          ></ir-custom-date-picker>
+          ></ir-date-select>
           <ir-custom-button variant="brand" loading={isRequestPending('/Check_Availability')} onClickHandler={() => this.checkBookingAvailability()}>
             Check available units
           </ir-custom-button>

@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+.cell-input {
+  height: 100%;
+  width: 100%;
+}
+.cell-input:focus-within {
+  z-index: 10;
+}
+.cell-input::part(wa-input) {
+  height: 100%;
+  z-index: 1;
+}
+.cell-input::part(base) {
+  height: 100%;
+  border-radius: 0;
+  border: 0;
+  font-size: 1rem;
+}
+.input-cell__container {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+.input-cell__container[data-active='false'] {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  justify-content: center;
+  padding: var(--ir-cell-padding);
+}

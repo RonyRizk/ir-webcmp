@@ -23,10 +23,11 @@ graph TD;
   ir-invoice --> ir-preview-screen-dialog
   ir-invoice --> ir-proforma-invoice-preview
   ir-invoice-form --> ir-spinner
-  ir-invoice-form --> ir-custom-date-picker
+  ir-invoice-form --> ir-date-select
   ir-invoice-form --> ir-booking-billing-recipient
   ir-invoice-form --> ir-empty-state
-  ir-custom-date-picker --> ir-input
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-booking-billing-recipient --> ir-booking-company-dialog
   ir-booking-company-dialog --> ir-dialog
   ir-booking-company-dialog --> ir-booking-company-form

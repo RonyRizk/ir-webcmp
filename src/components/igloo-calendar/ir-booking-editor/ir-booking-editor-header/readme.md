@@ -36,7 +36,7 @@
 - [ir-validator](../../../ui/ir-validator)
 - [ir-picker](../../../ui/ir-picker)
 - [ir-picker-item](../../../ui/ir-picker/ir-picker-item)
-- [igl-date-range](../../igl-date-range)
+- [ir-date-range](../../../ui/ir-date-range)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
@@ -45,10 +45,10 @@ graph TD;
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item
-  ir-booking-editor-header --> igl-date-range
+  ir-booking-editor-header --> ir-date-range
   ir-booking-editor-header --> ir-custom-button
-  igl-date-range --> ir-input
-  igl-date-range --> ir-custom-date-range
+  ir-date-range --> ir-input
+  ir-date-range --> ir-custom-date-range
   ir-booking-editor --> ir-booking-editor-header
   style ir-booking-editor-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

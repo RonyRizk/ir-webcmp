@@ -45,7 +45,7 @@
 - [ir-picker](../../../ui/ir-picker)
 - [ir-picker-item](../../../ui/ir-picker/ir-picker-item)
 - [ir-validator](../../../ui/ir-validator)
-- [igl-date-range](../../igl-date-range)
+- [ir-date-range](../../../ui/ir-date-range)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
@@ -54,10 +54,10 @@ graph TD;
   igl-book-property-header --> ir-picker
   igl-book-property-header --> ir-picker-item
   igl-book-property-header --> ir-validator
-  igl-book-property-header --> igl-date-range
+  igl-book-property-header --> ir-date-range
   igl-book-property-header --> ir-custom-button
-  igl-date-range --> ir-input
-  igl-date-range --> ir-custom-date-range
+  ir-date-range --> ir-input
+  ir-date-range --> ir-custom-date-range
   igl-booking-overview-page --> igl-book-property-header
   style igl-book-property-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

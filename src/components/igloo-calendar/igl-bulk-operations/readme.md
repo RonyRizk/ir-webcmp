@@ -40,10 +40,11 @@ graph TD;
   ir-title --> ir-icon
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-custom-button
-  igl-bulk-stop-sale --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  igl-bulk-stop-sale --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-bulk-block --> ir-custom-button
-  igl-bulk-block --> ir-custom-date-picker
+  igl-bulk-block --> ir-date-select
   style igl-bulk-operations fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

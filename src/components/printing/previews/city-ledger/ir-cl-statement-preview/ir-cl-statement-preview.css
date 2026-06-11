@@ -1,0 +1,76 @@
+@import '../cl-print-table.css';
+
+:host {
+  display: block;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: #1a1a1a;
+}
+
+/* ── Loading / Error states ──────────────────────────────────────────────── */
+
+.document-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.document-state--error {
+  color: #dc2626;
+}
+
+/* ── Document shell ──────────────────────────────────────────────────────── */
+
+.document {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+/* ── Statement period ────────────────────────────────────────────────────── */
+
+.statement-period {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.statement-period__label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.statement-period__value {
+  color: #374151;
+}
+
+/* ── Print ───────────────────────────────────────────────────────────────── */
+
+@media print {
+  :host {
+    display: block;
+    width: 100%;
+  }
+
+  .document {
+    box-shadow: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    border-radius: 0;
+  }
+}

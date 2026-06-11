@@ -108,7 +108,9 @@ export class IrInvoice {
 
   @State() viewMode: ViewMode = 'invoice';
   @State() isLoading: boolean;
+
   private _id = `invoice-form__${v4()}`;
+
   componentWillLoad() {
     if (this.booking) {
       if (moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') && this.viewMode === 'invoice') {
@@ -157,7 +159,7 @@ export class IrInvoice {
                 }
               }}
             >
-              Pro-forma
+              Proforma
             </wa-switch>
           </div>
 
@@ -186,8 +188,8 @@ export class IrInvoice {
             >
               Cancel
             </ir-custom-button>
-            {/* <ir-custom-button value="pro-forma" type="submit" size="medium" class="w-100 flex-fill" appearance="outlined" variant="neutral" form={this._id}>
-              Pro-forma invoice
+            {/* <ir-custom-button value="pro_forma" type="submit" size="medium" class="w-100 flex-fill" appearance="outlined" variant="neutral" form={this._id}>
+              Proforma invoice
             </ir-custom-button> */}
             <ir-custom-button
               disabled={this.invoiceInfo?.invoiceable_items?.filter(i => i.is_invoiceable)?.length === 0}

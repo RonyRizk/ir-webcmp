@@ -1,3 +1,4 @@
+import { Agent } from '@/services/agents/type';
 import moment from 'moment';
 
 export const _formatDate = (date: string) => {
@@ -14,4 +15,7 @@ export const _formatTime = (hour: string, minute: string) => {
   // format them as AM/PM using moment.js
   return moment(`${hour}:${minute}`, 'HH:mm').format('hh:mm A');
   // return moment(`${hour}:${minute}`, 'HH:mm').format('HH:mm');
+};
+export const isAgentMode = (agent: Agent) => {
+  return agent && agent.payment_mode.code !== '002';
 };

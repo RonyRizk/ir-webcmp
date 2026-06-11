@@ -1,6 +1,10 @@
 /* Base styles */
+:host {
+  /* --ir-cell-padding: 0.1rem 0.8rem; */
+  --ir-cell-padding: 0.5rem 1rem;
+}
 .ir-table-row td {
-  padding: 0.5rem 1rem !important;
+  padding: var(--ir-cell-padding) !important;
   text-align: left;
   z-index: 2;
   background-color: var(--wa-color-surface-default);
@@ -50,7 +54,8 @@
   background: var(--wa-color-surface-default) !important;
   padding-top: 0.5rem !important;
   padding-bottom: 0.5rem !important;
-  border-bottom: 1px solid var(--wa-color-neutral-90) !important;
+  /* border-bottom: 1px solid var(--wa-color-neutral-fill-normal) !important; */
+  border-bottom: var(--wa-border-style) var(--wa-border-width-s) var(--wa-color-neutral-border-normal) !important;
   color: var(--wa-color-text-normal);
   /* position: sticky;
   top: 0;
@@ -65,8 +70,8 @@
 
 .data-table--pagination {
   padding: 0.5rem 1rem;
-  position: sticky;
-  bottom: 0;
+  /* position: sticky;
+  bottom: 0; */
   background: var(--wa-color-surface-default);
   border-top: 1px solid var(--wa-color-neutral-90);
 }
@@ -75,7 +80,7 @@
 
 .selected td {
   background: var(--wa-color-brand-fill-quiet) !important;
-  border-color: var(--wa-color-brand-fill-normal) !important;
+  border-color: var(--wa-color-neutral-border-quiet) !important;
 }
 .selected td {
   color: var(--gray-dark) !important;
@@ -98,6 +103,9 @@
 .sortable {
   text-transform: capitalize;
   cursor: pointer;
+}
+.ir-table-row td {
+  transition-duration: var(--wa-transition-fast);
 }
 .table thead th.sortable {
   transition-property: background, border, box-shadow, color;

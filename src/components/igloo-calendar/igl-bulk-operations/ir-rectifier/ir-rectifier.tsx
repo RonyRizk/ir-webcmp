@@ -33,7 +33,7 @@ export class IrRectifier {
   @Event() toast: EventEmitter<IToast>;
 
   private propertyService = new PropertyService();
-  toDateRef: HTMLIrCustomDatePickerElement;
+  toDateRef: HTMLIrDateSelectElement;
 
   componentWillLoad() {
     this.form = {
@@ -143,7 +143,7 @@ export class IrRectifier {
           {this.showRoomTypeError && <p class="text-danger m-0">Please select at least one room type.</p>}
           <div class="ir-rectifier__date-range">
             <ir-validator value={this.form.from ?? null} schema={ExposedRectifierParamsSchema.shape.from} autovalidate={this.autoValidate}>
-              <ir-custom-date-picker
+              <ir-date-select
                 class="ir-rectifier__date-picker ir-rectifier__date-picker--from"
                 label="Date from"
                 emitEmptyDate
@@ -153,10 +153,10 @@ export class IrRectifier {
                   this.updateForm(this.normalizeDateRange({ from }));
                   requestAnimationFrame(() => this.toDateRef?.openDatePicker());
                 }}
-              ></ir-custom-date-picker>
+              ></ir-date-select>
             </ir-validator>
             <ir-validator value={this.form.to ?? null} schema={ExposedRectifierParamsSchema.shape.to} autovalidate={this.autoValidate}>
-              <ir-custom-date-picker
+              <ir-date-select
                 class="ir-rectifier__date-picker ir-rectifier__date-picker--to"
                 label="To (inclusive)"
                 emitEmptyDate
@@ -168,7 +168,7 @@ export class IrRectifier {
                   const to = e.detail.start?.format('YYYY-MM-DD') ?? null;
                   this.updateForm(this.normalizeDateRange({ to }));
                 }}
-              ></ir-custom-date-picker>
+              ></ir-date-select>
             </ir-validator>
           </div>
         </form>

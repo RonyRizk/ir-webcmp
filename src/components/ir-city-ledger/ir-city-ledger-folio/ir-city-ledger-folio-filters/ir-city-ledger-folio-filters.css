@@ -1,0 +1,143 @@
+:host {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════
+   Filter bar — mobile-first layout
+   Default : single column, full-width rows
+   md      : two rows  (dates + search | actions)
+   lg      : single flex row
+   ═══════════════════════════════════════════════ */
+.filters-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+/* ── Date range ─────────────────────────────────── */
+.filters-bar__dates {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.filters-bar__date_picker {
+  width: 100%;
+}
+
+/* ── Status + Search group ──────────────────────── */
+.filters-bar__search-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.filters-bar__status-select {
+  flex-shrink: 0;
+  min-width: 110px;
+}
+
+.filters-bar__search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.filters-bar__search-icon {
+  font-size: 0.875rem;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  flex-shrink: 0;
+}
+
+/* ── Actions group ──────────────────────────────── */
+.filters-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+/*sm — 640px: date picker on row 1; search-group + actions share row 2 */
+@media (min-width: 640px) {
+  .filters-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* force dates onto its own row */
+  .filters-bar__dates {
+    width: 100%;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  /* search group fills the remaining space on row 2 */
+  .filters-bar__search-group {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+
+  .filters-bar__status-select {
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+
+  .filters-bar__search-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* actions sit at the end of row 2 */
+  .filters-bar__actions {
+    flex-shrink: 0;
+    width: auto;
+    justify-content: flex-end;
+  }
+}
+
+/*md — 768px: dates still on its own row; search-group + actions share row 2 with more room */
+@media (min-width: 768px) {
+  .filters-bar__search-input {
+    min-width: 160px;
+    max-width: none;
+  }
+}
+
+/*lg — 1024px: all three groups in one row */
+@media (min-width: 1024px) {
+  .filters-bar__search-input {
+    max-width: 250px;
+  }
+  .filters-bar {
+    flex-wrap: nowrap;
+  }
+
+  .filters-bar__dates {
+    width: auto;
+    flex-shrink: 0;
+    min-width: 280px;
+  }
+
+  .filters-bar__search-group {
+    flex: 1;
+    width: auto;
+  }
+
+  .filters-bar__actions {
+    width: auto;
+    flex-shrink: 0;
+  }
+}
+
+/*xl*/
+@media (min-width: 1280px) {
+}
+
+/*2xl*/
+@media (min-width: 1536px) {
+}

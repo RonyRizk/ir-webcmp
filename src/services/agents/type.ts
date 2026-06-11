@@ -6,6 +6,11 @@ export const ExposedAgentsPropsSchema = z.object({
 });
 export type ExposedAgentsProps = z.infer<typeof ExposedAgentsPropsSchema>;
 
+export const ExposedAgentPropsSchema = z.object({
+  id: z.coerce.number(),
+});
+export type ExposedAgentProps = z.infer<typeof ExposedAgentPropsSchema>;
+
 export const CodeDescriptionSchema = z.object({
   code: z.string(),
   description: z.string().nullable().optional(),
@@ -52,7 +57,8 @@ export const AgentBaseSchema = z.object({
   tax_nbr: z.string(),
   reference: z.string().nullable().optional(),
   verification_mode: z.string().nullable().default(null),
-  cl_post_timing: ClPostTimingSchema,
+  has_opening_balance: z.boolean().optional().default(false),
+  cl_post_timing: ClPostTimingSchema.optional(),
 });
 
 export const AgentSchema = AgentBaseSchema.superRefine((value, ctx) => {

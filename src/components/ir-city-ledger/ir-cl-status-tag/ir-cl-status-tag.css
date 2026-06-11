@@ -1,0 +1,10 @@
+:host {
+  display: inline-flex;
+}
+.cl-status-tag__xs {
+  height: 1.5rem;
+}
+.cl-status-tag__xs::part(content) {
+  padding: 0;
+  height: fit-content;
+}

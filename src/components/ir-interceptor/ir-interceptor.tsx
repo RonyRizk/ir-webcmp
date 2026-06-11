@@ -265,7 +265,7 @@ export class IrInterceptor {
         {this.isLoading && !this.isPageLoadingStopped && (
           <div class="loadingScreenContainer">
             <div class="loaderContainer">
-              <ir-spinner></ir-spinner>
+              <wa-spinner style={{ fontSize: '2.5rem' }}></wa-spinner>
             </div>
           </div>
         )}

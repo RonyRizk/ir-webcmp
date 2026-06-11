@@ -1,10 +1,55 @@
+/* ─── Host ──────────────────────────────────────────────── */
 :host {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--ir-date-view-font-size, 0.8125rem); /* 13px */
+  color: var(--ir-date-view-color, inherit);
+  line-height: 1.4;
+}
+
+/* ─── Base wrapper ──────────────────────────────────────── */
+[part='base'] {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ir-date-view-gap, 0.3125rem); /* 5px */
+}
+
+/* ─── Date spans ────────────────────────────────────────── */
+[part='from-date'],
+[part='to-date'] {
+  white-space: nowrap;
+  font-weight: var(--ir-date-view-date-font-weight, 400);
+  color: var(--ir-date-view-date-color, inherit);
+}
+
+/* ─── Separator ─────────────────────────────────────────── */
+[part='separator'] {
+  display: inline-flex;
+  align-items: center;
+  /* color: var(--ir-date-view-separator-color, currentColor); */
+  /* opacity: 0.55; */
+  flex-shrink: 0;
+}
+
+[part='separator-icon'] {
+  width: var(--ir-date-view-separator-size, 0.75rem); /* 12px */
+  height: var(--ir-date-view-separator-size, 0.75rem);
   display: block;
-  font-size: 13.65px !important;
-  width: 100%;
 }
-.mx-01 {
-  --m: 5px;
-  margin-right: var(--m) !important;
-  margin-left: var(--m) !important;
-}
+
+/* ─── Night count badge ─────────────────────────────────── */
+/* [part='night-count'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1875rem;
+  font-size: var(--ir-date-view-night-font-size, 0.75rem);
+  font-weight: var(--ir-date-view-night-font-weight, 500);
+  color: var(--ir-date-view-night-color, var(--wa-color-neutral-600, #6b7280));
+  background-color: var(--ir-date-view-night-bg, var(--wa-color-neutral-100, #f3f4f6));
+  border: 1px solid var(--ir-date-view-night-border, var(--wa-color-neutral-200, #e5e7eb));
+  border-radius: var(--ir-date-view-night-radius, var(--wa-border-radius-pill, 9999px));
+  padding: 0.0625rem 0.4375rem;
+  white-space: nowrap;
+  line-height: 1.6;
+} */

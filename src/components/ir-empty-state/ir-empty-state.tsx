@@ -7,13 +7,18 @@ import { Component, Host, Prop, h } from '@stencil/core';
 })
 export class IrEmptyState {
   @Prop() message: string = 'No records found';
+  @Prop() showIcon: boolean = true;
   render() {
     return (
       <Host>
         <slot name="icon">
-          <wa-icon name="ban" style={{ transform: 'rotate(90deg)', fontSize: '2rem' }}></wa-icon>
+          {this.showIcon && (
+            <div class={'icon_container'}>
+              <wa-icon name="ban" style={{ transform: 'rotate(90deg)' }}></wa-icon>
+            </div>
+          )}
         </slot>
-        <p part="message" class="message">
+        <p part="message" class={`message ${this.showIcon ? '' : '--secondary'}`}>
           {this.message}
         </p>
         <slot></slot>

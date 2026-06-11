@@ -103,42 +103,78 @@ export class IglSplitBooking {
       this.isLoading = true;
       this.errors = null;
       const selectedUnit = SelectedUnitSchema.parse(this.selectedUnit);
-      const oldRooms = this.booking.rooms.filter(r => r.identifier !== this.identifier);
+      // const oldRooms = this.booking.rooms.filter(r => r.identifier !== this.identifier);
       const canCheckIn = this.room.in_out?.code === '001' ? (moment().isBefore(this.selectedDates.from_date) ? false : true) : false;
-      let rooms = [
-        ...oldRooms,
-        {
-          ...this.room,
-          from_date: this.room.from_date,
-          to_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
-          days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isBefore(this.selectedDates.from_date, 'dates')),
-          departure_time: null,
+      let rooms: any = [...this.booking.rooms];
+      let currIndex = rooms.findIndex(room => room.identifier === this.room.identifier);
+      if (currIndex === -1) {
+        throw new Error(`Didn't find room identifier ${this.room.identifier}`);
+      }
+      rooms[currIndex] = {
+        ...this.room,
+        from_date: this.room.from_date,
+        to_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
+        days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isBefore(this.selectedDates.from_date, 'dates')),
+        departure_time: null,
+      };
+      rooms.push({
+        ...this.room,
+        identifier: null,
+        in_out: canCheckIn
+          ? this.room.in_out
+          : {
+              code: '000',
+            },
+        check_in: canCheckIn,
+        assigned_units_pool: null,
+        parent_room_identifier: this.room.identifier,
+        is_split: true,
+        roomtype: {
+          id: selectedUnit.roomtype_id,
         },
-        {
-          ...this.room,
-          identifier: null,
-          in_out: canCheckIn
-            ? this.room.in_out
-            : {
-                code: '000',
-              },
-          check_in: canCheckIn,
-          assigned_units_pool: null,
-          parent_room_identifier: this.room.identifier,
-          is_split: true,
-          roomtype: {
-            id: selectedUnit.roomtype_id,
-          },
-          rateplan: {
-            id: selectedUnit.rateplan_id || this.room.rateplan.id,
-          },
-          departure_time: this.room.departure_time,
-          unit: { id: selectedUnit.unit_id },
-          from_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
-          // to_date: this.selectedDates.to_date.format('YYYY-MM-DD'),
-          days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isSameOrAfter(this.selectedDates.from_date, 'dates')),
+        rateplan: {
+          id: selectedUnit.rateplan_id || this.room.rateplan.id,
         },
-      ];
+        departure_time: this.room.departure_time,
+        unit: { id: selectedUnit.unit_id },
+        from_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
+        // to_date: this.selectedDates.to_date.format('YYYY-MM-DD'),
+        days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isSameOrAfter(this.selectedDates.from_date, 'dates')),
+      });
+      // let rooms = [
+      //   ...oldRooms,
+      //   {
+      //     ...this.room,
+      //     from_date: this.room.from_date,
+      //     to_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
+      //     days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isBefore(this.selectedDates.from_date, 'dates')),
+      //     departure_time: null,
+      //   },
+      //   {
+      //     ...this.room,
+      //     identifier: null,
+      //     in_out: canCheckIn
+      //       ? this.room.in_out
+      //       : {
+      //           code: '000',
+      //         },
+      //     check_in: canCheckIn,
+      //     assigned_units_pool: null,
+      //     parent_room_identifier: this.room.identifier,
+      //     is_split: true,
+      //     roomtype: {
+      //       id: selectedUnit.roomtype_id,
+      //     },
+      //     rateplan: {
+      //       id: selectedUnit.rateplan_id || this.room.rateplan.id,
+      //     },
+      //     departure_time: this.room.departure_time,
+      //     unit: { id: selectedUnit.unit_id },
+      //     from_date: this.selectedDates.from_date.format('YYYY-MM-DD'),
+      //     // to_date: this.selectedDates.to_date.format('YYYY-MM-DD'),
+      //     days: this.room.days.filter(r => moment(r.date, 'YYYY-MM-DD').isSameOrAfter(this.selectedDates.from_date, 'dates')),
+      //   },
+      // ];
       const booking = {
         assign_units: true,
         is_pms: true,

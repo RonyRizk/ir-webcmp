@@ -1,0 +1,32 @@
+@import url('../fields.css');
+
+.invoice-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.invoice-option__left {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.invoice-option__number {
+  font-weight: 500;
+}
+
+.invoice-option__date {
+  color: var(--wa-color-neutral-text-quiet);
+}
+
+.invoice-option__amount {
+  font-weight: 500;
+}
+
+.invoice-option__ref {
+  color: var(--wa-color-neutral-text-quiet);
+  font-style: italic;
+}

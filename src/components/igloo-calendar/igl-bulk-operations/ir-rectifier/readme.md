@@ -30,14 +30,15 @@
 ### Depends on
 
 - [ir-validator](../../../ui/ir-validator)
-- [ir-custom-date-picker](../../../ir-custom-date-picker)
+- [ir-date-select](../../../ui/date-picker/ir-date-select)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-rectifier --> ir-validator
-  ir-rectifier --> ir-custom-date-picker
-  ir-custom-date-picker --> ir-input
+  ir-rectifier --> ir-date-select
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   igl-bulk-operations-drawer --> ir-rectifier
   style ir-rectifier fill:#f9f,stroke:#333,stroke-width:4px
 ```

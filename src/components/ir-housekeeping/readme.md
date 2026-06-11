@@ -45,7 +45,6 @@ graph TD;
   ir-housekeeping --> ir-toast
   ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

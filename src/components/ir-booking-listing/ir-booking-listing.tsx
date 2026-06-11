@@ -354,6 +354,7 @@ export class IrBookingListing {
         ></ir-guest-info-drawer>
         <ir-payment-folio
           style={{ height: 'auto' }}
+          booking={this.booking}
           bookingNumber={this.booking?.booking_nbr}
           paymentEntries={this.paymentEntries}
           payment={this.payment}

@@ -1,4 +1,4 @@
-# ir-date-range
+# igl-date-range
 
 
 
@@ -7,49 +7,34 @@
 
 ## Properties
 
-| Property           | Attribute            | Description                                                                         | Type                                                            | Default                                                                                                                      |
-| ------------------ | -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `applyLabel`       | `apply-label`        | Text shown on the Apply button.                                                     | `string`                                                        | `'Apply'`                                                                                                                    |
-| `autoApply`        | `auto-apply`         | Whether to apply the selected range automatically without clicking 'Apply'.         | `boolean`                                                       | `undefined`                                                                                                                  |
-| `cancelLabel`      | `cancel-label`       | Text shown on the Cancel button.                                                    | `string`                                                        | `'Cancel'`                                                                                                                   |
-| `customRangeLabel` | `custom-range-label` | Label used for the custom date range option.                                        | `string`                                                        | `'Custom'`                                                                                                                   |
-| `date`             | --                   | Single date selection value (used in single date picker mode).                      | `Date`                                                          | `undefined`                                                                                                                  |
-| `daysOfWeek`       | --                   | Abbreviated names of the days of the week.                                          | `string[]`                                                      | `['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']`                                                                                 |
-| `disabled`         | `disabled`           | Disables the date range input when true.                                            | `boolean`                                                       | `false`                                                                                                                      |
-| `firstDay`         | `first-day`          | First day of the week (0 = Sunday, 1 = Monday, ...).                                | `number`                                                        | `1`                                                                                                                          |
-| `format`           | `format`             | Date format used in the input and picker.                                           | `string`                                                        | `'MMM DD, YYYY'`                                                                                                             |
-| `fromDate`         | --                   | Start date for the date range.                                                      | `Date`                                                          | `undefined`                                                                                                                  |
-| `fromLabel`        | `from-label`         | Label for the "From" date input.                                                    | `string`                                                        | `'Form'`                                                                                                                     |
-| `maxDate`          | `max-date`           | Maximum selectable date.                                                            | `Date \| string`                                                | `undefined`                                                                                                                  |
-| `maxSpan`          | `max-span`           | Maximum range span (e.g., `{ days: 240 }`).                                         | `Duration \| DurationInputObject \| FromTo \| number \| string` | `{ days: 240 }`                                                                                                              |
-| `minDate`          | `min-date`           | Minimum selectable date.                                                            | `Date \| string`                                                | `undefined`                                                                                                                  |
-| `monthNames`       | --                   | Month names shown in the calendar header.                                           | `string[]`                                                      | `['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']` |
-| `opens`            | `opens`              | Defines which side the calendar opens to. Options: `'left'`, `'right'`, `'center'`. | `"center" \| "left" \| "right"`                                 | `undefined`                                                                                                                  |
-| `separator`        | `separator`          | Separator string used between start and end dates.                                  | `string`                                                        | `' - '`                                                                                                                      |
-| `singleDatePicker` | `single-date-picker` | Enables single date selection mode.                                                 | `boolean`                                                       | `false`                                                                                                                      |
-| `toDate`           | --                   | End date for the date range.                                                        | `Date`                                                          | `undefined`                                                                                                                  |
-| `toLabel`          | `to-label`           | Label for the "To" date input.                                                      | `string`                                                        | `'To'`                                                                                                                       |
-| `weekLabel`        | `week-label`         | Label for the week column in the calendar.                                          | `string`                                                        | `'W'`                                                                                                                        |
+| Property             | Attribute              | Description                                                                                                                                     | Type                             | Default     |
+| -------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
+| `dateLabel`          | `date-label`           | Optional label text shown above the input (forwarded to ir-input).                                                                              | `string`                         | `undefined` |
+| `defaultData`        | --                     | Initial date values. Expects `{ fromDate: string \| Date, toDate: string \| Date }`. Re-initializes dates whenever this prop reference changes. | `{ [key: string]: any; }`        | `undefined` |
+| `disabled`           | `disabled`             | When `true`, the picker is disabled and cannot be opened.                                                                                       | `boolean`                        | `false`     |
+| `hint`               | `hint`                 | Optional hint text rendered below the input.                                                                                                    | `string`                         | `undefined` |
+| `maxDate`            | `max-date`             | ISO date string (YYYY-MM-DD) for the latest selectable date.                                                                                    | `string`                         | `undefined` |
+| `minDate`            | `min-date`             | ISO date string (YYYY-MM-DD) for the earliest selectable date.                                                                                  | `string`                         | `undefined` |
+| `size`               | `size`                 | Controls the visual size of the input trigger.                                                                                                  | `"large" \| "medium" \| "small"` | `'small'`   |
+| `variant`            | `variant`              | `"booking"` shows the nights badge; `"default"` hides it.                                                                                       | `"booking" \| "default"`         | `'default'` |
+| `withDateDifference` | `with-date-difference` | When `true` and `variant="booking"`, a nights badge is shown inside the input.                                                                  | `boolean`                        | `true`      |
 
 
 ## Events
 
-| Event         | Description                                                                                                                  | Type                                           |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `dateChanged` | Emits when a new date range is selected.  Example: ```tsx <ir-date-range onDateChanged={(e) => console.log(e.detail)} /> ``` | `CustomEvent<{ start: Moment; end: Moment; }>` |
+| Event             | Description                                                                                                                                                | Type                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `dateRangeChange` | Emits the selected check-in / check-out as Moment objects.                                                                                                 | `CustomEvent<{ checkIn: Moment; checkOut: Moment; }>` |
+| `dateRangeHide`   | Fired when the calendar popup closes.                                                                                                                      | `CustomEvent<void>`                                   |
+| `dateRangeShow`   | Fired when the calendar popup opens.                                                                                                                       | `CustomEvent<void>`                                   |
+| `dateSelectEvent` | <span style="color:red">**[DEPRECATED]**</span> Prefer `dateRangeChange`.<br/><br/>Legacy event – emits `{ key, data }` for backward-compatible consumers. | `CustomEvent<{ [key: string]: any; }>`                |
 
 
 ## Methods
 
-### `openDatePicker() => Promise<void>`
+### `closeDatePicker() => Promise<void>`
 
-Opens the date picker programmatically.
-
-Example:
-```ts
-const el = document.querySelector('ir-date-range');
-await el.openDatePicker();
-```
+Closes the calendar popup. Also invoked automatically on outside clicks via `@ClickOutside`.
 
 #### Returns
 
@@ -57,6 +42,52 @@ Type: `Promise<void>`
 
 
 
+### `openDatePicker() => Promise<void>`
+
+Opens the calendar popup.
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+
+## Shadow Parts
+
+| Part              | Description |
+| ----------------- | ----------- |
+| `"anchor"`        |             |
+| `"body"`          |             |
+| `"calendar"`      |             |
+| `"calendar-icon"` |             |
+| `"combobox"`      |             |
+| `"input"`         |             |
+| `"nights-badge"`  |             |
+| `"popup"`         |             |
+
+
+## Dependencies
+
+### Used by
+
+ - [igl-book-property-header](../../igloo-calendar/igl-book-property/igl-book-property-header)
+ - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
+
+### Depends on
+
+- [ir-input](../ir-input)
+- [ir-custom-date-range](../ir-custom-date-range)
+
+### Graph
+```mermaid
+graph TD;
+  ir-date-range --> ir-input
+  ir-date-range --> ir-custom-date-range
+  igl-book-property-header --> ir-date-range
+  ir-booking-editor-header --> ir-date-range
+  style ir-date-range fill:#f9f,stroke:#333,stroke-width:4px
+```
 
 ----------------------------------------------
 

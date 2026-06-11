@@ -1,0 +1,11 @@
+@import url('../../../common/table.css');
+:host {
+  display: contents;
+}
+td {
+  border-inline-end: 1px solid var(--wa-color-neutral-border-quiet, #abaeb9);
+}
+
+td:last-child {
+  border-inline-end: 0;
+}

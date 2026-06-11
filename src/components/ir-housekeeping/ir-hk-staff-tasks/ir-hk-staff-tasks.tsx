@@ -1,10 +1,9 @@
 import { Task } from '@/models/housekeeping';
 import Token from '@/models/Token';
 import { ConnectedHK, HouseKeepingService } from '@/services/housekeeping.service';
-import { UnitHkStatusChangePayload } from '@/components/igloo-calendar/igloo-calendar';
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment/min/moment-with-locales';
-import io, { Socket } from 'socket.io-client';
+import { realtimeService } from '@/services/realtime/realtime.service';
 import { v4 } from 'uuid';
 
 const LANGUAGE_KEY = 'ir_language';
@@ -75,7 +74,7 @@ export class IrHkStaffTasks {
   private fromDate = moment().locale('en').format('YYYY-MM-DD');
   private toDate = moment().add(3, 'days').locale('en').format('YYYY-MM-DD');
   private confirmDialog: HTMLIrDialogElement;
-  private socket: Socket;
+  private unsubscribeRealtime: (() => void) | null = null;
   private hkOverrideTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Resolved language: localStorage → language prop → 'en'. @State so render updates on change. */
@@ -223,30 +222,17 @@ export class IrHkStaffTasks {
   }
 
   private connectSocket() {
-    if (this.socket) {
+    if (this.unsubscribeRealtime) {
       return;
     }
-    this.socket = io('https://realtime.igloorooms.com/');
-    this.socket.on('MSG', async (msg: string) => {
-      const parsed = JSON.parse(msg);
-      if (!parsed) {
-        return;
-      }
-      const { REASON, KEY, PAYLOAD } = parsed;
-      if (KEY.toString() !== this.connectedHk.AC_ID.toString()) {
-        return;
-      }
-      if (REASON === 'UNIT_HK_STATUS_CHANGED') {
-        const result: UnitHkStatusChangePayload = JSON.parse(PAYLOAD);
-        if (result.HKM_ID === this.connectedHk.HKM_ID) {
+    this.unsubscribeRealtime = realtimeService.subscribe(this.connectedHk.AC_ID, async msg => {
+      if (msg.reason === 'UNIT_HK_STATUS_CHANGED') {
+        if (msg.payload.HKM_ID === this.connectedHk.HKM_ID) {
           await this.refreshTasks();
         }
-      } else if (REASON === 'HK_TASK_OVERRIDE') {
-        const result = JSON.parse(PAYLOAD);
-        // Relevant if assigned to us (HKM_ID matches) or removed from someone (HKM_ID null — could be us)
-        const affectsUs = result.HKM_ID === this.connectedHk.HKM_ID || result.HKM_ID === null;
-        // Only refresh if the date falls within our displayed window
-        const inRange = result.DATE >= this.fromDate && result.DATE <= this.toDate;
+      } else if (msg.reason === 'HK_TASK_OVERRIDE') {
+        const affectsUs = msg.payload.HKM_ID === this.connectedHk.HKM_ID || msg.payload.HKM_ID === null;
+        const inRange = msg.payload.DATE >= this.fromDate && msg.payload.DATE <= this.toDate;
         if (affectsUs && inRange) {
           this.scheduleTaskRefresh();
         }
@@ -259,8 +245,8 @@ export class IrHkStaffTasks {
       clearTimeout(this.hkOverrideTimer);
       this.hkOverrideTimer = null;
     }
-    this.socket?.disconnect();
-    this.socket = null;
+    this.unsubscribeRealtime?.();
+    this.unsubscribeRealtime = null;
   }
 
   private scheduleTaskRefresh() {

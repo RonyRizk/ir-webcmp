@@ -5,9 +5,9 @@ import { RoomService } from '@/services/room.service';
 import { UserService } from '@/services/user.service';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { AllowedUser } from './types';
-import { bookingReasons } from '@/models/IBooking';
-import { io, Socket } from 'socket.io-client';
+import { realtimeService, type RealtimeReason } from '@/services/realtime/realtime.service';
 import locales from '@/stores/locales.store';
+import { getEntryValue } from '@/utils/utils';
 
 @Component({
   tag: 'ir-user-management',
@@ -39,7 +39,7 @@ export class IrUserManagement {
   private bookingService = new BookingService();
 
   private userTypes: Map<number | string, string> = new Map();
-  private socket: Socket;
+  private unsubscribeRealtime: (() => void) | null = null;
 
   private superAdminId = '5';
 
@@ -106,9 +106,8 @@ export class IrUserManagement {
       }
 
       await Promise.all(requests);
-      this.socket = io('https://realtime.igloorooms.com/');
-      this.socket.on('MSG', async msg => {
-        await this.handleSocketMessage(msg);
+      this.unsubscribeRealtime = realtimeService.subscribe(this.property_id, async msg => {
+        await this.handleSocketMessage(msg.reason, msg.payload);
       });
     } catch (error) {
       console.log(error);
@@ -117,31 +116,13 @@ export class IrUserManagement {
     }
   }
 
-  private async handleSocketMessage(msg: string) {
-    const msgAsObject = JSON.parse(msg);
-    if (!msgAsObject) {
-      return;
-    }
-
-    const { REASON, KEY, PAYLOAD }: { REASON: bookingReasons; KEY: any; PAYLOAD: any } = msgAsObject;
-
-    if (KEY.toString() !== this.property_id.toString()) {
-      return;
-    }
-
-    let result = JSON.parse(PAYLOAD);
-    console.log(KEY, result);
-    // const reasonHandlers: Partial<Record<bookingReasons, Function>> = {
-    //   DORESERVATION: this.updateUserVerificationStatus,
-    // };
-    const reasonHandlers: Partial<Record<bookingReasons, Function>> = {
+  private async handleSocketMessage(reason: RealtimeReason, result: unknown) {
+    const reasonHandlers: Partial<Record<RealtimeReason, (payload: unknown) => any>> = {
       EMAIL_VERIFIED: this.updateUserVerificationStatus,
     };
-    const handler = reasonHandlers[REASON];
+    const handler = reasonHandlers[reason];
     if (handler) {
       await handler.call(this, result);
-    } else {
-      console.warn(`Unhandled REASON: ${REASON}`);
     }
   }
 
@@ -191,7 +172,7 @@ export class IrUserManagement {
     const res = await Promise.all([this.bookingService.getSetupEntriesByTableName('_USER_TYPE'), this.bookingService.getLov()]);
     const allowedUsers = res[1]?.My_Result?.allowed_user_types;
     for (const e of res[0]) {
-      const value = e[`CODE_VALUE_${this.language?.toUpperCase() ?? 'EN'}`];
+      const value = getEntryValue({ entry: e, language: this.language });
       if (allowedUsers.find(f => f.code === e.CODE_NAME)) {
         this.allowedUsersTypes.push({ code: e.CODE_NAME, value });
       }
@@ -199,7 +180,8 @@ export class IrUserManagement {
     }
   }
   disconnectedCallback() {
-    this.socket.disconnect();
+    this.unsubscribeRealtime?.();
+    this.unsubscribeRealtime = null;
   }
   render() {
     if (this.isLoading) {

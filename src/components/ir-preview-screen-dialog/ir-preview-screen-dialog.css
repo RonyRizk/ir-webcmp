@@ -9,7 +9,11 @@
   margin: 0;
   border-radius: 0;
 }
-
+.ir-fullscreen-dialog__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-m);
+}
 @media print {
   /* Page setup */
   @page {

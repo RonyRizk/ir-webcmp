@@ -73,7 +73,7 @@ export class IrBookingExtraNote {
   render() {
     return (
       <ir-dialog
-        label="Private note"
+        label="Private Note"
         open={this.open}
         onIrDialogHide={() => {
           this.open = false;

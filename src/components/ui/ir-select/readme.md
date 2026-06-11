@@ -67,10 +67,8 @@
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
  - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
- - [ir-pagination](../../ir-pagination)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
- - [ir-test-cmp](../../ir-test-cmp)
  - [ir-unit-status](../../ir-housekeeping/ir-unit-status)
 
 ### Graph
@@ -85,10 +83,8 @@ graph TD;
   ir-listing-modal --> ir-select
   ir-monthly-bookings-report-filter --> ir-select
   ir-option-details --> ir-select
-  ir-pagination --> ir-select
   ir-sales-by-channel-filters --> ir-select
   ir-sales-filters --> ir-select
-  ir-test-cmp --> ir-select
   ir-unit-status --> ir-select
   style ir-select fill:#f9f,stroke:#333,stroke-width:4px
 ```

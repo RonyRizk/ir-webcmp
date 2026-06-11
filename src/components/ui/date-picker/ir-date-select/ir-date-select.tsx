@@ -155,6 +155,9 @@ export class IrDateSelect {
     if (this.el.hasAttribute('aria-invalid')) {
       this.isValid = this.el.getAttribute('aria-invalid');
     }
+    if (this.date) {
+      this.currentDate = moment(this.date);
+    }
   }
 
   componentDidLoad() {
@@ -298,7 +301,7 @@ export class IrDateSelect {
                 this.dateChanged.emit(e.detail);
                 const shouldClose = this.autoClose && (!this.range || (this.range && (e.detail.dates as any).length > 1));
                 if (shouldClose) {
-                  this.togglePicker();
+                  this.closeDatePicker();
                 }
               }}
             />

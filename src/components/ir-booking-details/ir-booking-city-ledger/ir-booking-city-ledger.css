@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  --item-vertical-padding: var(--wa-space-xs, 0.5rem);
+  --item-inline-padding: var(--wa-space-l, 1.5rem);
+}
+
+/* ── Card ──────────────────────────────────────────────────── */
+.booking-city-ledger__card {
+  width: 100%;
+}
+
+.booking-city-ledger__card::part(body) {
+  padding: 0;
+  padding-bottom: calc(1.5rem - var(--item-vertical-padding));
+  padding-top: 0;
+}
+
+/* ── Header title ──────────────────────────────────────────── */
+.booking-city-ledger__header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.booking-city-ledger__agent-name {
+  font-weight: 400;
+  color: var(--wa-color-neutral-600, #6b7280);
+  font-size: var(--wa-font-size-s, 0.8125rem);
+}
+
+/* ── Spinner ───────────────────────────────────────────────── */
+.booking-city-ledger__spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+/* ── Empty / Error states ──────────────────────────────────── */
+.booking-city-ledger__empty-state {
+  padding: 1.5rem;
+}
+
+.booking-city-ledger__error {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--wa-color-danger-600, #dc2626);
+}
+
+/* ── Folio list ─────────────────────────────────────────────── */
+.folio-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Folio row ──────────────────────────────────────────────── */
+.folio-row {
+  padding: var(--item-vertical-padding) var(--item-inline-padding);
+  border-bottom: 1px solid var(--wa-color-neutral-100, #f4f4f5);
+}
+
+.folio-row:last-child {
+  border-bottom: none;
+}
+
+/* ── Row header: meta left, amount+actions right ────────────── */
+.folio-row__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folio-row__meta,
+.folio-row-desc_row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.folio-row-desc_row {
+  justify-content: space-between;
+}
+
+.folio-row__date {
+  font-size: 0.857rem;
+  /* color: var(--wa-color-neutral-500, #71717a); */
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Right side: amount + actions ───────────────────────────── */
+.folio-row__right {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.folio-row__amount {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Description ─────────────────────────────────────────────── */
+.folio-row__desc {
+  margin: 0.3rem 0 0;
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-neutral-800, #27272a);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* ── Action Trigger ─────────────────────────────────────────────── */
+.folio-row__action-trigger-icon {
+  font-size: 1rem;
+}
+.folio-row__action-trigger::part(base) {
+  height: auto;
+  width: var(--wa-space-xs);
+}
+
+/* ── City tax line ───────────────────────────────────────────── */
+.folio-row__city-tax {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  font-size: 0.857rem;
+  color: var(--wa-color-neutral-500, #71717a);
+}
+
+/* ── Debit / Credit colours ─────────────────────────────────── */
+.is-debit {
+  color: var(--wa-color-danger-fill-loud);
+  font-weight: 700;
+}
+
+.is-credit {
+  color: var(--wa-color-success-fill-loud);
+  font-weight: 700;
+}

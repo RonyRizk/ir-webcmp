@@ -14,6 +14,7 @@ export class IrBalanceCell {
   @Prop() label: string;
   @Prop({ reflect: true }) display: 'inline' | 'block' = 'block';
   @Prop() financial!: Booking['financial'];
+  @Prop() guestFinancial!: Booking['guest_financial'];
   @Prop() statusCode!: string;
   @Prop() isDirect!: boolean;
   @Prop() bookingNumber!: string;
@@ -21,6 +22,11 @@ export class IrBalanceCell {
   @Prop() removeBalance: boolean;
 
   @Event({ composed: true, bubbles: true }) payBookingBalance: EventEmitter<{ booking_nbr: string; payment: Payment }>;
+
+  /** A balance amount is actionable only when it is a non-zero, non-null number. */
+  private hasAmount(value: number | null | undefined): boolean {
+    return value !== null && value !== undefined && value !== 0;
+  }
 
   render() {
     return (
@@ -33,8 +39,8 @@ export class IrBalanceCell {
         )}
         <div class="balance_button-container">
           {['003', '004'].includes(this.statusCode) && this.isDirect
-            ? this.financial.cancelation_penality_as_if_today !== 0 &&
-              this.financial.due_amount !== 0 && (
+            ? this.hasAmount(this.financial.cancelation_penality_as_if_today) &&
+              this.hasAmount(this.financial.due_amount) && (
                 <ir-custom-button
                   onClickHandler={() => {
                     this.payBookingBalance.emit({
@@ -45,7 +51,7 @@ export class IrBalanceCell {
                         date: moment().format('YYYY-MM-DD'),
                         designation: null,
                         payment_method: null,
-                        payment_type: { code: this.financial.cancelation_penality_as_if_today < 0 ? '010' : '001', description: null, operation: null },
+                        payment_type: { code: this.financial.cancelation_penality_as_if_today < 0 ? '010' : '001', description: null, operation: 'CR' },
                         id: -1,
                         reference: '',
                       },
@@ -60,29 +66,84 @@ export class IrBalanceCell {
                   {formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}
                 </ir-custom-button>
               )
-            : this.financial.due_amount !== 0 && (
+            : this.hasAmount(this.guestFinancial?.due_amount) && (
                 <ir-custom-button
                   onClickHandler={() => {
                     this.payBookingBalance.emit({
                       booking_nbr: this.bookingNumber,
                       payment: {
-                        amount: Math.abs(this.financial.due_amount),
+                        amount: Math.abs(this.guestFinancial?.due_amount),
                         currency: calendar_data.property.currency,
                         date: moment().format('YYYY-MM-DD'),
                         designation: null,
                         payment_method: null,
-                        payment_type: { code: '001', description: null, operation: null },
+                        payment_type: { code: '001', description: null, operation: 'CR' },
                         id: -1,
                         reference: '',
                       },
                     });
+                    {
+                      ['003', '004'].includes(this.statusCode) && this.isDirect
+                        ? this.financial.cancelation_penality_as_if_today !== 0 &&
+                          this.financial.due_amount !== 0 && (
+                            <ir-custom-button
+                              onClickHandler={() => {
+                                this.payBookingBalance.emit({
+                                  booking_nbr: this.bookingNumber,
+                                  payment: {
+                                    amount: Math.abs(this.financial.cancelation_penality_as_if_today),
+                                    currency: calendar_data.property.currency,
+                                    date: moment().format('YYYY-MM-DD'),
+                                    designation: null,
+                                    payment_method: null,
+                                    payment_type: { code: this.financial.cancelation_penality_as_if_today < 0 ? '010' : '001', description: null, operation: null },
+                                    id: -1,
+                                    reference: '',
+                                  },
+                                });
+                              }}
+                              style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
+                              size="small"
+                              variant="danger"
+                              appearance="outlined"
+                            >
+                              <span>{this.financial.cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} </span>
+                              {formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}
+                            </ir-custom-button>
+                          )
+                        : this.financial.due_amount !== 0 && (
+                            <ir-custom-button
+                              onClickHandler={() => {
+                                this.payBookingBalance.emit({
+                                  booking_nbr: this.bookingNumber,
+                                  payment: {
+                                    amount: Math.abs(this.financial.due_amount),
+                                    currency: calendar_data.property.currency,
+                                    date: moment().format('YYYY-MM-DD'),
+                                    designation: null,
+                                    payment_method: null,
+                                    payment_type: { code: '001', description: null, operation: null },
+                                    id: -1,
+                                    reference: '',
+                                  },
+                                });
+                              }}
+                              style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
+                              size="small"
+                              variant="danger"
+                              appearance="outlined"
+                            >
+                              {formatAmount(this.currencySymbol, this.financial.due_amount)}
+                            </ir-custom-button>
+                          );
+                    }
                   }}
                   style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
                   size="small"
                   variant="danger"
                   appearance="outlined"
                 >
-                  {formatAmount(this.currencySymbol, this.financial.due_amount)}
+                  {formatAmount(this.currencySymbol, this.guestFinancial?.due_amount)}
                 </ir-custom-button>
               )}
         </div>

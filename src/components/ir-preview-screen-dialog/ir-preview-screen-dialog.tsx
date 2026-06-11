@@ -243,22 +243,24 @@ export class IrPreviewScreenDialog {
         open={this.open}
         class="ir-fullscreen-dialog"
       >
-        {!this.hideDefaultAction && (
-          <Fragment>
-            <wa-tooltip for={this._id}>Print PDF</wa-tooltip>
-            <ir-custom-button
-              id={this._id}
-              size="medium"
-              slot="header-actions"
-              variant="neutral"
-              appearance="plain"
-              onClickHandler={this.handleActionButtonClick.bind(this)}
-              disabled={this.shouldDisableActionButton()}
-            >
-              <wa-icon name={this.actionIconByType[this.action]} label={this.getActionLabel()} aria-label={this.getActionLabel()}></wa-icon>
-            </ir-custom-button>
-          </Fragment>
-        )}
+        <div slot="header-actions" class="ir-fullscreen-dialog__header-actions">
+          <slot name="header-actions"></slot>
+          {!this.hideDefaultAction && (
+            <Fragment>
+              <wa-tooltip for={this._id}>Print PDF</wa-tooltip>
+              <ir-custom-button
+                id={this._id}
+                size="medium"
+                variant="neutral"
+                appearance="plain"
+                onClickHandler={this.handleActionButtonClick.bind(this)}
+                disabled={this.shouldDisableActionButton()}
+              >
+                <wa-icon name={this.actionIconByType[this.action]} label={this.getActionLabel()} aria-label={this.getActionLabel()}></wa-icon>
+              </ir-custom-button>
+            </Fragment>
+          )}
+        </div>
         <slot></slot>
       </ir-dialog>
     );

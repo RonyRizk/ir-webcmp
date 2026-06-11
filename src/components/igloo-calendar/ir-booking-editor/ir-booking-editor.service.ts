@@ -252,7 +252,7 @@ export class IRBookingEditorService {
           identifier,
           notes: '',
           override_unit: this.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? true : false,
-          unit: this.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? unitId?.toString() ?? null : null,
+          unit: this.isEventType(['BAR_BOOKING', 'SPLIT_BOOKING']) ? (unitId?.toString() ?? null) : null,
           auto_check_in: check_in,
           room: identifier ? room : null,
         });
@@ -267,6 +267,7 @@ export class IRBookingEditorService {
           is_in_loyalty_mode,
           promo_key,
           extras,
+          agent: booking.agent,
           booking: {
             ...rest,
             rooms,
@@ -295,15 +296,16 @@ export class IRBookingEditorService {
         }
         case 'ADD_ROOM':
         case 'SPLIT_BOOKING': {
-          const newRooms = await generateNewRooms();
+          const agent = booking_store.bookingDraft.roomAssignee === 'agent' ? booking.agent : null;
+          const newRooms = (await generateNewRooms()).map(r => ({ ...r, agent }));
           const previousRooms = booking.rooms;
           newBooking = modifyBookingDetails(booking, [...previousRooms, ...newRooms]);
           break;
         }
         default: {
-          const newRooms = await generateNewRooms(null, check_in);
-          const { bookedByGuest } = booking_store;
           const isAgent = sourceOption.type === 'TRAVEL_AGENCY';
+          const newRooms = (await generateNewRooms(null, check_in)).map(r => ({ ...r, agent: isAgent ? { id: sourceOption.tag } : null }));
+          const { bookedByGuest } = booking_store;
           newBooking = {
             assign_units: true,
             is_pms: true,
@@ -315,6 +317,7 @@ export class IRBookingEditorService {
             agent: isAgent ? { id: sourceOption.tag } : null,
             is_email_client: bookedByGuest.emailGuest,
             booking: {
+              agent_booking_nbr: bookedByGuest.agent_booking_nbr,
               company_name: bookedByGuest.company ?? null,
               from_date: moment(fromDate).format('YYYY-MM-DD'),
               to_date: moment(toDate).format('YYYY-MM-DD'),

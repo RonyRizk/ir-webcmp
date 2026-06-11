@@ -13,6 +13,7 @@
 | `currencySymbol` _(required)_ | `currency-symbol` |             | `string`              | `undefined` |
 | `display`                     | `display`         |             | `"block" \| "inline"` | `'block'`   |
 | `financial` _(required)_      | --                |             | `IFinancial`          | `undefined` |
+| `guestFinancial` _(required)_ | --                |             | `IFinancial`          | `undefined` |
 | `isDirect` _(required)_       | `is-direct`       |             | `boolean`             | `undefined` |
 | `label`                       | `label`           |             | `string`              | `undefined` |
 | `removeBalance`               | `remove-balance`  |             | `boolean`             | `undefined` |

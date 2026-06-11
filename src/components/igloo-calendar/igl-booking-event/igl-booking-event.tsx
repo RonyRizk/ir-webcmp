@@ -68,6 +68,7 @@ export class IglBookingEvent {
   private moveDifferenceX: number;
   private moveDifferenceY: number;
   private animationFrameId: number | null = null;
+  private minResizeDays: number = 1;
 
   private handleMouseMoveBind = this.handleMouseMove.bind(this);
   private handleMouseUpBind = this.handleMouseUp.bind(this);
@@ -736,7 +737,7 @@ export class IglBookingEvent {
         if (this.resizeSide == 'rightSide') {
           newWidth = this.initialWidth + distanceX;
           newWidth = Math.min(newWidth, this.initialX + this.element.offsetWidth);
-          newWidth = Math.max(this.dayWidth - this.eventSpace, newWidth);
+          newWidth = Math.max(this.minResizeDays * this.dayWidth - this.eventSpace, newWidth);
           this.isShrinking = distanceX < 0;
           if (!this.isShrinking && baseCondition) {
             return;
@@ -753,7 +754,7 @@ export class IglBookingEvent {
           if (this.role === 'leftSplit') {
             return;
           }
-          newWidth = Math.max(this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
+          newWidth = Math.max(this.minResizeDays * this.dayWidth - this.eventSpace, this.initialWidth - distanceX);
           let newLeft = this.initialLeft + (this.initialWidth - newWidth);
           this.element.style.left = `${newLeft}px`;
           this.element.style.width = `${newWidth}px`;

@@ -1,14 +1,18 @@
-import booking_store, { bookedByGuestBaseData, calculateTotalRooms, getBookingTotalPrice, IRatePlanSelection, updateBookedByGuest } from '@/stores/booking.store';
+import booking_store, { bookedByGuestBaseData, calculateTotalRooms, getBookingTotalPrice, IRatePlanSelection, setBookingDraft, updateBookedByGuest } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { formatAmount } from '@/utils/utils';
-import { Component, Event, EventEmitter, h, Listen, Prop, State } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, h, Listen, Prop, State } from '@stencil/core';
 import { BookingEditorMode } from '../types';
 import { calculateDaysBetweenDates } from '@/utils/booking';
-import { Room } from '@/models/booking.dto';
+import { Room, Booking } from '@/models/booking.dto';
+import { AgentsService } from '@/services/agents/agents.service';
+import { Agent } from '@/services/agents/type';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { ExposedGuests } from '@/services/booking-service/types';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { isAgentMode } from '@/components/ir-booking-details/functions';
+import { IRBookingEditorService } from '../ir-booking-editor.service';
 
 @Component({
   tag: 'ir-booking-editor-form',
@@ -18,18 +22,34 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 export class IrBookingEditorForm {
   @Prop() mode: BookingEditorMode = 'PLUS_BOOKING';
   @Prop() room: Room;
+  @Prop() booking: Booking;
+  @Prop() agent: Agent;
 
   @State() guests: ExposedGuests;
   @State() totalCost = 0;
+  @State() assignee: 'agent' | 'guest' = 'guest';
+  @State() resolvedAgent: Agent;
   @Event() doReservation: EventEmitter<string>;
 
   private bookingService = new BookingService();
+  private agentsService = new AgentsService();
+  private bookingEditorService: IRBookingEditorService;
   private totalRooms = 0;
   pickerEl: HTMLIrPickerElement;
 
   async componentWillLoad() {
     this.totalRooms = calculateTotalRooms();
     this.totalCost = this.totalRooms > 1 ? await getBookingTotalPrice() : 0;
+    this.bookingEditorService = new IRBookingEditorService(this.mode);
+    if (this.agent) {
+      this.resolvedAgent = this.agent;
+    } else if (this.booking?.agent) {
+      this.resolvedAgent = await this.agentsService.getExposedAgent({ id: this.booking.agent.id });
+    }
+    if (this.bookingEditorService.isEventType(['ADD_ROOM', 'SPLIT_BOOKING']) && isAgentMode(this.resolvedAgent)) {
+      this.assignee = 'agent';
+      setBookingDraft({ roomAssignee: 'agent' });
+    }
   }
   @Listen('recalculateTotalCost')
   async handleRecalculation(e: CustomEvent) {
@@ -135,47 +155,65 @@ export class IrBookingEditorForm {
             });
           }),
         )}
-        {['BAR_BOOKING', 'PLUS_BOOKING'].includes(this.mode) && (
+        {this.bookingEditorService.isEventType(['BAR_BOOKING', 'PLUS_BOOKING']) && (
           <section class={'mt-2'}>
             <div class="booking-editor__booked-by booking-editor__booked-by-header">
               <h4 class="booking-editor__heading booking-editor__booked-by-title">Booked by</h4>
-
-              <ir-picker
-                class="booking-editor__booked-by-picker"
-                appearance="filled"
-                // placeholder="Search customer by email, name or company name"
-                placeholder="Search customer by email or name"
-                withClear
-                onText-change={event => this.fetchGuests(event.detail)}
-                debounce={500}
-                loading={isRequestPending('/Fetch_Exposed_Guests')}
-                mode="select-async"
-                ref={el => (this.pickerEl = el)}
-                onCombobox-select={this.handleComboboxSelect.bind(this)}
-              >
-                {this.guests?.map(guest => {
-                  const label = `${guest.email} - ${guest.first_name} ${guest.last_name}`;
-                  return (
-                    <ir-picker-item label={label} value={guest.id?.toString()} key={guest.id}>
-                      {label}
-                    </ir-picker-item>
-                  );
-                })}
-              </ir-picker>
-              {booking_store.bookedByGuest.id !== -1 && (
-                <ir-custom-button
-                  onClickHandler={() => {
-                    updateBookedByGuest(bookedByGuestBaseData);
-                    this.pickerEl.clearInput();
-                  }}
-                  variant="brand"
-                >
-                  Clear user
-                </ir-custom-button>
+              {booking_store.bookingDraft?.agent ? (
+                <span>{booking_store.bookingDraft?.agent.name}</span>
+              ) : (
+                <Fragment>
+                  <ir-picker
+                    class="booking-editor__booked-by-picker"
+                    appearance="filled"
+                    // placeholder="Search customer by email, name or company name"
+                    placeholder="Search customer by email or name"
+                    withClear
+                    onText-change={event => this.fetchGuests(event.detail)}
+                    debounce={500}
+                    loading={isRequestPending('/Fetch_Exposed_Guests')}
+                    mode="select-async"
+                    ref={el => (this.pickerEl = el)}
+                    onCombobox-select={this.handleComboboxSelect.bind(this)}
+                  >
+                    {this.guests?.map(guest => {
+                      const label = `${guest.email} - ${guest.first_name} ${guest.last_name}`;
+                      return (
+                        <ir-picker-item label={label} value={guest.id?.toString()} key={guest.id}>
+                          {label}
+                        </ir-picker-item>
+                      );
+                    })}
+                  </ir-picker>
+                  {booking_store.bookedByGuest.id !== -1 && (
+                    <ir-custom-button
+                      onClickHandler={() => {
+                        updateBookedByGuest(bookedByGuestBaseData);
+                        this.pickerEl.clearInput();
+                      }}
+                      variant="brand"
+                    >
+                      Clear user
+                    </ir-custom-button>
+                  )}
+                </Fragment>
               )}
             </div>
             <ir-booking-editor-guest-form></ir-booking-editor-guest-form>
           </section>
+        )}
+        {this.bookingEditorService.isEventType(['SPLIT_BOOKING', 'ADD_ROOM']) && isAgentMode(this.resolvedAgent) && (
+          <ir-service-assignee-select
+            style={{ maxWidth: '500px' }}
+            agent={this.booking.agent}
+            assigneeType={this.assignee}
+            onAssignmentChange={e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              this.assignee = e.detail;
+              setBookingDraft({ roomAssignee: e.detail });
+            }}
+          ></ir-service-assignee-select>
         )}
       </form>
     );

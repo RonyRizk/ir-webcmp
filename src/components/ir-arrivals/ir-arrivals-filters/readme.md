@@ -9,15 +9,16 @@
 
 ### Depends on
 
-- [ir-custom-date-picker](../../ir-custom-date-picker)
+- [ir-date-select](../../ui/date-picker/ir-date-select)
 - [ir-input](../../ui/ir-input)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-arrivals-filters --> ir-custom-date-picker
+  ir-arrivals-filters --> ir-date-select
   ir-arrivals-filters --> ir-input
-  ir-custom-date-picker --> ir-input
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   style ir-arrivals-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

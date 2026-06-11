@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Method, Prop, State, h } from '@stencil
 import moment from 'moment';
 import { FolioEntryMode, Payment, PaymentEntries } from '../../types';
 import { v4 } from 'uuid';
+import { Booking } from '@/models/booking.dto';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -24,6 +25,12 @@ export class IrPaymentFolio {
    * correct reservation when saving.
    */
   @Prop() bookingNumber: string;
+
+  /**
+   * The full booking object associated with this folio.
+   * Provides contextual reservation data required by the folio form.
+   */
+  @Prop() booking!: Booking;
 
   /**
    * The payment or folio entry being created or edited.
@@ -103,6 +110,7 @@ export class IrPaymentFolio {
       >
         {this.isOpen && (
           <ir-payment-folio-form
+            booking={this.booking}
             formId={this._id}
             onLoadingChanged={e => (this.isLoading = e.detail)}
             onCloseModal={e => {

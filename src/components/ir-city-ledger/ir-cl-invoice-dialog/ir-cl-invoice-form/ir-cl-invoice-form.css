@@ -1,0 +1,80 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Scope banner ─────────────────────────────────────────── */
+.invoice-form__scope-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  background: var(--wa-color-primary-50, #eff6ff);
+  border: 1px solid var(--wa-color-primary-200, #bfdbfe);
+  border-left: 3px solid var(--wa-color-primary-500, #3b82f6);
+  border-radius: 0.375rem;
+}
+
+.invoice-form__scope-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--wa-color-primary-500, #3b82f6);
+}
+
+.invoice-form__scope-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.invoice-form__scope-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--wa-color-primary-700, #1d4ed8);
+  letter-spacing: 0.01em;
+}
+
+.invoice-form__scope-desc {
+  font-size: 0.75rem;
+  color: var(--wa-color-primary-600, #2563eb);
+  line-height: 1.4;
+}
+
+/* ── Date error ───────────────────────────────────────────── */
+.invoice-form__date-error ir-date-range-filter {
+  border: 1px solid var(--wa-color-danger-500, #ef4444);
+  border-radius: 0.375rem;
+}
+
+.invoice-form__date-error-msg {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--wa-color-danger-600, #dc2626);
+}
+
+/* ── Fields ───────────────────────────────────────────────── */
+.invoice-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.invoice-form__label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--wa-color-text-normal, #374151);
+}
+
+.invoice-form__label-optional {
+  font-weight: 400;
+  color: var(--wa-color-text-quiet, #9ca3af);
+}
+
+.invoice-form__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  line-height: 1.4;
+}

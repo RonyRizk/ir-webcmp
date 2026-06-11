@@ -605,6 +605,15 @@ export type TableEntries =
   | '_AGENT_RATE_TYPE'
   | '_AGENT_TYPE'
   | '_TA_PAYMENT_METHOD'
+  | '_VAT_INCLUDED'
+  | '_CITY_TAX_INCLUDED'
+  | '_SERVICE_CHARGE_INCLUDED'
+  | '_TAXATION_STRATEGY'
+  | '_SVC_CATEGORY'
+  | '_VAT_INCLUDED'
+  | '_CL_TX_TYPE'
+  | '_FD_TYPE'
+  | '_FD_STATUS'
   | '_CL_POST_TIMING'
   | (string & {});
 
@@ -703,6 +712,14 @@ export class BookingService {
     }
     return data;
   }
+  public async handleRoomCheckout(props: { booking_nbr: string; room_identifier: string; penalty_amount: number }) {
+    const { data } = await axios.post(`/Handle_Room_Checkout`, props);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
+
   public async GetPenaltyStatement(params: { booking_nbr: string; currency_id: number; language: string }) {
     const { data } = await axios.post('/Get_Penalty_Statement', params);
     if (data.ExceptionMsg !== '') {
@@ -1100,6 +1117,7 @@ export class BookingService {
         booking_nbr,
         language,
         extras: withExtras ? extras : null,
+        is_get_financial_snapshot: true,
       });
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);

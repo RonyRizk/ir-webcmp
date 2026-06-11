@@ -155,7 +155,7 @@ export class IrDailyRevenueFilters {
                 <span class="or-divider__text">Or</span>
                 <span class="or-divider__line"></span>
               </div>
-              <igl-date-range
+              <ir-date-range
                 dateLabel="Select a date range"
                 withDateDifference={false}
                 defaultData={{ fromDate: this.filters?.from_date, toDate: this.filters?.to_date }}

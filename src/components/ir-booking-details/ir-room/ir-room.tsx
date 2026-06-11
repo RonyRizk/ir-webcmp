@@ -1,6 +1,7 @@
 import { Component, h, Prop, EventEmitter, Event, Listen, State, Element, Host, Fragment, Watch } from '@stencil/core';
-import { _getDay } from '../functions';
+import { _getDay, isAgentMode } from '../functions';
 import { Booking, IUnit, Occupancy, Room, SharedPerson } from '@/models/booking.dto';
+import { Agent } from '@/services/agents/type';
 import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { formatName } from '@/utils/booking';
 import locales from '@/stores/locales.store';
@@ -10,6 +11,8 @@ import { IEntries } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { OpenSidebarEvent, RoomGuestsPayload } from '../types';
 import { IToast } from '@/components/ui/ir-toast/toast';
+import { ClTx } from '@/services/city-ledger/types';
+import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 export type RoomModalReason = 'delete' | 'checkin' | 'checkout' | null;
 @Component({
   tag: 'ir-room',
@@ -41,13 +44,18 @@ export class IrRoom {
   @Prop() hasRoomAdd: boolean = false;
   @Prop() hasCheckIn: boolean = false;
   @Prop() hasCheckOut: boolean = false;
+  @Prop() agent: Agent;
+
+  @Prop() clTransactions: ClTx[] = [];
 
   @State() collapsed: boolean = true;
   @State() isLoading: boolean = false;
+  @State() isToggling: boolean = false;
   @State() modalReason: RoomModalReason = null;
   @State() mainGuest: SharedPerson;
   @State() isModelOpen: boolean = false;
   @State() isOpen: boolean = false;
+  @State() isPricingDrawerOpen: boolean = false;
 
   // Event Emitters
   @Event({ bubbles: true, composed: true }) deleteFinished: EventEmitter<string>;
@@ -59,6 +67,7 @@ export class IrRoom {
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
 
   private modal: HTMLIrDialogElement;
+  private toggleDialogRef: HTMLIrAssignmentToggleDialogElement;
   private bookingService = new BookingService();
   dialogRef: HTMLIrDialogElement;
 
@@ -169,7 +178,7 @@ export class IrRoom {
             room_identifier: this.room.identifier,
             status: this.modalReason === 'checkin' ? '001' : '002',
           });
-          this.resetBookingEvt.emit(null);
+          this.resetBookingEvt.emit();
           break;
         default:
           break;
@@ -210,6 +219,41 @@ export class IrRoom {
     await this.bookingService.doReservation(body);
     this.deleteFinished.emit(this.room.identifier);
   }
+  private async toggleRoomAgent() {
+    try {
+      this.isToggling = true;
+      const updatedRooms = this.booking.rooms.map(r => (r.identifier === this.room.identifier ? { ...r, agent: r.agent ? null : this.booking.agent } : r));
+      const body = {
+        assign_units: true,
+        check_in: true,
+        is_pms: true,
+        is_direct: true,
+        agent: this.booking.agent,
+        booking: {
+          booking_nbr: this.booking.booking_nbr,
+          from_date: this.booking.from_date,
+          to_date: this.booking.to_date,
+          remark: this.booking.remark,
+          property: this.booking.property,
+          source: this.booking.source,
+          currency: this.booking.currency,
+          arrival: this.booking.arrival,
+          guest: this.booking.guest,
+          rooms: updatedRooms,
+        },
+        extras: this.booking.extras,
+        pickup_info: this.booking.pickup_info,
+      };
+      await this.bookingService.doReservation(body);
+      this.resetBookingEvt.emit(null);
+      this.toggleDialogRef.closeModal();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.isToggling = false;
+    }
+  }
+
   private async updateDepartureTime(code: string) {
     try {
       await this.bookingService.setDepartureTime({
@@ -302,6 +346,22 @@ export class IrRoom {
   private getMainGuest() {
     return this.room.sharing_persons?.find(p => p.is_main);
   }
+  private showGuestModal(): void {
+    const { adult_nbr, children_nbr, infant_nbr } = this.room.occupancy;
+    this.openSidebar.emit({
+      type: 'room-guest',
+      payload: {
+        roomName: (this.room.unit as IUnit)?.name,
+        sharing_persons: this.room.sharing_persons,
+        totalGuests: adult_nbr + children_nbr + infant_nbr,
+        checkin: this.hasCheckIn,
+        identifier: this.room.identifier,
+      },
+    });
+  }
+  private get acmTxByDate(): Map<string, ClTx> {
+    return new Map(this.clTransactions.filter(tx => tx.CATEGORY === 'ACM' && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
+  }
 
   render() {
     const bed = this.getBedName();
@@ -327,8 +387,56 @@ export class IrRoom {
                 <div class="booking-room__price-row">
                   <span class="booking-room__price">{formatAmount(this.currency, this.room['gross_total'])}</span>
 
-                  <div class="booking-room__actions">
-                    {this.hasRoomEdit && this.isEditable && (
+                  {this.isEditable && (this.hasRoomEdit || this.hasRoomDelete) && (
+                    <div class="booking-room__actions">
+                      <wa-dropdown
+                        onwa-show={e => {
+                          e.stopImmediatePropagation();
+                          e.stopPropagation();
+                        }}
+                        onwa-hide={e => {
+                          e.stopImmediatePropagation();
+                          e.stopPropagation();
+                        }}
+                        onwa-select={e => {
+                          switch ((e.detail as any).item.value) {
+                            case 'edit':
+                              this.handleEditClick();
+                              break;
+                            case 'edit-rates':
+                              this.isPricingDrawerOpen = true;
+                              break;
+                            case 'delete':
+                              this.openModal('delete');
+                              break;
+                            case 'toggle':
+                              this.toggleDialogRef.openModal();
+                              break;
+                          }
+                        }}
+                      >
+                        <ir-custom-button
+                          slot="trigger"
+                          size="small"
+                          class="booking-room__edit-button"
+                          appearance="plain"
+                          id={`actions-room-${this.room.identifier}`}
+                          iconBtn
+                          variant="neutral"
+                          style={{ marginBottom: '4px' }}
+                        >
+                          <wa-icon style={{ fontSize: '1rem' }} label="Actions" name="ellipsis-vertical"></wa-icon>
+                        </ir-custom-button>
+                        {this.hasRoomEdit && <wa-dropdown-item value="edit">Edit unit</wa-dropdown-item>}
+                        {this.hasRoomEdit && <wa-dropdown-item value="edit-rates">Edit nightly rates</wa-dropdown-item>}
+                        {isAgentMode(this.agent) && <wa-dropdown-item value="toggle">Re-assign {this.room.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
+                        {this.hasRoomDelete && (
+                          <wa-dropdown-item value="delete" variant="danger">
+                            Delete
+                          </wa-dropdown-item>
+                        )}
+                      </wa-dropdown>
+                      {/* {this.hasRoomEdit && this.isEditable && (
                       <Fragment>
                         <wa-tooltip for={`edit-room-${this.room.identifier}`}>Edit {this.room.roomtype.name}</wa-tooltip>
                         <ir-custom-button
@@ -343,9 +451,9 @@ export class IrRoom {
                           <wa-icon label="Edit room" class="booking-room__edit-icon" name="edit" style={{ fontSize: '1rem' }}></wa-icon>
                         </ir-custom-button>
                       </Fragment>
-                    )}
+                    )} */}
 
-                    {this.hasRoomDelete && this.isEditable && (
+                      {/* {this.hasRoomDelete && this.isEditable && (
                       <Fragment>
                         <wa-tooltip for={`delete-room-${this.room.identifier}`}>Delete {this.room.roomtype.name}</wa-tooltip>
                         <ir-custom-button
@@ -360,8 +468,9 @@ export class IrRoom {
                           <wa-icon label="Delete room" class="booking-room__delete-icon" name="trash-can" style={{ fontSize: '1rem' }}></wa-icon>
                         </ir-custom-button>
                       </Fragment>
-                    )}
-                  </div>
+                    )} */}
+                    </div>
+                  )}
                 </div>
               </div>
               <div class="booking-room__dates-row">
@@ -452,23 +561,30 @@ export class IrRoom {
             {!this.collapsed && (
               <div class="booking-room__details-container">
                 <div class="booking-room__breakdown-row">
-                  <div class="booking-room__breakdown-label-wrapper">
+                  {/* <div class="booking-room__breakdown-label-wrapper">
                     <p class="booking-room__breakdown-label">{`${locales.entries.Lcz_Breakdown}:`}</p>
-                  </div>
+                  </div> */}
                   <div class="booking-room__breakdown-table">
                     <table>
                       {this.room.days.length > 0 &&
-                        this.room.days.map(room => {
-                          return (
-                            <tr>
-                              <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">{_getDay(room.date)}</td>
-                              <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, room.amount)}</td>
-                              {room.cost > 0 && room.cost !== null && (
-                                <td class="booking-room__cell booking-room__cell--left booking-room__cell--pad-left night-cost">{formatAmount(this.currency, room.cost)}</td>
-                              )}
-                            </tr>
-                          );
-                        })}
+                        (() => {
+                          const acmTxByDate = this.acmTxByDate;
+                          return this.room.days.map(room => {
+                            const tx = acmTxByDate.get(room.date);
+                            return (
+                              <tr>
+                                <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">{_getDay(room.date)}</td>
+                                <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, room.amount)}</td>
+                                {room.cost > 0 && room.cost !== null && (
+                                  <td class="booking-room__cell booking-room__cell--left booking-room__cell--pad-left night-cost">{formatAmount(this.currency, room.cost)}</td>
+                                )}
+                                <td class="booking-room__cell booking-room__cell--pad-left">
+                                  {tx && <ir-cl-status-tag transaction={{ _rowId: '', ...mapClTxToFolioRow(tx), balance: 0 }} size="extra-small"></ir-cl-status-tag>}
+                                </td>
+                              </tr>
+                            );
+                          });
+                        })()}
                       <tr class={''}>
                         <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right subtotal_row">{locales.entries.Lcz_SubTotal}</th>
                         <th class="booking-room__cell booking-room__cell--right subtotal_row">{formatAmount(this.currency, this.room.total)}</th>
@@ -490,7 +606,9 @@ export class IrRoom {
                               return (
                                 <tr>
                                   <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                    {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
+                                    <span class={'booking-room__cell-tax-name'}>
+                                      {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
+                                    </span>
                                   </td>
                                   <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, amount / 100)}</td>
                                   {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
@@ -505,7 +623,9 @@ export class IrRoom {
                           {this.room.inclusive_taxes?.CALCULATED_INCLUSIVE_TAXES?.map(d => (
                             <tr>
                               <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                {locales.entries.Lcz_Including} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
+                                <span class={'booking-room__cell-tax-name'}>
+                                  {locales.entries.Lcz_Including} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
+                                </span>
                               </td>
                               <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, d.CALCULATED_VALUE)}</td>
                               {/* {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
@@ -524,7 +644,9 @@ export class IrRoom {
                               return (
                                 <tr>
                                   <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                    {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name}
+                                    <span class={'booking-room__cell-tax-name'}>
+                                      {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name}
+                                    </span>
                                   </td>
                                   <td class="booking-room__cell booking-room__cell--right">
                                     {d.currency.symbol}
@@ -561,6 +683,12 @@ export class IrRoom {
             )}
           </div>
         </div>
+        <ir-assignment-toggle-dialog ref={el => (this.toggleDialogRef = el)} loading={this.isToggling} onConfirmToggle={() => this.toggleRoomAgent()}>
+          <span slot="message">
+            Move {this.room.roomtype.name} {this.room.rateplan.short_name} {(this.room.unit as IUnit)?.name} to{' '}
+            <b>{this.room.agent ? 'guest' : (this.booking?.agent?.name ?? 'agent')} folio</b>.
+          </span>
+        </ir-assignment-toggle-dialog>
         <ir-dialog
           label={this.modalReason === 'delete' ? 'Alert' : locales.entries.Lcz_Confirmation}
           ref={el => (this.modal = el)}
@@ -615,20 +743,20 @@ export class IrRoom {
           booking={this.booking}
           roomIdentifier={this.room.identifier}
         ></ir-invoice>
+        <ir-booking-pricing-drawer
+          open={this.isPricingDrawerOpen}
+          booking={this.booking}
+          room={this.room}
+          agent={this.agent}
+          folioEntries={this.clTransactions}
+          currencySymbol={this.booking?.currency?.symbol ?? ''}
+          onCloseDrawer={() => (this.isPricingDrawerOpen = false)}
+          onPricingSaved={() => {
+            this.isPricingDrawerOpen = false;
+            this.resetBookingEvt.emit(null);
+          }}
+        ></ir-booking-pricing-drawer>
       </Host>
     );
-  }
-  private showGuestModal(): void {
-    const { adult_nbr, children_nbr, infant_nbr } = this.room.occupancy;
-    this.openSidebar.emit({
-      type: 'room-guest',
-      payload: {
-        roomName: (this.room.unit as IUnit)?.name,
-        sharing_persons: this.room.sharing_persons,
-        totalGuests: adult_nbr + children_nbr + infant_nbr,
-        checkin: this.hasCheckIn,
-        identifier: this.room.identifier,
-      },
-    });
   }
 }

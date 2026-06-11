@@ -347,16 +347,16 @@ export class IrAutocomplete {
     let selectedOption: AutocompleteOptionElement | undefined;
 
     allOptions.forEach(option => {
-      const optionValue = this.getOptionValue(option);
-      option.selected = optionValue === value;
-      if (option.selected) {
+      const matches = this.getOptionValue(option) === value || this.getOptionLabel(option) === value;
+      option.selected = matches;
+      if (matches) {
         selectedOption = option;
       }
     });
 
     if (selectedOption) {
       this.currentOption = selectedOption;
-    } else if (this.currentOption && this.getOptionValue(this.currentOption) !== value) {
+    } else if (this.currentOption && this.getOptionValue(this.currentOption) !== value && this.getOptionLabel(this.currentOption) !== value) {
       this.currentOption = undefined;
     }
   }
@@ -369,13 +369,12 @@ export class IrAutocomplete {
     option.selected = true;
     this.currentOption = option;
 
-    const nextValue = this.getOptionValue(option);
-    if (this.emitOnSameValue || (!this.emitOnSameValue && nextValue !== this.value)) {
-      this.value = nextValue;
-      this.comboboxChange.emit(nextValue);
+    const emitValue = this.getOptionValue(option);
+    const displayValue = this.getOptionLabel(option);
+    if (this.emitOnSameValue || (!this.emitOnSameValue && emitValue !== this.value)) {
+      this.value = displayValue;
+      this.comboboxChange.emit(emitValue);
     }
-    // if (nextValue !== this.value && !this.emitOnSameValue) {
-    // }
     this.hide();
     requestAnimationFrame(() => this.inputRef?.focusInput());
   }

@@ -1,5 +1,11 @@
+import { IrServiceAssigneeSelectCustomEvent } from '@/components';
+import { isAgentMode } from '@/components/ir-booking-details/functions';
 import { Booking, ExtraService, ExtraServiceSchema } from '@/models/booking.dto';
+import { Agent } from '@/services/agents/type';
+import { IEntries } from '@/models/property';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { taxationModes } from '@/services/property.service';
+import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { ZodError } from 'zod';
@@ -10,14 +16,18 @@ import { ZodError } from 'zod';
   scoped: true,
 })
 export class IrExtraServiceConfigForm {
-  @Prop() booking: Pick<Booking, 'from_date' | 'to_date' | 'currency' | 'booking_nbr'>;
+  @Prop() booking: Booking;
+  @Prop() agent: Agent;
   @Prop() service: ExtraService;
+  @Prop() svcCategories: IEntries[] = [];
+  @Prop() language: string;
 
   @State() s_service: ExtraService;
   @State() error: boolean;
   @State() fromDateClicked: boolean;
   @State() toDateClicked: boolean;
   @State() autoValidate: boolean;
+  @State() assignee: 'agent' | 'guest' = 'guest';
 
   @Event() closeModal: EventEmitter<null>;
   @Event({ bubbles: true, composed: true }) resetBookingEvt: EventEmitter<null>;
@@ -25,24 +35,39 @@ export class IrExtraServiceConfigForm {
   private bookingService = new BookingService();
 
   componentWillLoad() {
-    if (this.service) {
-      this.s_service = { ...this.service };
+    if (isAgentMode(this.agent)) {
+      this.assignee = 'agent';
     }
+    this.assignService();
   }
 
   @Watch('service')
   handleServiceChange() {
+    this.assignService();
+  }
+  private assignService() {
     if (this.service) {
       this.s_service = { ...this.service };
+      if (!this.service.agent) {
+        this.assignee = 'guest';
+      }
     }
+  }
+
+  private get categories(): (IEntries & { pct: number })[] {
+    const taxPctByCode = Object.fromEntries(
+      calendar_data.property.tax_categories.filter(c => c.taxation_mode?.code !== taxationModes.NOT_APPLICABLE).map(c => [c.category.code, c.pct]),
+    );
+    return this.svcCategories.filter(cat => taxPctByCode[cat.CODE_NAME]).map(cat => ({ ...cat, pct: taxPctByCode[cat.CODE_NAME] }));
   }
 
   private async saveAmenity() {
     try {
       this.autoValidate = true;
-      ExtraServiceSchema.parse(this.s_service ?? {});
+      const service = { ...(this.s_service ?? {}), agent: this.assignee === 'agent' ? this.booking.agent : null };
+      ExtraServiceSchema.parse(service);
       await this.bookingService.doBookingExtraService({
-        service: this.s_service,
+        service,
         booking_nbr: this.booking.booking_nbr,
         is_remove: false,
       });
@@ -58,6 +83,7 @@ export class IrExtraServiceConfigForm {
   private closeDialog() {
     this.closeModal.emit();
   }
+
   private updateService(params: Partial<ExtraService>) {
     let prevService: ExtraService = this.s_service;
     if (!prevService) {
@@ -73,6 +99,12 @@ export class IrExtraServiceConfigForm {
     this.s_service = { ...prevService, ...params };
   }
 
+  private assignmentChanged(event: IrServiceAssigneeSelectCustomEvent<'agent' | 'guest'>): void {
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+    this.assignee = event.detail;
+  }
+
   render() {
     return (
       <form
@@ -83,6 +115,38 @@ export class IrExtraServiceConfigForm {
         }}
         class={'extra-service-config__container'}
       >
+        {this.categories.length > 0 && (
+          <ir-validator value={this.s_service?.category} schema={ExtraServiceSchema.shape.category}>
+            <wa-select
+              size="small"
+              label="Service category"
+              value={this.s_service?.category?.code ?? ''}
+              defaultValue={this.s_service?.category?.code ?? ''}
+              onchange={(e: any) => {
+                this.updateService({ category: { code: e.target.value } });
+              }}
+              onwa-hide={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+              }}
+              onwa-show={e => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+              }}
+            >
+              {this.categories?.map(category => {
+                const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
+                const label = (category[langKey] ?? category.CODE_VALUE_EN ?? '') + ` (VAT ${category.pct}%)`;
+
+                return (
+                  <wa-option value={category.CODE_NAME} label={label}>
+                    {label}
+                  </wa-option>
+                );
+              })}
+            </wa-select>
+          </ir-validator>
+        )}
         <ir-validator id="amenity description-validator" schema={ExtraServiceSchema.shape.description}>
           <wa-textarea
             size="small"
@@ -96,7 +160,7 @@ export class IrExtraServiceConfigForm {
           ></wa-textarea>
         </ir-validator>
         <ir-validator value={this.s_service?.start_date ?? null} schema={ExtraServiceSchema.shape.start_date}>
-          <ir-custom-date-picker
+          <ir-date-select
             placeholder="Select date"
             withClear
             label="Dates on"
@@ -105,9 +169,9 @@ export class IrExtraServiceConfigForm {
             minDate={this.booking.from_date}
             maxDate={this.booking.to_date}
             onDateChanged={e => this.updateService({ start_date: e.detail.start?.format('YYYY-MM-DD') })}
-          ></ir-custom-date-picker>
+          ></ir-date-select>
         </ir-validator>
-        <ir-custom-date-picker
+        <ir-date-select
           withClear
           emitEmptyDate
           placeholder="Select date"
@@ -120,7 +184,7 @@ export class IrExtraServiceConfigForm {
             this.updateService({ end_date: e.detail.start?.format('YYYY-MM-DD') });
           }}
           label="Till and including"
-        ></ir-custom-date-picker>
+        ></ir-date-select>
         {/* Prices and cost */}
         <ir-validator value={this.s_service?.price ?? null} schema={ExtraServiceSchema.shape.price}>
           <ir-input
@@ -131,7 +195,7 @@ export class IrExtraServiceConfigForm {
             value={this.s_service?.price?.toString()}
             mask={'price'}
             type="text"
-            label={locales.entries.Lcz_Price}
+            label={`${locales.entries.Lcz_Price} (including tax)`}
           >
             <span slot="start">{this.booking.currency.symbol}</span>
           </ir-input>
@@ -142,11 +206,14 @@ export class IrExtraServiceConfigForm {
             onText-change={e => this.updateService({ cost: Number(e.detail) })}
             value={this.s_service?.cost?.toString()}
             mask={'price'}
-            label={locales.entries.Lcz_Cost}
+            label={`${locales.entries.Lcz_Cost} (optional)`}
           >
             <span slot="start">{this.booking.currency.symbol}</span>
           </ir-input>
         </ir-validator>
+        {isAgentMode(this.agent) && (
+          <ir-service-assignee-select assigneeType={this.assignee} onAssignmentChange={e => this.assignmentChanged(e)} agent={this.booking.agent}></ir-service-assignee-select>
+        )}
       </form>
     );
   }

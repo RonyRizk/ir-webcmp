@@ -74,6 +74,7 @@ export class IrDeparturesTable {
         </td>
         <td class="text-right">
           <ir-balance-cell
+            guestFinancial={booking.guest_financial}
             bookingNumber={booking.booking_nbr}
             isDirect={booking.is_direct}
             statusCode={booking.status.code}

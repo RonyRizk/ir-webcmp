@@ -1,3 +1,4 @@
+/* #region Base & Layout ~~~~~~~~~~~~~~~~~~~~ */
 .date-picker {
   width: 100%;
   display: flex;
@@ -5,108 +6,26 @@
   gap: 20px;
   position: relative;
   z-index: 999;
-  background: var(--backgroud, white);
-  color: var(--gray-800, #1d2939);
+  background: var(--wa-color-surface-default, white);
+  color: var(--wa-color-text-normal, #1d2939);
   box-sizing: border-box;
   padding: 0;
-}
-.navigation-buttons:dir(rtl) svg {
-  transform: rotate(180deg);
 }
 
-.month-navigation span {
-  line-height: 0;
-  color: var(--gray-800, #1d2939);
-  font-size: 16px;
-}
-.current-date {
-  color: hsl(var(--brand-600, 215, 87%, 51%));
-}
-.day-button:hover::after {
-  content: '';
-  border-radius: var(--radius, 0.5rem);
-  background: var(--gray-200, #eaecf0);
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-.navigation-buttons {
-  box-sizing: border-box;
-  border: 0;
-  background: var(--backgroud, white);
+.month-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: var(--cal-button-size, 30px);
-  width: var(--cal-button-size, 40px);
-  margin: 0;
-  padding: 0;
-  border-radius: var(--radius, 0.5rem);
-  cursor: pointer;
-  color: var(--gray-800, #1d2939);
-}
-.navigation-buttons:hover {
-  background: var(--gray-200, #eaecf0);
-}
-.day-button:focus-visible {
-  outline-color: hsl(var(--brand-600, 215, 87%, 51%));
-}
-.day-button:disabled,
-.day-button[aria-unavailable='true'] {
-  opacity: 0.3;
-  cursor: default;
-}
-.day-button:disabled .day,
-.day-button[aria-unavailable='true'] .day {
-  text-decoration: line-through;
-}
-.day-button:disabled:hover::after .day-button[aria-unavailable='true']:hover::after {
-  content: none;
-}
-.day-button .day,
-.price {
-  margin: 0;
-  padding: 0;
-}
-.day-button .price {
-  font-size: 10px;
-  color: var(--gray-600);
-}
-.month-navigation {
-  display: flex;
-  align-items: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
   box-sizing: border-box;
 }
-.month-navigation span {
-  padding: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-.month-year-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--gray-800, #1d2939);
-  margin-left: auto;
-  margin-right: auto;
-}
-.margin-right {
-  margin-right: 0;
-}
-.margin-left {
-  margin-left: 0;
-}
-.margin-horizontal:dir(ltr) {
-  margin-left: var(--cal-button-size, 30px);
-}
-.margin-horizontal:dir(rtl) {
-  margin-right: var(--cal-button-size, 30px);
-}
-.weekday-name {
-  font-weight: 400;
+.month-container span {
+  flex: 1;
   text-align: center;
-  color: var(--gray-800, #1d2939);
-  /* font-size: 14px; */
 }
+/* #endregion */
+
+/* #region Table & Grid ~~~~~~~~~~~~~~~~~~~~ */
 table {
   border-collapse: collapse;
   box-sizing: border-box;
@@ -129,26 +48,70 @@ td {
   margin: 0;
   box-sizing: border-box;
 }
-.day-button {
-  box-sizing: border-box;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-size: 0.875rem;
-  padding: 0;
-  margin: 0;
-  width: var(--cal-button-size, 100%);
-  height: var(--cal-button-size, 40px);
-  position: relative;
-  border-radius: var(--radius, 0.5rem);
-  margin: 0;
-  color: var(--gray-800);
+.weekday-name {
+  font-weight: 400;
+  text-align: center;
+  color: var(--wa-color-text-normal, #1d2939);
 }
+/* #endregion */
+
+/* #region Month Navigation ~~~~~~~~~~~~~~~~~~~~ */
 .month-navigation {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
   position: relative;
 }
+.month-navigation span {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 0;
+  color: var(--wa-color-text-normal, #1d2939);
+  font-size: 16px;
+}
+.month-year-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--wa-color-text-normal, #1d2939);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .navigation-buttons {
+  box-sizing: border-box;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
+  height: var(--cal-button-size, 30px);
+  width: var(--cal-button-size, 40px);
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius, 0.5rem);
+  cursor: pointer;
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: transparent;
+  border-color: transparent;
+  transition-property: background, border, box-shadow, color;
+  transition-duration: var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
+}
+.navigation-buttons:hover {
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet));
+}
+.navigation-buttons:active {
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active));
+}
+.navigation-buttons:dir(rtl) svg {
+  transform: rotate(180deg);
+}
+
+.button-next-main {
+  display: none;
 }
 .button-next-main:dir(ltr),
 .button-next:dir(ltr) {
@@ -165,18 +128,84 @@ td {
   right: 0;
 }
 
-.month-container {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  box-sizing: border-box;
+.margin-right {
+  margin-right: 0;
 }
-.month-container span {
-  flex: 1;
-  text-align: center;
+.margin-left {
+  margin-left: 0;
+}
+.margin-horizontal:dir(ltr) {
+  margin-left: var(--cal-button-size, 30px);
+}
+.margin-horizontal:dir(rtl) {
+  margin-right: var(--cal-button-size, 30px);
+}
+/* #endregion */
+
+/* #region Day Button ~~~~~~~~~~~~~~~~~~~~ */
+.day-button {
+  box-sizing: border-box;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  margin: 0;
+  width: var(--cal-button-size, 100%);
+  height: var(--cal-button-size, 40px);
+  position: relative;
+  border-radius: var(--radius, 0.5rem);
+  color: var(--gray-800);
+  transition-property: background, border, box-shadow, color;
+  transition-duration: var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
+}
+.day-button .day,
+.price {
+  margin: 0;
+  padding: 0;
+}
+.day-button .price {
+  font-size: 10px;
+  color: var(--gray-600);
 }
 
+.day-button:hover::after {
+  content: '';
+  border-radius: var(--radius, 0.5rem);
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet));
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.day-button:active::after {
+  content: '';
+  border-radius: var(--radius, 0.5rem);
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active));
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.day-button:focus-visible {
+  outline-color: hsl(var(--brand-600, 215, 87%, 51%));
+}
+
+.day-button:disabled,
+.day-button[aria-unavailable='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.day-button:disabled:hover::after,
+.day-button:disabled:active::after,
+.day-button[aria-unavailable='true']:hover::after,
+.day-button[aria-unavailable='true']:active::after {
+  content: unset;
+}
+/* #endregion */
+
+/* #region Date Range Selection ~~~~~~~~~~~~~~~~~~~~ */
 .day-range-end,
 .day-range-start,
 .day-range-end .current-date,
@@ -193,12 +222,18 @@ td {
 .day-button:hover.day-range-end::after,
 .day-button:hover.day-range-start::after {
   content: '';
-  background: hsl(var(--brand-600, 215, 87%, 51%));
+  background: var(--wa-color-brand-fill-loud, hsl(var(--brand-600, 215, 87%, 51%)));
+  color: var(--wa-color-brand-on-loud);
   position: absolute;
   inset: 0;
   border-radius: var(--radius, 0.5rem);
   z-index: -1;
 }
+.day-button:hover.day-range-end::after,
+.day-button:hover.day-range-start::after {
+  background-color: color-mix(in oklab, var(--wa-color-fill-loud, var(--wa-color-brand-fill-loud)), var(--wa-color-mix-hover));
+}
+
 .day-range-start:dir(ltr)::after,
 .day-button:hover.day-range-start:dir(ltr)::after {
   border-top-right-radius: 0px;
@@ -219,16 +254,31 @@ td {
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
 }
-.day-button:hover.highlight::after {
-  border-radius: var(--radius, 0.5rem);
-}
+
 .highlight::after {
   content: '';
   border-radius: 0;
-  background: var(--gray-100, #f2f4f7);
+  background: var(--wa-color-neutral-fill-quiet, #f2f4f7);
   position: absolute;
   inset: 0;
   z-index: -1;
+}
+.day-button:hover.highlight::after {
+  border-radius: var(--radius, 0.5rem);
+}
+.highlight:not(:disabled):not([aria-unavailable='true']):hover::after {
+  color: var(--wa-color-on-normal, var(--wa-color-neutral-on-normal));
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-neutral-fill-normal)), var(--wa-color-mix-hover));
+}
+.highlight:not(:disabled):not([aria-unavailable='true']):active::after {
+  color: var(--wa-color-on-normal, var(--wa-color-neutral-on-normal));
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-neutral-fill-normal)), var(--wa-color-mix-active));
+}
+/* #endregion */
+
+/* #region Accessibility ~~~~~~~~~~~~~~~~~~~~ */
+.current-date {
+  color: var(--wa-color-brand, hsl(var(--brand-600, 215, 87%, 51%)));
 }
 .sr-only {
   position: absolute;
@@ -241,9 +291,9 @@ td {
   white-space: nowrap;
   border-width: 0;
 }
-.button-next-main {
-  display: none;
-}
+/* #endregion */
+
+/* #region Responsive ~~~~~~~~~~~~~~~~~~~~ */
 @media only screen and (min-width: 640px) {
   .date-picker {
     flex-direction: row;
@@ -255,6 +305,7 @@ td {
     display: none;
   }
 }
+
 @media only screen and (min-width: 740px) {
   .date-picker {
     gap: 40px;
@@ -284,6 +335,7 @@ td {
     margin-right: var(--cal-button-size, 38px);
   }
 }
+
 @media only screen and (min-width: 1200px) {
   .day-button,
   th,
@@ -310,3 +362,4 @@ td {
     margin-right: var(--cal-button-size, 45px);
   }
 }
+/* #endregion */

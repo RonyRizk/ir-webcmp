@@ -183,6 +183,7 @@ export class IrBookingEditorHeader {
 
   private handleSourceChange(event: Event): void {
     this.stopEvent(event);
+    resetAvailability();
     const value = (event.target as HTMLSelectElement).value;
     const source = booking_store.selects.sources.find(s => s.id === value);
     setBookingDraft({ source });
@@ -319,7 +320,8 @@ export class IrBookingEditorHeader {
               schema={this.datesSchema}
               style={{ position: 'relative' }}
             >
-              <igl-date-range
+              <ir-date-range
+                class="booking-editor__date-range"
                 defaultData={{
                   fromDate: checkIn?.format('YYYY-MM-DD') ?? '',
                   toDate: checkOut?.format('YYYY-MM-DD') ?? '',
@@ -340,7 +342,7 @@ export class IrBookingEditorHeader {
                     placeholder={locales.entries.Lcz_AdultsCaption}
                     value={adults?.toString()}
                     defaultValue={adults?.toString()}
-                    onwa-hide={this.stopEvent.bind(this)}
+                    // onwa-hide={this.stopEvent.bind(this)}
                     onchange={this.handleAdultsChange.bind(this)}
                   >
                     {Array.from({ length: calendar_data.property.adult_child_constraints.adult_max_nbr }, (_, i) => i + 1).map(option => (
@@ -356,7 +358,7 @@ export class IrBookingEditorHeader {
                     placeholder={this.childrenSelectPlaceholder}
                     value={children?.toString()}
                     defaultValue={children?.toString()}
-                    onwa-hide={this.stopEvent.bind(this)}
+                    // onwa-hide={this.stopEvent.bind(this)}
                     onchange={this.handleChildrenChange.bind(this)}
                   >
                     {Array.from({ length: calendar_data.property.adult_child_constraints.child_max_nbr }, (_, i) => i + 1).map(option => (

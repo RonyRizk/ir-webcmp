@@ -1,10 +1,57 @@
 import moment, { MomentFormatSpecification } from 'moment';
-import IBooking, { ICountry, PhysicalRoomType, PropertyRoomType, IEntries } from '../models/IBooking';
+import IBooking, { ICountry, IEntries, PhysicalRoomType, PropertyRoomType } from '../models/IBooking';
 import { z } from 'zod';
 import calendarData from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { ROOM_IN_OUT } from '@/models/booking.dto';
 import { GroupedTableEntries } from '@/services/booking-service/types';
+
+/** Supported language codes that map to `CODE_VALUE_*` fields on {@link IEntries}. */
+export type EntryLanguage = 'en' | 'ar' | 'de' | 'el' | 'fr' | 'he' | 'pl' | 'ru' | 'ua';
+
+const LANGUAGE_KEY_MAP: Record<EntryLanguage, keyof IEntries> = {
+  en: 'CODE_VALUE_EN',
+  ar: 'CODE_VALUE_AR',
+  de: 'CODE_VALUE_DE',
+  el: 'CODE_VALUE_EL',
+  fr: 'CODE_VALUE_FR',
+  he: 'CODE_VALUE_HE',
+  pl: 'CODE_VALUE_PL',
+  ru: 'CODE_VALUE_RU',
+  ua: 'CODE_VALUE_UA',
+};
+
+/**
+ * Returns the localised display string for an {@link IEntries} entry.
+ *
+ * Resolution order:
+ * 1. `CODE_VALUE_<language>` — if present and non-empty.
+ * 2. `CODE_VALUE_EN` — English fallback.
+ * 3. `CODE_NAME` — last-resort fallback when both the requested language
+ *    and English values are absent.
+ *
+ * @param entry - The `IEntries` object to translate.
+ * @param language - BCP-47-style language code (e.g. `"fr"`, `"ar"`).
+ *   Defaults to `"en"`.
+ * @returns The best available display string for the requested language.
+ *
+ * @example
+ * ```ts
+ * const label = getEntryValue({ entry: someEntry, language: 'fr' });
+ * // → "Petit-déjeuner" (falls back to "Breakfast" if French is null)
+ * ```
+ */
+export function getEntryValue({ entry, language = 'en' }: { entry: IEntries; language?: string }): string {
+  const key = LANGUAGE_KEY_MAP[language] ?? 'CODE_VALUE_EN';
+  const localised = entry[key] as string | null;
+
+  if (localised) return localised;
+
+  const english = entry['CODE_VALUE_EN'] as string | null;
+  if (english) return english;
+
+  return entry.CODE_NAME;
+}
 
 export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string, format: string = 'D_M_YYYY'): string {
   const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
@@ -159,7 +206,7 @@ export const transformBooking = (physicalRoom: PhysicalRoomType[]): IBooking[] =
 
 export function dateToFormattedString(date: Date): string {
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // +1 because months are 0-based in JS       
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // +1 because months are 0-based in JS
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
@@ -205,7 +252,7 @@ export function formatLegendColors(legendData) {
   // const statusId = (() => {
   //   let d = {};
   //   legendData.forEach(element => {
-  //     d[toStatusCode(element.name)] = { id: Number(element?.id), clsName: normalizeStatus(element.name) };   
+  //     d[toStatusCode(element.name)] = { id: Number(element?.id), clsName: normalizeStatus(element.name) };
   //   });
   //   return d;
   // })();
@@ -294,8 +341,8 @@ export function validateEmail(email: string) {
   const parsedEmailResults = z.string().email().safeParse(email);
   return !parsedEmailResults.success;
 }
-export function formatAmount(currency: string, amount: number) {
-  return currency + ' ' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatAmount(currency: string, amount: number = 0) {
+  return `${amount < 0 ? '- ' : ''}${currency} ${Math.abs(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 /**
  * Determines whether the given user has privileged (global or elevated) access.
@@ -404,7 +451,7 @@ export function canCheckout({ to_date, inOutCode, skipAutoCheckout = false }: { 
   if ((!calendarData.checkin_enabled || calendarData.is_automatic_check_in_out) && !skipAutoCheckout) {
     return false;
   }
-  if (inOutCode === ROOM_IN_OUT.CHECKOUT) {
+  if (inOutCode === ROOM_IN_OUT.CHECKOUT || inOutCode === ROOM_IN_OUT.IDLE) {
     return false;
   }
   if (inOutCode === ROOM_IN_OUT.CHECKIN) {
@@ -416,11 +463,12 @@ export function canCheckout({ to_date, inOutCode, skipAutoCheckout = false }: { 
  * Downloads a file from a given URL.
  *
  * @param url - The URL of the file to download.
- * @param filename - The name of the file to save. If not provided, the URL will be used as the filename.       
+ * @param filename - The name of the file to save. If not provided, the URL will be used as the filename.
  */
 export function downloadFile(url: string, filename?: string) {
   const a = document.createElement('a');
   a.href = url;
+  a.setAttribute('download', '');
   a.download = filename || url;
   document.body.appendChild(a);
   a.click();
@@ -487,7 +535,7 @@ export function handleBodyOverflow(open: boolean) {
 export function generatePassword(length = 16): string {
   const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789' + '!@#$%^&*()-_=+[]{}|;:,.<>?';
 
-  const cryptoObj = (window.crypto || (window as any).msCrypto) as Crypto & { getRandomValues?: Function };     
+  const cryptoObj = (window.crypto || (window as any).msCrypto) as Crypto & { getRandomValues?: Function };
   if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
     const randomValues = new Uint32Array(length);
     cryptoObj.getRandomValues(randomValues);
@@ -509,9 +557,9 @@ export function generatePassword(length = 16): string {
  * @param from - Start time in "HH:mm" (24-hour/military) format (e.g., "04:00").
  * @param to - End time in "HH:mm" (24-hour/military) format (e.g., "18:00").
  * @param stepMinutes - The interval step in minutes between time slots (default is 60).
- * @returns An array of time strings in "HH:mm" format representing each step between the start and end times.  
+ * @returns An array of time strings in "HH:mm" format representing each step between the start and end times.
  */
-export function generateTimeSlotsMilitary(from: string, to: string, stepMinutes: number = 60): string[] {       
+export function generateTimeSlotsMilitary(from: string, to: string, stepMinutes: number = 60): string[] {
   const startTime = moment(from, 'HH:mm');
   const endTime = moment(to, 'HH:mm');
 
@@ -543,19 +591,16 @@ export function getFormSubmitter(e: Event): string {
   const submitter = (e as SubmitEvent).submitter as any | null;
   return submitter.value;
 }
-
 export function groupEntryTablesResult(entries: IEntries[]): GroupedTableEntries {
-    let result: any = {};
-    for (const entry of entries) {
-      if (!entry.TBL_NAME) continue;
-      const key = entry.TBL_NAME.startsWith('_')
-        ? entry.TBL_NAME.substring(1).toLowerCase()
-        : entry.TBL_NAME.toLowerCase();
+  let result: any = {};
+  for (const entry of entries) {
+    if (!entry.TBL_NAME) continue;
+    const key = entry.TBL_NAME.startsWith('_') ? entry.TBL_NAME.substring(1).toLowerCase() : entry.TBL_NAME.toLowerCase();
 
-      if (!result[key]) {
-        result[key] = [];
-      }
-      result[key] = [...result[key], entry];
+    if (!result[key]) {
+      result[key] = [];
     }
-    return result as GroupedTableEntries;
+    result[key] = [...result[key], entry];
   }
+  return result as GroupedTableEntries;
+}

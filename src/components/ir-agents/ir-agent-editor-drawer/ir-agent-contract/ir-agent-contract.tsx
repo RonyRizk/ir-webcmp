@@ -5,7 +5,6 @@ import WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/rad
 import WaSlider from '@awesome.me/webawesome/dist/components/slider/slider';
 import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
 import { z } from 'zod';
-import WaSelect from '@awesome.me/webawesome/dist/components/select/select';
 
 @Component({
   tag: 'ir-agent-contract',
@@ -299,7 +298,7 @@ export class IrAgentContract {
           )}
         </wa-card>
         {/* Post Timing */}
-        <wa-card appearance="plain" class="contract-card" data-testid="agent-contract-collection-card">
+        {/* <wa-card appearance="plain" class="contract-card" data-testid="agent-contract-collection-card">
           <p slot="header" class="contract-card__title" data-testid="agent-contract-collection-title">
             Post Timing
           </p>
@@ -320,7 +319,7 @@ export class IrAgentContract {
               ))}
             </wa-select>
           </ir-validator>
-        </wa-card>
+        </wa-card> */}
       </Host>
     );
   }

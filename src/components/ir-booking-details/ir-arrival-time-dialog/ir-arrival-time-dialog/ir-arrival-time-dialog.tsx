@@ -89,7 +89,7 @@ export class IrArrivalTimeDialog {
   render() {
     return (
       <ir-dialog
-        label="Edit arrival time"
+        label="Edit Arrival Time"
         open={this.open}
         onIrDialogHide={() => {
           this.open = false;

@@ -252,7 +252,7 @@ export class IrHkArchive {
           showCloseButton={false}
           sidebarStyles={{
             width: '80rem',
-            background: '#F2F3F8',
+            background: 'var(--ir-color-muted-background,#f2f3f8)',
           }}
         >
           {this.selectedBooking && (

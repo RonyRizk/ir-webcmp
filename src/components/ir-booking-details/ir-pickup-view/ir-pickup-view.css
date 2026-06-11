@@ -2,62 +2,99 @@
   display: block;
 }
 
-.pickup-info {
+.pickup-body {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.pickup-info__summary {
-  display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: space-between;
+}
+
+.pickup-body--guest {
+  border-left: 3px solid var(--wa-color-neutral-300, #d4d4d8);
+  padding-left: 0.625rem;
+}
+
+.pickup-body--agent {
+  border-left: 3px solid var(--wa-color-brand-fill-loud, #60a5fa);
+  padding-left: 0.625rem;
+}
+
+/* Bill-to label (original service-group__label pattern) */
+.service-group__label {
+  display: flex;
   align-items: center;
-  color: #1f2a37;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--wa-color-neutral-500, #71717a);
 }
 
-.pickup-info__datetime {
+.service-group__label.--agent {
+  color: var(--wa-color-primary-600, #2563eb);
+}
+
+/* Header row: date + price */
+.pickup-row--header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.pickup-datetime {
+  font-size: 0.925rem;
   font-weight: 600;
-  margin: 0;
+  color: var(--wa-color-neutral-900, #18181b);
 }
 
-.pickup-info__due {
-  margin: 0;
-  color: #1f2a37;
+.pickup-time {
+  font-weight: 400;
+  color: var(--wa-color-neutral-600, #52525b);
 }
 
-.pickup-info__details {
+.pickup-price {
+  /* font-size: 0.925rem; */
+  color: var(--wa-color-neutral-900, #18181b);
+  white-space: nowrap;
+}
+
+/* Details list */
+.pickup-dl {
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  color: #1f2a37;
+  gap: 0.2rem;
 }
 
-.pickup-info__line {
-  margin: 0;
+.pickup-dl__row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.pickup-info__label {
-  font-weight: 600;
-}
-
-.pickup-info__divider {
-  opacity: 0.4;
-}
-
-.pickup-info__note {
-  margin: 0;
-  color: #6b7280;
+  gap: 0.35rem;
   font-size: 0.875rem;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 600px) {
-  .pickup-info__summary {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.pickup-dl__row dt {
+  font-weight: 600;
+  color: var(--wa-color-neutral-600, #52525b);
+  white-space: nowrap;
+}
+
+.pickup-dl__row dt::after {
+  content: ':';
+}
+
+.pickup-dl__row dd {
+  margin: 0;
+  color: var(--wa-color-neutral-800, #27272a);
+}
+
+/* Note */
+.pickup-note {
+  margin: 0;
+  font-size: 0.825rem;
+  color: var(--wa-color-neutral-500, #71717a);
+  line-height: 1.4;
+  border-top: 1px solid var(--wa-color-neutral-100, #f4f4f5);
+  padding-top: 0.4rem;
 }

@@ -1,0 +1,109 @@
+/**
+ * cl-print-table.css
+ *
+ * Shared table classes for city-ledger print preview components.
+ * @import this file in any preview CSS that renders a table.
+ * Edit once here — all components update automatically.
+ */
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+
+.cl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  table-layout: auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.cl-th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* letter-spacing: 0.06em; */
+  text-transform: capitalize;
+  color: #374151;
+  border-top: 2px solid #111827;
+  border-bottom: 1px solid #111827;
+  white-space: nowrap;
+}
+
+.cl-th--num {
+  text-align: right;
+}
+
+/* ── Body cell ───────────────────────────────────────────────────────────── */
+
+.cl-td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.cl-td--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cl-td--muted {
+  color: #6b7280;
+}
+
+.cl-td--bold {
+  font-weight: 700;
+  color: #111827;
+}
+
+.cl-td--nowrap {
+  white-space: nowrap;
+}
+
+.cl-td--empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 1.5rem 0.75rem;
+  font-style: italic;
+}
+
+/* ── Balance / summary rows ──────────────────────────────────────────────── */
+
+.cl-balance-row td {
+  background: #f3f4f6;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #111827;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* ── Print ───────────────────────────────────────────────────────────────── */
+
+@media print {
+  .cl-table {
+    font-size: 0.75rem;
+  }
+
+  .cl-th,
+  .cl-td {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .cl-td--muted,
+  .cl-td--empty {
+    color: #374151;
+  }
+
+  .cl-balance-row td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cl-balance-row {
+    page-break-inside: avoid;
+  }
+}

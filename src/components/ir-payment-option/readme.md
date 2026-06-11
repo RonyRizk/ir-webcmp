@@ -26,6 +26,10 @@
 
 ## Dependencies
 
+### Used by
+
+ - [ir-secure-tasks](../ir-secure-tasks)
+
 ### Depends on
 
 - [ir-toast](../ui/ir-toast)
@@ -48,7 +52,6 @@ graph TD;
   ir-payment-option --> ir-option-details
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-alert
-  ir-interceptor --> ir-spinner
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -61,6 +64,7 @@ graph TD;
   ir-option-details --> ir-input-text
   ir-option-details --> ir-button
   ir-title --> ir-icon
+  ir-secure-tasks --> ir-payment-option
   style ir-payment-option fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

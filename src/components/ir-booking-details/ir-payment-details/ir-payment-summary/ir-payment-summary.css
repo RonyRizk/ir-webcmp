@@ -1,9 +1,151 @@
 :host {
   display: block;
+  font-family: var(--wa-font-family-body);
+  border-bottom: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  padding-bottom: var(--wa-space-l);
+  margin-bottom: var(--wa-space-l);
 }
-:host {
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+
+.ps-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.357rem; /* 5px */
 }
-:host * {
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+
+/* ─── Agent mode: two columns ─────────────────────────── */
+
+.ps-cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.ps-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.357rem;
+}
+
+.ps-col--bordered {
+  padding-left: 0.857rem; /* 12px */
+  margin-left: 0.857rem;
+  border-left: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+
+/* Section title — sits above the metrics in each column */
+.ps-section-title {
+  font-weight: 600;
+  color: var(--wa-color-text-quiet, #9ca3af);
+  white-space: nowrap;
+}
+
+/* Stacked metric: label on top, value below — full column width for the value */
+.ps-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.071rem; /* 1px */
+  min-width: 0;
+}
+
+.ps-stacked__label {
+  color: var(--wa-color-text-quiet, #9ca3af);
+}
+
+.ps-stacked__value {
+  font-weight: 700;
+  color: var(--wa-color-text-normal, #111827);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.ps-stacked__value--danger {
+  color: var(--wa-color-danger-text-loud, #dc2626);
+}
+
+/* ─── Non-agent mode: full-width rows ─────────────────── */
+
+.ps-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.571rem; /* 8px */
+  min-width: 0;
+}
+
+.ps-row__label {
+  color: var(--wa-color-text-quiet, #6b7280);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ps-row__value {
+  font-weight: 700;
+  color: var(--wa-color-text-normal, #111827);
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.ps-row__value--danger {
+  color: var(--wa-color-danger-text-loud, #dc2626);
+}
+
+/* ─── Grand total — always full width ─────────────────── */
+
+.ps-grand-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.571rem;
+  padding-top: 0.429rem; /* 6px */
+  margin-top: 0.143rem; /* 2px */
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  min-width: 0;
+}
+
+.ps-grand-total__label {
+  font-weight: 700;
+  color: var(--wa-color-text-normal, #111827);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ps-grand-total__value {
+  font-weight: 700;
+  color: var(--wa-color-text-normal, #111827);
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/*sm*/
+@media (min-width: 640px) {
+}
+
+/*md*/
+@media (min-width: 768px) {
+}
+
+/*lg*/
+@media (min-width: 1024px) {
+}
+
+/*xl*/
+@media (min-width: 1280px) {
+  .ps-stacked {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    /* justify-content: space-between; */
+    align-items: center;
+  }
+  .ps-stacked.--stacked-right {
+    justify-content: flex-end;
+  }
+}
+
+/*2xl*/
+@media (min-width: 1536px) {
 }

@@ -14,7 +14,7 @@ export class IrDeparturesFilter {
   render() {
     return (
       <div class="departures-filters__container">
-        <ir-custom-date-picker
+        <ir-date-select
           onDateChanged={e => {
             e.stopImmediatePropagation();
             e.stopPropagation();
@@ -24,7 +24,7 @@ export class IrDeparturesFilter {
           class="departures-filters__date-picker"
         >
           <wa-icon name="calendar" slot="start"></wa-icon>
-        </ir-custom-date-picker>
+        </ir-date-select>
         <ir-input
           withClear
           class="departures-filters__search-bar"

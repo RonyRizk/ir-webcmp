@@ -22,7 +22,7 @@
 | `inputClass`         | `input-class`          | Custom CSS classes applied to the inner `<wa-input>` element.  You can also target the exposed parts `::part(input)` and `::part(base)` for deeper styling of the native input and container.                                                                                          | `string`                                                                                                            | `undefined` |
 | `inputmode`          | `inputmode`            | Tells the browser what type of data will be entered by the user, allowing it to display the appropriate virtual keyboard on supportive devices.                                                                                                                                        | `"decimal" \| "email" \| "none" \| "numeric" \| "search" \| "tel" \| "text" \| "url"`                               | `undefined` |
 | `label`              | `label`                | The input's label. If you need to display HTML, use the `label` slot instead.                                                                                                                                                                                                          | `string`                                                                                                            | `undefined` |
-| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"email" \| "date" \| "time" \| "price" \| "url"> \| FactoryArg`                                         | `undefined` |
+| `mask`               | `mask`                 | Mask for the input field (optional)                                                                                                                                                                                                                                                    | `MaskConfig<"email" \| "date" \| "price" \| "time" \| "url"> \| FactoryArg`                                         | `undefined` |
 | `max`                | `max`                  | The input's maximum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
 | `maxlength`          | `maxlength`            | The maximum length of input that will be considered valid.                                                                                                                                                                                                                             | `number`                                                                                                            | `undefined` |
 | `min`                | `min`                  | The input's minimum value. Only applies to date and number input types.                                                                                                                                                                                                                | `number \| string`                                                                                                  | `undefined` |
@@ -49,11 +49,12 @@
 
 ## Events
 
-| Event         | Description | Type                  |
-| ------------- | ----------- | --------------------- |
-| `input-blur`  |             | `CustomEvent<void>`   |
-| `inputFocus`  |             | `CustomEvent<void>`   |
-| `text-change` |             | `CustomEvent<string>` |
+| Event          | Description | Type                  |
+| -------------- | ----------- | --------------------- |
+| `input-blur`   |             | `CustomEvent<void>`   |
+| `inputCleared` |             | `CustomEvent<void>`   |
+| `inputFocus`   |             | `CustomEvent<void>`   |
+| `text-change`  |             | `CustomEvent<string>` |
 
 
 ## Methods
@@ -79,13 +80,20 @@ Type: `Promise<void>`
 
 
 
+## Shadow Parts
+
+| Part         | Description |
+| ------------ | ----------- |
+| `"wa-input"` |             |
+
+
 ## Dependencies
 
 ### Used by
 
  - [igl-application-info](../../igloo-calendar/igl-book-property/igl-booking-form/igl-application-info)
- - [igl-date-range](../../igloo-calendar/igl-date-range)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
+ - [igl-rate-extender-form](../../igloo-calendar/igl-rate-extender-drawer/igl-rate-extender-form)
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [ir-agent-contract](../../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
  - [ir-agent-profile](../../ir-agents/ir-agent-editor-drawer/ir-agent-profile)
@@ -93,13 +101,21 @@ Type: `Promise<void>`
  - [ir-autocomplete](../ir-autocomplete)
  - [ir-booking-company-form](../../ir-booking-company-dialog/ir-booking-company-form)
  - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
- - [ir-custom-date-picker](../../ir-custom-date-picker)
+ - [ir-booking-pricing-form](../../ir-booking-details/ir-room/ir-booking-pricing-drawer/ir-booking-pricing-form)
+ - [ir-checkout-dialog](../../ir-checkout-dialog)
+ - [ir-city-ledger-fiscal-documents-filters](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-filters)
+ - [ir-city-ledger-folio-filters](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-filters)
+ - [ir-city-ledger-transaction-form](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form)
+ - [ir-date-range](../ir-date-range)
  - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departures-filter](../../ir-departures/ir-departures-filter)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
+ - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
+ - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
+ - [ir-input-cell](../../ir-table/ir-input-cell)
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
@@ -108,6 +124,7 @@ Type: `Promise<void>`
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
+ - [ir-tax-input](../../ir-tax-service-categories/ir-tax-input)
  - [ir-unbookable-rooms-data](../../ir-unbookable-rooms/ir-unbookable-rooms-data)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
@@ -116,8 +133,8 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   igl-application-info --> ir-input
-  igl-date-range --> ir-input
   igl-property-booked-by --> ir-input
+  igl-rate-extender-form --> ir-input
   igl-rate-plan --> ir-input
   ir-agent-contract --> ir-input
   ir-agent-profile --> ir-input
@@ -125,13 +142,21 @@ graph TD;
   ir-autocomplete --> ir-input
   ir-booking-company-form --> ir-input
   ir-booking-editor-guest-form --> ir-input
-  ir-custom-date-picker --> ir-input
+  ir-booking-pricing-form --> ir-input
+  ir-checkout-dialog --> ir-input
+  ir-city-ledger-fiscal-documents-filters --> ir-input
+  ir-city-ledger-folio-filters --> ir-input
+  ir-city-ledger-transaction-form --> ir-input
+  ir-date-range --> ir-input
   ir-date-select --> ir-input
   ir-departures-filter --> ir-input
   ir-extra-service-config-form --> ir-input
+  ir-fiscal-documents-filters --> ir-input
+  ir-ghs-candidate-table --> ir-input
   ir-guest-info-form --> ir-input
   ir-hk-operations-card --> ir-input
   ir-hk-user-drawer-form --> ir-input
+  ir-input-cell --> ir-input
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input
@@ -140,6 +165,7 @@ graph TD;
   ir-room-guests-form --> ir-input
   ir-secure-tasks --> ir-input
   ir-tasks-header --> ir-input
+  ir-tax-input --> ir-input
   ir-unbookable-rooms-data --> ir-input
   ir-unbookable-rooms-filters --> ir-input
   ir-user-form-panel --> ir-input

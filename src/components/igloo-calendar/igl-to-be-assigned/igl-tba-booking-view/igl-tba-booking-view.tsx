@@ -76,7 +76,7 @@ export class IglTbaBookingView {
     this.selectedRoom = parseInt(evt.target.value);
   }
 
-  private async handleAssignUnit(event: CustomEvent, check_in: boolean = false) {
+  private async handleAssignUnit(event: Event, check_in: boolean = false) {
     try {
       event.stopImmediatePropagation();
       event.stopPropagation();
@@ -224,73 +224,70 @@ export class IglTbaBookingView {
   render() {
     return (
       <Host>
-        <div class="bookingContainer" onClick={() => this.handleHighlightAvailability()}>
-          <div
-            class={`guestTitle booking-guest-title tba-guest-title pointer font-small-3 ${this.highlightSection ? 'selectedOrder is-active' : ''}`}
-            data-toggle="tooltip"
-            data-placement="top"
-            data-original-title="Click to assign unit"
-          >
-            <p class="guest-booking-number">{this.eventData.BOOKING_NUMBER}</p>
+        <wa-card appearance="filled" class={`tba ${this.highlightSection ? '--active' : ''}`} onClick={() => this.handleHighlightAvailability()}>
+          <div slot="header" class={`tba__header`} title="Click to assign unit">
+            <p class="tba__booking-number">{this.eventData.BOOKING_NUMBER}</p>
 
-            <span class="guest-separator">-</span>
+            <span class="tba__separator">-</span>
 
-            <p class="guest-name truncate">{this.eventData.NAME}</p>
+            <p class="tba__guest-name">{this.eventData.NAME}</p>
 
             {this.eventData.occupancy && (
-              <p class="guest-occupancy">
-                <span class="guest-occupancy-wrapper">( </span>
-                <span class="guest-occupancy-values" innerHTML={this.formatVariation(this.eventData.occupancy)}></span>
-                <span class="guest-occupancy-wrapper"> )</span>
+              <p class="tba__occupancy">
+                <span class="tba__occupancy-paren">( </span>
+                <span class="tba__occupancy-values" innerHTML={this.formatVariation(this.eventData.occupancy)}></span>
+                <span class="tba__occupancy-paren"> )</span>
               </p>
             )}
           </div>
-          <div class="row m-0 p-0 actionsContainer">
-            <select class="form-control input-sm room-select flex-grow-1" id={v4()} onChange={evt => this.onSelectRoom(evt)}>
-              <option value="" selected={this.selectedRoom == -1}>
-                {locales.entries.Lcz_AssignUnit}
-              </option>
+          <div class="tba__actions">
+            <wa-select
+              defaultValue={this.selectedRoom === -1 ? '' : this.selectedRoom.toString()}
+              class="tba__select"
+              id={v4()}
+              size="small"
+              value={this.selectedRoom === -1 ? '' : this.selectedRoom.toString()}
+              onchange={evt => this.onSelectRoom(evt)}
+            >
+              <wa-option value="">{locales.entries.Lcz_AssignUnit}</wa-option>
               {this.allRoomsList.map(room => (
-                <option value={room.id} selected={this.selectedRoom == room.id}>
-                  {room.name}
-                </option>
+                <wa-option value={room.id.toString()}>{room.name}</wa-option>
               ))}
-            </select>
+            </wa-select>
             {this.highlightSection ? (
-              <div class="buttonsContainer bg-red">
-                <button type="button" class="btn btn-secondary btn-sm mx-0" onClick={evt => this.handleCloseAssignment(evt)}>
-                  <svg class="m-0 p-0" xmlns="http://www.w3.org/2000/svg" height="12" width="9" viewBox="0 0 384 512">
-                    <path
-                      fill="currentColor"
-                      d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
-                    />
-                  </svg>
-                </button>
+              <div class="tba__close">
+                <wa-button type="button" appearance="plain" size="small" class="tba__close-btn" onClick={evt => this.handleCloseAssignment(evt)}>
+                  <wa-icon name="xmark"></wa-icon>
+                </wa-button>
               </div>
             ) : null}
           </div>
-          <div class="d-flex align-items-center " style={{ gap: '0.5rem', paddingInline: '5px' }}>
-            <ir-button
-              isLoading={this.isLoading === 'default'}
-              size="sm"
-              class="flex-grow-1"
-              text={locales.entries.Lcz_Assign}
-              onClickHandler={evt => this.handleAssignUnit(evt)}
-              btn_disabled={this.selectedRoom === -1}
-            ></ir-button>
+          <div class="tba__assign">
+            <wa-button
+              class="tba__assign-btn"
+              size="small"
+              variant="brand"
+              appearance={this.canCheckIn() ? 'outlined' : 'accent'}
+              loading={this.isLoading === 'default'}
+              disabled={this.selectedRoom === -1}
+              onClick={evt => this.handleAssignUnit(evt)}
+            >
+              {locales.entries.Lcz_Assign}
+            </wa-button>
             {this.canCheckIn() && (
-              <ir-button
-                isLoading={this.isLoading === 'checkin'}
-                size="sm"
-                class="flex-grow-1"
-                text={locales.entries.Lcz_AssignedAndChecIn}
-                onClickHandler={evt => this.handleAssignUnit(evt, true)}
-                btn_disabled={this.selectedRoom === -1}
-              ></ir-button>
+              <wa-button
+                class="tba__assign-btn"
+                size="small"
+                variant="brand"
+                loading={this.isLoading === 'checkin'}
+                disabled={this.selectedRoom === -1}
+                onClick={evt => this.handleAssignUnit(evt, true)}
+              >
+                {locales.entries.Lcz_AssignedAndChecIn}
+              </wa-button>
             )}
           </div>
-          <hr />
-        </div>
+        </wa-card>
       </Host>
     );
   }
