@@ -42,7 +42,7 @@ graph TD;
   ir-departures --> ir-checkout-dialog
   ir-departures --> ir-invoice
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -124,6 +124,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -164,6 +165,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state

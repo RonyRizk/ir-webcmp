@@ -80,7 +80,7 @@ export class IrCityLedgerFiscalDocumentsFilters {
                 value={this.filters.type}
                 defaultValue={this.filters.type}
                 onchange={e => this.updateFilters({ type: (e.target as WaOption).value as any })}
-                size="small"
+                size="s"
                 placeholder="Document Type"
               >
                 {this.typeOptions.map(option => (

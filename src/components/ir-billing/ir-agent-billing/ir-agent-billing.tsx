@@ -68,7 +68,7 @@ export class IrAgentBilling {
               }}
               appearance={'accent'}
               class="booking-header__stretched-btn"
-              size="small"
+              size="s"
               variant="brand"
             >
               Issue Invoice

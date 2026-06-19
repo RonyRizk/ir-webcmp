@@ -5,6 +5,8 @@ import calendarData from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { ROOM_IN_OUT } from '@/models/booking.dto';
 import { GroupedTableEntries } from '@/services/booking-service/types';
+import { Toast } from '@/components/ir-toast-provider/ir-toast-provider';
+import { TPositions } from '@/components/ui/ir-toast/toast';
 
 /** Supported language codes that map to `CODE_VALUE_*` fields on {@link IEntries}. */
 export type EntryLanguage = 'en' | 'ar' | 'de' | 'el' | 'fr' | 'he' | 'pl' | 'ru' | 'ua';
@@ -177,7 +179,11 @@ export function checkMealPlan({ rateplan_id, roomTypes, roomTypeId }: CheckMealP
   }
   return options;
 }
+export function showToast(toast: Toast & { position?: TPositions }) {
+  const event = new CustomEvent('toast', { detail: toast });
 
+  document.body.dispatchEvent(event);
+}
 export function dateDifference(FROM_DATE: string, TO_DATE: string): number {
   const startDate = new Date(FROM_DATE);
   const endDate = new Date(TO_DATE);

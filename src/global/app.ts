@@ -30,6 +30,7 @@ import '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
 import '@awesome.me/webawesome/dist/components/callout/callout.js';
 import '@awesome.me/webawesome/dist/components/animation/animation.js';
 import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
+import '@awesome.me/webawesome/dist/components/progress-ring/progress-ring.js';
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import '@awesome.me/webawesome/dist/components/copy-button/copy-button.js';
 export default () => {

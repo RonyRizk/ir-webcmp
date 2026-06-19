@@ -25,7 +25,7 @@ export class IrClCreditNoteFields {
           <wa-radio-group
             label="Credit Note Type"
             orientation="horizontal"
-            size="small"
+            size="s"
             value={this.creditNoteMode}
             onchange={e => {
               const val = (e.target as HTMLInputElement).value as CreditNoteMode;

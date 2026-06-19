@@ -61,6 +61,6 @@ export class IrBilling {
         </wa-tab-group>
       );
     }
-    return <ir-guest-billing style={{ paddingTop: '1.5rem' }} booking={this.booking}></ir-guest-billing>;
+    return <ir-guest-billing booking={this.booking}></ir-guest-billing>;
   }
 }

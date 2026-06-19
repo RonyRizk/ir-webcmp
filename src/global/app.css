@@ -25,6 +25,15 @@
 }
 body {
   background-color: var(--ir-color-muted-background) !important;
+  color: var(--wa-color-text-normal);
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--wa-color-text-normal) !important;
 }
 html {
   font-size: 14px !important;

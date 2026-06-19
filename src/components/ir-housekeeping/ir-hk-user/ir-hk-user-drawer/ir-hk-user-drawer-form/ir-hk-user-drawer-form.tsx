@@ -170,7 +170,7 @@ export class IrHkUserDrawerForm {
           this.addUser();
         }}
       >
-        <ir-custom-button type="button" class="hk-user-form__back-btn" appearance="plain" variant="neutral" size="small" onClickHandler={() => this.cancelPasswordChange()}>
+        <ir-custom-button type="button" class="hk-user-form__back-btn" appearance="plain" variant="neutral" size="s" onClickHandler={() => this.cancelPasswordChange()}>
           <wa-icon name="arrow-left" aria-hidden="true" style={{ fontSize: '1rem' }}></wa-icon>
         </ir-custom-button>
 
@@ -261,7 +261,7 @@ export class IrHkUserDrawerForm {
         <wa-textarea
           data-testid="note"
           maxlength={250}
-          size="small"
+          size="s"
           label={locales.entries.Lcz_Note}
           value={this.userInfo.note}
           defaultValue={this.userInfo.note}
@@ -288,7 +288,7 @@ export class IrHkUserDrawerForm {
             {this.showPasswordValidation && <ir-password-validator password={this.userInfo.password} />}
           </Fragment>
         ) : (
-          <wa-button size="small" appearance="plain" variant="brand" type="button" class="hk-user-form__change-password-btn" onClick={() => (this.isChangingPassword = true)}>
+          <wa-button size="s" appearance="plain" variant="brand" type="button" class="hk-user-form__change-password-btn" onClick={() => (this.isChangingPassword = true)}>
             Change Password
           </wa-button>
         )}

@@ -30,8 +30,7 @@ graph TD;
   ir-revenue-row --> ir-accordion
   ir-revenue-row --> ir-revenue-row-details
   ir-accordion --> ir-icons
-  ir-revenue-row-details --> ir-button
-  ir-button --> ir-icons
+  ir-revenue-row-details --> ir-custom-button
   ir-revenue-table --> ir-revenue-row
   style ir-revenue-row fill:#f9f,stroke:#333,stroke-width:4px
 ```

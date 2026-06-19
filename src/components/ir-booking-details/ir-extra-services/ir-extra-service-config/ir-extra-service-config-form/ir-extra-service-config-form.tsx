@@ -54,11 +54,12 @@ export class IrExtraServiceConfigForm {
     }
   }
 
-  private get categories(): (IEntries & { pct: number })[] {
-    const taxPctByCode = Object.fromEntries(
-      calendar_data.property.tax_categories.filter(c => c.taxation_mode?.code !== taxationModes.NOT_APPLICABLE).map(c => [c.category.code, c.pct]),
+  private get categories(): (IEntries & { pct: number; isNotApplicable: boolean })[] {
+    const notApplicableCodes = new Set(
+      calendar_data.property.tax_categories.filter(c => c.taxation_mode?.code === taxationModes.NOT_APPLICABLE).map(c => c.category.code),
     );
-    return this.svcCategories.filter(cat => taxPctByCode[cat.CODE_NAME]).map(cat => ({ ...cat, pct: taxPctByCode[cat.CODE_NAME] }));
+    const taxPctByCode = Object.fromEntries(calendar_data.property.tax_categories.map(c => [c.category.code, c.pct || 0]));
+    return this.svcCategories.map(cat => ({ ...cat, pct: taxPctByCode[cat.CODE_NAME], isNotApplicable: notApplicableCodes.has(cat.CODE_NAME) }));
   }
 
   private async saveAmenity() {
@@ -118,7 +119,7 @@ export class IrExtraServiceConfigForm {
         {this.categories.length > 0 && (
           <ir-validator value={this.s_service?.category} schema={ExtraServiceSchema.shape.category}>
             <wa-select
-              size="small"
+              size="s"
               label="Service category"
               value={this.s_service?.category?.code ?? ''}
               defaultValue={this.s_service?.category?.code ?? ''}
@@ -136,7 +137,8 @@ export class IrExtraServiceConfigForm {
             >
               {this.categories?.map(category => {
                 const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
-                const label = (category[langKey] ?? category.CODE_VALUE_EN ?? '') + ` (VAT ${category.pct}%)`;
+                const vatSuffix = category.isNotApplicable ? 'VAT - Not applicable' : `VAT ${category.pct}%`;
+                const label = (category[langKey] ?? category.CODE_VALUE_EN ?? '') + ` (${vatSuffix})`;
 
                 return (
                   <wa-option value={category.CODE_NAME} label={label}>
@@ -149,7 +151,7 @@ export class IrExtraServiceConfigForm {
         )}
         <ir-validator id="amenity description-validator" schema={ExtraServiceSchema.shape.description}>
           <wa-textarea
-            size="small"
+            size="s"
             defaultValue={this.s_service?.description}
             value={this.s_service?.description}
             onchange={e => this.updateService({ description: (e.target as any).value })}

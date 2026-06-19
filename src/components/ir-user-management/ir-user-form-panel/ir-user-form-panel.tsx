@@ -205,7 +205,7 @@ export class IrUserFormPanel {
                 disabled={this.disableFields}
                 label="Role"
                 value={this.userInfo.type?.toString()}
-                size="small"
+                size="s"
                 defaultValue={this.userInfo.type?.toString()}
                 placeholder={locales.entries.Lcz_Select}
                 onchange={e => this.updateUserField('type', (e.target as HTMLSelectElement).value)}
@@ -342,10 +342,10 @@ export class IrUserFormPanel {
         </ir-sidebar>
         {/* </section> */}
         {/* <div class="sheet-footer">
-          <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="medium">
+          <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button data-testid="save" size="medium" loading={this.isLoading} class="flex-fill" type="submit" variant="brand">
+          <ir-custom-button data-testid="save" size="m" loading={this.isLoading} class="flex-fill" type="submit" variant="brand">
             {locales.entries.Lcz_Save}
           </ir-custom-button>
         </div> */}

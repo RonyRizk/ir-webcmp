@@ -47,6 +47,7 @@ export class IrSalesByCountry {
       this.initializeApp();
     }
   }
+
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
     if (newValue === oldValue) {
@@ -55,15 +56,14 @@ export class IrSalesByCountry {
     this.token.setToken(this.ticket);
     this.initializeApp();
   }
+
   private async initializeApp() {
     try {
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
       }
-      // let roomResp = null;
       if (!propertyId) {
-        console.log(propertyId);
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
@@ -71,7 +71,6 @@ export class IrSalesByCountry {
           is_backend: true,
           include_units_hk_status: true,
         });
-        // roomResp = propertyData;
         propertyId = propertyData.My_Result.id;
       }
       this.property_id = propertyId;
@@ -153,11 +152,6 @@ export class IrSalesByCountry {
         }));
       }
 
-      // this.salesData = enrichedSales.sort((a, b) => {
-      //   if (a.country_id === 0) return -1;
-      //   if (b.country_id === 0) return 1;
-      //   return 0;
-      // });
       this.salesData = [...enrichedSales];
     } catch (error) {
       console.error('Failed to fetch sales data:', error);
@@ -165,35 +159,30 @@ export class IrSalesByCountry {
       this.isLoading = null;
     }
   }
+
   render() {
     if (this.isPageLoading) {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
       <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">Sales by Country</h3>
-            <ir-button
-              size="sm"
-              btn_color="outline"
-              isLoading={this.isLoading === 'export'}
-              text={locales.entries.Lcz_Export}
-              onClickHandler={async e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                await this.getCountrySales(true);
-              }}
-              btnStyle={{ height: '100%' }}
-              iconPosition="right"
-              icon_name="file"
-              icon_style={{ '--icon-size': '14px' }}
-            ></ir-button>
-          </div>
+        <ir-page label="Sales by Country">
+          <ir-custom-button
+            slot="page-header"
+            variant="neutral"
+            appearance="outlined"
+            loading={this.isLoading === 'export'}
+            onClickHandler={async e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              await this.getCountrySales(true);
+            }}
+          >
+            <wa-icon name="download" slot="start"></wa-icon>
+            {locales.entries?.Lcz_Export}
+          </ir-custom-button>
           <ir-sales-by-country-summary salesReports={this.salesData}></ir-sales-by-country-summary>
-          <div class="d-flex flex-column flex-lg-row mt-1 " style={{ gap: '1rem' }}>
+          <div class="sales-content-row">
             <ir-sales-filters
               isLoading={this.isLoading === 'filter'}
               onApplyFilters={e => {
@@ -202,12 +191,11 @@ export class IrSalesByCountry {
                 this.salesFilters = e.detail;
                 this.getCountrySales();
               }}
-              class="filters-card"
               baseFilters={this.baseFilters}
             ></ir-sales-filters>
-            <ir-sales-table mappedCountries={this.countries} class="card mb-0" records={this.salesData}></ir-sales-table>
+            <ir-sales-table mappedCountries={this.countries} class="sales-table-card" records={this.salesData}></ir-sales-table>
           </div>
-        </section>
+        </ir-page>
       </Host>
     );
   }

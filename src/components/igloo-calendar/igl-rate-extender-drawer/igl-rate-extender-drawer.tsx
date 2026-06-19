@@ -65,10 +65,10 @@ export class IglRateExtenderDrawer {
           ></igl-rate-extender-form>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
-          <ir-custom-button size="medium" appearance="filled" variant="neutral" data-drawer="close">
+          <ir-custom-button size="m" appearance="filled" variant="neutral" data-drawer="close">
             Cancel
           </ir-custom-button>
-          <ir-custom-button loading={this.isLoading} disabled={!this.hasInventory} size="medium" type="submit" form="rate-extender-form" appearance="accent" variant="brand">
+          <ir-custom-button loading={this.isLoading} disabled={!this.hasInventory} size="m" type="submit" form="rate-extender-form" appearance="accent" variant="brand">
             Confirm
           </ir-custom-button>
         </div>

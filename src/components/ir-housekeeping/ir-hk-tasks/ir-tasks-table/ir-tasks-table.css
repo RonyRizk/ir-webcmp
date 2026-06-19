@@ -76,6 +76,13 @@
   min-width: 0;
   width: 100%;
 }
+.table-container::part(body) {
+  min-height: 50vh;
+  padding: 0.5rem;
+}
+.tasks__header {
+  padding: 1rem;
+}
 
 /* >= 640px: show table, hide cards */
 @media (min-width: 640px) {

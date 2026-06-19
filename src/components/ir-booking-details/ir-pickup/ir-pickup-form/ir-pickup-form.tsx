@@ -241,7 +241,7 @@ export class IrPickupForm {
           blurEvent="wa-hide blur"
         >
           <wa-select
-            size="small"
+            size="s"
             onchange={e => this.handleLocationChange((e.target as HTMLSelectElement).value)}
             defaultValue={this.pickupData.location === -1 ? '' : this.pickupData.location?.toString()}
             value={this.pickupData.location === -1 ? '' : this.pickupData.location?.toString()}
@@ -312,7 +312,7 @@ export class IrPickupForm {
               blurEvent="wa-hide blur"
             >
               <wa-select
-                size="small"
+                size="s"
                 onchange={e => this.handleVehicleTypeChange((e.target as HTMLSelectElement).value)}
                 value={this.pickupData.vehicle_type_code}
                 defaultValue={this.pickupData.vehicle_type_code}
@@ -332,7 +332,7 @@ export class IrPickupForm {
               blurEvent="wa-hide blur"
             >
               <wa-select
-                size="small"
+                size="s"
                 defaultValue={this.pickupData.number_of_vehicles?.toString()}
                 value={this.pickupData.number_of_vehicles?.toString()}
                 label={locales.entries.Lcz_NbrOfVehicles}

@@ -28,17 +28,15 @@
 
 ### Depends on
 
-- [ir-select](../../ui/ir-select)
-- [ir-checkbox](../../ui/ir-checkbox)
-- [ir-button](../../ui/ir-button)
+- [ir-filter-card](../../ir-filter-card)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-monthly-bookings-report-filter --> ir-select
-  ir-monthly-bookings-report-filter --> ir-checkbox
-  ir-monthly-bookings-report-filter --> ir-button
-  ir-button --> ir-icons
+  ir-monthly-bookings-report-filter --> ir-filter-card
+  ir-monthly-bookings-report-filter --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-monthly-bookings-report --> ir-monthly-bookings-report-filter
   style ir-monthly-bookings-report-filter fill:#f9f,stroke:#333,stroke-width:4px
 ```

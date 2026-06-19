@@ -54,6 +54,7 @@ Type: `Promise<void>`
 ### Used by
 
  - [ir-interceptor](../ir-interceptor)
+ - [ir-test-cmp](../ir-test-cmp)
 
 ### Depends on
 
@@ -69,6 +70,7 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-interceptor --> ir-otp-modal
+  ir-test-cmp --> ir-otp-modal
   style ir-otp-modal fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

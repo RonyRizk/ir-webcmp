@@ -137,7 +137,7 @@ export class IrExtraService {
                 }
               }}
             >
-              <wa-button class="es-action-trigger" slot="trigger" size="small" appearance="plain" id={`actions-room-${this.service.system_id}`} variant="neutral">
+              <wa-button class="es-action-trigger" slot="trigger" size="s" appearance="plain" id={`actions-room-${this.service.system_id}`} variant="neutral">
                 <wa-icon class="es-action-trigger-icon" label="Actions" name="ellipsis-vertical"></wa-icon>
               </wa-button>
               <wa-dropdown-item value="edit">Edit</wa-dropdown-item>
@@ -169,10 +169,10 @@ export class IrExtraService {
         >
           {`${locales.entries['Lcz_AreYouSureDoYouWantToRemove ']} ${locales.entries.Lcz_ThisService} ${locales.entries.Lcz_FromThisBooking}`}
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button appearance="filled" variant="neutral" size="medium" data-dialog="close">
+            <ir-custom-button appearance="filled" variant="neutral" size="m" data-dialog="close">
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
-            <ir-custom-button onClickHandler={() => this.deleteService()} loading={isRequestPending('/Do_Booking_Extra_Service')} variant="danger" size="medium">
+            <ir-custom-button onClickHandler={() => this.deleteService()} loading={isRequestPending('/Do_Booking_Extra_Service')} variant="danger" size="m">
               {locales.entries.Lcz_Delete}
             </ir-custom-button>
           </div>

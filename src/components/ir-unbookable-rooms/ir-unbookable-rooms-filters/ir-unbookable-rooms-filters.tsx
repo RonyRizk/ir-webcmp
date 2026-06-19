@@ -62,7 +62,7 @@ export class IrUnbookableRoomsFilters {
           </div>
           <wa-select
             label="Look ahead"
-            size="small"
+            size="s"
             value={this.filters.period_to_check?.toString()}
             defaultValue={this.filters.period_to_check?.toString()}
             onchange={e => {
@@ -89,7 +89,7 @@ export class IrUnbookableRoomsFilters {
           {this.mode === 'mpo' && sortedCountries.length > 1 && (
             <wa-select
               label="Country"
-              size="small"
+              size="s"
               value={this.filters.country?.toString()}
               defaultValue="all"
               onchange={e => {

@@ -97,7 +97,7 @@ export class IrCityLedgerFolioFilters {
                 this.emitFilters();
               }}
               placeholder="Status"
-              size="small"
+              size="s"
               withClear
             >
               {this.statuses.map(s => (

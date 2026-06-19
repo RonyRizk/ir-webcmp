@@ -1,18 +1,19 @@
 :host {
   display: block;
 }
-.daily-revenue__meta {
+
+.revenue-content-row {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-.daily-revenue__table {
+
+.revenue-table-card {
   flex: 1 1 0%;
 }
 
-/*sm*/
-@media (min-width: 768px) {
-  .daily-revenue__meta {
+@media (min-width: 992px) {
+  .revenue-content-row {
     flex-direction: row;
   }
 }

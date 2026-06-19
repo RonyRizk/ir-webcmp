@@ -1,3 +1,6 @@
+@import url('layers.css');
+
+/* Required utilities */
 @import url('utilities/size.css');
 @import url('utilities/variants.css');
 
@@ -102,18 +105,23 @@
   }
 
   h6 {
-    font-size: var(--wa-font-size-s);
+    font-size: var(--wa-font-size-xs);
   }
 
   p {
-    text-wrap: pretty;
+    text-wrap: wrap;
   }
-
+  @supports (text-wrap: pretty) {
+    p {
+      text-wrap: pretty;
+    }
+  }
   blockquote {
     padding: var(--wa-space-xl);
 
+    color: var(--wa-color-text-quiet);
     font-family: var(--wa-font-family-longform);
-    font-size: var(--wa-font-size-l);
+    font-size: var(--wa-font-size-larger);
 
     border-inline-start: var(--wa-border-style) var(--wa-border-width-l) var(--wa-color-neutral-border-quiet);
   }
@@ -123,6 +131,14 @@
 
     border: none;
     border-bottom: solid var(--wa-border-width-s) var(--wa-color-surface-border);
+  }
+
+  figcaption {
+    margin-block-start: var(--wa-space-xs);
+
+    color: var(--wa-color-text-quiet);
+    font-size: var(--wa-font-size-smaller);
+    line-height: var(--wa-line-height-condensed);
   }
   /* #endregion */
 
@@ -146,8 +162,29 @@
     padding: 0;
   }
 
+  /* `ul` markers are graphical (3:1 contrast threshold); `ol` markers are text
+     (4.5:1). Numerals also wear transparency more than discs, so they keep more
+     contrast. `currentColor` lets markers ride along when text color changes. */
+  ul > li::marker {
+    color: color-mix(in oklch, currentColor 40%, transparent);
+  }
+
+  ol > li::marker {
+    color: color-mix(in oklch, currentColor 60%, transparent);
+  }
+
   dt {
     font-weight: var(--wa-font-weight-bold);
+  }
+
+  menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    & > li {
+      margin: 0;
+    }
   }
   /* #endregion */
 
@@ -297,7 +334,8 @@
     white-space: pre;
 
     background-color: var(--wa-color-overlay-inline);
-    border-radius: var(--wa-border-radius-m);
+    border-radius: var(--wa-panel-border-radius);
+    overflow-x: auto;
 
     /* Remove overlapping styles for child code elements */
     & code,
@@ -325,7 +363,11 @@
   video {
     max-width: 100%;
     height: auto;
+  }
 
+  img,
+  picture,
+  video {
     border-radius: var(--wa-border-radius-m);
   }
 
@@ -343,6 +385,8 @@
   /* #region Tables ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
   table {
     width: 100%;
+
+    font-variant-numeric: tabular-nums;
 
     border: none;
     border-collapse: collapse;
@@ -393,6 +437,8 @@
 
     font-size: var(--wa-font-size-smaller);
     font-weight: var(--wa-font-weight-bold);
+
+    border-block-end: var(--wa-border-style) var(--wa-border-width-s) var(--wa-color-border-normal);
   }
   /* #endregion */
 
@@ -442,6 +488,10 @@
         border-end-start-radius: 0;
         border-end-end-radius: 0;
       }
+    }
+
+    &::details-content {
+      box-sizing: border-box; /* Ensure contents don't overflow */
     }
 
     /* Print styles */
@@ -572,7 +622,8 @@
   input[type='button'],
   input[type='reset'],
   input[type='submit'],
-  input[type='file'] {
+  input[type='file'],
+  a.wa-button {
     /* We allow modifier classes on <input type="file">,
      * but these selectors ensure the styles only apply to
      * the file selector button in the user agent's shadow root */
@@ -588,7 +639,6 @@
       font-family: inherit;
       font-size: var(--wa-form-control-value-font-size);
       font-weight: var(--wa-font-weight-action);
-      line-height: calc(var(--wa-form-control-height) - var(--border-width) * 2);
       text-decoration: none;
       vertical-align: middle;
       white-space: nowrap;
@@ -607,18 +657,21 @@
     }
 
     /* Default styles for standard buttons */
-    :where(&:not(input[type='file'])) {
+    &:not(input[type='file']) {
       color: var(--wa-color-on-loud, var(--wa-color-neutral-on-loud));
       background-color: var(--wa-color-fill-loud, var(--wa-color-neutral-fill-loud));
       border-color: transparent;
 
       &:not(:disabled) {
-        &:hover {
-          background-color: color-mix(
-            in oklab,
-            var(--wa-color-fill-loud, var(--wa-color-neutral-fill-loud)),
-            var(--wa-color-mix-hover)
-          );
+        @media (hover: hover) {
+          &:hover {
+            background-color: color-mix(
+              in oklab,
+              var(--wa-color-fill-loud, var(--wa-color-neutral-fill-loud)),
+              var(--wa-color-mix-hover)
+            );
+            transform: var(--wa-button-transform-hover);
+          }
         }
 
         &:active {
@@ -627,12 +680,20 @@
             var(--wa-color-fill-loud, var(--wa-color-neutral-fill-loud)),
             var(--wa-color-mix-active)
           );
+          transform: var(--wa-button-transform-active);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          &:hover,
+          &:active {
+            transform: none;
+          }
         }
       }
     }
 
     /* Default styles for file selector buttons */
-    :where(&:is(input[type='file'])) {
+    &:is(input[type='file']) {
       &::file-selector-button {
         color: var(--wa-color-on-normal, var(--wa-color-neutral-on-normal));
         background-color: var(--wa-color-fill-normal, var(--wa-color-neutral-fill-normal));
@@ -1005,9 +1066,11 @@
 
     transition:
       background-color var(--wa-transition-normal),
-      border var(--wa-transition-normal),
-      outline var(--wa-transition-fast);
+      border-color var(--wa-transition-normal),
+      outline-color var(--wa-transition-fast);
     transition-timing-function: var(--wa-transition-easing);
+    outline: var(--wa-focus-ring-style) var(--wa-focus-ring-width) transparent;
+    outline-offset: var(--wa-focus-ring-offset);
 
     cursor: text;
 
@@ -1018,13 +1081,8 @@
       -webkit-user-select: none;
     }
 
-    &:focus {
-      outline: none;
-    }
-
     &:focus-visible {
-      outline: var(--wa-focus-ring);
-      outline-offset: var(--wa-focus-ring-offset);
+      outline-color: var(--wa-color-focus);
     }
 
     &:disabled {
@@ -1056,6 +1114,7 @@
   textarea {
     height: auto;
     min-height: var(--wa-form-control-height);
+    scroll-padding-block: var(--wa-form-control-padding-block);
     padding: calc(var(--wa-form-control-padding-block) - ((1lh - 1em) / 2)) var(--wa-form-control-padding-inline); /* accounts for the larger line height of textarea content */
 
     line-height: var(--wa-line-height-normal);
@@ -1072,15 +1131,22 @@
     position: relative;
 
     min-width: 0;
-    overflow: hidden;
-
     background-image: var(--icon-caret), var(--icon-caret);
     background-repeat: no-repeat;
     background-position: center right var(--wa-form-control-padding-inline);
     background-blend-mode: hue, difference;
     background-size: 1rem 1rem;
+    text-overflow: ellipsis;
+    padding-inline-end: calc(var(--wa-form-control-padding-inline) + 1rem + var(--wa-space-xs));
+    overflow: hidden;
 
     cursor: pointer;
+
+    &[multiple] {
+      height: auto;
+      background-image: none;
+      padding-inline: var(--wa-form-control-padding-inline);
+    }
   }
   /* #endregion */
 

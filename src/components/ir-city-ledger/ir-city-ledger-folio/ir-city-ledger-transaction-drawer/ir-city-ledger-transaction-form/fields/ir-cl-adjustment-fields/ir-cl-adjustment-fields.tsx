@@ -30,7 +30,7 @@ export class IrClAdjustmentFields {
             <wa-radio-group
               label="Entry Type"
               orientation="horizontal"
-              size="small"
+              size="s"
               value={this.entryType}
               onchange={event => {
                 this.fieldChange.emit({ entryType: (event.target as HTMLInputElement).value as EntryType });
@@ -51,7 +51,7 @@ export class IrClAdjustmentFields {
           <ir-validator schema={linkTypeFieldSchema} value={this.linkType} valueEvent="change">
             <wa-select
               label="Link Type"
-              size="small"
+              size="s"
               value={this.linkType}
               onchange={event => {
                 const linkType = (event.target as HTMLSelectElement).value as LinkType;
@@ -75,7 +75,7 @@ export class IrClAdjustmentFields {
           <div class="field">
             <wa-select
               label="Linked Record"
-              size="small"
+              size="s"
               value={this.linkedId ?? ''}
               onchange={event => {
                 this.fieldChange.emit({ linkedId: (event.target as HTMLSelectElement).value || undefined });

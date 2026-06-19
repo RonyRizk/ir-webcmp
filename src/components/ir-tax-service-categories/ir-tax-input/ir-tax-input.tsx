@@ -118,7 +118,7 @@ export class IrTaxInput {
             part="input"
             label={this.label}
             class="ir-tax-input__percentage"
-            size="small"
+            size="s"
             placeholder={this.placeholder}
             onText-change={e => {
               const inputValue = `${e.detail ?? ''}`.trim();
@@ -135,7 +135,7 @@ export class IrTaxInput {
           <wa-select
             part="select"
             class="ir-tax-input__select"
-            size="small"
+            size="s"
             value={this.tax?.mode}
             defaultValue={this.tax?.mode}
             onchange={e => {

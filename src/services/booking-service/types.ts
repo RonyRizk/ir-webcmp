@@ -256,6 +256,13 @@ export type ExposedGuest = z.infer<typeof ExposedGuestSchema>;
 export const ExposedGuestsSchema = z.array(ExposedGuestSchema);
 export type ExposedGuests = z.infer<typeof ExposedGuestsSchema>;
 
+export const SetHbPreferencePropsSchema = z.object({
+  property_id: z.number(),
+  room_identifier: z.string(),
+  code: z.union([z.literal('001'), z.literal('002')]),
+});
+export type SetHbPreferenceProps = z.infer<typeof SetHbPreferencePropsSchema>;
+
 export const CalculateExclusiveTaxPropsSchema = z.object({
   property_id: z.number().min(1),
   amount: z.number(),

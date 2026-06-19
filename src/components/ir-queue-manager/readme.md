@@ -36,7 +36,7 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   style ir-queue-manager fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

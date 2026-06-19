@@ -35,7 +35,7 @@ graph TD;
   ir-unbookable-rooms --> ir-unbookable-rooms-filters
   ir-unbookable-rooms --> ir-unbookable-rooms-data
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

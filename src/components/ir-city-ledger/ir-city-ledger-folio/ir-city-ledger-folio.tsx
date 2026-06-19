@@ -392,10 +392,10 @@ export class IrCityLedgerFolio {
         >
           <p>Are you sure you want to delete this entry? This action cannot be undone.</p>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button size="medium" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
+            <ir-custom-button size="m" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
               Cancel
             </ir-custom-button>
-            <ir-custom-button size="medium" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
+            <ir-custom-button size="m" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
               Delete
             </ir-custom-button>
           </div>

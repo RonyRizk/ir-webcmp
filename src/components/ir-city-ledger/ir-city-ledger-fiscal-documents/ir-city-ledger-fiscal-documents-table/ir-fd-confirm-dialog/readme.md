@@ -10,6 +10,7 @@
 | Property       | Attribute       | Description | Type                                               | Default           |
 | -------------- | --------------- | ----------- | -------------------------------------------------- | ----------------- |
 | `action`       | `action`        |             | `"convert-to-invoice" \| "delete-draft" \| "void"` | `null`            |
+| `amount`       | `amount`        |             | `number`                                           | `undefined`       |
 | `docNumber`    | `doc-number`    |             | `string`                                           | `'this document'` |
 | `fdType`       | `fd-type`       |             | `string`                                           | `undefined`       |
 | `isConfirming` | `is-confirming` |             | `boolean`                                          | `false`           |
@@ -18,10 +19,10 @@
 
 ## Events
 
-| Event       | Description | Type                |
-| ----------- | ----------- | ------------------- |
-| `cancelled` |             | `CustomEvent<void>` |
-| `confirmed` |             | `CustomEvent<void>` |
+| Event       | Description | Type                                                                      |
+| ----------- | ----------- | ------------------------------------------------------------------------- |
+| `cancelled` |             | `CustomEvent<void>`                                                       |
+| `confirmed` |             | `CustomEvent<{ amount: number; voidType: "credit-note" \| "goodwill"; }>` |
 
 
 ## Dependencies

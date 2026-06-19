@@ -1,11 +1,11 @@
-import { Component, Host, h, Element, Prop, State, Watch, EventEmitter, Event } from '@stencil/core';
+import { Component, Host, h, Element, Prop, State, Watch } from '@stencil/core';
 import axios from 'axios';
 import { GHSService } from '../../services/ghs/ghs.service';
 import { BookingService } from '../../services/booking-service/booking.service';
 import Token from '../../models/Token';
 import { GHS_Candidate_Property } from '../../services/ghs/types';
 import { ICountry } from '../../models/IBooking';
-import { IToast } from '../ui/ir-toast/toast';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-ghs-onboarding',
@@ -26,8 +26,6 @@ export class IrGhsOnboarding {
   @State() isGenerating: boolean = false;
   @State() isActivating: boolean = false;
   @State() propertyToActivate: GHS_Candidate_Property | null = null;
-
-  @Event() toast: EventEmitter<IToast>;
 
   private ghsService = new GHSService();
   private bookingService = new BookingService();
@@ -57,16 +55,11 @@ export class IrGhsOnboarding {
   private async init() {
     this.isPageLoading = true;
     try {
-      const [allCountries, allProperties] = await Promise.all([
-        this.bookingService.getCountries('EN'),
-        this.ghsService.Get_GHS_Candidate_Properties({ COUNTRY_ID: null }),
-      ]);
+      const [allCountries, allProperties] = await Promise.all([this.bookingService.getCountries('EN'), this.ghsService.Get_GHS_Candidate_Properties({ COUNTRY_ID: null })]);
 
       const validCountryIds = new Set(allProperties.map(p => p.COUNTRY_ID));
 
-      this.countries = allCountries
-        .filter(c => validCountryIds.has(c.id))
-        .sort((a, b) => a.name.localeCompare(b.name));
+      this.countries = allCountries.filter(c => validCountryIds.has(c.id)).sort((a, b) => a.name.localeCompare(b.name));
       this.properties = allProperties;
     } catch (error) {
       this.showToast('error', 'Initialization Error', error.message || 'Failed to load properties');
@@ -138,7 +131,7 @@ export class IrGhsOnboarding {
         IS_ENABLED: true,
       });
       this.showToast('success', 'Success', `${this.propertyToActivate.NAME} GHS has been activated.`);
-      
+
       const activatedId = this.propertyToActivate.AC_ID;
       this.properties = this.properties.filter(p => p.AC_ID !== activatedId);
       this.selectedProperties = this.selectedProperties.filter(p => p.AC_ID !== activatedId);
@@ -167,11 +160,11 @@ export class IrGhsOnboarding {
         // Create a clean axios instance to bypass global interceptors (avoiding network errors)
         const cleanAxios = axios.create();
         const response = await cleanAxios.get(downloadUrl, { responseType: 'blob' });
-        
+
         // Create a local blob URL
         const blob = new Blob([response.data], { type: 'application/xml' });
         const localUrl = window.URL.createObjectURL(blob);
-        
+
         // Trigger download of the local blob
         const a = document.createElement('a');
         a.href = localUrl;
@@ -179,11 +172,11 @@ export class IrGhsOnboarding {
         a.setAttribute('download', filename);
         document.body.appendChild(a);
         a.click();
-        
+
         // Clean up
         document.body.removeChild(a);
         window.URL.revokeObjectURL(localUrl);
-        
+
         this.selectedProperties = [];
         await this.fetchProperties();
         this.showToast('success', 'Success', 'GHS onboarding request downloaded.');
@@ -196,7 +189,7 @@ export class IrGhsOnboarding {
   }
 
   private showToast(type: 'success' | 'error', title: string, description: string) {
-    this.toast.emit({
+    showToast({
       type,
       title,
       description,
@@ -206,7 +199,7 @@ export class IrGhsOnboarding {
 
   render() {
     if (this.isPageLoading) {
-        return <ir-loading-screen></ir-loading-screen>;
+      return <ir-loading-screen></ir-loading-screen>;
     }
     return (
       <Host>
@@ -222,8 +215,7 @@ export class IrGhsOnboarding {
         >
           <div class="ir-ghs-onboarding__dialog-body">
             <p class="m-0 text-center">
-              Are you sure you want to <strong>activate</strong> GHS for{' '}
-              <span class="text-primary">{this.propertyToActivate?.NAME}</span>?
+              Are you sure you want to <strong>activate</strong> GHS for <span class="text-primary">{this.propertyToActivate?.NAME}</span>?
             </p>
             <p class="small text-muted mt-2 mb-0">This will enable real-time synchronization with Google.</p>
           </div>
@@ -232,7 +224,7 @@ export class IrGhsOnboarding {
               type="button"
               variant="neutral"
               appearance="filled"
-              size="medium"
+              size="m"
               onClickHandler={(e: CustomEvent) => {
                 const ev = e.detail as MouseEvent;
                 if (ev && typeof ev.preventDefault === 'function') {
@@ -249,7 +241,7 @@ export class IrGhsOnboarding {
               type="button"
               variant="success"
               appearance="accent"
-              size="medium"
+              size="m"
               loading={this.isActivating}
               onClickHandler={(e: CustomEvent) => {
                 const ev = e.detail as MouseEvent;
@@ -264,86 +256,79 @@ export class IrGhsOnboarding {
             </ir-custom-button>
           </div>
         </ir-dialog>
-        <ir-dialog
-          ref={el => (this.removeAllModal = el)}
-          label="Confirmation"
-          onIrDialogHide={() => this.removeAllModal.closeModal()}
-        >
+        <ir-dialog ref={el => (this.removeAllModal = el)} label="Confirmation" onIrDialogHide={() => this.removeAllModal.closeModal()}>
           <div class="ir-ghs-onboarding__dialog-body">
             <p class="m-0 text-center">Are you sure you want to remove all selected properties from the list?</p>
           </div>
           <div slot="footer" class="ir-ghs-onboarding__dialog-footer">
-            <ir-custom-button 
-                type="button"
-                variant="neutral" 
-                appearance="filled" 
-                size="medium" 
-                onClickHandler={(e: CustomEvent) => {
-                    const ev = e.detail as MouseEvent;
-                    if (ev && typeof ev.preventDefault === 'function') {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                    }
-                    this.removeAllModal.closeModal()
-                }}
+            <ir-custom-button
+              type="button"
+              variant="neutral"
+              appearance="filled"
+              size="m"
+              onClickHandler={(e: CustomEvent) => {
+                const ev = e.detail as MouseEvent;
+                if (ev && typeof ev.preventDefault === 'function') {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                }
+                this.removeAllModal.closeModal();
+              }}
             >
               Cancel
             </ir-custom-button>
-            <ir-custom-button 
-                type="button"
-                variant="danger" 
-                appearance="accent" 
-                size="medium" 
-                onClickHandler={(e: CustomEvent) => {
-                    const ev = e.detail as MouseEvent;
-                    if (ev && typeof ev.preventDefault === 'function') {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                    }
-                    this.handleConfirmRemoveAll()
-                }}
+            <ir-custom-button
+              type="button"
+              variant="danger"
+              appearance="accent"
+              size="m"
+              onClickHandler={(e: CustomEvent) => {
+                const ev = e.detail as MouseEvent;
+                if (ev && typeof ev.preventDefault === 'function') {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                }
+                this.handleConfirmRemoveAll();
+              }}
             >
               Confirm
             </ir-custom-button>
           </div>
         </ir-dialog>
         <section class="ir-ghs-onboarding__container">
-          
           <div class="ir-ghs-onboarding__header">
-             <h3 class="ir-ghs-onboarding__title">Google hotels request</h3>
+            <h3 class="ir-ghs-onboarding__title">Google hotels request</h3>
           </div>
 
           <div class="ir-ghs-onboarding__content">
-            
             <div class="ir-ghs-onboarding__main-row">
               <ir-ghs-candidate-table
-                  class="ir-ghs-onboarding__candidate-table"
-                  properties={this.properties}
-                  countries={this.countries}
-                  selectedCountryId={this.selectedCountryId}
-                  selectedProperties={this.selectedProperties}
-                  propertyToActivate={this.propertyToActivate}
-                  isLoading={this.isDataLoading}
-                  baseUrl={this.baseurl}
-                  onToggleSelection={(e) => this.togglePropertySelection(e.detail)}
-                  onToggleAll={(e) => this.handleToggleAll(e.detail)}
-                  onActivateProperty={(e) => this.handleActivateProperty(e.detail)}
-                  onCountryChange={(e) => {
-                      this.selectedCountryId = e.detail;
-                      this.fetchProperties();
-                  }}
+                class="ir-ghs-onboarding__candidate-table"
+                properties={this.properties}
+                countries={this.countries}
+                selectedCountryId={this.selectedCountryId}
+                selectedProperties={this.selectedProperties}
+                propertyToActivate={this.propertyToActivate}
+                isLoading={this.isDataLoading}
+                baseUrl={this.baseurl}
+                onToggleSelection={e => this.togglePropertySelection(e.detail)}
+                onToggleAll={e => this.handleToggleAll(e.detail)}
+                onActivateProperty={e => this.handleActivateProperty(e.detail)}
+                onCountryChange={e => {
+                  this.selectedCountryId = e.detail;
+                  this.fetchProperties();
+                }}
               ></ir-ghs-candidate-table>
 
               <ir-ghs-selection-bucket
-                  class="ir-ghs-onboarding__selection-bucket"
-                  selectedProperties={this.selectedProperties}
-                  isGenerating={this.isGenerating}
-                  onGenerateRequest={() => this.handleGenerateRequest()}
-                  onRemoveAll={() => this.handleRemoveAll()}
-                  onRemoveProperty={(e) => this.removePropertySelection(e.detail)}
+                class="ir-ghs-onboarding__selection-bucket"
+                selectedProperties={this.selectedProperties}
+                isGenerating={this.isGenerating}
+                onGenerateRequest={() => this.handleGenerateRequest()}
+                onRemoveAll={() => this.handleRemoveAll()}
+                onRemoveProperty={e => this.removePropertySelection(e.detail)}
               ></ir-ghs-selection-bucket>
             </div>
-
           </div>
         </section>
       </Host>

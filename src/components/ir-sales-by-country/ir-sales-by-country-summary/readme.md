@@ -20,13 +20,12 @@
 
 ### Depends on
 
-- [ir-stats-card](../../ui/ir-stats-card)
+- [ir-metric-card](../../ir-metric-card)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-sales-by-country-summary --> ir-stats-card
-  ir-stats-card --> ir-icons
+  ir-sales-by-country-summary --> ir-metric-card
   ir-sales-by-country --> ir-sales-by-country-summary
   style ir-sales-by-country-summary fill:#f9f,stroke:#333,stroke-width:4px
 ```

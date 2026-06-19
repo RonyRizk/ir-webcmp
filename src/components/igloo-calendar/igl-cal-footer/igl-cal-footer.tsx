@@ -44,8 +44,8 @@ export class IglCalFooter {
               </svg>
             )}
             <span>{locales.entries.Lcz_Legend}</span>
-            <span>v1.4</span>
-            <ir-new-badge style={{ marginLeft: '0.25rem' }}></ir-new-badge>
+            <span>v1.5</span>
+            {/* <ir-new-badge style={{ marginLeft: '0.25rem' }}></ir-new-badge> */}
           </button>
           {/* <div class={`${this.isOnline ? 'isOnline' : 'isOffline'}`}>
             <i class="la la-share-alt isOffline"></i><span>{this.isOnline ? "Connected": "Offline"}</span>

@@ -70,7 +70,7 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-title --> ir-icon
   ir-user-form-panel-drawer --> ir-user-form-panel
   style ir-user-form-panel fill:#f9f,stroke:#333,stroke-width:4px

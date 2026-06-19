@@ -16,7 +16,7 @@ export class IrClDebitNoteFields {
   render() {
     if (this.fiscalDocuments.length === 0) {
       return (
-        <wa-callout size="small" variant="warning">
+        <wa-callout size="s" variant="warning">
           <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
           No paid invoices are available. A debit note requires at least one paid invoice to reference. Please issue an invoice first, then return to create the debit note.
         </wa-callout>

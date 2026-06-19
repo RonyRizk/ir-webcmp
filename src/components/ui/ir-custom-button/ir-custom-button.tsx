@@ -20,7 +20,7 @@ export class IrCustomButton {
   @Prop() appearance: NativeButton['appearance'];
 
   /** The button's size. */
-  @Prop() size: NativeButton['size'] = 'small';
+  @Prop() size: NativeButton['size'] = 's';
 
   /** Draws the button with a caret. Used to indicate that the button triggers a dropdown menu or similar behavior. */
   @Prop() withCaret: NativeButton['withCaret'];
@@ -68,7 +68,7 @@ export class IrCustomButton {
    * The "form owner" to associate the button with. If omitted, the closest containing form will be used instead. The
    * value of this attribute must be an id of a form in the same document or shadow root as the button.
    */
-  @Prop() form: NativeButton['form'];
+  @Prop() form: string | HTMLFormElement | null;
 
   /** Used to override the form owner's `action` attribute. */
   @Prop() formAction: NativeButton['formAction'];
@@ -130,7 +130,7 @@ export class IrCustomButton {
           /* form-related props */
           name={this.name}
           value={this.value}
-          form={this.form}
+          form={this.form as unknown as HTMLFormElement}
           form-action={this.formAction}
           form-enctype={this.formEnctype}
           form-method={this.formMethod}

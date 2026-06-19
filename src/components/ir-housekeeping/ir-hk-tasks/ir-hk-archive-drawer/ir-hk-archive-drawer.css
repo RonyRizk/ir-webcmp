@@ -1,0 +1,94 @@
+@import url('../../../../common/table.css');
+:host {
+  display: contents;
+}
+.hk_archive__drawer::part(body) {
+  padding: 0;
+}
+.archive-content {
+  display: flex;
+  flex-direction: column;
+  /* gap: 1rem; */
+}
+
+/* Filter section */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--wa-color-neutral-200, #e5e7eb);
+}
+
+.filters-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filters-row wa-select {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.filters-row ir-date-range-filter {
+  flex: 1;
+  min-width: 14rem;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Results */
+.table-wrapper {
+  padding: 1.5rem;
+  padding-inline: 0.75rem;
+  padding-top: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.archive-table th,
+.archive-table td {
+  white-space: nowrap;
+  text-align: start;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--wa-color-neutral-200, #e5e7eb);
+  font-size: var(--wa-font-size-s, 0.875rem);
+}
+
+.archive-table th {
+  font-weight: 600;
+  color: var(--wa-color-neutral-600, #4b5563);
+  border-bottom: 2px solid var(--wa-color-neutral-200, #e5e7eb);
+  padding-top: 0;
+}
+
+.archive-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.archive-table tbody tr:hover td {
+  background-color: var(--wa-color-neutral-50, #f9fafb);
+}
+
+.unit-name {
+  max-width: 100px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0;
+  margin: 0;
+  text-align: start;
+}

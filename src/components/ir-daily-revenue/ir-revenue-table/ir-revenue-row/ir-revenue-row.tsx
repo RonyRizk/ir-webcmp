@@ -30,9 +30,9 @@ export class IrRevenueRow {
             <div class="ir-revenue-row__header-left">
               <p class="ir-revenue-row__group">
                 {this.groupName}{' '}
-                <span class="ir-revenue-row__badge" aria-label={`${this.payments.length} transactions`}>
+                <wa-badge variant="brand" aria-label={`${this.payments.length} transactions`}>
                   {this.payments.length}
-                </span>
+                </wa-badge>
               </p>
             </div>
             <p class="ir-revenue-row__total">{formatAmount(calendar_data.currency.symbol, total)}</p>

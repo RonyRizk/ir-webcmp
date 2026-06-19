@@ -17,7 +17,7 @@
   margin: 0;
   font-size: var(--wa-font-size-m);
   line-height: 1.5;
-  color: var(--wa-color-neutral-800, #27272a);
+  color: var(--wa-color-text-quiet, #27272a);
   word-break: break-word;
 }
 
@@ -59,13 +59,13 @@
   font-weight: 700;
   white-space: nowrap;
   line-height: 1.4;
-  color: var(--wa-color-neutral-900, #18181b);
+  color: var(--wa-color-text-quiet, #18181b);
 }
 
 .es-vat {
   margin: 2px 0 0;
   font-size: var(--wa-font-size-xs);
-  color: var(--wa-color-neutral-500, #71717a);
+  color: var(--wa-color-text-quiet, #71717a);
   white-space: nowrap;
 }
 .es-action-trigger::part(base) {

@@ -30,17 +30,11 @@
 ### Used by
 
  - [ir-checkboxes](../ir-checkboxes)
- - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
- - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
- - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-checkboxes --> ir-checkbox
-  ir-monthly-bookings-report-filter --> ir-checkbox
-  ir-sales-by-channel-filters --> ir-checkbox
-  ir-sales-filters --> ir-checkbox
   style ir-checkbox fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

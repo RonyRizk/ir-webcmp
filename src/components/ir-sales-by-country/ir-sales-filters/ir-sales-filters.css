@@ -1,13 +1,23 @@
 :host {
   display: block;
-  height: 100%;
-  flex: 1 1 0%;
 }
-@media (min-width: 768px) {
-  .collapse-btn {
-    display: none;
-  }
-  #salesFiltersCollapse.collapse:not(.show) {
-    display: block;
-  }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.or-divider__line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--wa-color-surface-border, #dee2e6);
+}
+
+.or-divider__text {
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet, #6c757d);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

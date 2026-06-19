@@ -3,6 +3,7 @@ import { HouseKeepingService } from '@/services/housekeeping.service';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import locales from '@/stores/locales.store';
+import WaOption from '@awesome.me/webawesome/dist/components/option/option';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 
 @Component({
@@ -69,9 +70,12 @@ export class IrHkUnassignedUnitsDrawerForm {
           <td class="">{unit.name}</td>
           <td class="sr-only"></td>
           <td class="pl-1">
-            <ir-select
-              onSelectChange={e => {
-                let hk_id = e.detail;
+            <wa-select
+              size="s"
+              style={{ textAlign: 'start' }}
+              placeholder="Select"
+              onchange={e => {
+                let hk_id = (e.target as WaOption).value as any;
                 if (hk_id === '') {
                   hk_id = null;
                 } else {
@@ -79,8 +83,13 @@ export class IrHkUnassignedUnitsDrawerForm {
                 }
                 this.assignUnit(unit.id, hk_id, false);
               }}
-              data={housekeeping_store.hk_criteria.housekeepers.map(hk => ({ text: hk.name, value: hk.id.toString() }))}
-            ></ir-select>
+            >
+              {housekeeping_store.hk_criteria.housekeepers.map(hk => (
+                <wa-option key={hk.id} value={hk.id?.toString()}>
+                  {hk.name}
+                </wa-option>
+              ))}
+            </wa-select>
           </td>
         </tr>
       ));

@@ -206,7 +206,7 @@ export class IrResetPassword {
                         onClickHandler={() => window.history.back()}
                         class="flex-fill"
                         // text={locales.entries?.Lcz_Cancel}
-                        size="medium"
+                        size="m"
                         appearance="filled"
                         variant="neutral"
                       >
@@ -217,7 +217,7 @@ export class IrResetPassword {
                         class="flex-fill"
                         loading={this.isLoading}
                         type="submit"
-                        size="medium"
+                        size="m"
                         variant="brand"
                       >
                         {locales.entries?.Lcz_ChangePassword}
@@ -229,10 +229,10 @@ export class IrResetPassword {
             </div>
             {insideSidebar && (
               <div class={'sheet-footer w-full'}>
-                <ir-custom-button onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="medium">
+                <ir-custom-button onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
                   {locales.entries.Lcz_Cancel}
                 </ir-custom-button>
-                <ir-custom-button variant="brand" loading={this.isLoading} class="flex-fill" type="submit" size="medium">
+                <ir-custom-button variant="brand" loading={this.isLoading} class="flex-fill" type="submit" size="m">
                   {locales.entries.Lcz_ChangePassword}
                 </ir-custom-button>
               </div>

@@ -5,6 +5,7 @@
 .ir__drawer::part(header) {
   border-bottom: 1px solid var(--wa-color-surface-border);
   padding-bottom: calc(var(--spacing) / 2);
+  color: var(--wa-color-text-normal);
   background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
 }
 .ir__drawer::part(body) {
@@ -23,7 +24,7 @@
 .ir__drawer-footer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   width: 100%;
 }
 .ir__drawer-footer > * {

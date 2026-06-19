@@ -38,7 +38,7 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-secure-tasks --> ir-booking-email-logs
   style ir-booking-email-logs fill:#f9f,stroke:#333,stroke-width:4px
 ```

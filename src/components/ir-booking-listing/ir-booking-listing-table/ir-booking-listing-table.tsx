@@ -214,7 +214,7 @@ export class IrBookingListingTable {
                     <ir-custom-button
                       id="balance-info"
                       style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
-                      size="small"
+                      size="s"
                       variant="danger"
                       appearance="outlined"
                     >
@@ -306,7 +306,7 @@ export class IrBookingListingTable {
         >
           <span>{locales.entries.Lcz_SureYouWantToDeleteBookingNbr + this.booking_nbr}</span>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="medium" variant="neutral" appearance="filled">
+            <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled">
               Cancel
             </ir-custom-button>
             <ir-custom-button
@@ -316,7 +316,7 @@ export class IrBookingListingTable {
                 this.deleteBooking();
               }}
               loading={this.isLoading}
-              size="medium"
+              size="m"
               variant="danger"
             >
               Confirm

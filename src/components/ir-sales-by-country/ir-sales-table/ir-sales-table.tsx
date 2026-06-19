@@ -19,104 +19,107 @@ export class IrSalesTable {
 
   render() {
     const visibleRecords = this.records.slice(0, this.visibleCount);
-    return (
-      <div class="table-container h-100 p-1 m-0 mb-2 table-responsive">
-        <table class="table" data-testid="hk_tasks_table">
-          <thead class="table-header">
-            <tr>
-              <th class="text-left">Country</th>
-              <th class="text-center">Room nights</th>
-              <th class="text-center">No of guests</th>
-              <th class="text-right">Revenue</th>
-              <th class=""></th>
-            </tr>
-          </thead>
 
-          <tbody>
-            {this.records.length === 0 && (
+    if (this.records.length === 0) {
+      return (
+        <wa-card class="sales-table__card">
+          <div class="sales-table__empty-wrapper">
+            <ir-empty-state message="No sales data found."></ir-empty-state>
+          </div>
+        </wa-card>
+      );
+    }
+
+    return (
+      <wa-card class="sales-table__card">
+        <div class="sales-table__scroll">
+          <table class="table data-table" data-testid="hk_tasks_table">
+            <thead class="table-header">
               <tr>
-                <td colSpan={5} style={{ height: '300px' }}>
-                  No data found.
+                <th class="cell--left">Country</th>
+                <th class="cell--center">Room nights</th>
+                <th class="cell--center">No of guests</th>
+                <th class="cell--right">Revenue</th>
+                <th style={{ width: '35%' }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleRecords.map(record => {
+                const mainPercentage = `${parseFloat(record.percentage.toString()).toFixed(2)}%`;
+                const secondaryPercentage = record.last_year ? `${parseFloat(record.last_year.percentage.toString()).toFixed(2)}%` : null;
+                const mappedCountry = this.mappedCountries.get(record.country_id);
+
+                return (
+                  <tr data-testid="record_row" class={{ 'task-table-row ir-table-row': true }} key={record.id}>
+                    <td class="cell--left">
+                      <div class="country-cell">
+                        {mappedCountry?.flag && <img class="flag" alt={mappedCountry.name} src={mappedCountry.flag} />}
+                        <span>{mappedCountry?.name ?? record.country}</span>
+                      </div>
+                    </td>
+                    <td class="cell--center">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.nights ? 'value--primary' : ''}>{record.nights}</p>
+                        {record.last_year?.nights && <p class="value--previous">{record.last_year.nights}</p>}
+                      </div>
+                    </td>
+                    <td class="cell--center">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.number_of_guests ? 'value--primary' : ''}>{record.number_of_guests}</p>
+                        {record.last_year?.number_of_guests && <p class="value--previous">{record.last_year.number_of_guests}</p>}
+                      </div>
+                    </td>
+                    <td class="cell--right">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.revenue ? 'value--primary' : ''}>{formatAmount(calendar_data.currency.symbol, record.revenue)}</p>
+                        {record.last_year?.revenue && <p class="value--previous">{formatAmount(calendar_data.currency.symbol, record.last_year.revenue)}</p>}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-stack">
+                        <div class="occ-row">
+                          <span class="occ-label">{mainPercentage}</span>
+                          <wa-progress-bar class="occ-bar" value={parseFloat(record.percentage.toString())}></wa-progress-bar>
+                        </div>
+                        {record.last_year?.percentage && (
+                          <div class="occ-row">
+                            <span class="occ-label">{secondaryPercentage}</span>
+                            <wa-progress-bar class="occ-bar occ-bar--previous" value={parseFloat(record.last_year.percentage.toString())}></wa-progress-bar>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr style={{ fontSize: '12px' }}>
+                <td colSpan={4}></td>
+                <td class="legend-cell">
+                  <div class="legend-row">
+                    <div class="legend-item">
+                      <div class="legend-dot legend-dot--current"></div>
+                      <p>Selected period</p>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-dot legend-dot--previous"></div>
+                      <p>Previous year</p>
+                    </div>
+                  </div>
                 </td>
               </tr>
-            )}
-            {visibleRecords.map(record => {
-              const mainPercentage = `${parseFloat(record.percentage.toString()).toFixed(2)}%`;
-              const secondaryPercentage = record.last_year ? `${parseFloat(record.last_year.percentage.toString()).toFixed(2)}%` : null;
-              const mappedCountry = this.mappedCountries.get(record.country_id);
-
-              return (
-                <tr data-testid={`record_row`} class={{ 'task-table-row ir-table-row': true }} key={record.id}>
-                  <td class="text-left">
-                    <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
-                      {mappedCountry?.flag && <img class="flag" alt={mappedCountry.name} src={mappedCountry.flag} />}
-                      <span>{mappedCountry?.name ?? record.country}</span>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.nights ? 'font-weight-bold' : ''}`}>{record.nights}</p>
-                      {record.last_year?.nights && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {record.last_year.nights}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.number_of_guests ? 'font-weight-bold' : ''}`}>{record.number_of_guests}</p>
-                      {record.last_year?.number_of_guests && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {record.last_year.number_of_guests}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td class="text-right">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.revenue ? 'font-weight-bold' : ''}`}>{formatAmount(calendar_data.currency.symbol, record.revenue)}</p>
-                      {record.last_year?.revenue && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {formatAmount(calendar_data.currency.symbol, record.last_year.revenue)}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
-                      <ir-progress-indicator percentage={mainPercentage}></ir-progress-indicator>
-                      {record.last_year?.percentage && <ir-progress-indicator percentage={secondaryPercentage} color="secondary"></ir-progress-indicator>}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr style={{ fontSize: '12px' }}>
-              <td colSpan={4}></td>
-              <td style={{ width: '250px' }}>
-                <div class={'d-flex align-items-center justify-content-end'} style={{ gap: '1rem', paddingTop: '0.5rem' }}>
-                  <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                    <div class="legend bg-primary"></div>
-                    <p class="p-0 m-0">Selected period </p>
-                  </div>
-                  <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                    <div class="legend secondary"></div>
-                    <p class="p-0 m-0">Previous year</p>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-        {this.visibleCount < this.records.length && (
-          <div class={'d-flex mx-auto'}>
-            <ir-button class="mx-auto" size="sm" text="Load More" onClickHandler={this.handleLoadMore}></ir-button>
-          </div>
-        )}
-      </div>
+            </tfoot>
+          </table>
+          {this.visibleCount < this.records.length && (
+            <div class="sales-table__load-more">
+              <ir-custom-button variant="neutral" appearance="outlined" size="s" onClickHandler={this.handleLoadMore}>
+                Load More
+              </ir-custom-button>
+            </div>
+          )}
+        </div>
+      </wa-card>
     );
   }
 }

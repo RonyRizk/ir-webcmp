@@ -74,10 +74,10 @@ export class IrCityLedgerTransactionDrawer {
         )}
 
         <div slot="footer" class={'ir__drawer-footer'}>
-          <ir-custom-button appearance="filled" size="medium" variant="neutral" class="city-ledger-transaction-drawer__btn" onClickHandler={() => this.closeDrawer.emit()}>
+          <ir-custom-button appearance="filled" size="m" variant="neutral" class="city-ledger-transaction-drawer__btn" onClickHandler={() => this.closeDrawer.emit()}>
             Cancel
           </ir-custom-button>
-          <ir-custom-button form={this.formId} size="medium" type="submit" variant="brand" class="city-ledger-transaction-drawer__btn" disabled={this.saveDisabled}>
+          <ir-custom-button form={this.formId} size="m" type="submit" variant="brand" class="city-ledger-transaction-drawer__btn" disabled={this.saveDisabled}>
             Save
           </ir-custom-button>
         </div>

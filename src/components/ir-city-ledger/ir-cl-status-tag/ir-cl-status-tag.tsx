@@ -47,7 +47,7 @@ export class IrClStatusTag {
     const { label, variant, showLock } = resolveStatus(this.transaction);
     return (
       <Host>
-        <wa-tag size={'small'} className={`${this.size === 'default' ? '' : 'cl-status-tag__xs'}`} variant={variant}>
+        <wa-tag size={'s'} className={`${this.size === 'default' ? '' : 'cl-status-tag__xs'}`} variant={variant}>
           {label}
           {showLock && <wa-icon name="lock"></wa-icon>}
         </wa-tag>

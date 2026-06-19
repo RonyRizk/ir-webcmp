@@ -1,4 +1,4 @@
-import { Component, Host, h, Prop, State, Watch } from '@stencil/core';
+import { Component, h, Prop, State, Watch } from '@stencil/core';
 import { MealReportService } from '../../services/meal-report/meal-report.service';
 import Token from '../../models/Token';
 import moment from 'moment';
@@ -22,7 +22,7 @@ export class IrMealReport {
   @State() isPageLoading: boolean = true;
   @State() isExporting: boolean = false;
   @State() isDataLoading: boolean = false;
-  
+
   @State() localReportType: 'GUEST_LIST' | 'MEAL_COUNT' = 'GUEST_LIST';
   @State() localFrom: string = moment().format('YYYY-MM-DD');
   @State() localTo: string = moment().format('YYYY-MM-DD');
@@ -32,7 +32,7 @@ export class IrMealReport {
   @State() mealCountSummary: MealCountDaySummary[] = [];
   @State() setupEntries: { meal_type: IEntries[]; hb_preference: IEntries[] } = {
     meal_type: [],
-    hb_preference: []
+    hb_preference: [],
   };
 
   private mealReportService = new MealReportService();
@@ -46,13 +46,13 @@ export class IrMealReport {
     }
   }
 
-  async componentWillLoad() {
+  componentWillLoad() {
     if (this.baseurl) {
       this.tokenService.setBaseUrl(this.baseurl);
     }
     if (this.ticket) {
       this.tokenService.setToken(this.ticket);
-      await this.init();
+      this.init();
     }
   }
 
@@ -61,15 +61,15 @@ export class IrMealReport {
     await this.init();
   }
 
-  async init() {
+  private async init() {
     try {
       this.isPageLoading = true;
       this.isDataLoading = true;
 
       const setupEntries = await this.mealReportService.getSetupEntriesByTableNameMulti(['_MEAL_TYPE', '_HB_PREFERENCE'] as any);
-      
+
       const grouped = groupEntryTablesResult(setupEntries);
-      
+
       const meal_type = (grouped as any).meal_type || [];
       const hb_preference = (grouped as any).hb_preference || [];
 
@@ -79,24 +79,24 @@ export class IrMealReport {
       };
 
       if (meal_type.length > 0) {
-          if (!this.localMealType) {
-              this.localMealType = meal_type[0].CODE_NAME;
-          }
+        if (!this.localMealType) {
+          this.localMealType = meal_type[0].CODE_NAME;
+        }
       }
 
       await this.applyFilters();
     } catch (error) {
-        // Handling handled via UI
+      // Handling handled via UI
     } finally {
       this.isPageLoading = false;
       this.isDataLoading = false;
     }
   }
 
-  async applyFilters() {
+  private async applyFilters() {
     try {
       this.isDataLoading = true;
-      
+
       const response = await this.mealReportService.getMealReport({
         property_id: this.propertyid,
         from: this.localFrom,
@@ -105,43 +105,37 @@ export class IrMealReport {
         meal_type_code: this.localMealType,
         is_export_to_excel: false,
       });
-      
+
       this.guestList = response.My_Result.Guest_List || [];
       this.mealCountSummary = response.My_Result.Meal_Count_Summary || [];
     } catch (error) {
-        // Handling handled via UI
+      // Handling handled via UI
     } finally {
       this.isDataLoading = false;
     }
   }
 
-  resetFilters() {
+  private resetFilters() {
     this.localReportType = 'GUEST_LIST';
     this.localFrom = moment().format('YYYY-MM-DD');
     this.localTo = moment().format('YYYY-MM-DD');
     if (this.setupEntries.meal_type.length > 0) {
-        this.localMealType = this.setupEntries.meal_type[0].CODE_NAME;
+      this.localMealType = this.setupEntries.meal_type[0].CODE_NAME;
     }
-    this.guestList = [];
-    this.mealCountSummary = [];
     this.applyFilters();
   }
 
-  async setPresetDate(type: 'today' | 'tomorrow') {
+  private async setPresetDate(type: 'today' | 'tomorrow') {
     const date = type === 'today' ? moment() : moment().add(1, 'day');
     this.localFrom = date.format('YYYY-MM-DD');
-    this.guestList = [];
-    this.mealCountSummary = [];
-    
     if (type === 'today' && this.localReportType === 'MEAL_COUNT') {
-        this.localTo = moment().add(14, 'days').format('YYYY-MM-DD');
+      this.localTo = moment().add(14, 'days').format('YYYY-MM-DD');
     } else {
-        this.localTo = this.localFrom;
+      this.localTo = this.localFrom;
     }
-    await this.applyFilters();
   }
 
-  async handleExport() {
+  private async handleExport() {
     try {
       this.isExporting = true;
       const response = await this.mealReportService.getMealReport({
@@ -156,29 +150,29 @@ export class IrMealReport {
       const link = response.My_Params_Get_Meal_Report?.Link_excel;
 
       if (link) {
-          // Use clean axios to bypass interceptors (avoiding network errors)
-          const cleanAxios = axios.create();
-          const responseBlob = await cleanAxios.get(link, { responseType: 'blob' });
-          
-          // Force download via local blob URL
-          const blob = new Blob([responseBlob.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          const url = window.URL.createObjectURL(blob);
-          
-          const a = document.createElement('a');
-          a.href = url;
-          const filename = link.split('/').pop() || 'meal_report.xlsx';
-          a.setAttribute('download', filename);
-          document.body.appendChild(a);
-          a.click();
-          
-          // Cleanup
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
+        // Use clean axios to bypass interceptors (avoiding network errors)
+        const cleanAxios = axios.create();
+        const responseBlob = await cleanAxios.get(link, { responseType: 'blob' });
+
+        // Force download via local blob URL
+        const blob = new Blob([responseBlob.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = link.split('/').pop() || 'meal_report.xlsx';
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+
+        // Cleanup
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-        // Export Error handled silently or via UI
+      // Export Error handled silently or via UI
     } finally {
-        this.isExporting = false;
+      this.isExporting = false;
     }
   }
 
@@ -187,117 +181,91 @@ export class IrMealReport {
       return <ir-loading-screen></ir-loading-screen>;
     }
 
-    const mealType = this.setupEntries?.meal_type || [];
-    
-    const headerTitle = this.localReportType === 'GUEST_LIST' 
-        ? 'Guest list'
-        : 'Meal count';
-
-    const mealTypeLabel = this.localReportType === 'GUEST_LIST' && mealType.length > 0 
-        ? (mealType.find(t => t.CODE_NAME === this.localMealType)?.CODE_VALUE_EN || '')
-        : '';
-
-    const formatDate = (dateStr: string) => {
-        const m = moment(dateStr);
-        return `${m.format('ddd')} ${m.format('MMM DD, YYYY')}`;
-    };
-
-    const formattedFrom = formatDate(this.localFrom);
-    const formattedTo = formatDate(this.localTo);
-
     const lcz = (locales.entries as any) || {};
 
+    // const summary = this.mealCountSummary || [];
+    // const sum = (key: keyof MealCountDaySummary) => summary.reduce((acc, day) => acc + (Number(day[key]) || 0), 0);
+    // const mealMetrics = [
+    //   { label: 'Breakfast', icon: 'mug-saucer', intent: 'brand' as const, adults: sum('Breakfast_Ad'), children: sum('Breakfast_Ch') },
+    //   { label: 'Lunch', icon: 'utensils', intent: 'success' as const, adults: sum('Lunch_Ad'), children: sum('Lunch_Ch') },
+    //   { label: 'Dinner', icon: 'moon', intent: 'warning' as const, adults: sum('Dinner_Ad'), children: sum('Dinner_Ch') },
+    // ];
+
     return (
-      <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="ir-meal-report__container">
-          <div class="ir-meal-report__header">
-            <h3 class="ir-meal-report__title">Meal report</h3>
-            <ir-custom-button
-              type="button"
-              size="small"
-              appearance="outlined"
-              loading={this.isExporting}
-              onClickHandler={(e: CustomEvent) => {
-                const ev = e.detail as MouseEvent;
-                if (ev && typeof ev.preventDefault === 'function') {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-                this.handleExport();
-              }}
-              class="ir-meal-report__export-btn"
-            >
-              <wa-icon name="file" slot="end" style={{ fontSize: '14px' }}></wa-icon>
-              {lcz.Lcz_Export || 'Export'}
-            </ir-custom-button>
+      <ir-page label="Meal Report" description={this.localReportType === 'GUEST_LIST' ? 'Guest List' : 'Meal Count'} class={'page'}>
+        <ir-custom-button
+          slot="page-header"
+          type="button"
+          size="s"
+          appearance="outlined"
+          loading={this.isExporting}
+          onClickHandler={(e: CustomEvent) => {
+            const ev = e.detail as MouseEvent;
+            if (ev && typeof ev.preventDefault === 'function') {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            this.handleExport();
+          }}
+          class="ir-meal-report__export-btn"
+        >
+          <wa-icon name="download" slot="start" style={{ fontSize: '14px' }}></wa-icon>
+          {lcz.Lcz_Export || 'Export'}
+        </ir-custom-button>
+        {/* {this.localReportType === 'MEAL_COUNT' && (
+          <div class="ir-meal-report__metrics">
+            {mealMetrics.map(metric => (
+              <ir-metric-card
+                key={metric.label}
+                label={metric.label}
+                icon={metric.icon}
+                value={metric.adults + metric.children}
+                unit="guests"
+                caption={`Adults ${metric.adults} · Children ${metric.children}`}
+                loading={this.isDataLoading}
+              ></ir-metric-card>
+            ))}
           </div>
+        )} */}
+        <div class="ir-meal-report__layout">
+          <ir-meal-report-filters
+            reportType={this.localReportType}
+            fromDate={this.localFrom}
+            toDate={this.localTo}
+            mealType={this.localMealType}
+            setupEntries={this.setupEntries}
+            isLoading={this.isDataLoading}
+            lcz={lcz}
+            onReportTypeChange={e => {
+              this.localReportType = e.detail;
+              this.applyFilters();
+              if (e.detail === 'GUEST_LIST') {
+                this.localTo = this.localFrom;
+              }
+            }}
+            onDateChange={e => {
+              this.localFrom = e.detail.from;
+              this.localTo = e.detail.to;
+            }}
+            onMealTypeChange={async e => {
+              this.localMealType = e.detail;
+            }}
+            onFilterApply={() => this.applyFilters()}
+            onFilterReset={() => this.resetFilters()}
+            onPresetDate={e => this.setPresetDate(e.detail)}
+          ></ir-meal-report-filters>
 
-          <div class="ir-meal-report__layout">
-            
-            <ir-meal-report-filters
-                reportType={this.localReportType}
-                fromDate={this.localFrom}
-                toDate={this.localTo}
-                mealType={this.localMealType}
-                setupEntries={this.setupEntries}
-                isLoading={this.isDataLoading}
-                lcz={lcz}
-                onReportTypeChange={e => {
-                    this.localReportType = e.detail;
-                    this.guestList = [];
-                    this.mealCountSummary = [];
-                    if (e.detail === 'GUEST_LIST') {
-                        this.localTo = this.localFrom;
-                    }
-                }}
-                onDateChange={e => {
-                    this.localFrom = e.detail.from;
-                    this.localTo = e.detail.to;
-                    this.guestList = [];
-                    this.mealCountSummary = [];
-                }}
-                onMealTypeChange={async e => {
-                    this.localMealType = e.detail;
-                    this.guestList = [];
-                    this.mealCountSummary = [];
-                    await this.applyFilters();
-                }}
-                onFilterApply={() => this.applyFilters()}
-                onFilterReset={() => this.resetFilters()}
-                onPresetDate={e => this.setPresetDate(e.detail)}
-            ></ir-meal-report-filters>
-
-            <div class="ir-meal-report__results-card">
-               <div class="ir-meal-report__results-header">
-                  <h3 class="ir-meal-report__results-title">
-                    {headerTitle}
-                    <span class="ir-meal-report__results-subtitle">
-                        ({formattedFrom}{this.localReportType === 'MEAL_COUNT' ? ` - ${formattedTo}` : ''})
-                        {this.localReportType === 'GUEST_LIST' && mealTypeLabel && ` - ${mealTypeLabel}`}
-                    </span>
-                  </h3>
-                  {this.localReportType === 'GUEST_LIST' && this.guestList?.length > 0 && (
-                      <wa-tag>{this.guestList.length} Units</wa-tag>
-                  )}
-               </div>
-               <div class="ir-meal-report__results-body">
-                  {this.isDataLoading && (
-                    <div class="ir-meal-report__loading-overlay">
-                        <ir-spinner></ir-spinner>
-                    </div>
-                  )}
-                  {this.localReportType === 'GUEST_LIST' ? (
-                    <ir-meal-guest-list guestList={this.guestList}></ir-meal-guest-list>
-                  ) : (
-                    <ir-meal-count-summary mealCountSummary={this.mealCountSummary}></ir-meal-count-summary>
-                  )}
-               </div>
+          <wa-card class="ir-meal-report__results">
+            <div>
+              {this.localReportType === 'GUEST_LIST' ? (
+                <ir-meal-guest-list guestList={this.guestList}></ir-meal-guest-list>
+              ) : (
+                <ir-meal-count-summary mealCountSummary={this.mealCountSummary}></ir-meal-count-summary>
+              )}
             </div>
-          </div>
-        </section>
-      </Host>
+          </wa-card>
+        </div>
+      </ir-page>
     );
   }
 }

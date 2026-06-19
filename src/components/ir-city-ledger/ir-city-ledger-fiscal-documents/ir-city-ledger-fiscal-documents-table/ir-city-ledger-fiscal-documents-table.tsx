@@ -6,6 +6,8 @@ import { CellContext, createColumnHelper, getCoreRowModel, getSortedRowModel } f
 import { CityLedgerService, type FiscalDocument } from '../../../../services/city-ledger';
 import type { ICurrency } from '@/models/property';
 import { FdStatus, FdTypes } from '@/types/enums';
+import moment from 'moment';
+import calendar_data from '@/stores/calendar-data';
 
 @Component({
   tag: 'ir-city-ledger-fiscal-documents-table',
@@ -86,7 +88,7 @@ export class IrCityLedgerFiscalDocumentsTable {
     }
   }
 
-  private async confirmPendingAction() {
+  private async confirmPendingAction(e: CustomEvent) {
     if (!this.pendingAction) return;
     const { action, row } = this.pendingAction;
     this.isConfirming = true;
@@ -94,7 +96,35 @@ export class IrCityLedgerFiscalDocumentsTable {
       if (action === 'void') {
         switch (row.FD_TYPE_CODE) {
           case FdTypes.Invoice:
-            await this.cityLedgerService.voidInvoiceByCreditNote({ FD_ID: row.FD_ID });
+            const { amount, fdType } = e.detail;
+            if (fdType === 'credit-note') {
+              await this.cityLedgerService.voidInvoiceByCreditNote({ FD_ID: row.FD_ID });
+            } else {
+              const result = await this.cityLedgerService.issueManualCLTx({
+                CL_TX_ID: -1,
+                AGENCY_ID: this.agentId,
+                SERVICE_DATE: moment().format('YYYY-MM-DD'),
+                CL_TX_TYPE_CODE: FdTypes.CreditNote,
+                DESCRIPTION: 'Credit note',
+                DEBIT: null,
+                CREDIT: amount,
+                CURRENCY_ID: calendar_data?.property?.currency?.id,
+                PAY_METHOD_CODE: null,
+                EXTERNAL_REF: row.FD_ID.toString(),
+                BH_ID: null,
+                VAT_INCLUDED_CODE: '',
+                VAT_PCT: null,
+              });
+              if (result?.My_Fd?.FD_TYPE_CODE && result.My_Fd.DOC_NUMBER) {
+                this.clFiscalDocumentPreview.emit({
+                  fdTypeCode: result.My_Fd.FD_TYPE_CODE,
+                  documentNumber: result.My_Fd.DOC_NUMBER,
+                  agentId: this.agentId,
+                  agentName: result.My_Fd.AGENCY_NAME ?? '',
+                  externalRef: result.My_Fd.EXTERNAL_REF,
+                });
+              }
+            }
             break;
           case FdTypes.Receipt:
             await this.cityLedgerService.voidReceiptByCreditReceipt({ FD_ID: row.FD_ID });
@@ -234,7 +264,7 @@ export class IrCityLedgerFiscalDocumentsTable {
                 this.handleAction(e.detail.item.value, row);
               }}
             >
-              <wa-button slot="trigger" size="small" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
+              <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
                 <wa-icon name="ellipsis-vertical" style={{ fontSize: '1.2rem' }}></wa-icon>
               </wa-button>
 
@@ -265,7 +295,7 @@ export class IrCityLedgerFiscalDocumentsTable {
 
                     isInvoice && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
                       <wa-dropdown-item value="void">
-                        <span class="fiscal-table__action-danger">Void with credit note</span>
+                        <span class="fiscal-table__action-danger">Issue credit note</span>
                       </wa-dropdown-item>
                     ),
                     isReceipt && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
@@ -304,7 +334,7 @@ export class IrCityLedgerFiscalDocumentsTable {
             <p class="fiscal-table__date-prompt-title">Select a date range to get started</p>
             {hasDate && (
               <wa-animation iterations={1} play id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
-                <ir-custom-button size="small" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
+                <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
                   Load Documents
                 </ir-custom-button>
@@ -373,11 +403,13 @@ export class IrCityLedgerFiscalDocumentsTable {
           </table>
         </div>
         <ir-fd-confirm-dialog
+          amount={this.pendingAction?.row?.TOTAL_AMOUNT}
+          fdType={this.pendingAction?.row?.FD_TYPE_CODE}
           open={this.pendingAction !== null}
           action={this.pendingAction?.action ?? null}
           docNumber={this.pendingAction?.row.DOC_NUMBER ?? 'this document'}
           isConfirming={this.isConfirming}
-          onConfirmed={() => this.confirmPendingAction()}
+          onConfirmed={e => this.confirmPendingAction(e)}
           onCancelled={() => (this.pendingAction = null)}
         ></ir-fd-confirm-dialog>
       </Host>

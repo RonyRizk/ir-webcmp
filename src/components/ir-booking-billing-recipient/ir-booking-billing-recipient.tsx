@@ -84,7 +84,7 @@ export class IrBookingBillingRecipient {
           orientation="vertical"
           name={`${this.booking?.booking_nbr}-bill-to`}
           value={this.selectedRecipient}
-          size="small"
+          size="s"
         >
           <wa-radio appearance="button" value={'guest'}>
             {this.booking?.guest.first_name} {this.booking.guest.last_name}
@@ -100,7 +100,7 @@ export class IrBookingBillingRecipient {
                 <span class="billing-recipient__rateplan">{r.rateplan.short_name}</span>
 
                 {r.unit && (
-                  <wa-tag variant="brand" size="small" appearance="accent">
+                  <wa-tag variant="brand" size="s" appearance="accent">
                     {(r.unit as IUnit)?.name}
                   </wa-tag>
                 )}

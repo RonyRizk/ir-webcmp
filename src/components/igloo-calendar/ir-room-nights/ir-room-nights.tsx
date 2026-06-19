@@ -267,7 +267,7 @@ export class IrRoomNights {
 
               {this.selectedRoom.rateplan.custom_text && <p class={'text-secondary mt-0'}>{this.selectedRoom.rateplan.custom_text}</p>}
               {booking_store.roomTypes?.length > 0 && (
-                <wa-callout size="small" variant="neutral" appearance="filled" class="mt-1 booking-editor-header__tax_statement">
+                <wa-callout size="s" variant="neutral" appearance="filled" class="mt-1 booking-editor-header__tax_statement">
                   {/* Including taxes and fees. */}
                   {calendar_data.tax_statement}
                 </wa-callout>

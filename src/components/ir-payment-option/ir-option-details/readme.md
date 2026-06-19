@@ -14,10 +14,9 @@
 
 ## Events
 
-| Event        | Description | Type                                                                                                 |
-| ------------ | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `closeModal` |             | `CustomEvent<PaymentOption>`                                                                         |
-| `toast`      |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event        | Description | Type                         |
+| ------------ | ----------- | ---------------------------- |
+| `closeModal` |             | `CustomEvent<PaymentOption>` |
 
 
 ## Dependencies

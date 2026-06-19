@@ -1,7 +1,7 @@
 import { IHouseKeepers, THousekeepingTrigger } from '@/models/housekeeping';
 import housekeeping_store from '@/stores/housekeeping.store';
 import locales from '@/stores/locales.store';
-import { Component, Listen, State, h, Element } from '@stencil/core';
+import { Component, Listen, State, h, Element, Fragment } from '@stencil/core';
 
 @Component({
   tag: 'ir-hk-team',
@@ -19,7 +19,7 @@ export class IrHkTeam {
         <span>
           0 -{' '}
           <wa-button
-            size="small"
+            size="s"
             variant="brand"
             appearance="outlined"
             class="hk-team-header__unassigned-btn"
@@ -35,7 +35,7 @@ export class IrHkTeam {
         {hk.assigned_units.length} -{' '}
         <wa-button
           class="hk-team-header__unassigned-btn"
-          size="small"
+          size="s"
           variant="brand"
           appearance="outlined"
           onClick={() => (this.currentTrigger = { type: 'unassigned_units', user: hk })}
@@ -80,7 +80,7 @@ export class IrHkTeam {
     const { assigned, total, un_assigned } = housekeeping_store.hk_criteria.units_assignments;
 
     return (
-      <wa-card>
+      <wa-card class="hk-team__card">
         <section slot="header" class="hk-team-header">
           <div class="hk-team-header__top">
             <p class="hk-team-header__title">{locales.entries.Lcz_HousekeepingTeam}</p>
@@ -94,7 +94,7 @@ export class IrHkTeam {
               {un_assigned > 0 && (
                 <wa-button
                   onClick={() => (this.currentTrigger = { type: 'unassigned_units', user: null })}
-                  size="small"
+                  size="s"
                   class="hk-team-header__unassigned-btn"
                   variant="brand"
                   appearance="outlined"
@@ -107,7 +107,7 @@ export class IrHkTeam {
           <p class="hk-team-header__hint">{locales.entries.Lcz_AsAnOption}</p>
         </section>
         <section class="table-responsive">
-          <table class="table">
+          <table class="table data-table">
             <thead>
               <tr>
                 <th class="text-left">{locales.entries.Lcz_Name}</th>
@@ -140,16 +140,21 @@ export class IrHkTeam {
                   <td class="text-left">
                     <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
                       {hk.name?.length > 25 ? (
-                        <ir-popover trigger="hover" content={hk.name}>
-                          <span>{hk.name.slice(0, 25)}...</span>
-                        </ir-popover>
+                        <Fragment>
+                          <wa-tooltip for={hk.id + '_name'}>{hk.name}</wa-tooltip>
+                          <span id={hk.id + '_name'}>{hk.name.slice(0, 25)}...</span>
+                        </Fragment>
                       ) : (
                         hk.name
                       )}
                       {hk.note && (
-                        <ir-popover content={hk.note}>
-                          <ir-button variant="icon" icon_name="note" data-toggle="tooltip" data-placement="bottom" title="Click to view note"></ir-button>
-                        </ir-popover>
+                        // <ir-popover content={hk.note}>
+                        //   <ir-button variant="icon" icon_name="note" data-toggle="tooltip" data-placement="bottom" title="Click to view note"></ir-button>
+                        // </ir-popover>
+                        <Fragment>
+                          <wa-tooltip for={hk.id + '_note'}>{hk.note}</wa-tooltip>
+                          <wa-icon id={hk.id + '_note'} name="note-sticky" variant="regular"></wa-icon>
+                        </Fragment>
                       )}
                     </div>
                   </td>

@@ -18,7 +18,7 @@ export class IrClOpeningBalanceFields {
           <wa-radio-group
             label="Entry Type"
             orientation="horizontal"
-            size="small"
+            size="s"
             value={this.entryType}
             onchange={event => {
               this.fieldChange.emit({ entryType: (event.target as HTMLInputElement).value as EntryType });

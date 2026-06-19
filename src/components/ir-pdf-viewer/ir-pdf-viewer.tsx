@@ -1,14 +1,15 @@
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist/types/src/pdf';
+import { getDocument, GlobalWorkerOptions, RenderingCancelledException } from 'pdfjs-dist/build/pdf.mjs';
+import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from 'pdfjs-dist/types/src/pdf';
 
 const RENDER_QUALITY = 2;
+const PDF_WORKER_URL = 'https://unpkg.com/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs';
 
 let workerInitialized = false;
 
 function ensureWorker(workerSrc?: string) {
   if (workerInitialized) return;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc ?? `https://unpkg.com/pdfjs-dist@${(pdfjsLib as any).version}/build/pdf.worker.min.js`;
+  GlobalWorkerOptions.workerSrc = workerSrc ?? PDF_WORKER_URL;
   workerInitialized = true;
 }
 
@@ -19,6 +20,7 @@ function ensureWorker(workerSrc?: string) {
 })
 export class IrPdfViewer {
   private canvasEl?: HTMLCanvasElement;
+  private loadingTask: PDFDocumentLoadingTask | null = null;
   private pdf: PDFDocumentProxy | null = null;
   private renderTask: RenderTask | null = null;
   private loadToken = 0;
@@ -41,7 +43,7 @@ export class IrPdfViewer {
     this.loadPdf(next);
   }
 
-  /** Override the pdf.js worker URL (defaults to unpkg CDN). Read once at first load. */
+  /** Override the pdf.js worker URL (defaults to the bundled asset). Read once at first load. */
   @Prop() workerSrc?: string;
 
   componentWillLoad() {
@@ -59,8 +61,9 @@ export class IrPdfViewer {
     this.loadToken++;
     this.renderTask?.cancel();
     this.renderTask = null;
-    this.pdf?.destroy();
     this.pdf = null;
+    this.loadingTask?.destroy();
+    this.loadingTask = null;
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     if (this.resizeTimer) {
@@ -76,14 +79,17 @@ export class IrPdfViewer {
     this.totalPages = 0;
 
     try {
-      if (this.pdf) {
-        await this.pdf.destroy();
+      if (this.loadingTask) {
+        await this.loadingTask.destroy();
+        this.loadingTask = null;
         this.pdf = null;
       }
 
-      const pdf = await pdfjsLib.getDocument({ url }).promise;
+      const task = getDocument({ url });
+      this.loadingTask = task;
+      const pdf = await task.promise;
       if (token !== this.loadToken) {
-        await pdf.destroy();
+        await task.destroy();
         return;
       }
 
@@ -125,7 +131,7 @@ export class IrPdfViewer {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    this.renderTask = page.render({ canvasContext: ctx, viewport });
+    this.renderTask = page.render({ canvas, canvasContext: ctx, viewport });
     try {
       await this.renderTask.promise;
     } catch (err: unknown) {
@@ -208,5 +214,5 @@ export class IrPdfViewer {
 }
 
 function isCancelled(err: unknown): boolean {
-  return !!err && typeof err === 'object' && (err as { name?: string }).name === 'RenderingCancelledException';
+  return err instanceof RenderingCancelledException;
 }

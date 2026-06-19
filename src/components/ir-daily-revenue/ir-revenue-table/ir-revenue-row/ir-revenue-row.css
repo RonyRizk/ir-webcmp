@@ -1,5 +1,5 @@
 :host {
-  --ir-border: #e5e7eb;
+  --ir-border: var(--wa-color-surface-border);
 }
 
 .ir-revenue-row__accordion::part(base),
@@ -7,7 +7,6 @@
   border: 0;
   border-radius: 0;
   border-bottom: 1px solid var(--ir-border, #e5e7eb);
-  background: #fff;
   padding: 0;
 }
 
@@ -32,7 +31,10 @@
   width: 100%;
   justify-content: space-between;
   padding: 0.5rem;
-  color: rgb(83, 83, 83);
+  color: var(--wa-color-text-normal);
+  transition-property: background, border, box-shadow, color;
+  transition-duration: var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
 }
 .ir-revenue-row__title {
   padding: 0;
@@ -44,21 +46,17 @@
 }
 
 .ir-revenue-row__accordion::part(trigger):hover {
-  background: #f4f5fa;
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet));
+}
+.ir-revenue-row__accordion::part(trigger):active {
+  color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active));
 }
 
 .ir-revenue-row__group {
   margin: 0;
   /* font-weight: 600; */
-}
-
-.ir-revenue-row__badge {
-  background: lightgray;
-
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  padding: 0 0.5rem;
-  margin-left: 0.375rem;
 }
 
 .ir-revenue-row__total {
@@ -80,7 +78,7 @@
 /*lg*/
 @media (min-width: 1024px) {
   .ir-revenue-row__header-left {
-    width: 40vw;
+    width: 40.77vw;
   }
   .ir-revenue-row__accordion::part(trigger),
   .ir-revenue-row__title {

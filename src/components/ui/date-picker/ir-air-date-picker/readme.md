@@ -5,47 +5,64 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+`ir-air-date-picker` — a headless Stencil wrapper around the `air-datepicker` library.
+
+The component renders nothing itself (`render()` returns `null`); on `componentDidLoad`
+it instantiates an inline `AirDatepicker` calendar directly into the host element and
+keeps it in sync with the `date` / `dates` / `minDate` / `maxDate` props via watchers.
+
+Design notes:
+- All prop-driven picker mutations use `{ silent: true }` so they never re-trigger
+  `onSelect` → `dateChanged`, preventing parent ↔ child feedback loops.
+- All date inputs (`string | Moment`) are normalized through {@link toMoment} before
+  touching the picker, and value-compared (`isSameDates`) so re-renders of the parent
+  with equal values are no-ops.
+- The primary consumer is `ir-date-select`, which hosts this component inside its popup
+  and forwards its own props one-to-one.
+
 ## Properties
 
-| Property                | Attribute                 | Description                                                                                                                                                                                                                                                                            | Type                | Default        |
-| ----------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------------- |
-| `autoClose`             | `auto-close`              | Closes the picker automatically after a date is selected.                                                                                                                                                                                                                              | `boolean`           | `true`         |
-| `container`             | --                        | Pass a container element if you need the date picker to be appended to a specific element for styling or positioning (particularly for arrow rendering). If not provided, it defaults to `this.el`.                                                                                    | `HTMLElement`       | `undefined`    |
-| `customPicker`          | `custom-picker`           | Controls how the date picker is triggered. - **`true`**: The picker can be triggered by custom UI elements (provided via a `<slot name="trigger">`). - **`false`**: A default button input is used to open the picker.  Defaults to `false`.                                           | `boolean`           | `false`        |
-| `date`                  | `date`                    | The initially selected date; can be a `Date` object or a string recognized by `AirDatepicker`.                                                                                                                                                                                         | `Date \| string`    | `null`         |
-| `dateFormat`            | `date-format`             | Format for the date as it appears in the input field. Follows the `AirDatepicker` format rules.                                                                                                                                                                                        | `string`            | `'yyyy-MM-dd'` |
-| `dates`                 | --                        |                                                                                                                                                                                                                                                                                        | `string[]`          | `undefined`    |
-| `disabled`              | `disabled`                | Disables the input and prevents interaction.                                                                                                                                                                                                                                           | `boolean`           | `false`        |
-| `emitEmptyDate`         | `emit-empty-date`         | If `true`, the component will emit a `dateChanged` event when the selected date becomes empty (null). Otherwise, empty-date changes will be ignored (no event emitted).  Defaults to `false`.                                                                                          | `boolean`           | `false`        |
-| `forceDestroyOnUpdate`  | `force-destroy-on-update` | If `true`, the date picker instance is destroyed and rebuilt each time the `date` prop changes. This can be useful if you need the picker to fully re-initialize in response to dynamic changes, but note that it may affect performance if triggered frequently. Defaults to `false`. | `boolean`           | `false`        |
-| `inline`                | `inline`                  | Determines whether the date picker is rendered inline or in a pop-up. If `true`, the picker is always visible inline.                                                                                                                                                                  | `boolean`           | `false`        |
-| `label`                 | `label`                   |                                                                                                                                                                                                                                                                                        | `string`            | `undefined`    |
-| `maxDate`               | `max-date`                | The latest date that can be selected.                                                                                                                                                                                                                                                  | `Date \| string`    | `undefined`    |
-| `minDate`               | `min-date`                | The earliest date that can be selected.                                                                                                                                                                                                                                                | `Date \| string`    | `undefined`    |
-| `multipleDates`         | `multiple-dates`          | Enables multiple dates. If `true`, multiple selection is allowed. If you pass a number (e.g. 3), that is the maximum number of selectable dates.                                                                                                                                       | `boolean \| number` | `false`        |
-| `placeholder`           | `placeholder`             |                                                                                                                                                                                                                                                                                        | `string`            | `undefined`    |
-| `range`                 | `range`                   | Whether the picker should allow range selection (start and end date).                                                                                                                                                                                                                  | `boolean`           | `false`        |
-| `selectOtherMonths`     | `select-other-months`     | Allows selecting days from previous/next month shown in the current view.                                                                                                                                                                                                              | `boolean`           | `true`         |
-| `showOtherMonths`       | `show-other-months`       | Shows days from previous/next month in the current month's calendar.                                                                                                                                                                                                                   | `boolean`           | `true`         |
-| `timepicker`            | `timepicker`              | Enables the timepicker functionality (select hours and minutes).                                                                                                                                                                                                                       | `boolean`           | `false`        |
-| `triggerContainerStyle` | `trigger-container-style` | Styles for the trigger container                                                                                                                                                                                                                                                       | `string`            | `''`           |
-| `withClear`             | `with-clear`              |                                                                                                                                                                                                                                                                                        | `boolean`           | `undefined`    |
+| Property                | Attribute                 | Description                                                                                                                                                                                                                                      | Type                   | Default        |
+| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- | -------------- |
+| `autoClose`             | `auto-close`              | Passed to AirDatepicker at init only. Has no visual effect on an inline calendar; the parent popup handles closing.                                                                                                                              | `boolean`              | `true`         |
+| `container`             | --                        | Optional element AirDatepicker appends its calendar to (for positioning/styling). Defaults to the host.                                                                                                                                          | `HTMLElement`          | `undefined`    |
+| `customPicker`          | `custom-picker`           | Not wired to the picker. Forwarded by `ir-date-select` (trigger rendering is the parent's concern).                                                                                                                                              | `boolean`              | `false`        |
+| `date`                  | `date`                    | The selected date (single-select mode). Mutable: the component writes the latest selection back into it from `onSelect`, and the parent can set it to move the calendar selection programmatically (applied silently, no `dateChanged` emitted). | `Moment \| string`     | `null`         |
+| `dateFormat`            | `date-format`             | Display format for the picker (AirDatepicker format tokens, not moment tokens). Passed at init only.                                                                                                                                             | `string`               | `'yyyy-MM-dd'` |
+| `dates`                 | --                        | Pre-selected dates for multi-select/range mode. Takes precedence over `date` at initialization, and is re-applied through the `dates` watcher on change.                                                                                         | `(string \| Moment)[]` | `undefined`    |
+| `disabled`              | `disabled`                | Not wired to the picker. Forwarded by `ir-date-select` (which handles disabling interaction itself).                                                                                                                                             | `boolean`              | `false`        |
+| `emitEmptyDate`         | `emit-empty-date`         | If `true`, emits `dateChanged` with null values when the selection is cleared. Otherwise clear-events are swallowed.                                                                                                                             | `boolean`              | `false`        |
+| `forceDestroyOnUpdate`  | `force-destroy-on-update` | If `true`, a `date` prop change destroys and rebuilds the AirDatepicker instance instead of calling `selectDate`. Use only when the picker must fully re-initialize; rebuilding on every change is expensive.                                    | `boolean`              | `false`        |
+| `inline`                | `inline`                  | Not wired to the picker: the calendar is always created with `inline: true` (visibility is controlled by the parent `ir-date-select` popup).                                                                                                     | `boolean`              | `false`        |
+| `label`                 | `label`                   | Not wired to the picker (this component renders no input). Forwarded by `ir-date-select` for API parity.                                                                                                                                         | `string`               | `undefined`    |
+| `maxDate`               | `max-date`                | Latest selectable date. Reactive: changes call `datePicker.update()` while preserving the current selection.                                                                                                                                     | `Moment \| string`     | `undefined`    |
+| `minDate`               | `min-date`                | Earliest selectable date. Reactive: changes call `datePicker.update()` while preserving the current selection.                                                                                                                                   | `Moment \| string`     | `undefined`    |
+| `multipleDates`         | `multiple-dates`          | `true` for unlimited multi-select, or a number for a fixed max. Passed to AirDatepicker at init only.                                                                                                                                            | `boolean \| number`    | `false`        |
+| `placeholder`           | `placeholder`             | Not wired to the picker (this component renders no input). Forwarded by `ir-date-select` for API parity.                                                                                                                                         | `string`               | `undefined`    |
+| `range`                 | `range`                   | Enables range selection (start + end). Passed to AirDatepicker at init only.                                                                                                                                                                     | `boolean`              | `false`        |
+| `selectOtherMonths`     | `select-other-months`     | Allows selecting the previous/next-month days shown in the current view. Passed at init only.                                                                                                                                                    | `boolean`              | `true`         |
+| `showOtherMonths`       | `show-other-months`       | Shows days from the previous/next month in the current view. Passed at init only.                                                                                                                                                                | `boolean`              | `true`         |
+| `timepicker`            | `timepicker`              | Enables the timepicker. Also switches `isSameDates` comparisons from day precision to minute precision.                                                                                                                                          | `boolean`              | `false`        |
+| `triggerContainerStyle` | `trigger-container-style` | Not wired to the picker. Forwarded by `ir-date-select` for API parity.                                                                                                                                                                           | `string`               | `''`           |
+| `withClear`             | `with-clear`              | Not wired to the picker. Accepted only for API parity with `ir-date-select`, which forwards all of its props.                                                                                                                                    | `boolean`              | `undefined`    |
 
 
 ## Events
 
-| Event             | Description                                                                          | Type                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `dateChanged`     | Emitted when the selected date changes. Returns the selected date as Moment objects. | `CustomEvent<{ start: Moment; end: Moment; dates: Date \| Date[]; }>` |
-| `datePickerBlur`  | Emitted when the date picker loses focus or is closed.                               | `CustomEvent<void>`                                                   |
-| `datePickerFocus` | Emitted when the date picker gains focus or is opened.                               | `CustomEvent<void>`                                                   |
+| Event             | Description                                                                                                                                                                                   | Type                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `dateChanged`     | Emitted when the user picks a date in the calendar (never for silent, prop-driven updates). `start`/`end` are equal in single-select mode; `dates` holds every selected date as `YYYY-MM-DD`. | `CustomEvent<{ start: Moment; end: Moment; dates: string \| string[]; }>` |
+| `datePickerBlur`  | Emitted when the AirDatepicker reports `onHide`.                                                                                                                                              | `CustomEvent<void>`                                                       |
+| `datePickerFocus` | Emitted when the AirDatepicker reports `onShow`.                                                                                                                                              | `CustomEvent<void>`                                                       |
 
 
 ## Methods
 
 ### `clearDatePicker() => Promise<void>`
 
-
+Clears the calendar selection. Not silent: fires `onSelect` with an empty value (see `emitEmptyDate`).
 
 #### Returns
 
@@ -53,15 +70,17 @@ Type: `Promise<void>`
 
 
 
-### `syncSelection(options?: { date?: string | Date | null; dates?: (string | Date)[] | null; }) => Promise<void>`
+### `syncSelection(options?: { date?: string | Moment | null; dates?: (string | Moment)[] | null; }) => Promise<void>`
 
-
+Force-resyncs the calendar to the given (or current) value, bypassing the equality
+checks the watchers perform. Escape hatch for parents whose prop value didn't change
+but whose picker drifted (e.g. after a silent internal clear). Always silent.
 
 #### Parameters
 
-| Name      | Type                                                     | Description |
-| --------- | -------------------------------------------------------- | ----------- |
-| `options` | `{ date?: string \| Date; dates?: (string \| Date)[]; }` |             |
+| Name      | Type                                                         | Description |
+| --------- | ------------------------------------------------------------ | ----------- |
+| `options` | `{ date?: string \| Moment; dates?: (string \| Moment)[]; }` |             |
 
 #### Returns
 

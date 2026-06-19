@@ -5,9 +5,9 @@ import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
-import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
-import { IToast } from '@components/ui/ir-toast/toast';
+import { Component, Host, Prop, State, h } from '@stencil/core';
 import { IEntries } from '@/models/IBooking';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-hk-operations-card',
@@ -21,8 +21,6 @@ export class IrHkOperationsCard {
     { name: '', frequency: '' },
   ];
   @State() selectedCleaningFrequency: string = null;
-
-  @Event() toast: EventEmitter<IToast>;
 
   private roomService = new RoomService();
   private propertyService = new PropertyService();
@@ -48,7 +46,7 @@ export class IrHkOperationsCard {
         property_id: housekeeping_store.default_properties.property_id,
         flag,
       });
-      this.toast.emit({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
     } catch (error) {
       console.log(error);
     }
@@ -61,7 +59,7 @@ export class IrHkOperationsCard {
         code: this.selectedCleaningFrequency,
       });
       calendar_data.cleaning_frequency = { code: this.selectedCleaningFrequency, description: '' };
-      this.toast.emit({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
       this.dialog.closeModal();
     } catch (error) {
       console.log(error);
@@ -78,7 +76,7 @@ export class IrHkOperationsCard {
         t2_label: t2.name,
         t2_freq: t2.frequency,
       });
-      this.toast.emit({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
     } catch (error) {
       console.log(error);
     }
@@ -103,7 +101,7 @@ export class IrHkOperationsCard {
               </div>
               <div class="ops-setting-item__controls">
                 <wa-select
-                  size="small"
+                  size="s"
                   style={{ minWidth: '260px' }}
                   value={calendar_data.is_automatic_check_in_out ? 'auto' : 'manual'}
                   defaultValue={calendar_data.is_automatic_check_in_out ? 'auto' : 'manual'}
@@ -129,7 +127,7 @@ export class IrHkOperationsCard {
               <span class="ops-task-locked-label">Cleaning</span>
               <wa-select
                 class="ops-task-select"
-                size="small"
+                size="s"
                 value={this.selectedCleaningFrequency}
                 defaultValue={this.selectedCleaningFrequency}
                 onchange={(e: Event) => {
@@ -156,7 +154,7 @@ export class IrHkOperationsCard {
                 </wa-badge>
                 <ir-input
                   class="ops-task-input"
-                  size="small"
+                  size="s"
                   placeholder={i === 0 ? 'Change sheets, ...' : 'Amenities refill, ...'}
                   maxlength={30}
                   value={task.name}
@@ -169,7 +167,7 @@ export class IrHkOperationsCard {
                 ></ir-input>
                 <wa-select
                   class="ops-task-select"
-                  size="small"
+                  size="s"
                   value={task.frequency}
                   defaultValue={task.frequency}
                   placeholder="Frequency"
@@ -206,7 +204,7 @@ export class IrHkOperationsCard {
           <span>This action will reschedule all cleaning tasks. Do you want to continue?</span>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="filled"
               variant="neutral"
               onClickHandler={() => {
@@ -217,7 +215,7 @@ export class IrHkOperationsCard {
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="filled"
               variant="brand"
               loading={isRequestPending('/Set_Exposed_Cleaning_Frequency')}

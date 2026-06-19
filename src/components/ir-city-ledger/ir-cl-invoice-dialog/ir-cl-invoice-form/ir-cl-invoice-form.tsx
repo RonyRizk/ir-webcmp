@@ -57,6 +57,7 @@ export class IrClInvoiceForm {
 
         <div class={`invoice-form__field${this.dateError ? ' invoice-form__date-error' : ''}`}>
           <ir-date-range-filter
+            selectionMode="auto"
             showQuickActions={false}
             style={{ width: '100%' }}
             fromDate={this.fromDate}

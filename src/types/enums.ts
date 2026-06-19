@@ -24,6 +24,11 @@ export const FdTypes = {
   CreditReceipt: 'CREC',
 } as const;
 
+export const HbPreference = {
+  Dinner: '001',
+  Lunch: '002',
+} as const;
+
 export const InvoiceableItemReason = {
   AlreadyInvoiced: '001',
   NotCheckedOutYet: '002',

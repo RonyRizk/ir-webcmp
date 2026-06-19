@@ -10,7 +10,7 @@
 | `appearance`     | `appearance`       | The button's visual appearance.                                                                                                                                                                                      | `"accent" \| "filled" \| "filled-outlined" \| "outlined" \| "plain"`           | `undefined` |
 | `disabled`       | `disabled`         | Disables the button. Does not apply to link buttons.                                                                                                                                                                 | `boolean`                                                                      | `undefined` |
 | `download`       | `download`         | Tells the browser to download the linked file as this filename. Only used when `href` is present.                                                                                                                    | `string`                                                                       | `undefined` |
-| `form`           | `form`             | The "form owner" to associate the button with. If omitted, the closest containing form will be used instead. The value of this attribute must be an id of a form in the same document or shadow root as the button.  | `string`                                                                       | `undefined` |
+| `form`           | `form`             | The "form owner" to associate the button with. If omitted, the closest containing form will be used instead. The value of this attribute must be an id of a form in the same document or shadow root as the button.  | `HTMLFormElement \| string`                                                    | `undefined` |
 | `formAction`     | `form-action`      | Used to override the form owner's `action` attribute.                                                                                                                                                                | `string`                                                                       | `undefined` |
 | `formEnctype`    | `form-enctype`     | Used to override the form owner's `enctype` attribute.                                                                                                                                                               | `"application/x-www-form-urlencoded" \| "multipart/form-data" \| "text/plain"` | `undefined` |
 | `formMethod`     | `form-method`      | Used to override the form owner's `method` attribute.                                                                                                                                                                | `"get" \| "post"`                                                              | `undefined` |
@@ -23,7 +23,7 @@
 | `name`           | `name`             | The name of the button, submitted as a name/value pair with form data, but only when this button is the submitter. This attribute is ignored when `href` is present.                                                 | `string`                                                                       | `undefined` |
 | `pill`           | `pill`             | Draws a pill-style button with rounded edges.                                                                                                                                                                        | `boolean`                                                                      | `undefined` |
 | `rel`            | `rel`              | When using `href`, this attribute will map to the underlying link's `rel` attribute.                                                                                                                                 | `string`                                                                       | `undefined` |
-| `size`           | `size`             | The button's size.                                                                                                                                                                                                   | `"large" \| "medium" \| "small"`                                               | `'small'`   |
+| `size`           | `size`             | The button's size.                                                                                                                                                                                                   | `"l" \| "large" \| "m" \| "medium" \| "s" \| "small" \| "xl" \| "xs"`          | `'s'`       |
 | `target`         | `target`           | Tells the browser where to open the link. Only used when `href` is present.                                                                                                                                          | `"_blank" \| "_parent" \| "_self" \| "_top"`                                   | `undefined` |
 | `type`           | `type`             | The type of button. Note that the default value is `button` instead of `submit`, which is opposite of how native `<button>` elements behave. When the type is `submit`, the button will submit the surrounding form. | `"button" \| "reset" \| "submit"`                                              | `'button'`  |
 | `value`          | `value`            | The value of the button, submitted as a pair with the button's name as part of the form data, but only when this button is the submitter. This attribute is ignored when `href` is present.                          | `string`                                                                       | `undefined` |
@@ -95,12 +95,15 @@
  - [ir-city-ledger-transaction-drawer](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
  - [ir-cl-fiscal-document-preview](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
  - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
+ - [ir-daily-revenue](../../ir-daily-revenue)
+ - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-date-range-filter](../ir-date-range-filter)
  - [ir-departures-table](../../ir-departures/ir-departures-table)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
  - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
+ - [ir-filter-card](../../ir-filter-card)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-fiscal-documents-table](../../ir-fiscal-documents/ir-fiscal-documents-table)
  - [ir-ghs-filters](../../ir-ghs-onboarding)
@@ -108,6 +111,8 @@
  - [ir-ghs-selection-bucket](../../ir-ghs-onboarding)
  - [ir-guest-billing](../../ir-billing/ir-guest-billing)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
+ - [ir-hb-preference-dialog](../../ir-booking-details/ir-room/ir-hb-preference-dialog)
+ - [ir-hk-archive-drawer](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
  - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
@@ -121,7 +126,9 @@
  - [ir-invoice](../../ir-invoice)
  - [ir-listing-header](../../ir-booking-listing/ir-listing-header)
  - [ir-meal-report](../../ir-meal-report)
- - [ir-meal-report-filters](../../ir-meal-report)
+ - [ir-meal-report-filters](../../ir-meal-report/ir-meal-report-filters)
+ - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
+ - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-notifications](../../ir-notifications)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
@@ -136,8 +143,15 @@
  - [ir-reallocation-drawer](../../ir-reallocation-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-reset-password](../../ir-reset-password)
+ - [ir-revenue-row-details](../../ir-daily-revenue/ir-revenue-table/ir-revenue-row/ir-revenue-row-details)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
+ - [ir-sales-by-channel](../../ir-sales-by-channel)
+ - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
+ - [ir-sales-by-channel-table](../../ir-sales-by-channel/ir-sales-by-channel-table)
+ - [ir-sales-by-country](../../ir-sales-by-country)
+ - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
+ - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
  - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
@@ -204,12 +218,15 @@ graph TD;
   ir-city-ledger-transaction-drawer --> ir-custom-button
   ir-cl-fiscal-document-preview --> ir-custom-button
   ir-cl-invoice-dialog --> ir-custom-button
+  ir-daily-revenue --> ir-custom-button
+  ir-daily-revenue-filters --> ir-custom-button
   ir-date-range-filter --> ir-custom-button
   ir-departures-table --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button
   ir-fd-confirm-dialog --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-fiscal-documents-filters --> ir-custom-button
   ir-fiscal-documents-table --> ir-custom-button
   ir-ghs-filters --> ir-custom-button
@@ -217,6 +234,8 @@ graph TD;
   ir-ghs-selection-bucket --> ir-custom-button
   ir-guest-billing --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
+  ir-hb-preference-dialog --> ir-custom-button
+  ir-hk-archive-drawer --> ir-custom-button
   ir-hk-delete-dialog --> ir-custom-button
   ir-hk-operations-card --> ir-custom-button
   ir-hk-staff-tasks --> ir-custom-button
@@ -231,6 +250,8 @@ graph TD;
   ir-listing-header --> ir-custom-button
   ir-meal-report --> ir-custom-button
   ir-meal-report-filters --> ir-custom-button
+  ir-monthly-bookings-report --> ir-custom-button
+  ir-monthly-bookings-report-filter --> ir-custom-button
   ir-notifications --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button
@@ -245,8 +266,15 @@ graph TD;
   ir-reallocation-drawer --> ir-custom-button
   ir-reservation-information --> ir-custom-button
   ir-reset-password --> ir-custom-button
+  ir-revenue-row-details --> ir-custom-button
   ir-room --> ir-custom-button
   ir-room-guests --> ir-custom-button
+  ir-sales-by-channel --> ir-custom-button
+  ir-sales-by-channel-filters --> ir-custom-button
+  ir-sales-by-channel-table --> ir-custom-button
+  ir-sales-by-country --> ir-custom-button
+  ir-sales-filters --> ir-custom-button
+  ir-sales-table --> ir-custom-button
   ir-tasks-card --> ir-custom-button
   ir-tasks-filters --> ir-custom-button
   ir-tasks-header --> ir-custom-button

@@ -74,7 +74,7 @@ export class IrPmsSearch {
         }),
       )
       .subscribe(bookings => {
-        this.bookings = bookings;
+        this.bookings = bookings.filter(Boolean);
         this.isLoading = false;
         this.autoCompleteRef?.show();
       });
@@ -157,7 +157,7 @@ export class IrPmsSearch {
             {this.isLoading && <wa-spinner></wa-spinner>}
             {this.shortcutHint && <span>{this.shortcutHint}</span>}
           </div>
-          {this.bookings?.length === 0 && !this.isLoading && (
+          {(this.bookings ?? [])?.length === 0 && !this.isLoading && (
             <div class="pms-search__empty" role="status" aria-live="polite">
               <wa-icon name="circle-info" aria-hidden="true"></wa-icon>
               <div class="pms-search__empty-content">
@@ -165,8 +165,11 @@ export class IrPmsSearch {
               </div>
             </div>
           )}
-          {this.bookings.map(b => {
-            const label = `${b.booking_nbr}  ${b.guest.first_name} ${b.guest.last_name}`;
+          {(this.bookings ?? [])?.map(b => {
+            if (!b) {
+              return null;
+            }
+            const label = `${b?.booking_nbr}  ${b?.guest?.first_name} ${b?.guest?.last_name}`;
             return (
               <ir-autocomplete-option class="pms-search__autocomplete-option" value={b.booking_nbr} label={label}>
                 <img slot="start" class="pms-search__option-icon" src={b.origin.Icon} alt={b.origin.Label} />

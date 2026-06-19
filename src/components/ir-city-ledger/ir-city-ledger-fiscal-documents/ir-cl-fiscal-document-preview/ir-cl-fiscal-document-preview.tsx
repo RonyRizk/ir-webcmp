@@ -166,7 +166,7 @@ export class IrClFiscalDocumentPreview {
               </ir-custom-button>
             )}
             {this.request?.url && (
-              <ir-custom-button size="medium" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
+              <ir-custom-button size="m" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
                 <wa-icon name="download" style={{ fontSize: '1.2rem' }} label="Download PDF"></wa-icon>
               </ir-custom-button>
             )}

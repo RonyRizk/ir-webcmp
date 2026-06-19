@@ -96,7 +96,7 @@ export class IrArrivalTimeDialog {
         }}
       >
         <wa-select
-          size="small"
+          size="s"
           value={this.selectedArrivalTime}
           defaultValue={this.selectedArrivalTime}
           onchange={e => this.updateArrivalTime((e.target as HTMLSelectElement).value)}
@@ -108,10 +108,10 @@ export class IrArrivalTimeDialog {
           ))}
         </wa-select>
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button size="medium" appearance="filled" variant="neutral" onClickHandler={() => this.closeDialog()}>
+          <ir-custom-button size="m" appearance="filled" variant="neutral" onClickHandler={() => this.closeDialog()}>
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button size="medium" variant="brand" onClickHandler={() => this.saveArrivalTime()} loading={this.isLoading}>
+          <ir-custom-button size="m" variant="brand" onClickHandler={() => this.saveArrivalTime()} loading={this.isLoading}>
             {locales.entries.Lcz_Save}
           </ir-custom-button>
         </div>

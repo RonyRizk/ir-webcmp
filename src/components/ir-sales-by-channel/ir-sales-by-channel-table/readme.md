@@ -22,15 +22,14 @@
 
 ### Depends on
 
-- [ir-progress-indicator](../../ui/ir-progress-indicator)
-- [ir-button](../../ui/ir-button)
+- [ir-empty-state](../../ir-empty-state)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-sales-by-channel-table --> ir-progress-indicator
-  ir-sales-by-channel-table --> ir-button
-  ir-button --> ir-icons
+  ir-sales-by-channel-table --> ir-empty-state
+  ir-sales-by-channel-table --> ir-custom-button
   ir-sales-by-channel --> ir-sales-by-channel-table
   style ir-sales-by-channel-table fill:#f9f,stroke:#333,stroke-width:4px
 ```

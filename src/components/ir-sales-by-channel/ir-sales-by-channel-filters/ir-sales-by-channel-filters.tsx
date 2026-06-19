@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import moment from 'moment';
 import { ChannelSaleFilter } from '../types';
 import { AllowedProperties } from '@/services/property.service';
+import locales from '@/stores/locales.store';
 
 @Component({
   tag: 'ir-sales-by-channel-filters',
@@ -14,143 +15,168 @@ export class IrSalesByChannelFilters {
   @Prop() allowedProperties: AllowedProperties;
 
   @State() filters: ChannelSaleFilter;
-  @State() window: number;
+  @State() window: string;
 
   @Event() applyFilters: EventEmitter<ChannelSaleFilter>;
 
   componentWillLoad() {
     this.filters = { ...this.baseFilters };
-    this.window = this.baseFilters.WINDOW;
+    this.window = this.baseFilters.WINDOW.toString();
   }
 
   private updateFilter(params: Partial<ChannelSaleFilter>) {
     this.filters = { ...this.filters, ...params };
   }
 
+  private applyFiltersEvt(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.applyFilters.emit(this.filters);
+  }
+
+  private resetFilters(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.filters = { ...this.baseFilters };
+    this.window = this.baseFilters.WINDOW.toString();
+    this.applyFilters.emit(this.filters);
+  }
+
+  private quickDates = [
+    {
+      label: '7 Days Ago',
+      getDate: () => moment().subtract(7, 'days'),
+    },
+    {
+      label: '14 Days Ago',
+      getDate: () => moment().subtract(14, 'days'),
+    },
+    {
+      label: '30 Days Ago',
+      getDate: () => moment().subtract(30, 'days'),
+    },
+    {
+      label: '60 Days Ago',
+      getDate: () => moment().subtract(60, 'days'),
+    },
+    {
+      label: '90 Days Ago',
+      getDate: () => moment().subtract(90, 'days'),
+    },
+    {
+      label: '1 Year Ago',
+      getDate: () => moment().subtract(365, 'days'),
+    },
+  ];
   render() {
-    console.log(this.filters);
     return (
-      <ir-filters-panel
-        isApplyLoading={this.isLoading}
-        onIrFilterApply={() => {
-          this.applyFilters.emit(this.filters);
-        }}
-        onIrFilterReset={() => {
-          this.filters = { ...this.baseFilters };
-          this.applyFilters.emit(this.filters);
-        }}
-      >
-        <fieldset class="pt-1 filter-group">
-          <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
-            Rooms
-          </label>
-          <ir-select
-            selectedValue={this.filters?.BOOK_CASE}
-            selectId="rooms"
-            showFirstOption={false}
-            onSelectChange={e =>
-              this.updateFilter({
-                BOOK_CASE: e.detail,
-              })
-            }
-            data={[
-              { text: 'Booked', value: '001' },
-              { text: 'Stayed', value: '002' },
-            ]}
-          ></ir-select>
-        </fieldset>
+      <ir-filter-card>
+        <wa-radio-group
+          label="Rooms"
+          orientation="horizontal"
+          size="s"
+          style={{ width: '100%' }}
+          value={this.filters?.BOOK_CASE}
+          onchange={(e: CustomEvent) => {
+            this.updateFilter({ BOOK_CASE: (e.target as any).value });
+          }}
+        >
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="001">
+            Booked
+          </wa-radio>
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="002">
+            Stayed
+          </wa-radio>
+        </wa-radio-group>
+
         {this.allowedProperties.length > 1 && (
-          <fieldset class="filter-group">
-            <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
-              Properties
-            </label>
-            <ir-m-combobox
-              defaultOption={this.filters?.LIST_AC_ID?.length === this.allowedProperties?.length ? 'all' : this.filters?.LIST_AC_ID[0]?.toString()}
-              onOptionChange={e => {
-                const value = e.detail.value;
-                if (value === 'all') {
-                  this.updateFilter({
-                    LIST_AC_ID: this.allowedProperties.map(p => p.id),
-                  });
-                } else
-                  this.updateFilter({
-                    LIST_AC_ID: this.allowedProperties.filter(e => e.id === Number(value)).map(p => p.id),
-                  });
-              }}
-              options={[
-                { label: 'All', value: 'all' },
-                ...this.allowedProperties.map(p => ({
-                  label: p.name,
-                  value: p.id.toString(),
-                })),
-              ]}
-            ></ir-m-combobox>
-          </fieldset>
-        )}
-        <fieldset class="filter-group">
-          <label htmlFor="period" class="px-0 m-0" style={{ paddingBottom: '0.25rem' }}>
-            Selected period
-          </label>
-          <div class="d-flex flex-column date-filter-group" style={{ gap: '0.5rem' }}>
-            <ir-select
-              selectedValue={this.window?.toString()}
-              onSelectChange={e => {
-                const dateDiff = Number(e.detail);
-                const today = moment();
-                this.updateFilter({
-                  WINDOW: dateDiff,
-                  TO_DATE: today.format('YYYY-MM-DD'),
-                  FROM_DATE: today.add(-dateDiff, 'days').format('YYYY-MM-DD'),
-                });
-                this.window = e.detail;
-              }}
-              selectId="period"
-              // showFirstOption={false}
-              firstOption="..."
-              data={[
-                { text: 'For the past 7 days', value: '7' },
-                { text: 'For the past 14 days', value: '14' },
-                { text: 'For the past 30 days', value: '30' },
-                { text: 'For the past 60 days', value: '60' },
-                { text: 'For the past 90 days', value: '90' },
-                { text: 'For the past 365 days', value: '365' },
-              ]}
-            ></ir-select>
-            <p class="m-0 p-0 text-center">Or</p>
-            <ir-range-picker
-              onDateRangeChanged={e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                const { fromDate, toDate, wasFocused } = e.detail;
-                this.updateFilter({
-                  FROM_DATE: fromDate.format('YYYY-MM-DD'),
-                  TO_DATE: toDate.format('YYYY-MM-DD'),
-                });
-                if (wasFocused) this.window = null;
-                // this.dates = { from: fromDate, to: toDate };
-              }}
-              fromDate={moment(this.filters.FROM_DATE, 'YYYY-MM-DD')}
-              toDate={moment(this.filters.TO_DATE, 'YYYY-MM-DD')}
-              maxDate={moment().format('YYYY-MM-DD')}
-              withOverlay={false}
-            ></ir-range-picker>
-          </div>
-        </fieldset>
-        <div class="d-flex align-items-center mt-1 mb-2 compare-year-toggle" style={{ gap: '0.5rem' }}>
-          <label htmlFor="compare-prev-year" style={{ paddingBottom: '0.25rem' }}>
-            Compare with previous year
-          </label>
-          <ir-checkbox
-            checked={this.filters?.include_previous_year}
-            checkboxId="compare-prev-year"
-            onCheckChange={e => {
-              e.stopImmediatePropagation();
-              e.stopPropagation();
-              this.updateFilter({ include_previous_year: e.detail });
+          <ir-m-combobox
+            defaultOption={this.filters?.LIST_AC_ID?.length === this.allowedProperties?.length ? 'all' : this.filters?.LIST_AC_ID[0]?.toString()}
+            onOptionChange={e => {
+              const value = e.detail.value;
+              if (value === 'all') {
+                this.updateFilter({ LIST_AC_ID: this.allowedProperties.map(p => p.id) });
+              } else {
+                this.updateFilter({ LIST_AC_ID: this.allowedProperties.filter(p => p.id === Number(value)).map(p => p.id) });
+              }
             }}
-          ></ir-checkbox>
+            options={[
+              { label: 'All', value: 'all' },
+              ...this.allowedProperties.map(p => ({
+                label: p.name,
+                value: p.id.toString(),
+              })),
+            ]}
+          ></ir-m-combobox>
+        )}
+
+        <wa-select
+          label="Selected period"
+          size="s"
+          value={this.window}
+          defaultValue={this.window}
+          onchange={(e: CustomEvent) => {
+            const val = (e.target as HTMLSelectElement).value;
+            const dateDiff = Number(val);
+            this.updateFilter({
+              WINDOW: dateDiff,
+              TO_DATE: moment().format('YYYY-MM-DD'),
+              FROM_DATE: moment().subtract(dateDiff, 'days').format('YYYY-MM-DD'),
+            });
+            this.window = val;
+          }}
+        >
+          <wa-option value="7">For the past 7 days</wa-option>
+          <wa-option value="14">For the past 14 days</wa-option>
+          <wa-option value="30">For the past 30 days</wa-option>
+          <wa-option value="60">For the past 60 days</wa-option>
+          <wa-option value="90">For the past 90 days</wa-option>
+          <wa-option value="365">For the past 365 days</wa-option>
+        </wa-select>
+
+        <div class="or-divider">
+          <span class="or-divider__line"></span>
+          <span class="or-divider__text">Or</span>
+          <span class="or-divider__line"></span>
         </div>
-      </ir-filters-panel>
+
+        <ir-date-range-filter
+          label={'Date range'}
+          fromDate={this.filters?.FROM_DATE}
+          toDate={this.filters?.TO_DATE}
+          maxDate={moment().format('YYYY-MM-DD')}
+          selectionMode="auto"
+          quickDates={this.quickDates}
+          withClear={false}
+          onDatesChanged={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            const { from, to } = e.detail;
+            this.updateFilter({ FROM_DATE: from, TO_DATE: to });
+            this.window = '';
+          }}
+        ></ir-date-range-filter>
+
+        <wa-checkbox
+          checked={this.filters?.include_previous_year}
+          onchange={(e: CustomEvent) => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.updateFilter({ include_previous_year: (e.target as HTMLInputElement).checked });
+          }}
+        >
+          Compare with previous year
+        </wa-checkbox>
+
+        <div slot="footer">
+          <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
+            {locales.entries?.Lcz_Reset ?? 'Reset'}
+          </ir-custom-button>
+          <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
+            {locales.entries?.Lcz_Apply ?? 'Apply'}
+          </ir-custom-button>
+        </div>
+      </ir-filter-card>
     );
   }
 }

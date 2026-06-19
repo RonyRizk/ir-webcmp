@@ -12,7 +12,11 @@
   white-space: nowrap;
   cursor: default;
 }
-
+.booking-room__meal-report-button::part(base) {
+  height: auto;
+  padding: 0.375em 0.625em;
+  font-size: var(--wa-font-size-2xs);
+}
 .room_statements {
   display: block;
   width: 100%; /* Ensure the container uses the full width */

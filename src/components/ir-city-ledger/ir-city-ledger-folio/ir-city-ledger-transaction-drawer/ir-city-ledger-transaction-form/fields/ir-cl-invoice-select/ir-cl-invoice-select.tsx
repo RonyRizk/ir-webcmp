@@ -23,7 +23,7 @@ export class IrClInvoiceSelect {
       <ir-validator schema={invoiceIdRequiredFieldSchema} value={this.value} valueEvent="change">
         <wa-select
           label={this.label}
-          size="small"
+          size="s"
           required
           hint={this.hint || undefined}
           placeholder="Select invoice"

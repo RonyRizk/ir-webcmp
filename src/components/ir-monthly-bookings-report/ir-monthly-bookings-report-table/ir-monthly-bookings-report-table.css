@@ -1,18 +1,104 @@
+@import url('../../../common/table.css');
+
 :host {
   display: block;
+  width: 100%;
 }
+
+.table {
+  width: 100%;
+}
+
+/* Alignment helpers (local — no Bootstrap dependency) */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+/* Future-date rows */
 .future-report td {
-  background-color: hsla(210, 16%, 85.2%, 0.25) !important;
+  background-color: var(--wa-color-neutral-fill-quiet) !important;
 }
-.legend {
+
+/* Cell stacks (current + previous-year values stacked) */
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cell-stack p {
+  margin: 0;
+  padding: 0;
+}
+
+.value--primary {
+  font-weight: 600;
+}
+
+.value--previous {
+  color: var(--wa-color-brand-text-normal);
+}
+
+/* Occupancy bar rows */
+.occ-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.occ-label {
+  width: 8ch;
+  flex-shrink: 0;
+}
+
+.occ-bar {
+  flex: 1 1 0%;
+}
+
+.occ-bar--previous {
+  --indicator-color: var(--wa-color-brand-fill-normal);
+}
+
+/* Tfoot legend */
+.legend-cell {
+  white-space: nowrap;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-item p {
+  margin: 0;
+  padding: 0;
+}
+
+.legend-dot {
   height: 12px;
   aspect-ratio: 1;
-  background: #000;
   border-radius: 4px;
 }
-.secondary {
-  background: #6692b3;
+.daily-occupancy-table__card::part(body) {
+  min-height: 50vh;
+  padding: 0.5rem;
 }
-.progress-main {
-  width: 450px !important;
+.legend-dot--current {
+  background: var(--wa-color-brand-fill-loud);
+}
+
+.legend-dot--previous {
+  background: var(--wa-color-brand-fill-normal);
 }

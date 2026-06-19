@@ -270,7 +270,7 @@ export class IglRateExtenderForm {
           </p>
 
           {this.inventory !== 0 && this.inventory !== null && booking_store.roomTypes?.length > 0 && (
-            <wa-callout size="small" variant="neutral" appearance="filled" class="rate-form__tax-callout booking-editor-header__tax_statement">
+            <wa-callout size="s" variant="neutral" appearance="filled" class="rate-form__tax-callout booking-editor-header__tax_statement">
               {calendar_data.tax_statement}
             </wa-callout>
           )}
@@ -280,7 +280,7 @@ export class IglRateExtenderForm {
           {formatDate(moment(this.dates.to_date).format('YYYY-MM-DD'), 'YYYY-MM-DD')}
         </p>
         {(this.inventory === 0 || this.inventory === null) && (
-          <wa-callout size="small" variant="danger" class="rate-form__availability-callout">
+          <wa-callout size="s" variant="danger" class="rate-form__availability-callout">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
             {locales.entries.Lcz_NoAvailabilityForAdditionalNights}
           </wa-callout>

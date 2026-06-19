@@ -187,7 +187,7 @@ export class IrCheckoutDialog {
 
     return (
       <div class="early-checkout">
-        <wa-callout class="ec-summary" size="small" appearance="filled" variant="neutral">
+        <wa-callout class="ec-summary" size="s" appearance="filled" variant="neutral">
           <div class="ec-summary__row">
             <span class="ec-summary__label">Unit</span>
             <span class="ec-summary__value">{unitName}</span>
@@ -269,7 +269,7 @@ export class IrCheckoutDialog {
 
     return (
       <button type="button" class="due-amount-btn" onClick={() => this.paymentFolioRef?.openFolio()}>
-        <wa-callout size="small" variant="danger">
+        <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="money-bill-wave"></wa-icon>
           Outstanding guest balance: {amount}
         </wa-callout>
@@ -280,7 +280,7 @@ export class IrCheckoutDialog {
     if (moment().isSame(moment(this.room.from_date, 'YYYY-MM-DD'), 'date')) {
       const isSingleRoom = this.booking.rooms.length === 1;
       return (
-        <wa-callout size="small" variant="danger" style={{ marginBottom: 'var(--spacing)' }}>
+        <wa-callout size="s" variant="danger" style={{ marginBottom: 'var(--spacing)' }}>
           <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
           This {isSingleRoom ? 'booking' : 'room'} will be {isSingleRoom ? 'cancelled' : 'removed'}
         </wa-callout>
@@ -295,7 +295,7 @@ export class IrCheckoutDialog {
 
     if (summary.total === 0) {
       return (
-        <wa-callout size="small" variant="success" style={{ marginBottom: 'var(--spacing)' }}>
+        <wa-callout size="s" variant="success" style={{ marginBottom: 'var(--spacing)' }}>
           <wa-icon slot="icon" name="circle-check"></wa-icon>
           All charges posted to <b>{this.agent.name}</b> City Ledger
         </wa-callout>
@@ -303,7 +303,7 @@ export class IrCheckoutDialog {
     }
 
     return (
-      <wa-callout size="small" variant="warning" style={{ marginBottom: 'var(--spacing)' }}>
+      <wa-callout size="s" variant="warning" style={{ marginBottom: 'var(--spacing)' }}>
         <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
         {summary.total} item{summary.total !== 1 ? 's' : ''} not posted to city ledger
       </wa-callout>
@@ -344,18 +344,18 @@ export class IrCheckoutDialog {
           )}
           <div slot="footer" class="ir-dialog__footer">
             <Fragment>
-              <ir-custom-button size="medium" data-dialog="close" appearance="filled" variant="neutral">
+              <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
                 {locales?.entries?.Lcz_Cancel ?? 'Cancel'}
               </ir-custom-button>
               {this.buttons.has('checkout') && (
-                <ir-custom-button size="medium" onClickHandler={e => this.checkoutRoom({ e, source: 'checkout' })} variant={'brand'} loading={this.isLoading === 'checkout'}>
+                <ir-custom-button size="m" onClickHandler={e => this.checkoutRoom({ e, source: 'checkout' })} variant={'brand'} loading={this.isLoading === 'checkout'}>
                   {isEarly ? 'Confirm early check-out' : 'Checkout'}
                 </ir-custom-button>
               )}
               {this.buttons.has('checkout_without_invoice') && (
                 <ir-custom-button
                   loading={this.isLoading === 'skipCheckout'}
-                  size="medium"
+                  size="m"
                   onClickHandler={e => this.checkoutRoom({ e, source: 'skipCheckout' })}
                   variant={'brand'}
                   appearance={this.buttons.has('invoice_checkout') ? 'outlined' : 'accent'}
@@ -365,7 +365,7 @@ export class IrCheckoutDialog {
               )}
               {this.buttons.has('invoice_checkout') && (
                 <ir-custom-button
-                  size="medium"
+                  size="m"
                   loading={this.isLoading === 'checkout&invoice'}
                   onClickHandler={e => {
                     this.checkoutRoom({ e, source: 'checkout&invoice' });

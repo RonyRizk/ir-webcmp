@@ -16,11 +16,10 @@
 
 ## Events
 
-| Event            | Description | Type                                                                                                 |
-| ---------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `closeDrawer`    |             | `CustomEvent<null>`                                                                                  |
-| `loadingChanged` |             | `CustomEvent<boolean>`                                                                               |
-| `toast`          |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event            | Description | Type                   |
+| ---------------- | ----------- | ---------------------- |
+| `closeDrawer`    |             | `CustomEvent<null>`    |
+| `loadingChanged` |             | `CustomEvent<boolean>` |
 
 
 ## Dependencies

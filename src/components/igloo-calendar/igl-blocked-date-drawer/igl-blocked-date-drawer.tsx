@@ -108,7 +108,7 @@ export class IglBlockedDateDrawer {
           <igl-block-dates-view onDataUpdateEvent={e => (this.blockDatesData = { ...e.detail.data })} fromDate={this.fromDate} toDate={this.toDate}></igl-block-dates-view>
         )}
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button data-drawer="close" size="medium" appearance="filled" variant="neutral">
+          <ir-custom-button data-drawer="close" size="m" appearance="filled" variant="neutral">
             Cancel
           </ir-custom-button>
           <ir-custom-button
@@ -116,7 +116,7 @@ export class IglBlockedDateDrawer {
             onClickHandler={() => {
               this.handleBlockDate();
             }}
-            size="medium"
+            size="m"
             appearance="accent"
             variant="brand"
           >

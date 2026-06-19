@@ -225,11 +225,11 @@ export class IrClInvoiceDialog {
             {this.error && <p class="create-invoice-dialog__error">{this.error}</p>}
           </div>
 
-          <div slot="footer" class="create-invoice-dialog__footer">
-            <ir-custom-button size="medium" appearance="filled" variant="neutral" data-dialog="close" disabled={this.isLoading}>
+          <div slot="footer" class="ir-dialog__footer">
+            <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close" disabled={this.isLoading}>
               Cancel
             </ir-custom-button>
-            <ir-custom-button size="medium" appearance="accent" variant="brand" loading={this.isLoading} onClickHandler={() => this.handleSubmit()}>
+            <ir-custom-button size="m" appearance="accent" variant="brand" loading={this.isLoading} onClickHandler={() => this.handleSubmit()}>
               {this.isProforma ? 'Confirm' : 'Show draft'}
             </ir-custom-button>
           </div>

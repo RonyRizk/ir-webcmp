@@ -23,13 +23,12 @@
 
 ### Depends on
 
-- [ir-stats-card](../../ui/ir-stats-card)
+- [ir-metric-card](../../ir-metric-card)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-revenue-summary --> ir-stats-card
-  ir-stats-card --> ir-icons
+  ir-revenue-summary --> ir-metric-card
   ir-daily-revenue --> ir-revenue-summary
   style ir-revenue-summary fill:#f9f,stroke:#333,stroke-width:4px
 ```

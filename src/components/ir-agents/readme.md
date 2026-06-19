@@ -15,13 +15,6 @@
 | `ticket`     | `ticket`     | Authentication token issued by the PMS backend. Required for initializing the component and making API calls.                         | `string` | `undefined` |
 
 
-## Events
-
-| Event   | Description | Type                                                                                                 |
-| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
-
-
 ## Dependencies
 
 ### Used by
@@ -49,7 +42,7 @@ graph TD;
   ir-agents --> ir-dialog
   ir-agents --> ir-custom-button
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

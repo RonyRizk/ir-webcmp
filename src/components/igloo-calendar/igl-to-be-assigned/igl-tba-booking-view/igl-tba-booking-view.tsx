@@ -245,7 +245,7 @@ export class IglTbaBookingView {
               defaultValue={this.selectedRoom === -1 ? '' : this.selectedRoom.toString()}
               class="tba__select"
               id={v4()}
-              size="small"
+              size="s"
               value={this.selectedRoom === -1 ? '' : this.selectedRoom.toString()}
               onchange={evt => this.onSelectRoom(evt)}
             >
@@ -256,7 +256,7 @@ export class IglTbaBookingView {
             </wa-select>
             {this.highlightSection ? (
               <div class="tba__close">
-                <wa-button type="button" appearance="plain" size="small" class="tba__close-btn" onClick={evt => this.handleCloseAssignment(evt)}>
+                <wa-button type="button" appearance="plain" size="s" class="tba__close-btn" onClick={evt => this.handleCloseAssignment(evt)}>
                   <wa-icon name="xmark"></wa-icon>
                 </wa-button>
               </div>
@@ -265,7 +265,7 @@ export class IglTbaBookingView {
           <div class="tba__assign">
             <wa-button
               class="tba__assign-btn"
-              size="small"
+              size="s"
               variant="brand"
               appearance={this.canCheckIn() ? 'outlined' : 'accent'}
               loading={this.isLoading === 'default'}
@@ -277,7 +277,7 @@ export class IglTbaBookingView {
             {this.canCheckIn() && (
               <wa-button
                 class="tba__assign-btn"
-                size="small"
+                size="s"
                 variant="brand"
                 loading={this.isLoading === 'checkin'}
                 disabled={this.selectedRoom === -1}

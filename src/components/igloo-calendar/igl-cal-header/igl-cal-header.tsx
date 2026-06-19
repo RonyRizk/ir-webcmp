@@ -262,7 +262,7 @@ export class IglCalHeader {
                     appearance="outlined"
                     onClickHandler={() => {
                       this.handleOptionEvent('gotoToday');
-                      this.dateSelectRef.closeDatePicker();
+                      this.dateSelectRef.hide();
                     }}
                   >
                     Today
@@ -337,7 +337,7 @@ export class IglCalHeader {
           </div> */}
             <div class="searchContiner">
               <ir-picker
-                size="small"
+                size="s"
                 onCombobox-select={e => {
                   this.handleScrollToRoom(Number(e.detail.item.value));
                 }}

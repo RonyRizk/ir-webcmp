@@ -38,7 +38,6 @@ graph TD;
   ir-hk-unassigned-units-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-hk-unassigned-units-drawer-form
   ir-hk-unassigned-units-drawer --> ir-custom-button
-  ir-hk-unassigned-units-drawer-form --> ir-select
   ir-hk-team --> ir-hk-unassigned-units-drawer
   style ir-hk-unassigned-units-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

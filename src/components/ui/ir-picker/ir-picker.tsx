@@ -47,7 +47,7 @@ export class IrPicker {
    */
   @Prop() withClear: boolean = false;
   /** The input's size. */
-  @Prop({ reflect: true }) size: NativeWaInput['size'] = 'small';
+  @Prop({ reflect: true }) size: NativeWaInput['size'] = 's';
   /** The input's visual appearance. */
   @Prop({ reflect: true }) appearance: NativeWaInput['appearance'];
 

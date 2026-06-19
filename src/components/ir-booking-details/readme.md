@@ -27,11 +27,10 @@
 
 ## Events
 
-| Event            | Description                                                                                                       | Type                                                                                                 |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `bookingChanged` | Emitted whenever the booking object is updated. Used to notify parent components about booking state changes.     | `CustomEvent<Booking>`                                                                               |
-| `closeSidebar`   | Emitted when the sidebar should be closed. Typically triggered by header actions (e.g., close button).            | `CustomEvent<null>`                                                                                  |
-| `toast`          | Emits toast notifications to the parent context. Carries toast configuration such as message, type, and duration. | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event            | Description                                                                                                   | Type                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `bookingChanged` | Emitted whenever the booking object is updated. Used to notify parent components about booking state changes. | `CustomEvent<Booking>` |
+| `closeSidebar`   | Emitted when the sidebar should be closed. Typically triggered by header actions (e.g., close button).        | `CustomEvent<null>`    |
 
 
 ## Dependencies
@@ -40,7 +39,6 @@
 
  - [ir-booking](../ir-booking)
  - [ir-booking-details-drawer](ir-booking-details-drawer)
- - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-financial-actions](../ir-financial-actions)
  - [ir-hk-archive](../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
 
@@ -87,7 +85,7 @@ graph TD;
   ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-booking-editor-drawer
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -135,6 +133,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -175,6 +174,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -322,7 +323,6 @@ graph TD;
   ir-booking-editor-guest-form --> ir-mobile-input
   ir-booking --> ir-booking-details
   ir-booking-details-drawer --> ir-booking-details
-  ir-daily-revenue --> ir-booking-details
   ir-financial-actions --> ir-booking-details
   ir-hk-archive --> ir-booking-details
   style ir-booking-details fill:#f9f,stroke:#333,stroke-width:4px

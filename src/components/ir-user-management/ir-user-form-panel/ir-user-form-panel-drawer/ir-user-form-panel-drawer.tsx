@@ -55,10 +55,10 @@ export class IrUserFormPanelDrawer {
           ></ir-user-form-panel>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
-          <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="medium">
+          <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
             {locales?.entries?.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button form={formId} loading={isRequestPending('/Handle_Exposed_User')} data-testid="save" size="medium" class="flex-fill" type="submit" variant="brand">
+          <ir-custom-button form={formId} loading={isRequestPending('/Handle_Exposed_User')} data-testid="save" size="m" class="flex-fill" type="submit" variant="brand">
             {locales?.entries?.Lcz_Save}
           </ir-custom-button>
         </div>

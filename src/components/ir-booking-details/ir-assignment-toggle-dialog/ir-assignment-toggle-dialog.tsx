@@ -52,10 +52,10 @@ export class IrAssignmentToggleDialog {
             <slot name="message">{this.message}</slot>
           </p>
           <div slot="footer" class="assignment-toggle-dialog__footer">
-            <ir-custom-button appearance="filled" variant="neutral" size="medium" data-dialog="close" disabled={this.loading}>
+            <ir-custom-button appearance="filled" variant="neutral" size="m" data-dialog="close" disabled={this.loading}>
               {this.cancelLabel}
             </ir-custom-button>
-            <ir-custom-button variant="brand" size="medium" loading={this.loading} onClickHandler={() => this.confirmToggle.emit()}>
+            <ir-custom-button variant="brand" size="m" loading={this.loading} onClickHandler={() => this.confirmToggle.emit()}>
               {this.confirmLabel}
             </ir-custom-button>
           </div>

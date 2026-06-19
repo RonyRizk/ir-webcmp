@@ -34,3 +34,8 @@
   align-items: center;
   justify-content: space-between;
 }
+.page-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-l, 1.5rem);
+}

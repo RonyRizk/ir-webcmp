@@ -64,7 +64,7 @@ export class IrHkDeleteDialog {
           </p>
         )}
         {hasAssignedUnits && (
-          <wa-select size="small" defaultValue={this.selectedId} value={this.selectedId} onchange={e => (this.selectedId = (e.target as HTMLSelectElement).value)}>
+          <wa-select size="s" defaultValue={this.selectedId} value={this.selectedId} onchange={e => (this.selectedId = (e.target as HTMLSelectElement).value)}>
             <wa-option value="">{locales.entries.Lcz_nobody}</wa-option>
             {housekeeping_store.hk_criteria.housekeepers
               .filter(hk => hk.id !== this.user.id)
@@ -79,10 +79,10 @@ export class IrHkDeleteDialog {
         )}
 
         <div slot="footer" class="delete-modal__footer">
-          <ir-custom-button variant="neutral" appearance="filled" size="medium" onClickHandler={() => this.closeModal()}>
+          <ir-custom-button variant="neutral" appearance="filled" size="m" onClickHandler={() => this.closeModal()}>
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button variant="danger" appearance="accent" size="medium" loading={this.isConfirming} onClickHandler={() => this.handleConfirm()}>
+          <ir-custom-button variant="danger" appearance="accent" size="m" loading={this.isConfirming} onClickHandler={() => this.handleConfirm()}>
             {locales.entries.Lcz_Confirm}
           </ir-custom-button>
         </div>

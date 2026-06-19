@@ -261,11 +261,11 @@ export class IglSpiltBookingForm {
           <div class="split-header__summary">
             <ir-date-view from_date={this.room.from_date} to_date={this.room.to_date} showDateDifference={false}></ir-date-view>
             <div class="split-header__tags">
-              <wa-tag size="small" variant="neutral">
+              <wa-tag size="s" variant="neutral">
                 {this.room.rateplan.short_name}
               </wa-tag>
               {this.room.rateplan.is_non_refundable && (
-                <wa-tag size="small" variant="warning">
+                <wa-tag size="s" variant="warning">
                   {locales.entries.Lcz_NonRefundable}
                 </wa-tag>
               )}
@@ -292,7 +292,7 @@ export class IglSpiltBookingForm {
               <wa-input
                 id="split-from-date"
                 slot="trigger"
-                size="small"
+                size="s"
                 readonly
                 class="date-trigger"
                 value={this.selectedDates.from_date ? this.selectedDates.from_date.format('MMM DD, YYYY') : null}
@@ -300,7 +300,7 @@ export class IglSpiltBookingForm {
                 <wa-icon slot="start" name="calendar"></wa-icon>
               </wa-input>
             </ir-date-picker>
-            <wa-button class="split-header__check" size="small" variant="brand" loading={isRequestPending('/Check_Availability')} onClick={() => this.checkBookingAvailability()}>
+            <wa-button class="split-header__check" size="s" variant="brand" loading={isRequestPending('/Check_Availability')} onClick={() => this.checkBookingAvailability()}>
               <wa-icon slot="start" name="magnifying-glass"></wa-icon>
               Check
             </wa-button>
@@ -355,7 +355,7 @@ export class IglSpiltBookingForm {
                       {showMealPlanSelect && (
                         <ir-validator value={this.selectedUnit?.rateplan_id} schema={SelectedUnitSchema.shape.rateplan_id}>
                           <wa-select
-                            size="small"
+                            size="s"
                             placeholder="Select a new rateplan..."
                             value={this.selectedUnit?.rateplan_id?.toString()}
                             onchange={e => {

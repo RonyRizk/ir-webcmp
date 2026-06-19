@@ -251,7 +251,7 @@ export class IrSecureTasks {
               >
                 <ir-input
                   class="secure-header__aname-input"
-                  size="small"
+                  size="s"
                   pill
                   value={this.inputValue}
                   placeholder="Property"
@@ -270,7 +270,7 @@ export class IrSecureTasks {
               <wa-tooltip for="secure-logout-btn" placement="bottom">
                 Sign out
               </wa-tooltip>
-              <wa-button id="secure-logout-btn" size="small" appearance="plain" variant="neutral" pill aria-label="Sign out" onClick={() => this.logout()}>
+              <wa-button id="secure-logout-btn" size="s" appearance="plain" variant="neutral" pill aria-label="Sign out" onClick={() => this.logout()}>
                 <wa-icon name="arrow-right-from-bracket"></wa-icon>
               </wa-button>
             </div>
@@ -280,7 +280,7 @@ export class IrSecureTasks {
           <nav class="secure-header__tabbar" aria-label="Secure screens navigation">
             <wa-button
               class={`secure-header__scroll-btn${this.canScrollLeft ? '' : ' secure-header__scroll-btn--hidden'}`}
-              size="small"
+              size="s"
               appearance="plain"
               variant="neutral"
               pill
@@ -319,7 +319,7 @@ export class IrSecureTasks {
 
             <wa-button
               class={`secure-header__scroll-btn${this.canScrollRight ? '' : ' secure-header__scroll-btn--hidden'}`}
-              size="small"
+              size="s"
               appearance="plain"
               variant="neutral"
               pill
@@ -369,7 +369,7 @@ export class IrSecureTasks {
       case 'country-sales':
         return <ir-sales-by-country p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-sales-by-country>;
       case 'channel-sales':
-        return <ir-sales-by-channel language="en" propertyid={this.propertyid.toString()} ticket={this.token.getToken()}></ir-sales-by-channel>;
+        return <ir-sales-by-channel mode="property" language="en" propertyid={this.propertyid.toString()} ticket={this.token.getToken()}></ir-sales-by-channel>;
       case 'booking-listing':
         return <ir-booking-listing p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-booking-listing>;
       case 'email-logs':

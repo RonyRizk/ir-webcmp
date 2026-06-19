@@ -58,14 +58,14 @@ export class IrExtraServiceConfig {
           ></ir-extra-service-config-form>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
-          <ir-custom-button class={`flex-fill`} size="medium" appearance="filled" variant="neutral" data-drawer="close">
+          <ir-custom-button class={`flex-fill`} size="m" appearance="filled" variant="neutral" data-drawer="close">
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
           <ir-custom-button
             type="submit"
             loading={isRequestPending('/Do_Booking_Extra_Service')}
             form="extra-service-config-form"
-            size="medium"
+            size="m"
             class={`flex-fill`}
             variant="brand"
           >

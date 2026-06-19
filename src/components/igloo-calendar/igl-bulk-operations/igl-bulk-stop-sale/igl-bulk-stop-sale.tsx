@@ -4,9 +4,9 @@ import { ReloadInterceptor } from '@/utils/ReloadInterceptor';
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { z, ZodError } from 'zod';
-import { IToast } from '@components/ui/ir-toast/toast';
 import calendar_dates from '@/stores/calendar-dates.store';
 import locales from '@/stores/locales.store';
+import { showToast } from '@/utils/utils';
 export type SelectedRooms = { id: string | number; result: 'open' | 'closed' };
 
 @Component({
@@ -33,7 +33,6 @@ export class IglBulkStopSale {
   );
 
   @Event() closeDrawer: EventEmitter<null>;
-  @Event() toast: EventEmitter<IToast>;
   @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
@@ -202,7 +201,7 @@ export class IglBulkStopSale {
         updateCalendarCells(payloads);
       }
       this.deactivate();
-      this.toast.emit({
+      showToast({
         type: 'success',
         title: locales.entries.Lcz_RequestSubmittedSuccessfully,
         description: '',
@@ -254,11 +253,11 @@ export class IglBulkStopSale {
     // 4) open the appropriate picker
     setTimeout(() => {
       if (key === 'from') {
-        this.dateRefs[index]?.to.openDatePicker();
+        this.dateRefs[index]?.to.show();
       } else {
         const nextFrom = dates.findIndex(d => d.from === null);
         if (nextFrom > -1) {
-          this.dateRefs[nextFrom]?.from.openDatePicker();
+          this.dateRefs[nextFrom]?.from.show();
         }
       }
     }, 100);
@@ -359,7 +358,7 @@ export class IglBulkStopSale {
                               }
                               this.selectedRoomTypes = rest;
                             }}
-                            size="small"
+                            size="s"
                             placeholder={`${locales.entries.Lcz_Select}...`}
                           >
                             <wa-option value="open">{locales.entries.Lcz_Open}</wa-option>
@@ -441,11 +440,11 @@ export class IglBulkStopSale {
                           const index = this.dates.findIndex(d => !d.from || !d.to);
 
                           if (!this.dates[index]?.from) {
-                            this.dateRefs[index]?.from.openDatePicker();
+                            this.dateRefs[index]?.from.show();
                             return;
                           }
                           if (!this.dates[index]?.to) {
-                            this.dateRefs[index].to.openDatePicker();
+                            this.dateRefs[index].to.show();
                           }
                         }}
                       ></ir-date-select>
@@ -473,11 +472,11 @@ export class IglBulkStopSale {
                           const index = this.dates.findIndex(d => !d.from || !d.to);
 
                           if (!this.dates[index]?.from) {
-                            this.dateRefs[index]?.from?.openDatePicker();
+                            this.dateRefs[index]?.from?.show();
                             return;
                           }
                           if (!this.dates[index]?.to) {
-                            this.dateRefs[index].to.openDatePicker();
+                            this.dateRefs[index].to.show();
                           }
                         }}
                       ></ir-date-select>

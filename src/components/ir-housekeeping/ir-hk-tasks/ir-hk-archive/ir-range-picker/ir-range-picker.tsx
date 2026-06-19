@@ -119,7 +119,7 @@ export class IrRangePicker {
 
   render() {
     return (
-      <Host size="small">
+      <Host size="s">
         <div class="range-picker__container" ref={el => (this.date_container = el)}>
           {this.withOverlay && (
             <div

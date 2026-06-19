@@ -63,10 +63,10 @@ export class IrHoldTransactionDialog {
             )}
           </div>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button size="medium" appearance="filled" variant="neutral" data-dialog="close">
+            <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close">
               Cancel
             </ir-custom-button>
-            <ir-custom-button size="medium" loading={this.isLoading} onClickHandler={() => this.handleConfirm()} appearance="accent" variant="brand">
+            <ir-custom-button size="m" loading={this.isLoading} onClickHandler={() => this.handleConfirm()} appearance="accent" variant="brand">
               Confirm
             </ir-custom-button>
           </div>

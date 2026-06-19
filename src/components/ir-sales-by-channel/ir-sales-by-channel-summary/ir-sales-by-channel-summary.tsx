@@ -1,4 +1,6 @@
-import { Component, Host, h } from '@stencil/core';
+import { Component, Prop, h } from '@stencil/core';
+import { ChannelReport, ChannelReportResult } from '../types';
+import { formatAmount } from '@/utils/utils';
 
 @Component({
   tag: 'ir-sales-by-channel-summary',
@@ -6,11 +8,45 @@ import { Component, Host, h } from '@stencil/core';
   scoped: true,
 })
 export class IrSalesByChannelSummary {
+  @Prop() records: ChannelReportResult = [];
+
+  private sum(field: keyof Pick<ChannelReport, 'NIGHTS' | 'REVENUE'>, lastYear = false) {
+    return (this.records ?? []).reduce((acc, r) => {
+      const val = lastYear ? (r.last_year ? r.last_year[field] : 0) : r[field];
+      return acc + (val ?? 0);
+    }, 0);
+  }
+
   render() {
+    const totalNights = this.sum('NIGHTS');
+    const totalRevenue = this.sum('REVENUE');
+    const lastYearNights = this.sum('NIGHTS', true);
+    const lastYearRevenue = this.sum('REVENUE', true);
+    const currency = this.records?.[0]?.currency;
+    const hasLastYear = Boolean(this.records?.length && this.records[0].last_year);
+
     return (
-      <Host>
-        <slot></slot>
-      </Host>
+      <div class="summary-row">
+        <ir-metric-card
+          class="summary-metric"
+          icon="moon"
+          label="Total Room Nights"
+          value={totalNights.toString()}
+          trend={hasLastYear ? totalNights - lastYearNights : undefined}
+          trendLabel="vs last year"
+          caption={hasLastYear ? `Last year: ${lastYearNights}` : undefined}
+        ></ir-metric-card>
+        <ir-metric-card
+          class="summary-metric"
+          icon="money-bill"
+          label="Total Revenue"
+          value={formatAmount(currency, totalRevenue)}
+          trend={hasLastYear ? totalRevenue - lastYearRevenue : undefined}
+          trendLabel="vs last year"
+          caption={hasLastYear ? `Last year: ${formatAmount(currency, lastYearRevenue)}` : undefined}
+        ></ir-metric-card>
+        <ir-metric-card class="summary-metric" icon="chart-bar" label="Channels" value={(this.records?.length ?? 0).toString()}></ir-metric-card>
+      </div>
     );
   }
 }

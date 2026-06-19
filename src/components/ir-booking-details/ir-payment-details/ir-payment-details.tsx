@@ -326,10 +326,10 @@ export class IrPaymentDetails {
       >
         <p>{this.modalMode === 'delete' ? locales.entries.Lcz_IfDeletedPermantlyLost : locales.entries.Lcz_EnteringAmountGreaterThanDue}</p>
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button size="medium" data-dialog="close" variant="neutral" appearance="filled">
+          <ir-custom-button size="m" data-dialog="close" variant="neutral" appearance="filled">
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button loading={this.isLoading} size="medium" onClickHandler={e => this.handleConfirmModal(e)} variant={this.modalMode === 'delete' ? 'danger' : 'brand'}>
+          <ir-custom-button loading={this.isLoading} size="m" onClickHandler={e => this.handleConfirmModal(e)} variant={this.modalMode === 'delete' ? 'danger' : 'brand'}>
             {this.modalMode === 'delete' ? locales.entries.Lcz_Delete : locales.entries.Lcz_Confirm}
           </ir-custom-button>
         </div>

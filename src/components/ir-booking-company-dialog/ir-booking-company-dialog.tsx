@@ -52,10 +52,10 @@ export class IrBookingCompanyDialog {
           ></ir-booking-company-form>
         )}
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button size="medium" appearance="filled" variant="neutral" data-dialog="close">
+          <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close">
             Cancel
           </ir-custom-button>
-          <ir-custom-button type="submit" form={formId} loading={isRequestPending('/DoReservation')} size="medium" variant="brand">
+          <ir-custom-button type="submit" form={formId} loading={isRequestPending('/DoReservation')} size="m" variant="brand">
             Save
           </ir-custom-button>
         </div>

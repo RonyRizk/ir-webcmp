@@ -3,11 +3,11 @@ import Token from '@/models/Token';
 import { AgentsService } from '@/services/agents/agents.service';
 import type { Agent, Agents } from '@/services/agents/type';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { AgentSetupEntries } from './types';
-import { IToast } from '../ui/ir-toast/toast';
 import calendar_data from '@/stores/calendar-data';
 import { PropertyService } from '@/services/property.service';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-agents',
@@ -46,8 +46,6 @@ export class IrAgents {
   @State() isLoading = true;
   @State() countries: ICountry[];
   @State() setupEntries: AgentSetupEntries;
-
-  @Event() toast: EventEmitter<IToast>;
 
   private agentsService = new AgentsService();
   private propertyService = new PropertyService();
@@ -157,11 +155,10 @@ export class IrAgents {
     try {
       await this.agentsService.handleExposedAgent({ agent });
       this.upsertAgent();
-      this.toast.emit({
+      showToast({
         type: 'success',
         description: '',
         title: 'Saved Successfully',
-        position: 'top-right',
       });
     } catch (error) {
       console.error(error);
@@ -202,10 +199,10 @@ export class IrAgents {
               : 'Are you sure you want to delete this agent? This action permanently removes the agent and cannot be undone.'}
           </span>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
+            <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
               Cancel
             </ir-custom-button>
-            <ir-custom-button size="medium" appearance="accent" variant="danger" onClickHandler={() => this.confirmDeleteAgent()}>
+            <ir-custom-button size="m" appearance="accent" variant="danger" onClickHandler={() => this.confirmDeleteAgent()}>
               Delete
             </ir-custom-button>
           </div>

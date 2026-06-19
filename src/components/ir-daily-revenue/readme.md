@@ -28,28 +28,50 @@
 
 ### Depends on
 
-- [ir-booking-details](../ir-booking-details)
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-toast](../ui/ir-toast)
-- [ir-interceptor](../ir-interceptor)
-- [ir-button](../ui/ir-button)
+- [ir-page](../ui/ir-page)
+- [ir-custom-button](../ui/ir-custom-button)
 - [ir-revenue-summary](ir-revenue-summary)
 - [ir-daily-revenue-filters](ir-daily-revenue-filters)
 - [ir-revenue-table](ir-revenue-table)
-- [ir-sidebar](../ui/ir-sidebar)
+- [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-daily-revenue --> ir-booking-details
   ir-daily-revenue --> ir-loading-screen
-  ir-daily-revenue --> ir-toast
-  ir-daily-revenue --> ir-interceptor
-  ir-daily-revenue --> ir-button
+  ir-daily-revenue --> ir-page
+  ir-daily-revenue --> ir-custom-button
   ir-daily-revenue --> ir-revenue-summary
   ir-daily-revenue --> ir-daily-revenue-filters
   ir-daily-revenue --> ir-revenue-table
-  ir-daily-revenue --> ir-sidebar
+  ir-daily-revenue --> ir-booking-details-drawer
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
+  ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-spinner
+  ir-otp-modal --> ir-otp
+  ir-otp-modal --> ir-button
+  ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-item
+  ir-revenue-summary --> ir-metric-card
+  ir-daily-revenue-filters --> ir-filter-card
+  ir-daily-revenue-filters --> ir-date-range-filter
+  ir-daily-revenue-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
+  ir-revenue-table --> ir-revenue-row
+  ir-revenue-table --> ir-empty-state
+  ir-revenue-row --> ir-accordion
+  ir-revenue-row --> ir-revenue-row-details
+  ir-accordion --> ir-icons
+  ir-revenue-row-details --> ir-custom-button
+  ir-booking-details-drawer --> ir-drawer
+  ir-booking-details-drawer --> ir-booking-details
   ir-booking-details --> ir-spinner
   ir-booking-details --> ir-toast
   ir-booking-details --> ir-interceptor
@@ -68,13 +90,6 @@ graph TD;
   ir-booking-details --> ir-guest-info-drawer
   ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-booking-editor-drawer
-  ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
-  ir-interceptor --> ir-otp-modal
-  ir-otp-modal --> ir-spinner
-  ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-custom-button
@@ -117,6 +132,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -130,8 +146,6 @@ graph TD;
   ir-payment-folio-form --> ir-date-select
   ir-payment-folio-form --> ir-validator
   ir-payment-folio-form --> ir-input
-  ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
@@ -157,6 +171,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -260,8 +276,6 @@ graph TD;
   ir-cl-invoice-dialog --> ir-cl-invoice-form
   ir-cl-invoice-dialog --> ir-custom-button
   ir-cl-invoice-form --> ir-date-range-filter
-  ir-date-range-filter --> ir-date-select
-  ir-date-range-filter --> ir-custom-button
   ir-guest-info-drawer --> ir-drawer
   ir-guest-info-drawer --> ir-guest-info-form
   ir-guest-info-drawer --> ir-custom-button
@@ -302,18 +316,6 @@ graph TD;
   ir-booking-editor-guest-form --> ir-validator
   ir-booking-editor-guest-form --> ir-country-picker
   ir-booking-editor-guest-form --> ir-mobile-input
-  ir-revenue-summary --> ir-stats-card
-  ir-stats-card --> ir-icons
-  ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-select
-  ir-daily-revenue-filters --> ir-range-picker
-  ir-range-picker --> ir-date-picker
-  ir-revenue-table --> ir-revenue-row
-  ir-revenue-row --> ir-accordion
-  ir-revenue-row --> ir-revenue-row-details
-  ir-accordion --> ir-icons
-  ir-revenue-row-details --> ir-button
-  ir-sidebar --> ir-icon
   ir-secure-tasks --> ir-daily-revenue
   style ir-daily-revenue fill:#f9f,stroke:#333,stroke-width:4px
 ```

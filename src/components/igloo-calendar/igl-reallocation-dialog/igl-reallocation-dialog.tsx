@@ -160,7 +160,7 @@ export class IglReallocationDialog {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
                   }}
-                  size="small"
+                  size="s"
                   aria-invalid={String(this.showRateplanError)}
                   onchange={e => this.handleRateplanChange((e.target as any).value)}
                 >
@@ -174,10 +174,10 @@ export class IglReallocationDialog {
               )}
             </div>
             <div class="dialog-footer" slot="footer">
-              <ir-custom-button appearance="filled" variant="neutral" onClickHandler={this.handleCancelClick} size="medium">
+              <ir-custom-button appearance="filled" variant="neutral" onClickHandler={this.handleCancelClick} size="m">
                 Cancel
               </ir-custom-button>
-              <ir-custom-button variant="brand" onClickHandler={() => this.reallocateUnit()} size="medium" loading={isRequestPending('/ReAllocate_Exposed_Room')}>
+              <ir-custom-button variant="brand" onClickHandler={() => this.reallocateUnit()} size="m" loading={isRequestPending('/ReAllocate_Exposed_Room')}>
                 Confirm
               </ir-custom-button>
             </div>

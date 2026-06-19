@@ -16,13 +16,6 @@
 | `ticket`     | `ticket`     |             | `string` | `''`        |
 
 
-## Events
-
-| Event   | Description | Type                                                                                                 |
-| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
-
-
 ## Dependencies
 
 ### Used by
@@ -32,8 +25,7 @@
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-interceptor](../ir-interceptor)
-- [ir-toast](../ui/ir-toast)
+- [ir-page](../ui/ir-page)
 - [ir-hk-operations-card](ir-hk-operations-card)
 - [ir-hk-team](ir-hk-team)
 
@@ -41,24 +33,23 @@
 ```mermaid
 graph TD;
   ir-housekeeping --> ir-loading-screen
-  ir-housekeeping --> ir-interceptor
-  ir-housekeeping --> ir-toast
+  ir-housekeeping --> ir-page
   ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-hk-operations-card --> ir-input
   ir-hk-operations-card --> ir-dialog
   ir-hk-operations-card --> ir-custom-button
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-custom-button
-  ir-hk-team --> ir-popover
-  ir-hk-team --> ir-button
   ir-hk-team --> ir-hk-user-drawer
   ir-hk-team --> ir-hk-unassigned-units-drawer
   ir-hk-team --> ir-hk-delete-dialog
@@ -81,7 +72,6 @@ graph TD;
   ir-hk-unassigned-units-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-hk-unassigned-units-drawer-form
   ir-hk-unassigned-units-drawer --> ir-custom-button
-  ir-hk-unassigned-units-drawer-form --> ir-select
   ir-hk-delete-dialog --> ir-dialog
   ir-hk-delete-dialog --> ir-custom-button
   ir-secure-tasks --> ir-housekeeping

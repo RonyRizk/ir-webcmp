@@ -12,7 +12,6 @@ export class IrDailyRevenueFilters {
   @Prop() payments: GroupedFolioPayment;
   @Prop() isLoading: boolean;
 
-  @State() collapsed: boolean = false;
   @State() users: Set<string> = new Set();
   @State() filters: DailyPaymentFilter;
   private baseFilters: DailyPaymentFilter = {
@@ -33,6 +32,7 @@ export class IrDailyRevenueFilters {
   handlePaymentChange() {
     this.updateGuests();
   }
+
   private updateGuests() {
     const set: Set<string> = new Set();
     this.payments.forEach(payment => {
@@ -55,6 +55,7 @@ export class IrDailyRevenueFilters {
     this.filters = { ...this.baseFilters };
     this.fetchNewReports.emit(this.filters);
   }
+
   private updateFilter(params: Partial<DailyPaymentFilter>) {
     this.filters = { ...this.filters, ...params };
   }
@@ -69,190 +70,52 @@ export class IrDailyRevenueFilters {
 
   render() {
     return (
-      <div class="card mb-0 p-1 d-flex flex-column sales-filters-card">
-        <div class="d-flex align-items-center justify-content-between sales-filters-header">
-          <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={18} width={18}>
-              <path
-                fill="currentColor"
-                d="M3.9 54.9C10.5 40.9 24.5 32 40 32l432 0c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9 320 448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6l0-79.1L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"
-              />
-            </svg>
-            <h4 class="m-0 p-0 flex-grow-1">{locales.entries.Lcz_Filters}</h4>
-          </div>
-          <ir-button
-            variant="icon"
-            id="drawer-icon"
-            data-toggle="collapse"
-            data-target="#dailyRevenueFiltersCollapse"
-            aria-expanded={this.collapsed ? 'true' : 'false'}
-            aria-controls="dailyRevenueFiltersCollapse"
-            class="mr-1 collapse-btn toggle-collapse-btn"
-            icon_name={this.collapsed ? 'closed_eye' : 'open_eye'}
-            onClickHandler={() => {
-              this.collapsed = !this.collapsed;
-            }}
-            style={{ '--icon-size': '1.6rem' }}
-          ></ir-button>
+      <ir-filter-card>
+        <wa-select
+          label="Selected period"
+          size="s"
+          value={this.filters?.date?.toString()}
+          defaultValue={this.filters?.date?.toString()}
+          onchange={(e: CustomEvent) => {
+            const value = (e.target as HTMLSelectElement).value;
+            this.updateFilter({ date: value, to_date: value, from_date: value });
+          }}
+        >
+          {this.getLast30Days().map(({ text, value }) => (
+            <wa-option key={value} value={value}>
+              {text}
+            </wa-option>
+          ))}
+        </wa-select>
+        <div class="or-divider">
+          <span class="or-divider__line"></span>
+          <span class="or-divider__text">Or</span>
+          <span class="or-divider__line"></span>
         </div>
-        <div class="m-0 p-0 collapse filters-section" id="dailyRevenueFiltersCollapse">
-          <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
-            {/* <fieldset class="pt-1 filter-group"> */}
-            {/* <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
-                Select a date
-              </label> */}
-            {/*   <div class="w-100 d-flex">
-                <style>
-                  {`
-                  .ir-date-picker-trigger{
-                    width:100%;
-                  }
-                  `}
-                </style>
-                <ir-date-picker
-                  data-testid="pickup_date"
-                  date={this.filters?.date}
-                  class="w-100"
-                  emitEmptyDate={true}
-                  maxDate={moment().format('YYYY-MM-DD')}
-                  onDateChanged={evt => {
-                    evt.stopImmediatePropagation();
-                    evt.stopPropagation();
-                    this.updateFilter({ date: evt.detail.start?.format('YYYY-MM-DD') });
-                  }}
-                >
-                  <input
-                    slot="trigger"
-                    type="text"
-                    value={this?.filters?.date}
-                    class={`revenue-table__date-picker-input form-control w-100 input-sm  text-left`}
-                    style={{ width: '100%' }}
-                  ></input>
-                </ir-date-picker>
-              </div>*/}
-            {/* <wa-select
-                onchange={e => {
-                  const value = (e.target as HTMLSelectElement).value;
-                  this.updateFilter({
-                    date: value,
-                    from_date: moment(value, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
-                    to_date: moment(value, 'YYYY-MM-DD').format('YYYY-MM-DD'),
-                  });
-                }}
-                placeholder="Select a date"
-                size="small"
-                value={this.filters?.date}
-                defaultValue={this.filters?.date}
-              >
-                {this.getLast30Days().map(({ label, value }) => (
-                  <wa-option key={value} value={value}>
-                    {label}
-                  </wa-option>
-                ))}
-              </wa-select>
-              <div class="or-divider">
-                <span class="or-divider__line"></span>
-                <span class="or-divider__text">Or</span>
-                <span class="or-divider__line"></span>
-              </div>
-              <ir-date-range
-                dateLabel="Select a date range"
-                withDateDifference={false}
-                defaultData={{ fromDate: this.filters?.from_date, toDate: this.filters?.to_date }}
-                onDateRangeChange={e => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                  this.updateFilter({
-                    date: null,
-                    from_date: e.detail.checkIn.format('YYYY-MM-DD'),
-                    to_date: e.detail.checkOut.format('YYYY-MM-DD'),
-                  });
-                }}
-              ></igl-date-range> */}
-            {/* </fieldset> */}
-            <fieldset class="pt-1 filter-group">
-              <label htmlFor="period" class="px-0 m-0" style={{ paddingBottom: '0.25rem' }}>
-                Selected period
-              </label>
-              <div class="d-flex flex-column date-filter-group" style={{ gap: '0.5rem' }}>
-                <ir-select
-                  selectedValue={this.filters?.date?.toString()}
-                  onSelectChange={e => {
-                    const value = e.detail;
-                    this.updateFilter({
-                      date: value,
-                      to_date: value,
-                      from_date: value,
-                    });
-                  }}
-                  selectId="period"
-                  // showFirstOption={false}
-                  firstOption="..."
-                  data={this.getLast30Days()}
-                ></ir-select>
-                <p class="m-0 p-0 text-center">Or</p>
-                <ir-range-picker
-                  onDateRangeChanged={e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    const { fromDate, toDate, wasFocused } = e.detail;
-                    let params: any = {
-                      from_date: fromDate.format('YYYY-MM-DD'),
-                      to_date: toDate.format('YYYY-MM-DD'),
-                    };
-                    if (wasFocused) {
-                      params = { ...params, date: null };
-                    }
-                    this.updateFilter(params);
-                    // this.dates = { from: fromDate, to: toDate };
-                  }}
-                  fromDate={moment(this.filters?.from_date, 'YYYY-MM-DD')}
-                  toDate={moment(this.filters?.to_date, 'YYYY-MM-DD')}
-                  maxDate={moment().format('YYYY-MM-DD')}
-                  withOverlay={false}
-                ></ir-range-picker>
-              </div>
-            </fieldset>
-            {/* <fieldset class=" filter-group">
-              <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
-                Users
-              </label>
-              <ir-select
-                selectedValue={this.filters?.users}
-                selectId="rooms"
-                firstOption="All"
-                onSelectChange={e =>
-                  this.updateFilter({
-                    users: e.detail,
-                  })
-                }
-                data={Array.from(this.users).map(u => ({
-                  text: u,
-                  value: u,
-                }))}
-              ></ir-select>
-            </fieldset> */}
-            <div class="d-flex mt-1 align-items-center justify-content-end filter-actions" style={{ gap: '1rem' }}>
-              <ir-button
-                btn_type="button"
-                data-testid="reset"
-                text={locales.entries.Lcz_Reset}
-                size="sm"
-                btn_color="secondary"
-                onClickHandler={e => this.resetFilters(e)}
-              ></ir-button>
-              <ir-button
-                btn_type="button"
-                data-testid="apply"
-                isLoading={this.isLoading}
-                text={locales.entries.Lcz_Apply}
-                size="sm"
-                onClickHandler={e => this.applyFiltersEvt(e)}
-              ></ir-button>
-            </div>
-          </div>
+        <ir-date-range-filter
+          showQuickActions={false}
+          label="Date range"
+          fromDate={this.filters?.from_date}
+          toDate={this.filters?.to_date}
+          selectionMode="auto"
+          withClear={false}
+          maxDate={moment().format('YYYY-MM-DD')}
+          onDatesChanged={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            const { from, to } = e.detail;
+            this.updateFilter({ from_date: from, to_date: to, date: null });
+          }}
+        ></ir-date-range-filter>
+        <div slot="footer">
+          <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
+            {locales.entries?.Lcz_Reset ?? 'Reset'}
+          </ir-custom-button>
+          <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
+            {locales.entries?.Lcz_Apply ?? 'Apply'}
+          </ir-custom-button>
         </div>
-      </div>
+      </ir-filter-card>
     );
   }
 }

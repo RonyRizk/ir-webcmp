@@ -111,7 +111,7 @@ export class IrListingHeader {
                   }
                 }}
                 onText-change={e => (this.inputValue = e.detail)}
-                size="small"
+                size="s"
                 placeholder={locales.entries?.Lcz_FindBookNbrorName}
               >
                 <wa-icon name="magnifying-glass" slot="start"></wa-icon>
@@ -136,7 +136,7 @@ export class IrListingHeader {
               updateUserSelection('filter_type', (e.target as any).value);
             }}
             value={booking_listing.userSelection.filter_type?.toString()}
-            size="small"
+            size="s"
             defaultValue={booking_listing?.types[0]?.id?.toString()}
           >
             {booking_listing?.types.map(b => (
@@ -145,7 +145,7 @@ export class IrListingHeader {
               </wa-option>
             ))}
           </wa-select>
-          <ir-range-picker
+          {/* <ir-range-picker
             onDateRangeChanged={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();
@@ -162,18 +162,15 @@ export class IrListingHeader {
             allowNullDates={false}
             fromDate={moment(booking_listing.userSelection.from, 'YYYY-MM-DD')}
             toDate={moment(booking_listing.userSelection.to, 'YYYY-MM-DD')}
-          />
-          {/* <ir-date-range-filter
+          /> */}
+          <ir-date-range-filter
             class="filters-bar__date_picker"
+            showQuickActions={false}
             fromDate={booking_listing.userSelection.from}
             toDate={booking_listing.userSelection.to}
+            withClear={false}
+            selectionMode="auto"
             onDatesChanged={e => {
-              // const { from, to } = e.detail;
-              // this.dates = {
-              //   from: from ? moment(from, 'YYYY-MM-DD') : null,
-              //   to: to ? moment(to, 'YYYY-MM-DD') : null,
-              // };
-              // this.emitFilters();
               e.stopImmediatePropagation();
               e.stopPropagation();
               const { from, to } = e.detail;
@@ -188,14 +185,14 @@ export class IrListingHeader {
               }
               booking_listing.userSelection = { ...booking_listing.userSelection, to: to_date, from: fromDate.format('YYYY-MM-DD') };
             }}
-          ></ir-date-range-filter> */}
+          ></ir-date-range-filter>
 
           <wa-select
             onchange={e => {
               updateUserSelection('booking_status', (e.target as any).value);
             }}
             value={booking_listing.userSelection.booking_status}
-            size="small"
+            size="s"
             defaultValue={booking_listing?.statuses[0]?.code}
           >
             {booking_listing?.statuses.map(b => (
@@ -210,7 +207,7 @@ export class IrListingHeader {
                 updateUserSelection('channel', (e.target as any).value);
               }}
               value={booking_listing.userSelection.channel}
-              size="small"
+              size="s"
               defaultValue={booking_listing.userSelection.channel}
             >
               <wa-option value="">All channels</wa-option>
@@ -227,7 +224,7 @@ export class IrListingHeader {
               updateUserSelection('balance_filter', (e.target as any).value);
             }}
             value={booking_listing.userSelection.balance_filter}
-            size="small"
+            size="s"
             defaultValue={booking_listing?.balance_filter[0]?.value}
           >
             {booking_listing?.balance_filter.map(b => (

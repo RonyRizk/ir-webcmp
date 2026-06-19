@@ -776,7 +776,7 @@ export class IrInvoiceForm {
           <div class="ir-invoice__service" key={room.identifier}>
             <wa-checkbox
               disabled={isDisabled}
-              size="small"
+              size="s"
               onchange={e => {
                 const value = (e.target as any).checked;
                 this.handleCheckChange({ checked: value, system_id: room.system_id });
@@ -814,7 +814,7 @@ export class IrInvoiceForm {
         <div class="ir-invoice__service" key={group.order}>
           <wa-checkbox
             disabled={isDisabled}
-            size="small"
+            size="s"
             onchange={e => {
               const value = (e.target as any).checked;
               this.handleCheckChange({ checked: value, system_ids: roomIds });
@@ -863,7 +863,7 @@ export class IrInvoiceForm {
       <div class="ir-invoice__service">
         <wa-checkbox
           disabled={isDisabled}
-          size="small"
+          size="s"
           onchange={e => {
             const value = (e.target as any).checked;
             this.handleCheckChange({ checked: value, system_id: sysId });
@@ -903,7 +903,7 @@ export class IrInvoiceForm {
       <div class="ir-invoice__service">
         <wa-checkbox
           disabled={isDisabled}
-          size="small"
+          size="s"
           onchange={e => {
             const value = (e.target as any).checked;
             this.handleCheckChange({ checked: value, system_id: sysId });
@@ -933,7 +933,7 @@ export class IrInvoiceForm {
       );
     }
     return (
-      <Host size="small">
+      <Host size="s">
         <form
           id={this.formId}
           onSubmit={e => {
@@ -978,7 +978,7 @@ export class IrInvoiceForm {
                     <div key={extra_service.system_id} class="ir-invoice__service">
                       <wa-checkbox
                         disabled={isDisabled}
-                        size="small"
+                        size="s"
                         onchange={e => {
                           const value = (e.target as any).checked;
                           this.handleCheckChange({ checked: value, system_id: sysId });

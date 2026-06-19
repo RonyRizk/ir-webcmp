@@ -358,7 +358,7 @@ export class IrHkTasks {
           </span>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="filled"
               variant="neutral"
               onClickHandler={() => {
@@ -371,26 +371,12 @@ export class IrHkTasks {
             >
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
-            <ir-custom-button size="medium" appearance="accent" variant="brand" loading={this.isCleaningLoading} onClickHandler={this.handleModalConfirmation.bind(this)}>
+            <ir-custom-button size="m" appearance="accent" variant="brand" loading={this.isCleaningLoading} onClickHandler={this.handleModalConfirmation.bind(this)}>
               {locales.entries.Lcz_Confirm}
             </ir-custom-button>
           </div>
         </ir-dialog>
-        <ir-sidebar
-          open={this.isSidebarOpen}
-          id="editGuestInfo"
-          onIrSidebarToggle={e => {
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            this.isSidebarOpen = false;
-          }}
-          // sidebarStyles={{
-          //   width: '80vw',
-          // }}
-          showCloseButton={false}
-        >
-          {this.isSidebarOpen && <ir-hk-archive ticket={this.token.getToken()} propertyId={this.property_id} slot="sidebar-body"></ir-hk-archive>}
-        </ir-sidebar>
+        <ir-hk-archive-drawer open={this.isSidebarOpen} ticket={this.token.getToken()} propertyId={this.property_id} onDrawerClosed={() => (this.isSidebarOpen = false)} />
         {/* <ir-title class="d-none d-md-flex" label={locales.entries.Lcz_HousekeepingTasks} justifyContent="space-between">
             <ir-button slot="title-body" text={locales.entries.Lcz_Archive} size="sm"></ir-button>
           </ir-title> */}

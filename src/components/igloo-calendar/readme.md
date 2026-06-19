@@ -86,7 +86,7 @@ graph TD;
   igloo-calendar --> igl-bulk-operations-drawer
   igloo-calendar --> igl-blocked-date-drawer
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -122,7 +122,6 @@ graph TD;
   igl-housekeeping-dialog --> ir-custom-button
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
-  igl-cal-footer --> ir-new-badge
   ir-sidebar --> ir-icon
   igl-split-booking --> ir-title
   igl-split-booking --> ir-date-view
@@ -200,6 +199,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -238,6 +238,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state

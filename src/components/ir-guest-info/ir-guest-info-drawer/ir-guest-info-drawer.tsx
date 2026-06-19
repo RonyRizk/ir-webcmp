@@ -1,6 +1,5 @@
 import { Component, Element, Event, EventEmitter, h, Prop } from '@stencil/core';
 import locales from '@/stores/locales.store';
-import { IToast } from '@/components/ui/ir-toast/toast';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { GuestChangedEvent } from '@/components';
 import { v4 } from 'uuid';
@@ -20,7 +19,6 @@ export class IrGuestInfoDrawer {
   @Event() guestInfoDrawerClosed: EventEmitter<{ source: Element }>;
   @Event() guestChanged: EventEmitter<GuestChangedEvent>;
   @Event({ bubbles: true }) resetBookingEvt: EventEmitter<null>;
-  @Event() toast: EventEmitter<IToast>;
 
   @Element() hostElement: HTMLElement;
 
@@ -58,10 +56,10 @@ export class IrGuestInfoDrawer {
         )}
 
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button size="medium" appearance="filled" variant="neutral" type="button" onClickHandler={this.handleCancel}>
+          <ir-custom-button size="m" appearance="filled" variant="neutral" type="button" onClickHandler={this.handleCancel}>
             {locales.entries?.Lcz_Cancel || 'Cancel'}
           </ir-custom-button>
-          <ir-custom-button type="submit" form={this._formId} size="medium" variant="brand" loading={isRequestPending('/Edit_Exposed_Guest')}>
+          <ir-custom-button type="submit" form={this._formId} size="m" variant="brand" loading={isRequestPending('/Edit_Exposed_Guest')}>
             {locales.entries?.Lcz_Save || 'Save'}
           </ir-custom-button>
         </div>

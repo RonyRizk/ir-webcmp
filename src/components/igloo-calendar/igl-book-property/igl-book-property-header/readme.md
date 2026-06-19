@@ -24,14 +24,13 @@
 
 ## Events
 
-| Event                        | Description | Type                                                                                                 |
-| ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `animateIrSelect`            |             | `CustomEvent<string>`                                                                                |
-| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>`                                                       |
-| `checkClicked`               |             | `CustomEvent<any>`                                                                                   |
-| `spiltBookingSelected`       |             | `CustomEvent<{ key: string; data: unknown; }>`                                                       |
-| `splitBookingDropDownChange` |             | `CustomEvent<any>`                                                                                   |
-| `toast`                      |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event                        | Description | Type                                           |
+| ---------------------------- | ----------- | ---------------------------------------------- |
+| `animateIrSelect`            |             | `CustomEvent<string>`                          |
+| `buttonClicked`              |             | `CustomEvent<{ key: TPropertyButtonsTypes; }>` |
+| `checkClicked`               |             | `CustomEvent<any>`                             |
+| `spiltBookingSelected`       |             | `CustomEvent<{ key: string; data: unknown; }>` |
+| `splitBookingDropDownChange` |             | `CustomEvent<any>`                             |
 
 
 ## Dependencies

@@ -1,11 +1,7 @@
 :host {
   overflow-x: hidden;
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
-:host * {
-  font-family: inherit !important;
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-}
+
 .revenue-table__header,
 .revenue-table__method_header {
   box-sizing: border-box;
@@ -14,36 +10,59 @@
   justify-content: space-between;
   padding: 0.5rem 1rem;
 }
+
 .revenue-table__header {
-  background: #ececec;
-  color: #374151;
+  background: var(--wa-color-surface-default);
+  border-bottom: var(--wa-border-style) var(--wa-border-width-s) var(--wa-color-neutral-border-normal);
+  color: var(--wa-color-text-normal);
 }
+
 .revenue-table__header p,
 .revenue-table__method_header p {
   padding: 0;
   margin: 0;
-  font-size: 1rem;
   font-weight: 700;
 }
-.revenue-table__method_header {
-  color: black;
+.revenue-table__method_header p {
+  font-size: var(--wa-font-size-m);
+  font-weight: 600;
 }
+.revenue-table__method_header {
+  color: var(--wa-color-text-normal);
+}
+
 .revenue-table__title-section {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-bottom: 0.875rem;
 }
+
 .revenue-table__table {
   min-height: 50vh;
 }
-/*lg*/
+.revenue-table__table::part(body) {
+  padding: 0.5rem;
+}
+
+.revenue-table__empty-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.revenue-table__type-group {
+  padding: 0 0.25rem;
+}
+
 @media (min-width: 1024px) {
   .revenue-table__header,
   .revenue-table__method_header {
     width: 100%;
     justify-content: flex-start;
   }
+
   .revenue-table__header p:first-child,
   .revenue-table__method_header p:first-child {
     width: calc(40vw + 1.375rem + 0.5rem + 1rem);

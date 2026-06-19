@@ -209,7 +209,7 @@ export class IrReservationInformation {
             <ir-label labelText={`${locales.entries.Lcz_GuestRemark}:`} display="inline" content={this.booking.remark}></ir-label>
           ) : (
             <ota-label
-              class={'m-0 p-0'}
+              class={'m-0 p-0 reservation-information__channel-notes'}
               label={`${locales.entries.Lcz_ChannelNotes || 'Channel notes'}:`}
               remarks={this.booking.ota_notes}
               maxVisibleItems={this.booking.ota_notes?.length}

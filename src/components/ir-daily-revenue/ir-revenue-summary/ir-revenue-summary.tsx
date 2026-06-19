@@ -25,19 +25,14 @@ export class IrRevenueSummary {
     return total;
   }
 
-  // private calculateTotalAmount(groupedPayments: GroupedFolioPayment) {
-  //   return Array.from(groupedPayments.entries()).reduce((prev, curr) => prev + this.calculateTotalValue(curr[1]), 0);
-  // }
-
   private calculateTotalRefunds(groupedPayments: GroupedFolioPayment) {
     const refundKeyCode = '010';
-    const payments: any = [];
+    const payments: FolioPayment[] = [];
     groupedPayments.forEach((value, key) => {
       if (key.split('_')[0] === refundKeyCode) {
         payments.push(...value);
       }
     });
-
     return this.calculateTotalValue(payments);
   }
 
@@ -51,6 +46,7 @@ export class IrRevenueSummary {
     }
     return val1 > val2 ? 'arrow-trend-up' : 'arrow-trend-down';
   }
+
   render() {
     const paymentsTotal = this.calculateTotalPayments(this.groupedPayments);
     const refundAmount = this.calculateTotalRefunds(this.groupedPayments);
@@ -60,48 +56,39 @@ export class IrRevenueSummary {
     const previousDateRefundAmount = this.calculateTotalRefunds(this.previousDateGroupedPayments);
     const previousDateTotalAmount = previousDatePaymentsTotal + previousDateRefundAmount;
 
+    const hasPrevious = Boolean(this.filters?.date && this.previousDateGroupedPayments?.size > 0);
+
     return (
       <Host>
-        <div class="ir-revenue-summary__mobile">
-          <ir-stats-card icon={'arrow-trend-up'} value={formatAmount(calendar_data.currency.symbol, paymentsTotal)} cardTitle="Payments">
-            <p class="stats-card__payments-value" slot="value">
-              {formatAmount(calendar_data.currency.symbol, paymentsTotal)}
-            </p>
-          </ir-stats-card>
-          <ir-stats-card value="123$" class="refunds-card" icon={'arrow-trend-down'} cardTitle="Refunds">
-            <p class="stats-card__refund-value" slot="value">
-              {formatAmount(calendar_data.currency.symbol, refundAmount)}
-            </p>
-          </ir-stats-card>
-        </div>
-        <div class="ir-revenue-summary__tablet">
-          <ir-stats-card
-            icon={'arrow-trend-up'}
+        <div class="revenue-summary__row">
+          <ir-metric-card
+            class="revenue-summary__metric"
+            icon="arrow-trend-up"
+            label="Payments"
             value={formatAmount(calendar_data.currency.symbol, paymentsTotal)}
-            cardTitle="Payments"
-            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : ''}
-          >
-            <p class="stats-card__payments-value" slot="value">
-              {formatAmount(calendar_data.currency.symbol, paymentsTotal)}
-            </p>
-          </ir-stats-card>
-          <ir-stats-card
-            value="123$"
-            class="refunds-card"
-            icon={'arrow-trend-down'}
-            cardTitle="Refunds"
-            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : ''}
-          >
-            <p class="stats-card__refund-value" slot="value">
-              {formatAmount(calendar_data.currency.symbol, refundAmount)}
-            </p>
-          </ir-stats-card>
-          <ir-stats-card
-            icon={this.getTrendIcon(totalAmount, previousDateTotalAmount)}
+            trend={hasPrevious ? paymentsTotal - previousDatePaymentsTotal : undefined}
+            trendLabel="from previous day"
+            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : undefined}
+          ></ir-metric-card>
+          <ir-metric-card
+            class="revenue-summary__metric"
+            icon="arrow-trend-down"
+            label="Refunds"
+            value={formatAmount(calendar_data.currency.symbol, refundAmount)}
+            trend={hasPrevious ? refundAmount - previousDateRefundAmount : undefined}
+            trendLabel="from previous day"
+            invertTrend
+            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : undefined}
+          ></ir-metric-card>
+          <ir-metric-card
+            class="revenue-summary__metric"
+            icon={this.getTrendIcon(totalAmount, previousDateTotalAmount) ?? 'money-bill'}
+            label="Net Total"
             value={formatAmount(calendar_data.currency.symbol, totalAmount)}
-            cardTitle="Difference"
-            subtitle={this.filters?.date ? `Previous day  ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : ''}
-          ></ir-stats-card>
+            trend={hasPrevious ? totalAmount - previousDateTotalAmount : undefined}
+            trendLabel="from previous day"
+            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : undefined}
+          ></ir-metric-card>
         </div>
       </Host>
     );

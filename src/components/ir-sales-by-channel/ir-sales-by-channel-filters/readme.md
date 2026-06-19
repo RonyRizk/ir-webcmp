@@ -29,23 +29,23 @@
 
 ### Depends on
 
-- [ir-filters-panel](../../ui/ir-filters-panel)
-- [ir-select](../../ui/ir-select)
+- [ir-filter-card](../../ir-filter-card)
 - [ir-m-combobox](../../ir-m-combobox)
-- [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
-- [ir-checkbox](../../ui/ir-checkbox)
+- [ir-date-range-filter](../../ui/ir-date-range-filter)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-sales-by-channel-filters --> ir-filters-panel
-  ir-sales-by-channel-filters --> ir-select
+  ir-sales-by-channel-filters --> ir-filter-card
   ir-sales-by-channel-filters --> ir-m-combobox
-  ir-sales-by-channel-filters --> ir-range-picker
-  ir-sales-by-channel-filters --> ir-checkbox
-  ir-filters-panel --> ir-button
-  ir-button --> ir-icons
-  ir-range-picker --> ir-date-picker
+  ir-sales-by-channel-filters --> ir-date-range-filter
+  ir-sales-by-channel-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-sales-by-channel --> ir-sales-by-channel-filters
   style ir-sales-by-channel-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

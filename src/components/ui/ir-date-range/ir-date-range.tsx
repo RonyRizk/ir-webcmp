@@ -34,7 +34,7 @@ export class IrDateRange {
    * Controls the visual size of the input trigger.
    * @reflect
    */
-  @Prop({ reflect: true }) size: 'small' | 'medium' | 'large' = 'small';
+  @Prop({ reflect: true }) size: 's' | 'm' | 'l' = 's';
 
   /**
    * Initial date values. Expects `{ fromDate: string | Date, toDate: string | Date }`.

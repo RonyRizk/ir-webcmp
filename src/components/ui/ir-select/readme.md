@@ -59,32 +59,22 @@
 ### Used by
 
  - [igl-split-booking](../../igloo-calendar/igl-split-booking)
- - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
  - [ir-hk-unassigned-units](../../ir-housekeeping/ir-hk-unassigned-units)
- - [ir-hk-unassigned-units-drawer-form](../../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer/ir-hk-unassigned-units-drawer-form)
  - [ir-listing-modal](../../ir-booking-listing/ir-listing-modal)
- - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
- - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
- - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-unit-status](../../ir-housekeeping/ir-unit-status)
 
 ### Graph
 ```mermaid
 graph TD;
   igl-split-booking --> ir-select
-  ir-daily-revenue-filters --> ir-select
   ir-financial-filters --> ir-select
   ir-hk-archive --> ir-select
   ir-hk-unassigned-units --> ir-select
-  ir-hk-unassigned-units-drawer-form --> ir-select
   ir-listing-modal --> ir-select
-  ir-monthly-bookings-report-filter --> ir-select
   ir-option-details --> ir-select
-  ir-sales-by-channel-filters --> ir-select
-  ir-sales-filters --> ir-select
   ir-unit-status --> ir-select
   style ir-select fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -329,7 +329,7 @@ export class IrPropertySwitcher {
   private trigger() {
     return (
       <wa-button
-        size="small"
+        size="s"
         withCaret
         class="property-switcher__trigger-btn"
         variant="neutral"
@@ -366,7 +366,7 @@ export class IrPropertySwitcher {
               this.handleDropdownSelect(Number(e.detail.item.value));
             }}
           >
-            <wa-button size="small" class="property-switcher__trigger-btn" slot="trigger" withCaret variant="neutral" appearance="outlined">
+            <wa-button size="s" class="property-switcher__trigger-btn" slot="trigger" withCaret variant="neutral" appearance="outlined">
               <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME}</p>
             </wa-button>
             {this.isLinkedLoading && (

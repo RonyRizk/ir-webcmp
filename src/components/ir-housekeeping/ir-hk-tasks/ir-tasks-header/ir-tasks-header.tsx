@@ -50,7 +50,7 @@ export class IrTasksHeader {
               this.headerButtonPress.emit({ name: 'export' });
             }}
           >
-            <wa-icon slot="end" name="file-excel"></wa-icon>
+            <wa-icon slot="start" name="download"></wa-icon>
             {locales.entries.Lcz_Export}
           </ir-custom-button>
 

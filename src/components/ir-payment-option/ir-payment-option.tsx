@@ -3,9 +3,9 @@ import { PaymentOptionService } from '@/services/payment_option.service';
 import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import payment_option_store from '@/stores/payment-option.store';
-import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-import { IToast } from '@components/ui/ir-toast/toast';
+import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import Token from '@/models/Token';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-payment-option',
@@ -23,8 +23,6 @@ export class IrPaymentOption {
   @State() paymentOptions: PaymentOption[] = [];
   @State() isLoading: boolean = false;
   @State() selectedOption: PaymentOption | null = null;
-
-  @Event() toast: EventEmitter<IToast>;
 
   private paymentOptionService = new PaymentOptionService();
   private roomService = new RoomService();
@@ -135,7 +133,7 @@ export class IrPaymentOption {
       await this.changePaymentMethod(newOption);
       this.modifyPaymentList(newOption);
       if (po.code === '000' && is_active && this.paymentOptions.filter(p => p.code !== '000').every(p => p.is_active === false || p.is_active === null)) {
-        this.toast.emit({
+        showToast({
           type: 'success',
           description: '',
           title: locales.entries['Lcz_YouNeedToSelect'],
@@ -170,7 +168,7 @@ export class IrPaymentOption {
   }) {
     try {
       await this.paymentOptionService.HandlePaymentMethod(newOption);
-      this.toast.emit({
+      showToast({
         position: 'top-right',
         title: 'Saved Successfully',
         description: '',

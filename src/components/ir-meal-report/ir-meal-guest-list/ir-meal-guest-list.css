@@ -1,0 +1,126 @@
+@import url('../../../common/table.css');
+
+/* #region host */
+/* Card chrome lives on :host (matches ir-city-ledger-folio-table convention).
+   Compact by design: tight cell padding and small type so the table fits as
+   many rows as possible and stays usable on narrow viewports. */
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 200px;
+}
+.data-table {
+  font-size: var(--wa-font-size-m);
+}
+/* #endregion */
+
+/* #region header */
+/* Align header horizontal padding with the tightened body cells. */
+
+.meal-guest-list__cell--ad {
+  text-align: right !important;
+  padding-inline: 0.4rem 0.2rem !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.meal-guest-list__cell--ch {
+  text-align: left !important;
+  padding-inline: 0.4rem 0.2rem !important;
+  color: var(--wa-color-text-quiet);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.meal-guest-list__cell--ch.--total {
+  color: var(--wa-color-text-quiet);
+}
+.meal-guest-list__th {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  font-weight: var(--wa-font-weight-semibold, 600);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.meal-guest-list__th--center {
+  justify-content: center;
+  width: 100%;
+}
+.meal-guest-list__sort {
+  opacity: 0.35;
+  transition: opacity var(--wa-transition-fast, 150ms) var(--wa-transition-easing, ease);
+}
+.meal-guest-list__sort--active {
+  opacity: 1;
+  color: var(--wa-color-brand-fill-loud);
+}
+.table thead th.sortable:hover .meal-guest-list__sort {
+  opacity: 0.7;
+}
+/* #endregion */
+
+/* #region cells */
+.meal-guest-list__unit {
+  font-weight: var(--wa-font-weight-bold, 700);
+  color: var(--wa-color-text-normal, #0f172a);
+}
+.meal-guest-list__guest {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-xs, 0.5rem);
+  color: var(--wa-color-text-normal, #0f172a);
+}
+.meal-guest-list__muted {
+  color: var(--wa-color-text-quiet, #64748b);
+}
+.meal-guest-list__arr {
+  --wa-tag-padding: 0 0.3rem;
+}
+
+/* Center-aligned occupancy column hugs its content instead of floating. */
+.cell--align-center {
+  text-align: center !important;
+  padding-inline: 0.45rem !important;
+}
+/* #endregion */
+
+/* #region totals */
+.meal-guest-list__total-row td {
+  background: var(--wa-color-neutral-fill-quiet, #f1f5f9) !important;
+  border-top: 1px solid var(--wa-color-surface-border, #e2e8f0);
+  border-bottom: 0 !important;
+  /* padding: var(--ir-cell-padding) !important; */
+}
+.meal-guest-list__total-label {
+  text-align: end;
+  font-weight: var(--wa-font-weight-bold, 700);
+  letter-spacing: 0.03em;
+  color: var(--wa-color-text-quiet, #64748b);
+}
+.meal-guest-list__total-value {
+  font-weight: var(--wa-font-weight-bold, 700);
+  color: var(--wa-color-brand-fill-loud);
+}
+.meal-guest-list__total-meta {
+  color: var(--wa-color-text-quiet, #64748b);
+}
+/* #endregion */
+
+/* #region empty */
+.meal-guest-list__empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+/* #endregion */
+/*xl*/
+@media (min-width: 1280px) {
+  .cell__rate-plan {
+    width: 35% !important;
+  }
+}

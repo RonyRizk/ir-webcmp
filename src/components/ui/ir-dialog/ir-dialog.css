@@ -1,7 +1,7 @@
 .ir-dialog__footer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   justify-content: flex-end;
   width: 100%;
 }
@@ -14,4 +14,7 @@
   width: 100%;
   min-height: 50px;
   min-width: 31rem;
+}
+#dialog-overview::part(title) {
+  color: var(--wa-color-text-normal);
 }

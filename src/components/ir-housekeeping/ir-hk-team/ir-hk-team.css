@@ -14,7 +14,9 @@
   flex-direction: column;
   gap: 0.25rem;
 }
-
+.hk-team__card::part(body) {
+  padding: 0.5rem;
+}
 .hk-team-header__top {
   display: flex;
   flex-direction: column;

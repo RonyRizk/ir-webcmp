@@ -43,7 +43,7 @@ export class IrPickupView {
             {locales.entries.Lcz_Pickup}
           </p>
           <wa-tooltip for="pickup">{pickup_info ? 'Edit' : 'Add'} pickup</wa-tooltip>
-          <ir-custom-button slot="header-actions" id="pickup" size="small" appearance="plain" variant="neutral">
+          <ir-custom-button slot="header-actions" id="pickup" size="s" appearance="plain" variant="neutral">
             <wa-icon name="edit" style={{ fontSize: '1rem' }}></wa-icon>
           </ir-custom-button>
 

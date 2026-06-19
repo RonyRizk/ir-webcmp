@@ -27,15 +27,18 @@
 
 ### Depends on
 
-- [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
+- [ir-date-range-filter](../../ui/ir-date-range-filter)
 - [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-listing-header --> ir-range-picker
+  ir-listing-header --> ir-date-range-filter
   ir-listing-header --> ir-custom-button
-  ir-range-picker --> ir-date-picker
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-booking-listing --> ir-listing-header
   style ir-listing-header fill:#f9f,stroke:#333,stroke-width:4px
 ```

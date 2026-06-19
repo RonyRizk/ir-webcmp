@@ -167,7 +167,7 @@ export class IrArrivalsTable {
                     <ir-custom-button
                       id="balance-info"
                       style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
-                      size="small"
+                      size="s"
                       variant="danger"
                       appearance="outlined"
                     >

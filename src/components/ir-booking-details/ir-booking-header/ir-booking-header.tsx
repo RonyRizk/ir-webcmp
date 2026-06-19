@@ -1,4 +1,3 @@
-import { IToast } from '@/components/ui/ir-toast/toast';
 import { Booking } from '@/models/booking.dto';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import locales from '@/stores/locales.store';
@@ -9,6 +8,7 @@ import calendar_data from '@/stores/calendar-data';
 import { isAgentMode } from '../functions';
 import { Agent } from '@/services/agents/type';
 import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-booking-header',
@@ -35,8 +35,8 @@ export class IrBookingHeader {
   @Prop() hasCloseButton: boolean;
   @Prop() hasEmail: boolean = true;
   @Prop() folioRows: FolioRow[] = [];
+  @Prop() agents: Agent[] = [];
 
-  @Event() toast: EventEmitter<IToast>;
   @Event() closeSidebar: EventEmitter<null>;
   @Event() resetBookingEvt: EventEmitter<null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<any>>;
@@ -57,11 +57,10 @@ export class IrBookingHeader {
   }
   private async updateStatus() {
     if (!this.bookingStatus || this.bookingStatus === '-1') {
-      this.toast.emit({
+      showToast({
         type: 'error',
         description: '',
         title: locales.entries.Lcz_SelectStatus,
-        position: 'top-right',
       });
       return;
     }
@@ -70,11 +69,10 @@ export class IrBookingHeader {
         book_nbr: this.booking.booking_nbr,
         status: this.bookingStatus,
       });
-      this.toast.emit({
+      showToast({
         type: 'success',
         description: '',
         title: locales.entries.Lcz_StatusUpdatedSuccessfully,
-        position: 'top-right',
       });
       this.bookingStatus = null;
       this.modalEl.closeModal();
@@ -114,11 +112,18 @@ export class IrBookingHeader {
     return this.booking.origin.Icon;
   }
   private get canChangeSource() {
-    const folioRows = this.folioRows ?? [];
-    if (folioRows?.length > 0) {
-      return folioRows.every(f => f._raw.IS_LOCKED === false);
-    }
-    return true;
+    return this.booking?.is_source_editable;
+    // if (!this.booking.is_direct || this.booking.source?.code?.toLowerCase() === 'ghs' || !this.booking.is_editable) {
+    //   return false;
+    // }
+    // if (this.agents.length === 0) {
+    //   return false;
+    // }
+    // const folioRows = this.folioRows ?? [];
+    // if (folioRows?.length > 0) {
+    //   return folioRows.every(f => f._raw.IS_LOCKED === false);
+    // }
+    // return true;
   }
 
   render() {
@@ -133,13 +138,13 @@ export class IrBookingHeader {
                 {this.hasMenu && (
                   <Fragment>
                     <wa-tooltip for="menu">Go back</wa-tooltip>
-                    <ir-custom-button id="menu" variant="neutral" size="small" appearance="plain">
+                    <ir-custom-button id="menu" variant="neutral" size="s" appearance="plain">
                       {/* <wa-icon name="list" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon> */}
                       <wa-icon name="arrow-left" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon>
                     </ir-custom-button>
                   </Fragment>
                 )}
-                <wa-avatar shape="circle" initials={this.initials} image={this.avatarImage} loading="lazy"></wa-avatar>
+                <wa-avatar shape="circle" class="booking-header__avatar" initials={this.initials} image={this.avatarImage} loading="lazy"></wa-avatar>
                 <div class="booking-header__identity">
                   <div class={'booking-header__label'}>
                     <h4 class="booking-header__label-number">{`${locales.entries.Lcz_Booking}#${this.booking.booking_nbr}`}</h4>
@@ -216,7 +221,7 @@ export class IrBookingHeader {
                     withCaret
                     // loading={isRequestPending('/Change_Exposed_Booking_Status')}
                     appearance={'outlined'}
-                    size="small"
+                    size="s"
                     variant="brand"
                     class="booking-header__status-trigger"
                   >
@@ -247,7 +252,7 @@ export class IrBookingHeader {
                   }}
                   appearance={'outlined'}
                   class="booking-header__stretched-btn"
-                  size="small"
+                  size="s"
                   variant="warning"
                 >
                   Force city ledger
@@ -260,7 +265,7 @@ export class IrBookingHeader {
                   }}
                   appearance={'outlined'}
                   class="booking-header__stretched-btn"
-                  size="small"
+                  size="s"
                   variant="brand"
                 >
                   Invoice to agent
@@ -275,7 +280,7 @@ export class IrBookingHeader {
               }}
               appearance={'outlined'}
               class="booking-header__stretched-btn"
-              size="small"
+              size="s"
               variant="brand"
             >
               Logs
@@ -289,7 +294,7 @@ export class IrBookingHeader {
                   this.openDialog({ type: 'pms' });
                 }}
                 appearance={'outlined'}
-                size="small"
+                size="s"
                 variant="brand"
               >
                 PMS
@@ -298,7 +303,7 @@ export class IrBookingHeader {
 
             {this.hasReceipt && (
               <Fragment>
-                <ir-custom-button class="booking-header__stretched-btn" id="invoice" variant="brand" size="small" appearance="outlined">
+                <ir-custom-button class="booking-header__stretched-btn" id="invoice" variant="brand" size="s" appearance="outlined">
                   Billing
                 </ir-custom-button>
               </Fragment>
@@ -306,7 +311,7 @@ export class IrBookingHeader {
             {this.hasPrint && (
               <Fragment>
                 <wa-tooltip for="print">Print booking</wa-tooltip>
-                <ir-custom-button id="print" variant="brand" size="small" appearance="outlined">
+                <ir-custom-button id="print" variant="brand" size="s" appearance="outlined">
                   <wa-icon label="Print" name="print" style={{ fontSize: '1.2rem' }}></wa-icon>
                 </ir-custom-button>
               </Fragment>
@@ -315,7 +320,7 @@ export class IrBookingHeader {
             {this.hasEmail && (
               <Fragment>
                 <wa-tooltip for="email">Email this booking to guest</wa-tooltip>
-                <ir-custom-button id="email" variant="brand" size="small" appearance="outlined">
+                <ir-custom-button id="email" variant="brand" size="s" appearance="outlined">
                   <wa-icon name="envelope" style={{ fontSize: '1.2rem' }} label="Email this booking"></wa-icon>
                 </ir-custom-button>
               </Fragment>
@@ -323,7 +328,7 @@ export class IrBookingHeader {
             {this.hasDelete && (
               <Fragment>
                 <wa-tooltip for="book-delete">Delete this booking</wa-tooltip>
-                <ir-custom-button id="book-delete" variant="danger" size="small" appearance="plain">
+                <ir-custom-button id="book-delete" variant="danger" size="s" appearance="plain">
                   <wa-icon name="envelope" style={{ fontSize: '1.2rem' }} label="Delete this booking"></wa-icon>
                 </ir-custom-button>
               </Fragment>
@@ -337,7 +342,7 @@ export class IrBookingHeader {
                 }}
                 id="close"
                 variant="neutral"
-                size="small"
+                size="s"
                 appearance="plain"
               >
                 <wa-icon name="xmark" style={{ fontSize: '1.2rem' }} label="Go back"></wa-icon>
@@ -372,7 +377,7 @@ export class IrBookingHeader {
         >
           <p>{this.booking.is_direct ? 'Are you sure you want to update this booking status?' : locales.entries.Lcz_OTA_Modification_Alter}</p>
           <div class="ir-dialog__footer" slot="footer">
-            <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
+            <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
               {locales?.entries?.Lcz_Cancel}
             </ir-custom-button>
             <ir-custom-button
@@ -381,7 +386,7 @@ export class IrBookingHeader {
                 e.stopPropagation();
                 this.updateStatus();
               }}
-              size="medium"
+              size="m"
               variant="brand"
               loading={isRequestPending('/Change_Exposed_Booking_Status')}
             >

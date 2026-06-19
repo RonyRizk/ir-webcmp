@@ -23,6 +23,7 @@ export class IrSalesByChannelTable {
   handlePropertiesChange() {
     this.setupProperties();
   }
+
   private setupProperties() {
     const map: Map<number, string> = new Map();
     for (const property of this.allowedProperties) {
@@ -34,103 +35,108 @@ export class IrSalesByChannelTable {
   private handleLoadMore = () => {
     this.visibleCount = Math.min(this.visibleCount + 10, this.records.length);
   };
+
   render() {
-    const visibleRecords = this.records.slice(0, this.visibleCount);
+    const records = this.records ?? [];
+    const visibleRecords = records.slice(0, this.visibleCount);
     const isSingleProperty = this.mode === 'property';
 
+    if (records.length === 0) {
+      return (
+        <wa-card class="channel-table__card">
+          <div class="channel-table__empty-wrapper">
+            <ir-empty-state message="No sales data found."></ir-empty-state>
+          </div>
+        </wa-card>
+      );
+    }
+
     return (
-      <div class="table-container h-100 p-1 m-0 mb-2 table-responsive">
-        <table class="table" data-testid="hk_tasks_table">
-          <thead class="table-header">
-            <tr>
-              <th class="text-left">Channel</th>
-              <th class="text-center">Room nights</th>
-              <th class="text-right">Room Revenue</th>
-              <th class={`sales-by-channel-table__progress-col ${!isSingleProperty ? 'single' : ''}`}></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {this.records.length === 0 && (
+      <wa-card class="channel-table__card">
+        <div class="channel-table__scroll">
+          <table class="table data-table" data-testid="hk_tasks_table">
+            <thead class="table-header">
               <tr>
-                <td colSpan={5} style={{ height: '300px' }}>
-                  No data found.
-                </td>
+                <th class="cell--left">Channel</th>
+                <th class="cell--center">Room nights</th>
+                <th class="cell--right">Room Revenue</th>
+                <th class={`sales-by-channel-table__progress-col ${!isSingleProperty ? 'single' : ''}`}></th>
               </tr>
-            )}
-            {visibleRecords.map(record => {
-              const mainPercentage = `${parseFloat(record.PCT.toString()).toFixed(2)}%`;
-              const secondaryPercentage = record.last_year ? `${parseFloat(record.last_year.PCT.toString()).toFixed(2)}%` : null;
+            </thead>
+            <tbody>
+              {visibleRecords.map(record => {
+                const mainPercentage = `${parseFloat(record.PCT.toString()).toFixed(2)}%`;
+                const secondaryPercentage = record.last_year ? `${parseFloat(record.last_year.PCT.toString()).toFixed(2)}%` : null;
 
-              return (
-                <tr data-testid={`record_row`} class={{ 'task-table-row ir-table-row': true }}>
-                  <td class="text-left">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.SOURCE ? 'font-weight-bold' : ''}`}>{record.SOURCE}</p>
-                      {record.last_year?.SOURCE && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {record.last_year.SOURCE}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.NIGHTS ? 'font-weight-bold' : ''}`}>{record.NIGHTS}</p>
-                      {record.last_year?.NIGHTS && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {record.last_year.NIGHTS}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td class="text-right ">
-                    <div class="d-flex flex-column" style={{ gap: '0.25rem' }}>
-                      <p class={`p-0 m-0 ${record.last_year?.REVENUE ? 'font-weight-bold' : ''}`}>{formatAmount(record.currency, record.REVENUE)}</p>
-                      {record.last_year?.REVENUE && (
-                        <p class="p-0 mx-0" style={{ marginTop: '0.25rem', marginBottom: '0' }}>
-                          {formatAmount(record.currency, record.last_year.REVENUE)}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td class={`sales-by-channel-table__progress-col ${!isSingleProperty ? 'single' : ''}`}>
-                    {isSingleProperty && (
-                      <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
-                        <ir-progress-indicator percentage={mainPercentage}></ir-progress-indicator>
-                        {record.last_year?.PCT && <ir-progress-indicator percentage={secondaryPercentage} color="secondary"></ir-progress-indicator>}
+                return (
+                  <tr data-testid="record_row" class={{ 'task-table-row ir-table-row': true }}>
+                    <td class="cell--left">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.SOURCE ? 'value--primary' : ''}>{record.SOURCE}</p>
+                        {record.last_year?.SOURCE && <p class="value--previous">{record.last_year.SOURCE}</p>}
                       </div>
-                    )}
+                    </td>
+                    <td class="cell--center">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.NIGHTS ? 'value--primary' : ''}>{record.NIGHTS}</p>
+                        {record.last_year?.NIGHTS && <p class="value--previous">{record.last_year.NIGHTS}</p>}
+                      </div>
+                    </td>
+                    <td class="cell--right">
+                      <div class="cell-stack">
+                        <p class={record.last_year?.REVENUE ? 'value--primary' : ''}>{formatAmount(record.currency, record.REVENUE)}</p>
+                        {record.last_year?.REVENUE && <p class="value--previous">{formatAmount(record.currency, record.last_year.REVENUE)}</p>}
+                      </div>
+                    </td>
+                    <td class={`sales-by-channel-table__progress-col ${!isSingleProperty ? 'single' : ''}`}>
+                      {isSingleProperty && (
+                        <div class="cell-stack">
+                          <div class="occ-row">
+                            <span class="occ-label">{mainPercentage}</span>
+                            <wa-progress-bar class="occ-bar" value={parseFloat(record.PCT.toString())}></wa-progress-bar>
+                          </div>
+                          {record.last_year?.PCT && (
+                            <div class="occ-row">
+                              <span class="occ-label">{secondaryPercentage}</span>
+                              <wa-progress-bar class="occ-bar occ-bar--previous" value={parseFloat(record.last_year.PCT.toString())}></wa-progress-bar>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            {isSingleProperty && (
+              <tfoot>
+                <tr style={{ fontSize: '12px' }}>
+                  <td colSpan={3}></td>
+                  <td class="legend-cell">
+                    <div class="legend-row">
+                      <div class="legend-item">
+                        <div class="legend-dot legend-dot--current"></div>
+                        <p>Selected period</p>
+                      </div>
+                      <div class="legend-item">
+                        <div class="legend-dot legend-dot--previous"></div>
+                        <p>Previous year</p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-          {isSingleProperty && (
-            <tfoot>
-              <tr style={{ fontSize: '12px' }}>
-                <td colSpan={4}>
-                  <div class={'d-flex align-items-center justify-content-end'} style={{ gap: '1rem', paddingTop: '0.5rem' }}>
-                    <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                      <div class="legend bg-primary"></div>
-                      <p class="p-0 m-0">Selected period </p>
-                    </div>
-                    <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-                      <div class="legend secondary"></div>
-                      <p class="p-0 m-0">Previous year</p>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
+              </tfoot>
+            )}
+          </table>
+          {this.visibleCount < records.length && (
+            <div class="channel-table__load-more">
+              <ir-custom-button variant="neutral" appearance="outlined" size="s" onClickHandler={this.handleLoadMore}>
+                Load More
+              </ir-custom-button>
+            </div>
           )}
-        </table>
-        {this.visibleCount < this.records.length && (
-          <div class={'d-flex mx-auto'}>
-            <ir-button class="mx-auto" size="sm" text="Load More" onClickHandler={this.handleLoadMore}></ir-button>
-          </div>
-        )}
-      </div>
+        </div>
+      </wa-card>
     );
   }
 }

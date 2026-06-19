@@ -314,7 +314,7 @@ export class IrPaymentFolioForm {
         >
           <wa-select
             id={this.controlIds.transactionType}
-            size="small"
+            size="s"
             onwa-hide={event => this.stopEventPropagation(event)}
             onwa-show={event => this.stopEventPropagation(event)}
             placeholder="Select..."
@@ -342,7 +342,7 @@ export class IrPaymentFolioForm {
           >
             <wa-select
               id={this.controlIds.paymentMethod}
-              size="small"
+              size="s"
               label={`${this.folioData.payment_type?.code === '001' ? 'Payment' : 'Refund'} method`}
               onwa-show={event => this.stopEventPropagation(event)}
               onwa-hide={event => this.stopEventPropagation(event)}

@@ -7,9 +7,10 @@ import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { CalendarModalEvent } from '@/models/property-types';
 import { compareTime, createDateWithOffsetAndHour } from '@/utils/booking';
-import { BookingColor, IOtaNotes } from '@/models/booking.dto';
+import { BookingColor, IOtaNotes, Room } from '@/models/booking.dto';
 import { PropertyService } from '@/services/property.service';
 import { CalendarSidebarState } from '../igloo-calendar';
+import { HbPreference } from '@/types/enums';
 //import { transformNewBLockedRooms } from '../../../utils/booking';
 
 @Component({
@@ -130,16 +131,19 @@ export class IglBookingEventHover {
   private getArrivalTime() {
     return this.bookingEvent.ARRIVAL_TIME;
   }
-
-  private getRatePlan() {
-    if (!this.bookingEvent) {
-      return;
-    }
+  private get room(): Room {
     const currentRoom = this.bookingEvent?.booking?.rooms?.find(room => room.assigned_units_pool === this.bookingEvent.ID);
     if (!currentRoom) {
       console.warn(`Couldn't find room with pool ${this.bookingEvent.ID}`);
       return null;
     }
+    return currentRoom;
+  }
+  private getRatePlan() {
+    if (!this.bookingEvent) {
+      return;
+    }
+    const currentRoom = this.room;
     let str = '';
     str += currentRoom.rateplan['short_name'];
     if (currentRoom.rateplan['is_non_refundable']) {
@@ -424,7 +428,9 @@ export class IglBookingEventHover {
 
     return true;
   }
-
+  private get isHalfBoard() {
+    return this.room?.rateplan?.meal_plan?.code === '003';
+  }
   private getInfoElement() {
     console.log(this.bookingEvent);
     return (
@@ -524,7 +530,13 @@ export class IglBookingEventHover {
           <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhone()}></ir-label>
         )}
         {this.getRatePlan() && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_RatePlan}:`} content={this.getRatePlan()}></ir-label>
+          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_RatePlan}:`} content={this.getRatePlan()}>
+            {this.isHalfBoard && (
+              <wa-badge appearance="filled" variant={this.room?.hb_preference ? 'brand' : 'warning'}>
+                {this.room?.hb_preference === HbPreference.Lunch ? 'With lunch' : this.room?.hb_preference === HbPreference.Dinner ? 'With dinner' : 'Choose lunch or dinner'}
+              </wa-badge>
+            )}
+          </ir-label>
         )}
         {this.bookingEvent.DEPARTURE_TIME?.code !== '000' && (
           <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`Departure time:`} content={this.bookingEvent.DEPARTURE_TIME?.description}></ir-label>

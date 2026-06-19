@@ -1,5 +1,4 @@
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
-
 import locales from '@/stores/locales.store';
 import moment from 'moment';
 import { CountrySalesFilter } from '../types';
@@ -14,8 +13,6 @@ export class IrSalesFilters {
   @Prop() baseFilters: CountrySalesFilter;
 
   @State() filters: CountrySalesFilter;
-
-  @State() collapsed: boolean = false;
   @State() window: string;
 
   @Event() applyFilters: EventEmitter<CountrySalesFilter>;
@@ -34,146 +31,103 @@ export class IrSalesFilters {
     e.stopPropagation();
     this.applyFilters.emit(this.filters);
   }
+
   private resetFilters(e: CustomEvent) {
     e.stopImmediatePropagation();
     e.stopPropagation();
     this.filters = this.baseFilters;
+    this.window = this.baseFilters.WINDOW.toString();
     this.applyFilters.emit(this.filters);
   }
+
   render() {
     return (
-      <div class="card mb-0 p-1 d-flex flex-column sales-filters-card">
-        <div class="d-flex align-items-center justify-content-between sales-filters-header">
-          <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={18} width={18}>
-              <path
-                fill="currentColor"
-                d="M3.9 54.9C10.5 40.9 24.5 32 40 32l432 0c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9 320 448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6l0-79.1L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"
-              />
-            </svg>
-            <h4 class="m-0 p-0 flex-grow-1">{locales.entries.Lcz_Filters}</h4>
-          </div>
-          <ir-button
-            variant="icon"
-            id="drawer-icon"
-            data-toggle="collapse"
-            data-target="#salesFiltersCollapse"
-            aria-expanded={this.collapsed ? 'true' : 'false'}
-            aria-controls="salesFiltersCollapse"
-            class="mr-1 collapse-btn toggle-collapse-btn"
-            icon_name={this.collapsed ? 'closed_eye' : 'open_eye'}
-            onClickHandler={() => {
-              this.collapsed = !this.collapsed;
-            }}
-            style={{ '--icon-size': '1.6rem' }}
-          ></ir-button>
-        </div>
-        <div class="m-0 p-0 collapse filters-section" id="salesFiltersCollapse">
-          <div class="d-flex flex-column" style={{ gap: '0.5rem' }}>
-            <fieldset class="pt-1 filter-group">
-              <label htmlFor="rooms" class="m-0 px-0" style={{ paddingBottom: '0.25rem' }}>
-                Rooms
-              </label>
-              <ir-select
-                selectedValue={this.filters?.BOOK_CASE}
-                selectId="rooms"
-                showFirstOption={false}
-                onSelectChange={e =>
-                  this.updateFilter({
-                    BOOK_CASE: e.detail,
-                  })
-                }
-                data={[
-                  { text: 'Booked', value: '001' },
-                  { text: 'Stayed', value: '002' },
-                ]}
-              ></ir-select>
-            </fieldset>
-            <fieldset class="pt-1 filter-group">
-              <label htmlFor="period" class="px-0 m-0" style={{ paddingBottom: '0.25rem' }}>
-                Selected period
-              </label>
-              <div class="d-flex flex-column date-filter-group" style={{ gap: '0.5rem' }}>
-                <ir-select
-                  selectedValue={this.window}
-                  onSelectChange={e => {
-                    const dateDiff = Number(e.detail);
-                    const today = moment();
-                    this.updateFilter({
-                      WINDOW: dateDiff,
-                      TO_DATE: today.format('YYYY-MM-DD'),
-                      FROM_DATE: today.add(-dateDiff, 'days').format('YYYY-MM-DD'),
-                    });
-                    this.window = e.detail;
-                  }}
-                  selectId="period"
-                  // showFirstOption={false}
-                  firstOption="..."
-                  data={[
-                    { text: 'For the past 7 days', value: '7' },
-                    { text: 'For the past 14 days', value: '14' },
-                    { text: 'For the past 30 days', value: '30' },
-                    { text: 'For the past 60 days', value: '60' },
-                    { text: 'For the past 90 days', value: '90' },
-                    { text: 'For the past 365 days', value: '365' },
-                  ]}
-                ></ir-select>
-                <p class="m-0 p-0 text-center">Or</p>
-                <ir-range-picker
-                  onDateRangeChanged={e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    const { fromDate, toDate, wasFocused } = e.detail;
-                    this.updateFilter({
-                      FROM_DATE: fromDate.format('YYYY-MM-DD'),
-                      TO_DATE: toDate.format('YYYY-MM-DD'),
-                    });
-                    if (wasFocused) this.window = '';
-                    // this.dates = { from: fromDate, to: toDate };
-                  }}
-                  fromDate={moment(this.filters.FROM_DATE, 'YYYY-MM-DD')}
-                  toDate={moment(this.filters.TO_DATE, 'YYYY-MM-DD')}
-                  maxDate={moment().format('YYYY-MM-DD')}
-                  withOverlay={false}
-                ></ir-range-picker>
-              </div>
-            </fieldset>
-            <div class="d-flex align-items-center mt-1 mb-2 compare-year-toggle" style={{ gap: '0.5rem' }}>
-              <label htmlFor="compare-prev-year" style={{ paddingBottom: '0.25rem' }}>
-                Compare with previous year
-              </label>
-              <ir-checkbox
-                checked={this.filters?.include_previous_year}
-                checkboxId="compare-prev-year"
-                onCheckChange={e => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                  this.updateFilter({ include_previous_year: e.detail });
-                }}
-              ></ir-checkbox>
-            </div>
+      <ir-filter-card>
+        <wa-radio-group
+          label="Rooms"
+          orientation="horizontal"
+          size="s"
+          style={{ width: '100%' }}
+          value={this.filters?.BOOK_CASE}
+          onchange={(e: CustomEvent) => {
+            this.updateFilter({ BOOK_CASE: (e.target as any).value });
+          }}
+        >
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="001">
+            Booked
+          </wa-radio>
+          <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="002">
+            Stayed
+          </wa-radio>
+        </wa-radio-group>
 
-            <div class="d-flex align-items-center justify-content-end filter-actions" style={{ gap: '1rem' }}>
-              <ir-button
-                btn_type="button"
-                data-testid="reset"
-                text={locales.entries.Lcz_Reset}
-                size="sm"
-                btn_color="secondary"
-                onClickHandler={e => this.resetFilters(e)}
-              ></ir-button>
-              <ir-button
-                btn_type="button"
-                data-testid="apply"
-                isLoading={this.isLoading}
-                text={locales.entries.Lcz_Apply}
-                size="sm"
-                onClickHandler={e => this.applyFiltersEvt(e)}
-              ></ir-button>
-            </div>
-          </div>
+        <wa-select
+          label="Selected period"
+          size="s"
+          value={this.window}
+          defaultValue={this.window}
+          onchange={(e: CustomEvent) => {
+            const val = (e.target as HTMLSelectElement).value;
+            const dateDiff = Number(val);
+            this.updateFilter({
+              WINDOW: dateDiff,
+              TO_DATE: moment().format('YYYY-MM-DD'),
+              FROM_DATE: moment().subtract(dateDiff, 'days').format('YYYY-MM-DD'),
+            });
+            this.window = val;
+          }}
+        >
+          <wa-option value="7">For the past 7 days</wa-option>
+          <wa-option value="14">For the past 14 days</wa-option>
+          <wa-option value="30">For the past 30 days</wa-option>
+          <wa-option value="60">For the past 60 days</wa-option>
+          <wa-option value="90">For the past 90 days</wa-option>
+          <wa-option value="365">For the past 365 days</wa-option>
+        </wa-select>
+
+        <div class="or-divider">
+          <span class="or-divider__line"></span>
+          <span class="or-divider__text">Or</span>
+          <span class="or-divider__line"></span>
         </div>
-      </div>
+
+        <ir-date-range-filter
+          label="Date range"
+          fromDate={this.filters?.FROM_DATE}
+          toDate={this.filters?.TO_DATE}
+          maxDate={moment().format('YYYY-MM-DD')}
+          selectionMode="auto"
+          showQuickActions={false}
+          withClear={false}
+          onDatesChanged={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            const { from, to } = e.detail;
+            this.updateFilter({ FROM_DATE: from, TO_DATE: to });
+            this.window = '';
+          }}
+        ></ir-date-range-filter>
+
+        <wa-checkbox
+          checked={this.filters?.include_previous_year}
+          onchange={(e: CustomEvent) => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.updateFilter({ include_previous_year: (e.target as HTMLInputElement).checked });
+          }}
+        >
+          Compare with previous year
+        </wa-checkbox>
+
+        <div slot="footer">
+          <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
+            {locales.entries?.Lcz_Reset ?? 'Reset'}
+          </ir-custom-button>
+          <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
+            {locales.entries?.Lcz_Apply ?? 'Apply'}
+          </ir-custom-button>
+        </div>
+      </ir-filter-card>
     );
   }
 }

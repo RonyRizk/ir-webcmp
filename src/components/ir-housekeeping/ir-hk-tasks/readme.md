@@ -36,8 +36,7 @@
 - [ir-tasks-table](ir-tasks-table)
 - [ir-dialog](../../ui/ir-dialog)
 - [ir-custom-button](../../ui/ir-custom-button)
-- [ir-sidebar](../../ui/ir-sidebar)
-- [ir-hk-archive](ir-hk-archive)
+- [ir-hk-archive-drawer](ir-hk-archive-drawer)
 
 ### Graph
 ```mermaid
@@ -49,16 +48,17 @@ graph TD;
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-dialog
   ir-hk-tasks --> ir-custom-button
-  ir-hk-tasks --> ir-sidebar
-  ir-hk-tasks --> ir-hk-archive
+  ir-hk-tasks --> ir-hk-archive-drawer
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-tasks-table --> ir-tasks-header
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
@@ -70,16 +70,18 @@ graph TD;
   ir-tasks-table-pagination --> ir-button
   ir-tasks-table-pagination --> ir-pagination
   ir-pagination --> ir-custom-button
-  ir-sidebar --> ir-icon
-  ir-hk-archive --> ir-title
-  ir-hk-archive --> ir-select
-  ir-hk-archive --> ir-range-picker
-  ir-hk-archive --> ir-button
-  ir-hk-archive --> ir-tooltip
-  ir-hk-archive --> ir-sidebar
-  ir-hk-archive --> ir-booking-details
-  ir-title --> ir-icon
-  ir-range-picker --> ir-date-picker
+  ir-hk-archive-drawer --> ir-drawer
+  ir-hk-archive-drawer --> ir-date-range-filter
+  ir-hk-archive-drawer --> ir-custom-button
+  ir-hk-archive-drawer --> ir-empty-state
+  ir-hk-archive-drawer --> ir-tooltip
+  ir-hk-archive-drawer --> ir-booking-details-drawer
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
+  ir-booking-details-drawer --> ir-drawer
+  ir-booking-details-drawer --> ir-booking-details
   ir-booking-details --> ir-spinner
   ir-booking-details --> ir-toast
   ir-booking-details --> ir-interceptor
@@ -140,6 +142,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -153,8 +156,6 @@ graph TD;
   ir-payment-folio-form --> ir-date-select
   ir-payment-folio-form --> ir-validator
   ir-payment-folio-form --> ir-input
-  ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
@@ -180,6 +181,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -283,8 +286,6 @@ graph TD;
   ir-cl-invoice-dialog --> ir-cl-invoice-form
   ir-cl-invoice-dialog --> ir-custom-button
   ir-cl-invoice-form --> ir-date-range-filter
-  ir-date-range-filter --> ir-date-select
-  ir-date-range-filter --> ir-custom-button
   ir-guest-info-drawer --> ir-drawer
   ir-guest-info-drawer --> ir-guest-info-form
   ir-guest-info-drawer --> ir-custom-button

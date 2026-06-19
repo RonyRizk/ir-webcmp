@@ -2,7 +2,10 @@ import { ClickOutside } from '@/decorators/ClickOutside';
 import { createSlotManager } from '@/utils/slot';
 import { Component, Element, Event, EventEmitter, Host, Method, Prop, State, Watch, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
-
+export type DateChangeEvent = {
+  start: moment.Moment | null;
+  end: moment.Moment | null;
+};
 @Component({
   tag: 'ir-date-select',
   styleUrl: 'ir-date-select.css',
@@ -27,7 +30,7 @@ export class IrDateSelect {
   /**
    * The initially selected date; can be a `Date` object or a string recognized by `AirDatepicker`.
    */
-  @Prop({ mutable: true, reflect: true }) date: string | Date | null = null;
+  @Prop({ mutable: true, reflect: true }) date: string | Moment | null = null;
 
   /**
    * Enables multiple dates.
@@ -55,12 +58,12 @@ export class IrDateSelect {
   /**
    * The earliest date that can be selected.
    */
-  @Prop() minDate?: string | Date;
+  @Prop() minDate?: string | Moment;
 
   /**
    * The latest date that can be selected.
    */
-  @Prop() maxDate?: string | Date;
+  @Prop() maxDate?: string | Moment;
 
   /**
    * Disables the input and prevents interaction.
@@ -126,10 +129,7 @@ export class IrDateSelect {
 
   @Event() datePickerFocus: EventEmitter<void>;
   @Event() datePickerBlur: EventEmitter<void>;
-  @Event() dateChanged: EventEmitter<{
-    start: moment.Moment | null;
-    end: moment.Moment | null;
-  }>;
+  @Event() dateChanged: EventEmitter<DateChangeEvent>;
 
   private static instanceCounter = 0;
   private popupId: string;
@@ -173,24 +173,29 @@ export class IrDateSelect {
     if (newVal !== oldVal) this.isValid = newVal;
   }
 
+  @Watch('date')
+  handleDatePropChange(newDate: string | Moment | null) {
+    this.currentDate = newDate ? moment(newDate) : null;
+  }
+
   @Method()
-  async clearDatePicker() {
+  async clear() {
     this.airDatePickerRef?.clearDatePicker();
   }
 
   @Method()
-  async openDatePicker() {
+  async show() {
     this.isActive = true;
   }
 
   @ClickOutside()
   @Method()
-  async closeDatePicker() {
+  async hide() {
     this.isActive = false;
   }
 
   private togglePicker() {
-    this.isActive ? this.closeDatePicker() : this.openDatePicker();
+    this.isActive ? this.hide() : this.show();
   }
 
   private handleKeyDown(event: KeyboardEvent) {
@@ -203,7 +208,7 @@ export class IrDateSelect {
       case 'Escape':
         if (this.isActive) {
           event.preventDefault();
-          this.closeDatePicker();
+          this.hide();
         }
         break;
     }
@@ -301,7 +306,7 @@ export class IrDateSelect {
                 this.dateChanged.emit(e.detail);
                 const shouldClose = this.autoClose && (!this.range || (this.range && (e.detail.dates as any).length > 1));
                 if (shouldClose) {
-                  this.closeDatePicker();
+                  this.hide();
                 }
               }}
             />

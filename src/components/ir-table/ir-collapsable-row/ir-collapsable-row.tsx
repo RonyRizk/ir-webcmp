@@ -13,7 +13,7 @@ export class IrCollapsableRow {
   private renderCell = (cell: Cell<any, unknown>) => {
     if (cell.getIsGrouped()) {
       return (
-        <wa-button appearance="plain" size="small" class="group-expander" onClick={() => cell.row.toggleExpanded()}>
+        <wa-button appearance="plain" size="s" class="group-expander" onClick={() => cell.row.toggleExpanded()}>
           <wa-icon style={{ fontSize: '0.875rem' }} slot="start" name={cell.row.getIsExpanded() ? 'chevron-down' : 'chevron-up'}></wa-icon>
           {flexRender(cell.column.columnDef.cell, cell.getContext())} <span slot="end">({cell.row.subRows.length})</span>
         </wa-button>
@@ -46,7 +46,7 @@ export class IrCollapsableRow {
           >
             <div class={{ 'd-flex align-items-center': true }}>
               {index === 0 && (
-                <wa-button onClick={() => (this.isActive = !this.isActive)} size="small" appearance="plain">
+                <wa-button onClick={() => (this.isActive = !this.isActive)} size="s" appearance="plain">
                   <wa-icon name={this.isActive ? 'chevron-up' : 'chevron-down'}></wa-icon>
                 </wa-button>
               )}

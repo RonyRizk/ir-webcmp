@@ -7,10 +7,10 @@
 
 ## Properties
 
-| Property    | Attribute    | Description                                                                      | Type     | Default     |
-| ----------- | ------------ | -------------------------------------------------------------------------------- | -------- | ----------- |
-| `src`       | `src`        | URL of the PDF to display                                                        | `string` | `undefined` |
-| `workerSrc` | `worker-src` | Override the pdf.js worker URL (defaults to unpkg CDN). Read once at first load. | `string` | `undefined` |
+| Property    | Attribute    | Description                                                                              | Type     | Default     |
+| ----------- | ------------ | ---------------------------------------------------------------------------------------- | -------- | ----------- |
+| `src`       | `src`        | URL of the PDF to display                                                                | `string` | `undefined` |
+| `workerSrc` | `worker-src` | Override the pdf.js worker URL (defaults to the bundled asset). Read once at first load. | `string` | `undefined` |
 
 
 ## Dependencies

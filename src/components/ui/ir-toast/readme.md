@@ -7,9 +7,9 @@
 
 ## Properties
 
-| Property   | Attribute  | Description                                                                                                         | Type                                                           | Default         |
-| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------- |
-| `position` | `position` | Position where toasts will appear. Options include: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`. | `"bottom-left" \| "bottom-right" \| "top-left" \| "top-right"` | `'bottom-left'` |
+| Property   | Attribute  | Description                                                                                                         | Type                                                           | Default       |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------- |
+| `position` | `position` | Position where toasts will appear. Options include: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`. | `"bottom-left" \| "bottom-right" \| "top-left" \| "top-right"` | `'top-right'` |
 
 
 ## Dependencies
@@ -24,23 +24,16 @@
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
- - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-departures](../../ir-departures)
  - [ir-financial-actions](../../ir-financial-actions)
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
- - [ir-housekeeping](../../ir-housekeeping)
  - [ir-login](../../ir-login)
- - [ir-meal-report](../../ir-meal-report)
- - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
  - [ir-page](../ir-page)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reset-password](../../ir-reset-password)
- - [ir-sales-by-channel](../../ir-sales-by-channel)
- - [ir-sales-by-country](../../ir-sales-by-country)
- - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-unbookable-rooms](../../ir-unbookable-rooms)
  - [ir-user-management](../../ir-user-management)
 
@@ -52,7 +45,7 @@
 ```mermaid
 graph TD;
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   igl-book-property-container --> ir-toast
   igloo-calendar --> ir-toast
   ir-agents --> ir-toast
@@ -61,23 +54,16 @@ graph TD;
   ir-booking-email-logs --> ir-toast
   ir-booking-listing --> ir-toast
   ir-channel --> ir-toast
-  ir-daily-revenue --> ir-toast
   ir-departures --> ir-toast
   ir-financial-actions --> ir-toast
   ir-ghs-onboarding --> ir-toast
   ir-guest-info --> ir-toast
   ir-hk-tasks --> ir-toast
-  ir-housekeeping --> ir-toast
   ir-login --> ir-toast
-  ir-meal-report --> ir-toast
-  ir-monthly-bookings-report --> ir-toast
   ir-page --> ir-toast
   ir-payment-option --> ir-toast
   ir-queue-manager --> ir-toast
   ir-reset-password --> ir-toast
-  ir-sales-by-channel --> ir-toast
-  ir-sales-by-country --> ir-toast
-  ir-tax-service-categories --> ir-toast
   ir-unbookable-rooms --> ir-toast
   ir-user-management --> ir-toast
   style ir-toast fill:#f9f,stroke:#333,stroke-width:4px

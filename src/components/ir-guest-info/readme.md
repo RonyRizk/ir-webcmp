@@ -19,11 +19,10 @@
 
 ## Events
 
-| Event             | Description | Type                                                                                                 |
-| ----------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `closeSideBar`    |             | `CustomEvent<null>`                                                                                  |
-| `resetBookingEvt` |             | `CustomEvent<null>`                                                                                  |
-| `toast`           |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event             | Description | Type                |
+| ----------------- | ----------- | ------------------- |
+| `closeSideBar`    |             | `CustomEvent<null>` |
+| `resetBookingEvt` |             | `CustomEvent<null>` |
 
 
 ## Dependencies
@@ -53,7 +52,7 @@ graph TD;
   ir-guest-info --> ir-textarea
   ir-guest-info --> ir-button
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

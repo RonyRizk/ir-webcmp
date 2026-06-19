@@ -111,7 +111,7 @@ export class IrBookingAssignItems {
     const extras = this.items.filter(i => i.type === 'extra');
 
     return (
-      <Host size="small">
+      <Host size="s">
         <div class="assign-container">
           <p class="assign-intro">Select services for the Agent folio; others remain on the Guest folio.</p>
 

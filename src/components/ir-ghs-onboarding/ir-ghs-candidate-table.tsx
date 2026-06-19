@@ -88,7 +88,7 @@ export class IrGhsCandidateTable {
             </div>
             <div class="ir-ghs-candidate-table__controls">
               <wa-select 
-                size="small"
+                size="s"
                 value={this.selectedCountryId?.toString() || ''}
                 defaultValue={this.selectedCountryId?.toString() || ''}
                 class="ir-ghs-candidate-table__country-select"
@@ -108,7 +108,7 @@ export class IrGhsCandidateTable {
               </wa-select>
               <div class="ir-ghs-candidate-table__search-wrapper">
                 <ir-input 
-                    size="small" 
+                    size="s" 
                     placeholder="Search by name or aname..." 
                     value={this.searchQuery}
                     onText-change={(e: CustomEvent) => {

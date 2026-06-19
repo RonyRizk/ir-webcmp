@@ -276,7 +276,7 @@ export class IglApplicationInfo {
             (this.bookingType === 'PLUS_BOOKING' || this.bookingType === 'ADD_ROOM' || this.bookingType === 'EDIT_BOOKING') && (
               <wa-select
                 with-clear
-                size="small"
+                size="s"
                 class="fd-application-info__select"
                 placeholder={locales.entries.Lcz_Assignunits}
                 data-testid="unit"
@@ -300,7 +300,7 @@ export class IglApplicationInfo {
             <ir-validator value={this.guestInfo?.bed_preference} schema={z.string().nonempty()}>
               <wa-select
                 with-clear
-                size="small"
+                size="s"
                 class="fd-application-info__select"
                 placeholder={locales.entries.Lcz_BedConfiguration}
                 data-testid="bed_configuration"
@@ -334,7 +334,7 @@ export class IglApplicationInfo {
           <div class="fd-application-info__infant">
             <p class="fd-application-info__infant-label">Any of the children below 3 years?</p>
             <wa-select
-              size="small"
+              size="s"
               class="fd-application-info__select fd-application-info__select--inline"
               placeholder={locales.entries['No'] || 'No'}
               value={this.guestInfo?.infant_nbr?.toString()}

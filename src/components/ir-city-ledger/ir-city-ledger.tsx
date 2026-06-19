@@ -177,7 +177,7 @@ export class IrCityLedger {
           </i>
           <ir-autocomplete
             slot="page-header"
-            // size="medium"
+            // size="m"
             placeholder="Select agent"
             class="city-ledger__agents-autocomplete"
             onText-change={(e: CustomEvent<string>) => {

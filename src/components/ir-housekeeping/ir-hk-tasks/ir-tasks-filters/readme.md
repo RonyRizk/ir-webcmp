@@ -27,12 +27,15 @@
 
 ### Depends on
 
+- [ir-filter-card](../../../ir-filter-card)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-hk-tasks --> ir-tasks-filters
   style ir-tasks-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

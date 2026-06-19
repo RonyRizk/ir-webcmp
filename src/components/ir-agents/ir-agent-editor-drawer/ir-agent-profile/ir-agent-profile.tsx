@@ -46,7 +46,7 @@ export class IrAgentProfile {
           <div class="agent-form-group">
             <ir-validator schema={AgentBaseSchema?.shape?.agent_type_code} value={agent?.agent_type_code} valueEvent="change" data-testid="agent-profile-agent-type-validator">
               <wa-select
-                size="small"
+                size="s"
                 placeholder="Select agent type ..."
                 value={agent?.agent_type_code?.code}
                 defaultValue={agent?.agent_type_code?.code}
@@ -120,7 +120,7 @@ export class IrAgentProfile {
                 placeholder="Codename"
                 value={agent?.reference}
                 data-testid="agent-profile-reference-input"
-                onText-change={(e: CustomEvent<string>) => this.updateField({ reference: e.detail })}
+                onText-change={(e: CustomEvent<string>) => this.updateField({ reference: e.detail || null })}
               />
             </ir-validator>
           </div>
@@ -215,14 +215,14 @@ export class IrAgentProfile {
                 // hint="Additional email address to receive booking notifications"
                 value={agent?.email_copied_upon_booking}
                 data-testid="agent-profile-email-bcc-input"
-                onText-change={(e: CustomEvent<string>) => this.updateField({ email_copied_upon_booking: e.detail })}
+                onText-change={(e: CustomEvent<string>) => this.updateField({ email_copied_upon_booking: e.detail || null })}
               />
             </ir-validator>
 
             <ir-validator schema={AgentBaseSchema.shape.notes} value={agent?.notes} valueEvent="input change" data-testid="agent-profile-notes-validator">
               <wa-textarea
                 placeholder="Note"
-                size="small"
+                size="s"
                 value={agent?.notes}
                 defaultValue={agent?.notes}
                 data-testid="agent-profile-notes-textarea"

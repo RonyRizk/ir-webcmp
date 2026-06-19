@@ -105,7 +105,7 @@ export class IrBookingCityLedger {
             <div key={row._rowId} class="folio-row">
               <div class="folio-row__header">
                 <div class="folio-row__meta">
-                  {/* <wa-tag size="small" variant={row.status.variant as any}>
+                  {/* <wa-tag size="s" variant={row.status.variant as any}>
                   {row.status.label}
                   {row.status.id === 'billed' && <wa-icon name="lock"></wa-icon>}
                 </wa-tag> */}
@@ -135,7 +135,7 @@ export class IrBookingCityLedger {
                         }
                       }}
                     >
-                      <wa-button size="small" class="folio-row__action-trigger" appearance="plain" slot="trigger">
+                      <wa-button size="s" class="folio-row__action-trigger" appearance="plain" slot="trigger">
                         <wa-icon name="ellipsis-vertical" class="folio-row__action-trigger-icon"></wa-icon>
                       </wa-button>
 
@@ -180,7 +180,7 @@ export class IrBookingCityLedger {
           <ir-custom-button
             slot="header-actions"
             id="booking-city-ledger-add-btn"
-            size="small"
+            size="s"
             variant="neutral"
             appearance="plain"
             onClickHandler={() => {
@@ -233,10 +233,10 @@ export class IrBookingCityLedger {
         >
           <p>Are you sure you want to delete this entry? This action cannot be undone.</p>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button size="medium" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
+            <ir-custom-button size="m" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
               Cancel
             </ir-custom-button>
-            <ir-custom-button size="medium" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
+            <ir-custom-button size="m" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
               Delete
             </ir-custom-button>
           </div>

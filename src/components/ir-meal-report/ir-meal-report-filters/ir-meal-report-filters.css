@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.ir-meal-report-filters__warning {
+  padding: var(--wa-space-xs);
+  border: 1px solid var(--wa-color-warning-200);
+  border-radius: var(--wa-border-radius-m);
+  background: var(--wa-color-warning-50);
+  color: var(--wa-color-warning-700);
+  font-size: var(--wa-font-size-x-small);
+}

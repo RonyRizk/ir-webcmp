@@ -29,10 +29,10 @@ export class IrReallocationDrawer {
       >
         {this.open && <ir-reallocation-form pool={this.pool} formId={this._id} booking={this.booking} identifier={this.roomIdentifier}></ir-reallocation-form>}
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button size="medium" data-drawer="close" variant="neutral" appearance="filled">
+          <ir-custom-button size="m" data-drawer="close" variant="neutral" appearance="filled">
             Cancel
           </ir-custom-button>
-          <ir-custom-button form={this._id} size="medium" loading={isRequestPending('/ReAllocate_Exposed_Room')} type="submit" variant="brand">
+          <ir-custom-button form={this._id} size="m" loading={isRequestPending('/ReAllocate_Exposed_Room')} type="submit" variant="brand">
             Confirm
           </ir-custom-button>
         </div>

@@ -311,7 +311,7 @@ export class IglPropertyBookedBy {
                 country={this.countries.find(c => c.id === this.bookedByData.countryId)}
               ></ir-country-picker>
               <ir-mobile-input
-                size="small"
+                size="s"
                 onMobile-input-change={e => {
                   this.handleDataChange('contactNumber', { target: { value: e.detail.formattedValue } });
                 }}
@@ -322,7 +322,7 @@ export class IglPropertyBookedBy {
                 countries={this.countries}
               ></ir-mobile-input>
               <wa-select
-                size="small"
+                size="s"
                 label={locales.entries.Lcz_YourArrivalTime}
                 data-testid="arrival_time"
                 aria-disabled={String(Boolean(this.isButtonPressed && this.bookedByData.selectedArrivalTime.code === ''))}
@@ -341,7 +341,7 @@ export class IglPropertyBookedBy {
             <div class="p-0 flex-fill  ml-md-3 d-flex flex-column" style={{ gap: '0.5rem' }}>
               <wa-textarea
                 onchange={event => this.handleDataChange('message', event)}
-                size="small"
+                size="s"
                 value={this.bookedByData.message}
                 defaultValue={this.bookedByData.message}
                 label={locales.entries.Lcz_AnyMessageForUs}
@@ -350,7 +350,7 @@ export class IglPropertyBookedBy {
               {this.paymentMethods.length > 1 && (
                 <wa-select
                   label={'Payment Method'}
-                  size="small"
+                  size="s"
                   value={booking_store?.selectedPaymentMethod?.code}
                   onchange={e =>
                     modifyBookingStore('selectedPaymentMethod', {

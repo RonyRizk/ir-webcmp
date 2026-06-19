@@ -23,10 +23,10 @@ export class IglSplitBookingDrawer {
       <ir-drawer open={this.open} label={`Split unit ${this.room?.unit['name']}`}>
         {this.open && <igl-split-booking-form booking={this.booking} identifier={this.identifier}></igl-split-booking-form>}
         <div slot="footer">
-          <ir-custom-button size="medium" appearance="filled" variant="neutral" data-drawer="close">
+          <ir-custom-button size="m" appearance="filled" variant="neutral" data-drawer="close">
             Cancel
           </ir-custom-button>
-          <ir-custom-button form="split-booking-form" type="submit" size="medium" appearance="accent" variant="brand">
+          <ir-custom-button form="split-booking-form" type="submit" size="m" appearance="accent" variant="brand">
             Confirm
           </ir-custom-button>
         </div>

@@ -277,7 +277,7 @@ export class IrOtp {
                 ref={el => (this.inputRefs[index] = el as HTMLInputElement)}
                 type={this.type}
                 inputmode={this.numbersOnly ? 'numeric' : 'text'}
-                class="otp-digit form-control input-sm"
+                class="otp-digit"
                 maxlength="1"
                 placeholder={this.placeholder}
                 disabled={this.disabled}

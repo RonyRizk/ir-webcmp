@@ -303,7 +303,7 @@ export class IrBookingEditorHeader {
           <div class="booking-editor-header__container">
             {!this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM', 'SPLIT_BOOKING']) && (
               <wa-select
-                size="small"
+                size="s"
                 placeholder={locales.entries.Lcz_Source}
                 value={booking_store.bookingDraft.source?.id?.toString()}
                 defaultValue={booking_store.bookingDraft.source?.id}
@@ -338,7 +338,7 @@ export class IrBookingEditorHeader {
                 <ir-validator value={adults} schema={this.adultsSchema}>
                   <wa-select
                     class="booking-editor-header__adults-select"
-                    size="small"
+                    size="s"
                     placeholder={locales.entries.Lcz_AdultsCaption}
                     value={adults?.toString()}
                     defaultValue={adults?.toString()}
@@ -354,7 +354,7 @@ export class IrBookingEditorHeader {
                 {calendar_data.property.adult_child_constraints.child_max_nbr > 0 && (
                   <wa-select
                     class="booking-editor-header__children-select"
-                    size="small"
+                    size="s"
                     placeholder={this.childrenSelectPlaceholder}
                     value={children?.toString()}
                     defaultValue={children?.toString()}
@@ -374,7 +374,7 @@ export class IrBookingEditorHeader {
             </ir-custom-button>
           </div>
           {booking_store.roomTypes?.length > 0 && !this.isLoading && (
-            <wa-callout size="small" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
+            <wa-callout size="s" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
               {/* Including taxes and fees. */}
               {calendar_data.tax_statement}
             </wa-callout>

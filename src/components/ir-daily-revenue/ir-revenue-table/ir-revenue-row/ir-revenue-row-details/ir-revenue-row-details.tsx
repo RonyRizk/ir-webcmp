@@ -31,12 +31,9 @@ export class IrRevenueRowDetails {
                 <span class="ir-revenue-row-detail__value">{this.payment.user}</span>
               </div>
               <div class="ir-revenue-row-detail__booking">
-                <ir-button
-                  variant="default"
-                  btn_color="link"
-                  text={this.payment.bookingNbr}
-                  class="ir-revenue-row-detail__booking-btn"
-                  size="sm"
+                <ir-custom-button
+                  link
+                  style={{ marginLeft: '1rem' }}
                   onClickHandler={e => {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
@@ -47,8 +44,9 @@ export class IrRevenueRowDetails {
                       type: 'booking',
                     });
                   }}
-                  btnStyle={{ width: 'fit-content', margin: '0', padding: '0', fontSize: 'inherit', textAlign: 'center', lineHeight: '1.2' }}
-                ></ir-button>
+                >
+                  {this.payment.bookingNbr}
+                </ir-custom-button>
               </div>
             </div>
           </div>

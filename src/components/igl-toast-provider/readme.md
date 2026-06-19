@@ -32,7 +32,7 @@ Type: `Promise<void>`
 | Name      | Type                                                                                                                                | Description |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `message` | `string`                                                                                                                            |             |
-| `options` | `{ variant?: "danger" \| "success" \| "neutral" \| "warning" \| "primary"; duration?: number; closable?: boolean; icon?: string; }` |             |
+| `options` | `{ variant?: "danger" \| "neutral" \| "success" \| "warning" \| "primary"; duration?: number; closable?: boolean; icon?: string; }` |             |
 
 #### Returns
 

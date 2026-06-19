@@ -161,13 +161,13 @@ export class IrBookingPricingForm {
     return (
       <form id={this.formId} class="pricing-form" onSubmit={this.handleSubmit.bind(this)} novalidate>
         {hasDisabledInput && (
-          <wa-callout variant="warning" size="small">
+          <wa-callout variant="warning" size="s">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
             Locked nightly rates cannot be edited in case they have been invoiced. You can void the invoice with a credit note to update the rates and recreate a new one
           </wa-callout>
         )}
 
-        <wa-callout size="small" variant="neutral">
+        <wa-callout size="s" variant="neutral">
           {calendar_data.property.tax_statement}
         </wa-callout>
 

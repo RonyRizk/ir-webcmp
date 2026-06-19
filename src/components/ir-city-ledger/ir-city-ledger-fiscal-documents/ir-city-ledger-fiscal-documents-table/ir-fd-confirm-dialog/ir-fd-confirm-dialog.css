@@ -10,3 +10,50 @@
   justify-content: flex-end;
   gap: 0.5rem;
 }
+
+.void-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.goodwill-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.goodwill-amount__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--wa-color-text-normal, #111827);
+}
+
+.goodwill-amount__input {
+  width: 100%;
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.9375rem;
+  border: 1px solid var(--wa-color-border-normal, #d1d5db);
+  border-radius: var(--wa-border-radius-m, 0.375rem);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.goodwill-amount__input:focus {
+  border-color: var(--wa-color-brand-500, #6366f1);
+  box-shadow: 0 0 0 2px var(--wa-color-brand-100, #e0e7ff);
+}
+.confirm-dialog__radio-title,
+.confirm-dialog__radio-hint {
+  padding: 0;
+  margin: 0;
+}
+.confirm-dialog__radio-hint {
+  display: block;
+  color: var(--wa-form-control-hint-color);
+  font-weight: var(--wa-form-control-hint-font-weight);
+  line-height: var(--wa-form-control-hint-line-height);
+  margin-block-start: 0.5em;
+  font-size: var(--wa-font-size-smaller);
+}

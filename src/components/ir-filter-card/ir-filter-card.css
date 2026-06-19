@@ -1,0 +1,67 @@
+@import url('../../assets/webawesome/component/host.css');
+
+:host {
+  display: block;
+  min-width: 20vw;
+  height: 100%;
+  flex: 1;
+}
+
+/* Header row */
+.filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filters__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filters__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: var(--wa-color-text-quiet);
+}
+
+.filters__title {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+  font-weight: var(--wa-font-weight-heading);
+  color: var(--wa-color-text-normal);
+}
+
+/* Collapsible body */
+.filters__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m, 1rem);
+}
+
+/* Collapse is driven by the `filters__card__collapsed` class, which the
+   component toggles in JS (via matchMedia) — never from a CSS media query.
+   Toggling a shadow ::part() display across a media-query boundary is not
+   reliably re-invalidated during fast resizes, which caused the body to stay
+   visible when shrinking the viewport quickly. */
+.filters__card__collapsed::part(body) {
+  display: none;
+}
+
+/* Actions row */
+.filters__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+::slotted([slot='footer']) {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

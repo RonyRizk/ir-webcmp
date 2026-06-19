@@ -25,9 +25,9 @@
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-toast](../ui/ir-toast)
-- [ir-interceptor](../ir-interceptor)
-- [ir-button](../ui/ir-button)
+- [ir-page](../ui/ir-page)
+- [ir-custom-button](../ui/ir-custom-button)
+- [ir-sales-by-channel-summary](ir-sales-by-channel-summary)
 - [ir-sales-by-channel-filters](ir-sales-by-channel-filters)
 - [ir-sales-by-channel-table](ir-sales-by-channel-table)
 
@@ -35,27 +35,32 @@
 ```mermaid
 graph TD;
   ir-sales-by-channel --> ir-loading-screen
-  ir-sales-by-channel --> ir-toast
-  ir-sales-by-channel --> ir-interceptor
-  ir-sales-by-channel --> ir-button
+  ir-sales-by-channel --> ir-page
+  ir-sales-by-channel --> ir-custom-button
+  ir-sales-by-channel --> ir-sales-by-channel-summary
   ir-sales-by-channel --> ir-sales-by-channel-filters
   ir-sales-by-channel --> ir-sales-by-channel-table
-  ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
-  ir-sales-by-channel-filters --> ir-filters-panel
-  ir-sales-by-channel-filters --> ir-select
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-item
+  ir-sales-by-channel-summary --> ir-metric-card
+  ir-sales-by-channel-filters --> ir-filter-card
   ir-sales-by-channel-filters --> ir-m-combobox
-  ir-sales-by-channel-filters --> ir-range-picker
-  ir-sales-by-channel-filters --> ir-checkbox
-  ir-filters-panel --> ir-button
-  ir-range-picker --> ir-date-picker
-  ir-sales-by-channel-table --> ir-progress-indicator
-  ir-sales-by-channel-table --> ir-button
+  ir-sales-by-channel-filters --> ir-date-range-filter
+  ir-sales-by-channel-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
+  ir-sales-by-channel-table --> ir-empty-state
+  ir-sales-by-channel-table --> ir-custom-button
   ir-secure-tasks --> ir-sales-by-channel
   style ir-sales-by-channel fill:#f9f,stroke:#333,stroke-width:4px
 ```

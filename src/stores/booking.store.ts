@@ -270,7 +270,7 @@ export function setBookingDraft(params: Partial<BookingDraft>) {
  * Returns the linked travel agent if the source type is TRAVEL_AGENCY.
  */
 export function resolveAgentFromBookingSource(source: BookingSource): Agent | null {
-  const matchedSource = calendar_data.property.allowed_booking_sources.find(s => s.id.toString() === source.id.toString());
+  const matchedSource = calendar_data.property?.allowed_booking_sources?.find(s => s.id.toString() === source.id.toString());
 
   if (matchedSource?.type === 'TRAVEL_AGENCY') {
     const agent = calendar_data.property.agents?.find(a => a.id.toString() === matchedSource.tag);

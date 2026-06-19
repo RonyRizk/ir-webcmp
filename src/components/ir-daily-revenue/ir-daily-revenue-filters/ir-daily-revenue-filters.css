@@ -2,48 +2,22 @@
   display: block;
 }
 
-.revenue-filter__date-picker-icon {
-  position: absolute;
-  inset: 0;
-  left: 0.75rem;
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  transform: translateY(-0.15rem);
-}
-:host {
-  display: block;
-  height: 100%;
-}
 .or-divider {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 1rem 0;
 }
 
 .or-divider__line {
   flex: 1;
   height: 1px;
-  background-color: #dee2e6;
+  background-color: var(--wa-color-surface-border, #dee2e6);
 }
 
 .or-divider__text {
-  font-size: 0.75rem;
-  color: #6c757d;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet, #6c757d);
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-@media (min-width: 768px) {
-  :host {
-    width: 300px;
-  }
-  .collapse-btn {
-    display: none;
-  }
-  #dailyRevenueFiltersCollapse.collapse:not(.show) {
-    display: block;
-  }
 }

@@ -1,4 +1,4 @@
-import { SetDepartureTimeProps, SetDepartureTimePropsSchema } from './types';
+import { SetDepartureTimeProps, SetDepartureTimePropsSchema, SetHbPreferenceProps, SetHbPreferencePropsSchema } from './types';
 // import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 // import { DayData } from '../../models/DayType';
 // import axios from 'axios';
@@ -851,6 +851,11 @@ export class BookingService {
       console.log(error);
       throw new Error(error);
     }
+  }
+  public async setHbPreference(props: SetHbPreferenceProps) {
+    const payload = SetHbPreferencePropsSchema.parse(props);
+    const { data } = await axios.post('/Set_HB_Preference', payload);
+    return data;
   }
   public async ackExposedRevision(props: AckExposedRevisionProps) {
     const payload = AckExposedRevisionPropsSchema.parse(props);

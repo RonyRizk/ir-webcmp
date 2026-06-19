@@ -240,7 +240,7 @@ export class IrPagination {
               onchange={e => this.handlePageSizeChange(+(e.target as any).value)}
               aria-label={`Current page ${this.currentPage} of ${this.pages}`}
               disabled={this.disabled}
-              size="small"
+              size="s"
               defaultValue={String(this.pageSize)}
             >
               {this.pageSizes.map(size => (
@@ -276,7 +276,7 @@ export class IrPagination {
                 onchange={e => this.handlePageChange(+(e.target as any).value, 'direct')}
                 aria-label={`Current page ${this.currentPage} of ${this.pages}`}
                 disabled={this.disabled}
-                size="small"
+                size="s"
                 defaultValue={this.currentPage ? this.currentPage?.toString() : '1'}
               >
                 {Array.from(Array(this.pages), (_, i) => i + 1).map(i => (

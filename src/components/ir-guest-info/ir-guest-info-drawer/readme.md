@@ -18,12 +18,11 @@
 
 ## Events
 
-| Event                   | Description | Type                                                                                                 |
-| ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `guestChanged`          |             | `CustomEvent<GuestChangedEvent>`                                                                     |
-| `guestInfoDrawerClosed` |             | `CustomEvent<{ source: Element; }>`                                                                  |
-| `resetBookingEvt`       |             | `CustomEvent<null>`                                                                                  |
-| `toast`                 |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
+| Event                   | Description | Type                                |
+| ----------------------- | ----------- | ----------------------------------- |
+| `guestChanged`          |             | `CustomEvent<GuestChangedEvent>`    |
+| `guestInfoDrawerClosed` |             | `CustomEvent<{ source: Element; }>` |
+| `resetBookingEvt`       |             | `CustomEvent<null>`                 |
 
 
 ## Dependencies

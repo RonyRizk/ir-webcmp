@@ -268,7 +268,7 @@ export class IrFiscalDocumentsTable {
                 this.handleAction(e.detail.item.value, row);
               }}
             >
-              <wa-button slot="trigger" size="small" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
+              <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
                 <wa-icon name="ellipsis-vertical" style={{ fontSize: '1.2rem' }}></wa-icon>
               </wa-button>
 
@@ -326,7 +326,7 @@ export class IrFiscalDocumentsTable {
             <p class="fiscal-table__date-prompt-title">Select a date range to get started</p>
             {hasDate && (
               <wa-animation iterations={1} play id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
-                <ir-custom-button size="small" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
+                <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
                   Load Documents
                 </ir-custom-button>

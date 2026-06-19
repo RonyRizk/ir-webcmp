@@ -5,7 +5,6 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { IglBookPropertyPayloadAddRoom, TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
-import { IToast } from '@components/ui/ir-toast/toast';
 import { ICountry, IEntries } from '@/models/IBooking';
 import { IPaymentAction, PaymentService } from '@/services/payment.service';
 import Token from '@/models/Token';
@@ -74,6 +73,7 @@ export class IrBookingDetails {
   @State() rawTransactions: ClTx[] = [];
   @State() clLoading: boolean = false;
   @State() clError: string | null = null;
+  @State() agents: Agent[] = [];
 
   /**
    * Booking number used to fetch booking details.
@@ -179,12 +179,6 @@ export class IrBookingDetails {
    */
   @Event() closeSidebar: EventEmitter<null>;
 
-  /**
-   * Emits toast notifications to the parent context.
-   * Carries toast configuration such as message, type, and duration.
-   */
-  @Event() toast: EventEmitter<IToast>;
-
   componentWillLoad() {
     if (this.ticket !== '') {
       this.token.setToken(this.ticket);
@@ -238,7 +232,8 @@ export class IrBookingDetails {
       case 'book-delete':
         return;
       case 'menu':
-        window.location.href = 'https://x.igloorooms.com/manage/acbookinglist.aspx';
+        window.history.back();
+        // window.location.href = 'https://x.igloorooms.com/manage/acbookinglist.aspx';
         return;
       case 'room-add':
         (this.bookingItem as IglBookPropertyPayloadAddRoom) = {
@@ -317,7 +312,6 @@ export class IrBookingDetails {
   @Listen('editExtraService')
   handleEditExtraService(e: CustomEvent) {
     this.selectedService = e.detail;
-    console.log(this.selectedService);
     this.sidebarState = 'extra_service';
   }
   @Listen('openPrintScreen')
@@ -356,16 +350,16 @@ export class IrBookingDetails {
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
 
-    if (!booking?.agent) {
-      this.agent = null;
+    const pid = propertyId ?? this.property_id;
+    this.agent = this.agents?.find(a => a.id === booking?.agent?.id) ?? null;
+
+    if (!this.agent) {
       this.folioRows = [];
       this.rawTransactions = [];
       return;
     }
-    this.agent = await this.agentService.getExposedAgent({ id: booking.agent.id });
     if (isAgentMode(this.agent)) {
       await this.fetchCityLedger(booking);
-      const pid = propertyId ?? this.property_id;
       if (pid) {
         this.unsubscribeRealtime = realtimeService.subscribe(pid, msg => {
           this.handleClSocketMessage(msg);
@@ -428,7 +422,7 @@ export class IrBookingDetails {
   private async initializeApp() {
     try {
       this.isLoading = true;
-      const [roomResponse, languageTexts, countriesList, bookingDetails, setupEntries] = await Promise.all([
+      const [roomResponse, languageTexts, countriesList, bookingDetails, setupEntries, agents] = await Promise.all([
         this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
@@ -442,7 +436,9 @@ export class IrBookingDetails {
           '_ARRIVAL_TIME',
           '_SVC_CATEGORY',
         ]),
+        this.agentService.getExposedAgents({ property_id: this.propertyid || 0 }),
       ]);
+      this.agents = agents;
       const resolvedPropertyId = roomResponse?.My_Result?.id;
       await this.loadAgentAndFolio(bookingDetails, resolvedPropertyId);
       this.property_id = resolvedPropertyId;
@@ -583,6 +579,7 @@ export class IrBookingDetails {
         )}
 
         <ir-booking-header
+          agents={this.agents}
           booking={this.booking}
           hasCloseButton={this.hasCloseButton}
           hasDelete={this.hasDelete}
@@ -652,7 +649,7 @@ export class IrBookingDetails {
         >
           <p>{this.modalState?.message}</p>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
+            <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
             <ir-custom-button
@@ -662,7 +659,7 @@ export class IrBookingDetails {
                 e.stopPropagation();
                 this.handleModalConfirm();
               }}
-              size="medium"
+              size="m"
               variant="brand"
             >
               {locales.entries.Lcz_Confirm}

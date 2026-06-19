@@ -65,7 +65,7 @@ export class IglBookPropertyFooter {
         <ir-custom-button
           type={type}
           form={form}
-          size={'medium'}
+          size={'m'}
           loading={isLoading}
           appearance={appearance}
           variant={variant}

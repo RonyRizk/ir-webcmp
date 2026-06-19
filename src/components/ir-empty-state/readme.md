@@ -32,12 +32,19 @@
  - [ir-departures-table](../ir-departures/ir-departures-table)
  - [ir-extra-services](../ir-booking-details/ir-extra-services)
  - [ir-guest-billing](../ir-billing/ir-guest-billing)
+ - [ir-hk-archive-drawer](../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-invoice-form](../ir-invoice/ir-invoice-form)
+ - [ir-meal-count-summary](../ir-meal-report/ir-meal-count-summary)
+ - [ir-meal-guest-list](../ir-meal-report/ir-meal-guest-list)
+ - [ir-monthly-bookings-report-table](../ir-monthly-bookings-report/ir-monthly-bookings-report-table)
  - [ir-notifications](../ir-notifications)
  - [ir-payments-folio](../ir-booking-details/ir-payment-details/ir-payments-folio)
  - [ir-pickup-view](../ir-booking-details/ir-pickup-view)
  - [ir-queue-manager](../ir-queue-manager)
  - [ir-reallocation-form](../ir-reallocation-drawer/ir-reallocation-form)
+ - [ir-revenue-table](../ir-daily-revenue/ir-revenue-table)
+ - [ir-sales-by-channel-table](../ir-sales-by-channel/ir-sales-by-channel-table)
+ - [ir-sales-table](../ir-sales-by-country/ir-sales-table)
 
 ### Graph
 ```mermaid
@@ -50,12 +57,19 @@ graph TD;
   ir-departures-table --> ir-empty-state
   ir-extra-services --> ir-empty-state
   ir-guest-billing --> ir-empty-state
+  ir-hk-archive-drawer --> ir-empty-state
   ir-invoice-form --> ir-empty-state
+  ir-meal-count-summary --> ir-empty-state
+  ir-meal-guest-list --> ir-empty-state
+  ir-monthly-bookings-report-table --> ir-empty-state
   ir-notifications --> ir-empty-state
   ir-payments-folio --> ir-empty-state
   ir-pickup-view --> ir-empty-state
   ir-queue-manager --> ir-empty-state
   ir-reallocation-form --> ir-empty-state
+  ir-revenue-table --> ir-empty-state
+  ir-sales-by-channel-table --> ir-empty-state
+  ir-sales-table --> ir-empty-state
   style ir-empty-state fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

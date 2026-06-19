@@ -29,7 +29,7 @@ export class IrGhsFilters {
           <div class="ir-ghs-filters__group">
             <label class="ir-ghs-filters__label">Countries</label>
             <wa-select 
-              size="small"
+              size="s"
               value={this.selectedCountryId?.toString() || ''}
               defaultValue={this.selectedCountryId?.toString() || ''}
               onwa-hide={e => {
@@ -53,7 +53,7 @@ export class IrGhsFilters {
             <div class="d-flex align-items-center gap-2">
                 <ir-custom-button 
                 type="button"
-                size="small" 
+                size="s" 
                 variant="neutral" 
                 appearance="filled"
                 class="ir-ghs-filters__reset-btn"
@@ -71,7 +71,7 @@ export class IrGhsFilters {
                 </ir-custom-button>
                 <ir-custom-button 
                 type="button"
-                size="small" 
+                size="s" 
                 variant="brand" 
                 appearance="accent"
                 loading={this.isLoading}

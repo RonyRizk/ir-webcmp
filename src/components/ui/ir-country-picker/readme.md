@@ -7,18 +7,18 @@
 
 ## Properties
 
-| Property          | Attribute       | Description                                                    | Type                             | Default     |
-| ----------------- | --------------- | -------------------------------------------------------------- | -------------------------------- | ----------- |
-| `autoValidate`    | `auto-validate` | Whether to automatically validate the input.                   | `boolean`                        | `false`     |
-| `countries`       | --              | List of countries to display in the dropdown.                  | `ICountry[]`                     | `[]`        |
-| `country`         | --              | Currently selected country.                                    | `ICountry`                       | `undefined` |
-| `error`           | `error`         | Whether to show an error state on the input.                   | `boolean`                        | `undefined` |
-| `label`           | `label`         | The label to display for the input.                            | `string`                         | `undefined` |
-| `placeholder`     | `placeholder`   |                                                                | `string`                         | `undefined` |
-| `propertyCountry` | --              | The property-associated country, shown separately if relevant. | `ICountry`                       | `undefined` |
-| `size`            | `size`          | The input's size.                                              | `"large" \| "medium" \| "small"` | `undefined` |
-| `testId`          | `test-id`       | Test ID for automated testing.                                 | `string`                         | `undefined` |
-| `variant`         | `variant`       |                                                                | `"default" \| "modern"`          | `'default'` |
+| Property          | Attribute       | Description                                                    | Type                                                                  | Default     |
+| ----------------- | --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- | ----------- |
+| `autoValidate`    | `auto-validate` | Whether to automatically validate the input.                   | `boolean`                                                             | `false`     |
+| `countries`       | --              | List of countries to display in the dropdown.                  | `ICountry[]`                                                          | `[]`        |
+| `country`         | --              | Currently selected country.                                    | `ICountry`                                                            | `undefined` |
+| `error`           | `error`         | Whether to show an error state on the input.                   | `boolean`                                                             | `undefined` |
+| `label`           | `label`         | The label to display for the input.                            | `string`                                                              | `undefined` |
+| `placeholder`     | `placeholder`   |                                                                | `string`                                                              | `undefined` |
+| `propertyCountry` | --              | The property-associated country, shown separately if relevant. | `ICountry`                                                            | `undefined` |
+| `size`            | `size`          | The input's size.                                              | `"l" \| "large" \| "m" \| "medium" \| "s" \| "small" \| "xl" \| "xs"` | `undefined` |
+| `testId`          | `test-id`       | Test ID for automated testing.                                 | `string`                                                              | `undefined` |
+| `variant`         | `variant`       |                                                                | `"default" \| "modern"`                                               | `'default'` |
 
 
 ## Events

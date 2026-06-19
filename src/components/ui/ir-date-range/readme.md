@@ -7,17 +7,17 @@
 
 ## Properties
 
-| Property             | Attribute              | Description                                                                                                                                     | Type                             | Default     |
-| -------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
-| `dateLabel`          | `date-label`           | Optional label text shown above the input (forwarded to ir-input).                                                                              | `string`                         | `undefined` |
-| `defaultData`        | --                     | Initial date values. Expects `{ fromDate: string \| Date, toDate: string \| Date }`. Re-initializes dates whenever this prop reference changes. | `{ [key: string]: any; }`        | `undefined` |
-| `disabled`           | `disabled`             | When `true`, the picker is disabled and cannot be opened.                                                                                       | `boolean`                        | `false`     |
-| `hint`               | `hint`                 | Optional hint text rendered below the input.                                                                                                    | `string`                         | `undefined` |
-| `maxDate`            | `max-date`             | ISO date string (YYYY-MM-DD) for the latest selectable date.                                                                                    | `string`                         | `undefined` |
-| `minDate`            | `min-date`             | ISO date string (YYYY-MM-DD) for the earliest selectable date.                                                                                  | `string`                         | `undefined` |
-| `size`               | `size`                 | Controls the visual size of the input trigger.                                                                                                  | `"large" \| "medium" \| "small"` | `'small'`   |
-| `variant`            | `variant`              | `"booking"` shows the nights badge; `"default"` hides it.                                                                                       | `"booking" \| "default"`         | `'default'` |
-| `withDateDifference` | `with-date-difference` | When `true` and `variant="booking"`, a nights badge is shown inside the input.                                                                  | `boolean`                        | `true`      |
+| Property             | Attribute              | Description                                                                                                                                     | Type                      | Default     |
+| -------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
+| `dateLabel`          | `date-label`           | Optional label text shown above the input (forwarded to ir-input).                                                                              | `string`                  | `undefined` |
+| `defaultData`        | --                     | Initial date values. Expects `{ fromDate: string \| Date, toDate: string \| Date }`. Re-initializes dates whenever this prop reference changes. | `{ [key: string]: any; }` | `undefined` |
+| `disabled`           | `disabled`             | When `true`, the picker is disabled and cannot be opened.                                                                                       | `boolean`                 | `false`     |
+| `hint`               | `hint`                 | Optional hint text rendered below the input.                                                                                                    | `string`                  | `undefined` |
+| `maxDate`            | `max-date`             | ISO date string (YYYY-MM-DD) for the latest selectable date.                                                                                    | `string`                  | `undefined` |
+| `minDate`            | `min-date`             | ISO date string (YYYY-MM-DD) for the earliest selectable date.                                                                                  | `string`                  | `undefined` |
+| `size`               | `size`                 | Controls the visual size of the input trigger.                                                                                                  | `"l" \| "m" \| "s"`       | `'s'`       |
+| `variant`            | `variant`              | `"booking"` shows the nights badge; `"default"` hides it.                                                                                       | `"booking" \| "default"`  | `'default'` |
+| `withDateDifference` | `with-date-difference` | When `true` and `variant="booking"`, a nights badge is shown inside the input.                                                                  | `boolean`                 | `true`      |
 
 
 ## Events

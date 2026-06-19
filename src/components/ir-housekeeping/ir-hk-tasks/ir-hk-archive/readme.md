@@ -14,10 +14,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-hk-tasks](..)
-
 ### Depends on
 
 - [ir-title](../../../ir-title)
@@ -61,7 +57,7 @@ graph TD;
   ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-booking-editor-drawer
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -108,6 +104,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -148,6 +145,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -293,7 +292,6 @@ graph TD;
   ir-booking-editor-guest-form --> ir-validator
   ir-booking-editor-guest-form --> ir-country-picker
   ir-booking-editor-guest-form --> ir-mobile-input
-  ir-hk-tasks --> ir-hk-archive
   style ir-hk-archive fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

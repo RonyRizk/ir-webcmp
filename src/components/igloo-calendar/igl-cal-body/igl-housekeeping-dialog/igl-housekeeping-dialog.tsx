@@ -107,13 +107,13 @@ export class IglHousekeepingDialog {
         <p style={{ margin: '0' }}>{`${this.selectedRoom?.name} is currently marked as ${this.getStatusLabel()}.`}</p>
 
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button data-dialog="close" size="medium" variant="neutral" appearance="filled">
+          <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled">
             Cancel
           </ir-custom-button>
 
           <ir-custom-button
             value="hk-toggle-clean-dirty"
-            size="medium"
+            size="m"
             variant="brand"
             appearance="outlined"
             loading={this.isLoading === 'hk-toggle-clean-dirty'}
@@ -124,7 +124,7 @@ export class IglHousekeepingDialog {
 
           <ir-custom-button
             value="hk-clean-inspect"
-            size="medium"
+            size="m"
             variant="brand"
             appearance="accent"
             loading={this.isLoading === 'hk-clean-inspect'}

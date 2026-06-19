@@ -51,7 +51,7 @@ export class IrExtraServices {
               {locales.entries.Lcz_ExtraServices}
             </p>
             <wa-tooltip for="extra_service_btn">Add extra service</wa-tooltip>
-            <ir-custom-button slot="header-actions" id="extra_service_btn" size="small" appearance="plain" variant="neutral">
+            <ir-custom-button slot="header-actions" id="extra_service_btn" size="s" appearance="plain" variant="neutral">
               <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
             </ir-custom-button>
 
@@ -92,7 +92,7 @@ export class IrExtraServices {
             {locales.entries.Lcz_ExtraServices}
           </p>
           <wa-tooltip for="extra_service_btn">Add extra service</wa-tooltip>
-          <ir-custom-button slot="header-actions" id="extra_service_btn" size="small" appearance="plain" variant="neutral">
+          <ir-custom-button slot="header-actions" id="extra_service_btn" size="s" appearance="plain" variant="neutral">
             <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
           </ir-custom-button>
           {services.length === 0 && <ir-empty-state showIcon={false}></ir-empty-state>}

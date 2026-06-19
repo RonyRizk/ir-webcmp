@@ -16,6 +16,14 @@
   border-radius: var(--wa-border-radius-m);
   box-shadow: var(--wa-shadow-l);
   overflow: hidden;
+  animation: toast-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+:host([data-placement^='bottom']) .toast-item {
+  animation-name: toast-enter-up;
+}
+:host([data-leaving]) .toast-item {
+  animation: toast-exit 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none;
 }
 .icon {
   display: flex;
@@ -33,6 +41,45 @@
   padding: var(--wa-space-l);
   color: var(--wa-color-text-normal);
 }
+::slotted([data-toast-title]) {
+  display: block;
+  font-weight: var(--wa-font-weight-semibold, 600);
+  color: var(--wa-color-text-normal);
+}
+::slotted([data-toast-description]) {
+  display: block;
+  margin-top: 2px;
+  color: var(--wa-color-text-quiet);
+}
+::slotted([data-toast-action]) {
+  display: inline-flex;
+  margin-top: var(--wa-space-s);
+  padding: 0.25rem 0.625rem;
+  border: var(--wa-border-width-s) solid var(--wa-color-surface-border);
+  border-radius: var(--wa-border-radius-s);
+  background: transparent;
+  color: var(--accent-color);
+  font: inherit;
+  font-size: var(--wa-font-size-s);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--wa-transition-fast);
+}
+::slotted([data-toast-action]:hover) {
+  background: var(--wa-color-neutral-fill-quiet);
+}
+::slotted([data-toast-action]:focus-visible) {
+  outline: 2px solid var(--wa-color-brand-fill-loud);
+  outline-offset: 2px;
+}
+.close-button wa-progress-ring {
+  --size: 30px;
+  --track-width: 2px;
+  --indicator-width: 2px;
+  --track-color: var(--wa-color-surface-border);
+  --indicator-color: var(--accent-color);
+  font-size: var(--wa-font-size-xs);
+}
 .close-button {
   flex: 0 0 auto;
   display: flex;
@@ -48,4 +95,55 @@
   font-size: inherit;
   cursor: pointer;
   transition: background-color var(--wa-transition-fast);
+}
+.close-button:hover {
+  background: var(--wa-color-neutral-fill-quiet);
+  color: var(--wa-color-text-normal);
+}
+.close-button:focus-visible {
+  outline: 2px solid var(--wa-color-brand-fill-loud);
+  outline-offset: -2px;
+}
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toast-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toast-exit {
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+@keyframes toast-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-item,
+  :host([data-placement^='bottom']) .toast-item {
+    animation: toast-fade-in 120ms linear both;
+  }
+  :host([data-leaving]) .toast-item {
+    animation: none;
+  }
 }

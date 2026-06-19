@@ -32,7 +32,7 @@ export class IrHkStaffTasksHeader {
             <span class="tasks-header__name">{this.connectedHK.NAME}</span>
           </div>
           <div class="tasks-header__actions">
-            <wa-select onchange={this.handleWaChange} defaultValue={this.language} value={this.language} size="small">
+            <wa-select onchange={this.handleWaChange} defaultValue={this.language} value={this.language} size="s">
               {LANGUAGE_OPTIONS.map(opt => (
                 <wa-option key={opt.value} value={opt.value}>
                   {opt.label}

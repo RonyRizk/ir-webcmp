@@ -262,7 +262,7 @@ export class IrApplicablePolicies {
                         type: 'OVERDUE',
                       });
                     }}
-                    size="small"
+                    size="s"
                   >
                     Pay
                   </ir-custom-button>

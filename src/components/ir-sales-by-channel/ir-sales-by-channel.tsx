@@ -220,35 +220,30 @@ export class IrSalesByChannel {
       this.isLoading = null;
     }
   }
+
   render() {
     if (this.isPageLoading) {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
       <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">Sales by Channel</h3>
-            <ir-button
-              size="sm"
-              btn_color="outline"
-              isLoading={this.isLoading === 'export'}
-              text={locales.entries.Lcz_Export}
-              onClickHandler={async e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                await this.getChannelSales(true);
-              }}
-              btnStyle={{ height: '100%' }}
-              iconPosition="right"
-              icon_name="file"
-              icon_style={{ '--icon-size': '14px' }}
-            ></ir-button>
-          </div>
-          {/* <ir-sales-by-country-summary salesReports={this.salesData}></ir-sales-by-country-summary> */}
-          <div class="d-flex flex-column flex-lg-row mt-1 " style={{ gap: '1rem' }}>
+        <ir-page label="Sales by Channel">
+          <ir-custom-button
+            slot="page-header"
+            variant="neutral"
+            appearance="outlined"
+            loading={this.isLoading === 'export'}
+            onClickHandler={async e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              await this.getChannelSales(true);
+            }}
+          >
+            <wa-icon name="download" slot="start"></wa-icon>
+            {locales.entries?.Lcz_Export}
+          </ir-custom-button>
+          <ir-sales-by-channel-summary records={this.salesData}></ir-sales-by-channel-summary>
+          <div class="channel-content-row">
             <ir-sales-by-channel-filters
               isLoading={this.isLoading === 'filter'}
               onApplyFilters={e => {
@@ -260,9 +255,9 @@ export class IrSalesByChannel {
               allowedProperties={this.allowedProperties}
               baseFilters={this.baseFilters}
             ></ir-sales-by-channel-filters>
-            <ir-sales-by-channel-table mode={this.mode} allowedProperties={this.allowedProperties} class="card mb-0" records={this.salesData}></ir-sales-by-channel-table>
+            <ir-sales-by-channel-table mode={this.mode} allowedProperties={this.allowedProperties} class="channel-table-card" records={this.salesData}></ir-sales-by-channel-table>
           </div>
-        </section>
+        </ir-page>
       </Host>
     );
   }

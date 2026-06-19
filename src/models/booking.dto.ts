@@ -289,6 +289,7 @@ export interface FinancialSnapshotEntry {
   vat_percent: number;
 }
 export interface Booking {
+  is_source_editable: boolean;
   charges: Charges;
   agent_booking_nbr: string;
   agent: {
@@ -934,6 +935,7 @@ export const ROOM_IN_OUT = {
 };
 export interface Room {
   charges: Charges;
+  hb_preference: string;
   agent: { id: number; name: string; code: string } | null;
   days: Day[];
   applicable_policies: ExposedApplicablePolicy[];

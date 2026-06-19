@@ -33,7 +33,7 @@ export class IrServiceAssigneeSelect {
           onchange={e => this.assignmentChange.emit((e.target as any).value)}
           defaultValue={this.assigneeType}
           value={this.assigneeType}
-          size="small"
+          size="s"
           label={this.label}
           orientation="vertical"
         >

@@ -60,7 +60,7 @@ export class IrPmsPaymentDueAlert {
     }
     return (
       <Host>
-        <wa-callout class="pms-payment-due-alert__callout" size="small" appearance="filled" variant="danger">
+        <wa-callout class="pms-payment-due-alert__callout" size="s" appearance="filled" variant="danger">
           <div class="pms-payment-due-alert__callout-message">
             <wa-icon style={{ color: 'var(--wa-color-danger-fill-loud)', fontSize: '1rem' }} slot="icon" name="triangle-exclamation"></wa-icon>
             <span>{combinedMessage}</span>

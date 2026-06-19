@@ -51,6 +51,7 @@ export class IrCityLedgerStatementsFilter {
             class="stmt-filters__left"
           >
             <ir-date-range-filter
+              selectionMode="auto"
               class="stmt-filters__date-picker"
               maxDate={moment().format('YYYY-MM-DD')}
               fromDate={this.fromDate}

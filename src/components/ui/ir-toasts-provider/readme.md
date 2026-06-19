@@ -27,10 +27,6 @@ Type: `Promise<string>`
 
 ## Dependencies
 
-### Used by
-
- - [ir-test-cmp](../../ir-test-cmp)
-
 ### Depends on
 
 - [ir-toast-item](../ir-toast-item)
@@ -39,7 +35,6 @@ Type: `Promise<string>`
 ```mermaid
 graph TD;
   ir-toasts-provider --> ir-toast-item
-  ir-test-cmp --> ir-toasts-provider
   style ir-toasts-provider fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

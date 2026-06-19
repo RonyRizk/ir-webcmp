@@ -4,8 +4,7 @@ import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
 import calendar_data from '@/stores/calendar-data';
 import { updateHKStore } from '@/stores/housekeeping.store';
-import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-import { IToast } from '@components/ui/ir-toast/toast';
+import { Component, Listen, Prop, State, Watch, h } from '@stencil/core';
 import locales from '@/stores/locales.store';
 import { BookingService } from '@/services/booking-service/booking.service';
 @Component({
@@ -23,8 +22,6 @@ export class IrHousekeeping {
 
   @State() isLoading = false;
   @State() frequencies: IEntries[] = [];
-
-  @Event() toast: EventEmitter<IToast>;
 
   private roomService = new RoomService();
   private houseKeepingService = new HouseKeepingService();
@@ -98,15 +95,10 @@ export class IrHousekeeping {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <Host>
-        <ir-interceptor></ir-interceptor>
-        <ir-toast></ir-toast>
-        <section class="ir-page__container">
-          <h3 class="page-title">{locales.entries.Lcz_HouseKeepingAndCheckInSetup}</h3>
-          <ir-hk-operations-card frequencies={this.frequencies}></ir-hk-operations-card>
-          {calendar_data.housekeeping_enabled && <ir-hk-team></ir-hk-team>}
-        </section>
-      </Host>
+      <ir-page label={locales.entries.Lcz_HouseKeepingAndCheckInSetup}>
+        <ir-hk-operations-card frequencies={this.frequencies}></ir-hk-operations-card>
+        {calendar_data.housekeeping_enabled && <ir-hk-team></ir-hk-team>}
+      </ir-page>
     );
   }
 }

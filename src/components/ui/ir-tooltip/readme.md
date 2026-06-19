@@ -22,12 +22,14 @@
 ### Used by
 
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
+ - [ir-hk-archive-drawer](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-monthly-bookings-report-table](../../ir-monthly-bookings-report/ir-monthly-bookings-report-table)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-hk-archive --> ir-tooltip
+  ir-hk-archive-drawer --> ir-tooltip
   ir-monthly-bookings-report-table --> ir-tooltip
   style ir-tooltip fill:#f9f,stroke:#333,stroke-width:4px
 ```

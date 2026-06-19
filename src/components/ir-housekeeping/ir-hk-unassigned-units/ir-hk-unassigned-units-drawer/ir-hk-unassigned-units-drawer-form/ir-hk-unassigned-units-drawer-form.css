@@ -3,6 +3,7 @@
   min-width: 20rem;
   --ir-root-active-color: #1e9ff2;
   --ir-root-inactive-color: #d2d2d2;
+  text-align: start !important;
 }
 table {
   width: 100%;

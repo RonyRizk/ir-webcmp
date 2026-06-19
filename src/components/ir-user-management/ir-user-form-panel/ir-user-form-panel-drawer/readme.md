@@ -69,7 +69,7 @@ graph TD;
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-title --> ir-icon
   ir-user-management-table --> ir-user-form-panel-drawer
   style ir-user-form-panel-drawer fill:#f9f,stroke:#333,stroke-width:4px

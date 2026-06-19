@@ -29,8 +29,6 @@ export class IrDailyRevenue {
     date: moment().format('YYYY-MM-DD'),
     from_date: null,
     to_date: null,
-    // from_date: moment().add(-1, 'days').format('YYYY-MM-DD'),
-    // to_date: moment().format('YYYY-MM-DD'),
     users: null,
   };
   @State() sideBarEvent: SidebarOpenEvent | null;
@@ -85,34 +83,6 @@ export class IrDailyRevenue {
     this.sideBarEvent = null;
   };
 
-  private renderSidebarBody() {
-    if (!this.sideBarEvent) {
-      return;
-    }
-    switch (this.sideBarEvent.type) {
-      case 'booking':
-        return (
-          <ir-booking-details
-            slot="sidebar-body"
-            hasPrint
-            hasReceipt
-            hasCloseButton
-            onCloseSidebar={this.handleSidebarClose}
-            is_from_front_desk
-            propertyid={this.property_id}
-            hasRoomEdit
-            hasRoomDelete
-            bookingNumber={this.sideBarEvent.payload.bookingNumber.toString()}
-            ticket={this.ticket}
-            language={this.language}
-            hasRoomAdd
-          ></ir-booking-details>
-        );
-      default:
-        return null;
-    }
-  }
-
   private async initializeApp() {
     this.isPageLoading = true;
 
@@ -163,6 +133,7 @@ export class IrDailyRevenue {
       this.isPageLoading = false;
     }
   }
+
   private groupPaymentsByName(payments: FolioPayment[]): GroupedFolioPayment {
     const groupedPayment: GroupedFolioPayment = new Map();
 
@@ -243,49 +214,40 @@ export class IrDailyRevenue {
     }
     return (
       <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">Daily Revenue</h3>
-            <ir-button
-              size="sm"
-              btn_color="outline"
-              isLoading={this.isLoading === 'export'}
-              text={locales.entries?.Lcz_Export}
-              onClickHandler={async e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                await this.getPaymentReports(true);
-              }}
-              btnStyle={{ height: '100%' }}
-              iconPosition="right"
-              icon_name="file"
-              icon_style={{ '--icon-size': '14px' }}
-            ></ir-button>
-          </div>
+        <ir-page label="Daily Revenue">
+          <ir-custom-button
+            slot="page-header"
+            variant="neutral"
+            appearance="outlined"
+            loading={this.isLoading === 'export'}
+            onClickHandler={async e => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              await this.getPaymentReports(true);
+            }}
+          >
+            <wa-icon name="download" slot="start"></wa-icon>
+            {locales.entries?.Lcz_Export}
+          </ir-custom-button>
           <ir-revenue-summary
             filters={this.filters}
             previousDateGroupedPayments={this.previousDateGroupedPayments}
             groupedPayments={this.groupedPayment}
             paymentEntries={this.paymentEntries}
           ></ir-revenue-summary>
-          <div class="daily-revenue__meta">
+          <div class="revenue-content-row">
             <ir-daily-revenue-filters isLoading={this.isLoading === 'filter'} payments={this.groupedPayment}></ir-daily-revenue-filters>
-            <ir-revenue-table filters={this.filters} class={'daily-revenue__table'} paymentEntries={this.paymentEntries} payments={this.groupedPayment}></ir-revenue-table>
+            <ir-revenue-table filters={this.filters} class="revenue-table-card" paymentEntries={this.paymentEntries} payments={this.groupedPayment}></ir-revenue-table>
           </div>
-        </section>
-        <ir-sidebar
-          sidebarStyles={{
-            width: this.sideBarEvent?.type === 'booking' ? '80rem' : 'var(--sidebar-width,40rem)',
-            background: this.sideBarEvent?.type === 'booking' ? 'var(--ir-color-muted-background,#f2f3f8)' : 'white',
-          }}
+        </ir-page>
+        <ir-booking-details-drawer
           open={Boolean(this.sideBarEvent)}
-          showCloseButton={false}
-          onIrSidebarToggle={this.handleSidebarClose}
-        >
-          {this.renderSidebarBody()}
-        </ir-sidebar>
+          propertyId={this.property_id}
+          bookingNumber={this.sideBarEvent?.payload?.bookingNumber?.toString()}
+          ticket={this.ticket}
+          language={this.language}
+          onBookingDetailsDrawerClosed={e => this.handleSidebarClose(e)}
+        ></ir-booking-details-drawer>
       </Host>
     );
   }

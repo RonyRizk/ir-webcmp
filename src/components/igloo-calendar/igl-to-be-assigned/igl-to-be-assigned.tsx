@@ -299,7 +299,7 @@ export class IglToBeAssigned {
               <h2 class="tba-panel__title" id="to-be-assigned-title">
                 {locales.entries.Lcz_Assignments}
               </h2>
-              <ir-custom-button size="medium" appearance="plain" variant="neutral" onClickHandler={() => this.handleOptionEvent('closeSideMenu')}>
+              <ir-custom-button size="m" appearance="plain" variant="neutral" onClickHandler={() => this.handleOptionEvent('closeSideMenu')}>
                 <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
               </ir-custom-button>
             </header>
@@ -307,7 +307,7 @@ export class IglToBeAssigned {
             {hasDates && (
               <div class="tba-panel__toolbar">
                 <wa-select
-                  size="small"
+                  size="s"
                   aria-label={locales.entries.Lcz_Assignments}
                   value={this.selectedDate ? this.selectedDate.toString() : ''}
                   defaultValue={this.selectedDate ? this.selectedDate.toString() : ''}

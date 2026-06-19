@@ -76,7 +76,7 @@ export class IrSpinner {
   render() {
     return (
       <Host>
-        <wa-spinner style={{ fontSize: '2rem' }}></wa-spinner>
+        <wa-spinner style={{ 'fontSize': '2rem', '--track-width': '3px' }}></wa-spinner>
       </Host>
     );
   }

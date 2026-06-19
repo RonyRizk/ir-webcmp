@@ -12,7 +12,9 @@ h3 {
 ir-input-text {
   width: 300px;
 }
-
+.filters-bar__date_picker {
+  min-width: 280px;
+}
 .booking-search-field {
   margin-left: 0px;
   display: flex;

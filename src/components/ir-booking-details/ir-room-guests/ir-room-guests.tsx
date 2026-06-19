@@ -98,15 +98,15 @@ export class IrRoomGuests {
           ></ir-room-guests-form>
         )}
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button size="medium" data-drawer="close" appearance="filled" variant="neutral">
+          <ir-custom-button size="m" data-drawer="close" appearance="filled" variant="neutral">
             {locales?.entries?.Lcz_Cancel ?? 'Save'}
           </ir-custom-button>
 
-          <ir-custom-button value="save" loading={this.isLoading === 'save'} size="medium" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
+          <ir-custom-button value="save" loading={this.isLoading === 'save'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
             {locales?.entries?.Lcz_Save ?? 'Save'}
           </ir-custom-button>
           {this.checkIn && (
-            <ir-custom-button value="save_checkin" loading={this.isLoading === 'save_checkin'} size="medium" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
+            <ir-custom-button value="save_checkin" loading={this.isLoading === 'save_checkin'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
               {locales.entries?.Lcz_CheckIn ?? 'Check in'}
             </ir-custom-button>
           )}

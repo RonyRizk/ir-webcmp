@@ -1,0 +1,172 @@
+@import url('../../../common/table.css');
+
+/* #region host */
+/* Card chrome lives on :host (matches ir-city-ledger-folio-table convention).
+   Compact by design: tight cell padding and small type so the date column plus
+   three meal groups fit narrow viewports with minimal horizontal scrolling. */
+:host {
+  /* --ir-cell-padding: 0.3rem 0.45rem; */
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 200px;
+}
+/* #endregion */
+
+/* #region table */
+/* Full-width fixed layout sized via the colgroup: a comfortable date column
+   and compact numeric columns keep everything packed to the left, while the
+   last col (Dinner Ch) absorbs the leftover container width — its 100% width
+   gets clamped to whatever remains after the pixel columns (Chrome otherwise
+   inflates every column proportionally instead of honoring the pixels). At the
+   table's min-width the leftover equals a regular numeric column, so it never
+   collapses. Stays scrollable via the inherited .table--container
+   { overflow-x: auto }. */
+.meal-count__table {
+  width: 100%;
+  min-width: 560px;
+  table-layout: fixed;
+  font-size: var(--wa-font-size-m);
+}
+.meal-count__col--date {
+  width: 140px;
+}
+.meal-count__col--num {
+  width: 70px;
+}
+.meal-count__col--flex {
+  width: 100%;
+}
+/* Dinner's th spans its compact Ad/Ch pair plus the flexible leftover, so
+   center its label over the pair (twice the numeric column) instead of the
+   whole span. */
+.meal-count__table thead tr:first-child th:last-child {
+  text-align: start !important;
+}
+.meal-count__table thead tr:first-child th:last-child .meal-count__group-title {
+  width: 120px;
+  justify-content: center;
+}
+/* Roomier numeric columns on desktop; the Dinner title width tracks 2× the
+   column so its label stays over the Ad/Ch pair. */
+@media (min-width: 1024px) {
+  .meal-count__col--num {
+    width: 90px;
+  }
+  .meal-count__table thead tr:first-child th:last-child .meal-count__group-title {
+    width: 180px;
+  }
+}
+@media (min-width: 1280px) {
+  .meal-count__col--num {
+    width: 120px;
+  }
+  .meal-count__table thead tr:first-child th:last-child .meal-count__group-title {
+    width: 200px;
+  }
+}
+.cell--align-center {
+  text-align: center !important;
+}
+.cell--align-start {
+  text-align: start !important;
+}
+/* #endregion */
+
+/* #region group header */
+.meal-count__group-header {
+  text-align: center !important;
+
+  font-weight: var(--wa-font-weight-bold, 700);
+  letter-spacing: 0.02em;
+  color: var(--wa-color-text-normal, #0f172a);
+}
+.meal-count__group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.meal-count__sub-header {
+  font-weight: var(--wa-font-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--wa-color-text-quiet, #64748b);
+}
+.meal-count__subhead--ch {
+  color: var(--wa-color-text-quiet);
+}
+/* #endregion */
+
+/* #region ad-ch */
+/* Compact Ad/Ch pairing: Ad hugs the center from the right, Ch from the left,
+   so the gap falls *between* meal groups rather than between Ad and Ch.
+   Prefixed with .meal-count__table to win over shared table.css padding. */
+.meal-count__table td.meal-count__cell--ad,
+.meal-count__table thead th.meal-count__subhead--ad {
+  text-align: right !important;
+  padding-inline: 0.4rem 0.2rem !important;
+  font-weight: 600;
+}
+.meal-count__table td.meal-count__cell--ch,
+.meal-count__table thead th.meal-count__subhead--ch {
+  text-align: left !important;
+  padding-inline: 0.2rem 0.4rem !important;
+}
+/* Separator before each Ad column so every meal's Ad/Ch pair reads as a unit. */
+.meal-count__table td.meal-count__cell--ad,
+.meal-count__table thead th.meal-count__subhead--ad {
+  border-inline-start: 1px solid var(--wa-color-neutral-border-quiet, #eef1f5);
+}
+/* #endregion */
+
+/* #region cells */
+.meal-count__date {
+  font-weight: var(--wa-font-weight-medium, 500);
+  color: var(--wa-color-text-normal, #0f172a);
+  white-space: nowrap;
+}
+.meal-count__cell {
+  font-variant-numeric: tabular-nums;
+}
+.meal-count__cell--primary {
+  font-weight: var(--wa-font-weight-bold, 700);
+  color: var(--wa-color-brand-fill-loud);
+}
+.meal-count__cell--muted {
+  color: var(--wa-color-text-quiet, #64748b);
+}
+/* #endregion */
+
+/* #region totals */
+.meal-count__total-row td {
+  background: var(--wa-color-neutral-fill-quiet, #f1f5f9) !important;
+  border-top: 1px solid var(--wa-color-surface-border, #e2e8f0);
+  border-bottom: 0 !important;
+  padding: var(--ir-cell-padding) !important;
+  font-variant-numeric: tabular-nums;
+}
+.meal-count__total-label {
+  font-weight: var(--wa-font-weight-bold, 700);
+  letter-spacing: 0.03em;
+  color: var(--wa-color-text-quiet, #64748b);
+}
+.meal-count__total-value {
+  font-weight: var(--wa-font-weight-bold, 700);
+  color: var(--wa-color-brand-fill-loud);
+}
+.meal-count__total-muted {
+  color: var(--wa-color-text-quiet, #64748b);
+}
+/* #endregion */
+
+/* #region empty */
+.meal-count__empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+/* #endregion */

@@ -22,7 +22,7 @@
 | `closeModal`                        |             | `CustomEvent<null>`                     |
 | `loadingChanged`                    |             | `CustomEvent<"save" \| "save-print">`   |
 | `resetBookingEvt`                   |             | `CustomEvent<null>`                     |
-| `resetExposedCancellationDueAmount` |             | `CustomEvent<{ booking_nbr: string; }>` |
+| `resetExposedCancellationDueAmount` |             | `CustomEvent<"booking_nbr" \| Booking>` |
 
 
 ## Dependencies

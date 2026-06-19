@@ -17,11 +17,11 @@
 
 ## Events
 
-| Event           | Description | Type                                                                                        |
-| --------------- | ----------- | ------------------------------------------------------------------------------------------- |
-| `filtersChange` |             | `CustomEvent<{ period_to_check?: number; consecutive_period?: number; country?: string; }>` |
-| `filtersReset`  |             | `CustomEvent<void>`                                                                         |
-| `filtersSave`   |             | `CustomEvent<void>`                                                                         |
+| Event           | Description | Type                                                                                     |
+| --------------- | ----------- | ---------------------------------------------------------------------------------------- |
+| `filtersChange` |             | `CustomEvent<{ period_to_check: number; consecutive_period: number; country: string; }>` |
+| `filtersReset`  |             | `CustomEvent<void>`                                                                      |
+| `filtersSave`   |             | `CustomEvent<void>`                                                                      |
 
 
 ## Dependencies

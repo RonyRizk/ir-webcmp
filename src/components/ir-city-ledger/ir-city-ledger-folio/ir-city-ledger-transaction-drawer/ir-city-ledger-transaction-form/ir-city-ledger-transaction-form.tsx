@@ -259,7 +259,7 @@ export class IrCityLedgerTransactionForm {
         <ir-validator schema={transactionTypeFieldSchema} value={this.formData.transactionType} valueEvent="change">
           <wa-select
             label="Transaction Type"
-            size="small"
+            size="s"
             defaultValue={this.formData.transactionType}
             value={this.formData.transactionType}
             required
@@ -343,7 +343,7 @@ export class IrCityLedgerTransactionForm {
                   </ir-validator>
                   <ir-validator schema={taxIdFieldSchema} value={this.formData.taxId} valueEvent="change">
                     <wa-select
-                      size="small"
+                      size="s"
                       placeholder="Tax"
                       value={this.formData.taxId}
                       defaultValue={this.formData.taxId}

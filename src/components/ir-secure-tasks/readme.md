@@ -76,7 +76,7 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   igloo-calendar --> ir-toast
   igloo-calendar --> ir-interceptor
   igloo-calendar --> igl-to-be-assigned
@@ -128,7 +128,6 @@ graph TD;
   igl-housekeeping-dialog --> ir-custom-button
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
-  igl-cal-footer --> ir-new-badge
   ir-sidebar --> ir-icon
   igl-split-booking --> ir-title
   igl-split-booking --> ir-date-view
@@ -206,6 +205,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -244,6 +244,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -460,9 +462,10 @@ graph TD;
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-dialog
   ir-hk-tasks --> ir-custom-button
-  ir-hk-tasks --> ir-sidebar
-  ir-hk-tasks --> ir-hk-archive
+  ir-hk-tasks --> ir-hk-archive-drawer
+  ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-tasks-table --> ir-tasks-header
   ir-tasks-table --> ir-tasks-card
   ir-tasks-table --> ir-tasks-table-pagination
@@ -473,26 +476,23 @@ graph TD;
   ir-tasks-card --> ir-custom-button
   ir-tasks-table-pagination --> ir-button
   ir-tasks-table-pagination --> ir-pagination
-  ir-hk-archive --> ir-title
-  ir-hk-archive --> ir-select
-  ir-hk-archive --> ir-range-picker
-  ir-hk-archive --> ir-button
-  ir-hk-archive --> ir-tooltip
-  ir-hk-archive --> ir-sidebar
-  ir-hk-archive --> ir-booking-details
-  ir-range-picker --> ir-date-picker
+  ir-hk-archive-drawer --> ir-drawer
+  ir-hk-archive-drawer --> ir-date-range-filter
+  ir-hk-archive-drawer --> ir-custom-button
+  ir-hk-archive-drawer --> ir-empty-state
+  ir-hk-archive-drawer --> ir-tooltip
+  ir-hk-archive-drawer --> ir-booking-details-drawer
   ir-housekeeping --> ir-loading-screen
-  ir-housekeeping --> ir-interceptor
-  ir-housekeeping --> ir-toast
+  ir-housekeeping --> ir-page
   ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-hk-operations-card --> ir-input
   ir-hk-operations-card --> ir-dialog
   ir-hk-operations-card --> ir-custom-button
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-custom-button
-  ir-hk-team --> ir-popover
-  ir-hk-team --> ir-button
   ir-hk-team --> ir-hk-user-drawer
   ir-hk-team --> ir-hk-unassigned-units-drawer
   ir-hk-team --> ir-hk-delete-dialog
@@ -513,68 +513,60 @@ graph TD;
   ir-hk-unassigned-units-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-hk-unassigned-units-drawer-form
   ir-hk-unassigned-units-drawer --> ir-custom-button
-  ir-hk-unassigned-units-drawer-form --> ir-select
   ir-hk-delete-dialog --> ir-dialog
   ir-hk-delete-dialog --> ir-custom-button
-  ir-daily-revenue --> ir-booking-details
   ir-daily-revenue --> ir-loading-screen
-  ir-daily-revenue --> ir-toast
-  ir-daily-revenue --> ir-interceptor
-  ir-daily-revenue --> ir-button
+  ir-daily-revenue --> ir-page
+  ir-daily-revenue --> ir-custom-button
   ir-daily-revenue --> ir-revenue-summary
   ir-daily-revenue --> ir-daily-revenue-filters
   ir-daily-revenue --> ir-revenue-table
-  ir-daily-revenue --> ir-sidebar
-  ir-revenue-summary --> ir-stats-card
-  ir-stats-card --> ir-icons
-  ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-select
-  ir-daily-revenue-filters --> ir-range-picker
+  ir-daily-revenue --> ir-booking-details-drawer
+  ir-revenue-summary --> ir-metric-card
+  ir-daily-revenue-filters --> ir-filter-card
+  ir-daily-revenue-filters --> ir-date-range-filter
+  ir-daily-revenue-filters --> ir-custom-button
   ir-revenue-table --> ir-revenue-row
+  ir-revenue-table --> ir-empty-state
   ir-revenue-row --> ir-accordion
   ir-revenue-row --> ir-revenue-row-details
   ir-accordion --> ir-icons
-  ir-revenue-row-details --> ir-button
+  ir-revenue-row-details --> ir-custom-button
   ir-monthly-bookings-report --> ir-loading-screen
-  ir-monthly-bookings-report --> ir-toast
-  ir-monthly-bookings-report --> ir-interceptor
-  ir-monthly-bookings-report --> ir-button
-  ir-monthly-bookings-report --> ir-stats-card
+  ir-monthly-bookings-report --> ir-page
+  ir-monthly-bookings-report --> ir-custom-button
+  ir-monthly-bookings-report --> ir-metric-card
   ir-monthly-bookings-report --> ir-monthly-bookings-report-filter
   ir-monthly-bookings-report --> ir-monthly-bookings-report-table
-  ir-monthly-bookings-report-filter --> ir-select
-  ir-monthly-bookings-report-filter --> ir-checkbox
-  ir-monthly-bookings-report-filter --> ir-button
+  ir-monthly-bookings-report-filter --> ir-filter-card
+  ir-monthly-bookings-report-filter --> ir-custom-button
   ir-monthly-bookings-report-table --> ir-tooltip
-  ir-monthly-bookings-report-table --> ir-progress-indicator
+  ir-monthly-bookings-report-table --> ir-empty-state
   ir-sales-by-country --> ir-loading-screen
-  ir-sales-by-country --> ir-toast
-  ir-sales-by-country --> ir-interceptor
-  ir-sales-by-country --> ir-button
+  ir-sales-by-country --> ir-page
+  ir-sales-by-country --> ir-custom-button
   ir-sales-by-country --> ir-sales-by-country-summary
   ir-sales-by-country --> ir-sales-filters
   ir-sales-by-country --> ir-sales-table
-  ir-sales-by-country-summary --> ir-stats-card
-  ir-sales-filters --> ir-button
-  ir-sales-filters --> ir-select
-  ir-sales-filters --> ir-range-picker
-  ir-sales-filters --> ir-checkbox
-  ir-sales-table --> ir-progress-indicator
-  ir-sales-table --> ir-button
+  ir-sales-by-country-summary --> ir-metric-card
+  ir-sales-filters --> ir-filter-card
+  ir-sales-filters --> ir-date-range-filter
+  ir-sales-filters --> ir-custom-button
+  ir-sales-table --> ir-empty-state
+  ir-sales-table --> ir-custom-button
   ir-sales-by-channel --> ir-loading-screen
-  ir-sales-by-channel --> ir-toast
-  ir-sales-by-channel --> ir-interceptor
-  ir-sales-by-channel --> ir-button
+  ir-sales-by-channel --> ir-page
+  ir-sales-by-channel --> ir-custom-button
+  ir-sales-by-channel --> ir-sales-by-channel-summary
   ir-sales-by-channel --> ir-sales-by-channel-filters
   ir-sales-by-channel --> ir-sales-by-channel-table
-  ir-sales-by-channel-filters --> ir-filters-panel
-  ir-sales-by-channel-filters --> ir-select
+  ir-sales-by-channel-summary --> ir-metric-card
+  ir-sales-by-channel-filters --> ir-filter-card
   ir-sales-by-channel-filters --> ir-m-combobox
-  ir-sales-by-channel-filters --> ir-range-picker
-  ir-sales-by-channel-filters --> ir-checkbox
-  ir-filters-panel --> ir-button
-  ir-sales-by-channel-table --> ir-progress-indicator
-  ir-sales-by-channel-table --> ir-button
+  ir-sales-by-channel-filters --> ir-date-range-filter
+  ir-sales-by-channel-filters --> ir-custom-button
+  ir-sales-by-channel-table --> ir-empty-state
+  ir-sales-by-channel-table --> ir-custom-button
   ir-booking-listing --> ir-loading-screen
   ir-booking-listing --> ir-interceptor
   ir-booking-listing --> ir-toast
@@ -583,7 +575,7 @@ graph TD;
   ir-booking-listing --> ir-booking-details-drawer
   ir-booking-listing --> ir-guest-info-drawer
   ir-booking-listing --> ir-payment-folio
-  ir-listing-header --> ir-range-picker
+  ir-listing-header --> ir-date-range-filter
   ir-listing-header --> ir-custom-button
   ir-booking-listing-table --> ir-booking-number-cell
   ir-booking-listing-table --> ir-booked-on-cell
@@ -665,8 +657,6 @@ graph TD;
   ir-city-ledger --> ir-city-ledger-statements
   ir-city-ledger --> ir-cl-invoice-dialog
   ir-city-ledger --> ir-cl-fiscal-document-preview
-  ir-page --> ir-interceptor
-  ir-page --> ir-toast
   ir-autocomplete --> ir-input
   ir-city-ledger-toolbar --> ir-custom-button
   ir-city-ledger-folio --> ir-city-ledger-folio-filters
@@ -723,8 +713,7 @@ graph TD;
   ir-channel-mapping --> ir-button
   ir-channel-mapping --> ir-combobox
   ir-tax-service-categories --> ir-loading-screen
-  ir-tax-service-categories --> ir-toast
-  ir-tax-service-categories --> ir-interceptor
+  ir-tax-service-categories --> ir-page
   ir-tax-service-categories --> ir-custom-button
   ir-tax-service-categories --> ir-tax-input
   ir-tax-input --> ir-validator
@@ -752,15 +741,16 @@ graph TD;
   ir-ghs-candidate-table --> ir-spinner
   ir-ghs-selection-bucket --> ir-custom-button
   ir-meal-report --> ir-loading-screen
-  ir-meal-report --> ir-toast
-  ir-meal-report --> ir-interceptor
+  ir-meal-report --> ir-page
   ir-meal-report --> ir-custom-button
   ir-meal-report --> ir-meal-report-filters
-  ir-meal-report --> ir-spinner
   ir-meal-report --> ir-meal-guest-list
   ir-meal-report --> ir-meal-count-summary
+  ir-meal-report-filters --> ir-filter-card
+  ir-meal-report-filters --> ir-date-range-filter
   ir-meal-report-filters --> ir-custom-button
-  ir-meal-report-filters --> ir-range-picker
+  ir-meal-guest-list --> ir-empty-state
+  ir-meal-count-summary --> ir-empty-state
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

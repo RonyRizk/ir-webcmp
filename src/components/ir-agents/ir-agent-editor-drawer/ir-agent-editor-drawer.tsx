@@ -78,14 +78,14 @@ export class IrAgentEditorDrawer {
             ></ir-agent-editor-form>
           )}
           <div slot="footer" class="ir__drawer-footer" data-testid="agent-editor-drawer-footer">
-            <ir-custom-button size="medium" data-drawer="close" appearance="filled" variant="neutral" data-testid="agent-editor-cancel-button">
+            <ir-custom-button size="m" data-drawer="close" appearance="filled" variant="neutral" data-testid="agent-editor-cancel-button">
               Cancel
             </ir-custom-button>
             <ir-custom-button
               loading={this.loading === (this.agent?.id === -1 ? 'save&close' : 'save')}
               type="submit"
               form={this.baseId}
-              size="medium"
+              size="m"
               value={this.agent?.id === -1 ? 'save&close' : 'save'}
               appearance={this.agent?.id === -1 ? 'accent' : 'outlined'}
               variant="brand"
@@ -98,7 +98,7 @@ export class IrAgentEditorDrawer {
                 loading={this.loading === 'save&close'}
                 type="submit"
                 form={this.baseId}
-                size="medium"
+                size="m"
                 value="save&close"
                 appearance="accent"
                 variant="brand"

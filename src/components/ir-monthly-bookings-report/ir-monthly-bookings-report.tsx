@@ -1,5 +1,5 @@
 import Token from '@/models/Token';
-import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { DailyReport, DailyReportFilter } from './types';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
@@ -167,67 +167,62 @@ export class IrMonthlyBookingsReport {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
-          <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">Daily Occupancy</h3>
-            <ir-button
-              size="sm"
-              btn_color="outline"
-              isLoading={this.isLoading === 'export'}
-              text={locales.entries?.Lcz_Export}
-              onClickHandler={async e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                await this.getReports(true);
-              }}
-              btnStyle={{ height: '100%' }}
-              iconPosition="right"
-              icon_name="file"
-              icon_style={{ '--icon-size': '14px' }}
-            ></ir-button>
-          </div>
+      <ir-page label="Daily Occupancy">
+        <ir-custom-button variant="neutral" appearance="outlined" slot="page-header" loading={this.isLoading === 'export'}>
+          <wa-icon name="download" slot="start"></wa-icon>
+          {locales.entries?.Lcz_Export}
+        </ir-custom-button>
+        {/* <ir-toast></ir-toast>
+        <ir-interceptor></ir-interceptor> */}
+        <section class="report-layout">
           <section>
-            <div class="d-flex flex-column flex-md-row w-100" style={{ gap: '1rem', alignItems: 'stretch' }}>
-              <ir-stats-card
+            <div class="report-stats-row">
+              <ir-metric-card
+                class="report-metric"
                 icon={this.stats?.Occupancy_Difference_From_Previous_Month < 0 ? 'arrow-trend-down' : 'arrow-trend-up'}
-                cardTitle="Average Occupancy"
-                value={this.stats.AverageOccupancy ? this.stats?.AverageOccupancy.toFixed(2) + '%' : null}
-                subtitle={`${this.stats?.Occupancy_Difference_From_Previous_Month < 0 ? '' : '+'}${this.stats?.Occupancy_Difference_From_Previous_Month.toFixed(
-                  2,
-                )}% from last month`}
-              ></ir-stats-card>
+                label="Average Occupancy"
+                value={this.stats.AverageOccupancy ? this.stats?.AverageOccupancy.toFixed(2) : null}
+                unit="%"
+                trend={this.stats?.Occupancy_Difference_From_Previous_Month}
+                trendLabel="from last month"
+                caption={
+                  this.stats?.Occupancy_Difference_From_Previous_Month != null && this.stats?.AverageOccupancy != null
+                    ? `Last month: ${(this.stats.AverageOccupancy - this.stats.Occupancy_Difference_From_Previous_Month).toFixed(2)}%`
+                    : undefined
+                }
+              ></ir-metric-card>
 
-              <ir-stats-card
+              <ir-metric-card
+                class="report-metric"
                 icon="hotel"
-                cardTitle="Total Units"
+                label="Total Units"
                 value={this.stats?.TotalUnitsBooked ? this.stats?.TotalUnitsBooked.toString() : null}
-                subtitle="Booked"
-              ></ir-stats-card>
+                caption="Booked"
+              ></ir-metric-card>
 
-              <ir-stats-card
-                icon="user_group"
-                cardTitle="Total Guests"
+              <ir-metric-card
+                class="report-metric"
+                icon="user-group"
+                label="Total Guests"
                 value={this.stats?.Total_Guests ? this.stats?.Total_Guests?.toString() : null}
-                subtitle="Stayed"
-              ></ir-stats-card>
+                caption="Stayed"
+              ></ir-metric-card>
 
-              <ir-stats-card
+              <ir-metric-card
+                class="report-metric"
                 icon="calendar"
-                cardTitle="Peak Days"
+                label="Peak Days"
                 value={this.stats?.PeakDays.length === 0 ? null : this.stats?.PeakDays?.map(pd => moment(pd.Date, 'YYYY-MM-DD').format('D').concat('th')).join(' - ')}
-                subtitle={`${Math.max(...(this.stats.PeakDays?.map(pd => pd.OccupancyPercent) || []))}% occupancy`}
-              ></ir-stats-card>
+                caption={`${Math.max(...(this.stats.PeakDays?.map(pd => pd.OccupancyPercent) || []))}% occupancy`}
+              ></ir-metric-card>
             </div>
-            <div class="d-flex flex-column flex-lg-row mt-1 " style={{ gap: '1rem' }}>
+            <div class="report-content-row">
               <ir-monthly-bookings-report-filter isLoading={this.isLoading === 'filter'} class="filters-card" baseFilters={this.baseFilters}></ir-monthly-bookings-report-filter>
               <ir-monthly-bookings-report-table reports={this.reports}></ir-monthly-bookings-report-table>
             </div>
           </section>
         </section>
-      </Host>
+      </ir-page>
     );
   }
 }

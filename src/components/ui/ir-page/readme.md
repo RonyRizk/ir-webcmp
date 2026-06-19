@@ -13,12 +13,26 @@
 | `label`       | `label`       |             | `string` | `undefined` |
 
 
+## Shadow Parts
+
+| Part     | Description |
+| -------- | ----------- |
+| `"body"` |             |
+
+
 ## Dependencies
 
 ### Used by
 
  - [ir-city-ledger](../../ir-city-ledger)
+ - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
+ - [ir-housekeeping](../../ir-housekeeping)
+ - [ir-meal-report](../../ir-meal-report)
+ - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
+ - [ir-sales-by-channel](../../ir-sales-by-channel)
+ - [ir-sales-by-country](../../ir-sales-by-country)
+ - [ir-tax-service-categories](../../ir-tax-service-categories)
 
 ### Depends on
 
@@ -36,9 +50,16 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-city-ledger --> ir-page
+  ir-daily-revenue --> ir-page
   ir-fiscal-documents --> ir-page
+  ir-housekeeping --> ir-page
+  ir-meal-report --> ir-page
+  ir-monthly-bookings-report --> ir-page
+  ir-sales-by-channel --> ir-page
+  ir-sales-by-country --> ir-page
+  ir-tax-service-categories --> ir-page
   style ir-page fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -94,7 +94,7 @@ export class IrTasksCard {
             <wa-select
               label="Housekeeper"
               class="task-card__hk-select"
-              size="small"
+              size="s"
               placeholder="Unassigned"
               value={this.task.hkm_id ? String(this.task.hkm_id) : '0'}
               defaultValue={this.task.hkm_id ? String(this.task.hkm_id) : '0'}

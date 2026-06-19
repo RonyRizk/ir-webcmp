@@ -12,12 +12,37 @@
   font-size: 24px;
   font-weight: 500;
   text-align: center;
-  background-color: #fff;
-  padding: 0 !important;
+  padding: 0 var(--wa-form-control-padding-inline);
+
+  color: var(--wa-form-control-value-color);
+  font-size: var(--wa-form-control-value-size);
+  font-family: inherit;
+  font-weight: var(--wa-form-control-value-font-weight);
+  line-height: var(--wa-form-control-value-line-height);
+  vertical-align: middle;
+
+  background-color: var(--wa-form-control-background-color);
+  border-color: var(--wa-form-control-border-color);
+  border-style: var(--wa-form-control-border-style);
+  border-width: var(--wa-form-control-border-width);
+  border-radius: var(--wa-form-control-border-radius);
+
+  transition:
+    background-color var(--wa-transition-normal),
+    border-color var(--wa-transition-normal),
+    outline-color var(--wa-transition-fast);
+  transition-timing-function: var(--wa-transition-easing);
+  outline: var(--wa-focus-ring-style) var(--wa-focus-ring-width) transparent;
+  outline-offset: var(--wa-focus-ring-offset);
+
+  cursor: text;
+}
+.otp-digit:focus-visible {
+  outline-color: var(--wa-color-focus);
 }
 
 .otp-digit:disabled {
-  background-color: #e9ecef;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

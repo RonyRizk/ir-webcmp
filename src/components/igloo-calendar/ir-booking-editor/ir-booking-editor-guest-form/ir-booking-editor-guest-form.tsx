@@ -138,7 +138,7 @@ export class IrBookingEditorGuestForm {
             country={selects.countries.find(c => c.id.toString() === bookedByGuest.countryId?.toString())}
           ></ir-country-picker>
           <ir-mobile-input
-            size="small"
+            size="s"
             onMobile-input-change={e => {
               updateBookedByGuest({ mobile: e.detail.formattedValue });
             }}
@@ -150,7 +150,7 @@ export class IrBookingEditorGuestForm {
         </section>
         <section class={'booking-editor__form-control'}>
           <wa-select
-            size="small"
+            size="s"
             label={locales.entries.Lcz_YourArrivalTime}
             data-testid="arrival_time"
             id={v4()}
@@ -166,7 +166,7 @@ export class IrBookingEditorGuestForm {
           </wa-select>
           <wa-textarea
             onchange={event => updateBookedByGuest({ note: (event.target as HTMLTextAreaElement).value })}
-            size="small"
+            size="s"
             value={bookedByGuest.note}
             defaultValue={bookedByGuest.note}
             label={locales.entries.Lcz_AnyMessageForUs}
@@ -177,7 +177,7 @@ export class IrBookingEditorGuestForm {
               {this.paymentMethods.length > 1 && (
                 <wa-select
                   label={'Payment Method'}
-                  size="small"
+                  size="s"
                   defaultValue={booking_store?.selectedPaymentMethod?.code ?? this.paymentMethods[0].code}
                   value={booking_store?.selectedPaymentMethod?.code}
                   onchange={e =>

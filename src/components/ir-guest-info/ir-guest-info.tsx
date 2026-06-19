@@ -6,7 +6,7 @@ import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import Token from '@/models/Token';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { IToast } from '@components/ui/ir-toast/toast';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-guest-info',
@@ -29,7 +29,6 @@ export class GuestInfo {
 
   @Event() closeSideBar: EventEmitter<null>;
   @Event({ bubbles: true }) resetBookingEvt: EventEmitter<null>;
-  @Event() toast: EventEmitter<IToast>;
 
   private bookingService = new BookingService();
   private roomService = new RoomService();
@@ -85,7 +84,7 @@ export class GuestInfo {
       this.autoValidate = true;
 
       await this.bookingService.editExposedGuest(this.guest, this.booking_nbr ?? null);
-      this.toast.emit({
+      showToast({
         type: 'success',
         description: '',
         title: 'Saved Successfully',

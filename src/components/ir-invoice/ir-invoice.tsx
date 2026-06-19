@@ -178,7 +178,7 @@ export class IrInvoice {
           )}
           <div slot="footer" class="ir__drawer-footer">
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="filled"
               class="w-100 flex-fill"
               variant="neutral"
@@ -188,7 +188,7 @@ export class IrInvoice {
             >
               Cancel
             </ir-custom-button>
-            {/* <ir-custom-button value="pro_forma" type="submit" size="medium" class="w-100 flex-fill" appearance="outlined" variant="neutral" form={this._id}>
+            {/* <ir-custom-button value="pro_forma" type="submit" size="m" class="w-100 flex-fill" appearance="outlined" variant="neutral" form={this._id}>
               Proforma invoice
             </ir-custom-button> */}
             <ir-custom-button
@@ -198,7 +198,7 @@ export class IrInvoice {
               type="submit"
               form={this._id}
               class="w-100 flex-fill"
-              size="medium"
+              size="m"
               variant="brand"
               id={`confirm-btn_${this._id}`}
             >

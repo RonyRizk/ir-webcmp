@@ -179,12 +179,12 @@ export class IrBookingSourceEditorForm {
     return (
       <form id={`change-source-form-${this.booking?.booking_nbr}`} onSubmit={this.handleSubmit.bind(this)}>
         {this.booking.agent === null && this.booking?.financial?.payments?.filter(p => !p.is_city_ledger)?.length > 0 && (
-          <wa-callout size="small" variant="warning" style={{ marginBottom: '1rem' }}>
+          <wa-callout size="s" variant="warning" style={{ marginBottom: '1rem' }}>
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
             You have guest folio entries that may need to be removed and recreated in the agent folio.
           </wa-callout>
         )}
-        <wa-select label="New source" onchange={this.handleSelectChange.bind(this)} size="small" value={this.selectedSource?.id} defaultValue={this.selectedSource?.id}>
+        <wa-select label="New source" onchange={this.handleSelectChange.bind(this)} size="s" value={this.selectedSource?.id} defaultValue={this.selectedSource?.id}>
           {calendar_data?.property?.allowed_booking_sources?.map(option =>
             option.type === 'LABEL' ? (
               <small key={option.id}>{option.description}</small>

@@ -2,13 +2,13 @@ import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 
 import moment from 'moment';
-import { IToast } from '@components/ui/ir-toast/toast';
 import { User } from '@/models/Users';
 import { UserService } from '@/services/user.service';
 import { _formatTime } from '@/components/ir-booking-details/functions';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { AllowedUser } from '../types';
 import { SystemService } from '@/services/system.service';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-user-management-table',
@@ -35,7 +35,6 @@ export class IrUserManagementTable {
   @State() canEdit: boolean;
   @State() canCreate: boolean;
 
-  @Event() toast: EventEmitter<IToast>;
   @Event() resetData: EventEmitter<null>;
 
   private dialogRef: HTMLIrDialogElement;
@@ -77,7 +76,7 @@ export class IrUserManagementTable {
       base_user_type_code: this.baseUserTypeCode,
       property_id: this.property_id,
     });
-    this.toast.emit({
+    showToast({
       position: 'top-right',
       title: 'Saved Successfully',
       description: '',
@@ -108,7 +107,7 @@ export class IrUserManagementTable {
   //   try {
   //     console.log(user);
   //     await this.userService.sendVerificationEmail();
-  //     this.toast.emit({
+  //     showToast({
   //       position: 'top-right',
   //       title: `We've sent a verification email to ${this.maskEmail(user.email)}.`,
   //       description: '',
@@ -355,11 +354,11 @@ export class IrUserManagementTable {
               : `${locales.entries.Lcz_AreYouSureToUnverify} ${this.maskEmail(this.user?.email)}`}
           </span>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="medium" appearance="filled">
+            <ir-custom-button data-dialog="close" size="m" appearance="filled">
               Cancel
             </ir-custom-button>
             <ir-custom-button
-              size="medium"
+              size="m"
               loading={isRequestPending('/Handle_Exposed_User')}
               appearance="accent"
               variant={this.modalType === 'verify' ? 'brand' : 'danger'}

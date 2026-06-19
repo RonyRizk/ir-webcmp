@@ -1,10 +1,9 @@
 import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, h } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { buildSplitIndex, calculateDaysBetweenDates, getSplitRole, transformNewBooking } from '@/utils/booking';
-import { checkMealPlan, formatAmount, isBlockUnit, SelectOption } from '@/utils/utils';
+import { checkMealPlan, formatAmount, isBlockUnit, SelectOption, showToast } from '@/utils/utils';
 import { IRoomNightsData, CalendarModalEvent } from '@/models/property-types';
 import moment from 'moment';
-import { IToast } from '@components/ui/ir-toast/toast';
 import { EventsService } from '@/services/events.service';
 import locales from '@/stores/locales.store';
 import { ICountry } from '@/models/IBooking';
@@ -32,7 +31,6 @@ export class IglBookingEvent {
   @Event() showRoomNightsDialog: EventEmitter<IRoomNightsData>;
   @Event() showDialog: EventEmitter<CalendarModalEvent>;
   @Event() resetStretchedBooking: EventEmitter<string>;
-  @Event() toast: EventEmitter<IToast>;
   @Event() updateBookingEvent: EventEmitter<{ [key: string]: any }>;
 
   @State() renderElement: boolean = false;
@@ -311,8 +309,7 @@ export class IglBookingEvent {
         }
       }
     } catch (error) {
-      this.toast.emit({
-        position: 'top-right',
+      showToast({
         title: error.message,
         description: '',
         type: 'error',

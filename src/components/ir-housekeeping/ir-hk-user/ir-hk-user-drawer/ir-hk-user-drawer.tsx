@@ -38,10 +38,10 @@ export class IrHkUserDrawer {
           ></ir-hk-user-drawer-form>
         )}
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button data-drawer="close" variant="neutral" size="medium" appearance="filled">
+          <ir-custom-button data-drawer="close" variant="neutral" size="m" appearance="filled">
             Cancel
           </ir-custom-button>
-          <ir-custom-button loading={this.isLoading} variant="brand" type="submit" form={this.formId} appearance="accent" size="medium">
+          <ir-custom-button loading={this.isLoading} variant="brand" type="submit" form={this.formId} appearance="accent" size="m">
             Save
           </ir-custom-button>
         </div>

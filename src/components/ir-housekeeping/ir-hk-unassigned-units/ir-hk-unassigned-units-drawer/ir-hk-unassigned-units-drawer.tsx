@@ -28,10 +28,10 @@ export class IrHkUnassignedUnitsDrawer {
       >
         {this.open && <ir-hk-unassigned-units-drawer-form formId={this.formId} user={this.user}></ir-hk-unassigned-units-drawer-form>}
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button data-drawer="close" variant="neutral" size="medium" appearance="filled">
+          <ir-custom-button data-drawer="close" variant="neutral" size="m" appearance="filled">
             Cancel
           </ir-custom-button>
-          <ir-custom-button loading={isRequestPending('/Manage_Exposed_Assigned_Unit_To_HKM')} variant="brand" type="submit" form={this.formId} appearance="accent" size="medium">
+          <ir-custom-button loading={isRequestPending('/Manage_Exposed_Assigned_Unit_To_HKM')} variant="brand" type="submit" form={this.formId} appearance="accent" size="m">
             Save
           </ir-custom-button>
         </div>

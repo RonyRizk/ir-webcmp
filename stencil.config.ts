@@ -19,7 +19,7 @@ export const config: Config = {
     {
       type: 'www',
       serviceWorker: null,
-      copy: [{ src: 'assets' }, { src: 'scripts' }, { src: 'pages' }],
+      copy: [{ src: 'assets' }, { src: 'scripts' }],
     },
   ],
   testing: {

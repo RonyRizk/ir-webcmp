@@ -98,12 +98,12 @@ export class IrPickup {
           ></ir-pickup-form>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
-          <ir-custom-button class={`flex-fill`} size="medium" appearance="filled" variant="neutral" data-drawer="close">
+          <ir-custom-button class={`flex-fill`} size="m" appearance="filled" variant="neutral" data-drawer="close">
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
 
           {this.canSubmitPickup && (
-            <ir-custom-button type="submit" loading={this.isLoading} form={this._id} size="medium" class={`flex-fill`} variant="brand">
+            <ir-custom-button type="submit" loading={this.isLoading} form={this._id} size="m" class={`flex-fill`} variant="brand">
               {locales.entries.Lcz_Save}
             </ir-custom-button>
           )}

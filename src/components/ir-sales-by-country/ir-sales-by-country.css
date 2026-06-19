@@ -1,3 +1,19 @@
 :host {
   display: block;
 }
+
+.sales-content-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sales-table-card {
+  flex: 1 1 0%;
+}
+
+@media (min-width: 992px) {
+  .sales-content-row {
+    flex-direction: row;
+  }
+}

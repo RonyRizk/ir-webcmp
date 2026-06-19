@@ -47,10 +47,10 @@ export class IrBookingSourceEditorDialog {
         )}
 
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button size="medium" data-dialog="close" appearance="filled" variant="neutral">
+          <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
             Cancel
           </ir-custom-button>
-          <ir-custom-button type="submit" form={`change-source-form-${this.booking?.booking_nbr}`} size="medium" appearance="accent" variant="brand" loading={this.isLoading}>
+          <ir-custom-button type="submit" form={`change-source-form-${this.booking?.booking_nbr}`} size="m" appearance="accent" variant="brand" loading={this.isLoading}>
             Save
           </ir-custom-button>
         </div>

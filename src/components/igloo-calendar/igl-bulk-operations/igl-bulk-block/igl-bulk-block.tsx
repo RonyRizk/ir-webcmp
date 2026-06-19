@@ -4,9 +4,9 @@ import { ReloadInterceptor } from '@/utils/ReloadInterceptor';
 import { Component, Event, EventEmitter, Fragment, h, Prop, State } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { z, ZodError } from 'zod';
-import { IToast } from '@components/ui/ir-toast/toast';
 // import calendar_dates from '@/stores/calendar-dates.store';
 import locales from '@/stores/locales.store';
+import { showToast } from '@/utils/utils';
 export type RoomStatus = 'open' | 'closed';
 export type SelectedRooms = {
   id: string | number;
@@ -36,7 +36,6 @@ export class IglBulkBlock {
   }[] = [{ from: null, to: null }];
 
   @Event() closeDrawer: EventEmitter<null>;
-  @Event() toast: EventEmitter<IToast>;
   @Event() loadingChanged: EventEmitter<boolean>;
 
   private sidebar: HTMLIrSidebarElement;
@@ -104,7 +103,7 @@ export class IglBulkBlock {
       }
       this.activate();
       this.deactivate();
-      this.toast.emit({
+      showToast({
         type: 'success',
         title: locales.entries.Lcz_RequestSubmittedSuccessfully,
         description: '',
@@ -156,11 +155,11 @@ export class IglBulkBlock {
     // 4) open the appropriate picker
     setTimeout(() => {
       if (key === 'from') {
-        this.dateRefs[index]?.to.openDatePicker();
+        this.dateRefs[index]?.to.show();
       } else {
         const nextFrom = dates.findIndex(d => d.from === null);
         if (nextFrom > -1) {
-          this.dateRefs[nextFrom]?.from.openDatePicker();
+          this.dateRefs[nextFrom]?.from.show();
         }
       }
     }, 100);
@@ -203,7 +202,7 @@ export class IglBulkBlock {
             }}
           ></ir-select>
         </div> */}
-        <wa-radio-group size="small" label="Block or unblock a unit" orientation="horizontal" name="action">
+        <wa-radio-group size="s" label="Block or unblock a unit" orientation="horizontal" name="action">
           <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="block">
             Block
           </wa-radio>
@@ -277,7 +276,7 @@ export class IglBulkBlock {
               if (!this.dateRefs[i]) {
                 this.dateRefs[i] = {};
               }
-              const fromDateMinDate = i > 0 ? this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate : this.minDate;
+              const fromDateMinDate = i > 0 ? (this.dates[i - 1]?.to.clone().add(1, 'days')?.format('YYYY-MM-DD') ?? this.minDate) : this.minDate;
               const toDateMinDate = this.dates[i].from ? this.dates[i]?.from.clone().add(1, 'days')?.format('YYYY-MM-DD') : this.minDate;
               return (
                 <tr key={`date_${i}`}>
@@ -306,11 +305,11 @@ export class IglBulkBlock {
                         const index = this.dates.findIndex(d => !d.from || !d.to);
 
                         if (!this.dates[index]?.from) {
-                          this.dateRefs[index]?.from.openDatePicker();
+                          this.dateRefs[index]?.from.show();
                           return;
                         }
                         if (!this.dates[index]?.to) {
-                          this.dateRefs[index].to.openDatePicker();
+                          this.dateRefs[index].to.show();
                         }
                       }}
                     ></ir-date-select>
@@ -339,11 +338,11 @@ export class IglBulkBlock {
                         const index = this.dates.findIndex(d => !d.from || !d.to);
 
                         if (!this.dates[index]?.from) {
-                          this.dateRefs[index]?.from?.openDatePicker();
+                          this.dateRefs[index]?.from?.show();
                           return;
                         }
                         if (!this.dates[index]?.to) {
-                          this.dateRefs[index].to.openDatePicker();
+                          this.dateRefs[index].to.show();
                         }
                       }}
                     ></ir-date-select>

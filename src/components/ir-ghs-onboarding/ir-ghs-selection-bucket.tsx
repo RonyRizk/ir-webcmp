@@ -25,7 +25,7 @@ export class IrGhsSelectionBucket {
             <div class="ir-ghs-selection-bucket__header-right">
               <ir-custom-button 
                 type="button"
-                size="small" 
+                size="s" 
                 variant="brand" 
                 appearance="filled"
                 loading={this.isGenerating}
@@ -55,7 +55,7 @@ export class IrGhsSelectionBucket {
                         <wa-button 
                             variant="danger" 
                             appearance="plain" 
-                            size="small"
+                            size="s"
                             onClick={() => this.removeAll.emit()}
                             title="Remove all"
                         >
@@ -76,7 +76,7 @@ export class IrGhsSelectionBucket {
                           <wa-button 
                               variant="danger" 
                               appearance="plain" 
-                              size="small"
+                              size="s"
                               onClick={() => this.removeProperty.emit(p.AC_ID)}
                               title="Remove from list"
                           >

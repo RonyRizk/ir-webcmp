@@ -27,13 +27,12 @@
 
 ### Depends on
 
-- [ir-button](../../../../ui/ir-button)
+- [ir-custom-button](../../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-revenue-row-details --> ir-button
-  ir-button --> ir-icons
+  ir-revenue-row-details --> ir-custom-button
   ir-revenue-row --> ir-revenue-row-details
   style ir-revenue-row-details fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -250,7 +250,7 @@ export class IrCityLedgerFolioTable {
               this.handleAction(e.detail.item.value, row);
             }}
           >
-            <wa-button slot="trigger" size="small" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
+            <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
               <wa-icon name="ellipsis-vertical" style={{ fontSize: '1rem' }}></wa-icon>
             </wa-button>
             <wa-dropdown-item value="hold-transaction">{row._raw.IS_HOLD ? 'Revert to Unbilled' : 'Hold entry'}</wa-dropdown-item>
@@ -279,7 +279,7 @@ export class IrCityLedgerFolioTable {
   private renderCell = (cell: Cell<FolioRow, unknown>) => {
     if (cell.getIsGrouped()) {
       return (
-        <wa-button appearance="plain" size="small" class="group-expander" onClick={() => cell.row.toggleExpanded()}>
+        <wa-button appearance="plain" size="s" class="group-expander" onClick={() => cell.row.toggleExpanded()}>
           <wa-icon style={{ fontSize: '0.875rem' }} slot="start" name={cell.row.getIsExpanded() ? 'chevron-down' : 'chevron-up'}></wa-icon>
           {flexRender(cell.column.columnDef.cell, cell.getContext())} <span slot="end">({cell.row.subRows.length})</span>
         </wa-button>
@@ -360,7 +360,7 @@ export class IrCityLedgerFolioTable {
                           }}
                           style={{ fontWeight: '400' }}
                         >
-                          <wa-button slot="trigger" size="small" variant="neutral" appearance="plain" class="header-button">
+                          <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="header-button">
                             <wa-icon name="ellipsis-vertical"></wa-icon>
                           </wa-button>
                           {canSort && (
@@ -506,7 +506,7 @@ export class IrCityLedgerFolioTable {
             <p class="folio-table__date-prompt-title">Select a date range to get started</p>
             {hasDate && (
               <wa-animation play iterations={1} id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
-                <ir-custom-button size="small" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
+                <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
                   Load Transactions
                 </ir-custom-button>
@@ -555,11 +555,11 @@ export class IrCityLedgerFolioTable {
               <wa-icon name="file-invoice" style={{ marginRight: '0.375rem' }}></wa-icon>
               {this.selectedUnbilledRows.length} unbilled item{this.selectedUnbilledRows.length !== 1 ? 's' : ''} selected
             </span>
-            <ir-custom-button size="small" variant="brand" onClickHandler={() => this.generateInvoice.emit(this.selectedUnbilledRows)}>
+            <ir-custom-button size="s" variant="brand" onClickHandler={() => this.generateInvoice.emit(this.selectedUnbilledRows)}>
               <wa-icon slot="start" name="file-invoice-dollar"></wa-icon>
               Generate Invoice
             </ir-custom-button>
-            <ir-custom-button size="small" variant="neutral" appearance="outlined" onClickHandler={() => (this.selectedRowIds = new Set())}>
+            <ir-custom-button size="s" variant="neutral" appearance="outlined" onClickHandler={() => (this.selectedRowIds = new Set())}>
               Clear Selection
             </ir-custom-button>
           </div>

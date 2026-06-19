@@ -28,18 +28,21 @@
 
 ### Depends on
 
-- [ir-button](../../ui/ir-button)
-- [ir-select](../../ui/ir-select)
-- [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
+- [ir-filter-card](../../ir-filter-card)
+- [ir-date-range-filter](../../ui/ir-date-range-filter)
+- [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-daily-revenue-filters --> ir-button
-  ir-daily-revenue-filters --> ir-select
-  ir-daily-revenue-filters --> ir-range-picker
-  ir-button --> ir-icons
-  ir-range-picker --> ir-date-picker
+  ir-daily-revenue-filters --> ir-filter-card
+  ir-daily-revenue-filters --> ir-date-range-filter
+  ir-daily-revenue-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-daily-revenue --> ir-daily-revenue-filters
   style ir-daily-revenue-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

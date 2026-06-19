@@ -99,7 +99,7 @@ export class IrUnitTag {
     return (
       <Fragment>
         {this.showTooltip && <wa-tooltip for={this._id}>{this.unit}</wa-tooltip>}
-        <wa-tag id={this._id} class="unit-tag__el" size="small" appearance="filled" variant="brand">
+        <wa-tag id={this._id} class="unit-tag__el" size="s" appearance="filled" variant="brand">
           <span class="unit-tag__content" ref={this.setContentRef}>
             {this.unit}
           </span>

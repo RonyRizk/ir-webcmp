@@ -22,13 +22,6 @@ export class IrSalesByCountrySummary {
     }, 0);
   }
 
-  private getIcon(val1: number, val2: number): 'arrow-trend-up' | 'arrow-trend-down' | undefined {
-    if (this.salesReports?.length && this.salesReports[0].last_year) {
-      return val1 > val2 ? 'arrow-trend-up' : 'arrow-trend-down';
-    }
-    return;
-  }
-
   render() {
     const totalRoomNights = this.calculateTotalValues('nights');
     const totalGuests = this.calculateTotalValues('number_of_guests');
@@ -38,26 +31,37 @@ export class IrSalesByCountrySummary {
     const lastYearTotalGuests = this.calculateTotalValues('number_of_guests', true);
     const lastYearTotalRevenue = this.calculateTotalValues('revenue', true);
 
+    const hasLastYear = Boolean(this.salesReports?.length && this.salesReports[0].last_year);
+
     return (
-      <div class="sales-by-country-summary__container">
-        <ir-stats-card
-          cardTitle="Total Room Nights"
-          icon={this.getIcon(totalRoomNights, lastYearTotalRoomNights)}
-          value={totalRoomNights.toString()}
-          subtitle={lastYearTotalRoomNights ? `Last year ${lastYearTotalRoomNights}` : undefined}
-        ></ir-stats-card>
-        <ir-stats-card
-          icon={this.getIcon(totalGuests, lastYearTotalGuests)}
-          cardTitle="Total Guests"
-          value={totalGuests.toString()}
-          subtitle={lastYearTotalGuests ? `Last year ${lastYearTotalGuests}` : undefined}
-        ></ir-stats-card>
-        <ir-stats-card
-          icon={this.getIcon(totalRevenue, lastYearTotalRevenue)}
-          cardTitle="Total Revenue"
+      <div class="summary-row">
+        <ir-metric-card
+          class="summary-metric"
+          icon="moon"
+          label="Total Room Nights"
+          value={totalRoomNights?.toString()}
+          trend={hasLastYear ? totalRoomNights - lastYearTotalRoomNights : undefined}
+          trendLabel="vs last year"
+          caption={hasLastYear ? `Last year: ${lastYearTotalRoomNights}` : undefined}
+        ></ir-metric-card>
+        <ir-metric-card
+          class="summary-metric"
+          icon="user-group"
+          label="Total Guests"
+          value={totalGuests?.toString()}
+          trend={hasLastYear ? totalGuests - lastYearTotalGuests : undefined}
+          trendLabel="vs last year"
+          caption={hasLastYear ? `Last year: ${lastYearTotalGuests}` : undefined}
+        ></ir-metric-card>
+        <ir-metric-card
+          class="summary-metric"
+          icon="money-bill"
+          label="Total Revenue"
           value={formatAmount(calendar_data.currency.symbol, totalRevenue)}
-          subtitle={lastYearTotalRevenue ? `Last year ${formatAmount(calendar_data.currency.symbol, lastYearTotalRevenue)}` : undefined}
-        ></ir-stats-card>
+          trend={hasLastYear ? totalRevenue - lastYearTotalRevenue : undefined}
+          trendLabel="vs last year"
+          caption={hasLastYear ? `Last year: ${formatAmount(calendar_data.currency.symbol, lastYearTotalRevenue)}` : undefined}
+        ></ir-metric-card>
       </div>
     );
   }

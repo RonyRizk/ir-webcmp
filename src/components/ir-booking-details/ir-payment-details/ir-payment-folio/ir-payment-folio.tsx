@@ -125,14 +125,14 @@ export class IrPaymentFolio {
           ></ir-payment-folio-form>
         )}
         <div slot="footer" class="w-100 d-flex align-items-center" style={{ gap: 'var(--wa-space-xs)' }}>
-          <ir-custom-button class="flex-fill" size="medium" data-drawer="close" appearance="filled" variant="neutral" onClickHandler={() => this.closeFolio()}>
+          <ir-custom-button class="flex-fill" size="m" data-drawer="close" appearance="filled" variant="neutral" onClickHandler={() => this.closeFolio()}>
             Cancel
           </ir-custom-button>
           <ir-custom-button
             form={this._id}
             loading={this.isLoading === 'save'}
             class="flex-fill"
-            size="medium"
+            size="m"
             type="submit"
             value="save"
             // appearance={isNewPayment ? 'outlined' : 'accent'}
@@ -149,7 +149,7 @@ export class IrPaymentFolio {
             // onClickHandler={() => this.savePayment(true)}
             loading={this.isLoading === 'save-print'}
             class="flex-fill"
-            size="medium"
+            size="m"
             appearance="accent"
             variant="brand"
           >

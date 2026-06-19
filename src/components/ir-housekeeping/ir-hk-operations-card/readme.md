@@ -12,13 +12,6 @@
 | `frequencies` | --        |             | `IEntries[]` | `[]`    |
 
 
-## Events
-
-| Event   | Description | Type                                                                                                 |
-| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
-
-
 ## Dependencies
 
 ### Used by

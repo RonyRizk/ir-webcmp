@@ -17,13 +17,6 @@
 | `ticket`        | `ticket`         |             | `string`  | `undefined` |
 
 
-## Events
-
-| Event   | Description | Type                                                                                                 |
-| ------- | ----------- | ---------------------------------------------------------------------------------------------------- |
-| `toast` |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>` |
-
-
 ## Dependencies
 
 ### Used by
@@ -51,7 +44,7 @@ graph TD;
   ir-payment-option --> ir-sidebar
   ir-payment-option --> ir-option-details
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp

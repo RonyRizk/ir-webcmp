@@ -77,7 +77,7 @@ export class IrPmsLogs {
               </div>
             </div>
             {this.error && (
-              <wa-callout size="small" appearance="filled-outlined" variant="danger">
+              <wa-callout size="s" appearance="filled-outlined" variant="danger">
                 {this.error}
               </wa-callout>
             )}

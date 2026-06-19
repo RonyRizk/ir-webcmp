@@ -82,10 +82,10 @@ export class IglBulkOperationsDrawer {
             </wa-tab-group>
           )}
           <div slot="footer" class="ir__drawer-footer">
-            <ir-custom-button size="medium" variant="neutral" appearance="filled" data-drawer="close">
+            <ir-custom-button size="m" variant="neutral" appearance="filled" data-drawer="close">
               Cancel
             </ir-custom-button>
-            <ir-custom-button loading={this.isLoading} type="submit" form={formId} size="medium" variant="brand">
+            <ir-custom-button loading={this.isLoading} type="submit" form={formId} size="m" variant="brand">
               Confirm
             </ir-custom-button>
           </div>

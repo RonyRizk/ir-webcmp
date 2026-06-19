@@ -83,10 +83,10 @@ export class IrBookingPricingDrawer {
         )}
 
         <div slot="footer" class="ir__drawer-footer">
-          <ir-custom-button appearance="filled" size="medium" variant="neutral" onClickHandler={() => this.closeDrawer.emit()}>
+          <ir-custom-button appearance="filled" size="m" variant="neutral" onClickHandler={() => this.closeDrawer.emit()}>
             Cancel
           </ir-custom-button>
-          <ir-custom-button form={this.formId} size="medium" type="submit" variant="brand" loading={this.saveDisabled} disabled={this.allItemsDisabled}>
+          <ir-custom-button form={this.formId} size="m" type="submit" variant="brand" loading={this.saveDisabled} disabled={this.allItemsDisabled}>
             Confirm
           </ir-custom-button>
         </div>

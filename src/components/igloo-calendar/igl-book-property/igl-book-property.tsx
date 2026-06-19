@@ -701,7 +701,7 @@ export class IglBookProperty {
                       />
                     </svg>
                   </ir-icon> */}
-                  <ir-custom-button appearance="plain" variant="neutral" size="medium" onClickHandler={() => this.closeWindow()}>
+                  <ir-custom-button appearance="plain" variant="neutral" size="m" onClickHandler={() => this.closeWindow()}>
                     <wa-icon name="xmark" library="system" variant="solid" label="Close" aria-label="Close"></wa-icon>
                   </ir-custom-button>
                 </div>

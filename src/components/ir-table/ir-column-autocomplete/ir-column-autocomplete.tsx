@@ -123,7 +123,7 @@ export class IrColumnAutocomplete {
       <Host>
         <wa-popover placement="bottom" for={this.generatedTriggerId} class="column-autocomplete__popover">
           <div class="column-autocomplete__input-container">
-            <wa-input size="small" value={this.query} placeholder={this.placeholder} oninput={this.onQueryInput}></wa-input>
+            <wa-input size="s" value={this.query} placeholder={this.placeholder} oninput={this.onQueryInput}></wa-input>
           </div>
           <div class="column-autocomplete__list">
             {this.showSelectAll && (
@@ -145,7 +145,7 @@ export class IrColumnAutocomplete {
 
         <div id={this.generatedTriggerId}>
           <slot name="trigger">
-            <wa-button size="small" variant="neutral" appearance="plain" class="header-button">
+            <wa-button size="s" variant="neutral" appearance="plain" class="header-button">
               <wa-icon name="filter"></wa-icon>
             </wa-button>
           </slot>

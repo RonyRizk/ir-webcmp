@@ -142,10 +142,10 @@ export class IglHkIssuesDialog {
         {this.renderContent()}
 
         <div slot="footer" class="dialog-footer">
-          <ir-custom-button variant="neutral" size="medium" appearance="filled" onClickHandler={() => this.dialogRef?.closeModal()} disabled={this.isResolving}>
+          <ir-custom-button variant="neutral" size="m" appearance="filled" onClickHandler={() => this.dialogRef?.closeModal()} disabled={this.isResolving}>
             Close
           </ir-custom-button>
-          <ir-custom-button variant="brand" size="medium" appearance="accent" onClickHandler={this.handleResolve} disabled={selectedCount === 0} loading={this.isResolving}>
+          <ir-custom-button variant="brand" size="m" appearance="accent" onClickHandler={this.handleResolve} disabled={selectedCount === 0} loading={this.isResolving}>
             Mark as Resolved
           </ir-custom-button>
         </div>

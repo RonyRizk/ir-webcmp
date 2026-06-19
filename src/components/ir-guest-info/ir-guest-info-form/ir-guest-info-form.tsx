@@ -204,7 +204,7 @@ export class IrGuestInfoForm {
 
         <ir-validator schema={guestInfoFormSchema.shape.country_id} value={this.guest?.country_id ?? undefined} autovalidate={this.autoValidate} valueEvent="countryChange">
           <ir-country-picker
-            size="small"
+            size="s"
             variant="modern"
             country={this.countries.find(c => c.id === this.guest?.country_id)}
             label={locales.entries?.Lcz_Country}
@@ -226,7 +226,7 @@ export class IrGuestInfoForm {
           valueEvent="mobile-input-change"
         >
           <ir-mobile-input
-            size="small"
+            size="s"
             onMobile-input-change={e => {
               this.handleInputChange({ mobile: e.detail.formattedValue.trim() });
             }}
@@ -247,7 +247,7 @@ export class IrGuestInfoForm {
           blurEvent="wa-blur blur"
         >
           <wa-textarea
-            size="small"
+            size="s"
             onchange={e => this.handleInputChange({ notes: (e.target as any).value })}
             value={this.guest?.notes ?? ''}
             label={locales.entries?.Lcz_PrivateNote}

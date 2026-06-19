@@ -3,8 +3,8 @@ import { PaymentOptionService } from '@/services/payment_option.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import payment_option_store from '@/stores/payment-option.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
-import { IToast } from '@components/ui/ir-toast/toast';
 import locales from '@/stores/locales.store';
+import { showToast } from '@/utils/utils';
 @Component({
   tag: 'ir-option-details',
   styleUrls: ['ir-option-details.css', '../../../common/sheet.css'],
@@ -18,7 +18,6 @@ export class IrOptionDetails {
   @State() invalid: boolean = false;
 
   @Event() closeModal: EventEmitter<PaymentOption | null>;
-  @Event() toast: EventEmitter<IToast>;
 
   private paymentOptionService = new PaymentOptionService();
 
@@ -58,7 +57,7 @@ export class IrOptionDetails {
     let selectedOption: PaymentOption = {
       ...payment_option_store.selectedOption,
       property_id: this.propertyId,
-      is_active: payment_option_store.mode === 'create' ? true : payment_option_store.selectedOption.is_active ?? false,
+      is_active: payment_option_store.mode === 'create' ? true : (payment_option_store.selectedOption.is_active ?? false),
     };
 
     if (selectedOption?.code === '005') {
@@ -79,7 +78,7 @@ export class IrOptionDetails {
       }
     }
     await this.paymentOptionService.HandlePaymentMethod(selectedOption);
-    this.toast.emit({
+    showToast({
       type: 'success',
       description: '',
       title: locales.entries.Lcz_Saved,
@@ -187,7 +186,7 @@ export class IrOptionDetails {
                     placeholder=""
                     style={{ '--ir-editor-height': '250px' }}
                     error={this.invalid}
-                    value={this.localizationIdx !== null ? payment_option_store.selectedOption?.localizables[this.localizationIdx]?.description ?? '' : ''}
+                    value={this.localizationIdx !== null ? (payment_option_store.selectedOption?.localizables[this.localizationIdx]?.description ?? '') : ''}
                     onTextChange={this.handleTextAreaChange.bind(this)}
                   ></ir-text-editor>
                 </div>

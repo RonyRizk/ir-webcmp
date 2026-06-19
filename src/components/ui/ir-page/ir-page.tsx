@@ -28,7 +28,9 @@ export class IrPage {
             </slot>
             <slot name="page-header"></slot>
           </header>
-          <slot></slot>
+          <div part="body" class={'page-body'}>
+            <slot></slot>
+          </div>
         </main>
       </Host>
     );

@@ -80,18 +80,18 @@ export class IrBookingExtraNote {
         }}
       >
         <wa-textarea
-          size="small"
+          size="s"
           placeholder={locales.entries.Lcz_PrivateNote_MaxChar}
           defaultValue={this.note}
           onchange={e => this.setNote((e.target as any).value)}
           value={this.note}
         ></wa-textarea>
         <div slot="footer" class="ir-dialog__footer">
-          <ir-custom-button data-dialog="close" size="medium" variant="neutral" appearance="filled" onClickHandler={() => this.closeModal.emit(null)} class={`flex-fill'}`}>
+          <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled" onClickHandler={() => this.closeModal.emit(null)} class={`flex-fill'}`}>
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
 
-          <ir-custom-button size="medium" onClickHandler={() => this.savePrivateNote()} variant="brand" loading={this.isLoading}>
+          <ir-custom-button size="m" onClickHandler={() => this.savePrivateNote()} variant="brand" loading={this.isLoading}>
             {locales.entries.Lcz_Save}
           </ir-custom-button>
         </div>

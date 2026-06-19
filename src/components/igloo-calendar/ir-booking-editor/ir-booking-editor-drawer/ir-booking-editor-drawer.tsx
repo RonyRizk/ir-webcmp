@@ -207,7 +207,7 @@ export class IrBookingEditorDrawer {
     const hasCheckIn = checkIn ? checkIn?.isSame(moment(), 'date') : false;
     return (
       <Fragment>
-        <ir-custom-button onClickHandler={this.goToDetails} size="medium" appearance="filled" variant="neutral">
+        <ir-custom-button onClickHandler={this.goToDetails} size="m" appearance="filled" variant="neutral">
           Back
         </ir-custom-button>
         <ir-custom-button
@@ -216,7 +216,7 @@ export class IrBookingEditorDrawer {
           form="new_booking_form"
           disabled={false}
           type="submit"
-          size="medium"
+          size="m"
           appearance={hasCheckIn ? 'outlined' : 'accent'}
           variant="brand"
         >
@@ -228,7 +228,7 @@ export class IrBookingEditorDrawer {
             value="book-checkin"
             form="new_booking_form"
             type="submit"
-            size="medium"
+            size="m"
             appearance="accent"
             variant="brand"
           >
@@ -243,13 +243,13 @@ export class IrBookingEditorDrawer {
     const haveRoomSelected = hasAtLeastOneRoomSelected();
     return (
       <Fragment>
-        <ir-custom-button data-drawer="close" size="medium" appearance="filled" variant="neutral">
+        <ir-custom-button data-drawer="close" size="m" appearance="filled" variant="neutral">
           Cancel
         </ir-custom-button>
         {['PLUS_BOOKING', 'ADD_ROOM'].includes(this.mode) && (
           <Fragment>
             {!haveRoomSelected && <wa-tooltip for="booking_editor__next-button">Please select at least one unit to continue.</wa-tooltip>}
-            <ir-custom-button id="booking_editor__next-button" disabled={!haveRoomSelected} onClickHandler={this.goToConfirm} size="medium" appearance="accent" variant="brand">
+            <ir-custom-button id="booking_editor__next-button" disabled={!haveRoomSelected} onClickHandler={this.goToConfirm} size="m" appearance="accent" variant="brand">
               Next
             </ir-custom-button>
           </Fragment>

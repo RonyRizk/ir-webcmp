@@ -5,12 +5,12 @@ import moment from 'moment';
 import locales from '@/stores/locales.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import calendar_data from '@/stores/calendar-data';
-import { IToast } from '@/components/ui/ir-toast/toast';
 import booking_store, { setBookingDraft } from '@/stores/booking.store';
 
 import { BookingService } from '@/services/booking-service/booking.service';
 import { Booking } from '@/models/booking.dto';
 import { z } from 'zod';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'igl-book-property-header',
@@ -38,7 +38,6 @@ export class IglBookPropertyHeader {
   @Event() splitBookingDropDownChange: EventEmitter<any>;
   @Event() checkClicked: EventEmitter<any>;
   @Event() buttonClicked: EventEmitter<{ key: TPropertyButtonsTypes }>;
-  @Event() toast: EventEmitter<IToast>;
   @Event() spiltBookingSelected: EventEmitter<{ key: string; data: unknown }>;
   @Event({ bubbles: true, composed: true }) animateIrSelect: EventEmitter<string>;
   @State() autoValidate: boolean;
@@ -91,7 +90,7 @@ export class IglBookPropertyHeader {
     const { sources } = booking_store.selects;
     return (
       <wa-select
-        size="small"
+        size="s"
         placeholder={locales.entries.Lcz_Source}
         value={booking_store.bookingDraft.source?.id?.toString()}
         defaultValue={booking_store.bookingDraft.source?.id}
@@ -137,7 +136,7 @@ export class IglBookPropertyHeader {
             value={adults?.toString()}
             defaultValue={adults?.toString()}
             placeholder={locales.entries.Lcz_AdultsCaption}
-            size="small"
+            size="s"
           >
             {Array.from(Array(this.adultChildConstraints.adult_max_nbr), (_, i) => i + 1).map(option => (
               <wa-option value={option?.toString()}>{option}</wa-option>
@@ -163,7 +162,7 @@ export class IglBookPropertyHeader {
             defaultValue={children?.toString()}
             value={children?.toString()}
             placeholder={this.renderChildCaption()}
-            size="small"
+            size="s"
           >
             {Array.from(Array(this.adultChildConstraints.child_max_nbr), (_, i) => i + 1).map(option => (
               <wa-option value={option?.toString()}>{option}</wa-option>
@@ -188,11 +187,9 @@ export class IglBookPropertyHeader {
     const { occupancy } = booking_store.bookingDraft;
 
     if (this.isEventType('SPLIT_BOOKING') && Object.keys(this.bookedByInfoData).length <= 1) {
-      this.toast.emit({
+      showToast({
         type: 'error',
         title: locales.entries.Lcz_ChooseBookingNumber,
-        description: '',
-        position: 'top-right',
       });
     } else if (this.isEventType('ADD_ROOM') || this.isEventType('SPLIT_BOOKING')) {
       const initialToDate = moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date));
@@ -200,18 +197,16 @@ export class IglBookPropertyHeader {
       const selectedFromDate = moment(new Date(this.dateRangeData.fromDate));
       const selectedToDate = moment(new Date(this.dateRangeData.toDate));
       if (selectedToDate.isBefore(initialFromDate) || selectedFromDate.isAfter(initialToDate)) {
-        this.toast.emit({
+        showToast({
           type: 'error',
           title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace(
             '%1',
             moment(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date)).format('ddd, DD MMM YYYY'),
           ).replace('%2', moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date)).format('ddd, DD MMM YYYY'))}  `,
-          description: '',
-          position: 'top-right',
         });
         return;
       } else if (Number(occupancy.adults) === 0) {
-        this.toast.emit({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests, description: '', position: 'top-right' });
+        showToast({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests });
         // this.adultAnimationContainer.play = true;
         this.autoValidate = true;
       } else {
@@ -219,20 +214,19 @@ export class IglBookPropertyHeader {
       }
     }
     // else if (this.minDate && new Date(this.dateRangeData.fromDate).getTime() > new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date).getTime()) {
-    //   this.toast.emit({
+    //   showToast({
     //     type: 'error',
     //     title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace(
     //       '%1',
     //       moment(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date)).format('ddd, DD MMM YYYY'),
     //     ).replace('%2', moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date)).format('ddd, DD MMM YYYY'))}  `,
     //     description: '',
-    //     position: 'top-right',
     //   });
     // }
     else if (Number(occupancy.adults) === 0) {
       // this.adultAnimationContainer.play = true;
       this.autoValidate = true;
-      this.toast.emit({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests, description: '', position: 'top-right' });
+      showToast({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests, description: '' });
     } else {
       this.buttonClicked.emit({ key: 'check' });
     }

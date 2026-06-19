@@ -103,7 +103,7 @@ export class IrAgentContract {
                       minlength={5}
                       value={this.agent?.code}
                       data-testid="agent-contract-verification-code-input"
-                      onText-change={(e: CustomEvent<string>) => this.updateField({ code: e.detail })}
+                      onText-change={(e: CustomEvent<string>) => this.updateField({ code: e.detail || null })}
                     >
                       {this.agent?.code && this.agent?.id !== -1 && <wa-copy-button slot="end" value={this.agent?.code}></wa-copy-button>}
                     </ir-input>
@@ -133,7 +133,7 @@ export class IrAgentContract {
                       placeholder="e.g. Are you a Wizz Air cabin crew?"
                       value={this.agent?.question}
                       data-testid="agent-contract-verification-question-input"
-                      onText-change={(e: CustomEvent<string>) => this.updateField({ question: e.detail })}
+                      onText-change={(e: CustomEvent<string>) => this.updateField({ question: e.detail || null })}
                     />
                   </ir-validator>
                 </div>
@@ -312,7 +312,7 @@ export class IrAgentContract {
                   cl_post_timing: { code: (e.target as WaSelect).value?.toString() },
                 })
               }
-              size="small"
+              size="s"
             >
               {this.setupEntries?.cl_post_timing?.map(t => (
                 <wa-option value={t.CODE_NAME}>{t.CODE_VALUE_EN}</wa-option>

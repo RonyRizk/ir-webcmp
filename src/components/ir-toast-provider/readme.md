@@ -14,6 +14,13 @@
 | `rtl`      | `rtl`      |             | `boolean`                                                                                       | `false`     |
 
 
+## Events
+
+| Event         | Description                                      | Type                           |
+| ------------- | ------------------------------------------------ | ------------------------------ |
+| `toastAction` | Emitted when a toast's action button is clicked. | `CustomEvent<{ id: string; }>` |
+
+
 ## Methods
 
 ### `addToast(toast: Toast) => Promise<string>`
@@ -63,16 +70,18 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [ir-test-cmp](../ir-test-cmp)
  - [ir-toast](../ui/ir-toast)
 
 ### Depends on
 
-- [ir-toast-alert](../ir-toast-alert)
+- [ir-toast-item](../ui/ir-toast-item)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-toast-provider --> ir-toast-alert
+  ir-toast-provider --> ir-toast-item
+  ir-test-cmp --> ir-toast-provider
   ir-toast --> ir-toast-provider
   style ir-toast-provider fill:#f9f,stroke:#333,stroke-width:4px
 ```

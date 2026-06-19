@@ -46,7 +46,6 @@
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
  - [ir-invoice-form](../../ir-invoice/ir-invoice-form)
- - [ir-meal-report](../../ir-meal-report)
  - [ir-otp-modal](../../ir-otp-modal)
  - [ir-pms-logs](../../ir-booking-details/ir-booking-header/ir-pms-logs)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
@@ -83,7 +82,6 @@ graph TD;
   ir-guest-info-form --> ir-spinner
   ir-hk-user-drawer-form --> ir-spinner
   ir-invoice-form --> ir-spinner
-  ir-meal-report --> ir-spinner
   ir-otp-modal --> ir-spinner
   ir-pms-logs --> ir-spinner
   ir-property-switcher --> ir-spinner

@@ -1,9 +1,10 @@
 import Token from '@/models/Token';
-import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Prop, State, Watch, h } from '@stencil/core';
 import { ChargeRule, TaxAndChargeSetup, TaxationStrategy, TaxesSetupEntries } from './types';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { HandleExposedPropertyTaxCategoriesParams, TaxCategory, PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
+import { showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-tax-service-categories',
@@ -214,6 +215,10 @@ export class IrTaxServiceCategories {
       this.isSaving = true;
       const payload = this.buildPayload();
       await this.propertyService.handleExposedPropertyTaxCategories(payload);
+      showToast({
+        title: 'Saved Successfully',
+        type: 'success',
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -230,113 +235,108 @@ export class IrTaxServiceCategories {
     const categories = this.setupEntries?.svc_category ?? [];
 
     return (
-      <Host data-testid="ir-tax-service-categories">
-        <ir-toast></ir-toast>
-        <ir-interceptor handledEndpoints={['/Handle_Exposed_Property_Tax_Categories']}></ir-interceptor>
-        <div class="ir-page__container tax-page">
-          <div class="tax-page__header">
-            <div class="tax-page__heading">
-              <h3 class="page-title">Tax & Service Categories</h3>
-              <p class="tax-page__subtitle">Define taxes and service charges for room rates, cancellations, and on-property services.</p>
-            </div>
-            <ir-custom-button type="submit" form="tax-service-categories__form" style={{ width: '100px' }} variant="brand">
-              Save
-            </ir-custom-button>
-          </div>
-          <form id="tax-service-categories__form" onSubmit={e => this.handleSubmit(e)}>
-            <wa-card>
-              <div class="tax-grid">
-                {/* Column headers — hidden on mobile, shown via display:contents on desktop */}
-                <div class="tax-grid__header" aria-hidden="true">
-                  <div></div>
-                  <div class="tax-grid__col-label">VAT</div>
-                  <div class="tax-grid__col-label">City Tax</div>
-                  <div class="tax-grid__col-label">Service Charge</div>
-                  <div class="tax-grid__col-label">Taxation Strategy</div>
-                </div>
-
-                {/* Accommodation row */}
-                <div class="tax-grid__row">
-                  <div class="tax-grid__name">
-                    <p class="tax-grid__title">Accommodation</p>
-                    <p class="tax-grid__hint">Room-related charges applied to reservations and cancellations</p>
-                  </div>
-                  <div class="tax-grid__cell" data-label="VAT">
-                    <ir-tax-input
-                      autoValidate={this.autoValidate}
-                      language={this.language}
-                      onTaxChange={e => this.handleChargeRuleChange('ACC', 'vat', e.detail)}
-                      chargeRule={accSetup?.vat}
-                      setupEntries={this.setupEntries?.vat_included ?? []}
-                    ></ir-tax-input>
-                  </div>
-                  <div class="tax-grid__cell" data-label="City Tax">
-                    <ir-tax-input
-                      autoValidate={this.autoValidate}
-                      language={this.language}
-                      onTaxChange={e => this.handleChargeRuleChange('ACC', 'cityTax', e.detail)}
-                      chargeRule={accSetup?.cityTax}
-                      setupEntries={this.setupEntries?.city_tax_included ?? []}
-                    ></ir-tax-input>
-                  </div>
-                  <div class="tax-grid__cell" data-label="Service Charge">
-                    <ir-tax-input
-                      autoValidate={this.autoValidate}
-                      language={this.language}
-                      onTaxChange={e => this.handleChargeRuleChange('ACC', 'serviceCharge', e.detail)}
-                      chargeRule={accSetup?.serviceCharge}
-                      setupEntries={this.setupEntries?.service_charge_included ?? []}
-                    ></ir-tax-input>
-                  </div>
-                  <div class="tax-grid__cell" data-label="Taxation Strategy">
-                    <wa-radio-group
-                      size="small"
-                      orientation="horizontal"
-                      value={accSetup?.taxationStrategy ?? TaxationStrategy.Normal}
-                      onwa-change={(e: CustomEvent<{ value: string }>) => this.handleTaxationStrategyChange(e.detail.value as TaxationStrategy)}
-                    >
-                      <wa-radio appearance="button" value={TaxationStrategy.Normal}>
-                        Normal
-                      </wa-radio>
-                      <wa-radio appearance="button" value={TaxationStrategy.Cumulative}>
-                        Cumulative
-                      </wa-radio>
-                    </wa-radio-group>
-                  </div>
-                </div>
-
-                {/* Service category rows */}
-                {categories.map(category => {
-                  const categorySetup = this.chargeCategoryRules.get(category.CODE_NAME);
-                  return [
-                    <div class="tax-grid__divider">
-                      <wa-divider></wa-divider>
-                    </div>,
-                    <div class="tax-grid__row">
-                      <div class="tax-grid__name">
-                        <p class="tax-grid__title">{category.CODE_VALUE_EN}</p>
-                        {category.NOTES && <p class="tax-grid__hint">{category.NOTES}</p>}
-                      </div>
-                      <div class="tax-grid__cell" data-label="VAT">
-                        <ir-tax-input
-                          autoValidate={this.autoValidate}
-                          language={this.language}
-                          onTaxChange={e => this.handleChargeRuleChange(category.CODE_NAME, 'vat', e.detail)}
-                          chargeRule={categorySetup?.vat}
-                          setupEntries={filteredVat}
-                        ></ir-tax-input>
-                      </div>
-                      <div class="tax-grid__cell"></div>
-                      <div class="tax-grid__cell"></div>
-                      <div class="tax-grid__cell"></div>
-                    </div>,
-                  ];
-                })}
+      <ir-page
+        label="Tax & Service Categories"
+        description="Define taxes and service charges for room rates, cancellations, and on-property services."
+        data-testid="ir-tax-service-categories"
+      >
+        <ir-custom-button slot="page-header" loading={this.isSaving} type="submit" form="tax-service-categories__form" style={{ width: '100px' }} variant="brand">
+          Save
+        </ir-custom-button>
+        <form id="tax-service-categories__form" onSubmit={e => this.handleSubmit(e)}>
+          <wa-card>
+            <div class="tax-grid">
+              {/* Column headers — hidden on mobile, shown via display:contents on desktop */}
+              <div class="tax-grid__header" aria-hidden="true">
+                <div></div>
+                <div class="tax-grid__col-label">VAT</div>
+                <div class="tax-grid__col-label">City Tax</div>
+                <div class="tax-grid__col-label">Service Charge</div>
+                <div class="tax-grid__col-label">Taxation Strategy</div>
               </div>
-            </wa-card>
-          </form>
-        </div>
-      </Host>
+
+              {/* Accommodation row */}
+              <div class="tax-grid__row">
+                <div class="tax-grid__name">
+                  <p class="tax-grid__title">Accommodation</p>
+                  <p class="tax-grid__hint">Room-related charges applied to reservations and cancellations</p>
+                </div>
+                <div class="tax-grid__cell" data-label="VAT">
+                  <ir-tax-input
+                    autoValidate={this.autoValidate}
+                    language={this.language}
+                    onTaxChange={e => this.handleChargeRuleChange('ACC', 'vat', e.detail)}
+                    chargeRule={accSetup?.vat}
+                    setupEntries={this.setupEntries?.vat_included ?? []}
+                  ></ir-tax-input>
+                </div>
+                <div class="tax-grid__cell" data-label="City Tax">
+                  <ir-tax-input
+                    autoValidate={this.autoValidate}
+                    language={this.language}
+                    onTaxChange={e => this.handleChargeRuleChange('ACC', 'cityTax', e.detail)}
+                    chargeRule={accSetup?.cityTax}
+                    setupEntries={this.setupEntries?.city_tax_included ?? []}
+                  ></ir-tax-input>
+                </div>
+                <div class="tax-grid__cell" data-label="Service Charge">
+                  <ir-tax-input
+                    autoValidate={this.autoValidate}
+                    language={this.language}
+                    onTaxChange={e => this.handleChargeRuleChange('ACC', 'serviceCharge', e.detail)}
+                    chargeRule={accSetup?.serviceCharge}
+                    setupEntries={this.setupEntries?.service_charge_included ?? []}
+                  ></ir-tax-input>
+                </div>
+                <div class="tax-grid__cell" data-label="Taxation Strategy">
+                  <wa-radio-group
+                    size="s"
+                    orientation="horizontal"
+                    value={accSetup?.taxationStrategy ?? TaxationStrategy.Normal}
+                    onwa-change={(e: CustomEvent<{ value: string }>) => this.handleTaxationStrategyChange(e.detail.value as TaxationStrategy)}
+                  >
+                    <wa-radio appearance="button" value={TaxationStrategy.Normal}>
+                      Normal
+                    </wa-radio>
+                    <wa-radio appearance="button" value={TaxationStrategy.Cumulative}>
+                      Cumulative
+                    </wa-radio>
+                  </wa-radio-group>
+                </div>
+              </div>
+
+              {/* Service category rows */}
+              {categories.map(category => {
+                const categorySetup = this.chargeCategoryRules.get(category.CODE_NAME);
+                return [
+                  <div class="tax-grid__divider">
+                    <wa-divider></wa-divider>
+                  </div>,
+                  <div class="tax-grid__row">
+                    <div class="tax-grid__name">
+                      <p class="tax-grid__title">{category.CODE_VALUE_EN}</p>
+                      {category.NOTES && <p class="tax-grid__hint">{category.NOTES}</p>}
+                    </div>
+                    <div class="tax-grid__cell" data-label="VAT">
+                      <ir-tax-input
+                        autoValidate={this.autoValidate}
+                        language={this.language}
+                        onTaxChange={e => this.handleChargeRuleChange(category.CODE_NAME, 'vat', e.detail)}
+                        chargeRule={categorySetup?.vat}
+                        setupEntries={filteredVat}
+                      ></ir-tax-input>
+                    </div>
+                    <div class="tax-grid__cell"></div>
+                    <div class="tax-grid__cell"></div>
+                    <div class="tax-grid__cell"></div>
+                  </div>,
+                ];
+              })}
+            </div>
+          </wa-card>
+        </form>
+        {/* </div> */}
+      </ir-page>
     );
   }
 }

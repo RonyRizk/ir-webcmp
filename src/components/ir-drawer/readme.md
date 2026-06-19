@@ -40,6 +40,7 @@
  - [ir-city-ledger-transaction-drawer](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
  - [ir-extra-service-config](../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-guest-info-drawer](../ir-guest-info/ir-guest-info-drawer)
+ - [ir-hk-archive-drawer](../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-hk-unassigned-units-drawer](../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
  - [ir-hk-user-drawer](../ir-housekeeping/ir-hk-user/ir-hk-user-drawer)
  - [ir-invoice](../ir-invoice)
@@ -66,6 +67,7 @@ graph TD;
   ir-city-ledger-transaction-drawer --> ir-drawer
   ir-extra-service-config --> ir-drawer
   ir-guest-info-drawer --> ir-drawer
+  ir-hk-archive-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-drawer
   ir-hk-user-drawer --> ir-drawer
   ir-invoice --> ir-drawer

@@ -1,6 +1,6 @@
-import { IToast } from '@/components/ui/ir-toast/toast';
 import { ExposedRectifierParamsSchema, PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
+import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 
@@ -30,7 +30,6 @@ export class IrRectifier {
 
   @Event() loadingChanged: EventEmitter<boolean>;
   @Event() closeDrawer: EventEmitter<void>;
-  @Event() toast: EventEmitter<IToast>;
 
   private propertyService = new PropertyService();
   toDateRef: HTMLIrDateSelectElement;
@@ -90,7 +89,7 @@ export class IrRectifier {
         return;
       }
       await this.propertyService.exposedRectifier(result.data);
-      this.toast.emit({
+      showToast({
         type: 'success',
         title: 'The update is being processed.',
         description: '',
@@ -115,7 +114,7 @@ export class IrRectifier {
           class="ir-rectifier__form"
           id={this.formId}
         >
-          <wa-callout size="small" appearance="filled" variant="warning">
+          <wa-callout size="s" appearance="filled" variant="warning">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
             This will update the total availability of the select room types by calculating: No. of physical rooms - Booked - Blocked - Pending
           </wa-callout>
@@ -151,7 +150,7 @@ export class IrRectifier {
                 onDateChanged={e => {
                   const from = e.detail.start?.format('YYYY-MM-DD') ?? null;
                   this.updateForm(this.normalizeDateRange({ from }));
-                  requestAnimationFrame(() => this.toDateRef?.openDatePicker());
+                  requestAnimationFrame(() => this.toDateRef?.show());
                 }}
               ></ir-date-select>
             </ir-validator>

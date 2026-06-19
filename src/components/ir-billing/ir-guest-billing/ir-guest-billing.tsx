@@ -323,10 +323,10 @@ export class IrGuestBilling {
         >
           <p>Void invoice {this.selectedInvoice} by generating a credit note?</p>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="medium" appearance="filled" variant="neutral">
+            <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
               Cancel
             </ir-custom-button>
-            <ir-custom-button loading={this.isLoading === 'void'} onClickHandler={this.voidInvoice.bind(this)} size="medium" variant="danger">
+            <ir-custom-button loading={this.isLoading === 'void'} onClickHandler={this.voidInvoice.bind(this)} size="m" variant="danger">
               Confirm
             </ir-custom-button>
           </div>

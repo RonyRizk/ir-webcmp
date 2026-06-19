@@ -13,6 +13,7 @@ import { OpenSidebarEvent, RoomGuestsPayload } from '../types';
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { HbPreference } from '@/types/enums';
 export type RoomModalReason = 'delete' | 'checkin' | 'checkout' | null;
 @Component({
   tag: 'ir-room',
@@ -56,6 +57,7 @@ export class IrRoom {
   @State() isModelOpen: boolean = false;
   @State() isOpen: boolean = false;
   @State() isPricingDrawerOpen: boolean = false;
+  @State() isHbDialogOpen: boolean = false;
 
   // Event Emitters
   @Event({ bubbles: true, composed: true }) deleteFinished: EventEmitter<string>;
@@ -359,6 +361,10 @@ export class IrRoom {
       },
     });
   }
+  private get isHalfBoard() {
+    return this.room?.rateplan?.meal_plan?.code === '003';
+  }
+
   private get acmTxByDate(): Map<string, ClTx> {
     return new Map(this.clTransactions.filter(tx => tx.CATEGORY === 'ACM' && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
   }
@@ -381,6 +387,17 @@ export class IrRoom {
                 <p class="booking-room__summary-text">
                   <span class="booking-room__summary-highlight">{this.myRoomTypeFoodCat || ''} </span> {this.mealCodeName}{' '}
                   {this.room.rateplan.is_non_refundable && ` - ${locales.entries.Lcz_NonRefundable}`}{' '}
+                  {this.isHalfBoard && (
+                    <wa-button
+                      size="xs"
+                      class="booking-room__meal-report-button"
+                      appearance="filled"
+                      variant={this.room?.hb_preference ? 'brand' : 'warning'}
+                      onClick={() => (this.isHbDialogOpen = true)}
+                    >
+                      {this.room?.hb_preference === HbPreference.Lunch ? 'With lunch' : this.room?.hb_preference === HbPreference.Dinner ? 'With dinner' : 'Choose lunch or dinner'}
+                    </wa-button>
+                  )}
                 </p>
 
                 {/*this.room.My_Room_type.My_Room_type_desc[0].CUSTOM_TXT || ''*/}
@@ -398,7 +415,7 @@ export class IrRoom {
                           e.stopImmediatePropagation();
                           e.stopPropagation();
                         }}
-                        onwa-select={e => {
+                        onwa-select={async e => {
                           switch ((e.detail as any).item.value) {
                             case 'edit':
                               this.handleEditClick();
@@ -417,7 +434,7 @@ export class IrRoom {
                       >
                         <ir-custom-button
                           slot="trigger"
-                          size="small"
+                          size="s"
                           class="booking-room__edit-button"
                           appearance="plain"
                           id={`actions-room-${this.room.identifier}`}
@@ -429,7 +446,7 @@ export class IrRoom {
                         </ir-custom-button>
                         {this.hasRoomEdit && <wa-dropdown-item value="edit">Edit unit</wa-dropdown-item>}
                         {this.hasRoomEdit && <wa-dropdown-item value="edit-rates">Edit nightly rates</wa-dropdown-item>}
-                        {isAgentMode(this.agent) && <wa-dropdown-item value="toggle">Re-assign {this.room.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
+                        {isAgentMode(this.agent) && this.hasRoomEdit && <wa-dropdown-item value="toggle">Re-assign {this.room.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
                         {this.hasRoomDelete && (
                           <wa-dropdown-item value="delete" variant="danger">
                             Delete
@@ -445,7 +462,7 @@ export class IrRoom {
                           class="booking-room__edit-button"
                           onClickHandler={this.handleEditClick.bind(this)}
                           variant="neutral"
-                          size="small"
+                          size="s"
                           appearance="plain"
                         >
                           <wa-icon label="Edit room" class="booking-room__edit-icon" name="edit" style={{ fontSize: '1rem' }}></wa-icon>
@@ -462,7 +479,7 @@ export class IrRoom {
                           class="booking-room__delete-button"
                           onClickHandler={this.openModal.bind(this, 'delete')}
                           variant="danger"
-                          size="small"
+                          size="s"
                           appearance="plain"
                         >
                           <wa-icon label="Delete room" class="booking-room__delete-icon" name="trash-can" style={{ fontSize: '1rem' }}></wa-icon>
@@ -543,7 +560,7 @@ export class IrRoom {
                       this.updateDepartureTime((e.target as any).value);
                     }}
                     style={{ width: '140px' }}
-                    size="small"
+                    size="s"
                     placeholder="Not provided"
                     value={this.room.departure_time?.code}
                     defaultValue={this.room.departure_time?.code}
@@ -705,15 +722,10 @@ export class IrRoom {
         >
           <p>{this.renderModalMessage()}</p>
           <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button size="medium" data-dialog="close" appearance="filled" variant="neutral">
+            <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
-            <ir-custom-button
-              size="medium"
-              loading={this.isLoading}
-              onClickHandler={e => this.handleModalConfirmation(e)}
-              variant={this.modalReason === 'delete' ? 'danger' : 'brand'}
-            >
+            <ir-custom-button size="m" loading={this.isLoading} onClickHandler={e => this.handleModalConfirmation(e)} variant={this.modalReason === 'delete' ? 'danger' : 'brand'}>
               {this.modalReason === 'delete' ? locales.entries.Lcz_Delete : locales.entries.Lcz_Confirm}
             </ir-custom-button>
           </div>
@@ -756,6 +768,18 @@ export class IrRoom {
             this.resetBookingEvt.emit(null);
           }}
         ></ir-booking-pricing-drawer>
+        <ir-hb-preference-dialog
+          room={this.room}
+          open={this.isHbDialogOpen}
+          onHbPreferenceClose={(e: CustomEvent<{ saved: boolean }>) => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.isHbDialogOpen = false;
+            if (e.detail.saved) {
+              this.resetBookingEvt.emit(null);
+            }
+          }}
+        ></ir-hb-preference-dialog>
       </Host>
     );
   }

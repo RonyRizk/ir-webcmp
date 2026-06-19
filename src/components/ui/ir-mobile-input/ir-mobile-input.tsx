@@ -24,7 +24,7 @@ export class IrMobileInput {
   private readonly countryStatusId = `${this.inputId}-country-status`;
 
   /** The input's size. */
-  @Prop({ reflect: true }) size: NativeWaInput['size'] = 'small';
+  @Prop({ reflect: true }) size: NativeWaInput['size'] = 's';
   /** Visible label for the phone input */
   @Prop() label: string = 'Phone number';
   /** Name attribute passed to the native input */
@@ -145,7 +145,7 @@ export class IrMobileInput {
     const describedByIds = [this.description ? this.descriptionId : null, this.error ? this.errorId : null].filter(Boolean).join(' ') || undefined;
 
     return (
-      <Host size={'small'} role="group" aria-labelledby={this.labelId} aria-describedby={describedByIds}>
+      <Host size={'s'} role="group" aria-labelledby={this.labelId} aria-describedby={describedByIds}>
         <label class="mobile-input__label" id={this.labelId} htmlFor={this.inputId}>
           {this.label}
           {this.required ? (

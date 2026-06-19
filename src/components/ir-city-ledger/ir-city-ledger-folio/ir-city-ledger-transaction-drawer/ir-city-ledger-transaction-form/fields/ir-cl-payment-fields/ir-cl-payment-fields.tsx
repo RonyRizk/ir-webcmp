@@ -45,7 +45,7 @@ export class IrClPaymentFields {
           <div class="field">
             <ir-validator schema={paymentMethodCodeFieldSchema} value={this.paymentMethodCode} valueEvent="change">
               <wa-select
-                size="small"
+                size="s"
                 label="Payment method"
                 placeholder="Select method…"
                 value={this.paymentMethodCode}
@@ -71,7 +71,7 @@ export class IrClPaymentFields {
         {/* <div class="payment-section">
           <wa-radio-group
             label="Apply to"
-            size="small"
+            size="s"
             orientation="horizontal"
             value={this.isOnAccount ? 'on-account' : 'apply-to-invoice'}
             onchange={e => {
@@ -94,7 +94,7 @@ export class IrClPaymentFields {
             <div class="field invoice-select">
               <wa-select
                 label="Outstanding Invoices"
-                size="small"
+                size="s"
                 placeholder="Search invoices…"
                 value={this.invoiceId ?? ''}
                 onwa-show={e => this.stopPropagation(e)}

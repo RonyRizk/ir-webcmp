@@ -1,5 +1,5 @@
-import { Component, Element, Prop, h, State } from '@stencil/core';
-import { TPositions, IToast } from './toast';
+import { Component, Prop, h } from '@stencil/core';
+import { TPositions } from './toast';
 
 @Component({
   tag: 'ir-toast',
@@ -7,43 +7,26 @@ import { TPositions, IToast } from './toast';
   scoped: true,
 })
 export class IrToast {
-  @Element() element: HTMLElement;
-
   /**
    * Position where toasts will appear.
    * Options include: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`.
    */
-  @Prop({ reflect: true, mutable: true }) position: TPositions = 'bottom-left';
+  @Prop({ reflect: true, mutable: true }) position: TPositions = 'top-right';
 
-  /**
-   * Array of active toast messages.
-   */
-  @State() toasts: IToast[] = [];
-
-  // @Listen('toast', { target: 'body' })
-  // onToast(event: CustomEvent<IToast>) {
-  //   const toast: IToast = event.detail;
-  //   this.showToast(toast);
-  // }
-
-  // private showToast(toast: IToast) {
-  //   const toastrOptions = {
-  //     positionClass: 'toast-top-right',
-  //     closeButton: true,
-  //     timeOut: toast.duration || 5000,
-  //   };
-
-  //   switch (toast.type) {
-  //     case 'success':
-  //       toastr.success(toast.title, '', toastrOptions);
-  //       break;
-  //     case 'error':
-  //       toastr.error(toast.title, '', toastrOptions);
-  //       break;
-  //   }
-  // }
+  private get providerPosition(): HTMLIrToastProviderElement['position'] {
+    const map: Record<TPositions, HTMLIrToastProviderElement['position']> = {
+      'top-left': 'top-start',
+      'top-right': 'top-end',
+      'bottom-left': 'bottom-start',
+      'bottom-right': 'bottom-end',
+    };
+    return map[this.position] ?? 'top-end';
+  }
 
   render() {
-    return <ir-toast-provider></ir-toast-provider>;
+    // ir-toast-provider renders the ir-toast-item stack and listens for
+    // `toast` events on the body, so this component is a thin shell kept
+    // for backwards compatibility with the many pages that embed it.
+    return <ir-toast-provider position={this.providerPosition}></ir-toast-provider>;
   }
 }

@@ -80,7 +80,7 @@ export class IrPaymentsFolio {
           disabled={this.isAddPaymentDisabled}
           slot="header-actions"
           id="create-payment"
-          size="small"
+          size="s"
           variant="neutral"
           appearance="plain"
           onClickHandler={this.handleAddPayment}

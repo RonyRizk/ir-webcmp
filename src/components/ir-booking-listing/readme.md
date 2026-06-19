@@ -50,10 +50,13 @@ graph TD;
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-alert
-  ir-listing-header --> ir-range-picker
+  ir-toast-provider --> ir-toast-item
+  ir-listing-header --> ir-date-range-filter
   ir-listing-header --> ir-custom-button
-  ir-range-picker --> ir-date-picker
+  ir-date-range-filter --> ir-date-select
+  ir-date-range-filter --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-booking-listing-table --> ir-booking-number-cell
   ir-booking-listing-table --> ir-booked-on-cell
   ir-booking-listing-table --> ir-booked-by-cell
@@ -143,6 +146,7 @@ graph TD;
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
+  ir-room --> ir-hb-preference-dialog
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -156,8 +160,6 @@ graph TD;
   ir-payment-folio-form --> ir-date-select
   ir-payment-folio-form --> ir-validator
   ir-payment-folio-form --> ir-input
-  ir-date-select --> ir-input
-  ir-date-select --> ir-air-date-picker
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
@@ -183,6 +185,8 @@ graph TD;
   ir-booking-pricing-form --> ir-spinner
   ir-booking-pricing-form --> ir-validator
   ir-booking-pricing-form --> ir-input
+  ir-hb-preference-dialog --> ir-dialog
+  ir-hb-preference-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
@@ -286,8 +290,6 @@ graph TD;
   ir-cl-invoice-dialog --> ir-cl-invoice-form
   ir-cl-invoice-dialog --> ir-custom-button
   ir-cl-invoice-form --> ir-date-range-filter
-  ir-date-range-filter --> ir-date-select
-  ir-date-range-filter --> ir-custom-button
   ir-guest-info-drawer --> ir-drawer
   ir-guest-info-drawer --> ir-guest-info-form
   ir-guest-info-drawer --> ir-custom-button

@@ -161,7 +161,7 @@ export class IrFiscalDocumentsFilters {
                 value={this.filters.type}
                 defaultValue={this.filters.type}
                 onchange={e => this.updateFilters({ type: (e.target as WaOption).value as any })}
-                size="small"
+                size="s"
                 placeholder="Document Type"
               >
                 {this.typeOptions.map(option => (
@@ -175,7 +175,7 @@ export class IrFiscalDocumentsFilters {
                 value={this.filters.folioType}
                 defaultValue={this.filters.folioType}
                 onchange={e => this.handleFolioTypeChange((e.target as WaOption).value as FiscalFolioType)}
-                size="small"
+                size="s"
                 placeholder="Folios"
               >
                 {this.folioOptions.map(option => (
@@ -197,7 +197,7 @@ export class IrFiscalDocumentsFilters {
             {this.filters.folioType === 'agent' && (
               <ir-autocomplete
                 class="filters-bar__folio-select"
-                size="small"
+                size="s"
                 placeholder="Select agent"
                 value={this.filters.agentId ? (this.agents.find(a => a.id === this.filters.agentId)?.name ?? '') : ALL_AGENTS_LABEL}
                 onText-change={(e: CustomEvent<string>) => {
@@ -223,7 +223,7 @@ export class IrFiscalDocumentsFilters {
             {this.filters.folioType === 'guest' && (
               <ir-picker
                 class="filters-bar__folio-select"
-                size="small"
+                size="s"
                 placeholder="Search customer by email or name"
                 withClear
                 mode="select-async"

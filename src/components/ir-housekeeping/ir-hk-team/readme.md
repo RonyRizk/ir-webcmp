@@ -15,8 +15,6 @@
 
 - [ir-hk-unassigned-units](../ir-hk-unassigned-units)
 - [ir-custom-button](../../ui/ir-custom-button)
-- [ir-popover](../../ui/ir-popover)
-- [ir-button](../../ui/ir-button)
 - [ir-hk-user-drawer](../ir-hk-user/ir-hk-user-drawer)
 - [ir-hk-unassigned-units-drawer](../ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
 - [ir-hk-delete-dialog](../ir-hk-delete-dialog)
@@ -26,8 +24,6 @@
 graph TD;
   ir-hk-team --> ir-hk-unassigned-units
   ir-hk-team --> ir-custom-button
-  ir-hk-team --> ir-popover
-  ir-hk-team --> ir-button
   ir-hk-team --> ir-hk-user-drawer
   ir-hk-team --> ir-hk-unassigned-units-drawer
   ir-hk-team --> ir-hk-delete-dialog
@@ -51,7 +47,6 @@ graph TD;
   ir-hk-unassigned-units-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-hk-unassigned-units-drawer-form
   ir-hk-unassigned-units-drawer --> ir-custom-button
-  ir-hk-unassigned-units-drawer-form --> ir-select
   ir-hk-delete-dialog --> ir-dialog
   ir-hk-delete-dialog --> ir-custom-button
   ir-housekeeping --> ir-hk-team

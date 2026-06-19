@@ -93,7 +93,7 @@ export class IrRevenueTable {
     const hasPayments = this.payments instanceof Map && this.payments.size > 0;
 
     return (
-      <div class="card p-1 revenue-table__table">
+      <wa-card class="revenue-table__table">
         {hasPayments ? (
           <Fragment>
             <div class="revenue-table__header">
@@ -124,7 +124,7 @@ export class IrRevenueTable {
                       const groupName = PAYMENT_TYPES_WITH_METHOD.includes(typeKey) ? `${this.payTypesObj[typeKey] ?? typeKey}` : this.payTypesObj[typeKey] ?? typeKey;
 
                       return (
-                        <div key={`type_${typeKey}`} class="px-1">
+                        <div key={`type_${typeKey}`} class="revenue-table__type-group">
                           <ir-revenue-row payments={list} groupName={groupName}></ir-revenue-row>
                         </div>
                       );
@@ -134,9 +134,11 @@ export class IrRevenueTable {
               })}
           </Fragment>
         ) : (
-          <p class="text-center my-auto mx-auto">There are no payment transactions recorded for the selected date.</p>
+          <div class="revenue-table__empty-wrapper">
+            <ir-empty-state message="There are no payment transactions recorded for the selected date."></ir-empty-state>
+          </div>
         )}
-      </div>
+      </wa-card>
     );
   }
 }

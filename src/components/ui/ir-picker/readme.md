@@ -7,19 +7,19 @@
 
 ## Properties
 
-| Property       | Attribute       | Description                                                                                                                          | Type                                          | Default     |
-| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | ----------- |
-| `appearance`   | `appearance`    | The input's visual appearance.                                                                                                       | `"filled" \| "filled-outlined" \| "outlined"` | `undefined` |
-| `debounce`     | `debounce`      | Delay (in milliseconds) before emitting the `text-change` event. Defaults to 300ms for async mode.                                   | `number`                                      | `0`         |
-| `defaultValue` | `default-value` | The default value of the form control. Primarily used for resetting the form control.                                                | `string`                                      | `undefined` |
-| `label`        | `label`         | Optional label applied to the text field.                                                                                            | `string`                                      | `undefined` |
-| `loading`      | `loading`       |                                                                                                                                      | `boolean`                                     | `false`     |
-| `mode`         | `mode`          |                                                                                                                                      | `"default" \| "select" \| "select-async"`     | `'default'` |
-| `pill`         | `pill`          |                                                                                                                                      | `boolean`                                     | `false`     |
-| `placeholder`  | `placeholder`   | Placeholder shown inside the input when there is no query.                                                                           | `string`                                      | `''`        |
-| `size`         | `size`          | The input's size.                                                                                                                    | `"large" \| "medium" \| "small"`              | `'small'`   |
-| `value`        | `value`         | Selected value (also shown in the input when `mode="select"`).                                                                       | `string`                                      | `''`        |
-| `withClear`    | `with-clear`    | Whether to show a clear button inside the input. When clicked, the input value is cleared and the `combobox-clear` event is emitted. | `boolean`                                     | `false`     |
+| Property       | Attribute       | Description                                                                                                                          | Type                                                                  | Default     |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ----------- |
+| `appearance`   | `appearance`    | The input's visual appearance.                                                                                                       | `"filled" \| "filled-outlined" \| "outlined"`                         | `undefined` |
+| `debounce`     | `debounce`      | Delay (in milliseconds) before emitting the `text-change` event. Defaults to 300ms for async mode.                                   | `number`                                                              | `0`         |
+| `defaultValue` | `default-value` | The default value of the form control. Primarily used for resetting the form control.                                                | `string`                                                              | `undefined` |
+| `label`        | `label`         | Optional label applied to the text field.                                                                                            | `string`                                                              | `undefined` |
+| `loading`      | `loading`       |                                                                                                                                      | `boolean`                                                             | `false`     |
+| `mode`         | `mode`          |                                                                                                                                      | `"default" \| "select" \| "select-async"`                             | `'default'` |
+| `pill`         | `pill`          |                                                                                                                                      | `boolean`                                                             | `false`     |
+| `placeholder`  | `placeholder`   | Placeholder shown inside the input when there is no query.                                                                           | `string`                                                              | `''`        |
+| `size`         | `size`          | The input's size.                                                                                                                    | `"l" \| "large" \| "m" \| "medium" \| "s" \| "small" \| "xl" \| "xs"` | `'s'`       |
+| `value`        | `value`         | Selected value (also shown in the input when `mode="select"`).                                                                       | `string`                                                              | `''`        |
+| `withClear`    | `with-clear`    | Whether to show a clear button inside the input. When clicked, the input value is cleared and the `combobox-clear` event is emitted. | `boolean`                                                             | `false`     |
 
 
 ## Events

@@ -230,7 +230,7 @@ export class IrRoomGuestsForm {
                       <ir-validator class="flex-grow-1" schema={ZSharedPerson.shape.first_name}>
                         <ir-input
                           aria-invalid={String(!!this.error['first_name'] && !isRowValid)}
-                          size="small"
+                          size="s"
                           id={`first_name_${idx}`}
                           placeholder="First name"
                           onText-change={e => this.updateGuestInfo(idx, { first_name: e.detail })}
@@ -244,7 +244,7 @@ export class IrRoomGuestsForm {
                       {/* <ir-validator class="flex-grow-1" schema={ZSharedPerson.shape.last_name}> */}
                       <ir-input
                         aria-invalid={String(!!this.error['last_name'] && !isRowValid)}
-                        size="small"
+                        size="s"
                         id={`last_name_${idx}`}
                         placeholder="Last name"
                         onText-change={e => this.updateGuestInfo(idx, { last_name: e.detail })}
@@ -260,7 +260,7 @@ export class IrRoomGuestsForm {
                           aria-invalid={String(!!this.error['dob'] && !isRowValid)}
                           id={`dob_${idx}`}
                           mask={dateMask}
-                          size="small"
+                          size="s"
                           placeholder=""
                           onText-change={e => {
                             this.updateGuestInfo(idx, { dob: e.detail });
@@ -273,7 +273,7 @@ export class IrRoomGuestsForm {
                       <p class="guest_label">{locales.entries.Lcz_Nationality}</p>
                       <div class="flex-grow-1">
                         <ir-country-picker
-                          size="small"
+                          size="s"
                           variant="modern"
                           aria-invalid={String(!!this.error['country_id'] && !guest.country_id)}
                           propertyCountry={this.propertyCountry}
@@ -303,7 +303,7 @@ export class IrRoomGuestsForm {
                               },
                             });
                           }}
-                          size="small"
+                          size="s"
                         >
                           {this.idTypes?.map(t => {
                             const label = t[`CODE_VALUE_${this.language.toUpperCase()}`] ?? t[`CODE_VALUE_EN`];
@@ -315,7 +315,7 @@ export class IrRoomGuestsForm {
                           })}
                         </wa-select>
                         <wa-input
-                          size="small"
+                          size="s"
                           aria-invalid={String(!!this.error['number'] && !isRowValid)}
                           class="room-guest__document"
                           defaultValue={guest?.id_info?.number}

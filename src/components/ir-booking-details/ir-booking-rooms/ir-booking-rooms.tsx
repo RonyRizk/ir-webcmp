@@ -303,7 +303,7 @@ export class IrBookingRooms {
         {this.hasRoomAdd && this.booking.is_editable && (
           <Fragment>
             <wa-tooltip for="room-add">Add unit</wa-tooltip>
-            <ir-custom-button slot="header-actions" id="room-add" appearance={'plain'} size={'small'} variant={'neutral'}>
+            <ir-custom-button slot="header-actions" id="room-add" appearance={'plain'} size={'s'} variant={'neutral'}>
               <wa-icon name="plus" style={{ fontSize: '1rem' }} label="Add unit"></wa-icon>
             </ir-custom-button>
           </Fragment>

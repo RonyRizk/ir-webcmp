@@ -53,14 +53,14 @@ export class IrPmsPage {
       <div>
         <header class="app-header">
           <div class="app-header__left">
-            <ir-custom-button onClickHandler={() => this.menuDrawerRef.openDrawer()} size="small" appearance="plain" variant="neutral" class="header-action">
+            <ir-custom-button onClickHandler={() => this.menuDrawerRef.openDrawer()} size="s" appearance="plain" variant="neutral" class="header-action">
               <wa-icon name="bars" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             {/* <div class="d-flex" style={{ marginLeft: '1rem' }}>
               <a href="/">
                 <img class="logo" src="https://gateway.igloorooms.com/irimages/aclogo/AcLogo_229.png?t=1597509988143" />
               </a>
-              <ir-custom-button data-dialog="open dialog-opening" size="small" appearance="plain" class="header-property-switcher">
+              <ir-custom-button data-dialog="open dialog-opening" size="s" appearance="plain" class="header-property-switcher">
                 <span class="header-property-name">Hotel California</span>
                 <wa-icon name="chevron-down"></wa-icon>
               </ir-custom-button>
@@ -84,27 +84,27 @@ export class IrPmsPage {
           </div>
 
           <div class="app-header__right">
-            <ir-custom-button id="add-booking-btn" size="small" appearance="plain" variant="brand">
+            <ir-custom-button id="add-booking-btn" size="s" appearance="plain" variant="brand">
               <wa-icon name="circle-plus" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             <wa-tooltip for="add-booking-btn">New booking</wa-tooltip>
 
-            <ir-custom-button id="calendar-btn" href="/frontdesk.aspx" size="small" appearance="plain" class="header-desktop-only">
+            <ir-custom-button id="calendar-btn" href="/frontdesk.aspx" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="calendar" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             <wa-tooltip for="calendar-btn">Calendar</wa-tooltip>
 
-            <ir-custom-button href="/acbookinglist.aspx" id="rooms-btn" size="small" appearance="plain" class="header-desktop-only">
+            <ir-custom-button href="/acbookinglist.aspx" id="rooms-btn" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="bed" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             <wa-tooltip for="rooms-btn">Bookings</wa-tooltip>
 
-            <ir-custom-button id="departures-btn" href="AcDepartures.aspx" size="small" appearance="plain" class="header-desktop-only">
+            <ir-custom-button id="departures-btn" href="AcDepartures.aspx" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="plane-departure" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             <wa-tooltip for="departures-btn">Check-outs</wa-tooltip>
 
-            <ir-custom-button href="/AcArrivals.aspx" id="arrivals-btn" size="small" appearance="plain" class="header-desktop-only">
+            <ir-custom-button href="/AcArrivals.aspx" id="arrivals-btn" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="plane-arrival" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
             <wa-tooltip for="arrivals-btn">Check-ins</wa-tooltip>
@@ -156,7 +156,7 @@ export class IrPmsPage {
             <ir-property-switcher ticket={this.ticket}></ir-property-switcher>
 
             {/* <div>
-              <ir-custom-button data-dialog="open dialog-opening" size="small" appearance="plain" class="header-property-switcher">
+              <ir-custom-button data-dialog="open dialog-opening" size="s" appearance="plain" class="header-property-switcher">
                 <img class="logo" src="https://gateway.igloorooms.com/irimages/aclogo/AcLogo_229.png?t=1597509988143" />
                 <span class="header-property-name">Hotel California</span>
                 <wa-icon name="chevron-down"></wa-icon>

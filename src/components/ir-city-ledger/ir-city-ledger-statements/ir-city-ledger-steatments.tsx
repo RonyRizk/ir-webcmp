@@ -168,7 +168,7 @@ export class IrCityLedgerStatements {
         >
           <div slot="header-actions">
             {this.pdfUrl && (
-              <ir-custom-button size="medium" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
+              <ir-custom-button size="m" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
                 <wa-icon name="download" label="Download PDF"></wa-icon>
               </ir-custom-button>
             )}

@@ -1,8 +1,26 @@
-/* Base styles */
+/* #region CSS Variables ~~~~~~~~~~~~~~~~~~~~~ */
+
 :host {
-  /* --ir-cell-padding: 0.1rem 0.8rem; */
   --ir-cell-padding: 0.5rem 1rem;
 }
+
+/* #endregion */
+
+/* #region Table Layout ~~~~~~~~~~~~~~~~~~~~~ */
+
+.table--container {
+  overflow-x: auto;
+}
+
+.table--container,
+.data-table {
+  height: 100%;
+}
+
+/* #endregion */
+
+/* #region Table Cells ~~~~~~~~~~~~~~~~~~~~~ */
+
 .ir-table-row td {
   padding: var(--ir-cell-padding) !important;
   text-align: left;
@@ -11,87 +29,57 @@
   white-space: nowrap;
   color: var(--wa-color-text-normal);
   box-sizing: border-box;
-  /* width: max-content;
-  max-width: max-content; */
+
+  transition-duration: var(--wa-transition-fast);
 }
-/* .ir-table-row td:last-child {
-  width: 100%; 
-}*/
-/* .ir-table-row td:first-child,
-.table thead th:first-child {
-  position: sticky;
-  left: var(--ir-table-sticky-padding,-1rem);
-} */
-/* .table--container {
-  flex: 1 1 0%;
-} */
-.table--container {
-  overflow-x: auto;
-}
+
 .table td {
   border-top: 0;
   border-bottom: 1px solid var(--wa-color-neutral-border-quiet, #abaeb9);
-  /* border-bottom: 1px solid var(--wa-color-gray-80); */
+
   transition:
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
 }
+
 .table tbody tr:last-child > td {
   border-bottom: 0 !important;
 }
+
+/* #endregion */
+
+/* #region Table Headers ~~~~~~~~~~~~~~~~~~~~~ */
+
 .table thead th {
   border: none !important;
-  background: #ececec;
   background: color-mix(in oklab, var(--wa-color-neutral-fill-quiet, #f1f2f3) 60%, transparent);
-  color: #374151;
+  color: var(--wa-color-neutral-on-quiet);
   padding: 0.5rem 1rem !important;
   text-align: left;
 }
+
 .data-table thead th {
   box-sizing: border-box;
   background: var(--wa-color-surface-default) !important;
   padding-top: 0.5rem !important;
   padding-bottom: 0.5rem !important;
-  /* border-bottom: 1px solid var(--wa-color-neutral-fill-normal) !important; */
+
   border-bottom: var(--wa-border-style) var(--wa-border-width-s) var(--wa-color-neutral-border-normal) !important;
+
   color: var(--wa-color-text-normal);
-  /* position: sticky;
-  top: 0;
-  z-index: 99; */
 }
 
-.data-table .empty-row {
+/* #endregion */
+.empty-row {
   height: 50vh !important;
   text-align: center;
   color: var(--wa-color-gray-60);
 }
 
-.data-table--pagination {
-  padding: 0.5rem 1rem;
-  /* position: sticky;
-  bottom: 0; */
-  background: var(--wa-color-surface-default);
-  border-top: 1px solid var(--wa-color-neutral-90);
-}
+/* #region Sorting ~~~~~~~~~~~~~~~~~~~~~ */
 
-/* Selected Rows Styles */
-
-.selected td {
-  background: var(--wa-color-brand-fill-quiet) !important;
-  border-color: var(--wa-color-neutral-border-quiet) !important;
-}
-.selected td {
-  color: var(--gray-dark) !important;
-  transition:
-    color 0.15s ease-in-out,
-    background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
-}
-
-/* Sorting styles */
 .sortable,
 .ir-table-row {
   transition:
@@ -100,62 +88,109 @@
     border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
 }
+
 .sortable {
   text-transform: capitalize;
   cursor: pointer;
 }
-.ir-table-row td {
-  transition-duration: var(--wa-transition-fast);
-}
+
 .table thead th.sortable {
   transition-property: background, border, box-shadow, color;
+
   transition-duration: var(--wa-transition-fast);
   transition-timing-function: var(--wa-transition-easing);
 }
 
 .table thead th.sortable:hover {
   color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+
   background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)) !important;
 }
+
 .table thead th.sortable:active {
   color: var(--wa-color-on-quiet, var(--wa-color-neutral-on-quiet));
+
   background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active)) !important;
 }
 
-.ir-table-row:hover td {
-  background: #e2e6ea3f !important;
-  background: var(--wa-color-neutral-fill-quiet, #f1f2f3) !important;
-}
-.--clickable.ir-table-row:hover td {
-  background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)) !important;
-}
-.--clickable.ir-table-row:active td {
-  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active)) !important;
-}
-.selected.ir-table-row:hover td {
-  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-brand-fill-normal)), var(--wa-color-mix-hover)) !important;
-}
-.selected.ir-table-row:active td {
-  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-brand-fill-normal)), var(--wa-color-mix-active)) !important;
-}
 .sortable:active {
   color: #212529;
   background-color: #e2e8f0;
   border-color: #d3d9df;
 }
+
 .sortable svg {
   color: var(--wa-color-brand-fill-loud);
 }
-/* .action-row {
-  position: sticky;
-  right:var(--ir-table-sticky-padding,-1rem);
-} */
+
+/* #endregion */
+
+/* #region Row States ~~~~~~~~~~~~~~~~~~~~~ */
+
+.ir-table-row:hover td {
+  background: var(--wa-color-neutral-fill-quiet, #f1f2f3) !important;
+}
+
+.--clickable.ir-table-row:hover td {
+  background-color: var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)) !important;
+}
+
+.--clickable.ir-table-row:active td {
+  background-color: color-mix(in oklab, var(--wa-color-fill-quiet, var(--wa-color-neutral-fill-quiet)), var(--wa-color-mix-active)) !important;
+}
+
+/* #endregion */
+
+/* #region Selected Rows ~~~~~~~~~~~~~~~~~~~~~ */
+
+.selected td {
+  background: var(--wa-color-brand-fill-quiet) !important;
+  border-color: var(--wa-color-neutral-border-quiet) !important;
+  color: var(--gray-dark) !important;
+
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+
+.selected.ir-table-row:hover td {
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-brand-fill-normal)), var(--wa-color-mix-hover)) !important;
+}
+
+.selected.ir-table-row:active td {
+  background-color: color-mix(in oklab, var(--wa-color-fill-normal, var(--wa-color-brand-fill-normal)), var(--wa-color-mix-active)) !important;
+}
+
+/* #endregion */
+
+/* #region Empty States ~~~~~~~~~~~~~~~~~~~~~ */
+
+.data-table .empty-row {
+  height: 50vh !important;
+  text-align: center;
+  color: var(--wa-color-gray-60);
+}
+
+/* #endregion */
+
+/* #region Pagination ~~~~~~~~~~~~~~~~~~~~~ */
+
+.data-table--pagination {
+  padding: 0.5rem 1rem;
+  background: var(--wa-color-surface-default);
+  border-top: 1px solid var(--wa-color-neutral-90);
+}
+
+/* #endregion */
+
+/* #region Sticky Columns ~~~~~~~~~~~~~~~~~~~~~ */
+
 .sticky-column {
   position: sticky !important;
   right: 0;
   background-color: white;
 }
-.table--container,
-.data-table {
-  height: 100%;
-}
+
+/* #endregion */

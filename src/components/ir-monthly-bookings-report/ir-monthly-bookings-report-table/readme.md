@@ -21,13 +21,13 @@
 ### Depends on
 
 - [ir-tooltip](../../ui/ir-tooltip)
-- [ir-progress-indicator](../../ui/ir-progress-indicator)
+- [ir-empty-state](../../ir-empty-state)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-monthly-bookings-report-table --> ir-tooltip
-  ir-monthly-bookings-report-table --> ir-progress-indicator
+  ir-monthly-bookings-report-table --> ir-empty-state
   ir-monthly-bookings-report --> ir-monthly-bookings-report-table
   style ir-monthly-bookings-report-table fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -126,7 +126,7 @@ export class IglLegend {
           <h2 class="fd-legend__title" id="legend-title">
             {locales.entries.Lcz_Legend}
           </h2>
-          <ir-custom-button size="medium" onClickHandler={() => this.handleOptionEvent('closeSideMenu')} appearance="plain" variant="neutral">
+          <ir-custom-button size="m" onClickHandler={() => this.handleOptionEvent('closeSideMenu')} appearance="plain" variant="neutral">
             <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
           </ir-custom-button>
         </div>
@@ -185,7 +185,7 @@ export class IglLegend {
                     autocomplete="off"
                     class="legendTextarea border-0 m-0 p-0"
                     value={legendInfo.name}
-                    size="small"
+                    size="s"
                     placeholder="Reason for this color"
                     onchange={event => {
                       this.handleNameInput(index, (event.target as HTMLInputElement).value);

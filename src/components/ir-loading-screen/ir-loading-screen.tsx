@@ -11,7 +11,7 @@ export class IrLoadingScreen {
     return (
       <div class="loader__container" data-testid="loading-screen">
         {/* <span class="loader"></span> */}
-        <wa-spinner style={{ fontSize: '2.5rem' }}></wa-spinner>
+        <wa-spinner style={{ 'fontSize': '2.5rem', '--track-width': '3.5px' }}></wa-spinner>
         {/* {this.message && <p class={'m-0'}>{this.message}</p>} */}
       </div>
     );

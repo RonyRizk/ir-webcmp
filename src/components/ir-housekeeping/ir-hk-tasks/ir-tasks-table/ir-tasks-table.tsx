@@ -212,7 +212,7 @@ export class IrTasksTable {
           <ir-tasks-table-pagination></ir-tasks-table-pagination>
         </section>
         <wa-card class="table-container">
-          <ir-tasks-header></ir-tasks-header>
+          <ir-tasks-header class="tasks__header"></ir-tasks-header>
           <div class="table--container">
             <table class="table data-table" data-testid="hk_tasks_table">
               <thead class="table-header">
@@ -344,7 +344,7 @@ export class IrTasksTable {
                           <wa-select
                             key={`${task.id}-${this.selectRevertKey}`}
                             class="hk-owner-select"
-                            size="small"
+                            size="s"
                             value={String(task.hkm_id ?? 0)}
                             defaultValue={String(task.hkm_id ?? 0)}
                             onchange={(e: Event) => {
@@ -398,7 +398,7 @@ export class IrTasksTable {
           </span>
           <div slot="footer" class="hk-dialog-footer">
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="filled"
               variant="neutral"
               onClickHandler={() => {
@@ -410,7 +410,7 @@ export class IrTasksTable {
               {locales.entries.Lcz_Cancel}
             </ir-custom-button>
             <ir-custom-button
-              size="medium"
+              size="m"
               appearance="accent"
               variant="brand"
               loading={isRequestPending('/Override_HK_Task_Ownership')}

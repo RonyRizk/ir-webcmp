@@ -250,7 +250,7 @@ export class IrPreviewScreenDialog {
               <wa-tooltip for={this._id}>Print PDF</wa-tooltip>
               <ir-custom-button
                 id={this._id}
-                size="medium"
+                size="m"
                 variant="neutral"
                 appearance="plain"
                 onClickHandler={this.handleActionButtonClick.bind(this)}

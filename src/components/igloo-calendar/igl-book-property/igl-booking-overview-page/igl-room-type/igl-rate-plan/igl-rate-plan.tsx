@@ -203,7 +203,7 @@ export class IglRatePlan {
           {isAvailableToBook ? (
             <div class="rateplan-container">
               <wa-select
-                size="small"
+                size="s"
                 disabled={disableForm}
                 data-testid="adult-child-offering"
                 onchange={evt => this.handleDataChange('adult_child_offering', evt)}
@@ -265,7 +265,7 @@ export class IglRatePlan {
                       e.stopImmediatePropagation();
                       e.stopPropagation();
                     }}
-                    size="small"
+                    size="s"
                     class="fd-rateplan__nights-select"
                     id={uuidv4()}
                     onchange={evt =>
@@ -291,7 +291,7 @@ export class IglRatePlan {
                     onchange={evt => this.handleDataChange('totalRooms', evt)}
                     value={visibleInventory.reserved?.toString()}
                     defaultValue={visibleInventory.reserved?.toString()}
-                    size="small"
+                    size="s"
                     onwa-hide={e => {
                       e.stopImmediatePropagation();
                       e.stopPropagation();

@@ -1,3 +1,19 @@
 :host {
   display: block;
 }
+
+.channel-content-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.channel-table-card {
+  flex: 1 1 0%;
+}
+
+@media (min-width: 992px) {
+  .channel-content-row {
+    flex-direction: row;
+  }
+}
