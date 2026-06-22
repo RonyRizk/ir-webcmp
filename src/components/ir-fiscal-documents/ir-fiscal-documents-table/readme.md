@@ -54,6 +54,7 @@ graph TD;
   ir-fiscal-documents-table --> ir-spinner
   ir-fiscal-documents-table --> ir-fd-confirm-dialog
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-fiscal-documents --> ir-fiscal-documents-table
   style ir-fiscal-documents-table fill:#f9f,stroke:#333,stroke-width:4px

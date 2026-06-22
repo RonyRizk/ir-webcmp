@@ -100,6 +100,7 @@ graph TD;
   ir-preview-screen-dialog --> ir-dialog
   ir-preview-screen-dialog --> ir-custom-button
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-empty-state

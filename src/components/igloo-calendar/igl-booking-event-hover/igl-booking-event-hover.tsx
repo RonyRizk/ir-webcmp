@@ -429,7 +429,7 @@ export class IglBookingEventHover {
     return true;
   }
   private get isHalfBoard() {
-    return this.room?.rateplan?.meal_plan?.code === '003';
+    return this.room?.rateplan?.meal_plan?.code === '003' && calendar_data.property.is_frontdesk_enabled;
   }
   private getInfoElement() {
     console.log(this.bookingEvent);

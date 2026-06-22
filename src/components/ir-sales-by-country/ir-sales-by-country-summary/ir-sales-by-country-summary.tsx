@@ -1,6 +1,6 @@
 import { Component, h, Prop } from '@stencil/core';
 import { SalesRecord } from '../types';
-import { formatAmount } from '@/utils/utils';
+import { calculateTrend, formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 
 export type NumericKeys<T> = {
@@ -40,7 +40,7 @@ export class IrSalesByCountrySummary {
           icon="moon"
           label="Total Room Nights"
           value={totalRoomNights?.toString()}
-          trend={hasLastYear ? totalRoomNights - lastYearTotalRoomNights : undefined}
+          trend={hasLastYear ? calculateTrend(totalRoomNights, lastYearTotalRoomNights) : undefined}
           trendLabel="vs last year"
           caption={hasLastYear ? `Last year: ${lastYearTotalRoomNights}` : undefined}
         ></ir-metric-card>
@@ -49,7 +49,7 @@ export class IrSalesByCountrySummary {
           icon="user-group"
           label="Total Guests"
           value={totalGuests?.toString()}
-          trend={hasLastYear ? totalGuests - lastYearTotalGuests : undefined}
+          trend={hasLastYear ? calculateTrend(totalGuests, lastYearTotalGuests) : undefined}
           trendLabel="vs last year"
           caption={hasLastYear ? `Last year: ${lastYearTotalGuests}` : undefined}
         ></ir-metric-card>
@@ -58,7 +58,7 @@ export class IrSalesByCountrySummary {
           icon="money-bill"
           label="Total Revenue"
           value={formatAmount(calendar_data.currency.symbol, totalRevenue)}
-          trend={hasLastYear ? totalRevenue - lastYearTotalRevenue : undefined}
+          trend={hasLastYear ? calculateTrend(totalRevenue, lastYearTotalRevenue) : undefined}
           trendLabel="vs last year"
           caption={hasLastYear ? `Last year: ${formatAmount(calendar_data.currency.symbol, lastYearTotalRevenue)}` : undefined}
         ></ir-metric-card>

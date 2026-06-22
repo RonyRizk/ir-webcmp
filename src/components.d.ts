@@ -65,7 +65,7 @@ import { Element } from "@stencil/core";
 import { NativeDrawer } from "./components/ir-drawer/ir-drawer";
 import { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 import { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
-import { FdConfirmAction } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog/ir-fd-confirm-dialog";
+import { FdConfirmAction, FdConfirmationVoidType } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog/ir-fd-confirm-dialog";
 import { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
 import { FiscalDocumentFilters, FiscalDocumentRow, FiscalFolioType } from "./components/ir-fiscal-documents/types";
 import { ClFiscalDocumentPreviewRequest as ClFiscalDocumentPreviewRequest1 } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types";
@@ -162,7 +162,7 @@ export { Element } from "@stencil/core";
 export { NativeDrawer } from "./components/ir-drawer/ir-drawer";
 export { DropdownItem } from "./components/ui/ir-dropdown/ir-dropdown";
 export { DropdownItem as DropdownItem1 } from "./components/ui/ir-dropdown/ir-dropdown";
-export { FdConfirmAction } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog/ir-fd-confirm-dialog";
+export { FdConfirmAction, FdConfirmationVoidType } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog/ir-fd-confirm-dialog";
 export { DailyFinancialActionsFilter, SidebarOpenEvent } from "./components/ir-financial-actions/types";
 export { FiscalDocumentFilters, FiscalDocumentRow, FiscalFolioType } from "./components/ir-fiscal-documents/types";
 export { ClFiscalDocumentPreviewRequest as ClFiscalDocumentPreviewRequest1 } from "./components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types";
@@ -9895,7 +9895,7 @@ declare global {
     interface HTMLIrFdConfirmDialogElementEventMap {
         "confirmed": {
     amount: number | null;
-    voidType: 'credit-note' | 'goodwill';
+    voidType: FdConfirmationVoidType;
   };
         "cancelled": void;
     }
@@ -15915,7 +15915,7 @@ declare namespace LocalJSX {
         "onCancelled"?: (event: IrFdConfirmDialogCustomEvent<void>) => void;
         "onConfirmed"?: (event: IrFdConfirmDialogCustomEvent<{
     amount: number | null;
-    voidType: 'credit-note' | 'goodwill';
+    voidType: FdConfirmationVoidType;
   }>) => void;
         /**
           * @default false

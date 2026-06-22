@@ -7,6 +7,7 @@ export const ClTxTypeCode = {
   StandardChargeDebit: 'DB',
   Discount: 'DSC',
   CancellationPenalty: 'CPN',
+  AdjustmentCredit: 'ADJC',
 } as const;
 
 export const TaxationStrategies = {
@@ -15,6 +16,7 @@ export const TaxationStrategies = {
 } as const;
 
 export const FdTypes = {
+  AdjustmentCredit: 'ADJC',
   Draft: 'DFT',
   Invoice: 'INV',
   CreditNote: 'CN',

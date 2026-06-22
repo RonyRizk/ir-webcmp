@@ -219,6 +219,7 @@ graph TD;
   ir-cl-fiscal-document-preview --> ir-custom-button
   ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-empty-state

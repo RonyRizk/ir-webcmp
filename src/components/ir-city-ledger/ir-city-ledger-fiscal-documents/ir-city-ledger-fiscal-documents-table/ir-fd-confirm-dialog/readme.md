@@ -19,10 +19,10 @@
 
 ## Events
 
-| Event       | Description | Type                                                                      |
-| ----------- | ----------- | ------------------------------------------------------------------------- |
-| `cancelled` |             | `CustomEvent<void>`                                                       |
-| `confirmed` |             | `CustomEvent<{ amount: number; voidType: "credit-note" \| "goodwill"; }>` |
+| Event       | Description | Type                                                                 |
+| ----------- | ----------- | -------------------------------------------------------------------- |
+| `cancelled` |             | `CustomEvent<void>`                                                  |
+| `confirmed` |             | `CustomEvent<{ amount: number; voidType: FdConfirmationVoidType; }>` |
 
 
 ## Dependencies
@@ -36,12 +36,14 @@
 ### Depends on
 
 - [ir-dialog](../../../../ui/ir-dialog)
+- [ir-input](../../../../ui/ir-input)
 - [ir-custom-button](../../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-city-ledger-fiscal-documents-table --> ir-fd-confirm-dialog
   ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog

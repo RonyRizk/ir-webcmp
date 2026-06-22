@@ -1,6 +1,6 @@
 import { Component, Host, Prop, h } from '@stencil/core';
 import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from '../types';
-import { formatAmount } from '@/utils/utils';
+import { calculateTrend, formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 import { PaymentEntries } from '@/components/ir-booking-details/types';
 
@@ -66,7 +66,7 @@ export class IrRevenueSummary {
             icon="arrow-trend-up"
             label="Payments"
             value={formatAmount(calendar_data.currency.symbol, paymentsTotal)}
-            trend={hasPrevious ? paymentsTotal - previousDatePaymentsTotal : undefined}
+            trend={hasPrevious ? calculateTrend(paymentsTotal, previousDatePaymentsTotal) : undefined}
             trendLabel="from previous day"
             caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : undefined}
           ></ir-metric-card>
@@ -75,7 +75,7 @@ export class IrRevenueSummary {
             icon="arrow-trend-down"
             label="Refunds"
             value={formatAmount(calendar_data.currency.symbol, refundAmount)}
-            trend={hasPrevious ? refundAmount - previousDateRefundAmount : undefined}
+            trend={hasPrevious ? calculateTrend(refundAmount, previousDateRefundAmount) : undefined}
             trendLabel="from previous day"
             invertTrend
             caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : undefined}
@@ -85,7 +85,7 @@ export class IrRevenueSummary {
             icon={this.getTrendIcon(totalAmount, previousDateTotalAmount) ?? 'money-bill'}
             label="Net Total"
             value={formatAmount(calendar_data.currency.symbol, totalAmount)}
-            trend={hasPrevious ? totalAmount - previousDateTotalAmount : undefined}
+            trend={hasPrevious ? calculateTrend(totalAmount, previousDateTotalAmount) : undefined}
             trendLabel="from previous day"
             caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : undefined}
           ></ir-metric-card>

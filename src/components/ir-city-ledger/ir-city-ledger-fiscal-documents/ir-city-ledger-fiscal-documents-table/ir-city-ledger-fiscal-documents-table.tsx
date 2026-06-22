@@ -96,20 +96,20 @@ export class IrCityLedgerFiscalDocumentsTable {
       if (action === 'void') {
         switch (row.FD_TYPE_CODE) {
           case FdTypes.Invoice:
-            const { amount, fdType } = e.detail;
-            if (fdType === 'credit-note') {
+            const { amount, voidType } = e.detail;
+            if (voidType === FdTypes.CreditNote) {
               await this.cityLedgerService.voidInvoiceByCreditNote({ FD_ID: row.FD_ID });
             } else {
               const result = await this.cityLedgerService.issueManualCLTx({
                 CL_TX_ID: -1,
                 AGENCY_ID: this.agentId,
                 SERVICE_DATE: moment().format('YYYY-MM-DD'),
-                CL_TX_TYPE_CODE: FdTypes.CreditNote,
-                DESCRIPTION: 'Credit note',
-                DEBIT: null,
+                CL_TX_TYPE_CODE: FdTypes.AdjustmentCredit,
+                DESCRIPTION: 'Adjustment Credit',
+                DEBIT: 0,
                 CREDIT: amount,
                 CURRENCY_ID: calendar_data?.property?.currency?.id,
-                PAY_METHOD_CODE: null,
+                PAY_METHOD_CODE: '',
                 EXTERNAL_REF: row.FD_ID.toString(),
                 BH_ID: null,
                 VAT_INCLUDED_CODE: '',

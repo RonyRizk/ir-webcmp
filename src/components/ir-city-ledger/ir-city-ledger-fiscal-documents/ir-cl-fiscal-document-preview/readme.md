@@ -46,6 +46,7 @@ graph TD;
   ir-preview-screen-dialog --> ir-dialog
   ir-preview-screen-dialog --> ir-custom-button
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-booking-city-ledger --> ir-cl-fiscal-document-preview
   ir-city-ledger --> ir-cl-fiscal-document-preview

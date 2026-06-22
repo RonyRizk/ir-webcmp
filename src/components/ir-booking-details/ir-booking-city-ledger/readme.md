@@ -78,6 +78,7 @@ graph TD;
   ir-preview-screen-dialog --> ir-dialog
   ir-preview-screen-dialog --> ir-custom-button
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-payment-details --> ir-booking-city-ledger
   style ir-booking-city-ledger fill:#f9f,stroke:#333,stroke-width:4px

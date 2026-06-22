@@ -37,10 +37,10 @@
   }
   /* Fixed-basis filters rein in ir-filter-card's `min-width: 20vw; flex: 1`
      so the results card gets the remaining width. */
-  .ir-meal-report__layout > ir-meal-report-filters {
+  /* .ir-meal-report__layout > ir-meal-report-filters {
     flex: 0 0 320px;
     min-width: 0;
-  }
+  } */
   .ir-meal-report__layout > .ir-meal-report__results {
     flex: 1 1 auto;
   }

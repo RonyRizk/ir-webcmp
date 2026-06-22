@@ -1,6 +1,6 @@
 import { Component, Prop, h } from '@stencil/core';
 import { ChannelReport, ChannelReportResult } from '../types';
-import { formatAmount } from '@/utils/utils';
+import { calculateTrend, formatAmount } from '@/utils/utils';
 
 @Component({
   tag: 'ir-sales-by-channel-summary',
@@ -32,7 +32,7 @@ export class IrSalesByChannelSummary {
           icon="moon"
           label="Total Room Nights"
           value={totalNights.toString()}
-          trend={hasLastYear ? totalNights - lastYearNights : undefined}
+          trend={hasLastYear ? calculateTrend(totalNights, lastYearNights) : undefined}
           trendLabel="vs last year"
           caption={hasLastYear ? `Last year: ${lastYearNights}` : undefined}
         ></ir-metric-card>
@@ -41,11 +41,11 @@ export class IrSalesByChannelSummary {
           icon="money-bill"
           label="Total Revenue"
           value={formatAmount(currency, totalRevenue)}
-          trend={hasLastYear ? totalRevenue - lastYearRevenue : undefined}
+          trend={hasLastYear ? calculateTrend(totalRevenue, lastYearRevenue) : undefined}
           trendLabel="vs last year"
           caption={hasLastYear ? `Last year: ${formatAmount(currency, lastYearRevenue)}` : undefined}
         ></ir-metric-card>
-        <ir-metric-card class="summary-metric" icon="chart-bar" label="Channels" value={(this.records?.length ?? 0).toString()}></ir-metric-card>
+        <ir-metric-card class="summary-metric" icon="chart-bar" label="Sources" value={(this.records?.length ?? 0).toString()}></ir-metric-card>
       </div>
     );
   }

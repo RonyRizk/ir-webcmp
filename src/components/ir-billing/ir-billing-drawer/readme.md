@@ -80,6 +80,7 @@ graph TD;
   ir-city-ledger-fiscal-documents-table --> ir-spinner
   ir-city-ledger-fiscal-documents-table --> ir-fd-confirm-dialog
   ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
   ir-cl-invoice-dialog --> ir-dialog
   ir-cl-invoice-dialog --> ir-cl-invoice-form

@@ -227,7 +227,7 @@ export class IrSalesByChannel {
     }
     return (
       <Host>
-        <ir-page label="Sales by Channel">
+        <ir-page label="Sales by Source">
           <ir-custom-button
             slot="page-header"
             variant="neutral"

@@ -57,7 +57,7 @@ export class IrSalesByChannelTable {
           <table class="table data-table" data-testid="hk_tasks_table">
             <thead class="table-header">
               <tr>
-                <th class="cell--left">Channel</th>
+                <th class="cell--left">Source</th>
                 <th class="cell--center">Room nights</th>
                 <th class="cell--right">Room Revenue</th>
                 <th class={`sales-by-channel-table__progress-col ${!isSingleProperty ? 'single' : ''}`}></th>

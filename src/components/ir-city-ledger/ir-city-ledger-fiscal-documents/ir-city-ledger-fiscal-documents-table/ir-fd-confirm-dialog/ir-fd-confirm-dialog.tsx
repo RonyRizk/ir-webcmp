@@ -1,9 +1,9 @@
-// import calendar_data from '@/stores/calendar-data';
+import calendar_data from '@/stores/calendar-data';
 import { FdTypes } from '@/types/enums';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 
 export type FdConfirmAction = 'void' | 'delete-draft' | 'convert-to-invoice';
-
+export type FdConfirmationVoidType = typeof FdTypes.CreditNote | typeof FdTypes.AdjustmentCredit;
 interface ConfirmConfig {
   title: string;
   message: string;
@@ -45,18 +45,18 @@ export class IrFdConfirmDialog {
   @Prop() amount: number;
   @Prop() fdType: string;
 
-  @State() voidType: 'credit-note' | 'goodwill' = 'credit-note';
+  @State() voidType: FdConfirmationVoidType = FdTypes.CreditNote;
   @State() goodwillAmount: string = '';
 
   @Event() confirmed: EventEmitter<{
     amount: number | null;
-    voidType: 'credit-note' | 'goodwill';
+    voidType: FdConfirmationVoidType;
   }>;
   @Event() cancelled: EventEmitter<void>;
 
   render() {
     const config = this.action ? CONFIGS[this.action]?.(this.docNumber, this.fdType) : null;
-    // const showVoidOptions = this.action === 'void' && this.fdType !== FdTypes.Receipt;
+    const showVoidOptions = this.action === 'void' && this.fdType !== FdTypes.Receipt;
     return (
       <ir-dialog
         open={this.open}
@@ -66,29 +66,29 @@ export class IrFdConfirmDialog {
           this.cancelled.emit();
         }}
         onIrDialogAfterHide={() => {
-          this.voidType = 'credit-note';
+          this.voidType = FdTypes.CreditNote;
           this.goodwillAmount = null;
         }}
       >
-        {/* {!showVoidOptions && <p class="confirm-dialog__message">{config?.message ?? ''}</p>} */}
-        {<p class="confirm-dialog__message">{config?.message ?? ''}</p>}
-        {/* {showVoidOptions && (
+        {!showVoidOptions && <p class="confirm-dialog__message">{config?.message ?? ''}</p>}
+        {/* {<p class="confirm-dialog__message">{config?.message ?? ''}</p>} */}
+        {showVoidOptions && (
           <div class="void-options">
             <wa-radio-group defaultValue={this.voidType} value={this.voidType} onchange={(e: CustomEvent) => (this.voidType = (e.target as any).value)}>
-              <wa-radio value="credit-note">
+              <wa-radio value={FdTypes.CreditNote}>
                 <p class="confirm-dialog__radio-title">
                   Credit Note to reverse Invoice <b>{this.docNumber}</b>
                 </p>
                 <p class="confirm-dialog__radio-hint">Issue a Credit Note to reverse the invoice and unlock all invoiced entries for future invoicing.</p>
               </wa-radio>
-              <wa-radio value="goodwill">
+              <wa-radio value={FdTypes.AdjustmentCredit}>
                 <p class="confirm-dialog__radio-title">Adjustment Credit</p>
                 <p class="confirm-dialog__radio-hint">
                   Add a folio credit adjustment to create a fiscal credit note document related to <b>{this.docNumber}</b>
                 </p>
               </wa-radio>
             </wa-radio-group>
-            {this.voidType === 'goodwill' && (
+            {this.voidType === FdTypes.AdjustmentCredit && (
               <ir-input
                 style={{ marginLeft: '1.5rem' }}
                 max={this.amount}
@@ -102,7 +102,7 @@ export class IrFdConfirmDialog {
               </ir-input>
             )}
           </div>
-        )} */}
+        )}
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" variant="neutral" appearance="filled" onClickHandler={() => this.cancelled.emit()} disabled={this.isConfirming}>
             Cancel

@@ -12,6 +12,7 @@ export const TRANSACTION_TYPE_RATES: Record<TransactionType, 'CR' | 'DB' | 'CR|D
   [ClTxTypeCode.Adjustment]: 'CR|DB',
   [ClTxTypeCode.CreditNote]: 'CR',
   [ClTxTypeCode.DebitNote]: 'DB',
+  [ClTxTypeCode.AdjustmentCredit]: 'CR',
   [ClTxTypeCode.Discount]: 'CR',
   [ClTxTypeCode.CancellationPenalty]: 'DB',
 };

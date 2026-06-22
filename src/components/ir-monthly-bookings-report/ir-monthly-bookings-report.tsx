@@ -168,12 +168,20 @@ export class IrMonthlyBookingsReport {
     }
     return (
       <ir-page label="Daily Occupancy">
-        <ir-custom-button variant="neutral" appearance="outlined" slot="page-header" loading={this.isLoading === 'export'}>
+        <ir-custom-button
+          variant="neutral"
+          onClickHandler={async e => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            await this.getReports(true);
+          }}
+          appearance="outlined"
+          slot="page-header"
+          loading={this.isLoading === 'export'}
+        >
           <wa-icon name="download" slot="start"></wa-icon>
           {locales.entries?.Lcz_Export}
         </ir-custom-button>
-        {/* <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor> */}
         <section class="report-layout">
           <section>
             <div class="report-stats-row">
