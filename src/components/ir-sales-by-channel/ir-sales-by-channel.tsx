@@ -97,10 +97,9 @@ export class IrSalesByChannel {
       const { include_previous_year, LIST_AC_ID, ...filterParams } = this.channelSalesFilters;
       this.isLoading = isExportToExcel ? 'export' : 'filter';
       const currentSales = await this.propertyService.getChannelSales({
-        is_export_to_excel: isExportToExcel,
         ...filterParams,
         AC_ID: this.propertyID ? this.propertyID.toString() : undefined,
-        ...filterParams,
+        is_export_to_excel: isExportToExcel,
         LIST_AC_ID: this.propertyID ? null : LIST_AC_ID,
       });
       const shouldFetchPreviousYear = !isExportToExcel && include_previous_year;

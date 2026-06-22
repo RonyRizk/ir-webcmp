@@ -97,7 +97,7 @@
   font-size: var(--wa-font-size-xs, 0.75rem);
   font-weight: var(--wa-font-weight-semibold, 600);
   letter-spacing: 0.02em;
-  text-transform: uppercase;
+  text-transform: capitalize;
   color: var(--wa-color-text-quiet, #64748b);
   white-space: nowrap;
   overflow: hidden;
