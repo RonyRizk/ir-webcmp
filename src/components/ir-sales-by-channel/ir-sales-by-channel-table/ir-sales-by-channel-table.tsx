@@ -71,9 +71,10 @@ export class IrSalesByChannelTable {
                 return (
                   <tr data-testid="record_row" class={{ 'task-table-row ir-table-row': true }}>
                     <td class="cell--left">
-                      <div class="cell-stack">
-                        <p class={record.last_year?.SOURCE ? 'value--primary' : ''}>{record.SOURCE}</p>
-                        {record.last_year?.SOURCE && <p class="value--previous">{record.last_year.SOURCE}</p>}
+                      <div class="cell-stack --source">
+                        <img class="booked-by-source__logo" id={`source-logo__`} src={record.SOURCE_ICON} alt={record.SOURCE} />
+                        <p>{record.SOURCE}</p>
+                        {/* {record.last_year?.SOURCE && <p class="value--previous">{record.last_year.SOURCE}</p>} */}
                       </div>
                     </td>
                     <td class="cell--center">

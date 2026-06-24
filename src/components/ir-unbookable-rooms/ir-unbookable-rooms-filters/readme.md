@@ -32,14 +32,17 @@
 
 ### Depends on
 
+- [ir-filter-card](../../ir-filter-card)
 - [ir-input](../../ui/ir-input)
 - [ir-custom-button](../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-unbookable-rooms-filters --> ir-filter-card
   ir-unbookable-rooms-filters --> ir-input
   ir-unbookable-rooms-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-unbookable-rooms --> ir-unbookable-rooms-filters
   style ir-unbookable-rooms-filters fill:#f9f,stroke:#333,stroke-width:4px
 ```

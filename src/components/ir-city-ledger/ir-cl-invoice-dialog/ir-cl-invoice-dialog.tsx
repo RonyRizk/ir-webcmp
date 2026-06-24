@@ -4,7 +4,8 @@ import calendar_data from '@/stores/calendar-data';
 import { ClTxTypeCode, FdTypes, InOut } from '@/types/enums';
 import { ClFiscalDocumentPreviewRequest } from '../ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types';
 import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
-import { Room } from '@/models/booking.dto';
+import { Booking, IUnit } from '@/models/booking.dto';
+import moment from 'moment';
 
 @Component({
   tag: 'ir-cl-invoice-dialog',
@@ -14,23 +15,44 @@ import { Room } from '@/models/booking.dto';
 export class IrClInvoiceDialog {
   @Prop() agentId: number | null = null;
   @Prop() mode: 'booking' | 'default' = 'default';
-  @Prop() bookingNbr: string | null = null;
+  @Prop() booking: Booking;
   @Prop() startDate: string | null = null;
   @Prop() endDate: string | null = null;
   @Prop() currencyId: number | null = null;
-  @Prop() rooms: Room[] = [];
 
   @State() isLoading: boolean = false;
   @State() error: string | null = null;
   @State() noResults: boolean = false;
   @State() isProforma: boolean = false;
 
+  /**
+   * Determines whether a final (non-proforma) invoice can be issued, based on
+   * whether every room in the booking has effectively been checked out.
+   *
+   * Resolution order:
+   * 1. When not in `booking` mode, or the booking has no rooms, there is nothing
+   *    blocking a final invoice — returns `true`.
+   * 2. When today is on or before the booking's to-date and at least one room is
+   *    still checked in, the stay is ongoing — returns `false`.
+   * 3. When today is exactly the booking's to-date and no room has been set
+   *    (all rooms are `NotSet`), the invoice is allowed — returns `true`.
+   * 4. Otherwise falls back to the default rule: `true` once today is past the
+   *    booking's to-date, else `true` only when every room is checked out.
+   *
+   * @returns `true` when all rooms are considered checked out and a final invoice may be issued.
+   */
   private get allRoomsCheckedOut(): boolean {
-    if (this.mode !== 'booking' || !this.rooms.length) return true;
-    return this.rooms.every(r => r.in_out?.code === InOut.CheckedOut);
+    if (this.mode !== 'booking' || !this.booking.rooms.length) return true;
+    const today = moment();
+    const bookingToDate = moment(this.booking.to_date, 'YYYY-MM-DD');
+    if (today.isSameOrBefore(bookingToDate, 'date') && this.booking.rooms.some(r => r.in_out?.code === InOut.CheckedIn)) return false;
+    if (today.isSame(bookingToDate, 'date') && this.booking.rooms.every(r => r.in_out?.code === InOut.NotSet)) return true;
+    if (today.isAfter(bookingToDate, 'date')) return true;
+    return this.booking.rooms.every(r => r.in_out?.code === InOut.CheckedOut);
   }
 
   @Event() invoiceIssued: EventEmitter<FiscalDocument>;
+  @Event({ bubbles: true, composed: true }) fiscalDocumentIssued: EventEmitter<void>;
   @Event({ bubbles: true, composed: true }) clFiscalDocumentPreview: EventEmitter<ClFiscalDocumentPreviewRequest>;
 
   private dialogRef: HTMLIrDialogElement;
@@ -68,7 +90,7 @@ export class IrClInvoiceDialog {
           CURRENCY_ID: this.currencyId,
           START_DATE: this.startDate,
           END_DATE: this.endDate,
-          BOOKING_NBR: this.bookingNbr,
+          BOOKING_NBR: this.booking?.booking_nbr,
           FD_TYPE_CODE: FdTypes.Draft,
         });
         const doc = result;
@@ -81,6 +103,7 @@ export class IrClInvoiceDialog {
           externalRef: doc.EXTERNAL_REF,
         });
         this.invoiceIssued.emit(result);
+        this.fiscalDocumentIssued.emit();
         this.dialogRef.closeModal();
       } else {
         const isValid = await this.formRef.validate();
@@ -138,6 +161,7 @@ export class IrClInvoiceDialog {
           externalRef: doc.EXTERNAL_REF,
         });
         this.invoiceIssued.emit(doc);
+        this.fiscalDocumentIssued.emit();
         this.dialogRef.closeModal();
       }
     } catch (err) {
@@ -156,7 +180,7 @@ export class IrClInvoiceDialog {
       if (this.mode === 'booking') {
         fromDate = this.startDate;
         toDate = this.endDate;
-        bookingNbr = this.bookingNbr != null ? String(this.bookingNbr) : null;
+        bookingNbr = this.booking != null ? String(this.booking.booking_nbr) : null;
       } else {
         const isValid = await this.formRef.validate();
         if (!isValid) {
@@ -174,7 +198,7 @@ export class IrClInvoiceDialog {
         to_date: toDate,
         booking_nbr: bookingNbr,
       });
-
+      this.fiscalDocumentIssued.emit();
       if (url) {
         this.clFiscalDocumentPreview.emit({
           fdTypeCode: FdTypes.Proforma,
@@ -194,10 +218,11 @@ export class IrClInvoiceDialog {
   }
 
   render() {
+    const units = this.booking ? this.booking?.rooms.filter(r => r.agent && r.in_out?.code !== InOut.CheckedOut).map(r => (r.unit as IUnit).name) : null;
     return (
       <Host>
         <ir-dialog label="Create Invoice" ref={el => (this.dialogRef = el)}>
-          {this.bookingNbr && (
+          {this.booking && (
             <div slot="header-actions" class={'cl-invoice-dialog__header-actions'}>
               <wa-switch
                 checked={this.isProforma}
@@ -210,9 +235,19 @@ export class IrClInvoiceDialog {
           )}
           <div class="create-invoice-dialog__body">
             {this.mode === 'booking' ? (
-              <p class="create-invoice-dialog__message">
-                {this.isProforma ? `Generate a proforma for Booking #${this.bookingNbr}?` : `Issue a draft invoice for Booking #${this.bookingNbr} to the agent?`}
-              </p>
+              !this.allRoomsCheckedOut ? (
+                <wa-callout size="s" variant="warning">
+                  <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
+                  Only a proforma invoice can be generated at this time because {units?.length > 1 ? 'units' : 'unit'} <b>{units?.join(', ')}</b>.{' '}
+                  {units?.length > 1 ? 'are' : 'is'} still in-house.
+                </wa-callout>
+              ) : (
+                <p class="create-invoice-dialog__message">
+                  {this.isProforma
+                    ? `Generate a proforma for Booking #${this.booking?.booking_nbr}?`
+                    : `Issue a draft invoice for Booking #${this.booking?.booking_nbr} to the agent?`}
+                </p>
+              )
             ) : (
               <ir-cl-invoice-form ref={el => (this.formRef = el)}></ir-cl-invoice-form>
             )}

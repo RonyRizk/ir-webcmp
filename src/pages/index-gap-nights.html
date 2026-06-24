@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Gap nights</title>
+    <script type="module" src="/build/ir-webcmp.esm.js"></script>
+    <script nomodule src="/build/ir-webcmp.js"></script>
+    <script src="scripts/index.js"></script>
+</head>
+
+<body>
+    <ir-common></ir-common>
+    <ir-gap-nights baseurl="https://gateway.igloorooms.com/IR" language="en"></ir-gap-nights>
+    <script>
+        const gapNightsEl = document.querySelector("ir-gap-nights");
+        if (gapNightsEl) {
+            (async () => {
+                gapNightsEl.propertyid = getId();
+                gapNightsEl.ticket = await getToken()
+            })();
+        } 
+    </script>
+
+</body>
+
+</html>

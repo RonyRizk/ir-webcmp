@@ -72,6 +72,7 @@ graph TD;
   ir-print-room --> ir-printing-label
   ir-printing-pickup --> ir-printing-label
   ir-printing-extra-service --> ir-printing-label
+  ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
   ir-agent-billing --> ir-city-ledger-fiscal-documents-table
   ir-agent-billing --> ir-cl-invoice-dialog

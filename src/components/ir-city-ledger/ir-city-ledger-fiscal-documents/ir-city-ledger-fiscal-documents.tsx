@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { CityLedgerService, type FiscalDocument } from '../../../services/city-ledger';
 import type { ClFiscalDocumentFilters } from './types';
 import type { ICurrency } from '@/models/property';
@@ -74,6 +74,13 @@ export class IrCityLedgerFiscalDocuments {
       this.isLoading = false;
       this.hasFetched = true;
     }
+  }
+
+  @Listen('fiscalDocumentIssued', { target: 'body' })
+  handleFiscalDocumentIssued(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.fetchFiscalDocuments(this.filters);
   }
 
   render() {

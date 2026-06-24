@@ -25,6 +25,7 @@
  - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-departures](../ir-departures)
  - [ir-financial-actions](../ir-financial-actions)
+ - [ir-gap-nights](../ir-gap-nights)
  - [ir-ghs-onboarding](../ir-ghs-onboarding)
  - [ir-hk-staff-tasks](../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
@@ -52,6 +53,7 @@ graph TD;
   ir-daily-revenue --> ir-loading-screen
   ir-departures --> ir-loading-screen
   ir-financial-actions --> ir-loading-screen
+  ir-gap-nights --> ir-loading-screen
   ir-ghs-onboarding --> ir-loading-screen
   ir-hk-staff-tasks --> ir-loading-screen
   ir-hk-tasks --> ir-loading-screen

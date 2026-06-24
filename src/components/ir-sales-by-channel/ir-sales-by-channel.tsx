@@ -241,7 +241,7 @@ export class IrSalesByChannel {
             <wa-icon name="download" slot="start"></wa-icon>
             {locales.entries?.Lcz_Export}
           </ir-custom-button>
-          <ir-sales-by-channel-summary records={this.salesData}></ir-sales-by-channel-summary>
+          <ir-sales-by-channel-summary filters={this.channelSalesFilters} records={this.salesData}></ir-sales-by-channel-summary>
           <div class="channel-content-row">
             <ir-sales-by-channel-filters
               isLoading={this.isLoading === 'filter'}

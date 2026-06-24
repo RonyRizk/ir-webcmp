@@ -162,6 +162,8 @@ export type TableEntries =
   | '_PAY_TYPE_GROUP'
   | '_PAY_METHOD'
   | '_INVOICE_TARGET'
+  | '_GAP_RANGE'
+  | '_GAP_RULE'
   | (string & {});
 
 export type GroupedTableEntries = {

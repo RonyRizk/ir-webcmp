@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import { Component, Host, Prop, State, h } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
 import { IEntries } from '@/models/IBooking';
 import { CityLedgerService } from '@/services/city-ledger';
@@ -38,7 +38,7 @@ export class IrBookingCityLedger {
   @Prop() error: string | null = null;
 
   /** Emitted when a mutation (delete / save) completes so the parent can re-fetch. */
-  @Event({ bubbles: true }) clRefreshNeeded: EventEmitter<void>;
+  // @Event({ bubbles: true }) clRefreshNeeded: EventEmitter<void>;
 
   @State() private drawerOpen: boolean = false;
   @State() private deleteTarget: FolioRow | null = null;
@@ -64,7 +64,7 @@ export class IrBookingCityLedger {
         IS_DELETE: true,
       });
       this.deleteTarget = null;
-      this.clRefreshNeeded.emit();
+      // this.clRefreshNeeded.emit();
     } catch (err) {
       console.error('[ir-booking-city-ledger] delete failed:', err);
     } finally {
@@ -102,7 +102,7 @@ export class IrBookingCityLedger {
           const showDropdown = row.status.id !== 'billed' && row._raw.CATEGORY === null && actionableClTypes.has(row._raw.CL_TX_TYPE_CODE as any);
 
           return (
-            <div key={row._rowId} class="folio-row">
+            <div key={row._rowId} class={{ 'folio-row': true, '--without-dropdown': !showDropdown }}>
               <div class="folio-row__header">
                 <div class="folio-row__meta">
                   {/* <wa-tag size="s" variant={row.status.variant as any}>
@@ -217,7 +217,7 @@ export class IrBookingCityLedger {
           onTransactionSaved={() => {
             this.drawerOpen = false;
             this.editingRow = null;
-            this.clRefreshNeeded.emit();
+            // this.clRefreshNeeded.emit();
           }}
         ></ir-city-ledger-transaction-drawer>
         <ir-cl-fiscal-document-preview ticket={this.tokenService.getToken()} propertyId={calendar_data?.property?.id}></ir-cl-fiscal-document-preview>

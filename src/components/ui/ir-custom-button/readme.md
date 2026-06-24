@@ -106,6 +106,7 @@
  - [ir-filter-card](../../ir-filter-card)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-fiscal-documents-table](../../ir-fiscal-documents/ir-fiscal-documents-table)
+ - [ir-gap-nights](../../ir-gap-nights)
  - [ir-ghs-filters](../../ir-ghs-onboarding)
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-ghs-selection-bucket](../../ir-ghs-onboarding)
@@ -229,6 +230,7 @@ graph TD;
   ir-filter-card --> ir-custom-button
   ir-fiscal-documents-filters --> ir-custom-button
   ir-fiscal-documents-table --> ir-custom-button
+  ir-gap-nights --> ir-custom-button
   ir-ghs-filters --> ir-custom-button
   ir-ghs-onboarding --> ir-custom-button
   ir-ghs-selection-bucket --> ir-custom-button

@@ -156,11 +156,26 @@ export const HandleExposedPropertyTaxCategoriesParamsSchema = z.object({
   TAXATION_STRATEGY: z.string(),
 });
 export type HandleExposedPropertyTaxCategoriesParams = z.infer<typeof HandleExposedPropertyTaxCategoriesParamsSchema>;
+export const SetPropertyGapConfigParamsSchema = z.object({
+  property_id: z.number(),
+  gap_rule_code: z.string(),
+  gap_lookahead_days: z.number(),
+});
+
+export type SetPropertyGapConfigParams = z.infer<typeof SetPropertyGapConfigParamsSchema>;
 
 export class PropertyService {
   public async handleExposedPropertyTaxCategories(params: HandleExposedPropertyTaxCategoriesParams) {
     const payload = HandleExposedPropertyTaxCategoriesParamsSchema.parse(params);
     const { data } = await axios.post('/Handle_Exposed_Property_Tax_Categories', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
+  }
+  public async setPropertyGapConfig(params: SetPropertyGapConfigParams) {
+    const payload = SetPropertyGapConfigParamsSchema.parse(params);
+    const { data } = await axios.post('/Set_Property_Gap_Config', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
@@ -312,6 +327,14 @@ export class PropertyService {
   public async fetchUnBookableRooms(params: FetchUnBookableRooms): Promise<FetchUnBookableRoomsResult | null> {
     const payload = FetchUnBookableRoomsSchema.parse(params);
     const { data } = await axios.post('/Fetch_UnBookable_Rooms', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
+  }
+
+  public async setExposedGapNightsPolicy(params: { property_id: number; rule_code: string; applicable_days: number }) {
+    const { data } = await axios.post('/Set_Exposed_Gap_Nights_Policy', params);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

@@ -22,6 +22,7 @@
  - [igl-book-property](../../igloo-calendar/igl-book-property)
  - [igl-rate-extender-form](../../igloo-calendar/igl-rate-extender-drawer/igl-rate-extender-form)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
+ - [ir-agent-billing](../../ir-billing/ir-agent-billing)
  - [ir-booking-city-ledger](../../ir-booking-details/ir-booking-city-ledger)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-editor](../../igloo-calendar/ir-booking-editor)
@@ -58,6 +59,7 @@ graph TD;
   igl-book-property --> ir-spinner
   igl-rate-extender-form --> ir-spinner
   igl-to-be-assigned --> ir-spinner
+  ir-agent-billing --> ir-spinner
   ir-booking-city-ledger --> ir-spinner
   ir-booking-details --> ir-spinner
   ir-booking-editor --> ir-spinner

@@ -42,7 +42,6 @@
  - [ir-payment-option](../ir-payment-option)
  - [ir-queue-manager](../ir-queue-manager)
  - [ir-reset-password](../ir-reset-password)
- - [ir-unbookable-rooms](../ir-unbookable-rooms)
  - [ir-user-management](../ir-user-management)
 
 ### Depends on
@@ -75,7 +74,6 @@ graph TD;
   ir-payment-option --> ir-interceptor
   ir-queue-manager --> ir-interceptor
   ir-reset-password --> ir-interceptor
-  ir-unbookable-rooms --> ir-interceptor
   ir-user-management --> ir-interceptor
   style ir-interceptor fill:#f9f,stroke:#333,stroke-width:4px
 ```

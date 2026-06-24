@@ -1,4 +1,4 @@
-import { FdStatus, FdTypes } from '@/types/enums';
+import { ClTxTypeCode, FdStatus, FdTypes } from '@/types/enums';
 import moment from 'moment';
 import * as z from 'zod';
 
@@ -197,7 +197,7 @@ export const IssueManualCLTxParamsSchema = z.object({
   DEBIT: z.number(),
   CREDIT: z.number(),
   CURRENCY_ID: z.number(),
-  PAY_METHOD_CODE: z.string(),
+  PAY_METHOD_CODE: z.string().optional().default(''),
   EXTERNAL_REF: z.string(),
   // VAT handling for the transaction
   // 001 = VAT included in amount
@@ -210,6 +210,14 @@ export const IssueManualCLTxParamsSchema = z.object({
   BH_ID: z.number().optional().nullable().default(null),
 
   IS_DELETE: z.boolean().optional().default(false),
+}).superRefine((data, ctx) => {
+  if (data.CL_TX_TYPE_CODE === ClTxTypeCode.Payment && !data.PAY_METHOD_CODE) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['PAY_METHOD_CODE'],
+      message: 'PAY_METHOD_CODE is required for payment transactions',
+    });
+  }
 });
 /** Payload for issuing a manual city-ledger transaction. */
 export type IssueManualCLTxParams = z.infer<typeof IssueManualCLTxParamsSchema>;

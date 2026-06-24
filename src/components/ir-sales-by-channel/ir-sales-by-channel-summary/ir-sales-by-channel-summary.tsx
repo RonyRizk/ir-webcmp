@@ -1,5 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
-import { ChannelReport, ChannelReportResult } from '../types';
+import { ChannelReport, ChannelReportResult, ChannelSaleFilter } from '../types';
 import { calculateTrend, formatAmount } from '@/utils/utils';
 
 @Component({
@@ -9,6 +9,7 @@ import { calculateTrend, formatAmount } from '@/utils/utils';
 })
 export class IrSalesByChannelSummary {
   @Prop() records: ChannelReportResult = [];
+  @Prop() filters: ChannelSaleFilter;
 
   private sum(field: keyof Pick<ChannelReport, 'NIGHTS' | 'REVENUE'>, lastYear = false) {
     return (this.records ?? []).reduce((acc, r) => {
@@ -23,7 +24,7 @@ export class IrSalesByChannelSummary {
     const lastYearNights = this.sum('NIGHTS', true);
     const lastYearRevenue = this.sum('REVENUE', true);
     const currency = this.records?.[0]?.currency;
-    const hasLastYear = Boolean(this.records?.length && this.records[0].last_year);
+    const hasLastYear = Boolean(this.records?.length && this.filters?.include_previous_year);
 
     return (
       <div class="summary-row">

@@ -34,7 +34,6 @@
  - [ir-payment-option](../../ir-payment-option)
  - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reset-password](../../ir-reset-password)
- - [ir-unbookable-rooms](../../ir-unbookable-rooms)
  - [ir-user-management](../../ir-user-management)
 
 ### Depends on
@@ -64,7 +63,6 @@ graph TD;
   ir-payment-option --> ir-toast
   ir-queue-manager --> ir-toast
   ir-reset-password --> ir-toast
-  ir-unbookable-rooms --> ir-toast
   ir-user-management --> ir-toast
   style ir-toast fill:#f9f,stroke:#333,stroke-width:4px
 ```

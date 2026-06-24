@@ -4,6 +4,7 @@
   min-width: 0;
   --item-vertical-padding: var(--wa-space-xs, 0.5rem);
   --item-inline-padding: var(--wa-space-l, 1.5rem);
+  --folio-row-city-tax-gap: var(--wa-space-2xs, 0.25rem);
 }
 
 /* ── Card ──────────────────────────────────────────────────── */
@@ -21,7 +22,7 @@
 .booking-city-ledger__header-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--wa-space-xs);
 }
 
 .booking-city-ledger__agent-name {
@@ -60,7 +61,7 @@
 /* ── Folio row ──────────────────────────────────────────────── */
 .folio-row {
   padding: var(--item-vertical-padding) var(--item-inline-padding);
-  border-bottom: 1px solid var(--wa-color-neutral-100, #f4f4f5);
+  border-bottom: 1px solid var(--wa-color-surface-border, #f4f4f5);
 }
 
 .folio-row:last-child {
@@ -72,17 +73,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--wa-space-xs);
 }
 
 .folio-row__meta,
 .folio-row-desc_row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--wa-space-xs);
   flex-wrap: wrap;
   min-width: 0;
 }
+
 .folio-row-desc_row {
   justify-content: space-between;
 }
@@ -98,7 +100,7 @@
 .folio-row__right {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--folio-row-city-tax-gap);
   flex-shrink: 0;
 }
 
@@ -108,35 +110,36 @@
   white-space: nowrap;
 }
 
-/* ── Description ─────────────────────────────────────────────── */
+/* ── Description ───────────────────────────────────────────── */
 .folio-row__desc {
   margin: 0.3rem 0 0;
   font-size: var(--wa-font-size-s);
-  color: var(--wa-color-neutral-800, #27272a);
+  color: var(--wa-color-text-quiet, #27272a);
   line-height: 1.4;
   word-break: break-word;
 }
 
-/* ── Action Trigger ─────────────────────────────────────────────── */
+/* ── Action Trigger ────────────────────────────────────────── */
 .folio-row__action-trigger-icon {
   font-size: 1rem;
 }
+
 .folio-row__action-trigger::part(base) {
   height: auto;
   width: var(--wa-space-xs);
 }
 
-/* ── City tax line ───────────────────────────────────────────── */
+/* ── City tax line ─────────────────────────────────────────── */
 .folio-row__city-tax {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--folio-row-city-tax-gap);
   margin-top: 0.25rem;
   font-size: 0.857rem;
   color: var(--wa-color-neutral-500, #71717a);
 }
 
-/* ── Debit / Credit colours ─────────────────────────────────── */
+/* ── Debit / Credit colours ────────────────────────────────── */
 .is-debit {
   color: var(--wa-color-danger-fill-loud);
   font-weight: 700;
@@ -145,4 +148,8 @@
 .is-credit {
   color: var(--wa-color-success-fill-loud);
   font-weight: 700;
+}
+
+.folio-row.--without-dropdown {
+  padding-inline-end: calc(var(--folio-row-city-tax-gap) + var(--wa-space-xs) + var(--wa-form-control-padding-inline) + var(--item-inline-padding));
 }

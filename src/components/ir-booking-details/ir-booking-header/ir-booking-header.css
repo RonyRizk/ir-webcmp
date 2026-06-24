@@ -21,7 +21,7 @@
   font-weight: var(--wa-font-weight-heading);
   line-height: var(--wa-line-height-condensed);
   text-wrap: balance;
-  color: #464855;
+  color: var(--wa-color-text-quiet);
 }
 .booking-header__label-container {
   display: flex;
@@ -87,6 +87,9 @@
   gap: 1rem;
   font-size: 0.875rem;
 }
+.booking-header__booking-copy-btn {
+  visibility: hidden;
+}
 
 /*sm*/
 @media (min-width: 640px) {
@@ -110,6 +113,9 @@
   }
   .booking-header__row {
     justify-content: space-between;
+  }
+  .booking-header__label:hover .booking-header__booking-copy-btn {
+    visibility: visible;
   }
 }
 

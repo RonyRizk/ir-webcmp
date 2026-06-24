@@ -24,6 +24,7 @@
  - [ir-sales-by-channel-filters](../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../ir-sales-by-country/ir-sales-filters)
  - [ir-tasks-filters](../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
+ - [ir-unbookable-rooms-filters](../ir-unbookable-rooms/ir-unbookable-rooms-filters)
 
 ### Depends on
 
@@ -39,6 +40,7 @@ graph TD;
   ir-sales-by-channel-filters --> ir-filter-card
   ir-sales-filters --> ir-filter-card
   ir-tasks-filters --> ir-filter-card
+  ir-unbookable-rooms-filters --> ir-filter-card
   style ir-filter-card fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

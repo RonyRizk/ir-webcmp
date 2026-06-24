@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+.gap-nights__card {
+  min-height: 70vh;
+}
+/*lg*/
+@media (min-width: 768px) {
+  .gap-nights__day-options {
+    max-width: 300px;
+  }
+}
+.gap-nights__card-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: var(--wa-space-l);
+}
+.gap-nights__card-header p {
+  margin: 0;
+  padding: 0;
+}
+.gap-nights__card::part(body) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-l);
+}
+
+.gap-nights__period {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-m);
+}
+
+.gap-nights__period-label {
+  font-size: var(--wa-font-size-s);
+  font-weight: var(--wa-font-weight-semibold);
+  color: var(--wa-color-neutral-800);
+  white-space: nowrap;
+}
+
+.gap-nights__period--disabled .gap-nights__period-label {
+  color: var(--wa-color-neutral-400);
+}

@@ -87,6 +87,7 @@ slotted body content. Fully styleable via CSS parts and custom properties.
  - [ir-revenue-summary](../ir-daily-revenue/ir-revenue-summary)
  - [ir-sales-by-channel-summary](../ir-sales-by-channel/ir-sales-by-channel-summary)
  - [ir-sales-by-country-summary](../ir-sales-by-country/ir-sales-by-country-summary)
+ - [ir-unbookable-rooms](../ir-unbookable-rooms)
 
 ### Graph
 ```mermaid
@@ -95,6 +96,7 @@ graph TD;
   ir-revenue-summary --> ir-metric-card
   ir-sales-by-channel-summary --> ir-metric-card
   ir-sales-by-country-summary --> ir-metric-card
+  ir-unbookable-rooms --> ir-metric-card
   style ir-metric-card fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

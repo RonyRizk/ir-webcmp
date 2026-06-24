@@ -339,6 +339,7 @@ graph TD;
   ir-guest-billing --> ir-preview-screen-dialog
   ir-guest-billing --> ir-pdf-viewer
   ir-guest-billing --> ir-dialog
+  ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
   ir-agent-billing --> ir-city-ledger-fiscal-documents-table
   ir-agent-billing --> ir-cl-invoice-dialog

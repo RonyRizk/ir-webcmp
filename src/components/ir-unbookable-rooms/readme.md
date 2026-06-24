@@ -21,8 +21,8 @@
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-toast](../ui/ir-toast)
-- [ir-interceptor](../ir-interceptor)
+- [ir-page](../ui/ir-page)
+- [ir-metric-card](../ir-metric-card)
 - [ir-unbookable-rooms-filters](ir-unbookable-rooms-filters)
 - [ir-unbookable-rooms-data](ir-unbookable-rooms-data)
 
@@ -30,19 +30,23 @@
 ```mermaid
 graph TD;
   ir-unbookable-rooms --> ir-loading-screen
-  ir-unbookable-rooms --> ir-toast
-  ir-unbookable-rooms --> ir-interceptor
+  ir-unbookable-rooms --> ir-page
+  ir-unbookable-rooms --> ir-metric-card
   ir-unbookable-rooms --> ir-unbookable-rooms-filters
   ir-unbookable-rooms --> ir-unbookable-rooms-data
-  ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-item
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-button
   ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-item
+  ir-unbookable-rooms-filters --> ir-filter-card
   ir-unbookable-rooms-filters --> ir-input
   ir-unbookable-rooms-filters --> ir-custom-button
+  ir-filter-card --> ir-custom-button
   ir-unbookable-rooms-data --> ir-input
   style ir-unbookable-rooms fill:#f9f,stroke:#333,stroke-width:4px
 ```

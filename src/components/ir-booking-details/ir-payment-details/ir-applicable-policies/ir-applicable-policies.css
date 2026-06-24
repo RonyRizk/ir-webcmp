@@ -122,14 +122,14 @@
 
 /* Text styles */
 .applicable-policies__guarantee-date {
-  color: var(--text-muted, #666);
+  color: var(--wa-color-text-quiet, #666);
   padding: 0;
   margin: 0;
 }
 
 .applicable-policies__guarantee-amount {
   font-weight: 600;
-  color: var(--text-strong, #222);
+  color: var(--wa-color-text-normal, #222);
   padding: 0;
   margin: 0;
 }

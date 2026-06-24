@@ -14,6 +14,14 @@
   border: 0;
   border-radius: 0;
 }
+.agent-bill__loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  min-height: 70vh;
+}
 
 .billing__section-title-row {
   display: flex;

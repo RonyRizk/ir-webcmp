@@ -1,5 +1,5 @@
 import { Component, h, Prop } from '@stencil/core';
-import { SalesRecord } from '../types';
+import { CountrySalesFilter, SalesRecord } from '../types';
 import { calculateTrend, formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 
@@ -14,7 +14,7 @@ export type NumericKeys<T> = {
 })
 export class IrSalesByCountrySummary {
   @Prop() salesReports: SalesRecord[];
-
+  @Prop() filters: CountrySalesFilter;
   private calculateTotalValues(field: NumericKeys<SalesRecord>, lastYear: boolean = false) {
     return this.salesReports?.reduce((prev, curr) => {
       const value = lastYear ? (curr.last_year ? curr.last_year[field] : 0) : curr[field];
@@ -31,7 +31,7 @@ export class IrSalesByCountrySummary {
     const lastYearTotalGuests = this.calculateTotalValues('number_of_guests', true);
     const lastYearTotalRevenue = this.calculateTotalValues('revenue', true);
 
-    const hasLastYear = Boolean(this.salesReports?.length && this.salesReports[0].last_year);
+    const hasLastYear = Boolean(this.salesReports?.length && this.filters?.include_previous_year);
 
     return (
       <div class="summary-row">

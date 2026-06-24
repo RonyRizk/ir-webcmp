@@ -17,13 +17,6 @@
 | `svcCategories` | --           | Service-category entries used to populate the transaction form. | `IEntries[]` | `[]`        |
 
 
-## Events
-
-| Event             | Description                                                                   | Type                |
-| ----------------- | ----------------------------------------------------------------------------- | ------------------- |
-| `clRefreshNeeded` | Emitted when a mutation (delete / save) completes so the parent can re-fetch. | `CustomEvent<void>` |
-
-
 ## Dependencies
 
 ### Used by

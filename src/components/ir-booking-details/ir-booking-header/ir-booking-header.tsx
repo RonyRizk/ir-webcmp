@@ -148,6 +148,7 @@ export class IrBookingHeader {
                 <div class="booking-header__identity">
                   <div class={'booking-header__label'}>
                     <h4 class="booking-header__label-number">{`${locales.entries.Lcz_Booking}#${this.booking.booking_nbr}`}</h4>
+                    {/* <wa-copy-button value={this.booking.booking_nbr} class="booking-header__booking-copy-btn"></wa-copy-button> */}
                   </div>
                   <div class="booking-header__meta">
                     {!this.booking.is_direct && <p class="booking-header__channel-number --primary">{this.booking.channel_booking_nbr}</p>}

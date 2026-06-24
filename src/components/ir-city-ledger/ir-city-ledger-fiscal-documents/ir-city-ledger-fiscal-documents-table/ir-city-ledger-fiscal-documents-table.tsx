@@ -8,6 +8,7 @@ import type { ICurrency } from '@/models/property';
 import { FdStatus, FdTypes } from '@/types/enums';
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
+import { Booking } from '@/models/booking.dto';
 
 @Component({
   tag: 'ir-city-ledger-fiscal-documents-table',
@@ -16,6 +17,7 @@ import calendar_data from '@/stores/calendar-data';
 })
 export class IrCityLedgerFiscalDocumentsTable {
   @Prop() rows: FiscalDocument[] = [];
+  @Prop() booking: Booking;
   @Prop() currencySymbol: string = '$';
   @Prop() currencies: ICurrency[] = [];
   @Prop() taxableOnly: boolean = false;
@@ -107,11 +109,11 @@ export class IrCityLedgerFiscalDocumentsTable {
                 CL_TX_TYPE_CODE: FdTypes.AdjustmentCredit,
                 DESCRIPTION: 'Adjustment Credit',
                 DEBIT: 0,
+                BH_ID: this.booking?.system_id || null,
                 CREDIT: amount,
                 CURRENCY_ID: calendar_data?.property?.currency?.id,
                 PAY_METHOD_CODE: '',
                 EXTERNAL_REF: row.FD_ID.toString(),
-                BH_ID: null,
                 VAT_INCLUDED_CODE: '',
                 VAT_PCT: null,
               });

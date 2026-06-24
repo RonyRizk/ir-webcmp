@@ -1,5 +1,7 @@
 :host {
   display: block;
+  font-family: var(--wa-font-family-body);
+  font-weight: var(--wa-font-weight-normal);
 }
 .dialog-container-height {
   height: 4rem;
@@ -19,10 +21,10 @@
   width: fit-content;
 }
 .list-item.green {
-  color: #629a4c;
+  color: var(--wa-color-success-fill-loud);
   font-weight: 600;
 }
 .list-item.red {
-  color: #ff4961;
+  color: var(--wa-color-danger-fill-loud);
   font-weight: 600;
 }

@@ -615,6 +615,8 @@ export type TableEntries =
   | '_FD_TYPE'
   | '_FD_STATUS'
   | '_CL_POST_TIMING'
+  | '_GAP_RANGE'
+  | '_GAP_RULE'
   | (string & {});
 
 export type GroupedTableEntries = {

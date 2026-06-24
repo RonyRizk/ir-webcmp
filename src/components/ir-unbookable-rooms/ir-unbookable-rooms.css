@@ -28,8 +28,8 @@
   font-size: 0.82rem;
   color: #6a6256;
 }
-
-@media (min-width: 768px) {
+/*lg*/
+@media (min-width: 1024px) {
   .unbookable-rooms__content {
     flex-direction: row;
     align-items: flex-start;

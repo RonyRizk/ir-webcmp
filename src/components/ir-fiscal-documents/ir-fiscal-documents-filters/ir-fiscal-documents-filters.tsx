@@ -203,9 +203,10 @@ export class IrFiscalDocumentsFilters {
                 onText-change={(e: CustomEvent<string>) => {
                   this.agentSearch = e.detail ?? '';
                 }}
-                onCombobox-change={(e: CustomEvent<string>) => {
+                onCombobox-change={(e: CustomEvent<string | string[]>) => {
                   this.agentSearch = '';
-                  this.updateFilters({ agentId: e.detail && e.detail !== ALL_AGENTS_VALUE ? Number(e.detail) : null });
+                  const value = e.detail as string;
+                  this.updateFilters({ agentId: value && value !== ALL_AGENTS_VALUE ? Number(value) : null });
                 }}
               >
                 <ir-autocomplete-option label={ALL_AGENTS_LABEL} value={ALL_AGENTS_VALUE}>

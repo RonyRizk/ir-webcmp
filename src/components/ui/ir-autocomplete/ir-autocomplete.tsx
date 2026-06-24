@@ -86,6 +86,13 @@ export class IrAutocomplete {
   @Prop({ reflect: true }) withoutSpinButtons: NativeWaInput['withoutSpinButtons'];
 
   /**
+   * Enables selection of multiple options.
+   * When `true`, users can select more than one option at a time.
+   * Defaults to `false`.
+   */
+  @Prop() multiple: boolean = false;
+
+  /**
    * By default, form controls are associated with the nearest containing `<form>` element. This attribute allows you
    * to place the form control outside of a form and associate it with the form that has this `id`. The form must be in
    * the same document or shadow root for this to work.
@@ -169,9 +176,10 @@ export class IrAutocomplete {
 
   @State() private options: AutocompleteOptionElement[] = [];
   @State() private slotStateVersion = 0;
+  @State() private selectedOptions: AutocompleteOptionElement[] = [];
 
   @Event({ bubbles: true, composed: true, eventName: 'text-change' }) textChange: EventEmitter<string>;
-  @Event({ bubbles: true, composed: true, eventName: 'combobox-change' }) comboboxChange: EventEmitter<string>;
+  @Event({ bubbles: true, composed: true, eventName: 'combobox-change' }) comboboxChange: EventEmitter<string | string[]>;
 
   private currentOption?: AutocompleteOptionElement;
   private listboxRef?: HTMLElement;
@@ -193,7 +201,10 @@ export class IrAutocomplete {
     });
     this.slotManager.initialize();
     this.updateOptionsFromSlot();
-    this.syncSelectedFromValue(this.value);
+    if (!this.multiple) {
+      this.syncSelectedFromValue(this.value);
+    }
+    this.refreshSelectedOptions();
   }
 
   componentDidLoad() {
@@ -277,7 +288,18 @@ export class IrAutocomplete {
   }
   @Watch('value')
   handleValueChange(newValue: string) {
+    if (this.multiple) return;
     this.syncSelectedFromValue(newValue);
+  }
+
+  private refreshSelectedOptions() {
+    this.selectedOptions = this.getAllOptions().filter(option => option.selected);
+  }
+
+  private emitChange() {
+    if (this.multiple) {
+      this.comboboxChange.emit(this.selectedOptions.map(option => this.getOptionValue(option)));
+    }
   }
 
   private getAllOptions(): AutocompleteOptionElement[] {
@@ -360,8 +382,27 @@ export class IrAutocomplete {
       this.currentOption = undefined;
     }
   }
+
   private selectOption(option: AutocompleteOptionElement) {
     if (!option || option.disabled) return;
+
+    if (this.multiple) {
+      // Toggle selection without affecting the other options and keep the popup open.
+      option.selected = !option.selected;
+      this.currentOption = option;
+      this.refreshSelectedOptions();
+
+      // Clear the typed search text so the user can immediately filter for the next option.
+      if (this.value !== '') {
+        this.value = '';
+        this.textChange.emit('');
+      }
+
+      this.emitChange();
+      requestAnimationFrame(() => this.inputRef?.focusInput());
+      return;
+    }
+
     const allOptions = this.getAllOptions();
     allOptions.forEach(el => {
       el.selected = false;
@@ -378,6 +419,15 @@ export class IrAutocomplete {
     this.hide();
     requestAnimationFrame(() => this.inputRef?.focusInput());
   }
+
+  private removeOption = (option: AutocompleteOptionElement) => {
+    if (!option) return;
+    option.selected = false;
+    this.refreshSelectedOptions();
+    this.emitChange();
+    requestAnimationFrame(() => this.inputRef?.focusInput());
+  };
+
   private handleOptionClick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     const option = target?.closest('ir-autocomplete-option') as AutocompleteOptionElement | null;
@@ -387,6 +437,7 @@ export class IrAutocomplete {
     event.stopPropagation();
     this.selectOption(option);
   };
+
   private handleTextChange = (event: CustomEvent<string>) => {
     event.stopImmediatePropagation();
     event.stopPropagation();
@@ -403,13 +454,18 @@ export class IrAutocomplete {
       this.show();
     }
   };
+
   private handleOptionsSlotChange = (event: Event) => {
     this.updateOptionsFromSlot(event.target as HTMLSlotElement);
-    this.syncSelectedFromValue(this.value);
+    if (!this.multiple) {
+      this.syncSelectedFromValue(this.value);
+    }
+    this.refreshSelectedOptions();
     if (this.open) {
       this.ensureCurrentOption();
     }
   };
+
   private handleKeydownChange = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.open) {
       event.preventDefault();
@@ -465,6 +521,17 @@ export class IrAutocomplete {
     }
   };
 
+  private handleClick = () => {
+    if (this.value) {
+      return;
+    }
+    if (this.open) {
+      this.hide();
+      return;
+    }
+    this.show();
+  };
+
   render() {
     return (
       <Host>
@@ -474,6 +541,7 @@ export class IrAutocomplete {
             ref={el => (this.inputRef = el)}
             onKeyDown={this.handleKeydownChange}
             onText-change={this.handleTextChange}
+            onClick={this.handleClick}
             name={this.name}
             value={this.value}
             type={this.type}
@@ -512,6 +580,23 @@ export class IrAutocomplete {
             disabled={this.disabled}
             exportparts="base, hint, label, input, start, end, clear-button, password-toggle-button"
           >
+            {this.multiple && this.selectedOptions.length > 0 && (
+              <div slot="start" class="selected-tags" part="tags">
+                {this.selectedOptions.map(option => (
+                  <wa-tag
+                    key={this.getOptionValue(option)}
+                    size="s"
+                    with-remove
+                    onwa-remove={(e: Event) => {
+                      e.stopPropagation();
+                      this.removeOption(option);
+                    }}
+                  >
+                    {this.getOptionLabel(option)}
+                  </wa-tag>
+                ))}
+              </div>
+            )}
             {this.slotManager.hasSlot('label') && <slot name="label" slot="label"></slot>}
             {this.slotManager.hasSlot('start') && <slot name="start" slot="start"></slot>}
             {this.slotManager.hasSlot('end') && <slot name="end" slot="end"></slot>}
@@ -523,7 +608,7 @@ export class IrAutocomplete {
             ref={el => (this.listboxRef = el)}
             role="listbox"
             aria-expanded={this.open ? 'true' : 'false'}
-            aria-multiselectable={'false'}
+            aria-multiselectable={this.multiple ? 'true' : 'false'}
             aria-labelledby="label"
             part="listbox"
             class="listbox"

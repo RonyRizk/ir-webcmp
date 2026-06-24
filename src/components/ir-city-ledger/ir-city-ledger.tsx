@@ -183,9 +183,10 @@ export class IrCityLedger {
             onText-change={(e: CustomEvent<string>) => {
               this.agentSearch = e.detail ?? '';
             }}
-            onCombobox-change={(e: CustomEvent<string>) => {
+            onCombobox-change={(e: CustomEvent<string | string[]>) => {
               this.agentSearch = '';
-              this.selectedAgent = e.detail ? this.agents?.find(agent => agent.id === Number(e.detail)) : null;
+              const value = e.detail as string;
+              this.selectedAgent = value ? this.agents?.find(agent => agent.id === Number(value)) : null;
               this.showStatementPreview = false;
               this.folioSummary = null;
               this.fiscalFilters = { fromDate: undefined, toDate: undefined, docNumber: '', taxableOnly: false, type: 'all', proformaOnly: false };

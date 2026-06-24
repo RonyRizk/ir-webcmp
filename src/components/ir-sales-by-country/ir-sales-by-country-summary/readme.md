@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property       | Attribute | Description | Type            | Default     |
-| -------------- | --------- | ----------- | --------------- | ----------- |
-| `salesReports` | --        |             | `SalesRecord[]` | `undefined` |
+| Property       | Attribute | Description | Type                                                                                              | Default     |
+| -------------- | --------- | ----------- | ------------------------------------------------------------------------------------------------- | ----------- |
+| `filters`      | --        |             | `Omit<CountrySalesParams, "AC_ID" \| "is_export_to_excel"> & { include_previous_year: boolean; }` | `undefined` |
+| `salesReports` | --        |             | `SalesRecord[]`                                                                                   | `undefined` |
 
 
 ## Dependencies

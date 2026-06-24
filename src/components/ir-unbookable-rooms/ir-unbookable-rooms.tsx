@@ -1,4 +1,4 @@
-import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Prop, State, Watch, h } from '@stencil/core';
 import Token from '@/models/Token';
 import { AllowedProperties, FetchUnBookableRoomsResult, PropertyService } from '@/services/property.service';
 
@@ -185,49 +185,36 @@ export class IrUnbookableRooms {
     const totalIssues = this.unbookableRooms?.length ?? 0;
     const propertiesWithIssues = new Set(this.unbookableRooms?.map(entry => entry.property_id)).size;
     return (
-      <Host>
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="ir-page__container">
-          <h3 class="page-title">Availability Alert</h3>
-
-          {this.mode === 'mpo' && (
-            <section class="summary" aria-live="polite">
-              <wa-card>
-                <span class="summary__value">{totalIssues}</span>
-                <span class="summary__label">room types affected</span>
-              </wa-card>
-              <wa-card>
-                <span class="summary__value">{propertiesWithIssues}</span>
-                <span class="summary__label">properties impacted</span>
-              </wa-card>
-            </section>
-          )}
-
-          {/* {this.errorMessage && <p class="error">{this.errorMessage}</p>} */}
-
-          <section class="unbookable-rooms__content">
-            <ir-unbookable-rooms-filters
-              mode={this.mode}
-              filters={this.filters}
-              unbookableRooms={this.unbookableRooms}
-              isLoading={this.isLoading}
-              onFiltersChange={this.handleFiltersChange}
-              onFiltersReset={this.handleFiltersReset}
-              onFiltersSave={this.handleRefresh}
-            ></ir-unbookable-rooms-filters>
-            <ir-unbookable-rooms-data
-              mode={this.mode}
-              isLoading={this.isLoading}
-              errorMessage={this.errorMessage}
-              unbookableRooms={this.unbookableRooms}
-              allowedProperties={this.allowedProperties}
-              filters={this.filters}
-              progressFilters={this.progressFilters}
-            ></ir-unbookable-rooms-data>
+      <ir-page label="Availability Alert">
+        {this.mode === 'mpo' && (
+          <section class="summary" aria-live="polite">
+            <ir-metric-card icon={'bed'} value={totalIssues} label="Affected room types"></ir-metric-card>
+            <ir-metric-card icon={'hotel'} value={propertiesWithIssues} label="Properties impacted"></ir-metric-card>
           </section>
+        )}
+        {/* {this.errorMessage && <p class="error">{this.errorMessage}</p>} */}
+
+        <section class="unbookable-rooms__content">
+          <ir-unbookable-rooms-filters
+            mode={this.mode}
+            filters={this.filters}
+            unbookableRooms={this.unbookableRooms}
+            isLoading={this.isLoading}
+            onFiltersChange={this.handleFiltersChange}
+            onFiltersReset={this.handleFiltersReset}
+            onFiltersSave={this.handleRefresh}
+          ></ir-unbookable-rooms-filters>
+          <ir-unbookable-rooms-data
+            mode={this.mode}
+            isLoading={this.isLoading}
+            errorMessage={this.errorMessage}
+            unbookableRooms={this.unbookableRooms}
+            allowedProperties={this.allowedProperties}
+            filters={this.filters}
+            progressFilters={this.progressFilters}
+          ></ir-unbookable-rooms-data>
         </section>
-      </Host>
+      </ir-page>
     );
   }
 }

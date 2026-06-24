@@ -2,7 +2,7 @@ import { Booking } from '@/models/booking.dto';
 import { CityLedgerService, type FiscalDocument } from '@/services/city-ledger';
 import calendar_data from '@/stores/calendar-data';
 import Token from '@/models/Token';
-import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'ir-agent-billing',
@@ -54,7 +54,21 @@ export class IrAgentBilling {
     }
   }
 
+  @Listen('fiscalDocumentIssued', { target: 'body' })
+  handleFiscalDocumentIssued(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.fetchFiscalDocuments();
+  }
+
   render() {
+    if (this.isLoading) {
+      return (
+        <div class={'agent-bill__loader-container'}>
+          <ir-spinner></ir-spinner>
+        </div>
+      );
+    }
     return (
       <Host>
         <div class="billing__container">
@@ -78,6 +92,7 @@ export class IrAgentBilling {
           <ir-city-ledger-fiscal-documents-table
             class={'agent-billing__table'}
             rows={this.fiscalDocuments}
+            booking={this.booking}
             isLoading={this.isLoading}
             hasFetched={this.hasFetched}
             agentId={this.booking?.agent?.id ?? null}
@@ -93,17 +108,11 @@ export class IrAgentBilling {
         <ir-cl-invoice-dialog
           mode="booking"
           agentId={this.booking.agent?.id}
-          bookingNbr={this.booking.booking_nbr}
+          booking={this.booking}
           startDate={this.booking.from_date}
           endDate={this.booking.to_date}
           currencyId={calendar_data.property.currency.id}
-          rooms={this.booking.rooms ?? []}
           ref={el => (this.invoiceDialogRef = el)}
-          onInvoiceIssued={e => {
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            this.fetchFiscalDocuments();
-          }}
         ></ir-cl-invoice-dialog>
         {/* <ir-cl-fiscal-document-preview ticket={this.tokenService.getToken()} propertyId={calendar_data.property?.id}></ir-cl-fiscal-document-preview> */}
       </Host>

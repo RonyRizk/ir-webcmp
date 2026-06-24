@@ -18,7 +18,11 @@
   justify-content: center;
   min-height: 300px;
 }
-
+.booked-by-source__logo {
+  width: 1.5625rem;
+  background-color: white;
+  /* border-radius: 50%; */
+}
 .cell--left {
   text-align: left;
 }
@@ -35,6 +39,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+.cell-stack.--source {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cell-stack p {

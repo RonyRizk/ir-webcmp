@@ -997,6 +997,11 @@ export namespace Components {
          */
         "minlength": NativeWaInput['minlength'];
         /**
+          * Enables selection of multiple options. When `true`, users can select more than one option at a time. Defaults to `false`.
+          * @default false
+         */
+        "multiple": boolean;
+        /**
           * Name attribute forwarded to the underlying input element.
          */
         "name": string;
@@ -1892,6 +1897,7 @@ export namespace Components {
           * @default null
          */
         "agentId": number | null;
+        "booking": Booking;
         /**
           * @default []
          */
@@ -2293,10 +2299,7 @@ export namespace Components {
           * @default null
          */
         "agentId": number | null;
-        /**
-          * @default null
-         */
-        "bookingNbr": string | null;
+        "booking": Booking;
         "closeModal": () => Promise<void>;
         /**
           * @default null
@@ -2311,10 +2314,6 @@ export namespace Components {
          */
         "mode": 'booking' | 'default';
         "openModal": () => Promise<void>;
-        /**
-          * @default []
-         */
-        "rooms": Room[];
         /**
           * @default null
          */
@@ -3407,6 +3406,15 @@ export namespace Components {
           * @default null
          */
         "toDate": string | null;
+    }
+    interface IrGapNights {
+        /**
+          * @default 'en'
+         */
+        "language": string;
+        "p": string;
+        "propertyid": number;
+        "ticket": string;
     }
     interface IrGhsCandidateTable {
         "baseUrl": string;
@@ -5641,6 +5649,7 @@ export namespace Components {
         "isLoading": boolean;
     }
     interface IrSalesByChannelSummary {
+        "filters": ChannelSaleFilter;
         /**
           * @default []
          */
@@ -5664,6 +5673,7 @@ export namespace Components {
         "ticket": string;
     }
     interface IrSalesByCountrySummary {
+        "filters": CountrySalesFilter;
         "salesReports": SalesRecord[];
     }
     interface IrSalesFilters {
@@ -6647,10 +6657,6 @@ export interface IrBookingAssignItemsCustomEvent<T> extends CustomEvent<T> {
 export interface IrBookingBillingRecipientCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrBookingBillingRecipientElement;
-}
-export interface IrBookingCityLedgerCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLIrBookingCityLedgerElement;
 }
 export interface IrBookingCompanyDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -8264,7 +8270,7 @@ declare global {
     };
     interface HTMLIrAutocompleteElementEventMap {
         "text-change": string;
-        "combobox-change": string;
+        "combobox-change": string | string[];
     }
     interface HTMLIrAutocompleteElement extends Components.IrAutocomplete, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrAutocompleteElementEventMap>(type: K, listener: (this: HTMLIrAutocompleteElement, ev: IrAutocompleteCustomEvent<HTMLIrAutocompleteElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -8400,18 +8406,7 @@ declare global {
         prototype: HTMLIrBookingBillingRecipientElement;
         new (): HTMLIrBookingBillingRecipientElement;
     };
-    interface HTMLIrBookingCityLedgerElementEventMap {
-        "clRefreshNeeded": void;
-    }
     interface HTMLIrBookingCityLedgerElement extends Components.IrBookingCityLedger, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIrBookingCityLedgerElementEventMap>(type: K, listener: (this: HTMLIrBookingCityLedgerElement, ev: IrBookingCityLedgerCustomEvent<HTMLIrBookingCityLedgerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIrBookingCityLedgerElementEventMap>(type: K, listener: (this: HTMLIrBookingCityLedgerElement, ev: IrBookingCityLedgerCustomEvent<HTMLIrBookingCityLedgerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLIrBookingCityLedgerElement: {
         prototype: HTMLIrBookingCityLedgerElement;
@@ -9283,6 +9278,7 @@ declare global {
     };
     interface HTMLIrClInvoiceDialogElementEventMap {
         "invoiceIssued": FiscalDocument;
+        "fiscalDocumentIssued": void;
         "clFiscalDocumentPreview": ClFiscalDocumentPreviewRequest;
     }
     interface HTMLIrClInvoiceDialogElement extends Components.IrClInvoiceDialog, HTMLStencilElement {
@@ -10025,6 +10021,12 @@ declare global {
     var HTMLIrFiscalDocumentsTableElement: {
         prototype: HTMLIrFiscalDocumentsTableElement;
         new (): HTMLIrFiscalDocumentsTableElement;
+    };
+    interface HTMLIrGapNightsElement extends Components.IrGapNights, HTMLStencilElement {
+    }
+    var HTMLIrGapNightsElement: {
+        prototype: HTMLIrGapNightsElement;
+        new (): HTMLIrGapNightsElement;
     };
     interface HTMLIrGhsCandidateTableElementEventMap {
         "toggleSelection": GHS_Candidate_Property;
@@ -12422,6 +12424,7 @@ declare global {
         "ir-fiscal-documents": HTMLIrFiscalDocumentsElement;
         "ir-fiscal-documents-filters": HTMLIrFiscalDocumentsFiltersElement;
         "ir-fiscal-documents-table": HTMLIrFiscalDocumentsTableElement;
+        "ir-gap-nights": HTMLIrGapNightsElement;
         "ir-ghs-candidate-table": HTMLIrGhsCandidateTableElement;
         "ir-ghs-filters": HTMLIrGhsFiltersElement;
         "ir-ghs-onboarding": HTMLIrGhsOnboardingElement;
@@ -13507,10 +13510,15 @@ declare namespace LocalJSX {
          */
         "minlength"?: NativeWaInput['minlength'];
         /**
+          * Enables selection of multiple options. When `true`, users can select more than one option at a time. Defaults to `false`.
+          * @default false
+         */
+        "multiple"?: boolean;
+        /**
           * Name attribute forwarded to the underlying input element.
          */
         "name"?: string;
-        "onCombobox-change"?: (event: IrAutocompleteCustomEvent<string>) => void;
+        "onCombobox-change"?: (event: IrAutocompleteCustomEvent<string | string[]>) => void;
         "onText-change"?: (event: IrAutocompleteCustomEvent<string>) => void;
         /**
           * Whether the autocomplete dropdown is open.
@@ -13762,10 +13770,6 @@ declare namespace LocalJSX {
           * @default 'en'
          */
         "language"?: string;
-        /**
-          * Emitted when a mutation (delete / save) completes so the parent can re-fetch.
-         */
-        "onClRefreshNeeded"?: (event: IrBookingCityLedgerCustomEvent<void>) => void;
         /**
           * Service-category entries used to populate the transaction form.
           * @default []
@@ -14472,6 +14476,7 @@ declare namespace LocalJSX {
           * @default null
          */
         "agentId"?: number | null;
+        "booking"?: Booking;
         /**
           * @default []
          */
@@ -14902,10 +14907,7 @@ declare namespace LocalJSX {
           * @default null
          */
         "agentId"?: number | null;
-        /**
-          * @default null
-         */
-        "bookingNbr"?: string | null;
+        "booking"?: Booking;
         /**
           * @default null
          */
@@ -14919,11 +14921,8 @@ declare namespace LocalJSX {
          */
         "mode"?: 'booking' | 'default';
         "onClFiscalDocumentPreview"?: (event: IrClInvoiceDialogCustomEvent<ClFiscalDocumentPreviewRequest>) => void;
+        "onFiscalDocumentIssued"?: (event: IrClInvoiceDialogCustomEvent<void>) => void;
         "onInvoiceIssued"?: (event: IrClInvoiceDialogCustomEvent<FiscalDocument>) => void;
-        /**
-          * @default []
-         */
-        "rooms"?: Room[];
         /**
           * @default null
          */
@@ -16124,6 +16123,15 @@ declare namespace LocalJSX {
           * @default null
          */
         "toDate"?: string | null;
+    }
+    interface IrGapNights {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
+        "p"?: string;
+        "propertyid"?: number;
+        "ticket"?: string;
     }
     interface IrGhsCandidateTable {
         "baseUrl"?: string;
@@ -18567,6 +18575,7 @@ declare namespace LocalJSX {
         "onApplyFilters"?: (event: IrSalesByChannelFiltersCustomEvent<ChannelSaleFilter>) => void;
     }
     interface IrSalesByChannelSummary {
+        "filters"?: ChannelSaleFilter;
         /**
           * @default []
          */
@@ -18590,6 +18599,7 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrSalesByCountrySummary {
+        "filters"?: CountrySalesFilter;
         "salesReports"?: SalesRecord[];
     }
     interface IrSalesFilters {
@@ -19721,6 +19731,7 @@ declare namespace LocalJSX {
         "passwordToggle": NativeWaInput['passwordToggle'];
         "passwordVisible": NativeWaInput['passwordVisible'];
         "withoutSpinButtons": NativeWaInput['withoutSpinButtons'];
+        "multiple": boolean;
         "required": NativeWaInput['required'];
         "pattern": NativeWaInput['pattern'];
         "minlength": NativeWaInput['minlength'];
@@ -20109,7 +20120,6 @@ declare namespace LocalJSX {
     interface IrClInvoiceDialogAttributes {
         "agentId": number | null;
         "mode": 'booking' | 'default';
-        "bookingNbr": string | null;
         "startDate": string | null;
         "endDate": string | null;
         "currencyId": number | null;
@@ -20432,6 +20442,12 @@ declare namespace LocalJSX {
         "folioType": FiscalFolioType;
         "agentId": number | null;
         "guestId": number | null;
+    }
+    interface IrGapNightsAttributes {
+        "ticket": string;
+        "p": string;
+        "language": string;
+        "propertyid": number;
     }
     interface IrGhsCandidateTableAttributes {
         "selectedCountryId": number | null;
@@ -21513,6 +21529,7 @@ declare namespace LocalJSX {
         "ir-fiscal-documents": Omit<IrFiscalDocuments, keyof IrFiscalDocumentsAttributes> & { [K in keyof IrFiscalDocuments & keyof IrFiscalDocumentsAttributes]?: IrFiscalDocuments[K] } & { [K in keyof IrFiscalDocuments & keyof IrFiscalDocumentsAttributes as `attr:${K}`]?: IrFiscalDocumentsAttributes[K] } & { [K in keyof IrFiscalDocuments & keyof IrFiscalDocumentsAttributes as `prop:${K}`]?: IrFiscalDocuments[K] };
         "ir-fiscal-documents-filters": Omit<IrFiscalDocumentsFilters, keyof IrFiscalDocumentsFiltersAttributes> & { [K in keyof IrFiscalDocumentsFilters & keyof IrFiscalDocumentsFiltersAttributes]?: IrFiscalDocumentsFilters[K] } & { [K in keyof IrFiscalDocumentsFilters & keyof IrFiscalDocumentsFiltersAttributes as `attr:${K}`]?: IrFiscalDocumentsFiltersAttributes[K] } & { [K in keyof IrFiscalDocumentsFilters & keyof IrFiscalDocumentsFiltersAttributes as `prop:${K}`]?: IrFiscalDocumentsFilters[K] };
         "ir-fiscal-documents-table": Omit<IrFiscalDocumentsTable, keyof IrFiscalDocumentsTableAttributes> & { [K in keyof IrFiscalDocumentsTable & keyof IrFiscalDocumentsTableAttributes]?: IrFiscalDocumentsTable[K] } & { [K in keyof IrFiscalDocumentsTable & keyof IrFiscalDocumentsTableAttributes as `attr:${K}`]?: IrFiscalDocumentsTableAttributes[K] } & { [K in keyof IrFiscalDocumentsTable & keyof IrFiscalDocumentsTableAttributes as `prop:${K}`]?: IrFiscalDocumentsTable[K] };
+        "ir-gap-nights": Omit<IrGapNights, keyof IrGapNightsAttributes> & { [K in keyof IrGapNights & keyof IrGapNightsAttributes]?: IrGapNights[K] } & { [K in keyof IrGapNights & keyof IrGapNightsAttributes as `attr:${K}`]?: IrGapNightsAttributes[K] } & { [K in keyof IrGapNights & keyof IrGapNightsAttributes as `prop:${K}`]?: IrGapNights[K] };
         "ir-ghs-candidate-table": Omit<IrGhsCandidateTable, keyof IrGhsCandidateTableAttributes> & { [K in keyof IrGhsCandidateTable & keyof IrGhsCandidateTableAttributes]?: IrGhsCandidateTable[K] } & { [K in keyof IrGhsCandidateTable & keyof IrGhsCandidateTableAttributes as `attr:${K}`]?: IrGhsCandidateTableAttributes[K] } & { [K in keyof IrGhsCandidateTable & keyof IrGhsCandidateTableAttributes as `prop:${K}`]?: IrGhsCandidateTable[K] };
         "ir-ghs-filters": Omit<IrGhsFilters, keyof IrGhsFiltersAttributes> & { [K in keyof IrGhsFilters & keyof IrGhsFiltersAttributes]?: IrGhsFilters[K] } & { [K in keyof IrGhsFilters & keyof IrGhsFiltersAttributes as `attr:${K}`]?: IrGhsFiltersAttributes[K] } & { [K in keyof IrGhsFilters & keyof IrGhsFiltersAttributes as `prop:${K}`]?: IrGhsFilters[K] };
         "ir-ghs-onboarding": Omit<IrGhsOnboarding, keyof IrGhsOnboardingAttributes> & { [K in keyof IrGhsOnboarding & keyof IrGhsOnboardingAttributes]?: IrGhsOnboarding[K] } & { [K in keyof IrGhsOnboarding & keyof IrGhsOnboardingAttributes as `attr:${K}`]?: IrGhsOnboardingAttributes[K] } & { [K in keyof IrGhsOnboarding & keyof IrGhsOnboardingAttributes as `prop:${K}`]?: IrGhsOnboarding[K] };
@@ -21931,6 +21948,7 @@ declare module "@stencil/core" {
             "ir-fiscal-documents": LocalJSX.IntrinsicElements["ir-fiscal-documents"] & JSXBase.HTMLAttributes<HTMLIrFiscalDocumentsElement>;
             "ir-fiscal-documents-filters": LocalJSX.IntrinsicElements["ir-fiscal-documents-filters"] & JSXBase.HTMLAttributes<HTMLIrFiscalDocumentsFiltersElement>;
             "ir-fiscal-documents-table": LocalJSX.IntrinsicElements["ir-fiscal-documents-table"] & JSXBase.HTMLAttributes<HTMLIrFiscalDocumentsTableElement>;
+            "ir-gap-nights": LocalJSX.IntrinsicElements["ir-gap-nights"] & JSXBase.HTMLAttributes<HTMLIrGapNightsElement>;
             "ir-ghs-candidate-table": LocalJSX.IntrinsicElements["ir-ghs-candidate-table"] & JSXBase.HTMLAttributes<HTMLIrGhsCandidateTableElement>;
             "ir-ghs-filters": LocalJSX.IntrinsicElements["ir-ghs-filters"] & JSXBase.HTMLAttributes<HTMLIrGhsFiltersElement>;
             "ir-ghs-onboarding": LocalJSX.IntrinsicElements["ir-ghs-onboarding"] & JSXBase.HTMLAttributes<HTMLIrGhsOnboardingElement>;

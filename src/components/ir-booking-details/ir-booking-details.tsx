@@ -386,6 +386,8 @@ export class IrBookingDetails {
       this.folioRows = this.folioRows.map(r =>
         r._raw.CL_TX_ID === cl_tx_id ? { ...mapClTxToFolioRow({ ...r._raw, IS_HOLD: is_hold }), _rowId: r._rowId, balance: r.balance } : r,
       );
+    } else if (msg.reason === 'CL_TX_CREATED') {
+      this.fetchCityLedger();
     }
   }
 

@@ -20,6 +20,7 @@
 
 ### Depends on
 
+- [ir-spinner](../../ui/ir-spinner)
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-city-ledger-fiscal-documents-table](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table)
 - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
@@ -27,6 +28,7 @@
 ### Graph
 ```mermaid
 graph TD;
+  ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
   ir-agent-billing --> ir-city-ledger-fiscal-documents-table
   ir-agent-billing --> ir-cl-invoice-dialog
