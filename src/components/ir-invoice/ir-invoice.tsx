@@ -217,6 +217,7 @@ export class IrInvoice {
           >
             <ir-proforma-invoice-preview invoice={this.invoice} property={calendar_data.property as any} booking={this.booking}></ir-proforma-invoice-preview>
           </ir-preview-screen-dialog>
+          <ir-fiscal-document-preview mode="all"></ir-fiscal-document-preview>
         </ir-drawer>
       </Host>
     );

@@ -4,7 +4,7 @@ import { Booking, ExtraService, ExtraServiceSchema } from '@/models/booking.dto'
 import { Agent } from '@/services/agents/type';
 import { IEntries } from '@/models/property';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { taxationModes } from '@/services/property.service';
+import { taxationModes } from '@/services/property/types';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';

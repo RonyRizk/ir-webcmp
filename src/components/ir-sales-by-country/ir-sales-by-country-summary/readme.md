@@ -9,7 +9,7 @@
 
 | Property       | Attribute | Description | Type                                                                                              | Default     |
 | -------------- | --------- | ----------- | ------------------------------------------------------------------------------------------------- | ----------- |
-| `filters`      | --        |             | `Omit<CountrySalesParams, "AC_ID" \| "is_export_to_excel"> & { include_previous_year: boolean; }` | `undefined` |
+| `filters`      | --        |             | `Omit<CountrySalesParams, "is_export_to_excel" \| "AC_ID"> & { include_previous_year: boolean; }` | `undefined` |
 | `salesReports` | --        |             | `SalesRecord[]`                                                                                   | `undefined` |
 
 

@@ -7,10 +7,11 @@
 
 ## Properties
 
-| Property     | Attribute     | Description | Type                    | Default                                                                                                                                                                                                  |
-| ------------ | ------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters`    | --            |             | `FiscalDocumentFilters` | `{     fromDate: undefined,     toDate: undefined,     docNumber: '',     taxableOnly: false,     type: 'all',     proformaOnly: false,     folioType: 'all',     agentId: null,     guestId: null,   }` |
-| `propertyId` | `property-id` |             | `number`                | `undefined`                                                                                                                                                                                              |
+| Property     | Attribute     | Description                                                            | Type                    | Default                  |
+| ------------ | ------------- | ---------------------------------------------------------------------- | ----------------------- | ------------------------ |
+| `filters`    | --            | Initial filter values. Edits are kept locally and only sent on submit. | `FiscalDocumentFilters` | `{ ...DEFAULT_FILTERS }` |
+| `loading`    | `loading`     |                                                                        | `"export" \| "search"`  | `undefined`              |
+| `propertyId` | `property-id` |                                                                        | `number`                | `undefined`              |
 
 
 ## Events
@@ -18,7 +19,7 @@
 | Event           | Description | Type                                 |
 | --------------- | ----------- | ------------------------------------ |
 | `applyFilters`  |             | `CustomEvent<FiscalDocumentFilters>` |
-| `filtersChange` |             | `CustomEvent<FiscalDocumentFilters>` |
+| `filterChanged` |             | `CustomEvent<FiscalDocumentFilters>` |
 
 
 ## Dependencies

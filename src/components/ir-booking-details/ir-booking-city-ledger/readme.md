@@ -30,7 +30,6 @@
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-spinner](../../ui/ir-spinner)
 - [ir-city-ledger-transaction-drawer](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
-- [ir-cl-fiscal-document-preview](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
 - [ir-dialog](../../ui/ir-dialog)
 
 ### Graph
@@ -41,7 +40,6 @@ graph TD;
   ir-booking-city-ledger --> ir-custom-button
   ir-booking-city-ledger --> ir-spinner
   ir-booking-city-ledger --> ir-city-ledger-transaction-drawer
-  ir-booking-city-ledger --> ir-cl-fiscal-document-preview
   ir-booking-city-ledger --> ir-dialog
   ir-city-ledger-transaction-drawer --> ir-drawer
   ir-city-ledger-transaction-drawer --> ir-city-ledger-transaction-form
@@ -63,16 +61,6 @@ graph TD;
   ir-cl-credit-note-fields --> ir-cl-invoice-select
   ir-cl-invoice-select --> ir-validator
   ir-cl-debit-note-fields --> ir-cl-invoice-select
-  ir-cl-fiscal-document-preview --> ir-spinner
-  ir-cl-fiscal-document-preview --> ir-pdf-viewer
-  ir-cl-fiscal-document-preview --> ir-preview-screen-dialog
-  ir-cl-fiscal-document-preview --> ir-custom-button
-  ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
-  ir-preview-screen-dialog --> ir-dialog
-  ir-preview-screen-dialog --> ir-custom-button
-  ir-fd-confirm-dialog --> ir-dialog
-  ir-fd-confirm-dialog --> ir-input
-  ir-fd-confirm-dialog --> ir-custom-button
   ir-payment-details --> ir-booking-city-ledger
   style ir-booking-city-ledger fill:#f9f,stroke:#333,stroke-width:4px
 ```

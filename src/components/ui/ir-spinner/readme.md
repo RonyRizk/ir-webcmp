@@ -43,6 +43,7 @@
  - [ir-fiscal-documents-table](../../ir-fiscal-documents/ir-fiscal-documents-table)
  - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-billing](../../ir-billing/ir-guest-billing)
+ - [ir-guest-document-preview](../../ir-fiscal-documents/ir-guest-document-preview)
  - [ir-guest-info](../../ir-guest-info)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
@@ -80,6 +81,7 @@ graph TD;
   ir-fiscal-documents-table --> ir-spinner
   ir-ghs-candidate-table --> ir-spinner
   ir-guest-billing --> ir-spinner
+  ir-guest-document-preview --> ir-spinner
   ir-guest-info --> ir-spinner
   ir-guest-info-form --> ir-spinner
   ir-hk-user-drawer-form --> ir-spinner

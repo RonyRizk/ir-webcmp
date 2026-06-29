@@ -1,5 +1,5 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
-import { FetchedProperty, LinkedProperty } from '@/services/property.service';
+import type { FetchedProperty, LinkedProperty } from '@/services/property/types';
 import axios from 'axios';
 import { Debounce } from '../../../decorators/debounce';
 

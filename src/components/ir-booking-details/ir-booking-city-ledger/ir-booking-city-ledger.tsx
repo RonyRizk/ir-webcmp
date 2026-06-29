@@ -6,7 +6,6 @@ import type { ServiceCategoryOption } from '@/components/ir-city-ledger/ir-city-
 import { FolioRow, mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
-import Token from '@/models/Token';
 import { actionableClTypes } from '@/services/city-ledger.service';
 import { formatAmount } from '@/utils/utils';
 
@@ -17,7 +16,6 @@ import { formatAmount } from '@/utils/utils';
 })
 export class IrBookingCityLedger {
   private cityLedgerService = new CityLedgerService();
-  private tokenService = new Token();
 
   /** Booking object; component is hidden when booking.agent is null. */
   @Prop() booking: Booking;
@@ -220,7 +218,8 @@ export class IrBookingCityLedger {
             // this.clRefreshNeeded.emit();
           }}
         ></ir-city-ledger-transaction-drawer>
-        <ir-cl-fiscal-document-preview ticket={this.tokenService.getToken()} propertyId={calendar_data?.property?.id}></ir-cl-fiscal-document-preview>
+        {/* Document preview is mounted once at the booking-details root
+            (`ir-fiscal-document-preview`), which listens for these events globally. */}
 
         <ir-dialog
           label="Delete Entry"

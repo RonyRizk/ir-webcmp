@@ -13,6 +13,8 @@ import { IEntries } from '@/models/property';
 import { isAgentMode } from '../functions';
 import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { ClTx } from '@/services/city-ledger/types';
+import { FdTypes } from '@/types/enums';
+import type { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
 
 @Component({
   styleUrl: 'ir-payment-details.css',
@@ -43,6 +45,8 @@ export class IrPaymentDetails {
   @Event({ bubbles: true }) toast: EventEmitter<IToast>;
   @Event({ bubbles: true }) openSidebar: EventEmitter<PaymentSidebarEvent>;
   @Event({ bubbles: true }) openPrintScreen: EventEmitter<PrintScreenOptions>;
+  /** Opens an existing guest document (e.g. receipt) in the shared in-app preview. */
+  @Event({ bubbles: true, composed: true }) guestDocumentPreview: EventEmitter<GuestDocumentPreviewRequest>;
 
   private paymentService = new PaymentService();
   private bookingService = new BookingService();
@@ -136,15 +140,19 @@ export class IrPaymentDetails {
 
   private async handleIssueReceipt(detail: IPayment) {
     if (detail.receipt_nbr) {
-      this.openPrintScreen.emit({
-        mode: 'receipt',
-        payload: {
-          pid: detail.system_id?.toString(),
-          rnb: detail.receipt_nbr,
-        },
+      // Viewing an already-issued receipt now opens the shared in-app preview
+      // (ir-guest-document-preview) instead of a new browser window. Receipt
+      // rendering there is scaffolded and not implemented yet — it currently
+      // shows a placeholder until the fetch flow is wired up.
+      this.guestDocumentPreview.emit({
+        documentNumber: detail.receipt_nbr,
+        fdTypeCode: FdTypes.Receipt,
+        bookingNumber: this.booking.booking_nbr,
       });
       return;
     }
+    // Issuing a brand-new receipt still uses the legacy print flow, which both
+    // creates and renders the receipt.
     const starter = calendar_data.property.company?.receipt_prefix ? calendar_data.property.company?.receipt_prefix + '-' : '';
     const _number = await this.bookingService.getNextValue({ starter: `${starter}${calendar_data.property.aname}` });
     this.openPrintScreen.emit({

@@ -9,6 +9,8 @@ import { IEntries } from '@/models/IBooking';
 import { IssueInvoiceProps } from '@/services/booking-service/types';
 import calendar_data from '@/stores/calendar-data';
 import axios from 'axios';
+import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
+import { FdTypes } from '@/types/enums';
 @Component({
   tag: 'ir-invoice-form',
   styleUrl: 'ir-invoice-form.css',
@@ -99,7 +101,9 @@ export class IrInvoiceForm {
   @Event() previewProformaInvoice: EventEmitter<IssueInvoiceProps>;
 
   @Event() loadingChange: EventEmitter<boolean>;
+  @Event({ bubbles: true, composed: true }) guestDocumentPreview: EventEmitter<GuestDocumentPreviewRequest>;
 
+  private readonly version: string = 'new';
   private room: Booking['rooms'][0];
   private confirmButtonRef: HTMLIrCustomButtonElement;
   private bookingService = new BookingService();
@@ -251,9 +255,13 @@ export class IrInvoiceForm {
   private async openProformaInvoice() {
     const property = calendar_data.property as any;
     const documentId = moment().format('YYYYMMDDHHmm') + property.id;
-
-    let url = this.printingBaseUrl.replace('%1', encodeURIComponent(property.aname)).replace('%2', encodeURIComponent(this.booking.booking_nbr));
-    url += `&documentId=${encodeURIComponent(documentId)}`;
+    let url = '';
+    if (this.version !== 'new') {
+      url = this.printingBaseUrl.replace('%1', encodeURIComponent(property.aname)).replace('%2', encodeURIComponent(this.booking.booking_nbr));
+      url += `&documentId=${encodeURIComponent(documentId)}`;
+    } else {
+      url += 'p';
+    }
 
     const ids = [...this.selectedItemKeys].join('-');
     if (ids) {
@@ -265,13 +273,21 @@ export class IrInvoiceForm {
     } else if (this.selectedRecipient?.startsWith('room__')) {
       url += `&bill_to=${encodeURIComponent(this.selectedRecipient.replace('room__', '').trim())}`;
     }
+    if (this.version === 'new') {
+      this.guestDocumentPreview.emit({
+        bookingNumber: this.booking.booking_nbr,
+        documentNumber: documentId,
+        fdTypeCode: FdTypes.Proforma,
+        extras: url,
+      });
+    } else {
+      const { data } = await axios.post(`Get_ShortLiving_Token`);
+      if (!data.ExceptionMsg) {
+        url += `&token=${encodeURIComponent(data.My_Result)}`;
+      }
 
-    const { data } = await axios.post(`Get_ShortLiving_Token`);
-    if (!data.ExceptionMsg) {
-      url += `&token=${encodeURIComponent(data.My_Result)}`;
+      window.open(url, '_blank');
     }
-
-    window.open(url, '_blank');
   }
   /**
    * Returns the union of API-disabled keys and client-calculated non-invoiceable keys.
@@ -495,12 +511,21 @@ export class IrInvoiceForm {
    */
   private async openLastInvoice(invoiceInfo: BookingInvoiceInfo) {
     const lastInvoice = invoiceInfo.invoices[invoiceInfo.invoices.length - 1];
-    const { My_Result } = await this.bookingService.printInvoice({
-      property_id: calendar_data.property.id,
-      mode: lastInvoice?.credit_note ? 'creditnote' : 'invoice',
-      invoice_nbr: lastInvoice.nbr,
-    });
-    window.open(My_Result);
+    if (this.version === 'new') {
+      this.guestDocumentPreview.emit({
+        bookingNumber: this.booking.booking_nbr,
+        documentNumber: lastInvoice.nbr,
+        fdTypeCode: lastInvoice?.credit_note ? FdTypes.CreditNote : FdTypes.Invoice,
+        creditNoteDocNumber: lastInvoice?.credit_note ? lastInvoice?.credit_note?.nbr : undefined,
+      });
+    } else {
+      const { My_Result } = await this.bookingService.printInvoice({
+        property_id: calendar_data.property.id,
+        mode: lastInvoice?.credit_note ? 'creditnote' : 'invoice',
+        invoice_nbr: lastInvoice.nbr,
+      });
+      window.open(My_Result);
+    }
   }
 
   /**

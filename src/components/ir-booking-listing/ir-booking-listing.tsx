@@ -16,7 +16,8 @@ import Token from '@/models/Token';
 import { getAllParams } from '@/utils/browserHistory';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { Payment, PaymentEntries } from '../ir-booking-details/types';
-import { AllowedProperties, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { AllowedProperties } from '@/services/property/types';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { GuestChangedEvent } from '@/components';
 

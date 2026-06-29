@@ -19,14 +19,14 @@
 
  - [ir-city-ledger-statements](../ir-city-ledger/ir-city-ledger-statements)
  - [ir-cl-fiscal-document-preview](../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
- - [ir-guest-billing](../ir-billing/ir-guest-billing)
+ - [ir-guest-document-preview](../ir-fiscal-documents/ir-guest-document-preview)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-city-ledger-statements --> ir-pdf-viewer
   ir-cl-fiscal-document-preview --> ir-pdf-viewer
-  ir-guest-billing --> ir-pdf-viewer
+  ir-guest-document-preview --> ir-pdf-viewer
   style ir-pdf-viewer fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

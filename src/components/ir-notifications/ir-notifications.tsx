@@ -1,6 +1,7 @@
 import { Component, Host, h, Prop, Element, Watch, Event, EventEmitter, State } from '@stencil/core';
 import { Notification } from './types';
-import { FetchNotificationsResult as Notifications, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { FetchNotificationsResult as Notifications } from '@/services/property/types';
 import Token from '@/models/Token';
 import WaAnimation from '@awesome.me/webawesome/dist/components/animation/animation';
 @Component({

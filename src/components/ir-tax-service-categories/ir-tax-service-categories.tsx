@@ -2,7 +2,8 @@ import Token from '@/models/Token';
 import { Component, Prop, State, Watch, h } from '@stencil/core';
 import { ChargeRule, TaxAndChargeSetup, TaxationStrategy, TaxesSetupEntries } from './types';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { HandleExposedPropertyTaxCategoriesParams, TaxCategory, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { HandleExposedPropertyTaxCategoriesParams, TaxCategory } from '@/services/property/types';
 import calendar_data from '@/stores/calendar-data';
 import { showToast } from '@/utils/utils';
 

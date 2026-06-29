@@ -10,7 +10,7 @@
 | Property             | Attribute       | Description | Type                                                                                         | Default |
 | -------------------- | --------------- | ----------- | -------------------------------------------------------------------------------------------- | ------- |
 | `isGenerating`       | `is-generating` |             | `boolean`                                                                                    | `false` |
-| `selectedProperties` | --              |             | `{ AC_ID?: number; NAME?: string; aname?: string; level2?: string; COUNTRY_ID?: number; }[]` | `[]`    |
+| `selectedProperties` | --              |             | `{ NAME?: string; AC_ID?: number; aname?: string; level2?: string; COUNTRY_ID?: number; }[]` | `[]`    |
 
 
 ## Events

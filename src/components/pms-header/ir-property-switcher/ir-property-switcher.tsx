@@ -1,6 +1,6 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 
-import { FetchedProperty, LinkedProperty } from '@/services/property.service';
+import type { FetchedProperty, LinkedProperty } from '@/services/property/types';
 import { GetACByACID } from './legacy.types';
 import Token from '@/models/Token';
 import axios from 'axios';

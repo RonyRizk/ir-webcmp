@@ -4,7 +4,7 @@ import { TSourceOption } from './igl-book-property';
 import { ICountry } from './IBooking';
 import moment from 'moment';
 import { IHouseKeepers } from './housekeeping';
-import { TaxCategory } from '@/services/property.service';
+import type { TaxCategory } from '@/services/property/types';
 import { AgentBaseSchema } from '@/services/agents/type';
 
 interface IDType {

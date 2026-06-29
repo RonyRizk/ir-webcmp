@@ -24,8 +24,8 @@
 
 ### Used by
 
- - [ir-booking-city-ledger](../../../ir-booking-details/ir-booking-city-ledger)
  - [ir-city-ledger](../..)
+ - [ir-fiscal-document-preview](../../../ir-fiscal-documents/ir-fiscal-document-preview)
 
 ### Depends on
 
@@ -48,8 +48,8 @@ graph TD;
   ir-fd-confirm-dialog --> ir-dialog
   ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button
-  ir-booking-city-ledger --> ir-cl-fiscal-document-preview
   ir-city-ledger --> ir-cl-fiscal-document-preview
+  ir-fiscal-document-preview --> ir-cl-fiscal-document-preview
   style ir-cl-fiscal-document-preview fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

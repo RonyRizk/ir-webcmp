@@ -167,6 +167,18 @@ export class IrAutocomplete {
   @Prop({ reflect: true }) disabled: boolean;
 
   /**
+   * When `true`, renders a chevron button on the trailing edge of the input
+   * that toggles the dropdown open and closed — matching the visual pattern of
+   * `<wa-select>`.
+   *
+   * Set to `true` when the autocomplete is used as a pure select (fixed option
+   * list, no free-text filtering) so users have a clear affordance to open the
+   * listbox. Leave at the default `false` for search-as-you-type inputs where
+   * the dropdown opens automatically as the user types.
+   */
+  @Prop({ reflect: true }) withExpandIcon: boolean = false;
+
+  /**
    * Custom CSS classes applied to the inner `<ir-input>` element.
    *
    * You can also target the exposed parts `::part(input)` and `::part(base)`
@@ -522,14 +534,12 @@ export class IrAutocomplete {
   };
 
   private handleClick = () => {
-    if (this.value) {
-      return;
-    }
-    if (this.open) {
-      this.hide();
-      return;
-    }
-    this.show();
+    if (!this.open) this.show();
+  };
+
+  private handleExpandIconClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.open ? this.hide() : this.show();
   };
 
   render() {
@@ -597,12 +607,18 @@ export class IrAutocomplete {
                 ))}
               </div>
             )}
+            {this.withExpandIcon && (
+              <div slot="end" class={`expand-icon${this.open ? ' expand-icon--open' : ''}`} onClick={this.handleExpandIconClick}>
+                <wa-icon library="system" variant="solid" name="chevron-down"></wa-icon>
+              </div>
+            )}
             {this.slotManager.hasSlot('label') && <slot name="label" slot="label"></slot>}
             {this.slotManager.hasSlot('start') && <slot name="start" slot="start"></slot>}
             {this.slotManager.hasSlot('end') && <slot name="end" slot="end"></slot>}
             {this.slotManager.hasSlot('clear-icon') && <slot name="clear-icon" slot="clear-icon"></slot>}
             {this.slotManager.hasSlot('hint') && <slot name="hint" slot="hint"></slot>}
           </ir-input>
+
           <div
             id="listbox"
             ref={el => (this.listboxRef = el)}

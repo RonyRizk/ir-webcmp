@@ -89,6 +89,47 @@
   flex-shrink: 0;
 }
 
+/* ── Fused input + type selector ──────────────────────────── */
+.filters-bar__search-combo {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Input occupies remaining space; flatten the trailing corners */
+.filters-bar__combo-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+  z-index: 0;
+  --wa-form-control-border-radius: var(--wa-border-radius-m, 0.375rem) 0 0 var(--wa-border-radius-m, 0.375rem);
+}
+
+/* Raise the input above the select when focused so the outline is fully visible */
+.filters-bar__combo-input:focus-within {
+  z-index: 2;
+}
+
+/* Type select is a compact suffix; flatten the leading corners and overlap the shared border */
+.filters-bar__combo-select {
+  flex: 0 0 auto;
+  width: 12rem;
+  --wa-form-control-border-radius: 0 var(--wa-border-radius-m, 0.375rem) var(--wa-border-radius-m, 0.375rem) 0;
+  margin-inline-start: -1px;
+}
+
+/* RTL: visual order flips — select is on the left, input on the right */
+:dir(rtl) .filters-bar__combo-input,
+[dir='rtl'] .filters-bar__combo-input {
+  --wa-form-control-border-radius: 0 var(--wa-border-radius-m, 0.375rem) var(--wa-border-radius-m, 0.375rem) 0;
+}
+
+:dir(rtl) .filters-bar__combo-select,
+[dir='rtl'] .filters-bar__combo-select {
+  --wa-form-control-border-radius: var(--wa-border-radius-m, 0.375rem) 0 0 var(--wa-border-radius-m, 0.375rem);
+}
+
 /* ── sm ≥640px : controls pack into wrapping rows ─────────── */
 @media (min-width: 640px) {
   .filters-bar__search-group {
@@ -100,7 +141,7 @@
   /* type-group shrinks back to content width and flows with the rest */
   .filters-bar__type-group {
     width: auto;
-    flex: 1 1 auto;
+    /* flex: 1 1 auto; */
   }
 
   /* wider than folio's status-select to fit "All Document Types" */
@@ -118,6 +159,10 @@
     flex: 1 1 260px;
     width: auto;
   }
+
+  .filters-bar__search-actions--wide {
+    flex-basis: 400px;
+  }
 }
 
 /* ── lg ≥1024px : control group collapses to a single row ─── */
@@ -125,7 +170,10 @@
   .filters-bar__search-group {
     flex-wrap: nowrap;
   }
-
+  .filters-bar__type-group {
+    width: auto;
+    flex: 1 1 auto;
+  }
   .filters-bar__type-group {
     flex: 0 0 auto;
     flex-wrap: nowrap;
@@ -139,16 +187,22 @@
     flex: 1 1 auto;
     max-width: 320px;
   }
+
+  .filters-bar__search-actions--wide {
+    max-width: 480px;
+  }
 }
 
 /* ── xl ≥1280px : date range joins the row (full single line) ── */
 @media (min-width: 1280px) {
   .filters-bar {
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
   }
-
+  .filters-bar__search-combo {
+    flex: auto;
+  }
   .filters-bar__dates {
     width: auto;
     flex: 0 0 auto;

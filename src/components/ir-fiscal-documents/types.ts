@@ -1,18 +1,16 @@
 import { FiscalFilterType } from '../ir-city-ledger/ir-city-ledger-fiscal-documents/types';
-import type { FiscalDocument } from '@/services/city-ledger';
+import type { UnifiedFolioRecord } from '@/services/property/types';
 
 export type FiscalFolioType = 'all' | 'agent' | 'guest';
 
 /**
- * Fiscal document row used by the standalone fiscal-documents table.
+ * Row rendered by the standalone fiscal-documents table.
  *
- * Extends the city-ledger {@link FiscalDocument} with the guest name, which is
- * only present for guest-folio documents (agent name + booking number already
- * exist on the base type as `AGENCY_NAME` / `BOOK_NBR`).
+ * Sourced from the unified folio endpoint ({@link UnifiedFolioRecord}), which
+ * returns both agent- and guest-scoped documents in a single list,
+ * discriminated by `TARGET_TYPE` (`'AGENT'` | `'GUEST'`).
  */
-export interface FiscalDocumentRow extends FiscalDocument {
-  GUEST_NAME?: string | null;
-}
+export type FiscalDocumentRow = UnifiedFolioRecord;
 
 export interface FiscalDocumentFilters {
   fromDate: string | null;
@@ -27,4 +25,7 @@ export interface FiscalDocumentFilters {
   agentId: number | null;
   /** Selected guest id when `folioType === 'guest'`. */
   guestId: number | null;
+  /** Which field the free-text search targets. */
+  searchBy: 'doc_nbr' | 'booking_nbr';
+  export?: boolean;
 }

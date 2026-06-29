@@ -31,7 +31,6 @@
 
  - [ir-city-ledger-fiscal-documents-table](..)
  - [ir-cl-fiscal-document-preview](../../ir-cl-fiscal-document-preview)
- - [ir-fiscal-documents-table](../../../../ir-fiscal-documents/ir-fiscal-documents-table)
 
 ### Depends on
 
@@ -47,7 +46,6 @@ graph TD;
   ir-fd-confirm-dialog --> ir-custom-button
   ir-city-ledger-fiscal-documents-table --> ir-fd-confirm-dialog
   ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
-  ir-fiscal-documents-table --> ir-fd-confirm-dialog
   style ir-fd-confirm-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

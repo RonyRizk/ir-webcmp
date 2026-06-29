@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
-import { FetchUnBookableRoomsResult } from '@/services/property.service';
+import type { FetchUnBookableRoomsResult } from '@/services/property/types';
 
 type UnbookableRoomsMode = 'default' | 'mpo';
 type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: number; country: string };

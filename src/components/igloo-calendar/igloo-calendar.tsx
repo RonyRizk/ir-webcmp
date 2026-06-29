@@ -19,7 +19,7 @@ import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
 import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
 import housekeeping_store from '@/stores/housekeeping.store';
-import { SetRoomCalendarExtraParams } from '@/services/property.service';
+import type { SetRoomCalendarExtraParams } from '@/services/property/types';
 import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dialog';
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
 import { SetDepartureTimeProps } from '@/services/booking-service/types';

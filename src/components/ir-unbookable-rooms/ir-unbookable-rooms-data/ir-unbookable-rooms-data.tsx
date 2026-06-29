@@ -1,5 +1,5 @@
 import { Component, Host, Prop, State, h } from '@stencil/core';
-import { AllowedProperties, FetchUnBookableRoomsResult } from '@/services/property.service';
+import type { AllowedProperties, FetchUnBookableRoomsResult } from '@/services/property/types';
 import { Debounce } from '@/decorators/debounce';
 import moment from 'moment';
 

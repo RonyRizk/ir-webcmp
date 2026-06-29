@@ -233,20 +233,20 @@ export class IrListingHeader {
               </wa-option>
             ))}
           </wa-select>
-          <div class="d-flex flex-fill align-items-end m-0">
+          <div class="d-flex flex-fill align-items-end m-0" style={{ gap: '10px' }}>
             <wa-tooltip for="search-btn">{locales.entries?.Lcz_Search}</wa-tooltip>
-            <ir-custom-button id="search-btn" loading={this.isLoading === 'search'} onClickHandler={() => this.handleSearchClicked(false)} variant="neutral" appearance="plain">
-              <wa-icon name="magnifying-glass" style={{ fontSize: '1.2rem' }}></wa-icon>
+            <ir-custom-button id="search-btn" loading={this.isLoading === 'search'} onClickHandler={() => this.handleSearchClicked(false)} variant="neutral" appearance="outlined">
+              <wa-icon name="magnifying-glass"></wa-icon>
             </ir-custom-button>
 
             <wa-tooltip for="clear-btn">{locales.entries?.Lcz_Erase}</wa-tooltip>
-            <ir-custom-button id="clear-btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleClearUserField()}>
-              <wa-icon name="eraser" style={{ fontSize: '1.2rem' }}></wa-icon>
+            <ir-custom-button id="clear-btn" variant="neutral" appearance="outlined" onClickHandler={() => this.handleClearUserField()}>
+              <wa-icon name="eraser"></wa-icon>
             </ir-custom-button>
 
             <wa-tooltip for="excel-btn">{locales.entries?.Lcz_ExportToExcel}</wa-tooltip>
-            <ir-custom-button loading={this.isLoading === 'excel'} id="excel-btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleSearchClicked(true)}>
-              <wa-icon name="file-excel" variant="regular" style={{ fontSize: '1.2rem' }}></wa-icon>
+            <ir-custom-button loading={this.isLoading === 'excel'} id="excel-btn" variant="neutral" appearance="outlined" onClickHandler={() => this.handleSearchClicked(true)}>
+              <wa-icon name="file-excel" variant="regular"></wa-icon>
             </ir-custom-button>
           </div>
         </section>

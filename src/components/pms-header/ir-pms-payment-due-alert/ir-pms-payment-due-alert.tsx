@@ -1,4 +1,5 @@
-import { FetchNotificationsResult as Notifications, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { FetchNotificationsResult as Notifications } from '@/services/property/types';
 import Token from '@/models/Token';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 

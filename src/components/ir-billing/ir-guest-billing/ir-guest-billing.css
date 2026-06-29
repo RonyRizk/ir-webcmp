@@ -34,12 +34,17 @@
   /* min-width: 160px; */
   gap: 0.5rem;
 }
-.billing__invoice-nbr {
-  margin: 0;
-  padding: 0;
+.billing__invoice-nbr::part(base) {
+  padding: 0.05rem 0.5rem;
+  height: auto;
 }
-.billing__invoice-nbr.--secondary {
-  font-size: 0.75rem;
+
+.billing__doc-number-col {
+  --ir-cell-padding: 0.5rem;
+}
+
+th.billing__doc-number-col {
+  padding: 0.5rem !important;
 }
 .billing__price-col {
   text-align: end !important;

@@ -1,4 +1,3 @@
-import { Debounce } from '@/decorators/debounce';
 import { FdTypes } from '@/types/enums';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
@@ -18,6 +17,19 @@ type FdType = (typeof FdTypes)[keyof typeof FdTypes];
 const ALL_AGENTS_VALUE = 'all';
 const ALL_AGENTS_LABEL = 'All agents';
 
+const DEFAULT_FILTERS: FiscalDocumentFilters = {
+  fromDate: null,
+  toDate: null,
+  docNumber: '',
+  taxableOnly: false,
+  type: 'all',
+  proformaOnly: false,
+  folioType: 'all',
+  agentId: null,
+  guestId: null,
+  searchBy: 'doc_nbr',
+};
+
 @Component({
   tag: 'ir-fiscal-documents-filters',
   styleUrl: 'ir-fiscal-documents-filters.css',
@@ -25,34 +37,33 @@ const ALL_AGENTS_LABEL = 'All agents';
 })
 export class IrFiscalDocumentsFilters {
   @Prop() propertyId: number;
-  @Prop() filters: FiscalDocumentFilters = {
-    fromDate: undefined,
-    toDate: undefined,
-    docNumber: '',
-    taxableOnly: false,
-    type: 'all',
-    proformaOnly: false,
-    folioType: 'all',
-    agentId: null,
-    guestId: null,
-  };
+  @Prop() loading: 'search' | 'export';
+  /** Initial filter values. Edits are kept locally and only sent on submit. */
+  @Prop() filters: FiscalDocumentFilters = { ...DEFAULT_FILTERS };
 
-  @State() private docNumber: string = '';
+  /** Working copy of the filters — edited locally, emitted to the parent only on submit. */
+  @State() private draft: FiscalDocumentFilters = { ...DEFAULT_FILTERS };
   @State() private agents: Agent[] = [];
   @State() private agentSearch: string = '';
   @State() private guests: ExposedGuests = [];
 
-  @Event() filtersChange: EventEmitter<FiscalDocumentFilters>;
   @Event() applyFilters: EventEmitter<FiscalDocumentFilters>;
+  @Event() filterChanged: EventEmitter<FiscalDocumentFilters>;
 
   private agentsService = new AgentsService();
   private bookingService = new BookingService();
 
   componentWillLoad() {
-    this.docNumber = this.filters.docNumber ?? '';
+    this.draft = { ...DEFAULT_FILTERS, ...this.filters };
     if (this.propertyId) {
       this.fetchAgents();
     }
+  }
+
+  @Watch('filters')
+  handleFiltersChange(newValue: FiscalDocumentFilters) {
+    // Re-sync the local draft when the parent pushes a new filter set.
+    this.draft = { ...DEFAULT_FILTERS, ...newValue };
   }
 
   @Watch('propertyId')
@@ -63,7 +74,7 @@ export class IrFiscalDocumentsFilters {
   }
 
   private typeOptions: Array<{ label: string; value: FdType | 'all' }> = [
-    { label: 'All Document Types', value: 'all' },
+    { label: 'All document types', value: 'all' },
     { label: 'Invoices', value: FdTypes.Invoice },
     { label: 'Receipts', value: FdTypes.Receipt },
     { label: 'Credit Notes', value: FdTypes.CreditNote },
@@ -84,7 +95,7 @@ export class IrFiscalDocumentsFilters {
   }
 
   private get searchPlaceholder(): string {
-    return this.filters.folioType === 'guest' ? 'Search by doc or booking number' : 'Search by doc number';
+    return this.draft.folioType === 'guest' ? `Search by ${this.draft?.searchBy === 'booking_nbr' ? 'booking number' : 'doc number'}` : 'Search by doc number';
   }
 
   private async fetchAgents() {
@@ -107,15 +118,16 @@ export class IrFiscalDocumentsFilters {
     }
   }
 
-  private updateFilters(patch: Partial<FiscalDocumentFilters>) {
-    this.filtersChange.emit({ ...this.filters, ...patch });
+  /** Updates the local draft only — nothing is sent to the parent until submit. */
+  private updateDraft(patch: Partial<FiscalDocumentFilters>) {
+    this.draft = { ...this.draft, ...patch };
   }
 
   private handleFolioTypeChange(folioType: FiscalFolioType) {
     // Reset the folio-scoped selections whenever the folio scope changes.
     this.agentSearch = '';
     this.guests = [];
-    this.updateFilters({ folioType, agentId: null, guestId: null });
+    this.updateDraft({ folioType, agentId: null, guestId: null, searchBy: 'doc_nbr' });
   }
 
   private handleGuestSelect(e: CustomEvent) {
@@ -124,12 +136,7 @@ export class IrFiscalDocumentsFilters {
       console.warn(`guest not found with id ${e.detail.item.value}`);
       return;
     }
-    this.updateFilters({ guestId: guest.id });
-  }
-
-  @Debounce(300)
-  private emitSearchDebounced(value: string) {
-    this.updateFilters({ docNumber: value });
+    this.updateDraft({ guestId: guest.id });
   }
 
   render() {
@@ -137,18 +144,22 @@ export class IrFiscalDocumentsFilters {
       <form
         onSubmit={e => {
           e.preventDefault();
-          this.applyFilters.emit(this.filters);
+          const submitter = (e as SubmitEvent).submitter as any | null;
+          this.applyFilters.emit({ ...this.draft, export: submitter?.value === 'export' });
         }}
       >
         <div class="filters-bar">
           {/* ── Date range ───────────────────────── */}
-          <ir-validator value={this.filters?.fromDate || this.filters?.toDate} schema={z.string().nonempty()} class="filters-bar__dates">
+          <ir-validator value={this.draft?.fromDate || this.draft?.toDate} schema={z.string().nonempty()} class="filters-bar__dates">
             <ir-date-range-filter
               maxDate={today.format('YYYY-MM-DD')}
               class="filters-bar__date_picker"
-              fromDate={this.filters.fromDate}
-              toDate={this.filters.toDate}
-              onDatesChanged={e => this.updateFilters({ fromDate: e.detail.from, toDate: e.detail.to })}
+              fromDate={this.draft.fromDate}
+              toDate={this.draft.toDate}
+              onDatesChanged={e => {
+                this.updateDraft({ fromDate: e.detail.from, toDate: e.detail.to });
+                this.filterChanged.emit({ ...this.draft, fromDate: e.detail.from, toDate: e.detail.to });
+              }}
             ></ir-date-range-filter>
           </ir-validator>
 
@@ -158,9 +169,9 @@ export class IrFiscalDocumentsFilters {
             <div class="filters-bar__type-group">
               <wa-select
                 class="filters-bar__status-select"
-                value={this.filters.type}
-                defaultValue={this.filters.type}
-                onchange={e => this.updateFilters({ type: (e.target as WaOption).value as any })}
+                value={this.draft.type}
+                defaultValue={this.draft.type}
+                onchange={e => this.updateDraft({ type: (e.target as WaOption).value as any })}
                 size="s"
                 placeholder="Document Type"
               >
@@ -172,8 +183,8 @@ export class IrFiscalDocumentsFilters {
               </wa-select>
               <wa-select
                 class="filters-bar__status-select"
-                value={this.filters.folioType}
-                defaultValue={this.filters.folioType}
+                value={this.draft.folioType}
+                defaultValue={this.draft.folioType}
                 onchange={e => this.handleFolioTypeChange((e.target as WaOption).value as FiscalFolioType)}
                 size="s"
                 placeholder="Folios"
@@ -184,29 +195,33 @@ export class IrFiscalDocumentsFilters {
                   </wa-option>
                 ))}
               </wa-select>
-              <wa-switch
+              {/* <wa-switch
                 class="filters-bar__tax-switch"
-                checked={this.filters.taxableOnly}
-                onchange={e => this.updateFilters({ taxableOnly: (e.target as HTMLInputElement).checked })}
+                checked={this.draft.taxableOnly}
+                onchange={e => {
+                  this.updateDraft({ taxableOnly: (e.target as HTMLInputElement).checked });
+                  this.filterChanged.emit({ ...this.draft, taxableOnly: (e.target as HTMLInputElement).checked });
+                }}
               >
                 Taxes
-              </wa-switch>
+              </wa-switch> */}
             </div>
 
             {/* ── Agent folio → agents autocomplete ── */}
-            {this.filters.folioType === 'agent' && (
+            {this.draft.folioType === 'agent' && (
               <ir-autocomplete
                 class="filters-bar__folio-select"
                 size="s"
                 placeholder="Select agent"
-                value={this.filters.agentId ? (this.agents.find(a => a.id === this.filters.agentId)?.name ?? '') : ALL_AGENTS_LABEL}
+                withExpandIcon
+                value={this.draft.agentId ? (this.agents.find(a => a.id === this.draft.agentId)?.name ?? '') : ALL_AGENTS_LABEL}
                 onText-change={(e: CustomEvent<string>) => {
                   this.agentSearch = e.detail ?? '';
                 }}
                 onCombobox-change={(e: CustomEvent<string | string[]>) => {
                   this.agentSearch = '';
                   const value = e.detail as string;
-                  this.updateFilters({ agentId: value && value !== ALL_AGENTS_VALUE ? Number(value) : null });
+                  this.updateDraft({ agentId: value && value !== ALL_AGENTS_VALUE ? Number(value) : null });
                 }}
               >
                 <ir-autocomplete-option label={ALL_AGENTS_LABEL} value={ALL_AGENTS_VALUE}>
@@ -221,18 +236,21 @@ export class IrFiscalDocumentsFilters {
             )}
 
             {/* ── Guest folio → guest search picker ── */}
-            {this.filters.folioType === 'guest' && (
+            {this.draft.folioType === 'guest' && (
               <ir-picker
                 class="filters-bar__folio-select"
                 size="s"
-                placeholder="Search customer by email or name"
+                placeholder="Customer email or name"
                 withClear
                 mode="select-async"
                 debounce={500}
                 loading={isRequestPending('/Fetch_Exposed_Guests')}
                 onText-change={event => this.fetchGuests(event.detail)}
                 onCombobox-select={this.handleGuestSelect.bind(this)}
-                onCombobox-clear={() => this.updateFilters({ guestId: null })}
+                onCombobox-clear={() => {
+                  this.updateDraft({ guestId: null });
+                  this.applyFilters.emit(this.draft);
+                }}
               >
                 {this.guests?.map(guest => {
                   const label = `${guest.email} - ${guest.first_name} ${guest.last_name}`;
@@ -245,22 +263,63 @@ export class IrFiscalDocumentsFilters {
               </ir-picker>
             )}
 
-            <div class="filters-bar__search-actions">
-              <ir-input
-                class="filters-bar__search-input"
-                placeholder={this.searchPlaceholder}
-                value={this.docNumber}
-                onText-change={e => {
-                  this.docNumber = e.detail;
-                  this.emitSearchDebounced(e.detail);
-                }}
-                withClear
-              >
-                <wa-icon name="magnifying-glass" slot="start" class="filters-bar__search-icon"></wa-icon>
-              </ir-input>
+            <div class={`filters-bar__search-actions${this.draft.folioType === 'guest' ? ' filters-bar__search-actions--wide' : ''}`}>
+              <div class="filters-bar__search-combo">
+                <ir-input
+                  class={`filters-bar__search-input${this.draft.folioType === 'guest' ? ' filters-bar__combo-input' : ''}`}
+                  placeholder={this.searchPlaceholder}
+                  value={this.draft.docNumber}
+                  onText-change={e => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    this.updateDraft({ docNumber: e.detail });
+                  }}
+                  withClear
+                  onInputCleared={e => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    this.applyFilters.emit({ ...this.draft, docNumber: '' });
+                  }}
+                >
+                  <wa-icon name="magnifying-glass" slot="start" class="filters-bar__search-icon"></wa-icon>
+                </ir-input>
+                {this.draft.folioType === 'guest' && (
+                  <wa-select
+                    class="filters-bar__combo-select"
+                    size="s"
+                    value={this.draft.searchBy}
+                    defaultValue={this.draft.searchBy}
+                    onchange={e => this.updateDraft({ searchBy: (e.target as HTMLSelectElement).value as 'doc_nbr' | 'booking_nbr' })}
+                  >
+                    <wa-option value="doc_nbr">Document number</wa-option>
+                    <wa-option value="booking_nbr">Booking number</wa-option>
+                  </wa-select>
+                )}
+              </div>
 
-              <ir-custom-button class="filters-bar__search-submit" variant="neutral" appearance="outlined" type="submit">
+              <wa-tooltip for="search-btn">Search</wa-tooltip>
+              <ir-custom-button
+                id="search-btn"
+                loading={this.loading === 'search'}
+                class="filters-bar__search-submit"
+                value="search"
+                variant="neutral"
+                appearance="outlined"
+                type="submit"
+              >
                 <wa-icon name="magnifying-glass"></wa-icon>
+              </ir-custom-button>
+              <wa-tooltip for="excel-btn">{'Export to excel'}</wa-tooltip>
+              <ir-custom-button
+                disabled={!(this.draft?.fromDate || this.draft?.toDate)}
+                id="excel-btn"
+                variant="neutral"
+                loading={this.loading === 'export'}
+                appearance="outlined"
+                type="submit"
+                value="export"
+              >
+                <wa-icon name="file-excel" variant="regular"></wa-icon>
               </ir-custom-button>
             </div>
           </div>

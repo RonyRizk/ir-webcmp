@@ -760,6 +760,17 @@ export class IrBookingDetails {
           checkIn={this.bookingItem?.FROM_DATE}
           checkOut={this.bookingItem?.TO_DATE}
         ></ir-booking-editor-drawer>
+
+        {/* Shared fiscal-document preview for the whole booking. `mode="all"` mounts
+            both the agent (city-ledger) and guest preview listeners, so any
+            `clFiscalDocumentPreview` / `guestDocumentPreview` event raised anywhere in
+            the booking (guest folio, agent billing, city ledger) opens here. */}
+        <ir-fiscal-document-preview
+          mode="all"
+          ticket={this.ticket}
+          propertyId={this.property_id}
+          onDocumentConverted={() => this.fetchCityLedger()}
+        ></ir-fiscal-document-preview>
       </Host>
     );
   }

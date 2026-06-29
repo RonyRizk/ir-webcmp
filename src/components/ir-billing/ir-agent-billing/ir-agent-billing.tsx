@@ -60,7 +60,12 @@ export class IrAgentBilling {
     e.stopPropagation();
     this.fetchFiscalDocuments();
   }
-
+  @Listen('documentConverted', { target: 'body' })
+  handleDocumentConverted(e: CustomEvent) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.fetchFiscalDocuments();
+  }
   render() {
     if (this.isLoading) {
       return (
@@ -114,7 +119,10 @@ export class IrAgentBilling {
           currencyId={calendar_data.property.currency.id}
           ref={el => (this.invoiceDialogRef = el)}
         ></ir-cl-invoice-dialog>
-        {/* <ir-cl-fiscal-document-preview ticket={this.tokenService.getToken()} propertyId={calendar_data.property?.id}></ir-cl-fiscal-document-preview> */}
+        {/* The agent folio's fiscal documents are previewed through the shared
+            `ir-fiscal-document-preview` mounted at the booking-details root. The
+            `ir-city-ledger-fiscal-documents-table` above emits `clFiscalDocumentPreview`
+            (a window event) which that shared preview listens for. */}
       </Host>
     );
   }

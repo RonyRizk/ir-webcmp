@@ -4,7 +4,8 @@ import { DailyReport, DailyReportFilter } from './types';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
 import { RoomService } from '@/services/room.service';
-import { DailyStat, MonthlyStatsResults, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { DailyStat, MonthlyStatsResults } from '@/services/property/types';
 
 @Component({
   tag: 'ir-monthly-bookings-report',

@@ -1,6 +1,7 @@
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import Token from '@/models/Token';
-import { AllowedProperties, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { AllowedProperties } from '@/services/property/types';
 import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import moment from 'moment';

@@ -1,4 +1,5 @@
-import { ExposedRectifierParamsSchema, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import { ExposedRectifierParamsSchema } from '@/services/property/types';
 import calendar_data from '@/stores/calendar-data';
 import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';

@@ -1,13 +1,16 @@
-import { formatAmount } from '@/utils/utils';
+import { formatAmount, getEntryValue } from '@/utils/utils';
 import { flexRender, useTable } from '@/utils/useTable';
-import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import type { ClFiscalDocumentPreviewRequest } from '@components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types';
+import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { createColumnHelper, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
-import { CityLedgerService } from '@/services/city-ledger';
-import type { ICurrency } from '@/models/property';
-import { FdStatus, FdTypes } from '@/types/enums';
+import type { ICurrency, IEntries } from '@/models/property';
 import type { FiscalDocumentRow, FiscalFolioType } from '../types';
+import type { GuestDocumentPreviewRequest } from '../ir-guest-document-preview/types';
+import moment from 'moment';
+import calendar_data from '@/stores/calendar-data';
 
+const PAGE_SIZES = [20, 50, 100];
 @Component({
   tag: 'ir-fiscal-documents-table',
   styleUrl: 'ir-fiscal-documents-table.css',
@@ -15,198 +18,145 @@ import type { FiscalDocumentRow, FiscalFolioType } from '../types';
 })
 export class IrFiscalDocumentsTable {
   @Prop() rows: FiscalDocumentRow[] = [];
-  @Prop() currencySymbol: string = '$';
   @Prop() currencies: ICurrency[] = [];
-  @Prop() taxableOnly: boolean = false;
   @Prop() isLoading: boolean = false;
   @Prop() hasDates: boolean = false;
   @Prop() ticket: string;
   @Prop() propertyId: number;
+  @Prop() language: string = 'en';
+  /** `_FD_TYPE` setup entries used to display the document type. */
+  @Prop() fdTypes: IEntries[] = [];
   @Prop() fromDate: string | null = null;
   @Prop() toDate: string | null = null;
   @Prop() hasFetched: boolean = false;
 
   /** Folio scope driving which identity columns are shown. */
   @Prop() folioType: FiscalFolioType = 'all';
+  @Prop() taxableOnly: boolean = false;
   /** Selected agent id (when a specific agent is chosen under the agent folio). */
   @Prop() agentId: number | null = null;
   /** Selected guest id (when a specific guest is chosen under the guest folio). */
   @Prop() guestId: number | null = null;
 
+  // Pagination (server-side) — driven by the parent.
+  @Prop() currentPage: number = 1;
+  @Prop() pageSize: number = 20;
+  @Prop() totalRecords: number = 0;
+  @Prop() pageSizes: number[] = [20, 50, 100];
+
   @Event() clFiscalDocumentPreview: EventEmitter<ClFiscalDocumentPreviewRequest>;
   @Event() fetchRequested: EventEmitter<void>;
-
-  @State() private pendingAction: { action: 'void' | 'delete-draft' | 'convert-to-invoice'; row: FiscalDocumentRow } | null = null;
-  @State() private isConfirming = false;
+  @Event() requestPageChange: EventEmitter<PaginationChangeEvent>;
+  @Event() requestPageSizeChange: EventEmitter<PaginationChangeEvent>;
+  /** Emitted with the booking number when a booking link is clicked. */
+  @Event() openBookingDetails: EventEmitter<string>;
+  /** Emitted when a guest document link/action is clicked (caught by ir-guest-document-preview). */
+  @Event() guestDocumentPreview: EventEmitter<GuestDocumentPreviewRequest>;
 
   private columnHelper = createColumnHelper<FiscalDocumentRow>();
-  private cityLedgerService = new CityLedgerService();
 
-  /**
-   * A "specific party" is selected when the folio is scoped to a single agent or
-   * guest. In that case the table collapses to the base city-ledger layout (no
-   * identity / booking columns).
-   */
-  private get isSpecificPartySelected(): boolean {
-    return (this.folioType === 'agent' && !!this.agentId) || (this.folioType === 'guest' && !!this.guestId);
+  private emitGuestPreview(row: FiscalDocumentRow) {
+    this.guestDocumentPreview.emit({
+      documentNumber: row.DOC_NUMBER ?? '',
+      fdTypeCode: row.FD_TYPE_CODE ?? '',
+      bookingNumber: row.BOOKING_NUMBER ?? '',
+    });
   }
 
+  private handlePageChange(event: CustomEvent<PaginationChangeEvent>) {
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+    this.requestPageChange.emit(event.detail);
+  }
+
+  private handlePageSizeChange(event: CustomEvent<PaginationChangeEvent>) {
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+    this.requestPageSizeChange.emit(event.detail);
+  }
+
+  /** Agent column is hidden for the guest folio (those rows have no agent). */
   private get showAgentName(): boolean {
-    return !this.isSpecificPartySelected && this.folioType !== 'guest';
+    return this.folioType !== 'guest' && !this.agentId;
   }
 
+  /** Guest column is hidden for the agent folio (those rows have no guest). */
   private get showGuestName(): boolean {
-    return !this.isSpecificPartySelected && this.folioType !== 'agent';
+    return this.folioType !== 'agent' && !this.guestId;
   }
 
-  private get showBookingNumber(): boolean {
-    return !this.isSpecificPartySelected;
-  }
-
-  private handleAction(action: string, row: FiscalDocumentRow) {
-    switch (action) {
-      case 'view':
-      case 'preview':
-        this.clFiscalDocumentPreview.emit({
-          fdTypeCode: row.FD_TYPE_CODE,
-          documentNumber: row.DOC_NUMBER,
-          agentId: row.AGENCY_ID ?? this.agentId,
-          agentName: row.AGENCY_NAME,
-          fdId: row.FD_ID,
-          externalRef: row.EXTERNAL_REF,
-          fromDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.FROM_DATE : this.fromDate,
-          toDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.TO_DATE : this.toDate,
-          bookingNbr: row.FD_TYPE_CODE === FdTypes.Proforma ? row.BOOK_NBR : null,
-        });
-        break;
-      case 'print':
-        this.clFiscalDocumentPreview.emit({
-          fdTypeCode: row.FD_TYPE_CODE,
-          documentNumber: row.DOC_NUMBER,
-          agentId: row.AGENCY_ID ?? this.agentId,
-          agentName: row.AGENCY_NAME,
-          fdId: row.FD_ID,
-          autoPrint: true,
-          externalRef: row.EXTERNAL_REF,
-          fromDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.FROM_DATE : this.fromDate,
-          toDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.TO_DATE : this.toDate,
-          bookingNbr: row.FD_TYPE_CODE === FdTypes.Proforma ? row.BOOK_NBR : null,
-        });
-        break;
-      case 'download':
-        console.log('download', row);
-        break;
-      case 'send-reminder':
-        console.log('send-reminder', row);
-        break;
-      case 'apply-payment':
-        console.log('apply-payment', row);
-        break;
-      case 'mark-paid':
-        console.log('mark-paid', row);
-        break;
-      case 'void':
-      case 'delete-draft':
-      case 'convert-to-invoice':
-        this.pendingAction = { action: action as 'void' | 'delete-draft' | 'convert-to-invoice', row };
-        break;
+  /** Maps each `_FD_TYPE` code to its localized display label. */
+  private get fdTypeLabels(): Record<string, string> {
+    const map: Record<string, string> = {};
+    for (const entry of this.fdTypes ?? []) {
+      map[entry.CODE_NAME] = getEntryValue({ entry, language: this.language });
     }
+    return map;
   }
 
-  private async confirmPendingAction() {
-    if (!this.pendingAction) return;
-    const { action, row } = this.pendingAction;
-    this.isConfirming = true;
-    try {
-      if (action === 'void') {
-        switch (row.FD_TYPE_CODE) {
-          case FdTypes.Invoice:
-            await this.cityLedgerService.voidInvoiceByCreditNote({ FD_ID: row.FD_ID });
-            break;
-          case FdTypes.Receipt:
-            await this.cityLedgerService.voidReceiptByCreditReceipt({ FD_ID: row.FD_ID });
-            break;
-          default:
-            console.warn(row.FD_TYPE_CODE + ' not implemented');
-            break;
-        }
-      } else if (action === 'delete-draft') {
-        await this.cityLedgerService.deleteDraftFiscalDocument({ FD_ID: row.FD_ID });
-      } else if (action === 'convert-to-invoice') {
-        await this.cityLedgerService.issueInvoiceFromDraft({ FD_ID: row.FD_ID });
-      }
-      this.fetchRequested.emit();
-    } finally {
-      this.isConfirming = false;
-      this.pendingAction = null;
-    }
+  private emitPreview(row: FiscalDocumentRow, autoPrint = false) {
+    this.clFiscalDocumentPreview.emit({
+      fdTypeCode: row.FD_TYPE_CODE ?? '',
+      documentNumber: row.DOC_NUMBER ?? '',
+      agentId: row.AGENT_ID ?? this.agentId ?? 0,
+      agentName: row.AGENT_NAME ?? '',
+      fdId: row.DOC_ID ?? undefined,
+      autoPrint,
+      externalRef: '',
+      fromDate: this.fromDate,
+      toDate: this.toDate,
+      bookingNbr: row.BOOKING_NUMBER ?? null,
+    });
   }
 
   private get columns() {
     const base = [
-      this.columnHelper.accessor('FD_STATUS_CODE', {
-        header: 'Status',
-        cell: info => <ir-cl-status-tag transaction={info.row.original}></ir-cl-status-tag>,
-      }),
-      this.columnHelper.accessor('ISSUE_DATE_DISPLAY', {
+      this.columnHelper.accessor('DOC_DATE', {
         header: 'Date',
-        cell: info => info.getValue(),
+        cell: info => moment(info.getValue(), 'YYYY-MM-DD').format('MMM DD, YYYY') ?? '',
+        enableSorting: true,
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
         header: 'Doc Number',
-        cell: info => (
-          <wa-button
-            onClick={() => {
-              const row = info.row.original;
-              this.clFiscalDocumentPreview.emit({
-                fdTypeCode: row.FD_TYPE_CODE,
-                documentNumber: row.DOC_NUMBER,
-                agentId: row.AGENCY_ID ?? this.agentId,
-                agentName: row.AGENCY_NAME,
-                fdId: row.FD_ID,
-                externalRef: row.EXTERNAL_REF,
-                fromDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.FROM_DATE : this.fromDate,
-                toDate: row.FD_TYPE_CODE === FdTypes.Proforma ? row.TO_DATE : this.toDate,
-                bookingNbr: row.FD_TYPE_CODE === FdTypes.Proforma ? row.BOOK_NBR : null,
-              });
-            }}
-            variant="brand"
-            appearance="plain"
-            class="fiscal-table__doc-number"
-          >
-            {info.getValue() ?? ''}
-          </wa-button>
-        ),
+        cell: info => {
+          const row = info.row.original;
+          const value = info.getValue() ?? '';
+          if (!value) return <span></span>;
+          // Agent documents open the city-ledger fiscal-document preview; guest
+          // documents open the invoice/credit-note PDF (ir-guest-billing flow).
+          const onClick = row.TARGET_TYPE === 'GUEST' ? () => this.emitGuestPreview(row) : () => this.emitPreview(row);
+          return (
+            <wa-button onClick={onClick} variant="brand" appearance="plain" class="fiscal-table__doc-number">
+              {value}
+            </wa-button>
+          );
+        },
       }),
-      this.columnHelper.accessor('FD_TYPE_NAME', {
+      this.columnHelper.accessor('DOC_TYPE', {
         id: 'type',
         header: 'Type',
-        cell: info => (
-          <div>
-            <p class="m-0 p-0">{info.getValue()}</p>
-            {info.row.original.EXTERNAL_REF && (
-              <p class="fd_ss">
-                {[FdTypes.CreditNote, FdTypes.CreditReceipt].includes(info.row.original.FD_TYPE_CODE as any) ? 'for' : 'voided by'} {info.row.original.EXTERNAL_REF}
-              </p>
-            )}
-          </div>
-        ),
+        cell: info => {
+          const code = info.row.original.FD_TYPE_CODE;
+          // Display the localized `_FD_TYPE` label, falling back to the raw code.
+          const label = (code && this.fdTypeLabels[code]) || code || '';
+          return <span>{label}</span>;
+        },
       }),
     ];
 
-    // Identity / booking columns — shown only while the folio is not scoped to a
-    // single agent or guest (see the show* getters).
+    // Identity / booking columns depend on the folio scope.
     const identityCols = [];
-    if (this.showAgentName) {
+    if (this.showAgentName && this.rows.some(r => r.TARGET_TYPE === 'AGENT')) {
       identityCols.push(
-        this.columnHelper.accessor('AGENCY_NAME', {
+        this.columnHelper.accessor('AGENT_NAME', {
           id: 'agentName',
           header: 'Agent',
           cell: info => <span>{info.getValue() ?? ''}</span>,
         }),
       );
     }
-    if (this.showGuestName) {
+
+    if (this.showGuestName && this.rows.some(r => r.TARGET_TYPE === 'GUEST')) {
       identityCols.push(
         this.columnHelper.accessor('GUEST_NAME', {
           id: 'guestName',
@@ -215,88 +165,78 @@ export class IrFiscalDocumentsTable {
         }),
       );
     }
-    if (this.showBookingNumber) {
+    identityCols.push(
+      this.columnHelper.accessor('BOOKING_NUMBER', {
+        id: 'bookingNumber',
+        header: 'Booking #',
+        cell: info => {
+          const bookingNbr = info.getValue();
+          if (!bookingNbr) return <span></span>;
+          return (
+            <wa-button onClick={() => this.openBookingDetails.emit(String(bookingNbr))} variant="brand" appearance="plain" class="fiscal-table__doc-number">
+              {bookingNbr}
+            </wa-button>
+          );
+        },
+      }),
+    );
+    if (!this.taxableOnly) {
       identityCols.push(
-        this.columnHelper.accessor('BOOK_NBR', {
-          id: 'bookingNumber',
-          header: 'Booking #',
-          cell: info => <span>{info.getValue() ?? ''}</span>,
+        this.columnHelper.accessor('DEBIT', {
+          header: 'Debit',
+          cell: info => <span>{this.renderMoney(info.getValue())}</span>,
+        }),
+      );
+      identityCols.push(
+        this.columnHelper.accessor('CREDIT', {
+          header: 'Credit',
+          cell: info => <span>{this.renderMoney(info.getValue())}</span>,
+        }),
+      );
+    } else {
+      identityCols.push(
+        this.columnHelper.accessor('NET_AMOUNT', {
+          header: 'Net amount',
+          cell: info => <span>{this.renderMoney(info.getValue())}</span>,
+        }),
+      );
+      identityCols.push(
+        this.columnHelper.accessor('TAX_AMOUNT', {
+          header: 'Tax amount',
+          cell: info => <span>{this.renderMoney(info.getValue())}</span>,
+        }),
+      );
+      identityCols.push(
+        this.columnHelper.accessor('TOTAL_AMOUNT', {
+          header: 'Total',
+          cell: info => this.renderMoney(info.getValue()),
         }),
       );
     }
 
-    const amountCols = this.taxableOnly
-      ? [
-          this.columnHelper.accessor('NET_AMOUNT', {
-            header: 'Net Amount',
-            cell: info => this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID),
-          }),
-          this.columnHelper.accessor('TAX_AMOUNT', {
-            header: 'Taxes',
-            cell: info => this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID),
-          }),
-        ]
-      : [];
-
     return [
       ...base,
       ...identityCols,
-      ...amountCols,
-      this.columnHelper.accessor('DEBIT', {
-        header: 'Debit',
-        cell: info => (info.row.original.FD_TYPE_CODE === FdTypes.CreditReceipt ? '' : this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID)),
-      }),
-      this.columnHelper.accessor('CREDIT', {
-        header: 'Credit',
-        cell: info => this.renderMoney(info.row.original.FD_TYPE_CODE === FdTypes.CreditReceipt ? info.row.original.DEBIT : info.getValue(), info.row.original.CURRENCY_ID),
-      }),
+
       this.columnHelper.display({
         id: 'actions',
-        header: 'Actions',
+        header: 'Action',
         cell: info => {
           const row = info.row.original;
-          const isDraft = row.FD_TYPE_CODE === FdTypes.Draft;
-          const isInvoice = row.FD_TYPE_CODE === FdTypes.Invoice;
-          const isReceipt = row.FD_TYPE_CODE === FdTypes.Receipt;
           return (
-            <wa-dropdown
-              onwa-hide={e => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
+            <ir-custom-button
+              appearance="plain"
+              onClickHandler={() => {
+                if (row.TARGET_TYPE === 'GUEST') {
+                  this.emitGuestPreview(row);
+                } else {
+                  this.emitPreview(row);
+                }
               }}
-              onwa-select={(e: CustomEvent<{ item: { value: string } }>) => {
-                this.handleAction(e.detail.item.value, row);
-              }}
+              variant="neutral"
             >
-              <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
-                <wa-icon name="ellipsis-vertical" style={{ fontSize: '1.2rem' }}></wa-icon>
-              </wa-button>
-
-              {isDraft
-                ? [
-                    <wa-dropdown-item value="preview">Preview</wa-dropdown-item>,
-                    <wa-dropdown-item value="convert-to-invoice">Convert to invoice</wa-dropdown-item>,
-                    <wa-dropdown-item value="delete-draft" variant="danger">
-                      Delete
-                    </wa-dropdown-item>,
-                  ]
-                : [
-                    <wa-dropdown-item value="view">View document</wa-dropdown-item>,
-
-                    <wa-dropdown-item value="print">Print</wa-dropdown-item>,
-
-                    isInvoice && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
-                      <wa-dropdown-item value="void">
-                        <span class="fiscal-table__action-danger">Void with credit note</span>
-                      </wa-dropdown-item>
-                    ),
-                    isReceipt && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
-                      <wa-dropdown-item value="void">
-                        <span class="fiscal-table__action-danger">Void with credit receipt</span>
-                      </wa-dropdown-item>
-                    ),
-                  ]}
-            </wa-dropdown>
+              <wa-icon name="eye"></wa-icon>
+            </ir-custom-button>
           );
         },
         enableSorting: false,
@@ -304,14 +244,9 @@ export class IrFiscalDocumentsTable {
     ];
   }
 
-  private getSymbol(currencyId: number): string {
-    const match = this.currencies.find(c => c.id === currencyId);
-    return match?.symbol ?? this.currencySymbol;
-  }
-
-  private renderMoney(value: number, currencyId: number) {
+  private renderMoney(value: number | null | undefined) {
     if (!value) return <span class="fiscal-table__cell--zero"></span>;
-    return <span>{formatAmount(this.getSymbol(currencyId), value)}</span>;
+    return <span>{formatAmount(calendar_data?.property?.currency?.symbol, value)}</span>;
   }
 
   render() {
@@ -345,7 +280,13 @@ export class IrFiscalDocumentsTable {
       getSortedRowModel: getSortedRowModel(),
     });
 
-    const numericColumnIds = ['NET_AMOUNT', 'TAX_AMOUNT', 'amount', 'DEBIT', 'CREDIT'];
+    const numericColumnIds = ['TOTAL_AMOUNT', 'CREDIT', 'DEBIT', 'NET_AMOUNT', 'TAX_AMOUNT'];
+
+    const totalPages = this.pageSize > 0 ? Math.ceil(this.totalRecords / this.pageSize) : 0;
+    const showing = {
+      from: this.totalRecords === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1,
+      to: Math.min(this.currentPage * this.pageSize, this.totalRecords),
+    };
 
     return (
       <Host>
@@ -370,7 +311,7 @@ export class IrFiscalDocumentsTable {
             </thead>
             <tbody>
               {table.getRowModel().rows.map(row => (
-                <tr key={row.id} class={{ 'ir-table-row': true, '--is-draft': row.original.FD_TYPE_CODE === FdTypes.Draft }}>
+                <tr key={row.id} class="ir-table-row">
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
@@ -378,7 +319,7 @@ export class IrFiscalDocumentsTable {
                         'fiscal-table__cell': true,
                         'fiscal-table__cell--numeric': numericColumnIds.includes(cell.column.id),
                         'fiscal-table__cell--actions': cell.column.id === 'actions',
-                        'fiscal-table__cell--doc-number': cell.column.id === 'DOC_NUMBER',
+                        'fiscal-table__cell--doc-number': cell.column.id === 'DOC_NUMBER' || cell.column.id === 'bookingNumber',
                       }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -397,14 +338,21 @@ export class IrFiscalDocumentsTable {
             </tbody>
           </table>
         </div>
-        <ir-fd-confirm-dialog
-          open={this.pendingAction !== null}
-          action={this.pendingAction?.action ?? null}
-          docNumber={this.pendingAction?.row.DOC_NUMBER ?? 'this document'}
-          isConfirming={this.isConfirming}
-          onConfirmed={() => this.confirmPendingAction()}
-          onCancelled={() => (this.pendingAction = null)}
-        ></ir-fd-confirm-dialog>
+        {this.totalRecords > 0 && (
+          <ir-pagination
+            class="data-table--pagination"
+            showing={showing}
+            total={this.totalRecords}
+            pages={totalPages}
+            pageSize={this.pageSize}
+            currentPage={this.currentPage}
+            allowPageSizeChange={true}
+            pageSizes={PAGE_SIZES}
+            recordLabel="documents"
+            onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
+            onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
+          ></ir-pagination>
+        )}
       </Host>
     );
   }

@@ -1,6 +1,7 @@
 import { Component, Prop, State, Watch, h } from '@stencil/core';
 import Token from '@/models/Token';
-import { AllowedProperties, FetchUnBookableRoomsResult, PropertyService } from '@/services/property.service';
+import { PropertyService } from '@/services/property.service';
+import type { AllowedProperties, FetchUnBookableRoomsResult } from '@/services/property/types';
 
 type UnbookableRoomsMode = 'default' | 'mpo';
 type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: number; country: string };

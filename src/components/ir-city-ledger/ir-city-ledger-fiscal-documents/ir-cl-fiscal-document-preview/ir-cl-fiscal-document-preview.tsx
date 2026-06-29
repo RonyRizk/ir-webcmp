@@ -23,6 +23,8 @@ export class IrClFiscalDocumentPreview {
 
   @Listen('clFiscalDocumentPreview', { target: 'window' })
   async handlePreviewRequest(event: CustomEvent<ClFiscalDocumentPreviewRequest>) {
+    event.stopImmediatePropagation();
+    event.stopPropagation();
     if (event.detail.url) {
       this.request = { ...event.detail, url: event.detail.url };
       return;

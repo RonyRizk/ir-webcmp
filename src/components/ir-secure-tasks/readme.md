@@ -39,6 +39,7 @@
 - [ir-payment-option](../ir-payment-option)
 - [ir-ghs-onboarding](../ir-ghs-onboarding)
 - [ir-meal-report](../ir-meal-report)
+- [ir-fiscal-documents](../ir-fiscal-documents)
 
 ### Graph
 ```mermaid
@@ -65,6 +66,7 @@ graph TD;
   ir-secure-tasks --> ir-payment-option
   ir-secure-tasks --> ir-ghs-onboarding
   ir-secure-tasks --> ir-meal-report
+  ir-secure-tasks --> ir-fiscal-documents
   ir-login --> ir-interceptor
   ir-login --> ir-toast
   ir-login --> ir-input-text
@@ -163,6 +165,7 @@ graph TD;
   ir-booking-details --> ir-guest-info-drawer
   ir-booking-details --> ir-payment-folio
   ir-booking-details --> ir-booking-editor-drawer
+  ir-booking-details --> ir-fiscal-document-preview
   ir-booking-header --> ir-pms-logs
   ir-booking-header --> ir-events-log
   ir-booking-header --> ir-custom-button
@@ -224,6 +227,7 @@ graph TD;
   ir-invoice --> ir-custom-button
   ir-invoice --> ir-preview-screen-dialog
   ir-invoice --> ir-proforma-invoice-preview
+  ir-invoice --> ir-fiscal-document-preview
   ir-invoice-form --> ir-spinner
   ir-invoice-form --> ir-date-select
   ir-invoice-form --> ir-booking-billing-recipient
@@ -238,6 +242,20 @@ graph TD;
   ir-print-room --> ir-printing-label
   ir-printing-pickup --> ir-printing-label
   ir-printing-extra-service --> ir-printing-label
+  ir-fiscal-document-preview --> ir-cl-fiscal-document-preview
+  ir-fiscal-document-preview --> ir-guest-document-preview
+  ir-cl-fiscal-document-preview --> ir-spinner
+  ir-cl-fiscal-document-preview --> ir-pdf-viewer
+  ir-cl-fiscal-document-preview --> ir-preview-screen-dialog
+  ir-cl-fiscal-document-preview --> ir-custom-button
+  ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
+  ir-fd-confirm-dialog --> ir-dialog
+  ir-fd-confirm-dialog --> ir-input
+  ir-fd-confirm-dialog --> ir-custom-button
+  ir-guest-document-preview --> ir-pdf-viewer
+  ir-guest-document-preview --> ir-spinner
+  ir-guest-document-preview --> ir-preview-screen-dialog
+  ir-guest-document-preview --> ir-custom-button
   ir-booking-pricing-drawer --> ir-drawer
   ir-booking-pricing-drawer --> ir-booking-pricing-form
   ir-booking-pricing-drawer --> ir-custom-button
@@ -273,7 +291,6 @@ graph TD;
   ir-booking-city-ledger --> ir-custom-button
   ir-booking-city-ledger --> ir-spinner
   ir-booking-city-ledger --> ir-city-ledger-transaction-drawer
-  ir-booking-city-ledger --> ir-cl-fiscal-document-preview
   ir-booking-city-ledger --> ir-dialog
   ir-city-ledger-transaction-drawer --> ir-drawer
   ir-city-ledger-transaction-drawer --> ir-city-ledger-transaction-form
@@ -293,14 +310,6 @@ graph TD;
   ir-cl-credit-note-fields --> ir-cl-invoice-select
   ir-cl-invoice-select --> ir-validator
   ir-cl-debit-note-fields --> ir-cl-invoice-select
-  ir-cl-fiscal-document-preview --> ir-spinner
-  ir-cl-fiscal-document-preview --> ir-pdf-viewer
-  ir-cl-fiscal-document-preview --> ir-preview-screen-dialog
-  ir-cl-fiscal-document-preview --> ir-custom-button
-  ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
-  ir-fd-confirm-dialog --> ir-dialog
-  ir-fd-confirm-dialog --> ir-input
-  ir-fd-confirm-dialog --> ir-custom-button
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-empty-state
   ir-payments-folio --> ir-custom-button
@@ -336,8 +345,6 @@ graph TD;
   ir-guest-billing --> ir-custom-button
   ir-guest-billing --> ir-empty-state
   ir-guest-billing --> ir-invoice
-  ir-guest-billing --> ir-preview-screen-dialog
-  ir-guest-billing --> ir-pdf-viewer
   ir-guest-billing --> ir-dialog
   ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
@@ -753,6 +760,23 @@ graph TD;
   ir-meal-report-filters --> ir-custom-button
   ir-meal-guest-list --> ir-empty-state
   ir-meal-count-summary --> ir-empty-state
+  ir-fiscal-documents --> ir-loading-screen
+  ir-fiscal-documents --> ir-page
+  ir-fiscal-documents --> ir-fiscal-documents-filters
+  ir-fiscal-documents --> ir-fiscal-documents-table
+  ir-fiscal-documents --> ir-booking-details-drawer
+  ir-fiscal-documents --> ir-fiscal-document-preview
+  ir-fiscal-documents-filters --> ir-validator
+  ir-fiscal-documents-filters --> ir-date-range-filter
+  ir-fiscal-documents-filters --> ir-autocomplete
+  ir-fiscal-documents-filters --> ir-autocomplete-option
+  ir-fiscal-documents-filters --> ir-picker
+  ir-fiscal-documents-filters --> ir-picker-item
+  ir-fiscal-documents-filters --> ir-input
+  ir-fiscal-documents-filters --> ir-custom-button
+  ir-fiscal-documents-table --> ir-custom-button
+  ir-fiscal-documents-table --> ir-spinner
+  ir-fiscal-documents-table --> ir-pagination
   style ir-secure-tasks fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -23,7 +23,8 @@ export type SecureScreens =
   | 'tax-services'
   | 'payment-options'
   | 'ghs'
-  | 'meal-report';
+  | 'meal-report'
+  | 'fiscal-documents';
 
 @Component({
   tag: 'ir-secure-tasks',
@@ -139,6 +140,7 @@ export class IrSecureTasks {
     'payment-options',
     'meal-report',
     'ghs',
+    'fiscal-documents',
   ]);
 
   private isValidPage(value: string): value is SecureScreens {
@@ -156,7 +158,7 @@ export class IrSecureTasks {
     {
       routes: [
         { name: 'GHS', value: 'ghs' },
-        { name: 'Meal report', value: 'meal-report' },
+        { name: 'Meal Report', value: 'meal-report' },
       ],
     },
     {
@@ -175,6 +177,7 @@ export class IrSecureTasks {
         { name: 'Country Sales', value: 'country-sales' },
         { name: 'Channel Sales', value: 'channel-sales' },
         { name: 'Booking Listing', value: 'booking-listing' },
+        { name: 'Fiscal Documents', value: 'fiscal-documents' },
         { name: 'Email Logs', value: 'email-logs' },
       ],
     },
@@ -390,6 +393,8 @@ export class IrSecureTasks {
         return <ir-ghs-onboarding ticket={this.token.getToken()}></ir-ghs-onboarding>;
       case 'meal-report':
         return <ir-meal-report propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-meal-report>;
+      case 'fiscal-documents':
+        return <ir-fiscal-documents p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-fiscal-documents>;
       default:
         return null;
     }

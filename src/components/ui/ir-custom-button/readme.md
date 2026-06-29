@@ -111,6 +111,7 @@
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-ghs-selection-bucket](../../ir-ghs-onboarding)
  - [ir-guest-billing](../../ir-billing/ir-guest-billing)
+ - [ir-guest-document-preview](../../ir-fiscal-documents/ir-guest-document-preview)
  - [ir-guest-info-drawer](../../ir-guest-info/ir-guest-info-drawer)
  - [ir-hb-preference-dialog](../../ir-booking-details/ir-room/ir-hb-preference-dialog)
  - [ir-hk-archive-drawer](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
@@ -235,6 +236,7 @@ graph TD;
   ir-ghs-onboarding --> ir-custom-button
   ir-ghs-selection-bucket --> ir-custom-button
   ir-guest-billing --> ir-custom-button
+  ir-guest-document-preview --> ir-custom-button
   ir-guest-info-drawer --> ir-custom-button
   ir-hb-preference-dialog --> ir-custom-button
   ir-hk-archive-drawer --> ir-custom-button

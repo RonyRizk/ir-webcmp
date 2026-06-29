@@ -1,7 +1,7 @@
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import moment from 'moment';
 import { ChannelSaleFilter } from '../types';
-import { AllowedProperties } from '@/services/property.service';
+import type { AllowedProperties } from '@/services/property/types';
 import locales from '@/stores/locales.store';
 
 @Component({

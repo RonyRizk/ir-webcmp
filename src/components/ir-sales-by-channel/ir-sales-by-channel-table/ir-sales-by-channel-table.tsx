@@ -1,7 +1,7 @@
 import { Component, Prop, State, Watch, h } from '@stencil/core';
 import { ChannelReportResult, SalesByChannelMode } from '../types';
 import { formatAmount } from '@/utils/utils';
-import { AllowedProperties } from '@/services/property.service';
+import type { AllowedProperties } from '@/services/property/types';
 
 @Component({
   tag: 'ir-sales-by-channel-table',
