@@ -74,8 +74,6 @@ Resolves once the drawer state is updated.
 - [ir-drawer](../ir-drawer)
 - [ir-invoice-form](ir-invoice-form)
 - [ir-custom-button](../ui/ir-custom-button)
-- [ir-preview-screen-dialog](../ir-preview-screen-dialog)
-- [ir-proforma-invoice-preview](../printing/previews/ir-proforma-invoice-preview)
 - [ir-fiscal-document-preview](../ir-fiscal-documents/ir-fiscal-document-preview)
 
 ### Graph
@@ -84,8 +82,6 @@ graph TD;
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
-  ir-invoice --> ir-preview-screen-dialog
-  ir-invoice --> ir-proforma-invoice-preview
   ir-invoice --> ir-fiscal-document-preview
   ir-invoice-form --> ir-spinner
   ir-invoice-form --> ir-date-select
@@ -98,15 +94,6 @@ graph TD;
   ir-booking-company-dialog --> ir-booking-company-form
   ir-booking-company-dialog --> ir-custom-button
   ir-booking-company-form --> ir-input
-  ir-preview-screen-dialog --> ir-dialog
-  ir-preview-screen-dialog --> ir-custom-button
-  ir-proforma-invoice-preview --> ir-printing-label
-  ir-proforma-invoice-preview --> ir-print-room
-  ir-proforma-invoice-preview --> ir-printing-pickup
-  ir-proforma-invoice-preview --> ir-printing-extra-service
-  ir-print-room --> ir-printing-label
-  ir-printing-pickup --> ir-printing-label
-  ir-printing-extra-service --> ir-printing-label
   ir-fiscal-document-preview --> ir-cl-fiscal-document-preview
   ir-fiscal-document-preview --> ir-guest-document-preview
   ir-cl-fiscal-document-preview --> ir-spinner
@@ -114,6 +101,8 @@ graph TD;
   ir-cl-fiscal-document-preview --> ir-preview-screen-dialog
   ir-cl-fiscal-document-preview --> ir-custom-button
   ir-cl-fiscal-document-preview --> ir-fd-confirm-dialog
+  ir-preview-screen-dialog --> ir-dialog
+  ir-preview-screen-dialog --> ir-custom-button
   ir-fd-confirm-dialog --> ir-dialog
   ir-fd-confirm-dialog --> ir-input
   ir-fd-confirm-dialog --> ir-custom-button

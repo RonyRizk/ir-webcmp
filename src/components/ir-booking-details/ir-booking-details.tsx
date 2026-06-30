@@ -768,7 +768,7 @@ export class IrBookingDetails {
         <ir-fiscal-document-preview
           mode="all"
           ticket={this.ticket}
-          propertyId={this.property_id}
+          propertyId={calendar_data?.property.id}
           onDocumentConverted={() => this.fetchCityLedger()}
         ></ir-fiscal-document-preview>
       </Host>

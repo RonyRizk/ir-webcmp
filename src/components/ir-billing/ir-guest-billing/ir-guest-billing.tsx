@@ -27,6 +27,7 @@ export class IrGuestBilling {
   @State() rows: UnifiedFolioRecord[] = [];
   @State() selectedInvoice: string = null;
   @State() private fdTypes: IEntries[] = [];
+  @State() voidedInvoices: Set<string> = new Set();
 
   @Event() billingClose: EventEmitter<void>;
   @Event({ bubbles: true, composed: true }) guestDocumentPreview: EventEmitter<GuestDocumentPreviewRequest>;
@@ -77,6 +78,13 @@ export class IrGuestBilling {
         this.bookingService.getSetupEntriesByTableName('_FD_TYPE'),
       ]);
       this.invoiceInfo = invoiceInfo;
+      let voidedInvoices: Set<string> = new Set();
+      this.invoiceInfo.invoices?.forEach(invoice => {
+        if (invoice.credit_note) {
+          voidedInvoices.add(invoice.nbr);
+        }
+      });
+      this.voidedInvoices = new Set(voidedInvoices);
       this.rows = rows;
       this.fdTypes = fdTypes ?? [];
     } catch (error) {
@@ -229,7 +237,7 @@ export class IrGuestBilling {
                                 Open PDF
                                 {isRequestPending('/Print_Invoice') && <wa-spinner slot="details"></wa-spinner>}
                               </wa-dropdown-item>
-                              {isInvoice && (
+                              {isInvoice && !this.voidedInvoices.has(row.DOC_NUMBER) && (
                                 <wa-dropdown-item variant="danger" value="void">
                                   Void with credit note
                                 </wa-dropdown-item>
@@ -289,7 +297,7 @@ export class IrGuestBilling {
                       </div>
                     </div>
 
-                    {isInvoice && (
+                    {isInvoice && !this.voidedInvoices.has(row.DOC_NUMBER) && (
                       <div slot="footer" class="billing__card-footer">
                         <ir-custom-button
                           onClickHandler={() => {

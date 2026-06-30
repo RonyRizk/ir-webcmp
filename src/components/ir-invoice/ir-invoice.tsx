@@ -5,6 +5,7 @@ import { BookingInvoiceInfo, ViewMode } from './types';
 import { IssueInvoiceProps } from '@/components';
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
+import Token from '@/models/Token';
 
 @Component({
   tag: 'ir-invoice',
@@ -110,6 +111,7 @@ export class IrInvoice {
   @State() isLoading: boolean;
 
   private _id = `invoice-form__${v4()}`;
+  private tokenService = new Token();
 
   componentWillLoad() {
     if (this.booking) {
@@ -205,7 +207,7 @@ export class IrInvoice {
               Confirm
             </ir-custom-button>
           </div>
-          <ir-preview-screen-dialog
+          {/* <ir-preview-screen-dialog
             onOpenChanged={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();
@@ -216,9 +218,9 @@ export class IrInvoice {
             open={this.invoice !== null}
           >
             <ir-proforma-invoice-preview invoice={this.invoice} property={calendar_data.property as any} booking={this.booking}></ir-proforma-invoice-preview>
-          </ir-preview-screen-dialog>
-          <ir-fiscal-document-preview mode="all"></ir-fiscal-document-preview>
+          </ir-preview-screen-dialog> */}
         </ir-drawer>
+        <ir-fiscal-document-preview mode="all" ticket={this.tokenService.getToken()} propertyId={calendar_data?.property?.id}></ir-fiscal-document-preview>
       </Host>
     );
   }

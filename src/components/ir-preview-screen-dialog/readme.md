@@ -74,7 +74,6 @@ Resolves with `true` when the action was attempted, `false` when prerequisites a
  - [ir-city-ledger-statements](../ir-city-ledger/ir-city-ledger-statements)
  - [ir-cl-fiscal-document-preview](../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
  - [ir-guest-document-preview](../ir-fiscal-documents/ir-guest-document-preview)
- - [ir-invoice](../ir-invoice)
 
 ### Depends on
 
@@ -89,7 +88,6 @@ graph TD;
   ir-city-ledger-statements --> ir-preview-screen-dialog
   ir-cl-fiscal-document-preview --> ir-preview-screen-dialog
   ir-guest-document-preview --> ir-preview-screen-dialog
-  ir-invoice --> ir-preview-screen-dialog
   style ir-preview-screen-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

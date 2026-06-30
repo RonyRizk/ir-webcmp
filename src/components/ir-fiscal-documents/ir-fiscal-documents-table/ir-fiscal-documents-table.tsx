@@ -3,12 +3,13 @@ import { flexRender, useTable } from '@/utils/useTable';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import type { ClFiscalDocumentPreviewRequest } from '@components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
-import { createColumnHelper, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+import { CellContext, createColumnHelper, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 import type { ICurrency, IEntries } from '@/models/property';
 import type { FiscalDocumentRow, FiscalFolioType } from '../types';
 import type { GuestDocumentPreviewRequest } from '../ir-guest-document-preview/types';
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
+import { FdTypes } from '@/types/enums';
 
 const PAGE_SIZES = [20, 50, 100];
 @Component({
@@ -108,7 +109,21 @@ export class IrFiscalDocumentsTable {
       bookingNbr: row.BOOKING_NUMBER ?? null,
     });
   }
+  private getCredit(info: CellContext<FiscalDocumentRow, number>): number {
+    const { FD_TYPE_CODE } = info.row.original;
+    const value = info.getValue();
 
+    switch (FD_TYPE_CODE) {
+      case FdTypes.CreditReceipt:
+        return -Math.abs(value);
+
+      case FdTypes.Receipt:
+        return Math.abs(value);
+
+      default:
+        return value;
+    }
+  }
   private get columns() {
     const base = [
       this.columnHelper.accessor('DOC_DATE', {
@@ -190,7 +205,7 @@ export class IrFiscalDocumentsTable {
       identityCols.push(
         this.columnHelper.accessor('CREDIT', {
           header: 'Credit',
-          cell: info => <span>{this.renderMoney(info.getValue())}</span>,
+          cell: info => <span>{this.renderMoney(this.getCredit(info))}</span>,
         }),
       );
     } else {

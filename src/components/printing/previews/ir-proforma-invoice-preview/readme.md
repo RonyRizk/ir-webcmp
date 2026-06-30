@@ -19,10 +19,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-invoice](../../../ir-invoice)
-
 ### Depends on
 
 - [ir-printing-label](../../ir-printing-label)
@@ -40,7 +36,6 @@ graph TD;
   ir-print-room --> ir-printing-label
   ir-printing-pickup --> ir-printing-label
   ir-printing-extra-service --> ir-printing-label
-  ir-invoice --> ir-proforma-invoice-preview
   style ir-proforma-invoice-preview fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
