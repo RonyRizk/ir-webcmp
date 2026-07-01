@@ -373,7 +373,7 @@ export class IrBookingEditorHeader {
               Check
             </ir-custom-button>
           </div>
-          {booking_store.roomTypes?.length > 0 && !this.isLoading && (
+          {booking_store.roomTypes?.length > 0 && !this.isLoading && calendar_data.tax_statement && (
             <wa-callout size="s" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
               {/* Including taxes and fees. */}
               {calendar_data.tax_statement}

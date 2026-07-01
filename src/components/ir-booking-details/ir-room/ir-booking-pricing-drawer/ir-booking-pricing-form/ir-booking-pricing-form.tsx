@@ -167,9 +167,11 @@ export class IrBookingPricingForm {
           </wa-callout>
         )}
 
-        <wa-callout size="s" variant="neutral">
-          {calendar_data.property.tax_statement}
-        </wa-callout>
+        {calendar_data.property.tax_statement && (
+          <wa-callout size="s" variant="neutral">
+            {calendar_data.property.tax_statement}
+          </wa-callout>
+        )}
 
         <div style={{ marginBottom: '0.5rem' }}></div>
         {this.nights.map(night => (

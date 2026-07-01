@@ -163,11 +163,26 @@ export class IrCheckoutDialog {
     }
   }
 
+  /**
+   * Determines which checkout action buttons to surface.
+   *
+   * Decision rules (evaluated after `invoiceInfo` is loaded):
+   *
+   * 1. Filter `invoiceable_items` to items that still need invoicing — exclude
+   *    `AlreadyInvoiced` and `PickupCancellationPolicy` reasons.
+   * 2. From those, isolate room/accommodation items (`type === 'BSA'`).
+   * 3. Button set:
+   *    - Nothing outstanding           → `checkout` only
+   *    - Any outstanding items         → `invoice_checkout` (check out + invoice guest)
+   *    - 2+ outstanding room items     → also add `checkout_without_invoice` (skip invoicing)
+   *
+   * `checkout_without_invoice` is withheld when only one room is un-invoiced because
+   * the "check out & invoice" path already covers that case cleanly.
+   */
   private setupButtons() {
     const toBeInvoiced = this.invoiceInfo.invoiceable_items.filter(
-      item => ![InvoiceableItemReason.AlreadyInvoiced, InvoiceableItemReason.PickupCancellationPolicy, InvoiceableItemReason.NotCheckedOutYet].includes(item?.reason?.code as any),
+      item => ![InvoiceableItemReason.AlreadyInvoiced, InvoiceableItemReason.PickupCancellationPolicy].includes(item?.reason?.code as any),
     );
-
     const toBeInvoicedRooms = toBeInvoiced.filter(item => item.type === 'BSA');
     if (toBeInvoiced.length === 0) {
       this.buttons.add('checkout');
@@ -360,7 +375,7 @@ export class IrCheckoutDialog {
                   variant={'brand'}
                   appearance={this.buttons.has('invoice_checkout') ? 'outlined' : 'accent'}
                 >
-                  Checkout without invoice
+                  Checkout only
                 </ir-custom-button>
               )}
               {this.buttons.has('invoice_checkout') && (
