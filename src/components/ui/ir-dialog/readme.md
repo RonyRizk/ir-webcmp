@@ -71,7 +71,6 @@ Type: `Promise<void>`
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
- - [ir-guest-billing](../../ir-billing/ir-guest-billing)
  - [ir-hb-preference-dialog](../../ir-booking-details/ir-room/ir-hb-preference-dialog)
  - [ir-hk-delete-dialog](../../ir-housekeeping/ir-hk-delete-dialog)
  - [ir-hk-operations-card](../../ir-housekeeping/ir-hk-operations-card)
@@ -84,6 +83,7 @@ Type: `Promise<void>`
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
+ - [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
 
 ### Graph
 ```mermaid
@@ -107,7 +107,6 @@ graph TD;
   ir-extra-service --> ir-dialog
   ir-fd-confirm-dialog --> ir-dialog
   ir-ghs-onboarding --> ir-dialog
-  ir-guest-billing --> ir-dialog
   ir-hb-preference-dialog --> ir-dialog
   ir-hk-delete-dialog --> ir-dialog
   ir-hk-operations-card --> ir-dialog
@@ -120,6 +119,7 @@ graph TD;
   ir-room --> ir-dialog
   ir-tasks-table --> ir-dialog
   ir-user-management-table --> ir-dialog
+  ir-void-document-dialog --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

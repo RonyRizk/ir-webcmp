@@ -29,6 +29,7 @@ export class IrGuestDocumentPreview {
     [FdTypes.Invoice]: 'invoice',
     [FdTypes.Receipt]: 'receipt',
     [FdTypes.CreditNote]: 'creditnote',
+    [FdTypes.CreditReceipt]: 'creditreceipt',
     [FdTypes.Proforma]: 'proforma',
   };
 

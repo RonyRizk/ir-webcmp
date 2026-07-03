@@ -277,3 +277,9 @@ export const AckExposedRevisionPropsSchema = z.object({
 });
 
 export type AckExposedRevisionProps = z.infer<typeof AckExposedRevisionPropsSchema>;
+
+export const VoidPaymentPropsSchema = z.object({
+  receipt_nbr: z.string(),
+  booking_nbr: z.string(),
+});
+export type VoidPaymentProps = z.infer<typeof VoidPaymentPropsSchema>;

@@ -17,7 +17,7 @@ export type CheckoutDialogCloseEvent = { reason: 'cancel' | 'checkout' | 'openIn
 @Component({
   tag: 'ir-checkout-dialog',
   styleUrl: 'ir-checkout-dialog.css',
-  shadow: false,
+  scoped: true,
 })
 export class IrCheckoutDialog {
   @Prop({ reflect: true }) open: boolean;
@@ -33,6 +33,7 @@ export class IrCheckoutDialog {
   @State() penaltyAmount: number = 0;
   @State() agent: Agent;
   @State() paymentEntries: PaymentEntries;
+  @State() includeInvoice: boolean = false;
 
   @Event({ composed: true, bubbles: true }) checkoutDialogClosed: EventEmitter<CheckoutDialogCloseEvent>;
 
@@ -71,7 +72,8 @@ export class IrCheckoutDialog {
         penalty_amount: this.penaltyAmount >= 0 ? this.penaltyAmount : null,
       });
       this.isLoading = null;
-      this.checkoutDialogClosed.emit({ reason: source === 'checkout&invoice' ? 'openInvoice' : 'checkout' });
+      // this.checkoutDialogClosed.emit({ reason: source === 'checkout&invoice' ? 'openInvoice' : 'checkout' });
+      this.checkoutDialogClosed.emit({ reason: this.includeInvoice ? 'openInvoice' : 'checkout' });
     } catch (error) {
       console.error(error);
     }
@@ -186,13 +188,17 @@ export class IrCheckoutDialog {
     const toBeInvoicedRooms = toBeInvoiced.filter(item => item.type === 'BSA');
     if (toBeInvoiced.length === 0) {
       this.buttons.add('checkout');
+
       return;
     }
     const allRoomInvoiced = toBeInvoicedRooms.length === 0;
+    let includeInvoice = true;
     this.buttons.add('invoice_checkout');
     if (!allRoomInvoiced && toBeInvoicedRooms.length > 1) {
+      includeInvoice = false;
       this.buttons.add('checkout_without_invoice');
     }
+    this.includeInvoice = includeInvoice;
   }
 
   private renderEarlyCheckoutContent() {
@@ -286,7 +292,10 @@ export class IrCheckoutDialog {
       <button type="button" class="due-amount-btn" onClick={() => this.paymentFolioRef?.openFolio()}>
         <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="money-bill-wave"></wa-icon>
-          Outstanding guest balance: {amount}
+          <div class={'d-flex align-items-center justify-content-between'}>
+            <span>Outstanding guest balance: {amount}</span>
+            <wa-icon name="chevron-right" style={{ marginLeft: 'auto' }}></wa-icon>
+          </div>
         </wa-callout>
       </button>
     );
@@ -295,7 +304,7 @@ export class IrCheckoutDialog {
     if (moment().isSame(moment(this.room.from_date, 'YYYY-MM-DD'), 'date')) {
       const isSingleRoom = this.booking.rooms.length === 1;
       return (
-        <wa-callout size="s" variant="danger" style={{ marginBottom: 'var(--spacing)' }}>
+        <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
           This {isSingleRoom ? 'booking' : 'room'} will be {isSingleRoom ? 'cancelled' : 'removed'}
         </wa-callout>
@@ -310,7 +319,7 @@ export class IrCheckoutDialog {
 
     if (summary.total === 0) {
       return (
-        <wa-callout size="s" variant="success" style={{ marginBottom: 'var(--spacing)' }}>
+        <wa-callout size="s" variant="success">
           <wa-icon slot="icon" name="circle-check"></wa-icon>
           All charges posted to <b>{this.agent.name}</b> City Ledger
         </wa-callout>
@@ -318,7 +327,7 @@ export class IrCheckoutDialog {
     }
 
     return (
-      <wa-callout size="s" variant="warning" style={{ marginBottom: 'var(--spacing)' }}>
+      <wa-callout size="s" variant="warning">
         <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
         {summary.total} item{summary.total !== 1 ? 's' : ''} not posted to city ledger
       </wa-callout>
@@ -347,27 +356,44 @@ export class IrCheckoutDialog {
             </div>
           ) : (
             <Fragment>
-              {this.renderDueAmountWarning()}
-              {this.renderMissingClWarning()}
-              {this.renderSameDayWarning()}
+              <div class="checkout-dialog__callouts">
+                {this.renderDueAmountWarning()}
+                {this.renderMissingClWarning()}
+                {this.renderSameDayWarning()}
+              </div>
               {this.isEarlyCheckout ? (
                 this.renderEarlyCheckoutContent()
               ) : (
                 <p style={{ width: 'calc(31rem - var(--spacing))' }}>Are you sure you want to check out unit {(this.room?.unit as IUnit)?.name}?</p>
               )}
+              {this.buttons.has('invoice_checkout') && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <wa-checkbox
+                    style={{ marginTop: '1rem', color: 'var(--wa-color-text-quiet)', marginLeft: 'auto' }}
+                    value={String(this.includeInvoice)}
+                    defaultChecked={this.includeInvoice}
+                    onchange={() => {
+                      this.includeInvoice = !this.includeInvoice;
+                    }}
+                  >
+                    Prepare guest invoice after checkout
+                  </wa-checkbox>
+                </div>
+              )}
             </Fragment>
           )}
+
           <div slot="footer" class="ir-dialog__footer">
             <Fragment>
               <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
                 {locales?.entries?.Lcz_Cancel ?? 'Cancel'}
               </ir-custom-button>
-              {this.buttons.has('checkout') && (
-                <ir-custom-button size="m" onClickHandler={e => this.checkoutRoom({ e, source: 'checkout' })} variant={'brand'} loading={this.isLoading === 'checkout'}>
-                  {isEarly ? 'Confirm early check-out' : 'Checkout'}
-                </ir-custom-button>
-              )}
-              {this.buttons.has('checkout_without_invoice') && (
+              {/* {this.buttons.has('checkout') && ( */}
+              <ir-custom-button size="m" onClickHandler={e => this.checkoutRoom({ e, source: 'checkout' })} variant={'brand'} loading={this.isLoading === 'checkout'}>
+                {isEarly ? 'Confirm early check-out' : 'Check out'}
+              </ir-custom-button>
+              {/* )} */}
+              {/* {this.buttons.has('checkout_without_invoice') && (
                 <ir-custom-button
                   loading={this.isLoading === 'skipCheckout'}
                   size="m"
@@ -390,7 +416,7 @@ export class IrCheckoutDialog {
                 >
                   Check out & invoice guest
                 </ir-custom-button>
-              )}
+              )} */}
             </Fragment>
           </div>
         </ir-dialog>

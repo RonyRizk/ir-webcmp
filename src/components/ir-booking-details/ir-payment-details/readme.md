@@ -49,6 +49,7 @@
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-booking-city-ledger](../ir-booking-city-ledger)
 - [ir-payments-folio](ir-payments-folio)
+- [ir-void-document-dialog](../ir-void-document-dialog)
 - [ir-dialog](../../ui/ir-dialog)
 
 ### Graph
@@ -60,6 +61,7 @@ graph TD;
   ir-payment-details --> ir-custom-button
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
+  ir-payment-details --> ir-void-document-dialog
   ir-payment-details --> ir-dialog
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
@@ -95,6 +97,8 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-empty-state
   ir-payments-folio --> ir-custom-button
+  ir-void-document-dialog --> ir-dialog
+  ir-void-document-dialog --> ir-custom-button
   ir-booking-details --> ir-payment-details
   style ir-payment-details fill:#f9f,stroke:#333,stroke-width:4px
 ```

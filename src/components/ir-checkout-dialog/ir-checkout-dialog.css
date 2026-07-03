@@ -13,7 +13,12 @@
   width: 100%;
   min-height: 50px;
 }
-
+.checkout-dialog__callouts {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: var(--wa-space-xl, 2rem);
+}
 /* ── Early checkout layout ──────────────────── */
 
 .early-checkout {
@@ -142,7 +147,7 @@
   display: block;
   width: 100%;
   cursor: pointer;
-  margin-bottom: var(--spacing);
+  /* margin-bottom: var(--spacing); */
 }
 
 .due-amount-btn:focus-visible {

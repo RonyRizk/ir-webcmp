@@ -10,8 +10,9 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { v4 } from 'uuid';
 import calendar_data from '@/stores/calendar-data';
 import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
-import { FdTypes } from '@/types/enums';
+import { FdTypes, PayStatus, PayTypes } from '@/types/enums';
 import type { UnifiedFolioRecord, GetUnifiedFolioParams } from '@/services/property/types';
+import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
 
 @Component({
   tag: 'ir-guest-billing',
@@ -22,19 +23,22 @@ export class IrGuestBilling {
   @Prop() booking: Booking;
 
   @State() isOpen: 'invoice' = null;
-  @State() isLoading: 'page' | 'void' = 'page';
+  @State() isLoading: 'page' | null = 'page';
   @State() invoiceInfo: BookingInvoiceInfo;
   @State() rows: UnifiedFolioRecord[] = [];
-  @State() selectedInvoice: string = null;
   @State() private fdTypes: IEntries[] = [];
   @State() voidedInvoices: Set<string> = new Set();
+  @State() voidedReceipts: Set<string> = new Set();
 
   @Event() billingClose: EventEmitter<void>;
   @Event({ bubbles: true, composed: true }) guestDocumentPreview: EventEmitter<GuestDocumentPreviewRequest>;
+  /** Refreshes the wider booking-details tree. Emit with a Booking payload to skip ir-booking-details' full-page loading spinner. */
+  @Event({ bubbles: true, composed: true }) resetBookingEvt: EventEmitter<Booking | null>;
 
   private bookingService = new BookingService();
   private propertyService = new PropertyService();
   private _id = `issue_invoice__btn_${v4()}`;
+  private voidDialogRef: HTMLIrVoidDocumentDialogElement;
 
   componentWillLoad() {
     this.init();
@@ -72,21 +76,15 @@ export class IrGuestBilling {
   private async init() {
     try {
       this.isLoading = 'page';
-      const [invoiceInfo, { rows }, fdTypes] = await Promise.all([
-        this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
-        this.propertyService.getUnifiedFolio(this.buildFolioParams()),
-        this.bookingService.getSetupEntriesByTableName('_FD_TYPE'),
-      ]);
-      this.invoiceInfo = invoiceInfo;
-      let voidedInvoices: Set<string> = new Set();
-      this.invoiceInfo.invoices?.forEach(invoice => {
-        if (invoice.credit_note) {
-          voidedInvoices.add(invoice.nbr);
+      const [, fdTypes] = await Promise.all([this.refreshInvoiceAndFolio(), this.bookingService.getSetupEntriesByTableName('_FD_TYPE')]);
+      this.fdTypes = fdTypes ?? [];
+      let voidedReceipts: Set<string> = new Set();
+      this.booking.financial.payments?.forEach(payment => {
+        if (payment.payment_type?.code === PayTypes.Payment && !payment.is_city_ledger && payment.payment_status?.code === PayStatus.Void) {
+          voidedReceipts.add(payment.receipt_nbr);
         }
       });
-      this.voidedInvoices = new Set(voidedInvoices);
-      this.rows = rows;
-      this.fdTypes = fdTypes ?? [];
+      this.voidedReceipts = voidedReceipts;
     } catch (error) {
       console.error(error);
     } finally {
@@ -94,23 +92,36 @@ export class IrGuestBilling {
     }
   }
 
-  private async voidInvoice(e: CustomEvent) {
-    this.isLoading = 'void';
-    e.stopImmediatePropagation();
-    e.stopPropagation();
-    await this.bookingService.voidInvoice({
-      invoice_nbr: this.selectedInvoice,
-      property_id: calendar_data.property.id,
-      reason: '',
-    });
+  private async refreshInvoiceAndFolio() {
     const [invoiceInfo, { rows }] = await Promise.all([
       this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
       this.propertyService.getUnifiedFolio(this.buildFolioParams()),
     ]);
     this.invoiceInfo = invoiceInfo;
+    let voidedInvoices: Set<string> = new Set();
+    this.invoiceInfo.invoices?.forEach(invoice => {
+      if (invoice.credit_note) {
+        voidedInvoices.add(invoice.nbr);
+      }
+    });
+    this.voidedInvoices = voidedInvoices;
     this.rows = rows;
-    this.isLoading = null;
-    this.selectedInvoice = null;
+  }
+
+  private async handleDocumentVoided(e: CustomEvent<VoidDocumentRequest>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    await this.refreshInvoiceAndFolio();
+    if (e.detail.documentType === FdTypes.Receipt) {
+      const voidedReceipts = new Set(this.voidedReceipts);
+      voidedReceipts.add(e.detail.documentNumber);
+      this.voidedReceipts = new Set(voidedReceipts);
+      // Voiding a receipt changes booking.financial.payments, which this component doesn't own.
+      // Pass the freshly fetched booking so ir-booking-details updates in place instead of
+      // taking the resetBookingEvt(null) branch, which shows its full-page loading spinner.
+      const freshBooking = await this.bookingService.getExposedBooking(this.booking.booking_nbr, 'en');
+      this.resetBookingEvt.emit(freshBooking);
+    }
   }
 
   private get fdTypeLabels(): Record<string, string> {
@@ -193,6 +204,7 @@ export class IrGuestBilling {
                   )}
                   {this.sortedRows.map(row => {
                     const isInvoice = row.FD_TYPE_CODE === FdTypes.Invoice;
+                    const isReceipt = row.FD_TYPE_CODE === FdTypes.Receipt;
                     return (
                       <tr class="ir-table-row" key={row.DOC_NUMBER}>
                         <td>{row.DOC_DATE ? moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY') : '—'}</td>
@@ -228,7 +240,11 @@ export class IrGuestBilling {
                                     this.printInvoice({ row });
                                     break;
                                   case 'void':
-                                    this.selectedInvoice = row.DOC_NUMBER;
+                                    this.voidDialogRef?.open({
+                                      documentType: isInvoice ? FdTypes.Invoice : FdTypes.Receipt,
+                                      documentNumber: row.DOC_NUMBER,
+                                      bookingNumber: this.booking.booking_nbr,
+                                    });
                                     break;
                                 }
                               }}
@@ -240,6 +256,11 @@ export class IrGuestBilling {
                               {isInvoice && !this.voidedInvoices.has(row.DOC_NUMBER) && (
                                 <wa-dropdown-item variant="danger" value="void">
                                   Void with credit note
+                                </wa-dropdown-item>
+                              )}
+                              {isReceipt && !this.voidedReceipts.has(row.DOC_NUMBER) && (
+                                <wa-dropdown-item variant="danger" value="void">
+                                  Void with credit receipt
                                 </wa-dropdown-item>
                               )}
                               <ir-custom-button slot="trigger" id={`pdf-${row.DOC_ID ?? row.DOC_NUMBER}`} variant="neutral" appearance="plain">
@@ -301,7 +322,7 @@ export class IrGuestBilling {
                       <div slot="footer" class="billing__card-footer">
                         <ir-custom-button
                           onClickHandler={() => {
-                            this.selectedInvoice = row.DOC_NUMBER;
+                            this.voidDialogRef?.open({ documentType: FdTypes.Invoice, documentNumber: row.DOC_NUMBER });
                           }}
                           variant="danger"
                           appearance="outlined"
@@ -327,30 +348,7 @@ export class IrGuestBilling {
           open={this.isOpen === 'invoice'}
           booking={this.booking}
         ></ir-invoice>
-        <ir-dialog
-          label="Alert"
-          open={this.selectedInvoice !== null}
-          lightDismiss={false}
-          onIrDialogHide={e => {
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-          }}
-          onIrDialogAfterHide={e => {
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            this.selectedInvoice = null;
-          }}
-        >
-          <p>Void invoice {this.selectedInvoice} by generating a credit note?</p>
-          <div slot="footer" class="ir-dialog__footer">
-            <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
-              Cancel
-            </ir-custom-button>
-            <ir-custom-button loading={this.isLoading === 'void'} onClickHandler={this.voidInvoice.bind(this)} size="m" variant="danger">
-              Confirm
-            </ir-custom-button>
-          </div>
-        </ir-dialog>
+        <ir-void-document-dialog ref={el => (this.voidDialogRef = el)} onDocumentVoided={e => this.handleDocumentVoided(e)}></ir-void-document-dialog>
       </Fragment>
     );
   }

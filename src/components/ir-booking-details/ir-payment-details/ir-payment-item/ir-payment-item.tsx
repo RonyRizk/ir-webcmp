@@ -4,6 +4,7 @@ import { formatAmount } from '@/utils/utils';
 import { PAYMENT_TYPES_WITH_METHOD } from '../global.variables';
 import moment from 'moment';
 import { v4 } from 'uuid';
+import { PayStatus, PayTypes } from '@/types/enums';
 
 @Component({
   tag: 'ir-payment-item',
@@ -16,6 +17,7 @@ export class IrPaymentItem {
   @Event() editPayment: EventEmitter<IPayment>;
   @Event() deletePayment: EventEmitter<IPayment>;
   @Event() issueReceipt: EventEmitter<IPayment>;
+  @Event() voidReceipt: EventEmitter<IPayment>;
   private _id = v4();
 
   render() {
@@ -25,6 +27,11 @@ export class IrPaymentItem {
       (PAYMENT_TYPES_WITH_METHOD.includes(this.payment.payment_type?.code)
         ? `${this.payment.payment_type?.description}: ${this.payment.payment_method.description}`
         : this.payment.payment_type.description) ?? this.payment.designation;
+
+    const canEditOrDelete = ![PayTypes.Payment, PayTypes.CreditReceipt].includes(this.payment.payment_type?.code as any);
+
+    const canPrint = [PayTypes.Payment, PayTypes.CreditReceipt].includes(this.payment.payment_type.code as any);
+
     return (
       <div class="payment-item__payment-item">
         <div class="payment-item__payment-body" part="payment-body">
@@ -38,6 +45,7 @@ export class IrPaymentItem {
         <div class="payment-item__payment-toolbar">
           <p class={`payment-item__payment-amount ${isCredit ? 'is-credit' : 'is-debit'}`}>{formatAmount(this.payment.currency.symbol, this.payment.amount)}</p>
           <p class="payment-item__payment-description">{paymentDescription}</p>
+
           <div class="payment-item__payment-actions">
             <div class="d-flex align-items-center">
               <wa-tooltip for={this._id}>User: {this.payment.time_stamp.user}</wa-tooltip>
@@ -58,6 +66,9 @@ export class IrPaymentItem {
                     case 'receipt':
                       this.issueReceipt.emit(this.payment);
                       break;
+                    case 'void-receipt':
+                      this.voidReceipt.emit(this.payment);
+                      break;
                   }
                 }}
               >
@@ -65,20 +76,31 @@ export class IrPaymentItem {
                   <wa-icon name="ellipsis-vertical" class="payment-item__action-trigger-icon"></wa-icon>
                 </wa-button>
 
-                {this.payment.payment_type.code === '001' && (
+                {canEditOrDelete && (
+                  <wa-dropdown-item value="edit">
+                    {/* <wa-icon slot="icon" name="edit"></wa-icon> */}
+                    Edit
+                  </wa-dropdown-item>
+                )}
+                {canPrint && (
                   <wa-dropdown-item value="receipt">
                     {/* <wa-icon name="receipt" slot="icon"></wa-icon> */}
                     Print Receipt
                   </wa-dropdown-item>
                 )}
-                <wa-dropdown-item value="edit">
-                  {/* <wa-icon slot="icon" name="edit"></wa-icon> */}
-                  Edit
-                </wa-dropdown-item>
-                <wa-dropdown-item value="delete" variant="danger">
-                  {/* <wa-icon slot="icon" name="trash"></wa-icon> */}
-                  Delete
-                </wa-dropdown-item>
+
+                {canEditOrDelete && <wa-divider></wa-divider>}
+                {this.payment?.payment_type?.code === '001' && this.payment.payment_status?.code === PayStatus.Normal && (
+                  <wa-dropdown-item variant="danger" value="void-receipt">
+                    Void with credit receipt
+                  </wa-dropdown-item>
+                )}
+                {canEditOrDelete && (
+                  <wa-dropdown-item value="delete" variant="danger">
+                    {/* <wa-icon slot="icon" name="trash"></wa-icon> */}
+                    Delete
+                  </wa-dropdown-item>
+                )}
               </wa-dropdown>
             </div>
           </div>

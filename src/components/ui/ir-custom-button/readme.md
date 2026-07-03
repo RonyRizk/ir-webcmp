@@ -163,6 +163,7 @@
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
+ - [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
 
 ### Graph
 ```mermaid
@@ -288,6 +289,7 @@ graph TD;
   ir-unbookable-rooms-filters --> ir-custom-button
   ir-user-form-panel-drawer --> ir-custom-button
   ir-user-management-table --> ir-custom-button
+  ir-void-document-dialog --> ir-custom-button
   style ir-custom-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

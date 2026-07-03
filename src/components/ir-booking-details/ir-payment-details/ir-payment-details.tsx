@@ -13,8 +13,9 @@ import { IEntries } from '@/models/property';
 import { isAgentMode } from '../functions';
 import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { ClTx } from '@/services/city-ledger/types';
-import { FdTypes } from '@/types/enums';
+import { FdTypes, PayTypes } from '@/types/enums';
 import type { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
+import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
 
 @Component({
   styleUrl: 'ir-payment-details.css',
@@ -51,6 +52,7 @@ export class IrPaymentDetails {
   private paymentService = new PaymentService();
   private bookingService = new BookingService();
   private dialogRef: HTMLIrDialogElement;
+  private voidDialogRef: HTMLIrVoidDocumentDialogElement;
 
   @Listen('generatePayment')
   handlePaymentGeneration(e: CustomEvent) {
@@ -139,14 +141,11 @@ export class IrPaymentDetails {
   }
 
   private async handleIssueReceipt(detail: IPayment) {
-    if (detail.receipt_nbr) {
-      // Viewing an already-issued receipt now opens the shared in-app preview
-      // (ir-guest-document-preview) instead of a new browser window. Receipt
-      // rendering there is scaffolded and not implemented yet — it currently
-      // shows a placeholder until the fetch flow is wired up.
+    const { receipt_nbr, credit_receipt_nbr, payment_type } = detail;
+    if (receipt_nbr || credit_receipt_nbr) {
       this.guestDocumentPreview.emit({
-        documentNumber: detail.receipt_nbr,
-        fdTypeCode: FdTypes.Receipt,
+        documentNumber: payment_type?.code === PayTypes.Payment ? receipt_nbr : payment_type?.code === PayTypes.CreditReceipt ? credit_receipt_nbr : null,
+        fdTypeCode: payment_type?.code === PayTypes.Payment ? FdTypes.Receipt : FdTypes.CreditReceipt,
         bookingNumber: this.booking.booking_nbr,
       });
       return;
@@ -162,6 +161,19 @@ export class IrPaymentDetails {
         rnb: `${starter}${_number.My_Result}`,
       },
     });
+  }
+
+  private handleVoidReceipt(payment: IPayment) {
+    if (!payment.receipt_nbr) {
+      return;
+    }
+    this.voidDialogRef?.open({ documentType: FdTypes.Receipt, documentNumber: payment.receipt_nbr, bookingNumber: this.booking.booking_nbr });
+  }
+
+  private async handleDocumentVoided(e: CustomEvent<VoidDocumentRequest>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.resetBookingEvt.emit(null);
   }
 
   private async cancelPayment() {
@@ -319,7 +331,9 @@ export class IrPaymentDetails {
         onEditPayment={e => this.handleEditPayment(e.detail)}
         onDeletePayment={e => this.handleDeletePayment(e.detail)}
         onIssueReceipt={e => this.handleIssueReceipt(e.detail)}
+        onVoidReceipt={e => this.handleVoidReceipt(e.detail)}
       />,
+      <ir-void-document-dialog ref={el => (this.voidDialogRef = el)} onDocumentVoided={e => this.handleDocumentVoided(e)}></ir-void-document-dialog>,
       <ir-dialog
         onIrDialogHide={e => {
           e.stopImmediatePropagation();

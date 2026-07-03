@@ -104,6 +104,7 @@ import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 import { User } from "./models/Users";
 import { AllowedUser } from "./components/ir-user-management/types";
+import { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
 export { ACPages } from "./components/ac-pages-menu/ac-pages-menu";
 export { IRatePlanSelection, RatePlanGuest } from "./stores/booking.store";
 export { ICurrency } from "./models/calendarData";
@@ -203,6 +204,7 @@ export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 export { User } from "./models/Users";
 export { AllowedUser } from "./components/ir-user-management/types";
+export { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
 export namespace Components {
     interface AcPagesMenu {
         /**
@@ -6471,6 +6473,10 @@ export namespace Components {
          */
         "valueEvent": string;
     }
+    interface IrVoidDocumentDialog {
+        "close": () => Promise<void>;
+        "open": (request: VoidDocumentRequest) => Promise<void>;
+    }
     interface IrWeekdaySelector {
         /**
           * Initial list of selected weekdays (numeric values).
@@ -7409,6 +7415,10 @@ export interface IrUserManagementTableCustomEvent<T> extends CustomEvent<T> {
 export interface IrValidatorCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrValidatorElement;
+}
+export interface IrVoidDocumentDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrVoidDocumentDialogElement;
 }
 export interface IrWeekdaySelectorCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -10181,6 +10191,7 @@ declare global {
     interface HTMLIrGuestBillingElementEventMap {
         "billingClose": void;
         "guestDocumentPreview": GuestDocumentPreviewRequest;
+        "resetBookingEvt": Booking | null;
     }
     interface HTMLIrGuestBillingElement extends Components.IrGuestBilling, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrGuestBillingElementEventMap>(type: K, listener: (this: HTMLIrGuestBillingElement, ev: IrGuestBillingCustomEvent<HTMLIrGuestBillingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -11204,6 +11215,7 @@ declare global {
         "editPayment": IPayment;
         "deletePayment": IPayment;
         "issueReceipt": IPayment;
+        "voidReceipt": IPayment;
     }
     interface HTMLIrPaymentItemElement extends Components.IrPaymentItem, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrPaymentItemElementEventMap>(type: K, listener: (this: HTMLIrPaymentItemElement, ev: IrPaymentItemCustomEvent<HTMLIrPaymentItemElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -11236,6 +11248,7 @@ declare global {
         "editPayment": IPayment;
         "deletePayment": IPayment;
         "issueReceipt": IPayment;
+        "voidReceipt": IPayment;
     }
     interface HTMLIrPaymentsFolioElement extends Components.IrPaymentsFolio, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrPaymentsFolioElementEventMap>(type: K, listener: (this: HTMLIrPaymentsFolioElement, ev: IrPaymentsFolioCustomEvent<HTMLIrPaymentsFolioElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -12320,6 +12333,24 @@ declare global {
         prototype: HTMLIrValidatorElement;
         new (): HTMLIrValidatorElement;
     };
+    interface HTMLIrVoidDocumentDialogElementEventMap {
+        "documentVoided": VoidDocumentRequest;
+        "toast": IToast;
+    }
+    interface HTMLIrVoidDocumentDialogElement extends Components.IrVoidDocumentDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrVoidDocumentDialogElementEventMap>(type: K, listener: (this: HTMLIrVoidDocumentDialogElement, ev: IrVoidDocumentDialogCustomEvent<HTMLIrVoidDocumentDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrVoidDocumentDialogElementEventMap>(type: K, listener: (this: HTMLIrVoidDocumentDialogElement, ev: IrVoidDocumentDialogCustomEvent<HTMLIrVoidDocumentDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrVoidDocumentDialogElement: {
+        prototype: HTMLIrVoidDocumentDialogElement;
+        new (): HTMLIrVoidDocumentDialogElement;
+    };
     interface HTMLIrWeekdaySelectorElementEventMap {
         "weekdayChange": number[];
     }
@@ -12693,6 +12724,7 @@ declare global {
         "ir-user-management": HTMLIrUserManagementElement;
         "ir-user-management-table": HTMLIrUserManagementTableElement;
         "ir-validator": HTMLIrValidatorElement;
+        "ir-void-document-dialog": HTMLIrVoidDocumentDialogElement;
         "ir-weekday-selector": HTMLIrWeekdaySelectorElement;
         "ota-label": HTMLOtaLabelElement;
         "requirement-check": HTMLRequirementCheckElement;
@@ -16366,6 +16398,10 @@ declare namespace LocalJSX {
         "booking"?: Booking;
         "onBillingClose"?: (event: IrGuestBillingCustomEvent<void>) => void;
         "onGuestDocumentPreview"?: (event: IrGuestBillingCustomEvent<GuestDocumentPreviewRequest>) => void;
+        /**
+          * Refreshes the wider booking-details tree. Emit with a Booking payload to skip ir-booking-details' full-page loading spinner.
+         */
+        "onResetBookingEvt"?: (event: IrGuestBillingCustomEvent<Booking | null>) => void;
     }
     /**
      * Guest Fiscal Document Preview
@@ -17867,6 +17903,7 @@ declare namespace LocalJSX {
         "onDeletePayment"?: (event: IrPaymentItemCustomEvent<IPayment>) => void;
         "onEditPayment"?: (event: IrPaymentItemCustomEvent<IPayment>) => void;
         "onIssueReceipt"?: (event: IrPaymentItemCustomEvent<IPayment>) => void;
+        "onVoidReceipt"?: (event: IrPaymentItemCustomEvent<IPayment>) => void;
         "payment"?: IPayment;
     }
     interface IrPaymentOption {
@@ -17910,6 +17947,7 @@ declare namespace LocalJSX {
         "onDeletePayment"?: (event: IrPaymentsFolioCustomEvent<IPayment>) => void;
         "onEditPayment"?: (event: IrPaymentsFolioCustomEvent<IPayment>) => void;
         "onIssueReceipt"?: (event: IrPaymentsFolioCustomEvent<IPayment>) => void;
+        "onVoidReceipt"?: (event: IrPaymentsFolioCustomEvent<IPayment>) => void;
         /**
           * @default []
          */
@@ -19577,6 +19615,13 @@ declare namespace LocalJSX {
           * @default 'input input-change value-change select-change'
          */
         "valueEvent"?: string;
+    }
+    interface IrVoidDocumentDialog {
+        /**
+          * Emitted once a document has actually been voided server-side. Consumers listen for this to refresh whatever data they own — e.g. ir-guest-billing refetches its own rows, ir-payment-details forwards it into resetBookingEvt.
+         */
+        "onDocumentVoided"?: (event: IrVoidDocumentDialogCustomEvent<VoidDocumentRequest>) => void;
+        "onToast"?: (event: IrVoidDocumentDialogCustomEvent<IToast>) => void;
     }
     interface IrWeekdaySelector {
         /**
@@ -21892,6 +21937,7 @@ declare namespace LocalJSX {
         "ir-user-management": Omit<IrUserManagement, keyof IrUserManagementAttributes> & { [K in keyof IrUserManagement & keyof IrUserManagementAttributes]?: IrUserManagement[K] } & { [K in keyof IrUserManagement & keyof IrUserManagementAttributes as `attr:${K}`]?: IrUserManagementAttributes[K] } & { [K in keyof IrUserManagement & keyof IrUserManagementAttributes as `prop:${K}`]?: IrUserManagement[K] };
         "ir-user-management-table": Omit<IrUserManagementTable, keyof IrUserManagementTableAttributes> & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes]?: IrUserManagementTable[K] } & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes as `attr:${K}`]?: IrUserManagementTableAttributes[K] } & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes as `prop:${K}`]?: IrUserManagementTable[K] };
         "ir-validator": Omit<IrValidator, keyof IrValidatorAttributes> & { [K in keyof IrValidator & keyof IrValidatorAttributes]?: IrValidator[K] } & { [K in keyof IrValidator & keyof IrValidatorAttributes as `attr:${K}`]?: IrValidatorAttributes[K] } & { [K in keyof IrValidator & keyof IrValidatorAttributes as `prop:${K}`]?: IrValidator[K] };
+        "ir-void-document-dialog": IrVoidDocumentDialog;
         "ir-weekday-selector": IrWeekdaySelector;
         "ota-label": Omit<OtaLabel, keyof OtaLabelAttributes> & { [K in keyof OtaLabel & keyof OtaLabelAttributes]?: OtaLabel[K] } & { [K in keyof OtaLabel & keyof OtaLabelAttributes as `attr:${K}`]?: OtaLabelAttributes[K] } & { [K in keyof OtaLabel & keyof OtaLabelAttributes as `prop:${K}`]?: OtaLabel[K] };
         "requirement-check": Omit<RequirementCheck, keyof RequirementCheckAttributes> & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes]?: RequirementCheck[K] } & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes as `attr:${K}`]?: RequirementCheckAttributes[K] } & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes as `prop:${K}`]?: RequirementCheck[K] };
@@ -22363,6 +22409,7 @@ declare module "@stencil/core" {
             "ir-user-management": LocalJSX.IntrinsicElements["ir-user-management"] & JSXBase.HTMLAttributes<HTMLIrUserManagementElement>;
             "ir-user-management-table": LocalJSX.IntrinsicElements["ir-user-management-table"] & JSXBase.HTMLAttributes<HTMLIrUserManagementTableElement>;
             "ir-validator": LocalJSX.IntrinsicElements["ir-validator"] & JSXBase.HTMLAttributes<HTMLIrValidatorElement>;
+            "ir-void-document-dialog": LocalJSX.IntrinsicElements["ir-void-document-dialog"] & JSXBase.HTMLAttributes<HTMLIrVoidDocumentDialogElement>;
             "ir-weekday-selector": LocalJSX.IntrinsicElements["ir-weekday-selector"] & JSXBase.HTMLAttributes<HTMLIrWeekdaySelectorElement>;
             "ota-label": LocalJSX.IntrinsicElements["ota-label"] & JSXBase.HTMLAttributes<HTMLOtaLabelElement>;
             "requirement-check": LocalJSX.IntrinsicElements["requirement-check"] & JSXBase.HTMLAttributes<HTMLRequirementCheckElement>;

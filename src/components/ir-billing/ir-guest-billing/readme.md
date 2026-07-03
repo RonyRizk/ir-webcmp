@@ -14,10 +14,11 @@
 
 ## Events
 
-| Event                  | Description | Type                                       |
-| ---------------------- | ----------- | ------------------------------------------ |
-| `billingClose`         |             | `CustomEvent<void>`                        |
-| `guestDocumentPreview` |             | `CustomEvent<GuestDocumentPreviewRequest>` |
+| Event                  | Description                                                                                                                  | Type                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `billingClose`         |                                                                                                                              | `CustomEvent<void>`                        |
+| `guestDocumentPreview` |                                                                                                                              | `CustomEvent<GuestDocumentPreviewRequest>` |
+| `resetBookingEvt`      | Refreshes the wider booking-details tree. Emit with a Booking payload to skip ir-booking-details' full-page loading spinner. | `CustomEvent<Booking>`                     |
 
 
 ## Dependencies
@@ -32,7 +33,7 @@
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-empty-state](../../ir-empty-state)
 - [ir-invoice](../../ir-invoice)
-- [ir-dialog](../../ui/ir-dialog)
+- [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
 
 ### Graph
 ```mermaid
@@ -41,7 +42,7 @@ graph TD;
   ir-guest-billing --> ir-custom-button
   ir-guest-billing --> ir-empty-state
   ir-guest-billing --> ir-invoice
-  ir-guest-billing --> ir-dialog
+  ir-guest-billing --> ir-void-document-dialog
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
@@ -73,6 +74,8 @@ graph TD;
   ir-guest-document-preview --> ir-spinner
   ir-guest-document-preview --> ir-preview-screen-dialog
   ir-guest-document-preview --> ir-custom-button
+  ir-void-document-dialog --> ir-dialog
+  ir-void-document-dialog --> ir-custom-button
   ir-billing --> ir-guest-billing
   style ir-guest-billing fill:#f9f,stroke:#333,stroke-width:4px
 ```

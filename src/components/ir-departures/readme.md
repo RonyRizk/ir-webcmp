@@ -191,6 +191,7 @@ graph TD;
   ir-payment-details --> ir-custom-button
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
+  ir-payment-details --> ir-void-document-dialog
   ir-payment-details --> ir-dialog
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
@@ -223,6 +224,8 @@ graph TD;
   ir-payments-folio --> ir-payment-item
   ir-payments-folio --> ir-empty-state
   ir-payments-folio --> ir-custom-button
+  ir-void-document-dialog --> ir-dialog
+  ir-void-document-dialog --> ir-custom-button
   ir-room-guests --> ir-drawer
   ir-room-guests --> ir-room-guests-form
   ir-room-guests --> ir-custom-button
@@ -255,7 +258,7 @@ graph TD;
   ir-guest-billing --> ir-custom-button
   ir-guest-billing --> ir-empty-state
   ir-guest-billing --> ir-invoice
-  ir-guest-billing --> ir-dialog
+  ir-guest-billing --> ir-void-document-dialog
   ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
   ir-agent-billing --> ir-city-ledger-fiscal-documents-table

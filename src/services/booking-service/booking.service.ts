@@ -1,4 +1,4 @@
-import { SetDepartureTimeProps, SetDepartureTimePropsSchema, SetHbPreferenceProps, SetHbPreferencePropsSchema } from './types';
+import { SetDepartureTimeProps, SetDepartureTimePropsSchema, SetHbPreferenceProps, SetHbPreferencePropsSchema, VoidPaymentProps, VoidPaymentPropsSchema } from './types';
 // import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 // import { DayData } from '../../models/DayType';
 // import axios from 'axios';
@@ -1187,6 +1187,14 @@ export class BookingService {
       console.error(error);
       throw new Error(error);
     }
+  }
+  public async voidPayment(props: VoidPaymentProps) {
+    const payload = VoidPaymentPropsSchema.parse(props);
+    const { data } = await axios.post('/Void_Payment', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data;
   }
   public async getPCICardInfoURL(BOOK_NBR: string) {
     try {

@@ -16,6 +16,7 @@ export class IrPaymentsFolio {
   @Event({ bubbles: true }) editPayment: EventEmitter<IPayment>;
   @Event({ bubbles: true }) deletePayment: EventEmitter<IPayment>;
   @Event({ bubbles: true }) issueReceipt: EventEmitter<IPayment>;
+  @Event({ bubbles: true }) voidReceipt: EventEmitter<IPayment>;
 
   private handleAddPayment = () => {
     this.addPayment.emit();
@@ -31,6 +32,10 @@ export class IrPaymentsFolio {
 
   private handleIssueReceipt(payment: IPayment) {
     this.issueReceipt.emit(payment);
+  }
+
+  private handleVoidReceipt(payment: IPayment) {
+    this.voidReceipt.emit(payment);
   }
 
   private hasPayments(): boolean {
@@ -59,6 +64,11 @@ export class IrPaymentsFolio {
           e.stopImmediatePropagation();
           e.stopPropagation();
           this.handleIssueReceipt(e.detail);
+        }}
+        onVoidReceipt={e => {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          this.handleVoidReceipt(e.detail);
         }}
       />,
       index < this.payments.length - 1 && <wa-divider class="payment-divider"></wa-divider>,

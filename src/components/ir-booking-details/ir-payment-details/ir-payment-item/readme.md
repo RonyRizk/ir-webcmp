@@ -19,6 +19,7 @@
 | `deletePayment` |             | `CustomEvent<IPayment>` |
 | `editPayment`   |             | `CustomEvent<IPayment>` |
 | `issueReceipt`  |             | `CustomEvent<IPayment>` |
+| `voidReceipt`   |             | `CustomEvent<IPayment>` |
 
 
 ## Shadow Parts

@@ -44,7 +44,7 @@ graph TD;
   ir-guest-billing --> ir-custom-button
   ir-guest-billing --> ir-empty-state
   ir-guest-billing --> ir-invoice
-  ir-guest-billing --> ir-dialog
+  ir-guest-billing --> ir-void-document-dialog
   ir-invoice --> ir-drawer
   ir-invoice --> ir-invoice-form
   ir-invoice --> ir-custom-button
@@ -76,6 +76,8 @@ graph TD;
   ir-guest-document-preview --> ir-spinner
   ir-guest-document-preview --> ir-preview-screen-dialog
   ir-guest-document-preview --> ir-custom-button
+  ir-void-document-dialog --> ir-dialog
+  ir-void-document-dialog --> ir-custom-button
   ir-agent-billing --> ir-spinner
   ir-agent-billing --> ir-custom-button
   ir-agent-billing --> ir-city-ledger-fiscal-documents-table

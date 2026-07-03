@@ -15,6 +15,15 @@ export const TaxationStrategies = {
   Cumulative: '001',
 } as const;
 
+export const PayTypes = {
+  Payment: '001',
+  Discount: '009',
+  Refund: '010',
+  CancellationAdjustment: '012',
+  CancellationPenalty: '013',
+  CreditReceipt: '014',
+} as const;
+
 export const FdTypes = {
   AdjustmentCredit: 'ADJC',
   Draft: 'DFT',
@@ -25,6 +34,11 @@ export const FdTypes = {
   Proforma: 'PRF',
   CreditReceipt: 'CREC',
 } as const;
+
+export const PayStatus = {
+  Normal: '001',
+  Void: '002',
+};
 
 export const HbPreference = {
   Dinner: '001',

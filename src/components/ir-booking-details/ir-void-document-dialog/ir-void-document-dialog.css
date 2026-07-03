@@ -1,0 +1,16 @@
+:host {
+  display: contents;
+}
+
+.void-document-dialog__message {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--wa-color-neutral-700, #3f3f46);
+}
+
+.void-document-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

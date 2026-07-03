@@ -6,6 +6,7 @@ import moment from 'moment';
 import { IHouseKeepers } from './housekeeping';
 import type { TaxCategory } from '@/services/property/types';
 import { AgentBaseSchema } from '@/services/agents/type';
+import { PayStatus } from '@/types/enums';
 
 interface IDType {
   code: string;
@@ -411,6 +412,8 @@ export interface IFinancial {
   // gross_total_with_extras: number;
 }
 export interface IPayment {
+  credit_receipt_nbr?: string;
+  payment_status?: { code: (typeof PayStatus)[keyof typeof PayStatus] };
   system_id?: number;
   id: number | null;
   date: string;
