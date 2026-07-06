@@ -5510,6 +5510,9 @@ export namespace Components {
     interface IrRectifier {
         "formId": string;
     }
+    interface IrRectifierDrawer {
+        "open": boolean;
+    }
     interface IrReservationInformation {
         "arrivalTime": IEntries[];
         "booking": Booking;
@@ -7287,6 +7290,10 @@ export interface IrReallocationFormCustomEvent<T> extends CustomEvent<T> {
 export interface IrRectifierCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrRectifierElement;
+}
+export interface IrRectifierDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrRectifierDrawerElement;
 }
 export interface IrReservationInformationCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -11611,6 +11618,23 @@ declare global {
         prototype: HTMLIrRectifierElement;
         new (): HTMLIrRectifierElement;
     };
+    interface HTMLIrRectifierDrawerElementEventMap {
+        "closeDrawer": void;
+    }
+    interface HTMLIrRectifierDrawerElement extends Components.IrRectifierDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrRectifierDrawerElementEventMap>(type: K, listener: (this: HTMLIrRectifierDrawerElement, ev: IrRectifierDrawerCustomEvent<HTMLIrRectifierDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrRectifierDrawerElementEventMap>(type: K, listener: (this: HTMLIrRectifierDrawerElement, ev: IrRectifierDrawerCustomEvent<HTMLIrRectifierDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrRectifierDrawerElement: {
+        prototype: HTMLIrRectifierDrawerElement;
+        new (): HTMLIrRectifierDrawerElement;
+    };
     interface HTMLIrReservationInformationElementEventMap {
         "openSidebar": OpenSidebarEvent<any>;
     }
@@ -12666,6 +12690,7 @@ declare global {
         "ir-reallocation-drawer": HTMLIrReallocationDrawerElement;
         "ir-reallocation-form": HTMLIrReallocationFormElement;
         "ir-rectifier": HTMLIrRectifierElement;
+        "ir-rectifier-drawer": HTMLIrRectifierDrawerElement;
         "ir-reservation-information": HTMLIrReservationInformationElement;
         "ir-reset-password": HTMLIrResetPasswordElement;
         "ir-revenue-row": HTMLIrRevenueRowElement;
@@ -18577,6 +18602,10 @@ declare namespace LocalJSX {
         "onCloseDrawer"?: (event: IrRectifierCustomEvent<void>) => void;
         "onLoadingChanged"?: (event: IrRectifierCustomEvent<boolean>) => void;
     }
+    interface IrRectifierDrawer {
+        "onCloseDrawer"?: (event: IrRectifierDrawerCustomEvent<void>) => void;
+        "open"?: boolean;
+    }
     interface IrReservationInformation {
         "arrivalTime"?: IEntries[];
         "booking"?: Booking;
@@ -21270,6 +21299,9 @@ declare namespace LocalJSX {
     interface IrRectifierAttributes {
         "formId": string;
     }
+    interface IrRectifierDrawerAttributes {
+        "open": boolean;
+    }
     interface IrResetPasswordAttributes {
         "username": string;
         "old_pwd": string;
@@ -21879,6 +21911,7 @@ declare namespace LocalJSX {
         "ir-reallocation-drawer": Omit<IrReallocationDrawer, keyof IrReallocationDrawerAttributes> & { [K in keyof IrReallocationDrawer & keyof IrReallocationDrawerAttributes]?: IrReallocationDrawer[K] } & { [K in keyof IrReallocationDrawer & keyof IrReallocationDrawerAttributes as `attr:${K}`]?: IrReallocationDrawerAttributes[K] } & { [K in keyof IrReallocationDrawer & keyof IrReallocationDrawerAttributes as `prop:${K}`]?: IrReallocationDrawer[K] };
         "ir-reallocation-form": Omit<IrReallocationForm, keyof IrReallocationFormAttributes> & { [K in keyof IrReallocationForm & keyof IrReallocationFormAttributes]?: IrReallocationForm[K] } & { [K in keyof IrReallocationForm & keyof IrReallocationFormAttributes as `attr:${K}`]?: IrReallocationFormAttributes[K] } & { [K in keyof IrReallocationForm & keyof IrReallocationFormAttributes as `prop:${K}`]?: IrReallocationForm[K] };
         "ir-rectifier": Omit<IrRectifier, keyof IrRectifierAttributes> & { [K in keyof IrRectifier & keyof IrRectifierAttributes]?: IrRectifier[K] } & { [K in keyof IrRectifier & keyof IrRectifierAttributes as `attr:${K}`]?: IrRectifierAttributes[K] } & { [K in keyof IrRectifier & keyof IrRectifierAttributes as `prop:${K}`]?: IrRectifier[K] };
+        "ir-rectifier-drawer": Omit<IrRectifierDrawer, keyof IrRectifierDrawerAttributes> & { [K in keyof IrRectifierDrawer & keyof IrRectifierDrawerAttributes]?: IrRectifierDrawer[K] } & { [K in keyof IrRectifierDrawer & keyof IrRectifierDrawerAttributes as `attr:${K}`]?: IrRectifierDrawerAttributes[K] } & { [K in keyof IrRectifierDrawer & keyof IrRectifierDrawerAttributes as `prop:${K}`]?: IrRectifierDrawer[K] };
         "ir-reservation-information": IrReservationInformation;
         "ir-reset-password": Omit<IrResetPassword, keyof IrResetPasswordAttributes> & { [K in keyof IrResetPassword & keyof IrResetPasswordAttributes]?: IrResetPassword[K] } & { [K in keyof IrResetPassword & keyof IrResetPasswordAttributes as `attr:${K}`]?: IrResetPasswordAttributes[K] } & { [K in keyof IrResetPassword & keyof IrResetPasswordAttributes as `prop:${K}`]?: IrResetPassword[K] };
         "ir-revenue-row": Omit<IrRevenueRow, keyof IrRevenueRowAttributes> & { [K in keyof IrRevenueRow & keyof IrRevenueRowAttributes]?: IrRevenueRow[K] } & { [K in keyof IrRevenueRow & keyof IrRevenueRowAttributes as `attr:${K}`]?: IrRevenueRowAttributes[K] } & { [K in keyof IrRevenueRow & keyof IrRevenueRowAttributes as `prop:${K}`]?: IrRevenueRow[K] } & OneOf<"groupName", IrRevenueRow["groupName"], IrRevenueRowAttributes["groupName"]>;
@@ -22351,6 +22384,7 @@ declare module "@stencil/core" {
             "ir-reallocation-drawer": LocalJSX.IntrinsicElements["ir-reallocation-drawer"] & JSXBase.HTMLAttributes<HTMLIrReallocationDrawerElement>;
             "ir-reallocation-form": LocalJSX.IntrinsicElements["ir-reallocation-form"] & JSXBase.HTMLAttributes<HTMLIrReallocationFormElement>;
             "ir-rectifier": LocalJSX.IntrinsicElements["ir-rectifier"] & JSXBase.HTMLAttributes<HTMLIrRectifierElement>;
+            "ir-rectifier-drawer": LocalJSX.IntrinsicElements["ir-rectifier-drawer"] & JSXBase.HTMLAttributes<HTMLIrRectifierDrawerElement>;
             "ir-reservation-information": LocalJSX.IntrinsicElements["ir-reservation-information"] & JSXBase.HTMLAttributes<HTMLIrReservationInformationElement>;
             "ir-reset-password": LocalJSX.IntrinsicElements["ir-reset-password"] & JSXBase.HTMLAttributes<HTMLIrResetPasswordElement>;
             "ir-revenue-row": LocalJSX.IntrinsicElements["ir-revenue-row"] & JSXBase.HTMLAttributes<HTMLIrRevenueRowElement>;

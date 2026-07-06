@@ -26,7 +26,7 @@ import { SetDepartureTimeProps } from '@/services/booking-service/types';
 import { HKIssue } from '@/models/housekeeping';
 // import Auth from '@/models/Auth';
 export type CalendarSidebarState = {
-  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer';
+  type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer' | 'rectifier';
   payload: any;
 };
 @Component({
@@ -1022,6 +1022,12 @@ export class IglooCalendar {
           payload: null,
         };
         break;
+      case 'rectify':
+        this.calendarSidebarState = {
+          type: 'rectifier',
+          payload: null,
+        };
+        break;
       case 'add':
         //console.log('data:', opt.data);
         if (opt.data.event_type !== 'EDIT_BOOKING') {
@@ -1588,6 +1594,10 @@ export class IglooCalendar {
           onCloseDrawer={() => (this.calendarSidebarState = null)}
           open={this.calendarSidebarState?.type === 'bulk-blocks'}
         ></igl-bulk-operations-drawer>
+        <ir-rectifier-drawer
+          onCloseDrawer={() => (this.calendarSidebarState = null)}
+          open={this.calendarSidebarState?.type === 'rectifier'}
+        ></ir-rectifier-drawer>
         <igl-blocked-date-drawer
           onBlockedDateDrawerClosed={e => {
             e.stopImmediatePropagation();

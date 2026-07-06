@@ -28,10 +28,6 @@ export class IglBulkOperationsDrawer {
       id: 'block',
       label: 'Block Unit',
     },
-    {
-      id: 'rectifier',
-      label: 'Rectify Availability',
-    },
   ];
 
   @Listen('loadingChanged')
@@ -75,9 +71,6 @@ export class IglBulkOperationsDrawer {
                     property_id={this.property_id}
                   ></igl-bulk-block>
                 )}
-              </wa-tab-panel>
-              <wa-tab-panel name="rectifier">
-                {this.selectedTab === 'rectifier' && <ir-rectifier onCloseDrawer={this.handleDrawerClose.bind(this)} formId={formId}></ir-rectifier>}
               </wa-tab-panel>
             </wa-tab-group>
           )}

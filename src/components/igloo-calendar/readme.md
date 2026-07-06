@@ -20,15 +20,15 @@
 
 ## Events
 
-| Event                      | Description | Type                                                                                                                                        |
-| -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `calculateUnassignedDates` |             | `CustomEvent<any>`                                                                                                                          |
-| `dragOverHighlightElement` |             | `CustomEvent<any>`                                                                                                                          |
-| `moveBookingTo`            |             | `CustomEvent<any>`                                                                                                                          |
-| `openCalendarSidebar`      |             | `CustomEvent<{ type: "split" \| "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks" \| "reallocate-drawer"; payload: any; }>` |
-| `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                                                                        |
-| `revertBooking`            |             | `CustomEvent<any>`                                                                                                                          |
-| `showRoomNightsDialog`     |             | `CustomEvent<IRoomNightsData>`                                                                                                              |
+| Event                      | Description | Type                                                                                                                                                       |
+| -------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `calculateUnassignedDates` |             | `CustomEvent<any>`                                                                                                                                         |
+| `dragOverHighlightElement` |             | `CustomEvent<any>`                                                                                                                                         |
+| `moveBookingTo`            |             | `CustomEvent<any>`                                                                                                                                         |
+| `openCalendarSidebar`      |             | `CustomEvent<{ type: "split" \| "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks" \| "reallocate-drawer" \| "rectifier"; payload: any; }>` |
+| `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                                                                                       |
+| `revertBooking`            |             | `CustomEvent<any>`                                                                                                                                         |
+| `showRoomNightsDialog`     |             | `CustomEvent<IRoomNightsData>`                                                                                                                             |
 
 
 ## Dependencies
@@ -59,6 +59,7 @@
 - [ir-invoice](../ir-invoice)
 - [ir-booking-editor-drawer](./ir-booking-editor/ir-booking-editor-drawer)
 - [igl-bulk-operations-drawer](./igl-bulk-operations/igl-bulk-operations-drawer)
+- [ir-rectifier-drawer](../ir-rectifier-drawer)
 - [igl-blocked-date-drawer](igl-blocked-date-drawer)
 
 ### Graph
@@ -84,6 +85,7 @@ graph TD;
   igloo-calendar --> ir-invoice
   igloo-calendar --> ir-booking-editor-drawer
   igloo-calendar --> igl-bulk-operations-drawer
+  igloo-calendar --> ir-rectifier-drawer
   igloo-calendar --> igl-blocked-date-drawer
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
@@ -399,13 +401,15 @@ graph TD;
   igl-bulk-operations-drawer --> ir-drawer
   igl-bulk-operations-drawer --> igl-bulk-stop-sale
   igl-bulk-operations-drawer --> igl-bulk-block
-  igl-bulk-operations-drawer --> ir-rectifier
   igl-bulk-operations-drawer --> ir-custom-button
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-custom-button
   igl-bulk-stop-sale --> ir-date-select
   igl-bulk-block --> ir-custom-button
   igl-bulk-block --> ir-date-select
+  ir-rectifier-drawer --> ir-drawer
+  ir-rectifier-drawer --> ir-rectifier
+  ir-rectifier-drawer --> ir-custom-button
   ir-rectifier --> ir-validator
   ir-rectifier --> ir-date-select
   igl-blocked-date-drawer --> ir-drawer

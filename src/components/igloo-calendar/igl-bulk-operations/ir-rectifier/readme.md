@@ -24,7 +24,7 @@
 
 ### Used by
 
- - [igl-bulk-operations-drawer](../igl-bulk-operations-drawer)
+ - [ir-rectifier-drawer](../../../ir-rectifier-drawer)
 
 ### Depends on
 
@@ -38,7 +38,7 @@ graph TD;
   ir-rectifier --> ir-date-select
   ir-date-select --> ir-input
   ir-date-select --> ir-air-date-picker
-  igl-bulk-operations-drawer --> ir-rectifier
+  ir-rectifier-drawer --> ir-rectifier
   style ir-rectifier fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

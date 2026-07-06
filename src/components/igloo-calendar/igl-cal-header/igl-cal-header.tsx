@@ -206,7 +206,7 @@ export class IglCalHeader {
                   <ir-custom-button id="fd-unassigned-dates_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('showAssigned')}>
                     <wa-icon
                       style={{ fontSize: '1.5rem' }}
-                      name="server"
+                      name="list-ol"
                       label={locales.entries.Lcz_UnassignedUnitsTooltip}
                       aria-label={locales.entries.Lcz_UnassignedUnitsTooltip}
                     ></wa-icon>
@@ -270,12 +270,6 @@ export class IglCalHeader {
                 </div>
               </ir-date-select>
               {/* <Fragment>
-                <wa-tooltip for="fd-today-navigation_btn">{locales.entries.Lcz_Today}</wa-tooltip>
-                <ir-custom-button slot="trigger" id="fd-today-navigation_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('gotoToday')}>
-                  <wa-icon style={{ fontSize: '1.5rem' }} name="clock" variant="regular" label={locales.entries.Lcz_Today} aria-label={locales.entries.Lcz_Today}></wa-icon>
-                </ir-custom-button>
-              </Fragment> */}
-              <Fragment>
                 <wa-tooltip for="fd-new-booking_btn">{locales.entries.Lcz_CreateNewBooking}</wa-tooltip>
                 <ir-custom-button
                   slot="trigger"
@@ -285,6 +279,18 @@ export class IglCalHeader {
                   onClickHandler={() => this.handleOptionEvent('add', this.getNewBookingModel())}
                 >
                   <wa-icon style={{ fontSize: '1.5rem' }} name="plus" label={locales.entries.Lcz_CreateNewBooking} aria-label={locales.entries.Lcz_CreateNewBooking}></wa-icon>
+                </ir-custom-button>
+              </Fragment> */}
+              <Fragment>
+                <wa-tooltip for="fd-rectifier">Rectify or open availability</wa-tooltip>
+                <ir-custom-button slot="trigger" id="fd-rectifier" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('rectify')}>
+                  <wa-icon
+                    style={{ fontSize: '1.5rem' }}
+                    name="calendar-check"
+                    variant="regular"
+                    label={'Rectify or open availability'}
+                    aria-label={'Rectify or open availability'}
+                  ></wa-icon>
                 </ir-custom-button>
               </Fragment>
               <Fragment>

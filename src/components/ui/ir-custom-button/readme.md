@@ -143,6 +143,7 @@
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reallocation-drawer](../../ir-reallocation-drawer)
+ - [ir-rectifier-drawer](../../ir-rectifier-drawer)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-revenue-row-details](../../ir-daily-revenue/ir-revenue-table/ir-revenue-row/ir-revenue-row-details)
@@ -269,6 +270,7 @@ graph TD;
   ir-preview-screen-dialog --> ir-custom-button
   ir-queue-manager --> ir-custom-button
   ir-reallocation-drawer --> ir-custom-button
+  ir-rectifier-drawer --> ir-custom-button
   ir-reservation-information --> ir-custom-button
   ir-reset-password --> ir-custom-button
   ir-revenue-row-details --> ir-custom-button

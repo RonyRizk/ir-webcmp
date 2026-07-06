@@ -99,6 +99,7 @@ graph TD;
   igloo-calendar --> ir-invoice
   igloo-calendar --> ir-booking-editor-drawer
   igloo-calendar --> igl-bulk-operations-drawer
+  igloo-calendar --> ir-rectifier-drawer
   igloo-calendar --> igl-blocked-date-drawer
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
@@ -407,13 +408,15 @@ graph TD;
   igl-bulk-operations-drawer --> ir-drawer
   igl-bulk-operations-drawer --> igl-bulk-stop-sale
   igl-bulk-operations-drawer --> igl-bulk-block
-  igl-bulk-operations-drawer --> ir-rectifier
   igl-bulk-operations-drawer --> ir-custom-button
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-custom-button
   igl-bulk-stop-sale --> ir-date-select
   igl-bulk-block --> ir-custom-button
   igl-bulk-block --> ir-date-select
+  ir-rectifier-drawer --> ir-drawer
+  ir-rectifier-drawer --> ir-rectifier
+  ir-rectifier-drawer --> ir-custom-button
   ir-rectifier --> ir-validator
   ir-rectifier --> ir-date-select
   igl-blocked-date-drawer --> ir-drawer

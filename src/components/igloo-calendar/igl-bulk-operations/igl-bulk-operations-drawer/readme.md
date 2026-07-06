@@ -33,7 +33,6 @@
 - [ir-drawer](../../../ir-drawer)
 - [igl-bulk-stop-sale](../igl-bulk-stop-sale)
 - [igl-bulk-block](../igl-bulk-block)
-- [ir-rectifier](../ir-rectifier)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
@@ -42,7 +41,6 @@ graph TD;
   igl-bulk-operations-drawer --> ir-drawer
   igl-bulk-operations-drawer --> igl-bulk-stop-sale
   igl-bulk-operations-drawer --> igl-bulk-block
-  igl-bulk-operations-drawer --> ir-rectifier
   igl-bulk-operations-drawer --> ir-custom-button
   igl-bulk-stop-sale --> ir-weekday-selector
   igl-bulk-stop-sale --> ir-custom-button
@@ -51,8 +49,6 @@ graph TD;
   ir-date-select --> ir-air-date-picker
   igl-bulk-block --> ir-custom-button
   igl-bulk-block --> ir-date-select
-  ir-rectifier --> ir-validator
-  ir-rectifier --> ir-date-select
   igloo-calendar --> igl-bulk-operations-drawer
   style igl-bulk-operations-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

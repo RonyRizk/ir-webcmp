@@ -48,6 +48,7 @@
  - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
  - [ir-pickup](../ir-booking-details/ir-pickup)
  - [ir-reallocation-drawer](../ir-reallocation-drawer)
+ - [ir-rectifier-drawer](../ir-rectifier-drawer)
  - [ir-room-guests](../ir-booking-details/ir-room-guests)
  - [ir-test-cmp](../ir-test-cmp)
  - [ir-user-form-panel-drawer](../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
@@ -75,6 +76,7 @@ graph TD;
   ir-payment-folio --> ir-drawer
   ir-pickup --> ir-drawer
   ir-reallocation-drawer --> ir-drawer
+  ir-rectifier-drawer --> ir-drawer
   ir-room-guests --> ir-drawer
   ir-test-cmp --> ir-drawer
   ir-user-form-panel-drawer --> ir-drawer
