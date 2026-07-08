@@ -202,7 +202,9 @@ export class IglCalHeader {
             <div class="row justify-content-around no-gutters" style={{ gap: '0' }}>
               {!this.calendarData.is_vacation_rental && (
                 <Fragment>
-                  <wa-tooltip for="fd-unassigned-dates_btn">{locales.entries.Lcz_UnassignedUnitsTooltip}</wa-tooltip>
+                  <wa-tooltip trigger="hover" for="fd-unassigned-dates_btn">
+                    {locales.entries.Lcz_UnassignedUnitsTooltip}
+                  </wa-tooltip>
                   <ir-custom-button id="fd-unassigned-dates_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('showAssigned')}>
                     <wa-icon
                       style={{ fontSize: '1.5rem' }}
@@ -237,7 +239,9 @@ export class IglCalHeader {
                   ></wa-icon>
                 </ir-custom-button>
               </ir-date-picker> */}
-              <wa-tooltip for="fd-dates-navigation_btn">{locales.entries.Lcz_Navigate}</wa-tooltip>
+              <wa-tooltip trigger="hover" for="fd-dates-navigation_btn">
+                {locales.entries.Lcz_Navigate}
+              </wa-tooltip>
               <ir-date-select
                 minDate={moment().add(-2, 'months').startOf('month').format('YYYY-MM-DD')}
                 onDateChanged={evt => {
@@ -281,27 +285,25 @@ export class IglCalHeader {
                   <wa-icon style={{ fontSize: '1.5rem' }} name="plus" label={locales.entries.Lcz_CreateNewBooking} aria-label={locales.entries.Lcz_CreateNewBooking}></wa-icon>
                 </ir-custom-button>
               </Fragment> */}
+
+              <wa-tooltip trigger="hover" for="fd-rectifier">
+                Rectify or open availability
+              </wa-tooltip>
+              <ir-custom-button id="fd-rectifier" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('rectify')}>
+                <wa-icon
+                  style={{ fontSize: '1.5rem' }}
+                  name="calendar-check"
+                  variant="regular"
+                  label={'Rectify or open availability'}
+                  aria-label={'Rectify or open availability'}
+                ></wa-icon>
+              </ir-custom-button>
+
               <Fragment>
-                <wa-tooltip for="fd-rectifier">Rectify or open availability</wa-tooltip>
-                <ir-custom-button slot="trigger" id="fd-rectifier" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('rectify')}>
-                  <wa-icon
-                    style={{ fontSize: '1.5rem' }}
-                    name="calendar-check"
-                    variant="regular"
-                    label={'Rectify or open availability'}
-                    aria-label={'Rectify or open availability'}
-                  ></wa-icon>
-                </ir-custom-button>
-              </Fragment>
-              <Fragment>
-                <wa-tooltip for="fd-stop-open-sale_btn">{locales.entries.Lcz_StopOpenSale}</wa-tooltip>
-                <ir-custom-button
-                  slot="trigger"
-                  id="fd-stop-open-sale_btn"
-                  variant="neutral"
-                  appearance="plain"
-                  onClickHandler={() => this.handleOptionEvent('bulk', this.getNewBookingModel())}
-                >
+                <wa-tooltip trigger="hover" for="fd-stop-open-sale_btn">
+                  {locales.entries.Lcz_StopOpenSale}
+                </wa-tooltip>
+                <ir-custom-button id="fd-stop-open-sale_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('bulk', this.getNewBookingModel())}>
                   <wa-icon
                     variant="regular"
                     style={{ fontSize: '1.5rem' }}

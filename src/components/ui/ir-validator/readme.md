@@ -62,7 +62,7 @@
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
- - [ir-rectifier](../../igloo-calendar/igl-bulk-operations/ir-rectifier)
+ - [ir-rectifier](../../ir-rectifier-drawer/ir-rectifier)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
  - [ir-tax-input](../../ir-tax-service-categories/ir-tax-input)

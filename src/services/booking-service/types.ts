@@ -283,3 +283,13 @@ export const VoidPaymentPropsSchema = z.object({
   booking_nbr: z.string(),
 });
 export type VoidPaymentProps = z.infer<typeof VoidPaymentPropsSchema>;
+
+export const CalculateOptimBaseGrossAmountParamsSchema = z.object({
+  booking_nbr: z.string(),
+});
+export type CalculateOptimBaseGrossAmountParams = z.infer<typeof CalculateOptimBaseGrossAmountParamsSchema>;
+
+export const SimulateDirectBookingParamsSchema = z.object({
+  booking_nbr: z.string(),
+});
+export type SimulateDirectBookingParams = z.infer<typeof SimulateDirectBookingParamsSchema>;

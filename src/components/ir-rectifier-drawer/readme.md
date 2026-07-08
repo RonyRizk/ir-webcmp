@@ -28,7 +28,7 @@
 ### Depends on
 
 - [ir-drawer](../ir-drawer)
-- [ir-rectifier](../igloo-calendar/igl-bulk-operations/ir-rectifier)
+- [ir-rectifier](ir-rectifier)
 - [ir-custom-button](../ui/ir-custom-button)
 
 ### Graph

@@ -4815,6 +4815,21 @@ export namespace Components {
         "booking": Booking;
         "paymentAction": IPaymentAction[];
     }
+    interface IrPaymentAnalytics {
+        "booking": Booking;
+        /**
+          * @default null
+         */
+        "directBookingGrossAmount": number | null;
+        /**
+          * @default false
+         */
+        "loading": boolean;
+        /**
+          * @default null
+         */
+        "optimBaseGrossAmount": number | null;
+    }
     interface IrPaymentDetails {
         "agent": Agent;
         "booking": Booking;
@@ -4831,6 +4846,10 @@ export namespace Components {
          */
         "clTransactions": ClTx[];
         /**
+          * @default null
+         */
+        "directBookingGrossAmount": number | null;
+        /**
           * @default []
          */
         "folioRows": FolioRow[];
@@ -4842,9 +4861,17 @@ export namespace Components {
           * @default 'en'
          */
         "language": string;
+        /**
+          * @default null
+         */
+        "optimBaseGrossAmount": number | null;
         "paymentActions": IPaymentAction[];
         "paymentEntries": PaymentEntries1;
         "propertyId": number;
+        /**
+          * @default false
+         */
+        "rateAnalyticsLoading": boolean;
         "svcCategories": IEntries[];
     }
     interface IrPaymentFolio {
@@ -11159,6 +11186,12 @@ declare global {
         prototype: HTMLIrPaymentActionsElement;
         new (): HTMLIrPaymentActionsElement;
     };
+    interface HTMLIrPaymentAnalyticsElement extends Components.IrPaymentAnalytics, HTMLStencilElement {
+    }
+    var HTMLIrPaymentAnalyticsElement: {
+        prototype: HTMLIrPaymentAnalyticsElement;
+        new (): HTMLIrPaymentAnalyticsElement;
+    };
     interface HTMLIrPaymentDetailsElementEventMap {
         "resetBookingEvt": null;
         "resetExposedCancellationDueAmount": null;
@@ -12654,6 +12687,7 @@ declare global {
         "ir-password-validator": HTMLIrPasswordValidatorElement;
         "ir-payment-action": HTMLIrPaymentActionElement;
         "ir-payment-actions": HTMLIrPaymentActionsElement;
+        "ir-payment-analytics": HTMLIrPaymentAnalyticsElement;
         "ir-payment-details": HTMLIrPaymentDetailsElement;
         "ir-payment-folio": HTMLIrPaymentFolioElement;
         "ir-payment-folio-form": HTMLIrPaymentFolioFormElement;
@@ -17841,6 +17875,21 @@ declare namespace LocalJSX {
         "booking"?: Booking;
         "paymentAction"?: IPaymentAction[];
     }
+    interface IrPaymentAnalytics {
+        "booking"?: Booking;
+        /**
+          * @default null
+         */
+        "directBookingGrossAmount"?: number | null;
+        /**
+          * @default false
+         */
+        "loading"?: boolean;
+        /**
+          * @default null
+         */
+        "optimBaseGrossAmount"?: number | null;
+    }
     interface IrPaymentDetails {
         "agent"?: Agent;
         "booking"?: Booking;
@@ -17856,6 +17905,10 @@ declare namespace LocalJSX {
           * @default []
          */
         "clTransactions"?: ClTx[];
+        /**
+          * @default null
+         */
+        "directBookingGrossAmount"?: number | null;
         /**
           * @default []
          */
@@ -17877,9 +17930,17 @@ declare namespace LocalJSX {
         "onResetBookingEvt"?: (event: IrPaymentDetailsCustomEvent<null>) => void;
         "onResetExposedCancellationDueAmount"?: (event: IrPaymentDetailsCustomEvent<null>) => void;
         "onToast"?: (event: IrPaymentDetailsCustomEvent<IToast>) => void;
+        /**
+          * @default null
+         */
+        "optimBaseGrossAmount"?: number | null;
         "paymentActions"?: IPaymentAction[];
         "paymentEntries"?: PaymentEntries1;
         "propertyId"?: number;
+        /**
+          * @default false
+         */
+        "rateAnalyticsLoading"?: boolean;
         "svcCategories"?: IEntries[];
     }
     interface IrPaymentFolio {
@@ -21103,12 +21164,20 @@ declare namespace LocalJSX {
     interface IrPasswordValidatorAttributes {
         "password": string;
     }
+    interface IrPaymentAnalyticsAttributes {
+        "optimBaseGrossAmount": number | null;
+        "directBookingGrossAmount": number | null;
+        "loading": boolean;
+    }
     interface IrPaymentDetailsAttributes {
         "propertyId": number;
         "language": string;
         "isAllServicesAgentOwned": boolean;
         "clLoading": boolean;
         "clError": string | null;
+        "optimBaseGrossAmount": number | null;
+        "directBookingGrossAmount": number | null;
+        "rateAnalyticsLoading": boolean;
     }
     interface IrPaymentFolioAttributes {
         "bookingNumber": string;
@@ -21875,6 +21944,7 @@ declare namespace LocalJSX {
         "ir-password-validator": Omit<IrPasswordValidator, keyof IrPasswordValidatorAttributes> & { [K in keyof IrPasswordValidator & keyof IrPasswordValidatorAttributes]?: IrPasswordValidator[K] } & { [K in keyof IrPasswordValidator & keyof IrPasswordValidatorAttributes as `attr:${K}`]?: IrPasswordValidatorAttributes[K] } & { [K in keyof IrPasswordValidator & keyof IrPasswordValidatorAttributes as `prop:${K}`]?: IrPasswordValidator[K] };
         "ir-payment-action": IrPaymentAction;
         "ir-payment-actions": IrPaymentActions;
+        "ir-payment-analytics": Omit<IrPaymentAnalytics, keyof IrPaymentAnalyticsAttributes> & { [K in keyof IrPaymentAnalytics & keyof IrPaymentAnalyticsAttributes]?: IrPaymentAnalytics[K] } & { [K in keyof IrPaymentAnalytics & keyof IrPaymentAnalyticsAttributes as `attr:${K}`]?: IrPaymentAnalyticsAttributes[K] } & { [K in keyof IrPaymentAnalytics & keyof IrPaymentAnalyticsAttributes as `prop:${K}`]?: IrPaymentAnalytics[K] };
         "ir-payment-details": Omit<IrPaymentDetails, keyof IrPaymentDetailsAttributes> & { [K in keyof IrPaymentDetails & keyof IrPaymentDetailsAttributes]?: IrPaymentDetails[K] } & { [K in keyof IrPaymentDetails & keyof IrPaymentDetailsAttributes as `attr:${K}`]?: IrPaymentDetailsAttributes[K] } & { [K in keyof IrPaymentDetails & keyof IrPaymentDetailsAttributes as `prop:${K}`]?: IrPaymentDetails[K] };
         "ir-payment-folio": Omit<IrPaymentFolio, keyof IrPaymentFolioAttributes> & { [K in keyof IrPaymentFolio & keyof IrPaymentFolioAttributes]?: IrPaymentFolio[K] } & { [K in keyof IrPaymentFolio & keyof IrPaymentFolioAttributes as `attr:${K}`]?: IrPaymentFolioAttributes[K] } & { [K in keyof IrPaymentFolio & keyof IrPaymentFolioAttributes as `prop:${K}`]?: IrPaymentFolio[K] };
         "ir-payment-folio-form": Omit<IrPaymentFolioForm, keyof IrPaymentFolioFormAttributes> & { [K in keyof IrPaymentFolioForm & keyof IrPaymentFolioFormAttributes]?: IrPaymentFolioForm[K] } & { [K in keyof IrPaymentFolioForm & keyof IrPaymentFolioFormAttributes as `attr:${K}`]?: IrPaymentFolioFormAttributes[K] } & { [K in keyof IrPaymentFolioForm & keyof IrPaymentFolioFormAttributes as `prop:${K}`]?: IrPaymentFolioForm[K] };
@@ -22344,6 +22414,7 @@ declare module "@stencil/core" {
             "ir-password-validator": LocalJSX.IntrinsicElements["ir-password-validator"] & JSXBase.HTMLAttributes<HTMLIrPasswordValidatorElement>;
             "ir-payment-action": LocalJSX.IntrinsicElements["ir-payment-action"] & JSXBase.HTMLAttributes<HTMLIrPaymentActionElement>;
             "ir-payment-actions": LocalJSX.IntrinsicElements["ir-payment-actions"] & JSXBase.HTMLAttributes<HTMLIrPaymentActionsElement>;
+            "ir-payment-analytics": LocalJSX.IntrinsicElements["ir-payment-analytics"] & JSXBase.HTMLAttributes<HTMLIrPaymentAnalyticsElement>;
             "ir-payment-details": LocalJSX.IntrinsicElements["ir-payment-details"] & JSXBase.HTMLAttributes<HTMLIrPaymentDetailsElement>;
             "ir-payment-folio": LocalJSX.IntrinsicElements["ir-payment-folio"] & JSXBase.HTMLAttributes<HTMLIrPaymentFolioElement>;
             "ir-payment-folio-form": LocalJSX.IntrinsicElements["ir-payment-folio-form"] & JSXBase.HTMLAttributes<HTMLIrPaymentFolioFormElement>;

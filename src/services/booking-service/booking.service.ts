@@ -1,4 +1,15 @@
-import { SetDepartureTimeProps, SetDepartureTimePropsSchema, SetHbPreferenceProps, SetHbPreferencePropsSchema, VoidPaymentProps, VoidPaymentPropsSchema } from './types';
+import {
+  CalculateOptimBaseGrossAmountParams,
+  CalculateOptimBaseGrossAmountParamsSchema,
+  SetDepartureTimeProps,
+  SetDepartureTimePropsSchema,
+  SetHbPreferenceProps,
+  SetHbPreferencePropsSchema,
+  SimulateDirectBookingParams,
+  SimulateDirectBookingParamsSchema,
+  VoidPaymentProps,
+  VoidPaymentPropsSchema,
+} from './types';
 // import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 // import { DayData } from '../../models/DayType';
 // import axios from 'axios';
@@ -1150,12 +1161,14 @@ export class BookingService {
 
     return days;
   }
+
   private calculateTotalRate(rate: number, totalNights: number, isRateModified: boolean, preference: number) {
     if (isRateModified && preference === 2) {
       return +rate;
     }
     return +rate / +totalNights;
   }
+
   public async fetchExposedGuest(email: string, property_id: number): Promise<ExposedGuests> {
     try {
       const { data } = await axios.post(`/Fetch_Exposed_Guests`, {
@@ -1382,5 +1395,23 @@ export class BookingService {
     const payload = PrintInvoicePropsSchema.parse(props);
     const { data } = await axios.post('/Print_Invoice', payload);
     return data;
+  }
+
+  public async calculateOptimBaseGrossAmount(params: CalculateOptimBaseGrossAmountParams): Promise<number> {
+    const payload = CalculateOptimBaseGrossAmountParamsSchema.parse(params);
+    const { data } = await axios.post(`/Calculate_Optim_Base_Gross_Amount`, payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data['My_Result'];
+  }
+
+  public async simulateDirectBooking(params: SimulateDirectBookingParams): Promise<number> {
+    const payload = SimulateDirectBookingParamsSchema.parse(params);
+    const { data } = await axios.post(`/Simulate_Direct_Booking`, payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data['My_Result'];
   }
 }

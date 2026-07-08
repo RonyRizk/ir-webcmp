@@ -30,7 +30,7 @@ export class IrRectifierDrawer {
   render() {
     return (
       <Host>
-        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label="Rectify Availability" open={this.open} class="rectifier__drawer">
+        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label="Rectify/Extend Availability" open={this.open} class="rectifier__drawer">
           {this.open && <ir-rectifier formId={this.formId} onCloseDrawer={this.handleDrawerClose.bind(this)} onLoadingChanged={this.handleLoadingChange.bind(this)}></ir-rectifier>}
           <div slot="footer" class="ir__drawer-footer">
             <ir-custom-button size="m" variant="neutral" appearance="filled" data-drawer="close">
