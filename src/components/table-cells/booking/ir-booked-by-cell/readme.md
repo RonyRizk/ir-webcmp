@@ -12,7 +12,7 @@
 | `cellId`               | `cell-id`                 |                                                                                                              | `string`              | `undefined` |
 | `clickableGuest`       | `clickable-guest`         | Makes the guest name clickable. Emits `openGuestDetails` when clicked.                                       | `boolean`             | `false`     |
 | `display`              | `display`                 |                                                                                                              | `"block" \| "inline"` | `'block'`   |
-| `guest`                | --                        | Guest associated with this booking.                                                                          | `Guest`               | `undefined` |
+| `guest`                | --                        | Guest associated with this booking.                                                                          | `BookedByCellGuest`   | `undefined` |
 | `identifier`           | `identifier`              | Unique identifier for this cell. Used for tooltip scoping.                                                   | `string`              | `undefined` |
 | `label`                | `label`                   |                                                                                                              | `string`              | `undefined` |
 | `promoKey`             | `promo-key`               | Promo key if a promo/coupon was applied.                                                                     | `string`              | `undefined` |
@@ -40,6 +40,7 @@
  - [ir-booking-listing-mobile-card](../../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
+ - [ir-dp-report-table](../../../ir-dp-report/ir-dp-report-table)
 
 ### Graph
 ```mermaid
@@ -48,6 +49,7 @@ graph TD;
   ir-booking-listing-mobile-card --> ir-booked-by-cell
   ir-booking-listing-table --> ir-booked-by-cell
   ir-departures-table --> ir-booked-by-cell
+  ir-dp-report-table --> ir-booked-by-cell
   style ir-booked-by-cell fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

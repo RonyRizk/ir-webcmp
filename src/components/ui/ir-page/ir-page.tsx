@@ -17,9 +17,11 @@ export class IrPage {
           <header class="tax-page__header">
             <slot name="heading">
               <div class="tax-page__heading">
-                <h3 class="page-title">{this.label}</h3>
+                <h3 part="title" class="page-title">
+                  {this.label}
+                </h3>
                 {this.description && (
-                  <p class="page__description">
+                  <p part="description" class="page__description">
                     {this.description}
                     <slot name="page-description"></slot>
                   </p>

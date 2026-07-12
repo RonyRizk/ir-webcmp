@@ -24,6 +24,7 @@
  - [ir-city-ledger](../ir-city-ledger)
  - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-departures](../ir-departures)
+ - [ir-dp-report](../ir-dp-report)
  - [ir-financial-actions](../ir-financial-actions)
  - [ir-fiscal-documents](../ir-fiscal-documents)
  - [ir-gap-nights](../ir-gap-nights)
@@ -53,6 +54,7 @@ graph TD;
   ir-city-ledger --> ir-loading-screen
   ir-daily-revenue --> ir-loading-screen
   ir-departures --> ir-loading-screen
+  ir-dp-report --> ir-loading-screen
   ir-financial-actions --> ir-loading-screen
   ir-fiscal-documents --> ir-loading-screen
   ir-gap-nights --> ir-loading-screen

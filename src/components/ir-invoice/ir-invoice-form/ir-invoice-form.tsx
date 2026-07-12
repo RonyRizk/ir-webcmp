@@ -372,7 +372,7 @@ export class IrInvoiceForm {
       // let invoiceInfo = this.invoiceInfo;
       // if (!this.invoiceInfo) {
       const [booking, invoiceInfo] = await Promise.all([
-        this.bookingService.getExposedBooking(this.booking.booking_nbr, 'en', true),
+        this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: 'en', withExtras: true }),
         this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
       ]);
 

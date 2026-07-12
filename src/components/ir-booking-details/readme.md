@@ -199,7 +199,6 @@ graph TD;
   ir-payment-details --> ir-booking-guarantee
   ir-payment-details --> ir-applicable-policies
   ir-payment-details --> ir-custom-button
-  ir-payment-details --> ir-payment-analytics
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-void-document-dialog

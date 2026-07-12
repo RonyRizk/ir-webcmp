@@ -191,7 +191,9 @@ export class IrPmsPage {
             <ir-menu-group groupName="sub-property">
               <ir-menu-item slot="summary">Settings</ir-menu-item>
               <ir-menu-item href="acgeneral.aspx">General Info</ir-menu-item>
-              <ir-menu-item href="acamenities.aspx">Facilities &amp; Services</ir-menu-item>
+              <ir-menu-item href="acamenities.aspx" badge="    جديد">
+                المرافق والخدمات
+              </ir-menu-item>
               <ir-menu-item href="acdescriptions.aspx">Descriptions</ir-menu-item>
               <ir-menu-item href="acconcan.aspx">Policies</ir-menu-item>
               <ir-menu-item href="accommtax.aspx">Money Matters</ir-menu-item>

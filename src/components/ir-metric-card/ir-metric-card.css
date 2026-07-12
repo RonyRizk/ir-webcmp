@@ -117,6 +117,7 @@
   flex-wrap: wrap;
   gap: var(--wa-space-xs, 0.5rem);
   line-height: var(--wa-line-height-condensed, 1.2);
+  color: var(--wa-color-text-normal, #0f172a);
 }
 
 .metric__value-number {
@@ -124,7 +125,6 @@
   font-size: var(--ir-metric-card-value-size);
   font-weight: var(--wa-font-weight-bold, 700);
   font-variant-numeric: tabular-nums;
-  color: var(--wa-color-text-normal, #0f172a);
 }
 
 .metric__unit {

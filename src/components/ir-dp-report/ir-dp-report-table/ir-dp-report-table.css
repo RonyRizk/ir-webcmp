@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+
+.dp-report-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  background-color: var(--wa-color-surface-default, #fff);
+}
+
+.table--container {
+  overflow-x: auto;
+}
+
+.cell--align-end {
+  text-align: right !important;
+}
+
+.dp-report-table__effect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  font-weight: 500;
+}
+.dp-report__booking-nbr-cell::part(container) {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+}
+.dp-report__booking-nbr-cell::part(booking-reference) {
+  font-size: var(--wa-form-control-value-font-size);
+  line-height: calc(var(--wa-form-control-height) - var(--border-width) * 2);
+}
+.dp-report-table__effect--gain {
+  font-weight: 600;
+  color: var(--wa-color-success-fill-loud, #16a34a);
+}
+
+.dp-report-table__effect--loss {
+  font-weight: 600;
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+}
+
+.dp-report-table__pagination {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+.cell--align-center {
+  text-align: center !important;
+}
+
+/* ir-booking-number-cell — center the logo against the booking number + source text block */
+.dp-report-table ir-booking-number-cell .booking-nbr-cell__container {
+  align-self: center;
+}
+
+/* ir-booked-on-cell — this table only ever shows the date, not the time */
+.dp-report-table ir-booked-on-cell .booked-on-cell__time {
+  display: none;
+}
+
+/* ir-booked-by-cell — no table-specific overrides needed, uses shared defaults */
+
+/* ir-dates-cell — check-in/check-out on one line with a compact gap around the arrow */
+.dp-report-table ir-dates-cell[display='inline'] {
+  justify-content: flex-start !important;
+  gap: 0.5rem !important;
+}

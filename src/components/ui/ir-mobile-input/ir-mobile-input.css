@@ -92,7 +92,11 @@
   border-style: var(--wa-form-control-border-style);
   border-width: var(--wa-form-control-border-width);
   border-radius: var(--wa-form-control-border-radius);
-  transition: background-color var(--wa-transition-normal), border var(--wa-transition-normal), all var(--wa-transition-normal), outline var(--wa-transition-fast);
+  transition:
+    background-color var(--wa-transition-normal),
+    border var(--wa-transition-normal),
+    all var(--wa-transition-normal),
+    outline var(--wa-transition-fast);
   transition-timing-function: var(--wa-transition-easing);
 }
 .mobile-input__container {
@@ -122,9 +126,6 @@
   -webkit-user-select: none;
 }
 .mobile-input__trigger {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: 0;
   cursor: pointer;
 }
 .mobile-input__phone {
@@ -165,4 +166,14 @@
 .phone__input:dir(rtl)::part(base) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+}
+.mobile-input__trigger:dir(ltr) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+.mobile-input__trigger:dir(rtl) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
 }

@@ -1,8 +1,13 @@
 import { Booking } from '@/models/booking.dto';
 import calendar_data from '@/stores/calendar-data';
-import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { formatAmount } from '@/utils/utils';
-import { Component, Host, Prop, h } from '@stencil/core';
+import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
+
+type DpEffectTone = 'neutral' | 'loss' | 'gain';
+
+const COUNT_UP_DURATION_MS = 700;
+/** Cubic ease-out — starts fast, settles gently instead of stopping abruptly. */
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 @Component({
   tag: 'ir-payment-analytics',
@@ -11,110 +16,72 @@ import { Component, Host, Prop, h } from '@stencil/core';
 })
 export class IrPaymentAnalytics {
   @Prop() booking: Booking;
-  @Prop() optimBaseGrossAmount: number | null = null;
-  @Prop() directBookingGrossAmount: number | null = null;
-  @Prop() loading: boolean = false;
 
-  private renderAmount(value: number | null, currencySymbol: string) {
-    if (this.loading) {
-      return <p class="analytics__row-value analytics__row-value--loading">…</p>;
-    }
-    return <p class="analytics__row-value">{value === null ? '—' : formatAmount(currencySymbol, value)}</p>;
+  @State() private displayedValue = 0;
+
+  private animationFrameId?: number;
+
+  componentWillLoad() {
+    this.runCountUp();
   }
 
-  private renderShimmer() {
-    return (
-      <div class="analytics__shimmer">
-        <span class="analytics__shimmer-bar analytics__shimmer-bar--value"></span>
-        <span class="analytics__shimmer-bar analytics__shimmer-bar--delta"></span>
-      </div>
-    );
+  @Watch('booking')
+  onBookingChange() {
+    this.runCountUp();
   }
 
-  private renderBaseRateDelta(delta: number | null, currencySymbol: string) {
-    if (this.loading || delta === null) {
-      return null;
+  disconnectedCallback() {
+    if (this.animationFrameId !== undefined) {
+      cancelAnimationFrame(this.animationFrameId);
     }
-    if (delta === 0) {
-      return (
-        <span class="analytics__delta analytics__delta--flat">
-          <wa-icon name="minus" aria-hidden="true"></wa-icon>
-          Break-even
-        </span>
-      );
+  }
+
+  private runCountUp() {
+    if (this.animationFrameId !== undefined) {
+      cancelAnimationFrame(this.animationFrameId);
     }
-    const isProfit = delta > 0;
-    return (
-      <span class={{ 'analytics__delta': true, 'analytics__delta--profit': isProfit, 'analytics__delta--loss': !isProfit }}>
-        <wa-icon name={isProfit ? 'arrow-trend-up' : 'arrow-trend-down'} aria-hidden="true"></wa-icon>
-        {formatAmount(currencySymbol, Math.abs(delta))}
-      </span>
-    );
+    const target = this.booking.dp_effect;
+    const start = performance.now();
+
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / COUNT_UP_DURATION_MS, 1);
+      this.displayedValue = target * easeOutCubic(progress);
+      if (progress < 1) {
+        this.animationFrameId = requestAnimationFrame(step);
+      } else {
+        this.displayedValue = target;
+        this.animationFrameId = undefined;
+      }
+    };
+
+    this.animationFrameId = requestAnimationFrame(step);
+  }
+
+  private getTone(): DpEffectTone {
+    const { dp_effect } = this.booking;
+    if (dp_effect === 0) {
+      return 'neutral';
+    }
+    return dp_effect < 0 ? 'loss' : 'gain';
   }
 
   render() {
-    const currencySymbol = calendar_data.property?.currency?.symbol;
-    const totalAccommodation = this.booking?.rooms?.reduce((prev, curr) => prev + curr.total, 0) ?? 0;
-    const baseRateTotal = this.optimBaseGrossAmount;
-    const directTotal = this.directBookingGrossAmount;
-    const baseRateDelta = baseRateTotal !== null ? totalAccommodation - baseRateTotal : null;
-    const directTotalDelta = baseRateTotal !== null ? totalAccommodation - directTotal : null;
+    const tone = this.getTone();
+    const calloutVariant = tone === 'gain' ? 'success' : tone === 'loss' ? 'danger' : 'neutral';
+    const trendIcon = tone === 'gain' ? 'arrow-trend-up' : tone === 'loss' ? 'arrow-trend-down' : 'minus';
 
     return (
       <Host>
-        <wa-card appearance="outlined" class="analytics" aria-label="Rate analytics">
-          <header class="analytics__header">
-            {/* <span class="analytics__header-icon">
-              <wa-icon name="scale-balanced" aria-hidden="true"></wa-icon>
-            </span> */}
-            <div class="analytics__heading">
-              <p class="analytics__title">Rate analytics</p>
-              <p class="analytics__subtitle">How this booking compares to other rate scenarios</p>
-            </div>
-            <wa-badge variant="danger" pill>
-              BETA
-            </wa-badge>
-          </header>
-          <div class="analytics__rows">
-            <div class="analytics__row analytics__row--primary">
-              <p class="analytics__row-label">
-                {/* <wa-icon name="bed" aria-hidden="true"></wa-icon> */}
-                Total accommodation:
-              </p>
-              <p class="analytics__row-value">{formatAmount(currencySymbol, totalAccommodation)}</p>
-            </div>
-            <div class="analytics__row">
-              <p class="analytics__row-label">
-                {/* <wa-icon name="tag" aria-hidden="true"></wa-icon> */}
-                If issued on base rate:
-              </p>
-              {isRequestPending('/Calculate_Optim_Base_Gross_Amount') ? (
-                this.renderShimmer()
-              ) : (
-                <div class="analytics__row-figures">
-                  {this.renderAmount(baseRateTotal, currencySymbol)}
-                  {this.renderBaseRateDelta(baseRateDelta, currencySymbol)}
-                </div>
-              )}
-            </div>
-            {!this.booking?.is_direct && (
-              <div class="analytics__row">
-                <p class="analytics__row-label">
-                  {/* <wa-icon name="building" aria-hidden="true"></wa-icon> */}
-                  If issued as direct:
-                </p>
-                {isRequestPending('/Simulate_Direct_Booking') ? (
-                  this.renderShimmer()
-                ) : (
-                  <div class="analytics__row-figures">
-                    {this.renderAmount(directTotal, currencySymbol)}
-                    {this.renderBaseRateDelta(directTotalDelta, currencySymbol)}
-                  </div>
-                )}
-              </div>
-            )}
+        <wa-callout class={`dp-effect-callout --${tone}`} variant={calloutVariant} size="small">
+          <wa-icon class="dp-effect-icon" slot="icon" name="wand-magic-sparkles"></wa-icon>
+          <div class="booking-dp-effect">
+            <p class="booking-dp-effect__label">Dynamic pricing effect</p>
+            <p class={`booking-dp-effect__value --${tone}`}>
+              <span>{formatAmount(calendar_data.property.currency.symbol, this.displayedValue)}</span>
+              <wa-icon class="booking-dp-effect__trend-icon" name={trendIcon}></wa-icon>
+            </p>
           </div>
-        </wa-card>
+        </wa-callout>
       </Host>
     );
   }

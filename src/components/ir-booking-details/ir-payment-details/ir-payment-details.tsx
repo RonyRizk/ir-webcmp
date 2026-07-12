@@ -16,7 +16,6 @@ import { ClTx } from '@/services/city-ledger/types';
 import { FdTypes, PayTypes } from '@/types/enums';
 import type { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
 import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
-import { showPaymentAnalytics } from '../constants';
 
 @Component({
   styleUrl: 'ir-payment-details.css',
@@ -36,9 +35,6 @@ export class IrPaymentDetails {
   @Prop() clLoading: boolean = false;
   @Prop() clError: string | null = null;
   @Prop() clTransactions: ClTx[] = [];
-  @Prop() optimBaseGrossAmount: number | null = null;
-  @Prop() directBookingGrossAmount: number | null = null;
-  @Prop() rateAnalyticsLoading: boolean = false;
 
   @State() confirmModal: boolean = false;
   @State() toBeDeletedItem: IPayment | null = null;
@@ -315,14 +311,6 @@ export class IrPaymentDetails {
               {`Charge cancellation penalty ${formatAmount(currency.symbol, this.booking.financial.cancelation_penality_as_if_today)}`}
             </ir-custom-button>
           </div>
-        )}
-        {showPaymentAnalytics.has(calendar_data?.property?.id) && (
-          <ir-payment-analytics
-            booking={this.booking}
-            optimBaseGrossAmount={this.optimBaseGrossAmount}
-            directBookingGrossAmount={this.directBookingGrossAmount}
-            loading={this.rateAnalyticsLoading}
-          ></ir-payment-analytics>
         )}
       </wa-card>,
       isAgentMode(this.agent) && (

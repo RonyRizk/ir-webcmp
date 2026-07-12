@@ -17,3 +17,9 @@
 .date-cell__label {
   font-weight: 700;
 }
+
+.date-cell__arrow {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--wa-color-text-quiet, #6b7280);
+}

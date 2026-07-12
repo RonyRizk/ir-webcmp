@@ -334,7 +334,7 @@ export class IglBookingEvent {
         return;
       }
 
-      const data = await this.bookingService.getExposedBooking(this.bookingEvent.BOOKING_NUMBER, 'en');
+      const data = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingEvent.BOOKING_NUMBER, language: 'en' });
       const base_booking = { ...data };
       const filteredRooms = data.rooms.filter(room => room['assigned_units_pool'] === this.bookingEvent.ID);
 

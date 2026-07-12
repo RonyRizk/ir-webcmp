@@ -67,7 +67,7 @@ APP HEADER — MOBILE FIRST
 }
 
 .app-header__right {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 /* Center search — MOBILE (normal flow) */

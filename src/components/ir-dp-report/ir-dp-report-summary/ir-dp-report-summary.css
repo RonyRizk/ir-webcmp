@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.dp-summary__row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.dp-summary__metric.--gain::part(value) {
+  color: var(--wa-color-success-fill-loud);
+}
+.dp-summary__metric.--loss::part(value) {
+  color: var(--wa-color-danger-fill-loud);
+}
+@media (min-width: 768px) {
+  .dp-summary__row {
+    flex-direction: row;
+  }
+
+  .dp-summary__metric {
+    flex: 1;
+  }
+}

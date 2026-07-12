@@ -41,6 +41,7 @@
  - [ir-booking-listing-table](../ir-booking-listing/ir-booking-listing-table)
  - [ir-city-ledger-folio-table](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-departures-table](../ir-departures/ir-departures-table)
+ - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
  - [ir-fiscal-documents-table](../ir-fiscal-documents/ir-fiscal-documents-table)
  - [ir-tasks-table-pagination](../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
 
@@ -56,6 +57,7 @@ graph TD;
   ir-booking-listing-table --> ir-pagination
   ir-city-ledger-folio-table --> ir-pagination
   ir-departures-table --> ir-pagination
+  ir-dp-report-table --> ir-pagination
   ir-fiscal-documents-table --> ir-pagination
   ir-tasks-table-pagination --> ir-pagination
   style ir-pagination fill:#f9f,stroke:#333,stroke-width:4px

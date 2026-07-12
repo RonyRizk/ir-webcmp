@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.dp-report-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.dp-report-filters__date-picker {
+  width: 100%;
+}
+/*md*/
+@media (min-width: 768px) {
+  .dp-report-filters__date-picker {
+    max-width: 350px;
+  }
+}

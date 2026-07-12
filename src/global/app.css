@@ -10,6 +10,10 @@
   background: #000;
   color: white;
 }
+html:dir(rtl),
+body:dir(rtl) {
+  direction: rtl !important;
+}
 /* body {
   background-color: var(--wa-color-surface-default) !important;
 } */

@@ -18,7 +18,7 @@ import { CityLedgerService, type ClTx } from '@/services/city-ledger';
 import { mapClTxToFolioRow, FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { isAgentMode } from './functions';
 import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
-import { showPaymentAnalytics } from './constants';
+
 @Component({
   tag: 'ir-booking-details',
   styleUrls: ['ir-booking-details.css'],
@@ -74,9 +74,6 @@ export class IrBookingDetails {
   @State() clLoading: boolean = false;
   @State() clError: string | null = null;
   @State() agents: Agent[] = [];
-  @State() optimBaseGrossAmount: number | null = null;
-  @State() directBookingGrossAmount: number | null = null;
-  @State() rateAnalyticsLoading: boolean = false;
 
   /**
    * Booking number used to fetch booking details.
@@ -307,7 +304,6 @@ export class IrBookingDetails {
     if (e.detail) {
       this.booking = e.detail;
       this.splitIndex = buildSplitIndex(this.booking.rooms);
-      this.fetchRateAnalytics(e.detail);
       await this.loadAgentAndFolio(e.detail);
       return;
     }
@@ -347,27 +343,6 @@ export class IrBookingDetails {
       this.clError = 'Failed to load city ledger.';
     } finally {
       this.clLoading = false;
-    }
-  }
-
-  private async fetchRateAnalytics(booking: Booking = this.booking): Promise<void> {
-    if (!booking?.booking_nbr || !showPaymentAnalytics.has(calendar_data?.property?.id)) {
-      this.optimBaseGrossAmount = null;
-      this.directBookingGrossAmount = null;
-      return;
-    }
-    this.rateAnalyticsLoading = true;
-    try {
-      const [optimBaseGrossAmount, directBookingGrossAmount] = await Promise.all([
-        this.bookingService.calculateOptimBaseGrossAmount({ booking_nbr: booking.booking_nbr }),
-        booking.is_direct ? Promise.resolve(null) : this.bookingService.simulateDirectBooking({ booking_nbr: booking.booking_nbr }),
-      ]);
-      this.optimBaseGrossAmount = optimBaseGrossAmount;
-      this.directBookingGrossAmount = directBookingGrossAmount;
-    } catch (error) {
-      console.error('[ir-booking-details] fetchRateAnalytics failed:', error);
-    } finally {
-      this.rateAnalyticsLoading = false;
     }
   }
 
@@ -453,7 +428,7 @@ export class IrBookingDetails {
         this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
-        this.bookingService.getExposedBooking(this.bookingNumber, this.language),
+        this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language, include_dp_pricing: true }),
         this.bookingService.getSetupEntriesByTableNameMulti([
           '_BED_PREFERENCE_TYPE',
           '_DEPARTURE_TIME',
@@ -501,7 +476,6 @@ export class IrBookingDetails {
       this.guestData = bookingDetails.guest;
       this.booking = bookingDetails;
       this.splitIndex = buildSplitIndex(this.booking.rooms);
-      this.fetchRateAnalytics(this.booking);
     } catch (error) {
       console.error('Error initializing app:', error);
     } finally {
@@ -562,11 +536,10 @@ export class IrBookingDetails {
   private async resetBooking() {
     try {
       this.isLoading = true;
-      const booking = await this.bookingService.getExposedBooking(this.bookingNumber, this.language);
+      const booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language, include_dp_pricing: true });
       this.splitIndex = buildSplitIndex(booking.rooms);
       await this.loadAgentAndFolio(booking);
       this.booking = { ...booking };
-      this.fetchRateAnalytics(this.booking);
       this.bookingChanged.emit(this.booking);
     } catch (error) {
       console.log(error);
@@ -664,9 +637,6 @@ export class IrBookingDetails {
             folioRows={this.folioRows}
             clLoading={this.clLoading}
             clError={this.clError}
-            optimBaseGrossAmount={this.optimBaseGrossAmount}
-            directBookingGrossAmount={this.directBookingGrossAmount}
-            rateAnalyticsLoading={this.rateAnalyticsLoading}
           ></ir-payment-details>
         </div>
         <ir-dialog

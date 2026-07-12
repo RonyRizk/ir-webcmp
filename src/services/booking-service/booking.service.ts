@@ -1129,12 +1129,23 @@ export class BookingService {
       throw new Error(error);
     }
   }
-  public async getExposedBooking(booking_nbr: string, language: string, withExtras: boolean = true): Promise<Booking> {
+  public async getExposedBooking({
+    booking_nbr,
+    language,
+    withExtras = true,
+    include_dp_pricing,
+  }: {
+    booking_nbr: string;
+    language: string;
+    withExtras?: boolean;
+    include_dp_pricing?: boolean;
+  }): Promise<Booking> {
     try {
       const { data } = await axios.post(`/Get_Exposed_Booking`, {
         booking_nbr,
         language,
         extras: withExtras ? extras : null,
+        is_calculate_dp_effect: include_dp_pricing,
         is_get_financial_snapshot: true,
       });
       if (data.ExceptionMsg !== '') {

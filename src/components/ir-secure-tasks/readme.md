@@ -271,7 +271,6 @@ graph TD;
   ir-payment-details --> ir-booking-guarantee
   ir-payment-details --> ir-applicable-policies
   ir-payment-details --> ir-custom-button
-  ir-payment-details --> ir-payment-analytics
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-void-document-dialog
@@ -575,8 +574,7 @@ graph TD;
   ir-sales-by-channel-table --> ir-empty-state
   ir-sales-by-channel-table --> ir-custom-button
   ir-booking-listing --> ir-loading-screen
-  ir-booking-listing --> ir-interceptor
-  ir-booking-listing --> ir-toast
+  ir-booking-listing --> ir-page
   ir-booking-listing --> ir-listing-header
   ir-booking-listing --> ir-booking-listing-table
   ir-booking-listing --> ir-booking-details-drawer

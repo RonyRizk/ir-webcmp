@@ -31,7 +31,6 @@
  - [ir-booking-details](../ir-booking-details)
  - [ir-booking-editor](../igloo-calendar/ir-booking-editor)
  - [ir-booking-email-logs](../ir-booking-email-logs)
- - [ir-booking-listing](../ir-booking-listing)
  - [ir-departures](../ir-departures)
  - [ir-financial-actions](../ir-financial-actions)
  - [ir-ghs-onboarding](../ir-ghs-onboarding)
@@ -63,7 +62,6 @@ graph TD;
   ir-booking-details --> ir-interceptor
   ir-booking-editor --> ir-interceptor
   ir-booking-email-logs --> ir-interceptor
-  ir-booking-listing --> ir-interceptor
   ir-departures --> ir-interceptor
   ir-financial-actions --> ir-interceptor
   ir-ghs-onboarding --> ir-interceptor

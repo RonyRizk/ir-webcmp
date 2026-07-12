@@ -1,6 +1,14 @@
-import { Booking } from '@/models/booking.dto';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Fragment, Host, Prop, h } from '@stencil/core';
+
+export interface BookedByCellGuest {
+  id: number;
+  first_name: string;
+  last_name: string;
+  country_phone_prefix?: string | null;
+  mobile_without_prefix?: string;
+  nbr_confirmed_bookings?: number;
+}
 
 @Component({
   tag: 'ir-booked-by-cell',
@@ -14,7 +22,7 @@ export class IrBookedByCell {
   /**
    * Guest associated with this booking.
    */
-  @Prop() guest: Booking['guest'];
+  @Prop() guest: BookedByCellGuest;
 
   /**
    * Unique identifier for this cell. Used for tooltip scoping.

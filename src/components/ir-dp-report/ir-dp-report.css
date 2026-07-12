@@ -1,0 +1,7 @@
+:host {
+  display: block;
+}
+.dp-report__page::part(description) {
+  font-size: var(--wa-font-size-s);
+  margin-top: 0.25rem;
+}

@@ -143,6 +143,7 @@ export class IrPaymentSummary {
               <span class="ps-stacked__label ps-stacked__value">Grand Total:</span>
               <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.booking.financial?.gross_total ?? 0)}</span>
             </div>
+            <div class="ps-stacked --stacked-right"></div>
           </div>
         </div>
 

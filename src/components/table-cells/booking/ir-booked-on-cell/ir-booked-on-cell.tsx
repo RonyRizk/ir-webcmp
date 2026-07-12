@@ -12,13 +12,14 @@ export class IrBookedOnCell {
   @Prop({ reflect: true }) display: 'inline' | 'block' = 'block';
   @Prop() bookedOn: Booking['booked_on'];
   @Prop() label: string;
+  @Prop() showTime: boolean = true;
   render() {
     const { date, hour, minute } = this.bookedOn;
     return (
       <Host>
         {this.label && <p class="cell-label">{this.label}:</p>}
         <p class="booked-on-cell__date">{moment(date, 'YYYY-MM-DD').format('DD MMM YYYY')}</p>
-        <p class="booked-on-cell__time">{_formatTime(hour.toString(), minute.toString())}</p>
+        {this.showTime && <p class="booked-on-cell__time">{_formatTime(hour.toString(), minute.toString())}</p>}
       </Host>
     );
   }

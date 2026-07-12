@@ -30,6 +30,8 @@
  - [ir-city-ledger](../ir-city-ledger)
  - [ir-city-ledger-folio-table](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-departures-table](../ir-departures/ir-departures-table)
+ - [ir-dp-report-chart](../ir-dp-report/ir-dp-report-chart)
+ - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
  - [ir-extra-services](../ir-booking-details/ir-extra-services)
  - [ir-guest-billing](../ir-billing/ir-guest-billing)
  - [ir-hk-archive-drawer](../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
@@ -55,6 +57,8 @@ graph TD;
   ir-city-ledger --> ir-empty-state
   ir-city-ledger-folio-table --> ir-empty-state
   ir-departures-table --> ir-empty-state
+  ir-dp-report-chart --> ir-empty-state
+  ir-dp-report-table --> ir-empty-state
   ir-extra-services --> ir-empty-state
   ir-guest-billing --> ir-empty-state
   ir-hk-archive-drawer --> ir-empty-state

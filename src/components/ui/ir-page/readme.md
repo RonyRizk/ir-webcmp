@@ -15,17 +15,21 @@
 
 ## Shadow Parts
 
-| Part     | Description |
-| -------- | ----------- |
-| `"body"` |             |
+| Part            | Description |
+| --------------- | ----------- |
+| `"body"`        |             |
+| `"description"` |             |
+| `"title"`       |             |
 
 
 ## Dependencies
 
 ### Used by
 
+ - [ir-booking-listing](../../ir-booking-listing)
  - [ir-city-ledger](../../ir-city-ledger)
  - [ir-daily-revenue](../../ir-daily-revenue)
+ - [ir-dp-report](../../ir-dp-report)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
  - [ir-gap-nights](../../ir-gap-nights)
  - [ir-housekeeping](../../ir-housekeeping)
@@ -53,8 +57,10 @@ graph TD;
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
+  ir-booking-listing --> ir-page
   ir-city-ledger --> ir-page
   ir-daily-revenue --> ir-page
+  ir-dp-report --> ir-page
   ir-fiscal-documents --> ir-page
   ir-gap-nights --> ir-page
   ir-housekeeping --> ir-page

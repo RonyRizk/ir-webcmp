@@ -69,68 +69,7 @@ export class IrListingHeader {
     //const havePrivilege = isPrivilegedUser(booking_listing.userSelection.userTypeCode);
     return (
       <Host>
-        <section class="d-flex align-items-center ">
-          <div class="d-flex flex-fill flex-column flex-md-row align-items-md-center booking-container">
-            <div class="d-flex mb-1 d-md-none align-items-center justify-content-bettween width-fill">
-              <h3 class="page-title">{locales.entries?.Lcz_Bookings}</h3>
-              {/* <div>
-                {!havePrivilege && (
-                  // <igl-book-property-container
-                  //   p={this.p}
-                  //   withIrToastAndInterceptor={false}
-                  //   propertyid={this.propertyId}
-                  //   language={this.language}
-                  //   title={locales.entries.Lcz_CreateNewBooking}
-                  //   ticket={booking_listing.token}
-                  // >
-         
-                  //   <ir-custom-button id="new-booking" class={'new-booking-btn'} variant="brand" appearance="plain" slot="trigger">
-                  //     <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
-                  //   </ir-custom-button>
-                  // </igl-book-property-container>
-                  <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
-                )}
-              </div>*/}
-            </div>
-            <h3 class="d-none d-md-block page-title">{locales.entries?.Lcz_Bookings}</h3>
-            {/* <div
-              // onSubmit={e => {
-              //   e.preventDefault();
-              //   console.log(this.inputValue);
-              //   this.handleSearchClicked(false);
-              // }}
-              class="booking-search-field width-fill"
-            >
-              <ir-input
-                class={'flex-fill w-100'}
-                value={this.inputValue}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.handleSearchClicked(false);
-                  }
-                }}
-                onText-change={e => (this.inputValue = e.detail)}
-                size="s"
-                placeholder={locales.entries?.Lcz_FindBookNbrorName}
-              >
-                <wa-icon name="magnifying-glass" slot="start"></wa-icon>
-              </ir-input>
-              <h5 class="m-0 font-weight-bold d-none d-sm-block">{locales.entries?.Lcz_Or}</h5>
-            </div> */}
-          </div>
-          {/* <div class="d-none d-md-block">
-            <wa-tooltip for="new-booking">Create new booking</wa-tooltip>
-            {!havePrivilege && (
-             
-              <ir-booking-new-form propertyid={this.propertyId as any} language={this.language} ticket={booking_listing.token}></ir-booking-new-form>
-            )}
-          </div> */}
-        </section>
         <section class="d-flex flex-column align-items-sm-center flex-sm-row flex-sm-wrap filters-container justify-content-lg-start mt-1">
-          {/* <fieldset class="d-flex align-items-center flex-sm-column align-items-sm-start flex-fill-sm-none">
-            <label htmlFor="dateTo"></label> */}
-
           <wa-select
             onchange={e => {
               updateUserSelection('filter_type', (e.target as any).value);
@@ -145,24 +84,6 @@ export class IrListingHeader {
               </wa-option>
             ))}
           </wa-select>
-          {/* <ir-range-picker
-            onDateRangeChanged={e => {
-              e.stopImmediatePropagation();
-              e.stopPropagation();
-              const { fromDate, toDate } = e.detail;
-              let to_date = toDate.format('YYYY-MM-DD');
-              if (
-                toDate.isSame(moment(booking_listing.userSelection.to, 'YYYY-MM-DD'), 'days') ||
-                toDate.isBefore(moment(booking_listing.userSelection.from, 'YYYY-MM-DD'), 'days')
-              ) {
-                to_date = booking_listing.userSelection.to;
-              }
-              booking_listing.userSelection = { ...booking_listing.userSelection, to: to_date, from: fromDate.format('YYYY-MM-DD') };
-            }}
-            allowNullDates={false}
-            fromDate={moment(booking_listing.userSelection.from, 'YYYY-MM-DD')}
-            toDate={moment(booking_listing.userSelection.to, 'YYYY-MM-DD')}
-          /> */}
           <ir-date-range-filter
             class="filters-bar__date_picker"
             showQuickActions={false}

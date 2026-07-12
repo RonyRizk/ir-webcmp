@@ -119,7 +119,7 @@ export class IrGuestBilling {
       // Voiding a receipt changes booking.financial.payments, which this component doesn't own.
       // Pass the freshly fetched booking so ir-booking-details updates in place instead of
       // taking the resetBookingEvt(null) branch, which shows its full-page loading spinner.
-      const freshBooking = await this.bookingService.getExposedBooking(this.booking.booking_nbr, 'en');
+      const freshBooking = await this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: 'en' });
       this.resetBookingEvt.emit(freshBooking);
     }
   }

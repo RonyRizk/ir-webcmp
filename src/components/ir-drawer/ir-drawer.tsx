@@ -21,7 +21,7 @@ export class IrDrawer {
    */
   @Prop({ reflect: true }) label: NativeDrawer['label'];
   /** The direction from which the drawer will open. */
-  @Prop({ reflect: true }) placement: NativeDrawer['placement'];
+  @Prop({ reflect: true }) placement: NativeDrawer['placement'] = 'end';
   /** Disables the header. This will also remove the default close button. */
   @Prop({ reflect: true }) withoutHeader: NativeDrawer['withoutHeader'];
   /** When enabled, the drawer will be closed when the user clicks outside of it. */

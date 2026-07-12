@@ -14,6 +14,10 @@ export class IrDatesCell {
   @Prop() checkoutLabel: string;
   @Prop() overdueCheckin: boolean;
   @Prop() overdueCheckout: boolean;
+  /**
+   * Shows a small arrow between check-in and check-out. Intended for `display="inline"`.
+   */
+  @Prop() showArrow: boolean = false;
   private formatDate(date: string) {
     return moment(date, 'YYYY-MM-DD').format('DD MMM YYYY');
   }
@@ -24,6 +28,7 @@ export class IrDatesCell {
           {this.checkInLabel && <span class="date-cell__label">{this.checkInLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckin ? 'bold' : 'auto' }}>{this.formatDate(this.checkIn)}</p>
         </div>
+        {this.showArrow && <wa-icon class="date-cell__arrow" name="arrow-right"></wa-icon>}
         <div class="date-cell__container">
           {this.checkoutLabel && <span class="date-cell__label">{this.checkoutLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckout ? 'bold' : 'auto' }}>{this.formatDate(this.checkOut)}</p>

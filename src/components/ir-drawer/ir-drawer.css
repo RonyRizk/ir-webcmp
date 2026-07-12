@@ -8,6 +8,9 @@
   color: var(--wa-color-text-normal);
   background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
 }
+.ir__drawer::part(title) {
+  text-align: start;
+}
 .ir__drawer::part(body) {
   background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
   padding: 0;

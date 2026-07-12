@@ -22,7 +22,6 @@
  - [ir-arrivals](../../ir-arrivals)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
- - [ir-booking-listing](../../ir-booking-listing)
  - [ir-channel](../../ir-channel)
  - [ir-departures](../../ir-departures)
  - [ir-financial-actions](../../ir-financial-actions)
@@ -51,7 +50,6 @@ graph TD;
   ir-arrivals --> ir-toast
   ir-booking-details --> ir-toast
   ir-booking-email-logs --> ir-toast
-  ir-booking-listing --> ir-toast
   ir-channel --> ir-toast
   ir-departures --> ir-toast
   ir-financial-actions --> ir-toast

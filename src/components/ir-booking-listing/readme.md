@@ -25,8 +25,7 @@
 ### Depends on
 
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-interceptor](../ir-interceptor)
-- [ir-toast](../ui/ir-toast)
+- [ir-page](../ui/ir-page)
 - [ir-listing-header](ir-listing-header)
 - [ir-booking-listing-table](ir-booking-listing-table)
 - [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
@@ -37,13 +36,14 @@
 ```mermaid
 graph TD;
   ir-booking-listing --> ir-loading-screen
-  ir-booking-listing --> ir-interceptor
-  ir-booking-listing --> ir-toast
+  ir-booking-listing --> ir-page
   ir-booking-listing --> ir-listing-header
   ir-booking-listing --> ir-booking-listing-table
   ir-booking-listing --> ir-booking-details-drawer
   ir-booking-listing --> ir-guest-info-drawer
   ir-booking-listing --> ir-payment-folio
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
@@ -209,7 +209,6 @@ graph TD;
   ir-payment-details --> ir-booking-guarantee
   ir-payment-details --> ir-applicable-policies
   ir-payment-details --> ir-custom-button
-  ir-payment-details --> ir-payment-analytics
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-void-document-dialog

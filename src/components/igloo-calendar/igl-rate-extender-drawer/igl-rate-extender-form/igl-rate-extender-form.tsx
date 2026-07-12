@@ -80,7 +80,7 @@ export class IglRateExtenderForm {
         this.dates.from_date = new Date(this.fromDate);
       }
       this.dates.to_date = new Date(this.toDate);
-      this.booking = await this.bookingService.getExposedBooking(this.bookingNumber, this.language);
+      this.booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
       if (this.booking) {
         const filteredRooms = this.booking.rooms.filter(room => room.identifier === this.identifier);
         this.selectedRoom = filteredRooms[0];

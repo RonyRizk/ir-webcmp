@@ -83,6 +83,7 @@ slotted body content. Fully styleable via CSS parts and custom properties.
 
 ### Used by
 
+ - [ir-dp-report-summary](../ir-dp-report/ir-dp-report-summary)
  - [ir-monthly-bookings-report](../ir-monthly-bookings-report)
  - [ir-revenue-summary](../ir-daily-revenue/ir-revenue-summary)
  - [ir-sales-by-channel-summary](../ir-sales-by-channel/ir-sales-by-channel-summary)
@@ -92,6 +93,7 @@ slotted body content. Fully styleable via CSS parts and custom properties.
 ### Graph
 ```mermaid
 graph TD;
+  ir-dp-report-summary --> ir-metric-card
   ir-monthly-bookings-report --> ir-metric-card
   ir-revenue-summary --> ir-metric-card
   ir-sales-by-channel-summary --> ir-metric-card

@@ -67,7 +67,7 @@ export class IrBookingPrinting {
       const [property, languageTexts, booking, fetchedCountries] = await Promise.all([
         this.roomService.getExposedProperty({ id: this.propertyid, language: this.language, is_backend: true }),
         this.roomService.fetchLanguage(this.language),
-        this.bookingService.getExposedBooking(this.bookingNumber, this.language),
+        this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language }),
         this.bookingService.getCountries(this.language),
       ]);
       if (!locales.entries) {

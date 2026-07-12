@@ -11,7 +11,7 @@ import booking_listing, {
   updatePaginationFromSelection,
 } from '@/stores/booking_listing.store';
 import { isPrivilegedUser } from '@/utils/utils';
-import { Component, Host, Prop, State, Watch, h, Element, Listen } from '@stencil/core';
+import { Component, Prop, State, Watch, h, Element, Listen } from '@stencil/core';
 import Token from '@/models/Token';
 import { getAllParams } from '@/utils/browserHistory';
 import { BookingService } from '@/services/booking-service/booking.service';
@@ -20,6 +20,7 @@ import { PropertyService } from '@/services/property.service';
 import type { AllowedProperties } from '@/services/property/types';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { GuestChangedEvent } from '@/components';
+import locales from '@/stores/locales.store';
 
 @Component({
   tag: 'ir-booking-listing',
@@ -327,9 +328,7 @@ export class IrBookingListing {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <Host>
-        <ir-interceptor></ir-interceptor>
-        <ir-toast></ir-toast>
+      <ir-page label={locales?.entries?.Lcz_Bookings}>
         <div class="main-container">
           <ir-listing-header propertyId={this.propertyid} p={this.p} language={this.language}></ir-listing-header>
           <section class="mt-2">
@@ -366,7 +365,7 @@ export class IrBookingListing {
             this.payment = null;
           }}
         ></ir-payment-folio>
-      </Host>
+      </ir-page>
     );
   }
 }

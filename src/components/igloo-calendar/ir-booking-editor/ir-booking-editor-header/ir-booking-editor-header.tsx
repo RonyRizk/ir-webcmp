@@ -260,7 +260,7 @@ export class IrBookingEditorHeader {
   private async selectGuest(e: CustomEvent) {
     this.stopEvent(e);
     const booking_nbr = e.detail?.item?.value;
-    const booking = await this.bookingService.getExposedBooking(booking_nbr, 'en', true);
+    const booking = await this.bookingService.getExposedBooking({ booking_nbr, language: 'en', withExtras: true });
     this.guestSelected.emit(booking);
   }
 

@@ -99,6 +99,7 @@
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-date-range-filter](../ir-date-range-filter)
  - [ir-departures-table](../../ir-departures/ir-departures-table)
+ - [ir-dp-report-filters](../../ir-dp-report/ir-dp-report-filters)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
@@ -226,6 +227,7 @@ graph TD;
   ir-daily-revenue-filters --> ir-custom-button
   ir-date-range-filter --> ir-custom-button
   ir-departures-table --> ir-custom-button
+  ir-dp-report-filters --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-service-config --> ir-custom-button
   ir-extra-services --> ir-custom-button

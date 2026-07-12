@@ -300,6 +300,7 @@ export interface Booking {
     verification_mode: null;
   } | null;
   agent_financial: IFinancial;
+  dp_effect: number;
   guest_financial: IFinancial;
   events: ExposedBookingEvent[];
   company_name: string | null;

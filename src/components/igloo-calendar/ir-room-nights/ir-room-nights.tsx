@@ -57,7 +57,7 @@ export class IrRoomNights {
         this.dates.from_date = new Date(this.fromDate);
       }
       this.dates.to_date = new Date(this.toDate);
-      this.bookingEvent = await this.bookingService.getExposedBooking(this.bookingNumber, this.language);
+      this.bookingEvent = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
       if (this.bookingEvent) {
         const filteredRooms = this.bookingEvent.rooms.filter(room => room.identifier === this.identifier);
         this.selectedRoom = filteredRooms[0];

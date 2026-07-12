@@ -80,6 +80,15 @@ export class IrDateRangeFilter {
   /** Whether to show the quick-action preset buttons in each calendar popup. */
   @Prop() showQuickActions: boolean = true;
 
+  /**
+   * How a quick-date preset behaves when picked from the *to* side:
+   * - `'absolute'` (default): sets only the to-date to `preset.getDate()`, same as the from side.
+   * - `'range'`: treats `preset.getDate()` as a "N units ago" anchor — sets from-date to
+   *   `preset.getDate()` and to-date to today, so e.g. "7 Days Ago" becomes a "last 7 days" range.
+   *   The from side is unaffected by this prop; it always sets only the from-date.
+   */
+  @Prop() quickDatesMode: 'absolute' | 'range' = 'absolute';
+
   /** Earliest selectable date in YYYY-MM-DD format. Applied to both calendars. */
   @Prop() minDate?: string;
 
@@ -149,16 +158,18 @@ export class IrDateRangeFilter {
   /**
    * Updates one side of the date range and emits the change. In `'auto'` selection
    * mode, picking a from-date opens the to-picker on the next frame (the popup needs
-   * the click that closed the from-picker to finish propagating first).
+   * the click that closed the from-picker to finish propagating first). Pass
+   * `skipAutoAdvance` when the caller is about to set the to-date itself right after
+   * (e.g. a range-style quick action), so the to-picker doesn't pop open and then close.
    */
-  private selectDate(date: Moment | null, type: 'from' | 'to') {
+  private selectDate(date: Moment | null, type: 'from' | 'to', skipAutoAdvance = false) {
     let changes = { ...this.dates, [type]: date };
     if (this.dates.to && type === 'from' && date.isAfter(this.dates.to, 'date')) {
       changes = { ...changes, to: date };
     }
     this.dates = changes;
     this.emitChange();
-    if (type === 'from' && date && this.selectionMode === 'auto') {
+    if (!skipAutoAdvance && type === 'from' && date && this.selectionMode === 'auto') {
       requestAnimationFrame(() => {
         this.toDateSelectRef?.show();
       });
@@ -346,9 +357,14 @@ export class IrDateRangeFilter {
                       variant="neutral"
                       appearance="outlined"
                       aria-label={`Set end date to ${action.label}`}
-                      disabled={this.dates?.from?.isSameOrAfter(action.getDate(), 'date')}
+                      disabled={this.quickDatesMode === 'range' ? false : this.dates?.from?.isSameOrAfter(action.getDate(), 'date')}
                       onClickHandler={() => {
-                        this.selectDate(action.getDate(), 'to');
+                        if (this.quickDatesMode === 'range') {
+                          this.selectDate(action.getDate(), 'from', true);
+                          this.selectDate(moment(), 'to');
+                        } else {
+                          this.selectDate(action.getDate(), 'to');
+                        }
                         this.toDateSelectRef?.hide();
                       }}
                     >

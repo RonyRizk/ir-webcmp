@@ -4,7 +4,7 @@ import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 @Component({
   tag: 'ir-booking-number-cell',
   styleUrl: 'ir-booking-number-cell.css',
-  scoped: true,
+  shadow: true,
 })
 export class IrBookingNumberCell {
   @Prop() bookingNumber: Booking['booking_nbr'];
@@ -26,7 +26,7 @@ export class IrBookingNumberCell {
       <Host>
         {this.channelBookingNumber && <wa-tooltip for={`source-logo__${this.bookingNumber}`}>{this.origin.Label}</wa-tooltip>}
         <img class="booked-by-source__logo" id={`source-logo__${this.bookingNumber}`} src={this.origin.Icon} alt={this.origin.Label} />
-        <div class="booking-nbr-cell__container">
+        <div part="container" class="booking-nbr-cell__container">
           <div style={{ width: 'fit-content' }}>
             {/* <ir-custom-button size="m" onClickHandler={() => this.openBookingDetails.emit(this.bookingNumber)} link variant="brand" appearance="plain">
               {this.bookingNumber}
@@ -35,7 +35,9 @@ export class IrBookingNumberCell {
               {this.bookingNumber}
             </button>
           </div>
-          <p class="booking-nbr-cell__channel_nbr">{this.channelBookingNumber ? this.channelBookingNumber : this.origin.Label}</p>
+          <p part="booking-reference" class="booking-nbr-cell__channel_nbr">
+            {this.channelBookingNumber ? this.channelBookingNumber : this.origin.Label}
+          </p>
         </div>
       </Host>
     );

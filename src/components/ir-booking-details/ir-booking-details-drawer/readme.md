@@ -39,6 +39,7 @@ close event when the drawer is dismissed from any source.
  - [ir-city-ledger-folio-table](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-departures](../../ir-departures)
+ - [ir-dp-report](../../ir-dp-report)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
  - [ir-hk-archive-drawer](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
 
@@ -184,7 +185,6 @@ graph TD;
   ir-payment-details --> ir-booking-guarantee
   ir-payment-details --> ir-applicable-policies
   ir-payment-details --> ir-custom-button
-  ir-payment-details --> ir-payment-analytics
   ir-payment-details --> ir-booking-city-ledger
   ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-void-document-dialog
@@ -315,6 +315,7 @@ graph TD;
   ir-city-ledger-folio-table --> ir-booking-details-drawer
   ir-daily-revenue --> ir-booking-details-drawer
   ir-departures --> ir-booking-details-drawer
+  ir-dp-report --> ir-booking-details-drawer
   ir-fiscal-documents --> ir-booking-details-drawer
   ir-hk-archive-drawer --> ir-booking-details-drawer
   style ir-booking-details-drawer fill:#f9f,stroke:#333,stroke-width:4px
