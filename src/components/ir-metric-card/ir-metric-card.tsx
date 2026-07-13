@@ -43,8 +43,11 @@ export class IrMetricCard {
   /** Name of a `wa-icon` rendered in the leading icon chip. */
   @Prop() icon: string;
 
-  /** Trend delta as a percentage. The sign selects the up/down arrow and color. */
+  /** Trend delta. Sign selects the up/down arrow and color. Rendered as `{trend}%` unless `trendValue` is given. */
   @Prop() trend: number;
+
+  /** Preformatted text to render in place of `{trend}%` (e.g. a currency amount), while `trend`'s sign still drives the icon/color. */
+  @Prop() trendValue: string;
 
   /** Context text shown beside the trend (e.g. `vs last week`). */
   @Prop() trendLabel: string;
@@ -103,11 +106,12 @@ export class IrMetricCard {
     const tone = direction === 'flat' ? 'flat' : this.trendIsPositive ? 'positive' : 'negative';
     const iconName = direction === 'up' ? 'arrow-trend-up' : direction === 'down' ? 'arrow-trend-down' : 'minus';
     const magnitude = Math.abs(this.trend);
-    const ariaLabel = `${direction === 'flat' ? 'no change' : direction} ${magnitude} percent`;
+    const displayValue = this.trendValue ?? `${magnitude}%`;
+    const ariaLabel = `${direction === 'flat' ? 'no change' : direction} ${this.trendValue ?? `${magnitude} percent`}`;
     return (
       <span part="trend" class={`metric__trend metric__trend--${tone}`} aria-label={ariaLabel}>
         <wa-icon name={iconName} aria-hidden="true"></wa-icon>
-        <span>{magnitude}%</span>
+        <span>{displayValue}</span>
         {this.trendLabel && <span class="metric__trend-label">{this.trendLabel}</span>}
       </span>
     );

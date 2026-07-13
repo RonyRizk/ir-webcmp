@@ -5,6 +5,7 @@ import { DpReportService } from '@/services/dp-report.service';
 import locales from '@/stores/locales.store';
 import dp_report from '@/stores/dp_report.store';
 import { mapBookingToDpRow } from './types';
+import { isOptimReadOnly } from '@/stores/calendar-data';
 
 export type DPReportPageTabs = 'chart' | 'bookings';
 
@@ -146,9 +147,24 @@ export class IrDpReport {
         description="The dynamic pricing effect is calculated at the time the booking is
 created and remains fixed thereafter, serving as an indicator of the additional profit generated or of
 the incentive price reduction."
-        label="Dynamic Pricing Report"
+        label="Dynamic Pricing Effect"
         class="dp-report__page"
       >
+        {isOptimReadOnly() && (
+          <wa-callout size="s" variant="danger" class="dp-report__callout">
+            <wa-icon slot="icon" name="face-frown"></wa-icon>
+            <div class="dp-report__callout-header">
+              <b>Potential Missed Profit</b>
+              <wa-badge pill variant="danger">
+                SIMULATION
+              </wa-badge>
+            </div>
+            <p class="dp-report__callout-text">
+              The figures below estimate the additional profit your hotel could have generated if Dynamic Pricing had been enabled during the selected period. Contact your account
+              manager to subscribe.
+            </p>
+          </wa-callout>
+        )}
         <ir-dp-report-summary></ir-dp-report-summary>
         <wa-tab-group active={this.activeTab} activation="manual" onwa-tab-show={this.handleTabShow}>
           <wa-tab panel="chart">Chart</wa-tab>

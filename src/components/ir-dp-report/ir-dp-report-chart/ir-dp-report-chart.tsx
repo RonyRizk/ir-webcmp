@@ -77,7 +77,29 @@ export class IrDpReportChart {
       hoverBackgroundColor: colors,
       borderRadius: 3,
       barPercentage: 0.7,
-      minBarLength: 10,
+    };
+  }
+
+  // chart.js's own `minBarLength` also inflates true-zero bars (it centers a minimum
+  // sliver on the baseline whenever value === base), so it can't tell "negligible" apart
+  // from "zero". This clamps rendered height per-frame, skipping rows whose value is 0.
+  private buildMinBarLengthPlugin(minPx = 10): Plugin<'bar'> {
+    return {
+      id: 'dpMinBarLength',
+      beforeDatasetDraw: (_chart, args) => {
+        for (let i = 0; i < args.meta.data.length; i++) {
+          const value = this.rows[i]?.profit;
+          if (!value) {
+            continue;
+          }
+          const bar = args.meta.data[i] as unknown as { y: number; base: number };
+          const height = Math.abs(bar.base - bar.y);
+          if (height >= minPx) {
+            continue;
+          }
+          bar.y = bar.base + (value >= 0 ? -minPx : minPx);
+        }
+      },
     };
   }
 
@@ -116,14 +138,9 @@ export class IrDpReportChart {
       header.appendChild(logo);
     }
 
-    const source = document.createElement('span');
-    source.className = 'dp-chart-tooltip__source';
-    source.textContent = row.raw.origin?.Label ?? 'Unknown source';
-    header.appendChild(source);
-
-    const date = document.createElement('div');
-    date.className = 'dp-chart-tooltip__date';
+    const date = document.createElement('span');
     date.textContent = moment(row.date).format('MMM DD, YYYY');
+    header.appendChild(date);
 
     // const tone = row.profit >= 0 ? 'Gain' : 'Reduction';
     const sign = row.profit >= 0 ? '+' : '-';
@@ -138,9 +155,9 @@ export class IrDpReportChart {
 
     const valueRow = document.createElement('div');
     valueRow.className = 'dp-chart-tooltip__row';
-    valueRow.textContent = `Total accommodation value: ${formatAmount(row.currencySymbol, row.accommodationGross)}`;
+    valueRow.textContent = `Total stay value: ${formatAmount(row.currencySymbol, row.accommodationGross)}`;
 
-    container.append(header, date, effectRow, valueRow);
+    container.append(header, effectRow, valueRow);
   }
 
   private handleTooltip = (context: { chart: Chart; tooltip: TooltipModel<'bar'> }) => {
@@ -167,6 +184,13 @@ export class IrDpReportChart {
     this.renderTooltipContent(this.tooltipEl, row);
     this.tooltipEl.style.opacity = '1';
 
+    // The tooltip's anchor point (caretY) is the bar's tip: the top of a positive bar,
+    // or the bottom of a negative one. Placing it "above" the anchor only clears the bar
+    // when the tip is the bar's highest point, so flip below whenever the tip sits below
+    // the zero baseline (i.e. the bar itself extends downward from it).
+    const zeroY = chart.scales.y.getPixelForValue(0);
+    this.tooltipEl.classList.toggle('dp-chart-tooltip--below', tooltip.caretY > zeroY);
+
     const idealCenterX = chart.canvas.offsetLeft + tooltip.caretX;
     const tooltipWidth = this.tooltipEl.offsetWidth;
     const minLeft = chart.canvas.offsetLeft;
@@ -192,7 +216,7 @@ export class IrDpReportChart {
         labels: this.rows.map(r => this.formatDateLabel(r.date)),
         datasets: [this.buildDataset(this.rows)],
       },
-      plugins: [this.buildActiveBarHighlightPlugin()],
+      plugins: [this.buildActiveBarHighlightPlugin(), this.buildMinBarLengthPlugin()],
       options: {
         responsive: true,
         maintainAspectRatio: false,

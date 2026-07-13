@@ -30,19 +30,20 @@ slotted body content. Fully styleable via CSS parts and custom properties.
 
 ## Properties
 
-| Property      | Attribute      | Description                                                                            | Type               | Default     |
-| ------------- | -------------- | -------------------------------------------------------------------------------------- | ------------------ | ----------- |
-| `caption`     | `caption`      | Secondary descriptive line shown beneath the value.                                    | `string`           | `undefined` |
-| `clickable`   | `clickable`    | Make the whole card interactive: adds hover/focus affordance and emits `metricClick`.  | `boolean`          | `false`     |
-| `icon`        | `icon`         | Name of a `wa-icon` rendered in the leading icon chip.                                 | `string`           | `undefined` |
-| `invertTrend` | `invert-trend` | Flip trend color semantics so a decrease reads as positive (good).                     | `boolean`          | `false`     |
-| `label`       | `label`        | Metric label / title.                                                                  | `string`           | `undefined` |
-| `loading`     | `loading`      | Render skeleton placeholders instead of content.                                       | `boolean`          | `false`     |
-| `size`        | `size`         | Visual density. `small` is compact (default); `medium` enlarges the value and padding. | `"m" \| "s"`       | `'s'`       |
-| `trend`       | `trend`        | Trend delta as a percentage. The sign selects the up/down arrow and color.             | `number`           | `undefined` |
-| `trendLabel`  | `trend-label`  | Context text shown beside the trend (e.g. `vs last week`).                             | `string`           | `undefined` |
-| `unit`        | `unit`         | Unit rendered after the value (e.g. `guests`, `%`, `nights`).                          | `string`           | `undefined` |
-| `value`       | `value`        | Primary metric value. Rendered with tabular figures.                                   | `number \| string` | `undefined` |
+| Property      | Attribute      | Description                                                                                                                    | Type               | Default     |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- |
+| `caption`     | `caption`      | Secondary descriptive line shown beneath the value.                                                                            | `string`           | `undefined` |
+| `clickable`   | `clickable`    | Make the whole card interactive: adds hover/focus affordance and emits `metricClick`.                                          | `boolean`          | `false`     |
+| `icon`        | `icon`         | Name of a `wa-icon` rendered in the leading icon chip.                                                                         | `string`           | `undefined` |
+| `invertTrend` | `invert-trend` | Flip trend color semantics so a decrease reads as positive (good).                                                             | `boolean`          | `false`     |
+| `label`       | `label`        | Metric label / title.                                                                                                          | `string`           | `undefined` |
+| `loading`     | `loading`      | Render skeleton placeholders instead of content.                                                                               | `boolean`          | `false`     |
+| `size`        | `size`         | Visual density. `small` is compact (default); `medium` enlarges the value and padding.                                         | `"m" \| "s"`       | `'s'`       |
+| `trend`       | `trend`        | Trend delta. Sign selects the up/down arrow and color. Rendered as `{trend}%` unless `trendValue` is given.                    | `number`           | `undefined` |
+| `trendLabel`  | `trend-label`  | Context text shown beside the trend (e.g. `vs last week`).                                                                     | `string`           | `undefined` |
+| `trendValue`  | `trend-value`  | Preformatted text to render in place of `{trend}%` (e.g. a currency amount), while `trend`'s sign still drives the icon/color. | `string`           | `undefined` |
+| `unit`        | `unit`         | Unit rendered after the value (e.g. `guests`, `%`, `nights`).                                                                  | `string`           | `undefined` |
+| `value`       | `value`        | Primary metric value. Rendered with tabular figures.                                                                           | `number \| string` | `undefined` |
 
 
 ## Events

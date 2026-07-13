@@ -10,7 +10,9 @@
   border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
   background-color: var(--wa-color-surface-default, #fff);
 }
-
+.dp-report__booking-nbr-cell::part(booking-reference) {
+  display: none;
+}
 .table--container {
   overflow-x: auto;
 }

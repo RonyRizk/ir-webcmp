@@ -60,11 +60,24 @@
   transform: translateX(-50%) rotate(45deg);
 }
 
+.dp-chart-tooltip--below {
+  transform: translateY(0.625rem);
+}
+
+.dp-chart-tooltip--below::after {
+  top: -0.375rem;
+  bottom: auto;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--wa-color-surface-border, #e5e7eb);
+  border-top: 1px solid var(--wa-color-surface-border, #e5e7eb);
+}
+
 .dp-chart-tooltip__header {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  /* font-weight: 600; */
+  margin-bottom: 0.375rem;
 }
 
 .dp-chart-tooltip__logo {
@@ -73,13 +86,6 @@
   object-fit: contain;
   border-radius: 0.25rem;
   flex-shrink: 0;
-}
-
-.dp-chart-tooltip__date {
-  font-size: 0.6875rem;
-  font-weight: 400;
-  color: var(--wa-color-text-quiet, #6b7280);
-  margin-bottom: 0.375rem;
 }
 
 .dp-chart-tooltip__row {

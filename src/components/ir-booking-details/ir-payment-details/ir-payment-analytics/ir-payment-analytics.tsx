@@ -1,5 +1,5 @@
 import { Booking } from '@/models/booking.dto';
-import calendar_data from '@/stores/calendar-data';
+import calendar_data, { isOptimReadOnly } from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 
@@ -75,7 +75,7 @@ export class IrPaymentAnalytics {
         <wa-callout class={`dp-effect-callout --${tone}`} variant={calloutVariant} size="small">
           <wa-icon class="dp-effect-icon" slot="icon" name="wand-magic-sparkles"></wa-icon>
           <div class="booking-dp-effect">
-            <p class="booking-dp-effect__label">Dynamic pricing effect</p>
+            <p class="booking-dp-effect__label">Dynamic pricing {isOptimReadOnly() ? 'lost profit' : 'effect'}</p>
             <p class={`booking-dp-effect__value --${tone}`}>
               <span>{formatAmount(calendar_data.property.currency.symbol, this.displayedValue)}</span>
               <wa-icon class="booking-dp-effect__trend-icon" name={trendIcon}></wa-icon>

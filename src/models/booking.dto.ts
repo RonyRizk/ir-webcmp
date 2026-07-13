@@ -570,7 +570,12 @@ export interface LinkedPms {
   code: string;
   is_active: boolean;
   description: string;
+  is_read_only: boolean;
   id: number;
+  partner: {
+    code: string;
+    description: string;
+  };
 }
 export interface Property {
   tax_categories: TaxCategory[];

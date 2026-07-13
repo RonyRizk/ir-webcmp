@@ -18,6 +18,7 @@ import { CityLedgerService, type ClTx } from '@/services/city-ledger';
 import { mapClTxToFolioRow, FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { isAgentMode } from './functions';
 import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
+import { extras } from '@/utils/utils';
 
 @Component({
   tag: 'ir-booking-details',
@@ -428,7 +429,19 @@ export class IrBookingDetails {
         this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
-        this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language, include_dp_pricing: true }),
+        this.bookingService.getExposedBooking({
+          booking_nbr: this.bookingNumber,
+          language: this.language,
+          include_dp_pricing: true,
+          withExtras: true,
+          extras: [
+            ...extras,
+            {
+              key: 'DP_OPTIM_BASE_GROSS',
+              value: '',
+            },
+          ],
+        }),
         this.bookingService.getSetupEntriesByTableNameMulti([
           '_BED_PREFERENCE_TYPE',
           '_DEPARTURE_TIME',

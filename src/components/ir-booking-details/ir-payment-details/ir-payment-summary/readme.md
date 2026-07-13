@@ -26,9 +26,14 @@
 
  - [ir-payment-details](..)
 
+### Depends on
+
+- [ir-payment-analytics](../ir-payment-analytics)
+
 ### Graph
 ```mermaid
 graph TD;
+  ir-payment-summary --> ir-payment-analytics
   ir-payment-details --> ir-payment-summary
   style ir-payment-summary fill:#f9f,stroke:#333,stroke-width:4px
 ```

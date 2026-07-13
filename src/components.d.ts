@@ -4484,13 +4484,17 @@ export namespace Components {
          */
         "size": MetricSize;
         /**
-          * Trend delta as a percentage. The sign selects the up/down arrow and color.
+          * Trend delta. Sign selects the up/down arrow and color. Rendered as `{trend}%` unless `trendValue` is given.
          */
         "trend": number;
         /**
           * Context text shown beside the trend (e.g. `vs last week`).
          */
         "trendLabel": string;
+        /**
+          * Preformatted text to render in place of `{trend}%` (e.g. a currency amount), while `trend`'s sign still drives the icon/color.
+         */
+        "trendValue": string;
         /**
           * Unit rendered after the value (e.g. `guests`, `%`, `nights`).
          */
@@ -17569,13 +17573,17 @@ declare namespace LocalJSX {
          */
         "size"?: MetricSize;
         /**
-          * Trend delta as a percentage. The sign selects the up/down arrow and color.
+          * Trend delta. Sign selects the up/down arrow and color. Rendered as `{trend}%` unless `trendValue` is given.
          */
         "trend"?: number;
         /**
           * Context text shown beside the trend (e.g. `vs last week`).
          */
         "trendLabel"?: string;
+        /**
+          * Preformatted text to render in place of `{trend}%` (e.g. a currency amount), while `trend`'s sign still drives the icon/color.
+         */
+        "trendValue"?: string;
         /**
           * Unit rendered after the value (e.g. `guests`, `%`, `nights`).
          */
@@ -21164,6 +21172,7 @@ declare namespace LocalJSX {
         "unit": string;
         "icon": string;
         "trend": number;
+        "trendValue": string;
         "trendLabel": string;
         "invertTrend": boolean;
         "caption": string;

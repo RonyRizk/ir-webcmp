@@ -275,6 +275,7 @@ graph TD;
   ir-payment-details --> ir-payments-folio
   ir-payment-details --> ir-void-document-dialog
   ir-payment-details --> ir-dialog
+  ir-payment-summary --> ir-payment-analytics
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
   ir-applicable-policies --> ir-custom-button

@@ -1134,7 +1134,9 @@ export class BookingService {
     language,
     withExtras = true,
     include_dp_pricing,
+    extras: _extras = extras,
   }: {
+    extras?: { key: string; value: unknown }[];
     booking_nbr: string;
     language: string;
     withExtras?: boolean;
@@ -1144,7 +1146,7 @@ export class BookingService {
       const { data } = await axios.post(`/Get_Exposed_Booking`, {
         booking_nbr,
         language,
-        extras: withExtras ? extras : null,
+        extras: withExtras ? _extras : null,
         is_calculate_dp_effect: include_dp_pricing,
         is_get_financial_snapshot: true,
       });

@@ -5,3 +5,18 @@
   font-size: var(--wa-font-size-s);
   margin-top: 0.25rem;
 }
+
+.dp-report__callout {
+  margin-bottom: 1rem;
+}
+
+.dp-report__callout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.dp-report__callout-text {
+  margin: 0;
+}

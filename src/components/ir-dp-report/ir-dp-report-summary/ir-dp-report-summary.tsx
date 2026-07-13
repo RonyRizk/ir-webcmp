@@ -13,6 +13,9 @@ export class IrDpReportSummary {
     const currencySymbol = dp_report.rows[0]?.currencySymbol ?? '$';
     const loading = dp_report.isLoading;
 
+    const totalRevenue = dp_report.rows.reduce((sum, row) => sum + row.accommodationGross, 0);
+    const dpContributionPct = totalRevenue !== 0 ? Number(((summary.total_profit / totalRevenue) * 100).toFixed(1)) : 0;
+
     return (
       <Host>
         <div class="dp-summary__row">
@@ -22,6 +25,7 @@ export class IrDpReportSummary {
             label="Total Profit Generated"
             loading={loading}
             value={formatAmount(currencySymbol, summary.total_profit)}
+            trend={dpContributionPct}
             caption={`from ${summary.total_bookings} booking${summary.total_bookings === 1 ? '' : 's'}`}
           ></ir-metric-card>
           <ir-metric-card

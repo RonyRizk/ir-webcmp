@@ -6,10 +6,42 @@
   margin-bottom: var(--wa-space-l);
 }
 
+/* When ir-payment-analytics is present, the divider runs through its middle
+   instead of sitting below it — see .ps-analytics. */
+:host(.ps-host--analytics) {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
 .ps-layout {
   display: flex;
   flex-direction: column;
   gap: 0.357rem; /* 5px */
+}
+
+/* Divider that cuts through ir-payment-analytics instead of sitting below it.
+   The line sits at the vertical midpoint behind the analytics callout; the
+   callout's own (fit-content) background hides the segment behind it. */
+.ps-analytics {
+  position: relative;
+  margin-top: var(--wa-space-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-analytics::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+
+.ps-analytics ir-payment-analytics {
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Agent mode: two columns ─────────────────────────── */

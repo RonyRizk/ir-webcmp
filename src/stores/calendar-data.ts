@@ -67,4 +67,16 @@ export function isSingleUnit(id: number) {
   calendar_data.roomHistory[id] = result;
   return result;
 }
+export const isOptimReadOnly = () => {
+  const optimIntegration = hasOptim();
+
+  if (!optimIntegration) {
+    return false;
+  }
+
+  return optimIntegration.is_read_only;
+};
+export const hasOptim = () => {
+  return calendar_data?.property?.linked_pms?.find(p => p.partner.code?.toUpperCase() === 'OPTIM');
+};
 export default calendar_data;
