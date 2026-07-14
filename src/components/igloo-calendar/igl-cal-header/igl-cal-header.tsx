@@ -194,6 +194,16 @@ export class IglCalHeader {
     this.renderAgain = !this.renderAgain;
   }
 
+  // private getTotalUnits() {
+  //   return calendar_data.property?.roomtypes?.reduce((prev, curr: RoomType) => {
+  //     if (!curr.is_active) {
+  //       return prev;
+  //     }
+  //     const activePhysicalRooms = curr.physicalrooms?.filter(r => r.is_active) ?? [];
+  //     return activePhysicalRooms.length > 0 ? activePhysicalRooms.length + prev : prev;
+  //   }, 0);
+  // }
+
   render() {
     return (
       <Host>
@@ -253,7 +263,7 @@ export class IglCalHeader {
                 <ir-custom-button slot="trigger" id="fd-dates-navigation_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('calendar')}>
                   <wa-icon
                     style={{ fontSize: '1.5rem' }}
-                    name="calendar"
+                    name="calendar-days"
                     variant="regular"
                     label={locales.entries.Lcz_Navigate}
                     aria-label={locales.entries.Lcz_Navigate}
@@ -292,7 +302,7 @@ export class IglCalHeader {
               <ir-custom-button id="fd-rectifier" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('rectify')}>
                 <wa-icon
                   style={{ fontSize: '1.5rem' }}
-                  name="calendar-check"
+                  name="circle-check"
                   variant="regular"
                   label={'Rectify or open availability'}
                   aria-label={'Rectify or open availability'}
@@ -305,9 +315,9 @@ export class IglCalHeader {
                 </wa-tooltip>
                 <ir-custom-button id="fd-stop-open-sale_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleOptionEvent('bulk', this.getNewBookingModel())}>
                   <wa-icon
-                    variant="regular"
+                    // variant="regular"
                     style={{ fontSize: '1.5rem' }}
-                    name="calendar-xmark"
+                    name="xmarks-lines"
                     label={locales.entries.Lcz_StopOpenSale}
                     aria-label={locales.entries.Lcz_StopOpenSale}
                   ></wa-icon>
@@ -343,20 +353,22 @@ export class IglCalHeader {
               }}
             ></ir-m-combobox>
           </div> */}
-            <div class="searchContiner">
-              <ir-picker
-                size="s"
-                onCombobox-select={e => {
-                  this.handleScrollToRoom(Number(e.detail.item.value));
-                }}
-              >
-                {this.roomsList.map(room => (
-                  <ir-picker-item label={room.name} value={room.id}>
-                    {room.name}
-                  </ir-picker-item>
-                ))}
-              </ir-picker>
-            </div>
+            {this.roomsList.length >= 20 && (
+              <div class="searchContiner">
+                <ir-picker
+                  size="s"
+                  onCombobox-select={e => {
+                    this.handleScrollToRoom(Number(e.detail.item.value));
+                  }}
+                >
+                  {this.roomsList.map(room => (
+                    <ir-picker-item label={room.name} value={room.id}>
+                      {room.name}
+                    </ir-picker-item>
+                  ))}
+                </ir-picker>
+              </div>
+            )}
           </div>
         </div>
         <div class="stickyCell headersContainer">

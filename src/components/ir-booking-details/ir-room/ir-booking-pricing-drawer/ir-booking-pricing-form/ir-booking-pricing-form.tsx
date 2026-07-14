@@ -155,7 +155,7 @@ export class IrBookingPricingForm {
       );
     }
 
-    const allDisabled = this.invoiceLocked || this.isSubmitting;
+    const allDisabled = this.invoiceLocked;
     const hasDisabledInput = this.nights.some(night => night.isLocked || allDisabled);
 
     return (
@@ -181,7 +181,7 @@ export class IrBookingPricingForm {
               label={moment(night.date).format('ddd, MMM D')}
               value={night.amount}
               mask="price"
-              disabled={night.isLocked || allDisabled}
+              disabled={night.isLocked || allDisabled || this.isSubmitting}
               onText-change={(e: CustomEvent<string>) => this.updateNight(night.date, e.detail)}
             >
               <span slot="start">{calendar_data.property.currency.symbol}</span>

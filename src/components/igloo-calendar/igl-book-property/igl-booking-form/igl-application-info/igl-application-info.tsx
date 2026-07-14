@@ -48,7 +48,7 @@ export class IglApplicationInfo {
   private updateGuest(params: Partial<RatePlanGuest>) {
     const roomTypeId = this.rateplanSelection.roomtype.id;
     const ratePlanId = this.rateplanSelection.ratePlan.id;
-    let prevGuest = [...this.rateplanSelection.guest];
+    let prevGuest = [...(this.rateplanSelection.guest ?? [])];
     prevGuest[this.roomIndex] = {
       ...prevGuest[this.roomIndex],
       ...params,
@@ -153,7 +153,7 @@ export class IglApplicationInfo {
         infants: this.guestInfo?.infant_nbr,
       });
     }
-    return variation.discounted_gross_amount;
+    return variation?.discounted_gross_amount ?? 0;
   }
 
   private filterRooms(): { name: string; id: number }[] {
@@ -166,8 +166,21 @@ export class IglApplicationInfo {
         result.push({ name: unit.name, id: unit.pr_id });
       }
     });
-    const filteredGuestsRoom = this.rateplanSelection.guest.filter((_, i) => i !== this.roomIndex).map(r => r.unit);
-    const filteredResults = result.filter(r => !filteredGuestsRoom.includes(r.id.toString()));
+    // Exclude units already assigned to any other room of the same room type, across all its rate plans
+    const roomTypeId = this.rateplanSelection.roomtype.id;
+    const currentRatePlanId = this.rateplanSelection.ratePlan.id;
+    const takenUnits: string[] = [];
+    Object.entries(booking_store.ratePlanSelections[roomTypeId] ?? {}).forEach(([ratePlanId, selection]) => {
+      (selection.guest ?? []).forEach((guest, i) => {
+        if (i >= selection.reserved || (Number(ratePlanId) === currentRatePlanId && i === this.roomIndex)) {
+          return;
+        }
+        if (guest?.unit) {
+          takenUnits.push(guest.unit.toString());
+        }
+      });
+    });
+    const filteredResults = result.filter(r => !takenUnits.includes(r.id.toString()));
     return this.bookingType === 'EDIT_BOOKING'
       ? [...filteredResults, this.rateplanSelection.roomtype.id === this.baseData?.roomtypeId ? this.baseData?.unit : null]
           .filter(f => !!f)
@@ -180,7 +193,7 @@ export class IglApplicationInfo {
     const filteredRoomList = this.filterRooms();
     const formattedVariation = this.variationService.formatVariationBasedOnInfants({
       baseVariation: this.rateplanSelection.selected_variation,
-      infants: this.guestInfo.infant_nbr,
+      infants: this.guestInfo?.infant_nbr,
       variations: this.rateplanSelection.ratePlan.variations,
     });
     // const amount = await this.getAmount();
@@ -330,7 +343,7 @@ export class IglApplicationInfo {
           </p>
         </div>
 
-        {this.rateplanSelection.selected_variation.child_nbr > 0 && (
+        {this.rateplanSelection.selected_variation?.child_nbr > 0 && (
           <div class="fd-application-info__infant">
             <p class="fd-application-info__infant-label">Any of the children below 3 years?</p>
             <wa-select

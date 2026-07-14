@@ -100,7 +100,8 @@ export class IRBookingEditorService {
   private async calculateAmount({ is_amount_modified, selected_variation, view_mode, rp_amount }: IRatePlanSelection) {
     if (!is_amount_modified) return null;
 
-    const total_days = selected_variation.nights.length;
+    const total_days = selected_variation?.nights?.length;
+    if (!total_days) return null;
 
     // Gross amount (tax included)
     const gross = view_mode === '002' ? rp_amount : rp_amount / total_days;
@@ -125,21 +126,24 @@ export class IRBookingEditorService {
   private async generateDailyRates(rate_plan: IRatePlanSelection, i: number) {
     let variation = rate_plan.selected_variation;
     const amount = rate_plan.is_amount_modified ? await this.calculateAmount(rate_plan) : null;
-    if (rate_plan.guest[i].infant_nbr > 0 && !rate_plan.is_amount_modified) {
+    const infantNbr = rate_plan.guest?.[i]?.infant_nbr ?? 0;
+    if (infantNbr > 0 && !rate_plan.is_amount_modified) {
       if (!this.variationService) {
         this.variationService = new VariationService();
       }
       variation = this.variationService.getVariationBasedOnInfants({
         variations: rate_plan.ratePlan.variations,
         baseVariation: rate_plan.selected_variation,
-        infants: rate_plan.guest[i].infant_nbr,
+        infants: infantNbr,
       });
     }
-    return variation.nights.map(n => ({
-      date: n.night,
-      amount: amount ?? n.discounted_amount,
-      cost: null,
-    }));
+    return (
+      variation?.nights?.map(n => ({
+        date: n.night,
+        amount: amount ?? n.discounted_amount,
+        cost: null,
+      })) ?? []
+    );
   }
 
   private async getBookedRooms({
@@ -176,7 +180,9 @@ export class IRBookingEditorService {
         const rateplan = roomtype[rateplanId];
         if (rateplan.reserved > 0) {
           for (let i = 0; i < rateplan.reserved; i++) {
-            const { first_name, last_name } = rateplan.guest[i];
+            const guest = rateplan.guest?.[i];
+            const first_name = guest?.first_name ?? '';
+            const last_name = guest?.last_name ?? '';
             const days = await this.generateDailyRates(rateplan, i);
             let newRoom = {
               ...(room ?? {}),
@@ -184,14 +190,14 @@ export class IRBookingEditorService {
               roomtype: rateplan.roomtype,
               rateplan: rateplan.ratePlan,
               prepayment_amount_gross: 0,
-              unit: override_unit ? (toUnitId(unit) !== null ? { id: toUnitId(unit) } : null) : rateplan.guest[i].unit ? { id: toUnitId(rateplan.guest[i].unit) } : null,
+              unit: override_unit ? (toUnitId(unit) !== null ? { id: toUnitId(unit) } : null) : guest?.unit ? { id: toUnitId(guest.unit) } : null,
               occupancy: {
-                adult_nbr: rateplan.selected_variation.adult_nbr,
-                children_nbr: Number(rateplan.selected_variation.child_nbr ?? 0) - Math.max(Number(rateplan.guest[i].infant_nbr ?? 0), 0),
-                infant_nbr: rateplan.guest[i].infant_nbr,
+                adult_nbr: rateplan.selected_variation?.adult_nbr ?? 0,
+                children_nbr: Number(rateplan.selected_variation?.child_nbr ?? 0) - Math.max(Number(guest?.infant_nbr ?? 0), 0),
+                infant_nbr: guest?.infant_nbr ?? null,
               },
 
-              bed_preference: rateplan.guest[i].bed_preference,
+              bed_preference: guest?.bed_preference ?? null,
               from_date: moment(check_in).format('YYYY-MM-DD'),
               to_date: moment(check_out).format('YYYY-MM-DD'),
               notes,

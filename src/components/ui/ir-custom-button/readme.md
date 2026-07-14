@@ -156,6 +156,7 @@
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
  - [ir-sales-table](../../ir-sales-by-country/ir-sales-table)
+ - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-tasks-card](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-card)
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
@@ -284,6 +285,7 @@ graph TD;
   ir-sales-by-country --> ir-custom-button
   ir-sales-filters --> ir-custom-button
   ir-sales-table --> ir-custom-button
+  ir-secure-tasks --> ir-custom-button
   ir-tasks-card --> ir-custom-button
   ir-tasks-filters --> ir-custom-button
   ir-tasks-header --> ir-custom-button

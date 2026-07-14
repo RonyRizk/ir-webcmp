@@ -84,9 +84,11 @@ export class IrPmsPage {
           </div>
 
           <div class="app-header__right">
-            <ir-custom-button id="add-booking-btn" size="s" appearance="plain" variant="brand">
-              <wa-icon name="circle-plus" style={{ fontSize: '1.2rem' }}></wa-icon>
-            </ir-custom-button>
+            <ir-booking-new-form ticket={this.ticket} prop:propertyid={this.propertyid} language="en">
+              <ir-custom-button slot="trigger" id="add-booking-btn" size="s" appearance="plain" variant="brand">
+                <wa-icon name="circle-plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+              </ir-custom-button>
+            </ir-booking-new-form>
             <wa-tooltip for="add-booking-btn">New booking</wa-tooltip>
 
             <ir-custom-button id="calendar-btn" href="/frontdesk.aspx" size="s" appearance="plain" class="header-desktop-only">

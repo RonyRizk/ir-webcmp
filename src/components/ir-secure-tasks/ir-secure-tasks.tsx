@@ -2,7 +2,7 @@ import Token from '@/models/Token';
 import { PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
 import { checkUserAuthState, manageAnchorSession } from '@/utils/utils';
-import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Element, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 
 export type SecureScreens =
   | 'hk'
@@ -240,6 +240,17 @@ export class IrSecureTasks {
             </div>
 
             <div class="secure-header__controls">
+              {calendar_data?.property && (
+                <Fragment>
+                  <ir-booking-new-form ticket={this.token.getToken()} propertyid={calendar_data?.property?.id?.toString()} language="en">
+                    <ir-custom-button slot="trigger" id="add-booking-btn" size="s" appearance="plain" variant="brand">
+                      <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
+                    </ir-custom-button>
+                  </ir-booking-new-form>
+                  <div class="secure-header__sep" role="separator"></div>
+                </Fragment>
+              )}
+
               <form
                 class="secure-header__aname-form"
                 onSubmit={e => {

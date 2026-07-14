@@ -16,6 +16,11 @@
 
 ## Dependencies
 
+### Used by
+
+ - [ir-pms-page](../pms-header/ir-pms-page)
+ - [ir-secure-tasks](../ir-secure-tasks)
+
 ### Depends on
 
 - [ir-custom-button](../ui/ir-custom-button)
@@ -66,6 +71,8 @@ graph TD;
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
   ir-mobile-input --> ir-input
+  ir-pms-page --> ir-booking-new-form
+  ir-secure-tasks --> ir-booking-new-form
   style ir-booking-new-form fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

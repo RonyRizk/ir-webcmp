@@ -1,6 +1,6 @@
 import { Task, ArchivedTask } from '@/models/housekeeping';
 import { createStore } from '@stencil/store';
-import calendar_data from './calendar-data';
+import calendar_data from '@/stores/calendar-data';
 
 const defaultTasksList = [10, 20, 50, 100];
 
