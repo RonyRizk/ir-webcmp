@@ -104,6 +104,13 @@ export class PropertyService {
       throw new Error(error);
     }
   }
+  public async getActiveOptimExposedProperties() {
+    const { data } = await axios.post('/Get_Active_Optim_Exposed_Properties', {});
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return AllowedPropertiesSchema.parse(data.My_Result);
+  }
   public async exposedRectifier(params: ExposedRectifierParams) {
     const payload = ExposedRectifierParamsSchema.parse(params);
     const { data } = await axios.post('/Exposed_Rectifier', payload);

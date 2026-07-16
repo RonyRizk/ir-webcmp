@@ -106,6 +106,7 @@ Type: `Promise<void>`
 ### Used by
 
  - [ir-city-ledger](../../ir-city-ledger)
+ - [ir-dp-report](../../ir-dp-report)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-pms-search](../../pms-header/ir-pms-search)
 
@@ -118,6 +119,7 @@ Type: `Promise<void>`
 graph TD;
   ir-autocomplete --> ir-input
   ir-city-ledger --> ir-autocomplete
+  ir-dp-report --> ir-autocomplete
   ir-fiscal-documents-filters --> ir-autocomplete
   ir-pms-search --> ir-autocomplete
   style ir-autocomplete fill:#f9f,stroke:#333,stroke-width:4px

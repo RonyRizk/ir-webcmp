@@ -21,6 +21,7 @@
 ### Used by
 
  - [ir-city-ledger](../../../ir-city-ledger)
+ - [ir-dp-report](../../../ir-dp-report)
  - [ir-fiscal-documents-filters](../../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-pms-search](../../../pms-header/ir-pms-search)
 
@@ -28,6 +29,7 @@
 ```mermaid
 graph TD;
   ir-city-ledger --> ir-autocomplete-option
+  ir-dp-report --> ir-autocomplete-option
   ir-fiscal-documents-filters --> ir-autocomplete-option
   ir-pms-search --> ir-autocomplete-option
   style ir-autocomplete-option fill:#f9f,stroke:#333,stroke-width:4px

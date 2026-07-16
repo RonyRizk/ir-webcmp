@@ -3117,6 +3117,10 @@ export namespace Components {
     interface IrDpReportChart {
     }
     interface IrDpReportFilters {
+        /**
+          * Earliest selectable date. Set by the parent once it discovers that the property's data does not go back the full default lookback window.
+         */
+        "minDate"?: string;
     }
     interface IrDpReportSummary {
     }
@@ -16052,6 +16056,10 @@ declare namespace LocalJSX {
     }
     interface IrDpReportFilters {
         /**
+          * Earliest selectable date. Set by the parent once it discovers that the property's data does not go back the full default lookback window.
+         */
+        "minDate"?: string;
+        /**
           * Emitted only when the user clicks Search. The shared store (updated as soon as the dates change) keeps every filter instance (chart tab + table tab) visually in sync regardless of whether a search has been triggered yet.
          */
         "onDpFiltersChange"?: (event: IrDpReportFiltersCustomEvent<{ from: string; to: string }>) => void;
@@ -20759,6 +20767,9 @@ declare namespace LocalJSX {
         "baseUrl": string;
         "userType": number;
     }
+    interface IrDpReportFiltersAttributes {
+        "minDate": string;
+    }
     interface IrDrawerAttributes {
         "open": NativeDrawer['open'];
         "label": NativeDrawer['label'];
@@ -21948,7 +21959,7 @@ declare namespace LocalJSX {
         "ir-dialog": Omit<IrDialog, keyof IrDialogAttributes> & { [K in keyof IrDialog & keyof IrDialogAttributes]?: IrDialog[K] } & { [K in keyof IrDialog & keyof IrDialogAttributes as `attr:${K}`]?: IrDialogAttributes[K] } & { [K in keyof IrDialog & keyof IrDialogAttributes as `prop:${K}`]?: IrDialog[K] };
         "ir-dp-report": Omit<IrDpReport, keyof IrDpReportAttributes> & { [K in keyof IrDpReport & keyof IrDpReportAttributes]?: IrDpReport[K] } & { [K in keyof IrDpReport & keyof IrDpReportAttributes as `attr:${K}`]?: IrDpReportAttributes[K] } & { [K in keyof IrDpReport & keyof IrDpReportAttributes as `prop:${K}`]?: IrDpReport[K] };
         "ir-dp-report-chart": IrDpReportChart;
-        "ir-dp-report-filters": IrDpReportFilters;
+        "ir-dp-report-filters": Omit<IrDpReportFilters, keyof IrDpReportFiltersAttributes> & { [K in keyof IrDpReportFilters & keyof IrDpReportFiltersAttributes]?: IrDpReportFilters[K] } & { [K in keyof IrDpReportFilters & keyof IrDpReportFiltersAttributes as `attr:${K}`]?: IrDpReportFiltersAttributes[K] } & { [K in keyof IrDpReportFilters & keyof IrDpReportFiltersAttributes as `prop:${K}`]?: IrDpReportFilters[K] };
         "ir-dp-report-summary": IrDpReportSummary;
         "ir-dp-report-table": IrDpReportTable;
         "ir-drawer": Omit<IrDrawer, keyof IrDrawerAttributes> & { [K in keyof IrDrawer & keyof IrDrawerAttributes]?: IrDrawer[K] } & { [K in keyof IrDrawer & keyof IrDrawerAttributes as `attr:${K}`]?: IrDrawerAttributes[K] } & { [K in keyof IrDrawer & keyof IrDrawerAttributes as `prop:${K}`]?: IrDrawer[K] };

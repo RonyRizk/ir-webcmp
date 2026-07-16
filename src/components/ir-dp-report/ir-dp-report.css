@@ -20,3 +20,15 @@
 .dp-report__callout-text {
   margin: 0;
 }
+.dp-report__property-select::part(listbox) {
+  max-height: 300px;
+}
+.dp-report__property-select {
+  width: 100%;
+}
+/*lg*/
+@media (min-width: 1024px) {
+  .dp-report__property-select {
+    width: 300px;
+  }
+}

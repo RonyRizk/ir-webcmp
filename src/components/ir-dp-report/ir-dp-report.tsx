@@ -1,11 +1,14 @@
 import { Component, Element, Listen, Prop, State, Watch, h } from '@stencil/core';
+import moment from 'moment';
 import Token from '@/models/Token';
 import { RoomService } from '@/services/room.service';
 import { DpReportService } from '@/services/dp-report.service';
 import locales from '@/stores/locales.store';
-import dp_report from '@/stores/dp_report.store';
+import dp_report, { updateDpReportFilters } from '@/stores/dp_report.store';
 import { mapBookingToDpRow } from './types';
 import { isOptimReadOnly } from '@/stores/calendar-data';
+import { PropertyService } from '@/services/property';
+import { AllowedProperties } from '@/services/property/types';
 
 export type DPReportPageTabs = 'chart' | 'bookings';
 
@@ -28,12 +31,14 @@ export class IrDpReport {
   @State() activeTab: DPReportPageTabs = 'chart';
   @State() activeBookingNbr: string | null = null;
   @State() activeGuestBookingNbr: string | null = null;
+  @State() propertyId: number;
+  @State() allowedProperties: AllowedProperties = null;
+  @State() minAllowedDate: string | undefined;
 
   private token = new Token();
   private roomService = new RoomService();
+  private propertyService = new PropertyService();
   private dpReportService = new DpReportService();
-
-  private propertyId: number;
 
   componentWillLoad() {
     if (this.baseUrl) {
@@ -93,17 +98,51 @@ export class IrDpReport {
       }
       this.propertyId = propertyId;
 
-      const languageTexts = await this.roomService.fetchLanguage(this.language);
+      const [languageTexts, allowedProperties] = await Promise.all([
+        this.roomService.fetchLanguage(this.language),
+        this.propertyService.getActiveOptimExposedProperties(),
+        await this.fetchInitialDpReport(),
+      ]);
       if (!locales.entries) {
         locales.entries = languageTexts.entries;
         locales.direction = languageTexts.direction;
       }
 
-      await this.fetchDpReport();
+      this.allowedProperties = allowedProperties && allowedProperties.length > 1 ? allowedProperties : null;
     } catch (error) {
       console.error('Error initializing DP report:', error);
     } finally {
       this.isPageLoading = false;
+    }
+  }
+
+  /**
+   * Loads the default 2-month lookback window, then checks whether the property's data
+   * actually goes back that far. If the earliest returned booking is more recent than the
+   * requested from-date, the property has less history than the default window — pin the
+   * from-date and the date picker's minimum to that earliest date. Otherwise we can't tell
+   * where the real history boundary is, so leave the picker unrestricted.
+   */
+  private async fetchInitialDpReport() {
+    const from = moment().subtract(2, 'months').format('YYYY-MM-DD');
+    const to = moment().format('YYYY-MM-DD');
+    updateDpReportFilters({ from, to });
+
+    await this.fetchDpReport();
+
+    if (dp_report.rows.length === 0) {
+      updateDpReportFilters({ from: to, to });
+      this.minAllowedDate = undefined;
+      return;
+    }
+
+    const earliestDate = dp_report.rows.reduce<string | undefined>((earliest, row) => (!earliest || row.date < earliest ? row.date : earliest), undefined);
+
+    if (earliestDate && earliestDate > from) {
+      updateDpReportFilters({ from: earliestDate });
+      this.minAllowedDate = earliestDate;
+    } else {
+      this.minAllowedDate = undefined;
     }
   }
 
@@ -126,6 +165,20 @@ export class IrDpReport {
       dp_report.isLoading = false;
     }
   }
+
+  private handlePropertyChange = async (e: CustomEvent<string | string[]>) => {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    const value = e.detail as string;
+    const newPropertyId = value ? Number(value) : undefined;
+    if (!newPropertyId || newPropertyId === this.propertyId) {
+      return;
+    }
+    this.propertyId = newPropertyId;
+    this.activeBookingNbr = null;
+    this.activeGuestBookingNbr = null;
+    await this.fetchInitialDpReport();
+  };
 
   private handleTabShow = (e: CustomEvent<{ name: string }>) => {
     this.activeTab = e.detail.name as DPReportPageTabs;
@@ -150,6 +203,23 @@ the incentive price reduction."
         label="Dynamic Pricing Effect"
         class="dp-report__page"
       >
+        {this.allowedProperties && (
+          <ir-autocomplete
+            slot="page-header"
+            placeholder="Change property"
+            withExpandIcon
+            class={'dp-report__property-select'}
+            value={this.allowedProperties.find(property => property.id === this.propertyId)?.name ?? ''}
+            onCombobox-change={this.handlePropertyChange}
+          >
+            <wa-icon slot="start" name="magnifying-glass"></wa-icon>
+            {this.allowedProperties.map(property => (
+              <ir-autocomplete-option key={property.id} label={property.name} value={String(property.id)}>
+                {property.name}
+              </ir-autocomplete-option>
+            ))}
+          </ir-autocomplete>
+        )}
         {isOptimReadOnly() && (
           <wa-callout size="s" variant="danger" class="dp-report__callout">
             <wa-icon slot="icon" name="face-frown"></wa-icon>
@@ -170,11 +240,11 @@ the incentive price reduction."
           <wa-tab panel="chart">Chart</wa-tab>
           <wa-tab panel="bookings">Bookings</wa-tab>
           <wa-tab-panel name="chart">
-            <ir-dp-report-filters></ir-dp-report-filters>
+            <ir-dp-report-filters minDate={this.minAllowedDate}></ir-dp-report-filters>
             <ir-dp-report-chart></ir-dp-report-chart>
           </wa-tab-panel>
           <wa-tab-panel name="bookings">
-            <ir-dp-report-filters></ir-dp-report-filters>
+            <ir-dp-report-filters minDate={this.minAllowedDate}></ir-dp-report-filters>
             <ir-dp-report-table></ir-dp-report-table>
           </wa-tab-panel>
         </wa-tab-group>

@@ -28,9 +28,9 @@ export class IrPaymentItem {
         ? `${this.payment.payment_type?.description}: ${this.payment.payment_method.description}`
         : this.payment.payment_type.description) ?? this.payment.designation;
 
-    const canEditOrDelete = ![PayTypes.Payment, PayTypes.CreditReceipt].includes(this.payment.payment_type?.code as any);
+    const canEditOrDelete = ![PayTypes.Payment, PayTypes.CreditReceipt, PayTypes.Refund].includes(this.payment.payment_type?.code as any);
 
-    const canPrint = [PayTypes.Payment, PayTypes.CreditReceipt].includes(this.payment.payment_type.code as any);
+    const canPrint = [PayTypes.Payment, PayTypes.CreditReceipt, PayTypes.Refund].includes(this.payment.payment_type.code as any);
 
     return (
       <div class="payment-item__payment-item">
@@ -85,12 +85,12 @@ export class IrPaymentItem {
                 {canPrint && (
                   <wa-dropdown-item value="receipt">
                     {/* <wa-icon name="receipt" slot="icon"></wa-icon> */}
-                    Print Receipt
+                    Print
                   </wa-dropdown-item>
                 )}
 
                 {canEditOrDelete && <wa-divider></wa-divider>}
-                {this.payment?.payment_type?.code === '001' && this.payment.payment_status?.code === PayStatus.Normal && (
+                {this.payment?.payment_type?.code === PayTypes.Payment && this.payment.payment_status?.code === PayStatus.Normal && (
                   <wa-dropdown-item variant="danger" value="void-receipt">
                     Void with credit receipt
                   </wa-dropdown-item>

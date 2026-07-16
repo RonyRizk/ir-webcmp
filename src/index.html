@@ -4,16 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <title>Payment Option</title>
+    <title>Dp report</title>
     <script type="module" src="/build/ir-webcmp.esm.js"></script>
     <script nomodule src="/build/ir-webcmp.js"></script>
-    <script src="assets/scripts/jquery.min.js"></script>
-    <script src="assets/scripts/daterangepicker/moment.min.js"></script>
-    <script src="assets/scripts/daterangepicker/daterangepicker.js"></script>
-    <script src="assets/scripts/inputmask/jquery.inputmask.js"></script>
-    <script src="assets/scripts/bootstrap.bundle.min.js"></script>
-    <script src="assets/scripts/toastr/toastr.min.js"></script>
-    <link rel="stylesheet" href="assets/scripts/daterangepicker/daterangepicker.css">
     <script src="scripts/index.js"></script>
     <style>
         body {
@@ -24,15 +17,15 @@
 
 <body>
     <ir-common></ir-common>
-    <ir-pms-page propertyid="42" language="en" baseurl="https://gateway.igloorooms.com/IR"></ir-pms-page>
-
+    <ir-dp-report baseurl="https://gateway.igloorooms.com/IR" language="en"></ir-dp-report>
     <script>
-        const pmsPage = document.querySelector("ir-pms-page");
-        setTimeout(async () => {
-            const ticket = await getToken();
-            pmsPage.propertyid = getId();
-            pmsPage.ticket = ticket;
-        }, 300)
+        const dpReportEl = document.querySelector("ir-dp-report");
+        if (dpReportEl) {
+            (async () => {
+                dpReportEl.propertyid = 373 || getId();
+                dpReportEl.ticket = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODQzODYzNzQsIkNMQUlNLTAxIjoieHhMMzFBem8vQkk9IiwiQ0xBSU0tMDIiOiI5UStMQm93VTl6az0iLCJDTEFJTS0wMyI6InJ5Y0ZmdnF6NjQ0PSIsIkNMQUlNLTA0IjoiQUVxVnRCMm1kWTg9IiwiQ0xBSU0tMDUiOiJFQTEzejA3ejBUcWRkM2gwNElyYThLK2JNNVJYNWxhaSIsIkNMQUlNLTA2IjoiQUVxVnRCMm1kWTg9In0.n3mm3vhZgA1elJ-LGbhuR8ilyzq6OhDbz4Z_yPC1S7k" || await getToken()
+            })();
+        } 
     </script>
 
 </body>

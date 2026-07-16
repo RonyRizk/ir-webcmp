@@ -213,7 +213,7 @@ export class IrGuestBilling {
                             {row.DOC_NUMBER}
                           </wa-button>
                         </td>
-                        <td>{(row.FD_TYPE_CODE && this.fdTypeLabels[row.FD_TYPE_CODE]) || row.FD_TYPE_CODE || '—'}</td>
+                        <td>{(row.FD_TYPE_CODE && this.fdTypeLabels[row.FD_TYPE_CODE === 'RFND' ? FdTypes.CreditReceipt : row.FD_TYPE_CODE]) || row.FD_TYPE_CODE || '—'}</td>
                         <td class="billing__price-col">
                           <span class="ir-price" style={{ fontWeight: '400' }}>
                             {this.renderMoney(row.DEBIT)}

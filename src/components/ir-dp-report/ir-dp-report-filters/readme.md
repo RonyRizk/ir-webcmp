@@ -5,6 +5,13 @@
 <!-- Auto Generated Below -->
 
 
+## Properties
+
+| Property  | Attribute  | Description                                                                                                                               | Type     | Default     |
+| --------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| `minDate` | `min-date` | Earliest selectable date. Set by the parent once it discovers that the property's data does not go back the full default lookback window. | `string` | `undefined` |
+
+
 ## Events
 
 | Event             | Description                                                                                                                                                                                                                  | Type                                         |

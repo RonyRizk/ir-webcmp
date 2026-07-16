@@ -30,6 +30,7 @@ export class IrGuestDocumentPreview {
     [FdTypes.Receipt]: 'receipt',
     [FdTypes.CreditNote]: 'creditnote',
     [FdTypes.CreditReceipt]: 'creditreceipt',
+    [FdTypes.Refund]: 'refund',
     [FdTypes.Proforma]: 'proforma',
   };
 
@@ -98,6 +99,8 @@ export class IrGuestDocumentPreview {
         return 'Debit Note';
       case FdTypes.Receipt:
         return 'Receipt';
+      case FdTypes.Refund:
+        return 'Refund';
       case FdTypes.Proforma:
         return 'Proforma Invoice';
       default:

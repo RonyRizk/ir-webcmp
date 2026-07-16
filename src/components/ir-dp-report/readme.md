@@ -23,6 +23,8 @@
 
 - [ir-loading-screen](../ir-loading-screen)
 - [ir-page](../ui/ir-page)
+- [ir-autocomplete](../ui/ir-autocomplete)
+- [ir-autocomplete-option](../ui/ir-autocomplete/ir-autocomplete-option)
 - [ir-dp-report-summary](ir-dp-report-summary)
 - [ir-dp-report-filters](ir-dp-report-filters)
 - [ir-dp-report-chart](ir-dp-report-chart)
@@ -35,6 +37,8 @@
 graph TD;
   ir-dp-report --> ir-loading-screen
   ir-dp-report --> ir-page
+  ir-dp-report --> ir-autocomplete
+  ir-dp-report --> ir-autocomplete-option
   ir-dp-report --> ir-dp-report-summary
   ir-dp-report --> ir-dp-report-filters
   ir-dp-report --> ir-dp-report-chart
@@ -50,6 +54,7 @@ graph TD;
   ir-button --> ir-icons
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
+  ir-autocomplete --> ir-input
   ir-dp-report-summary --> ir-metric-card
   ir-dp-report-filters --> ir-date-range-filter
   ir-dp-report-filters --> ir-custom-button

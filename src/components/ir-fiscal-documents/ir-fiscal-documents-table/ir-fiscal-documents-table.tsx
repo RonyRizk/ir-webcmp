@@ -153,7 +153,7 @@ export class IrFiscalDocumentsTable {
         cell: info => {
           const code = info.row.original.FD_TYPE_CODE;
           // Display the localized `_FD_TYPE` label, falling back to the raw code.
-          const label = (code && this.fdTypeLabels[code]) || code || '';
+          const label = (code && this.fdTypeLabels[code === 'RFND' ? FdTypes.CreditReceipt : code]) || code || '';
           return <span>{label}</span>;
         },
       }),

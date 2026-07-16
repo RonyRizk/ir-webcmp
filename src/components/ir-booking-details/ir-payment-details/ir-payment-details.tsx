@@ -144,8 +144,8 @@ export class IrPaymentDetails {
     const { receipt_nbr, credit_receipt_nbr, payment_type } = detail;
     if (receipt_nbr || credit_receipt_nbr) {
       this.guestDocumentPreview.emit({
-        documentNumber: payment_type?.code === PayTypes.Payment ? receipt_nbr : payment_type?.code === PayTypes.CreditReceipt ? credit_receipt_nbr : null,
-        fdTypeCode: payment_type?.code === PayTypes.Payment ? FdTypes.Receipt : FdTypes.CreditReceipt,
+        documentNumber: payment_type?.code === PayTypes.Payment ? receipt_nbr : [PayTypes.CreditReceipt, PayTypes.Refund].includes(payment_type?.code as any) ? credit_receipt_nbr : null,
+        fdTypeCode: payment_type?.code === PayTypes.Payment ? FdTypes.Receipt : payment_type?.code === PayTypes.Refund ? FdTypes.Refund : FdTypes.CreditReceipt,
         bookingNumber: this.booking.booking_nbr,
       });
       return;

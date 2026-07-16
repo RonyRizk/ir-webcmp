@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import moment from 'moment';
 import dp_report, { updateDpReportFilters } from '@/stores/dp_report.store';
 import { QuickDatePreset } from '@/components/ui/ir-date-range-filter/ir-date-range-filter';
@@ -9,6 +9,12 @@ import { QuickDatePreset } from '@/components/ui/ir-date-range-filter/ir-date-ra
   scoped: true,
 })
 export class IrDpReportFilters {
+  /**
+   * Earliest selectable date. Set by the parent once it discovers that the property's
+   * data does not go back the full default lookback window.
+   */
+  @Prop() minDate?: string;
+
   /**
    * Emitted only when the user clicks Search. The shared store (updated as soon as the
    * dates change) keeps every filter instance (chart tab + table tab) visually in sync
@@ -49,6 +55,7 @@ export class IrDpReportFilters {
           class="dp-report-filters__date-picker"
           fromDate={dp_report.filters.from}
           toDate={dp_report.filters.to}
+          minDate={this.minDate}
           maxDate={moment().format('YYYY-MM-DD')}
           showQuickActions={true}
           quickDates={this.quickDates}
