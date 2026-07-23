@@ -203,8 +203,10 @@ export class IrBookingEditorDrawer {
   }
 
   private renderConfirmActions() {
-    const { checkIn } = booking_store?.bookingDraft?.dates;
-    const hasCheckIn = checkIn ? checkIn?.isSame(moment(), 'date') : false;
+    const { checkIn, checkOut } = booking_store?.bookingDraft?.dates;
+    const now = moment();
+
+    const hasCheckIn = !!calendar_data?.property.is_frontdesk_enabled && !!checkIn && (checkIn.isSame(now, 'date') || now.isBetween(checkIn, checkOut, 'date'));
     return (
       <Fragment>
         <ir-custom-button onClickHandler={this.goToDetails} size="m" appearance="filled" variant="neutral">
@@ -223,15 +225,7 @@ export class IrBookingEditorDrawer {
           Book
         </ir-custom-button>
         {hasCheckIn && (
-          <ir-custom-button
-            loading={this.isLoading === 'book-checkin'}
-            value="book-checkin"
-            form="new_booking_form"
-            type="submit"
-            size="m"
-            appearance="accent"
-            variant="brand"
-          >
+          <ir-custom-button loading={this.isLoading === 'book-checkin'} value="book-checkin" form="new_booking_form" type="submit" size="m" appearance="accent" variant="brand">
             Book and check-in
           </ir-custom-button>
         )}

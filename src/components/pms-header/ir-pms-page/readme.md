@@ -17,6 +17,8 @@
 
 ### Depends on
 
+- [ir-interceptor](../../ir-interceptor)
+- [ir-toast](../../ui/ir-toast)
 - [ir-custom-button](../../ui/ir-custom-button)
 - [ir-property-switcher](../ir-property-switcher)
 - [ir-pms-search](../ir-pms-search)
@@ -31,6 +33,8 @@
 ### Graph
 ```mermaid
 graph TD;
+  ir-pms-page --> ir-interceptor
+  ir-pms-page --> ir-toast
   ir-pms-page --> ir-custom-button
   ir-pms-page --> ir-property-switcher
   ir-pms-page --> ir-pms-search
@@ -41,6 +45,13 @@ graph TD;
   ir-pms-page --> ir-menu-item
   ir-pms-page --> ir-menu-group
   ir-pms-page --> ir-pms-payment-due-alert
+  ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-spinner
+  ir-otp-modal --> ir-otp
+  ir-otp-modal --> ir-button
+  ir-button --> ir-icons
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-item
   ir-property-switcher --> ir-dialog
   ir-property-switcher --> ir-spinner
   ir-property-switcher --> ir-property-switcher-dialog-content
@@ -59,11 +70,6 @@ graph TD;
   ir-booking-editor --> ir-booking-editor-header
   ir-booking-editor --> igl-room-type
   ir-booking-editor --> ir-booking-editor-form
-  ir-interceptor --> ir-otp-modal
-  ir-otp-modal --> ir-spinner
-  ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item

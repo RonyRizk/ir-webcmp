@@ -31,6 +31,7 @@
  - [ir-login](../../ir-login)
  - [ir-page](../ir-page)
  - [ir-payment-option](../../ir-payment-option)
+ - [ir-pms-page](../../pms-header/ir-pms-page)
  - [ir-queue-manager](../../ir-queue-manager)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-user-management](../../ir-user-management)
@@ -59,6 +60,7 @@ graph TD;
   ir-login --> ir-toast
   ir-page --> ir-toast
   ir-payment-option --> ir-toast
+  ir-pms-page --> ir-toast
   ir-queue-manager --> ir-toast
   ir-reset-password --> ir-toast
   ir-user-management --> ir-toast

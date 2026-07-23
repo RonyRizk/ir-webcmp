@@ -4,7 +4,7 @@ import { BlockedDatePayload, BookedByGuestSchema, BookingEditorMode, BookingStep
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
 import locales from '@/stores/locales.store';
-import booking_store, { BookingDraft, getReservedRooms, resetBookingStore, setBookingDraft, setBookingSelectOptions, updateBookedByGuest } from '@/stores/booking.store';
+import booking_store, { BookingDraft, fillMissingReservedGuestNames, getReservedRooms, resetBookingStore, setBookingDraft, setBookingSelectOptions, updateBookedByGuest } from '@/stores/booking.store';
 import { BookingSource } from '@/models/igl-book-property';
 import calendar_data from '@/stores/calendar-data';
 import { BookingDetails, ISetupEntries } from '@/models/IBooking';
@@ -236,6 +236,7 @@ export class IrBookingEditor {
   private async doReservation(source: string) {
     try {
       this.loadingChanged.emit({ cause: source as any });
+      fillMissingReservedGuestNames();
       const reservedRooms = getReservedRooms();
       RoomsGuestsSchema.parse(reservedRooms.map(r => ({ ...r.guest, requires_bed_preference: r.ratePlanSelection.roomtype.is_bed_configuration_enabled })));
       BookedByGuestSchema.parse(booking_store.bookedByGuest);

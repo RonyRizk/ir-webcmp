@@ -39,6 +39,7 @@
  - [ir-login](../ir-login)
  - [ir-page](../ui/ir-page)
  - [ir-payment-option](../ir-payment-option)
+ - [ir-pms-page](../pms-header/ir-pms-page)
  - [ir-queue-manager](../ir-queue-manager)
  - [ir-reset-password](../ir-reset-password)
  - [ir-user-management](../ir-user-management)
@@ -70,6 +71,7 @@ graph TD;
   ir-login --> ir-interceptor
   ir-page --> ir-interceptor
   ir-payment-option --> ir-interceptor
+  ir-pms-page --> ir-interceptor
   ir-queue-manager --> ir-interceptor
   ir-reset-password --> ir-interceptor
   ir-user-management --> ir-interceptor

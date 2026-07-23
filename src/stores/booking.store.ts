@@ -772,5 +772,65 @@ export function getReservedRooms(): ReservedRoomSelection[] {
   });
   return reservedRooms;
 }
+/**
+ * Syncs the primary guest's first or last name to the first reserved room,
+ * but only if that field has not already been filled.
+ */
+export function syncFirstRoomGuestName(field: 'first_name' | 'last_name', value: string) {
+  const firstRoom = getReservedRooms()[0];
+  if (!firstRoom || !firstRoom.guest || firstRoom.guest[field]) {
+    return;
+  }
+  const guests = [...(firstRoom.ratePlanSelection.guest ?? [])];
+  guests[firstRoom.reservationIndex] = {
+    ...guests[firstRoom.reservationIndex],
+    [field]: value,
+  };
+  updateRoomGuest({
+    ratePlanSelection: firstRoom.ratePlanSelection,
+    ratePlanId: firstRoom.ratePlanId,
+    roomTypeId: firstRoom.roomTypeId,
+    guest: guests,
+  });
+}
+
+/**
+ * Fills empty first/last names on reserved rooms with a placeholder.
+ * Meant to run right before validating/submitting a reservation with multiple rooms.
+ */
+export function fillMissingReservedGuestNames(placeholder = 'tba') {
+  Object.entries(booking_store.ratePlanSelections).forEach(([roomTypeId, ratePlans]) => {
+    Object.entries(ratePlans).forEach(([ratePlanId, ratePlanSelection]) => {
+      if (!ratePlanSelection.reserved || !ratePlanSelection.guest) {
+        return;
+      }
+      let hasChanges = false;
+      const guests = ratePlanSelection.guest.map((guest: RatePlanGuest, index: number) => {
+        if (index >= ratePlanSelection.reserved || !guest) {
+          return guest;
+        }
+        const needsFirstName = !guest.first_name?.trim();
+        const needsLastName = !guest.last_name?.trim();
+        if (!needsFirstName && !needsLastName) {
+          return guest;
+        }
+        hasChanges = true;
+        return {
+          ...guest,
+          first_name: needsFirstName ? placeholder : guest.first_name,
+          last_name: needsLastName ? placeholder : guest.last_name,
+        };
+      });
+      if (hasChanges) {
+        updateRoomGuest({
+          ratePlanSelection,
+          ratePlanId: Number(ratePlanId),
+          roomTypeId: Number(roomTypeId),
+          guest: guests,
+        });
+      }
+    });
+  });
+}
 
 export default booking_store;

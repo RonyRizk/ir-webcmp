@@ -38,8 +38,8 @@ export class IrAutocomplete {
   /** Name attribute forwarded to the underlying input element. */
   @Prop() name: string;
 
-  /** The value of the input. */
-  @Prop({ reflect: true, mutable: true }) value: string = '';
+  /** The value of the input. Not reflected to the host attribute — reflection would rewrite the DOM on every keystroke. */
+  @Prop({ mutable: true }) value: string = '';
 
   /**
    * The type of input. Works the same as a native `<input>` element, but only a subset of types are supported. Defaults
@@ -186,6 +186,13 @@ export class IrAutocomplete {
    */
   @Prop() inputClass: string;
 
+  /**
+   * In `multiple` mode, the maximum number of selected-option tags shown inside the input.
+   * Any further selections collapse into a single "+N" overflow tag. Set to `0` to always
+   * show every tag.
+   */
+  @Prop() maxTagsVisible: number = 3;
+
   @State() private options: AutocompleteOptionElement[] = [];
   @State() private slotStateVersion = 0;
   @State() private selectedOptions: AutocompleteOptionElement[] = [];
@@ -194,8 +201,17 @@ export class IrAutocomplete {
   @Event({ bubbles: true, composed: true, eventName: 'combobox-change' }) comboboxChange: EventEmitter<string | string[]>;
 
   private currentOption?: AutocompleteOptionElement;
+  // The active typed query; null means no filtering (all options visible).
+  private filterQuery: string | null = null;
   private listboxRef?: HTMLElement;
   private inputRef?: HTMLIrInputElement;
+  // Native <input> inside ir-input → wa-input; combobox ARIA lives here because
+  // string IDREFs (aria-activedescendant/aria-controls) cannot resolve across shadow roots.
+  private nativeInput?: HTMLInputElement;
+  // Per-option search metadata, built lazily. Reading textContent walks the option's whole
+  // subtree, so it must happen once per option — not on every keystroke.
+  private optionMeta = new WeakMap<AutocompleteOptionElement, { label: string; value: string; haystack: string }>();
+  private optionContentObserver?: MutationObserver;
   private readonly SLOT_NAMES = ['label', 'start', 'end', 'clear-icon', 'hint'] as const;
 
   private slotManager = createSlotManager(
@@ -222,11 +238,32 @@ export class IrAutocomplete {
   componentDidLoad() {
     this.slotManager.setupListeners();
     this.listboxRef?.addEventListener('click', this.handleOptionClick);
+    this.setupInputAria();
+    this.observeOptionContent();
   }
 
   disconnectedCallback() {
     this.slotManager.destroy();
     this.listboxRef?.removeEventListener('click', this.handleOptionClick);
+    this.optionContentObserver?.disconnect();
+  }
+
+  /**
+   * Slot changes rebuild the option list, but consumers can also rewrite an option's
+   * label/value or inner text in place without a slotchange firing. Drop the metadata
+   * cache when that happens; it rebuilds lazily on the next access.
+   */
+  private observeOptionContent() {
+    this.optionContentObserver = new MutationObserver(() => {
+      this.optionMeta = new WeakMap();
+    });
+    this.optionContentObserver.observe(this.el, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['label', 'value'],
+    });
   }
 
   @Method()
@@ -245,6 +282,38 @@ export class IrAutocomplete {
   @Method()
   async hide() {
     this.open = false;
+    // Reset the filter so the full option list shows the next time the dropdown opens.
+    this.clearFilter();
+  }
+
+  /**
+   * Applies the WAI-ARIA combobox pattern to the native input. String IDREFs like
+   * `aria-activedescendant` are dangling across shadow roots, so the active option and
+   * listbox are wired through ARIA element reflection where supported — never both
+   * mechanisms, since setting the IDL property resets the string attribute per spec.
+   */
+  private async setupInputAria() {
+    const input = await this.inputRef?.getNativeInput();
+    if (!input || !input.isConnected) return;
+    this.nativeInput = input;
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-haspopup', 'listbox');
+    input.setAttribute('aria-expanded', this.open ? 'true' : 'false');
+    if ('ariaControlsElements' in input && this.listboxRef) {
+      (input as any).ariaControlsElements = [this.listboxRef];
+    }
+    this.syncActiveDescendant();
+  }
+
+  private syncAriaExpanded() {
+    this.nativeInput?.setAttribute('aria-expanded', this.open ? 'true' : 'false');
+  }
+
+  private syncActiveDescendant() {
+    const input = this.nativeInput;
+    if (!input || !('ariaActiveDescendantElement' in input)) return;
+    (input as any).ariaActiveDescendantElement = this.open && this.currentOption ? this.currentOption : null;
   }
 
   @Watch('open')
@@ -252,6 +321,7 @@ export class IrAutocomplete {
     if (!this.listboxRef) return;
 
     this.listboxRef.hidden = !newValue;
+    this.syncAriaExpanded();
 
     if (!newValue) {
       this.clearCurrentOption();
@@ -318,6 +388,49 @@ export class IrAutocomplete {
     return this.options;
   }
 
+  private getVisibleOptions(): AutocompleteOptionElement[] {
+    return this.options.filter(option => !option.hidden);
+  }
+
+  private getOptionMeta(option: AutocompleteOptionElement) {
+    let meta = this.optionMeta.get(option);
+    if (!meta) {
+      const label = option.label || (option.textContent?.trim() ?? '');
+      const value = option.value ?? label;
+      meta = { label, value, haystack: `${label} ${value} ${option.textContent ?? ''}`.toLowerCase() };
+      this.optionMeta.set(option, meta);
+    }
+    return meta;
+  }
+
+  private applyFilter() {
+    // Normalize once per pass, not once per option.
+    const query = this.filterQuery?.trim().toLowerCase() || null;
+    this.getAllOptions().forEach(option => {
+      const shouldHide = query !== null && !this.getOptionMeta(option).haystack.includes(query);
+      if (option.hidden !== shouldHide) {
+        option.hidden = shouldHide;
+      }
+    });
+
+    if (this.currentOption?.hidden) {
+      this.clearCurrentOption();
+    }
+    if (this.open) {
+      this.ensureCurrentOption();
+    }
+  }
+
+  private clearFilter() {
+    if (this.filterQuery === null) return;
+    this.filterQuery = null;
+    this.getAllOptions().forEach(option => {
+      if (option.hidden) {
+        option.hidden = false;
+      }
+    });
+  }
+
   private updateOptionsFromSlot(slotEl?: HTMLSlotElement) {
     const slot = slotEl ?? (this.listboxRef?.querySelector('slot') as HTMLSlotElement | null);
     if (!slot) {
@@ -327,18 +440,28 @@ export class IrAutocomplete {
 
     const assigned = slot.assignedElements({ flatten: true }) as Element[];
     this.options = assigned.filter(el => el.tagName.toLowerCase() === 'ir-autocomplete-option') as AutocompleteOptionElement[];
+    // Options are never tab stops (combobox pattern); set once at registration
+    // instead of re-writing tabIndex on every keystroke or arrow key.
+    this.options.forEach(option => (option.tabIndex = -1));
+  }
+
+  /**
+   * Reassigns the currentOption pointer, clearing the highlight flag on the element it
+   * previously pointed at. Keeps highlight updates O(1) instead of sweeping all options.
+   */
+  private setCurrentPointer(option?: AutocompleteOptionElement) {
+    if (this.currentOption && this.currentOption !== option) {
+      this.currentOption.current = false;
+    }
+    this.currentOption = option;
   }
 
   private clearCurrentOption() {
-    const allOptions = this.getAllOptions();
-    allOptions.forEach(el => {
-      el.current = false;
-      el.tabIndex = -1;
-    });
-    this.currentOption = undefined;
+    this.setCurrentPointer(undefined);
+    this.syncActiveDescendant();
   }
   private ensureCurrentOption() {
-    const allOptions = this.getAllOptions().filter(option => !option.disabled);
+    const allOptions = this.getVisibleOptions().filter(option => !option.disabled);
     if (!allOptions.length) {
       this.clearCurrentOption();
       return;
@@ -352,46 +475,44 @@ export class IrAutocomplete {
   }
   private setCurrentOption(option: AutocompleteOptionElement, options: { scroll?: boolean } = {}) {
     if (!option || option.disabled) return;
-    const allOptions = this.getAllOptions();
 
-    // Clear selection
-    allOptions.forEach(el => {
-      el.current = false;
-      el.tabIndex = -1;
-    });
-
-    // Select the target option
-    this.currentOption = option;
+    // DOM focus stays on the input (combobox pattern); the highlight moves by clearing
+    // the previous option and flagging the new one — two writes, regardless of list size.
+    this.setCurrentPointer(option);
     option.current = true;
-    option.tabIndex = 0;
+    this.syncActiveDescendant();
 
     if (options.scroll && this.listboxRef) {
       this.scrollIntoView(option, this.listboxRef, 'vertical', 'auto');
     }
   }
   private getOptionLabel(option: AutocompleteOptionElement): string {
-    if (option.label) return option.label;
-    return option.textContent?.trim() ?? '';
+    return this.getOptionMeta(option).label;
   }
   private getOptionValue(option: AutocompleteOptionElement): string {
-    return option.value ?? this.getOptionLabel(option);
+    return this.getOptionMeta(option).value;
   }
   private syncSelectedFromValue(value: string) {
-    const allOptions = this.getAllOptions();
     let selectedOption: AutocompleteOptionElement | undefined;
 
-    allOptions.forEach(option => {
-      const matches = this.getOptionValue(option) === value || this.getOptionLabel(option) === value;
-      option.selected = matches;
+    this.getAllOptions().forEach(option => {
+      const meta = this.getOptionMeta(option);
+      const matches = meta.value === value || meta.label === value;
+      if (option.selected !== matches) {
+        option.selected = matches;
+      }
       if (matches) {
         selectedOption = option;
       }
     });
 
     if (selectedOption) {
-      this.currentOption = selectedOption;
-    } else if (this.currentOption && this.getOptionValue(this.currentOption) !== value && this.getOptionLabel(this.currentOption) !== value) {
-      this.currentOption = undefined;
+      this.setCurrentPointer(selectedOption);
+    } else if (this.currentOption) {
+      const meta = this.getOptionMeta(this.currentOption);
+      if (meta.value !== value && meta.label !== value) {
+        this.setCurrentPointer(undefined);
+      }
     }
   }
 
@@ -401,7 +522,7 @@ export class IrAutocomplete {
     if (this.multiple) {
       // Toggle selection without affecting the other options and keep the popup open.
       option.selected = !option.selected;
-      this.currentOption = option;
+      this.setCurrentPointer(option);
       this.refreshSelectedOptions();
 
       // Clear the typed search text so the user can immediately filter for the next option.
@@ -409,18 +530,20 @@ export class IrAutocomplete {
         this.value = '';
         this.textChange.emit('');
       }
+      this.clearFilter();
 
       this.emitChange();
       requestAnimationFrame(() => this.inputRef?.focusInput());
       return;
     }
 
-    const allOptions = this.getAllOptions();
-    allOptions.forEach(el => {
-      el.selected = false;
+    this.getAllOptions().forEach(el => {
+      if (el.selected && el !== option) {
+        el.selected = false;
+      }
     });
     option.selected = true;
-    this.currentOption = option;
+    this.setCurrentPointer(option);
 
     const emitValue = this.getOptionValue(option);
     const displayValue = this.getOptionLabel(option);
@@ -462,6 +585,8 @@ export class IrAutocomplete {
     }
     this.value = nextValue;
     this.textChange.emit(nextValue);
+    this.filterQuery = nextValue;
+    this.applyFilter();
     if (!this.open && this.getAllOptions().length) {
       this.show();
     }
@@ -473,9 +598,8 @@ export class IrAutocomplete {
       this.syncSelectedFromValue(this.value);
     }
     this.refreshSelectedOptions();
-    if (this.open) {
-      this.ensureCurrentOption();
-    }
+    // applyFilter re-runs ensureCurrentOption itself when the dropdown is open.
+    this.applyFilter();
   };
 
   private handleKeydownChange = (event: KeyboardEvent) => {
@@ -496,7 +620,7 @@ export class IrAutocomplete {
     }
 
     if (['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
-      const allOptions = this.getAllOptions().filter(option => !option.disabled);
+      const allOptions = this.getVisibleOptions().filter(option => !option.disabled);
       if (!allOptions.length) return;
 
       const baseOption = this.currentOption && allOptions.includes(this.currentOption) ? this.currentOption : allOptions[0];
@@ -536,6 +660,35 @@ export class IrAutocomplete {
   private handleClick = () => {
     if (!this.open) this.show();
   };
+
+  private renderSelectedTags() {
+    const limit = this.maxTagsVisible > 0 ? this.maxTagsVisible : this.selectedOptions.length;
+    const visibleTags = this.selectedOptions.slice(0, limit);
+    const overflow = this.selectedOptions.slice(limit);
+
+    return (
+      <div slot="start" class="selected-tags" part="tags">
+        {visibleTags.map(option => (
+          <wa-tag
+            key={this.getOptionValue(option)}
+            size="s"
+            with-remove
+            onwa-remove={(e: Event) => {
+              e.stopPropagation();
+              this.removeOption(option);
+            }}
+          >
+            {this.getOptionLabel(option)}
+          </wa-tag>
+        ))}
+        {overflow.length > 0 && (
+          <wa-tag key="overflow" size="s" class="selected-tags__overflow" title={overflow.map(option => this.getOptionLabel(option)).join(', ')}>
+            +{overflow.length}
+          </wa-tag>
+        )}
+      </div>
+    );
+  }
 
   private handleExpandIconClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -590,25 +743,9 @@ export class IrAutocomplete {
             disabled={this.disabled}
             exportparts="base, hint, label, input, start, end, clear-button, password-toggle-button"
           >
-            {this.multiple && this.selectedOptions.length > 0 && (
-              <div slot="start" class="selected-tags" part="tags">
-                {this.selectedOptions.map(option => (
-                  <wa-tag
-                    key={this.getOptionValue(option)}
-                    size="s"
-                    with-remove
-                    onwa-remove={(e: Event) => {
-                      e.stopPropagation();
-                      this.removeOption(option);
-                    }}
-                  >
-                    {this.getOptionLabel(option)}
-                  </wa-tag>
-                ))}
-              </div>
-            )}
+            {this.multiple && this.selectedOptions.length > 0 && this.renderSelectedTags()}
             {this.withExpandIcon && (
-              <div slot="end" class={`expand-icon${this.open ? ' expand-icon--open' : ''}`} onClick={this.handleExpandIconClick}>
+              <div slot="end" class={`expand-icon${this.open ? ' expand-icon--open' : ''}`} aria-hidden="true" onClick={this.handleExpandIconClick}>
                 <wa-icon library="system" variant="solid" name="chevron-down"></wa-icon>
               </div>
             )}
@@ -623,9 +760,8 @@ export class IrAutocomplete {
             id="listbox"
             ref={el => (this.listboxRef = el)}
             role="listbox"
-            aria-expanded={this.open ? 'true' : 'false'}
             aria-multiselectable={this.multiple ? 'true' : 'false'}
-            aria-labelledby="label"
+            aria-label={this.label || this.placeholder}
             part="listbox"
             class="listbox"
             tabindex="-1"

@@ -1,5 +1,5 @@
 import { ICountry } from '@/models/IBooking';
-import booking_store, { BookedByGuest, modifyBookingStore, updateBookedByGuest } from '@/stores/booking.store';
+import booking_store, { BookedByGuest, modifyBookingStore, syncFirstRoomGuestName, updateBookedByGuest } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { Component, Fragment, Host, h } from '@stencil/core';
@@ -91,6 +91,7 @@ export class IrBookingEditorGuestForm {
                 placeholder="First name"
                 autocomplete="off"
                 onText-change={e => updateBookedByGuest({ firstName: e.detail })}
+                onChange={e => syncFirstRoomGuestName('first_name', (e.target as HTMLIrInputElement).value)}
               >
                 <p style={{ margin: '0', marginBottom: '0.5rem' }} slot="label">
                   <span class="booking-editor__guest-input-label --first-name-pc-label">Name</span>
@@ -104,6 +105,7 @@ export class IrBookingEditorGuestForm {
                 class="booking-editor__guest-input --last-name"
                 label="Last name"
                 onText-change={e => updateBookedByGuest({ lastName: e.detail })}
+                onChange={e => syncFirstRoomGuestName('last_name', (e.target as HTMLIrInputElement).value)}
                 value={bookedByGuest.lastName}
                 defaultValue={bookedByGuest.lastName}
                 placeholder="Last name"

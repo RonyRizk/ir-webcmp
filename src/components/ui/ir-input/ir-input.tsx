@@ -367,6 +367,18 @@ export class IrInput {
   async blurInput() {
     this.inputRef?.blur();
   }
+
+  /**
+   * Returns the native `<input>` element nested inside `wa-input`.
+   * Needed by composite controls (e.g. `ir-autocomplete`) to wire ARIA
+   * combobox attributes and element reflection onto the real input.
+   */
+  @Method()
+  async getNativeInput(): Promise<HTMLInputElement | undefined> {
+    if (!this.inputRef) return undefined;
+    await (this.inputRef as WaInput & { updateComplete: Promise<WaInput> }).updateComplete;
+    return this.inputRef.input;
+  }
   render() {
     let displayValue = this.value;
     if (this._mask && this.returnMaskedValue) {

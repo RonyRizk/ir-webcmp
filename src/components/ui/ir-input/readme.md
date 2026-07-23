@@ -79,6 +79,18 @@ Type: `Promise<void>`
 
 
 
+### `getNativeInput() => Promise<HTMLInputElement | undefined>`
+
+Returns the native `<input>` element nested inside `wa-input`.
+Needed by composite controls (e.g. `ir-autocomplete`) to wire ARIA
+combobox attributes and element reflection onto the real input.
+
+#### Returns
+
+Type: `Promise<HTMLInputElement>`
+
+
+
 
 ## Shadow Parts
 

@@ -51,6 +51,8 @@ export class IrPmsPage {
   render() {
     return (
       <div>
+        <ir-interceptor></ir-interceptor>
+        <ir-toast></ir-toast>
         <header class="app-header">
           <div class="app-header__left">
             <ir-custom-button onClickHandler={() => this.menuDrawerRef.openDrawer()} size="s" appearance="plain" variant="neutral" class="header-action">

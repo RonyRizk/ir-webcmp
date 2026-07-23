@@ -989,6 +989,11 @@ export namespace Components {
          */
         "max": NativeWaInput['max'];
         /**
+          * In `multiple` mode, the maximum number of selected-option tags shown inside the input. Any further selections collapse into a single "+N" overflow tag. Set to `0` to always show every tag.
+          * @default 3
+         */
+        "maxTagsVisible": number;
+        /**
           * The maximum length of input that will be considered valid.
          */
         "maxlength": NativeWaInput['maxlength'];
@@ -1071,7 +1076,7 @@ export namespace Components {
          */
         "type": NativeWaInput['type'];
         /**
-          * The value of the input.
+          * The value of the input. Not reflected to the host attribute — reflection would rewrite the DOM on every keystroke.
           * @default ''
          */
         "value": string;
@@ -3843,6 +3848,10 @@ export namespace Components {
           * By default, form controls are associated with the nearest containing `<form>` element. This attribute allows you to place the form control outside of a form and associate it with the form that has this `id`. The form must be in the same document or shadow root for this to work.
          */
         "form": NativeWaInput1['form'];
+        /**
+          * Returns the native `<input>` element nested inside `wa-input`. Needed by composite controls (e.g. `ir-autocomplete`) to wire ARIA combobox attributes and element reflection onto the real input.
+         */
+        "getNativeInput": () => Promise<HTMLInputElement | undefined>;
         /**
           * The input's hint. If you need to display HTML, use the `hint` slot instead.
          */
@@ -13764,6 +13773,11 @@ declare namespace LocalJSX {
          */
         "max"?: NativeWaInput['max'];
         /**
+          * In `multiple` mode, the maximum number of selected-option tags shown inside the input. Any further selections collapse into a single "+N" overflow tag. Set to `0` to always show every tag.
+          * @default 3
+         */
+        "maxTagsVisible"?: number;
+        /**
           * The maximum length of input that will be considered valid.
          */
         "maxlength"?: NativeWaInput['maxlength'];
@@ -13847,7 +13861,7 @@ declare namespace LocalJSX {
          */
         "type"?: NativeWaInput['type'];
         /**
-          * The value of the input.
+          * The value of the input. Not reflected to the host attribute — reflection would rewrite the DOM on every keystroke.
           * @default ''
          */
         "value"?: string;
@@ -20167,6 +20181,7 @@ declare namespace LocalJSX {
         "disabled": boolean;
         "withExpandIcon": boolean;
         "inputClass": string;
+        "maxTagsVisible": number;
     }
     interface IrAutocompleteOptionAttributes {
         "value": string;

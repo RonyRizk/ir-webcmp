@@ -1,4 +1,12 @@
-import booking_store, { bookedByGuestBaseData, calculateTotalRooms, getBookingTotalPrice, IRatePlanSelection, setBookingDraft, updateBookedByGuest } from '@/stores/booking.store';
+import booking_store, {
+  bookedByGuestBaseData,
+  calculateTotalRooms,
+  getBookingTotalPrice,
+  IRatePlanSelection,
+  setBookingDraft,
+  syncFirstRoomGuestName,
+  updateBookedByGuest,
+} from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { formatAmount } from '@/utils/utils';
@@ -83,8 +91,9 @@ export class IrBookingEditorForm {
       countryId: guest.country_id?.toString(),
       phone_prefix: guest['country_phone_prefix'],
     });
+    syncFirstRoomGuestName('first_name', guest.first_name);
+    syncFirstRoomGuestName('last_name', guest.last_name);
   }
-
   render() {
     const { dates } = booking_store.bookingDraft;
     let hasBookedByGuestController = false;
