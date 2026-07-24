@@ -6097,8 +6097,33 @@ export namespace Components {
     interface IrTest2Cmp {
     }
     interface IrTextEditor {
+        /**
+          * @default 'outlined'
+         */
+        "appearance": NativeWaInput['appearance'];
+        /**
+          * Disables the editor.
+          * @default false
+         */
+        "disabled": boolean;
         "error": boolean;
+        /**
+          * The editor's hint. If you need to display HTML, use the `hint` slot instead.
+         */
+        "hint": string;
+        /**
+          * The editor's label. If you need to display HTML, use the `label` slot instead.
+         */
+        "label": string;
         "maxLength": number;
+        /**
+          * The name of the editor, submitted as a name/value pair with form data.
+         */
+        "name": string;
+        /**
+          * @default false
+         */
+        "pill": boolean;
         /**
           * Placeholder text
          */
@@ -6108,6 +6133,19 @@ export namespace Components {
           * @default false
          */
         "readOnly": boolean;
+        /**
+          * Makes the editor a required field for form submission.
+          * @default false
+         */
+        "required": boolean;
+        /**
+          * Moves focus into the editing area.
+         */
+        "setFocus": () => Promise<void>;
+        /**
+          * @default 's'
+         */
+        "size": NativeWaInput['size'];
         /**
           * Type-safe toolbar configuration. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   link: true,   clean: true }
          */
@@ -19359,12 +19397,41 @@ declare namespace LocalJSX {
     interface IrTest2Cmp {
     }
     interface IrTextEditor {
+        /**
+          * @default 'outlined'
+         */
+        "appearance"?: NativeWaInput['appearance'];
+        /**
+          * Disables the editor.
+          * @default false
+         */
+        "disabled"?: boolean;
         "error"?: boolean;
+        /**
+          * The `id` of a `<form>` element to associate this element with.
+         */
+        "form"?: string;
+        /**
+          * The editor's hint. If you need to display HTML, use the `hint` slot instead.
+         */
+        "hint"?: string;
+        /**
+          * The editor's label. If you need to display HTML, use the `label` slot instead.
+         */
+        "label"?: string;
         "maxLength"?: number;
+        /**
+          * The name of the editor, submitted as a name/value pair with form data.
+         */
+        "name"?: string;
         /**
           * Emits current HTML content whenever it changes
          */
         "onTextChange"?: (event: IrTextEditorCustomEvent<string>) => void;
+        /**
+          * @default false
+         */
+        "pill"?: boolean;
         /**
           * Placeholder text
          */
@@ -19374,6 +19441,15 @@ declare namespace LocalJSX {
           * @default false
          */
         "readOnly"?: boolean;
+        /**
+          * Makes the editor a required field for form submission.
+          * @default false
+         */
+        "required"?: boolean;
+        /**
+          * @default 's'
+         */
+        "size"?: NativeWaInput['size'];
         /**
           * Type-safe toolbar configuration. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   link: true,   clean: true }
          */
@@ -21665,12 +21741,20 @@ declare namespace LocalJSX {
         "propertyid": number;
     }
     interface IrTextEditorAttributes {
+        "size": NativeWaInput['size'];
+        "appearance": NativeWaInput['appearance'];
+        "pill": boolean;
         "error": boolean;
         "maxLength": number;
         "value": string;
         "readOnly": boolean;
         "userCanEdit": boolean;
         "placeholder": string;
+        "label": string;
+        "hint": string;
+        "name": string;
+        "required": boolean;
+        "disabled": boolean;
     }
     interface IrTextareaAttributes {
         "rows": number;

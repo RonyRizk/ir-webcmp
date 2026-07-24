@@ -235,7 +235,11 @@ export class IrPmsPage {
         </ir-menu-drawer>
         <div>
           <ir-pms-payment-due-alert propertyid={this.propertyid ? Number(this.propertyid) : null} ticket={this.ticket}></ir-pms-payment-due-alert>
-          <div style={{ height: '200vh' }}></div>
+          <div style={{ height: '200vh', padding: '1rem', background: 'white' }}>
+            <ir-text-editor hint="lola" label="Hello world"></ir-text-editor>
+            <ir-text-editor size={'m'} appearance={'filled'} label="Hello world"></ir-text-editor>
+            <ir-text-editor size="xl" appearance={'filled-outlined'} label="Hello world"></ir-text-editor>
+          </div>
         </div>
       </div>
     );
