@@ -245,7 +245,7 @@ export class IrTaxServiceCategories {
           Save
         </ir-custom-button>
         <form id="tax-service-categories__form" onSubmit={e => this.handleSubmit(e)}>
-          <wa-card>
+          <wa-card appearance="plain" class="tax-service-categories__card">
             <div class="tax-grid">
               {/* Column headers — hidden on mobile, shown via display:contents on desktop */}
               <div class="tax-grid__header" aria-hidden="true">

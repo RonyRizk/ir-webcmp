@@ -48,11 +48,12 @@ Type: `Promise<void>`
 
 ## Shadow Parts
 
-| Part      | Description |
-| --------- | ----------- |
-| `"base"`  |             |
-| `"hint"`  |             |
-| `"label"` |             |
+| Part                   | Description |
+| ---------------------- | ----------- |
+| `"base"`               |             |
+| `"form-control-label"` |             |
+| `"hint"`               |             |
+| `"label"`              |             |
 
 
 ## Dependencies

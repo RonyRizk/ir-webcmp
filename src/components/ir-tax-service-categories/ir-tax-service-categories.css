@@ -14,7 +14,9 @@
   justify-content: space-between;
   gap: var(--wa-space-m);
 }
-
+.tax-service-categories__card {
+  background-color: var(--wa-color-surface-default, white);
+}
 .tax-page__heading {
   display: flex;
   flex-direction: column;

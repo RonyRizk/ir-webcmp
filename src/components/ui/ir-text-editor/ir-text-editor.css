@@ -1,17 +1,16 @@
-@import url('../../../assets/webawesome/component/host.css');
-@import url('../../../assets/webawesome/component/form-control.css');
+/* @import url('../../../assets/webawesome/component/host.css'); */
 @import url('../../../assets/webawesome/component/size.css');
-@import url('../../../assets/webawesome/component/variants.css');
+@import url('../../../assets/webawesome/component/form-control.css');
 
 :host {
   display: block;
-  font-family: var(--wa-font-family-body, inherit);
+  /* font-family: var(--wa-font-family-body, inherit); */
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--wa-space-2xs, 0.25rem);
+  /* gap: var(--wa-space-2xs, 0.25rem); */
 }
 
 /* .field__label {

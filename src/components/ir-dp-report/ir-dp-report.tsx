@@ -96,13 +96,21 @@ export class IrDpReport {
         });
         propertyId = propertyData.My_Result.id;
       }
-      this.propertyId = propertyId;
 
       const [languageTexts, allowedProperties] = await Promise.all([
         this.roomService.fetchLanguage(this.language),
         this.propertyService.getActiveOptimExposedProperties(),
+        !this.propertyId
+          ? Promise.resolve(null)
+          : this.roomService.getExposedProperty({
+              id: this.propertyId,
+              aname: this.p,
+              language: this.language,
+              is_backend: true,
+            }),
         await this.fetchInitialDpReport(),
       ]);
+      this.propertyId = propertyId;
       if (!locales.entries) {
         locales.entries = languageTexts.entries;
         locales.direction = languageTexts.direction;
@@ -224,7 +232,7 @@ the incentive price reduction."
           <wa-callout size="s" variant="danger" class="dp-report__callout">
             <wa-icon slot="icon" name="face-frown"></wa-icon>
             <div class="dp-report__callout-header">
-              <b>Potential Missed Profit</b>
+              <b>Missed Profit</b>
               <wa-badge pill variant="danger">
                 SIMULATION
               </wa-badge>

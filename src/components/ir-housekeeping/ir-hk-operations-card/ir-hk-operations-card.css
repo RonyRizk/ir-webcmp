@@ -9,7 +9,9 @@
   font-weight: var(--wa-font-weight-heading);
   color: var(--wa-color-text-normal);
 }
-
+.hk-operation__card {
+  background-color: var(--wa-color-surface-default, white);
+}
 .ops-header__subtitle {
   display: block;
   font-size: var(--wa-font-size-xs);

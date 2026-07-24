@@ -85,7 +85,7 @@ export class IrHkOperationsCard {
   render() {
     return (
       <Host>
-        <wa-card class="">
+        <wa-card appearance="plain" class="hk-operation__card">
           <div slot="header">
             <span class="ops-header__title">Operations Settings</span>
           </div>

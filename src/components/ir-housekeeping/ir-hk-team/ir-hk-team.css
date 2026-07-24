@@ -14,6 +14,9 @@
   flex-direction: column;
   gap: 0.25rem;
 }
+.hk-team__card {
+  background-color: var(--wa-color-surface-default, white);
+}
 .hk-team__card::part(body) {
   padding: 0.5rem;
 }

@@ -356,7 +356,7 @@ export class IrTextEditor {
       <Host>
         <div class="field">
           {hasLabel && (
-            <label id={this.labelId} class="field__label" part="label" onClick={() => this.editor?.focus()}>
+            <label id={this.labelId} class="label has-label " part="form-control-label label" onClick={() => this.editor?.focus()}>
               <slot name="label">{this.label}</slot>
             </label>
           )}

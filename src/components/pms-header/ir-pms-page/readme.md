@@ -29,6 +29,7 @@
 - [ir-menu-item](../ir-menu-item)
 - [ir-menu-group](../ir-menu-group)
 - [ir-pms-payment-due-alert](../ir-pms-payment-due-alert)
+- [ir-input](../../ui/ir-input)
 - [ir-text-editor](../../ui/ir-text-editor)
 
 ### Graph
@@ -46,6 +47,7 @@ graph TD;
   ir-pms-page --> ir-menu-item
   ir-pms-page --> ir-menu-group
   ir-pms-page --> ir-pms-payment-due-alert
+  ir-pms-page --> ir-input
   ir-pms-page --> ir-text-editor
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-spinner

@@ -132,6 +132,7 @@ Type: `Promise<HTMLInputElement>`
  - [ir-mobile-input](../ir-mobile-input)
  - [ir-payment-folio-form](../../ir-booking-details/ir-payment-details/ir-payment-folio/ir-payment-folio-form)
  - [ir-pickup-form](../../ir-booking-details/ir-pickup/ir-pickup-form)
+ - [ir-pms-page](../../pms-header/ir-pms-page)
  - [ir-property-switcher-dialog-content](../../pms-header/ir-property-switcher)
  - [ir-reset-password](../../ir-reset-password)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
@@ -174,6 +175,7 @@ graph TD;
   ir-mobile-input --> ir-input
   ir-payment-folio-form --> ir-input
   ir-pickup-form --> ir-input
+  ir-pms-page --> ir-input
   ir-property-switcher-dialog-content --> ir-input
   ir-reset-password --> ir-input
   ir-room-guests-form --> ir-input

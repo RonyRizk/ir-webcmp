@@ -10,6 +10,9 @@
     max-width: 300px;
   }
 }
+.gap-nights__card {
+  background-color: var(--wa-color-surface-default, white);
+}
 .gap-nights__card-header {
   display: flex;
   flex-direction: row;

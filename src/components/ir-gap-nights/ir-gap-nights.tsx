@@ -130,7 +130,7 @@ export class IrGapNights {
           <ir-custom-button slot="page-header" variant="brand" loading={ruleDisabled} onClickHandler={() => this.save()}>
             Save
           </ir-custom-button>
-          <wa-card class="gap-nights__card">
+          <wa-card appearance="plain" class="gap-nights__card">
             <wa-callout variant="neutral" size="s">
               <wa-icon slot="icon" name="circle-info"></wa-icon>
               Gap nights are nights guests can't book because of your length of stay restriction. For example, if you have 2 consecutive nights left and you've set a restriction of

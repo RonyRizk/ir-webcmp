@@ -80,7 +80,7 @@ export class IrHkTeam {
     const { assigned, total, un_assigned } = housekeeping_store.hk_criteria.units_assignments;
 
     return (
-      <wa-card class="hk-team__card">
+      <wa-card appearance="plain" class="hk-team__card">
         <section slot="header" class="hk-team-header">
           <div class="hk-team-header__top">
             <p class="hk-team-header__title">{locales.entries.Lcz_HousekeepingTeam}</p>
