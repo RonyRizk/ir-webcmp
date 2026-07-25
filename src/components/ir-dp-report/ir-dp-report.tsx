@@ -97,10 +97,11 @@ export class IrDpReport {
         propertyId = propertyData.My_Result.id;
       }
 
+      this.propertyId = propertyId;
       const [languageTexts, allowedProperties] = await Promise.all([
         this.roomService.fetchLanguage(this.language),
         this.propertyService.getActiveOptimExposedProperties(),
-        !this.propertyId
+        !this.propertyid
           ? Promise.resolve(null)
           : this.roomService.getExposedProperty({
               id: this.propertyId,
@@ -110,7 +111,6 @@ export class IrDpReport {
             }),
         await this.fetchInitialDpReport(),
       ]);
-      this.propertyId = propertyId;
       if (!locales.entries) {
         locales.entries = languageTexts.entries;
         locales.direction = languageTexts.direction;
