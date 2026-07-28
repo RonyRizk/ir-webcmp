@@ -1153,7 +1153,7 @@ export class BookingService {
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
-      return data.My_Result;
+      return { ...data.My_Result, rooms: data.My_Result.rooms ?? [] };
     } catch (error) {
       console.error(error);
     }

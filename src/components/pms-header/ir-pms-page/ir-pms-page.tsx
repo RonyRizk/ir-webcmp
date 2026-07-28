@@ -240,7 +240,21 @@ export class IrPmsPage {
               <ir-input label="Hello world" size="s"></ir-input>
               <ir-text-editor size="s" hint="lola" label="Hello world"></ir-text-editor>
             </div>
-            <ir-text-editor size={'m'} appearance={'filled'} label="Hello world"></ir-text-editor>
+            <ir-text-editor
+              size={'m'}
+              toolbarConfig={{
+                undo: true,
+                redo: true,
+                color: true,
+                align: true,
+                background: true,
+                link: true,
+                list: ['bullet', 'ordered'],
+              }}
+              onTextChange={e => console.log(e.detail)}
+              appearance={'filled'}
+              label="Hello world"
+            ></ir-text-editor>
             <ir-text-editor size="xl" appearance={'filled-outlined'} label="Hello world"></ir-text-editor>
           </div>
         </div>

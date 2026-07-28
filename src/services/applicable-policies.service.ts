@@ -125,13 +125,13 @@ export class ApplicablePoliciesService {
    * @param rooms - The rooms attached to the active booking.
    */
   private groupRoomsForRequest(rooms: Room[]): GroupedRoomPayload[] {
-    if (!rooms.length) {
-      throw new Error('Cannot request applicable policies without booking rooms.');
-    }
+    // if (!rooms.length) {
+    //   throw new Error('Cannot request applicable policies without booking rooms.');
+    // }
 
     const groupMap = new Map<string, GroupedRoomPayload>();
 
-    rooms.forEach(room => {
+    rooms?.forEach(room => {
       if (!room.rateplan?.id || !room.roomtype?.id) {
         throw new Error('Room is missing rate plan or room type information.');
       }

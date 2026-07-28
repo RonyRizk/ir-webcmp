@@ -32,9 +32,9 @@ export class BookingListingService {
       return result;
     }
     if (options?.append) {
-      booking_listing.bookings = [...booking_listing.bookings, ...result];
+      booking_listing.bookings = [...booking_listing.bookings, ...result].map(b => ({ ...b, rooms: b.rooms ?? [] }));
     } else {
-      booking_listing.bookings = [...result];
+      booking_listing.bookings = [...result].map(b => ({ ...b, rooms: b.rooms ?? [] }));
     }
     booking_listing.userSelection = {
       ...booking_listing.userSelection,

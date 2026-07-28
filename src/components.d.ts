@@ -6147,7 +6147,7 @@ export namespace Components {
          */
         "size": NativeWaInput['size'];
         /**
-          * Type-safe toolbar configuration. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   link: true,   clean: true }
+          * Type-safe toolbar configuration covering every Quill toolbar control. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   header: true, // or e.g. [1, 2, false]   list: true, // or e.g. ['ordered', 'bullet']   link: true,   clean: true }
          */
         "toolbarConfig"?: ToolbarConfig;
         /**
@@ -19451,7 +19451,7 @@ declare namespace LocalJSX {
          */
         "size"?: NativeWaInput['size'];
         /**
-          * Type-safe toolbar configuration. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   link: true,   clean: true }
+          * Type-safe toolbar configuration covering every Quill toolbar control. For example, you can pass:  {   bold: true,   italic: true,   underline: true,   strike: false,   header: true, // or e.g. [1, 2, false]   list: true, // or e.g. ['ordered', 'bullet']   link: true,   clean: true }
          */
         "toolbarConfig"?: ToolbarConfig;
         /**

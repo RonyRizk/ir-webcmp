@@ -3,21 +3,69 @@ import Quill, { QuillOptions } from 'quill';
 import { patchQuillForShadowDom } from './quill-shadow';
 import { NativeWaInput } from '../ir-input/ir-input';
 
-export type QuillToolbarButton = 'bold' | 'italic' | 'underline' | 'strike' | 'link' | 'image' | 'video' | 'clean';
+export type QuillToolbarButton =
+  | 'undo'
+  | 'redo'
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strike'
+  | 'blockquote'
+  | 'code-block'
+  | 'link'
+  | 'image'
+  | 'video'
+  | 'formula'
+  | 'header'
+  | 'list'
+  | 'script'
+  | 'indent'
+  | 'direction'
+  | 'size'
+  | 'color'
+  | 'background'
+  | 'font'
+  | 'align'
+  | 'clean';
 
 export interface ToolbarConfig {
+  undo?: boolean;
+  redo?: boolean;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
   strike?: boolean;
+  blockquote?: boolean;
+  codeBlock?: boolean;
   link?: boolean;
   image?: boolean;
   video?: boolean;
+  formula?: boolean;
+  /** `true` uses [1, 2, 3, 4, 5, 6, false], or pass your own header levels (false = paragraph). */
+  header?: boolean | (1 | 2 | 3 | 4 | 5 | 6 | false)[];
+  /** `true` uses ['ordered', 'bullet', 'check']. */
+  list?: boolean | ('ordered' | 'bullet' | 'check')[];
+  /** `true` uses ['sub', 'super']. */
+  script?: boolean | ('sub' | 'super')[];
+  indent?: boolean;
+  direction?: boolean;
+  /** `true` uses ['small', false, 'large', 'huge']. */
+  size?: boolean | (string | false)[];
+  color?: boolean;
+  background?: boolean;
+  font?: boolean;
+  align?: boolean;
   clean?: boolean;
 }
 
 function buildToolbar(config: ToolbarConfig): any[] {
   const toolbar = [];
+  const historyControls: Record<string, string>[] = [];
+  if (config.undo) historyControls.push({ undo: 'ql-undo' });
+  if (config.redo) historyControls.push({ redo: 'ql-redo' });
+  if (historyControls.length) {
+    toolbar.push(historyControls);
+  }
   const textFormats: string[] = [];
   if (config.bold) textFormats.push('bold');
   if (config.italic) textFormats.push('italic');
@@ -26,11 +74,112 @@ function buildToolbar(config: ToolbarConfig): any[] {
   if (textFormats.length) {
     toolbar.push(textFormats);
   }
-  if (config.link) toolbar.push(['link']);
-  if (config.image) toolbar.push(['image']);
-  if (config.video) toolbar.push(['video']);
+  const blockFormats: string[] = [];
+  if (config.blockquote) blockFormats.push('blockquote');
+  if (config.codeBlock) blockFormats.push('code-block');
+  if (blockFormats.length) {
+    toolbar.push(blockFormats);
+  }
+  const embedFormats: string[] = [];
+  if (config.link) embedFormats.push('link');
+  if (config.image) embedFormats.push('image');
+  if (config.video) embedFormats.push('video');
+  if (config.formula) embedFormats.push('formula');
+  if (embedFormats.length) {
+    toolbar.push(embedFormats);
+  }
+  if (config.header) {
+    toolbar.push([{ header: config.header === true ? [1, 2, 3, 4, 5, 6, false] : config.header }]);
+  }
+  if (config.list) {
+    (config.list === true ? (['ordered', 'bullet', 'check'] as const) : config.list).forEach(value => toolbar.push([{ list: value }]));
+  }
+  if (config.script) {
+    (config.script === true ? (['sub', 'super'] as const) : config.script).forEach(value => toolbar.push([{ script: value }]));
+  }
+  if (config.indent) {
+    toolbar.push([{ indent: '-1' }, { indent: '+1' }]);
+  }
+  if (config.direction) {
+    toolbar.push([{ direction: 'rtl' }]);
+  }
+  if (config.size) {
+    toolbar.push([{ size: config.size === true ? ['small', false, 'large', 'huge'] : config.size }]);
+  }
+  const colorFormats: Record<string, any[]>[] = [];
+  if (config.color) colorFormats.push({ color: [] });
+  if (config.background) colorFormats.push({ background: [] });
+  if (colorFormats.length) {
+    toolbar.push(colorFormats);
+  }
+  if (config.font) {
+    toolbar.push([{ font: [] }]);
+  }
+  if (config.align) {
+    toolbar.push([{ align: [] }]);
+  }
   if (config.clean) toolbar.push(['clean']);
   return toolbar;
+}
+
+/**
+ * Quill 2 always emits lists as `<ol><li data-list="bullet|ordered|checked|unchecked" class="ql-indent-N">`,
+ * relying on CSS to draw bullets/numbers from the `data-list` attribute. That's invisible outside an
+ * element with Quill's stylesheet, so rewrite it into real semantic `<ul>`/`<ol>`/`<li>` markup (with
+ * genuine nesting for indented items) before the HTML leaves the component.
+ */
+function normalizeListMarkup(html: string): string {
+  if (!html || html.indexOf('data-list') === -1) {
+    return html;
+  }
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  template.content.querySelectorAll('ol').forEach(normalizeListElement);
+  return template.innerHTML;
+}
+
+function normalizeListElement(ol: Element) {
+  const items = Array.from(ol.children);
+  if (!items.length || !items.every(item => item.tagName === 'LI' && item.hasAttribute('data-list'))) {
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  const stack: { level: number; container: Element }[] = [];
+
+  items.forEach(li => {
+    const type = li.getAttribute('data-list') || 'bullet';
+    const indentMatch = /ql-indent-(\d+)/.exec(li.className);
+    const level = indentMatch ? parseInt(indentMatch[1], 10) : 0;
+    li.removeAttribute('data-list');
+    if (indentMatch) {
+      li.classList.remove(indentMatch[0]);
+      if (!li.classList.length) li.removeAttribute('class');
+    }
+    if (type === 'checked' || type === 'unchecked') {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.disabled = true;
+      if (type === 'checked') checkbox.setAttribute('checked', '');
+      li.insertBefore(checkbox, li.firstChild);
+    }
+    const tag = type === 'ordered' ? 'ol' : 'ul';
+
+    while (stack.length && stack[stack.length - 1].level > level) stack.pop();
+    let frame = stack[stack.length - 1];
+    const needsNewList = !frame || frame.level < level || (frame.level === level && frame.container.tagName.toLowerCase() !== tag);
+    if (needsNewList) {
+      if (frame && frame.level === level) stack.pop();
+      const parentFrame = stack[stack.length - 1];
+      const list = document.createElement(tag);
+      const parentLi = parentFrame ? parentFrame.container.lastElementChild : null;
+      (parentLi ?? fragment).appendChild(list);
+      frame = { level, container: list };
+      stack.push(frame);
+    }
+    frame.container.appendChild(li);
+  });
+
+  ol.replaceWith(fragment);
 }
 
 const icons = Quill.import('ui/icons') as Record<string, string>;
@@ -87,7 +236,7 @@ export class IrTextEditor {
   @Prop({ reflect: true }) disabled: boolean = false;
 
   /**
-   * Type-safe toolbar configuration.
+   * Type-safe toolbar configuration covering every Quill toolbar control.
    * For example, you can pass:
    *
    * {
@@ -95,6 +244,8 @@ export class IrTextEditor {
    *   italic: true,
    *   underline: true,
    *   strike: false,
+   *   header: true, // or e.g. [1, 2, false]
+   *   list: true, // or e.g. ['ordered', 'bullet']
    *   link: true,
    *   clean: true
    * }
@@ -276,7 +427,7 @@ export class IrTextEditor {
         return;
       }
     }
-    const html = this.editor.root.innerHTML;
+    const html = normalizeListMarkup(this.editor.root.innerHTML);
     this.pendingEchoHtml = html;
     this.syncFormValue();
     this.updateHistoryButtons();
@@ -310,7 +461,7 @@ export class IrTextEditor {
     if (!this.editor) {
       return;
     }
-    this.internals.setFormValue(this.isEmpty ? '' : this.editor.root.innerHTML);
+    this.internals.setFormValue(this.isEmpty ? '' : normalizeListMarkup(this.editor.root.innerHTML));
     this.updateValidity();
   }
 
