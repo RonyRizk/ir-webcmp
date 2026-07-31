@@ -1011,7 +1011,7 @@ export class BookingService {
       throw new Error(data.ExceptionMsg);
     }
     const res: IEntries[] = data.My_Result ?? [];
-    return res;
+    return res.filter(r=>r.ISVISIBLE);
   }
 
   public async fetchSetupEntries(): Promise<ISetupEntries> {
@@ -1052,7 +1052,7 @@ export class BookingService {
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
-    return data.My_Result;
+    return data.My_Result.filter(c=>c.ISVISIBLE);
   }
   public async getBlockedInfo(): Promise<IEntries[]> {
     return await this.getSetupEntriesByTableNameMulti(['_CALENDAR_BLOCKED_TILL']);
