@@ -118,7 +118,7 @@ export class IrTaxServiceCategories {
     const rules = new Map<string, TaxAndChargeSetup>();
     rules.set('ACC', accSetup);
 
-    (this.setupEntries?.svc_category ?? []).forEach(c => {
+    this.categories.forEach(c => {
       const match = taxCategories.find(tc => tc.category.code === c.CODE_NAME);
       rules.set(
         c.CODE_NAME,
@@ -127,6 +127,11 @@ export class IrTaxServiceCategories {
     });
 
     return rules;
+  }
+
+  private get categories() {
+    const extraServicesCategories = new Set(['ECI', 'LCO', 'BCT', 'EXB', 'HMP', 'ANP', 'BRF', 'LNC', 'DIN', 'HBD', 'FBD', 'MNB', 'DUZ']);
+    return (this.setupEntries?.svc_category ?? []).filter(s => !extraServicesCategories.has(s.CODE_NAME));
   }
 
   /** Returns a default setup for a service category with all fields set to Not Applicable. */
@@ -170,7 +175,7 @@ export class IrTaxServiceCategories {
     next.set(categoryCode, { ...next.get(categoryCode), [field]: nextRule });
 
     if (categoryCode === 'ACC' && field === 'vat') {
-      (this.setupEntries?.svc_category ?? []).forEach(category => {
+      this.categories.forEach(category => {
         const categorySetup = next.get(category.CODE_NAME);
         if (this.isChargeRuleEmpty(categorySetup?.vat)) {
           next.set(category.CODE_NAME, { ...categorySetup, vat: { ...categorySetup.vat, value: nextRule.value } });
@@ -185,9 +190,9 @@ export class IrTaxServiceCategories {
   private buildPayload(): HandleExposedPropertyTaxCategoriesParams {
     const accSetup = this.chargeCategoryRules.get('ACC');
 
-    const tax_categories: TaxCategory[] = (this.setupEntries?.svc_category ?? []).map(category => {
+    const tax_categories: TaxCategory[] = this.categories.map(category => {
       const setup = this.chargeCategoryRules.get(category.CODE_NAME);
-      const taxMode = (this.setupEntries?.vat_included ?? []).find(v => v.CODE_NAME === setup?.vat?.mode);
+      const taxMode = this.categories.find(v => v.CODE_NAME === setup?.vat?.mode);
       return {
         category: { code: category.CODE_NAME, description: category.CODE_VALUE_EN },
         taxation_mode: { code: setup?.vat?.mode ?? '', description: taxMode?.CODE_VALUE_EN ?? '' },
@@ -233,7 +238,7 @@ export class IrTaxServiceCategories {
     }
     const accSetup = this.chargeCategoryRules.get('ACC');
     const filteredVat = (this.setupEntries?.vat_included ?? []).filter(v => v.CODE_NAME !== '000');
-    const categories = this.setupEntries?.svc_category ?? [];
+    const categories = this.categories;
 
     return (
       <ir-page
