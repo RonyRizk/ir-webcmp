@@ -16,11 +16,14 @@ export class IrToastItem {
 
   @State() progress: number = 100;
   @State() leaving: boolean = false;
+  @State() entered: boolean = false;
 
   /** Emitted once the exit animation finishes and the toast should be removed from the DOM. */
   @Event() irDismiss: EventEmitter<void>;
 
   private timer: number;
+  private remainingMs: number;
+  private resumedAt: number;
   private timerStarted = false;
   private hiding = false;
   private hovered = false;
@@ -30,18 +33,28 @@ export class IrToastItem {
     if (!this.timerStarted) {
       this.startTimer();
     }
+    // Once the enter animation has played, mark the host so re-parenting (the
+    // provider moving the toast layer in/out of a modal dialog) never replays it.
+    const markEntered = () => {
+      clearTimeout(fallback);
+      this.entered = true;
+    };
+    const fallback = window.setTimeout(markEntered, 500);
+    this.el.shadowRoot?.querySelector('.toast-item')?.addEventListener('animationend', markEntered, { once: true });
   }
 
   connectedCallback() {
-    // Re-parenting (e.g. the provider moving the toast layer into a modal
-    // dialog) disconnects and reconnects the element; resume the countdown.
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    // Re-parenting disconnects and reconnects the element; resume the countdown
+    // with whatever time was left when it was paused.
     if (this.timerStarted && !this.hovered && !this.focused) {
       this.resumeTimer();
     }
   }
 
   disconnectedCallback() {
-    this.clearTimer();
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    this.pauseTimer();
   }
 
   /** Starts the auto-dismiss countdown. Safe to call more than once. */
@@ -61,7 +74,7 @@ export class IrToastItem {
       return;
     }
     this.hiding = true;
-    this.clearTimer();
+    this.pauseTimer();
     if (!this.prefersReducedMotion()) {
       this.leaving = true;
       await new Promise<void>(resolve => {
@@ -85,31 +98,45 @@ export class IrToastItem {
     return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   }
 
+  // The countdown is wall-clock based so it survives pauses, re-parenting, and
+  // interval throttling in background tabs without drifting.
   private resumeTimer() {
-    if (!this.hasTimer || this.hiding || this.timer) {
+    if (!this.hasTimer || this.hiding || this.timer || document.hidden) {
       return;
     }
-    const step = (16 / this.duration) * 100;
+    this.remainingMs = this.remainingMs ?? this.duration;
+    this.resumedAt = Date.now();
     this.timer = window.setInterval(() => {
-      this.progress = Math.max(0, this.progress - step);
-      if (this.progress <= 0) {
+      const left = this.remainingMs - (Date.now() - this.resumedAt);
+      this.progress = Math.max(0, (left / this.duration) * 100);
+      if (left <= 0) {
         this.hide();
       }
-    }, 16);
+    }, 100);
   }
 
-  private clearTimer() {
+  private pauseTimer() {
     if (this.timer) {
+      this.remainingMs = Math.max(0, this.remainingMs - (Date.now() - this.resumedAt));
       clearInterval(this.timer);
       this.timer = undefined;
     }
   }
 
+  private handleVisibilityChange = () => {
+    if (document.hidden) {
+      this.pauseTimer();
+    } else {
+      this.updateInteraction();
+    }
+  };
+
   private updateInteraction() {
     if (this.hovered || this.focused) {
       // Reset the countdown while the user is interacting; it restarts from
       // the full duration once they move away.
-      this.clearTimer();
+      this.pauseTimer();
+      this.remainingMs = this.duration;
       this.progress = 100;
     } else if (this.timerStarted) {
       this.resumeTimer();
@@ -142,7 +169,11 @@ export class IrToastItem {
 
   render() {
     return (
-      <Host data-leaving={this.leaving ? 'true' : undefined} style={{ '--accent-color': `var(--wa-color-${this.variant}-fill-loud)` }}>
+      <Host
+        data-leaving={this.leaving ? 'true' : undefined}
+        data-entered={this.entered ? 'true' : undefined}
+        style={{ '--accent-color': `var(--wa-color-${this.variant}-fill-loud)` }}
+      >
         <div class={'toast-item'} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave} onFocusin={this.handleFocusIn} onFocusout={this.handleFocusOut}>
           <div part="accent" class="accent"></div>
           <div part="icon" class="icon">

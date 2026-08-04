@@ -6322,6 +6322,11 @@ export namespace Components {
          */
         "duration": number;
         /**
+          * Maximum number of toasts shown at once; when exceeded, the oldest are dismissed.
+          * @default 5
+         */
+        "maxToasts": number;
+        /**
           * @default 'top-end'
          */
         "position": 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
@@ -19628,6 +19633,11 @@ declare namespace LocalJSX {
          */
         "duration"?: number;
         /**
+          * Maximum number of toasts shown at once; when exceeded, the oldest are dismissed.
+          * @default 5
+         */
+        "maxToasts"?: number;
+        /**
           * Emitted when a toast's action button is clicked.
          */
         "onToastAction"?: (event: IrToastProviderCustomEvent<{ id: string }>) => void;
@@ -21810,6 +21820,7 @@ declare namespace LocalJSX {
         "position": 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
         "rtl": boolean;
         "duration": number;
+        "maxToasts": number;
     }
     interface IrTooltipAttributes {
         "message": string;

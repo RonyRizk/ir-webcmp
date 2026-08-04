@@ -75,6 +75,8 @@ export class IrToastProvider {
   @Prop() position: 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end' = 'top-end';
   @Prop() rtl: boolean = false;
   @Prop() duration: number = 5000;
+  /** Maximum number of toasts shown at once; when exceeded, the oldest are dismissed. */
+  @Prop() maxToasts: number = 5;
 
   /** Emitted when a toast's action button is clicked. */
   @Event() toastAction: EventEmitter<{ id: string }>;
@@ -84,6 +86,7 @@ export class IrToastProvider {
   private liveRegion: HTMLElement | null = null;
   private modalStack: HTMLDialogElement[] = [];
   private positionCache = new Map<HTMLElement, DOMRect>();
+  private hostDialog: HTMLDialogElement | null = null;
 
   connectedCallback() {
     connectedProviders.push(this);
@@ -96,6 +99,8 @@ export class IrToastProvider {
       connectedProviders.splice(index, 1);
     }
     document.removeEventListener('keydown', this.handleKeyDown);
+    this.hostDialog?.removeEventListener('close', this.handleHostDialogClose);
+    this.hostDialog = null;
     this.layer?.remove();
     this.layer = null;
     this.liveRegion = null;
@@ -124,6 +129,7 @@ export class IrToastProvider {
   // A modal dialog opening makes everything outside it inert; track it and move
   // the toast layer inside so toasts stay visible and clickable above it.
   @Listen('drawerShow', { target: 'body' })
+  @Listen('irDialogShow', { target: 'body' })
   @Listen('wa-show', { target: 'body' })
   handleOverlayShow(event: Event) {
     const dialog = findDialogIn(event.target as Element);
@@ -136,7 +142,13 @@ export class IrToastProvider {
     requestAnimationFrame(() => this.relocateLayer());
   }
 
+  // Wrapper components (ir-dialog) stop the wa-* events and re-emit them under
+  // their own names, so both vocabularies must be listened for. Only the
+  // after-hide events are reliable for relocation: at wa-hide/irDialogHide time
+  // the native dialog is still `:modal` for the duration of the close animation.
   @Listen('drawerHide', { target: 'body' })
+  @Listen('irDialogHide', { target: 'body' })
+  @Listen('irDialogAfterHide', { target: 'body' })
   @Listen('wa-hide', { target: 'body' })
   @Listen('wa-after-hide', { target: 'body' })
   handleOverlayHide() {
@@ -170,6 +182,9 @@ export class IrToastProvider {
     this.capturePositions();
     layer.prepend(item);
     this.items.unshift({ id, el: item });
+    for (const extra of this.items.slice(this.maxToasts)) {
+      extra.el.hide();
+    }
     this.showLayerIfNeeded();
     requestAnimationFrame(() => this.animatePositions());
 
@@ -190,6 +205,10 @@ export class IrToastProvider {
   async clearAllToasts(): Promise<void> {
     await Promise.all(this.items.map(({ el }) => el.hide()));
   }
+
+  private handleHostDialogClose = () => {
+    requestAnimationFrame(() => this.relocateLayer());
+  };
 
   private handleKeyDown = async (event: KeyboardEvent) => {
     // Let modal drawers/dialogs consume Escape first (they mark it defaultPrevented).
@@ -231,7 +250,7 @@ export class IrToastProvider {
       right: '0',
       width: 'auto',
       height: 'auto',
-      maxHeight: '100vh',
+      maxHeight: '100dvh',
       margin: '0',
       border: 'none',
       background: 'transparent',
@@ -297,6 +316,14 @@ export class IrToastProvider {
     this.modalStack = this.modalStack.filter(dialog => open.includes(dialog));
     const host: HTMLElement = this.modalStack[this.modalStack.length - 1] ?? open[open.length - 1] ?? document.body;
     const inDialog = host !== document.body;
+    // Safety net: the native `close` event always fires on the hosting <dialog>
+    // itself, even when a wrapper component swallows the wa-* events, so the
+    // layer can never be stranded inside a closed dialog.
+    if (this.hostDialog !== host) {
+      this.hostDialog?.removeEventListener('close', this.handleHostDialogClose);
+      this.hostDialog = inDialog ? (host as HTMLDialogElement) : null;
+      this.hostDialog?.addEventListener('close', this.handleHostDialogClose);
+    }
     if (layer.parentNode !== host) {
       if (safeMatches(layer, ':popover-open')) {
         layer.hidePopover?.();

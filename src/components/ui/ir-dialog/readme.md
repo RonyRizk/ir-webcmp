@@ -82,6 +82,7 @@ Type: `Promise<void>`
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
+ - [ir-test-cmp](../../ir-test-cmp)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
  - [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
 
@@ -118,6 +119,7 @@ graph TD;
   ir-property-switcher --> ir-dialog
   ir-room --> ir-dialog
   ir-tasks-table --> ir-dialog
+  ir-test-cmp --> ir-dialog
   ir-user-management-table --> ir-dialog
   ir-void-document-dialog --> ir-dialog
   style ir-dialog fill:#f9f,stroke:#333,stroke-width:4px

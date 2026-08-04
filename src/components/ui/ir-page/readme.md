@@ -38,6 +38,7 @@
  - [ir-sales-by-channel](../../ir-sales-by-channel)
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-tax-service-categories](../../ir-tax-service-categories)
+ - [ir-test-cmp](../../ir-test-cmp)
  - [ir-unbookable-rooms](../../ir-unbookable-rooms)
 
 ### Depends on
@@ -69,6 +70,7 @@ graph TD;
   ir-sales-by-channel --> ir-page
   ir-sales-by-country --> ir-page
   ir-tax-service-categories --> ir-page
+  ir-test-cmp --> ir-page
   ir-unbookable-rooms --> ir-page
   style ir-page fill:#f9f,stroke:#333,stroke-width:4px
 ```

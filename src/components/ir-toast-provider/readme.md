@@ -7,11 +7,12 @@
 
 ## Properties
 
-| Property   | Attribute  | Description | Type                                                                                            | Default     |
-| ---------- | ---------- | ----------- | ----------------------------------------------------------------------------------------------- | ----------- |
-| `duration` | `duration` |             | `number`                                                                                        | `5000`      |
-| `position` | `position` |             | `"bottom-center" \| "bottom-end" \| "bottom-start" \| "top-center" \| "top-end" \| "top-start"` | `'top-end'` |
-| `rtl`      | `rtl`      |             | `boolean`                                                                                       | `false`     |
+| Property    | Attribute    | Description                                                                      | Type                                                                                            | Default     |
+| ----------- | ------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------- |
+| `duration`  | `duration`   |                                                                                  | `number`                                                                                        | `5000`      |
+| `maxToasts` | `max-toasts` | Maximum number of toasts shown at once; when exceeded, the oldest are dismissed. | `number`                                                                                        | `5`         |
+| `position`  | `position`   |                                                                                  | `"bottom-center" \| "bottom-end" \| "bottom-start" \| "top-center" \| "top-end" \| "top-start"` | `'top-end'` |
+| `rtl`       | `rtl`        |                                                                                  | `boolean`                                                                                       | `false`     |
 
 
 ## Events
@@ -70,7 +71,6 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [ir-test-cmp](../ir-test-cmp)
  - [ir-toast](../ui/ir-toast)
 
 ### Depends on
@@ -81,7 +81,6 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   ir-toast-provider --> ir-toast-item
-  ir-test-cmp --> ir-toast-provider
   ir-toast --> ir-toast-provider
   style ir-toast-provider fill:#f9f,stroke:#333,stroke-width:4px
 ```
