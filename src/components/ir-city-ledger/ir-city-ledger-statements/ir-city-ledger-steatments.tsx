@@ -44,9 +44,11 @@ export class IrCityLedgerStatements {
     this.statement = null;
     this.rows = [];
     this.hasFetched = false;
-    this.filters = { fromDate: null, toDate: null };
     this.printFilters = null;
     this.pdfUrl = null;
+    if (this.filters.fromDate && this.filters.toDate) {
+      this.fetchStatement(this.filters);
+    }
   }
 
   @Watch('printFilters')

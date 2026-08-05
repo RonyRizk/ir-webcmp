@@ -186,11 +186,19 @@ export class IrCityLedger {
             onCombobox-change={(e: CustomEvent<string | string[]>) => {
               this.agentSearch = '';
               const value = e.detail as string;
-              this.selectedAgent = value ? this.agents?.find(agent => agent.id === Number(value)) : null;
+              if (!value) {
+                // Cleared — keep the previously selected agent and don't fetch anything.
+                requestAnimationFrame(() => {
+                  const autocomplete = this.el.querySelector('ir-autocomplete') as any;
+                  if (autocomplete && this.selectedAgent) autocomplete.value = this.selectedAgent.name;
+                });
+                return;
+              }
+              const newAgent = this.agents?.find(agent => agent.id === Number(value));
+              if (newAgent?.id === this.selectedAgent?.id) return;
+              this.selectedAgent = newAgent ?? null;
               this.showStatementPreview = false;
               this.folioSummary = null;
-              this.fiscalFilters = { fromDate: undefined, toDate: undefined, docNumber: '', taxableOnly: false, type: 'all', proformaOnly: false };
-              this.stmtFilters = { fromDate: null, toDate: null };
               // Update URL search param
               if (this.selectedAgent) {
                 const url = new URL(window.location.href);

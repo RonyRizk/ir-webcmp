@@ -44,6 +44,9 @@ export class IrCityLedgerFiscalDocuments {
   handleAgentIdChange() {
     this.fiscalDocuments = [];
     this.hasFetched = false;
+    if (this.filters.fromDate || this.filters.toDate) {
+      this.fetchFiscalDocuments(this.filters);
+    }
   }
 
   private get filteredDocuments(): FiscalDocument[] {

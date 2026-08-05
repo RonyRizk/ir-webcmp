@@ -181,10 +181,12 @@ export class IrCityLedgerFolio {
     }
   }
 
-  @Watch('agentId')
-  handleAgentIdChange(newValue: number | null, oldValue: number | null) {
-    if (newValue !== oldValue) {
-      this.clearData();
+  @Watch('agent')
+  handleAgentChange(newAgent: Agent | null, oldAgent: Agent | null) {
+    if (newAgent?.id === oldAgent?.id) return;
+    this.clearData();
+    if (this.filters.fromDate || this.filters.toDate) {
+      this.fetchFolioData();
     }
   }
 
