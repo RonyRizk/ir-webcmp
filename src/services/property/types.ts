@@ -213,6 +213,8 @@ export const UnifiedFolioRecordSchema = z.object({
   DOC_NUMBER: z.string().nullable().optional(),
   DOC_DATE: z.string().nullable().optional(),
   DOC_TYPE: z.string().nullable().optional(),
+  DOC_HOUR: z.number().nullable().optional(),
+  DOC_MINUTE: z.number().nullable().optional(),
 
   FD_TYPE_CODE: z.string().nullable().optional(),
 

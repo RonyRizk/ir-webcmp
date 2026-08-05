@@ -19,6 +19,9 @@
   gap: 1rem;
   margin-bottom: var(--wa-space-xl, 2rem);
 }
+.checkout-dialog__callouts:empty {
+  display: none;
+}
 /* ── Early checkout layout ──────────────────── */
 
 .early-checkout {

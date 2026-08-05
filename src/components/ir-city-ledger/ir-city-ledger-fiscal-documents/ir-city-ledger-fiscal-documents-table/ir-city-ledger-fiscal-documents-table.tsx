@@ -9,6 +9,7 @@ import { FdStatus, FdTypes } from '@/types/enums';
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
 import { Booking } from '@/models/booking.dto';
+import { _formatTime } from '@/components/ir-booking-details/functions';
 
 @Component({
   tag: 'ir-city-ledger-fiscal-documents-table',
@@ -171,7 +172,15 @@ export class IrCityLedgerFiscalDocumentsTable {
       }),
       this.columnHelper.accessor('ISSUE_DATE_DISPLAY', {
         header: 'Date',
-        cell: info => info.getValue(),
+        cell: info => {
+          const row = info.row.original;
+          return (
+            <div class="fiscal-table__date-cell">
+              <p class="m-0 p-0">{info.getValue()}</p>
+              {row.ISSUE_HOUR != null && row.ISSUE_MINUTE != null && <p class="fd_ss">{_formatTime(String(row.ISSUE_HOUR), String(row.ISSUE_MINUTE))}</p>}
+            </div>
+          );
+        },
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
         header: 'Doc Number',

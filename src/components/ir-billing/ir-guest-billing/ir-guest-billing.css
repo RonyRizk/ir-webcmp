@@ -11,6 +11,17 @@
   gap: var(--wa-space-l);
   padding: 0 var(--wa-space-l);
 }
+.billing__date-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.billing__date-time {
+  color: var(--wa-color-text-quiet);
+  margin: 0;
+  padding: 0;
+  font-size: var(--wa-font-size-s);
+}
 .billing__section-title-row {
   display: flex;
   align-items: center;

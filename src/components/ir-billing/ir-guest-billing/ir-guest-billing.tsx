@@ -13,6 +13,7 @@ import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir
 import { FdTypes, PayStatus, PayTypes } from '@/types/enums';
 import type { UnifiedFolioRecord, GetUnifiedFolioParams } from '@/services/property/types';
 import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
+import { _formatTime } from '@/components/ir-booking-details/functions';
 
 @Component({
   tag: 'ir-guest-billing',
@@ -207,7 +208,16 @@ export class IrGuestBilling {
                     const isReceipt = row.FD_TYPE_CODE === FdTypes.Receipt;
                     return (
                       <tr class="ir-table-row" key={row.DOC_NUMBER}>
-                        <td>{row.DOC_DATE ? moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY') : '—'}</td>
+                        <td>
+                          {row.DOC_DATE ? (
+                            <div class="billing__date-cell">
+                              <p class="m-0 p-0">{moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY')}</p>
+                              {row.DOC_HOUR != null && row.DOC_MINUTE != null && <p class="billing__date-time">{_formatTime(String(row.DOC_HOUR), String(row.DOC_MINUTE))}</p>}
+                            </div>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
                         <td class="billing__doc-number-col">
                           <wa-button onClick={() => this.printInvoice({ row })} variant="brand" appearance="plain" class="billing__invoice-nbr">
                             {row.DOC_NUMBER}
@@ -309,7 +319,10 @@ export class IrGuestBilling {
                     <div class="billing__card-details">
                       <div class="billing__card-detail">
                         <p class="billing__card-detail-label">Date</p>
-                        <p class="billing__card-detail-value">{row.DOC_DATE ? moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY') : '—'}</p>
+                        <div class="billing__date-cell">
+                          <p class="billing__card-detail-value">{row.DOC_DATE ? moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY') : '—'}</p>
+                          {row.DOC_HOUR != null && row.DOC_MINUTE != null && <p class="billing__date-time">{_formatTime(String(row.DOC_HOUR), String(row.DOC_MINUTE))}</p>}
+                        </div>
                       </div>
 
                       <div class="billing__card-detail">

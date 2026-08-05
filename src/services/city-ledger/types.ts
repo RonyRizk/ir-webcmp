@@ -49,6 +49,8 @@ export const FiscalDocumentSchema = z.object({
 
   ISSUE_DATE: z.string().nullable().optional(),
   ISSUE_DATE_DISPLAY: z.string().nullable().optional(),
+  ISSUE_HOUR: z.number().nullable().optional(),
+  ISSUE_MINUTE: z.number().nullable().optional(),
 
   IS_PRINTED: z.boolean().nullable().optional(),
 

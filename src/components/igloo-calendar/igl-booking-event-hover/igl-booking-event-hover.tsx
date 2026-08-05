@@ -277,7 +277,7 @@ export class IglBookingEventHover {
   private handleCustomerCheckOut() {
     this.showDialog.emit({
       reason: 'checkout',
-      booking: this.bookingEvent.booking,
+      booking: this.bookingEvent.base_booking,
       bookingNumber: this.bookingEvent.BOOKING_NUMBER,
       roomIdentifier: this.bookingEvent.IDENTIFIER,
       roomName: '',

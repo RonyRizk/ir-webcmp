@@ -153,10 +153,6 @@ export class IrCheckoutDialog {
     const toDate = moment(this.room.to_date, 'YYYY-MM-DD');
     this.isEarlyCheckout = today.isBefore(toDate, 'date');
     if (this.isEarlyCheckout) {
-      if (this.room.agent === null) {
-        this.isEarlyCheckout = false;
-        return;
-      }
       const todayStr = today.format('YYYY-MM-DD');
       this.remainingDays = (this.room.days ?? []).filter(d => d.date >= todayStr);
       const total = this.remainingTotal;
@@ -301,7 +297,7 @@ export class IrCheckoutDialog {
     );
   }
   private renderSameDayWarning() {
-    if (moment().isSame(moment(this.room.from_date, 'YYYY-MM-DD'), 'date')) {
+    if (moment().isSame(moment(this.room?.from_date, 'YYYY-MM-DD'), 'date')) {
       const isSingleRoom = this.booking.rooms.length === 1;
       return (
         <wa-callout size="s" variant="danger">
@@ -336,7 +332,7 @@ export class IrCheckoutDialog {
 
   render() {
     const isEarly = this.isEarlyCheckout && this.isLoading !== 'page';
-    const hasDue = (this.booking?.financial?.due_amount ?? 0) > 0;
+    const hasDue = (this.booking?.guest_financial?.due_amount ?? 0) > 0;
     return (
       <Fragment>
         <ir-dialog
@@ -350,35 +346,39 @@ export class IrCheckoutDialog {
             this.checkoutDialogClosed.emit({ reason: 'cancel' });
           }}
         >
-          {this.isLoading === 'page' ? (
-            <div class="dialog__loader-container">
-              <ir-spinner></ir-spinner>
-            </div>
-          ) : (
+          {this.open && (
             <Fragment>
-              <div class="checkout-dialog__callouts">
-                {this.renderDueAmountWarning()}
-                {this.renderMissingClWarning()}
-                {this.renderSameDayWarning()}
-              </div>
-              {this.isEarlyCheckout ? (
-                this.renderEarlyCheckoutContent()
-              ) : (
-                <p style={{ width: 'calc(31rem - var(--spacing))' }}>Are you sure you want to check out unit {(this.room?.unit as IUnit)?.name}?</p>
-              )}
-              {this.buttons.has('invoice_checkout') && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                  <wa-checkbox
-                    style={{ marginTop: '1rem', color: 'var(--wa-color-text-quiet)', marginLeft: 'auto' }}
-                    value={String(this.includeInvoice)}
-                    defaultChecked={this.includeInvoice}
-                    onchange={() => {
-                      this.includeInvoice = !this.includeInvoice;
-                    }}
-                  >
-                    Prepare guest invoice after checkout
-                  </wa-checkbox>
+              {this.isLoading === 'page' ? (
+                <div class="dialog__loader-container">
+                  <ir-spinner></ir-spinner>
                 </div>
+              ) : (
+                <Fragment>
+                  <div class="checkout-dialog__callouts">
+                    {this.renderDueAmountWarning()}
+                    {this.renderMissingClWarning()}
+                    {this.renderSameDayWarning()}
+                  </div>
+                  {this.isEarlyCheckout ? (
+                    this.renderEarlyCheckoutContent()
+                  ) : (
+                    <p style={{ width: 'calc(31rem - var(--spacing))' }}>Are you sure you want to check out unit {(this.room?.unit as IUnit)?.name}?</p>
+                  )}
+                  {this.buttons.has('invoice_checkout') && (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                      <wa-checkbox
+                        style={{ marginTop: '1rem', color: 'var(--wa-color-text-quiet)', marginLeft: 'auto' }}
+                        value={String(this.includeInvoice)}
+                        defaultChecked={this.includeInvoice}
+                        onchange={() => {
+                          this.includeInvoice = !this.includeInvoice;
+                        }}
+                      >
+                        Prepare guest invoice after checkout
+                      </wa-checkbox>
+                    </div>
+                  )}
+                </Fragment>
               )}
             </Fragment>
           )}

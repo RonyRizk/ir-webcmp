@@ -10,6 +10,7 @@ import type { GuestDocumentPreviewRequest } from '../ir-guest-document-preview/t
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
 import { FdTypes } from '@/types/enums';
+import { _formatTime } from '@/components/ir-booking-details/functions';
 
 const PAGE_SIZES = [20, 50, 100];
 @Component({
@@ -128,7 +129,16 @@ export class IrFiscalDocumentsTable {
     const base = [
       this.columnHelper.accessor('DOC_DATE', {
         header: 'Date',
-        cell: info => moment(info.getValue(), 'YYYY-MM-DD').format('MMM DD, YYYY') ?? '',
+        cell: info => {
+          const row = info.row.original;
+          const date = moment(info.getValue(), 'YYYY-MM-DD').format('MMM DD, YYYY');
+          return (
+            <div class="fiscal-table__date-cell">
+              <p class="m-0 p-0">{date}</p>
+              {row.DOC_HOUR != null && row.DOC_MINUTE != null && <p class="fd_ss">{_formatTime(String(row.DOC_HOUR), String(row.DOC_MINUTE))}</p>}
+            </div>
+          );
+        },
         enableSorting: true,
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
