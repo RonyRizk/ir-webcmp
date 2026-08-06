@@ -734,12 +734,6 @@ export class IglooCalendar {
     };
   }
 
-  private checkBookingAvailability(data) {
-    return this.calendarData.bookingEvents.some(
-      booking => booking.ID === data.ID || (booking.FROM_DATE === data.FROM_DATE && booking.TO_DATE === data.TO_DATE && booking.PR_ID === data.PR_ID),
-    );
-  }
-
   private updateBookingEventsDateRange(eventData) {
     eventData.forEach(bookingEvent => {
       bookingEvent.legendData = this.calendarData.formattedLegendData;
@@ -938,18 +932,16 @@ export class IglooCalendar {
   }
   private AddOrUpdateRoomBookings(data: RoomBlockDetails[] | RoomBookingDetails[], pool: string | undefined = undefined) {
     let bookings = [...this.calendarData.bookingEvents];
-    data.forEach(d => {
-      if (!this.checkBookingAvailability(d)) {
-        bookings = bookings.filter(booking => booking.ID !== d.ID);
-      }
-    });
     this.updateBookingEventsDateRange(data);
     if (pool) {
       bookings = bookings.filter(booking => booking.POOL === pool);
     }
     data.forEach(d => {
-      if (!bookings.some(booking => booking.ID === d.ID)) {
+      const idx = bookings.findIndex(booking => booking.ID === d.ID);
+      if (idx === -1) {
         bookings.push(d);
+      } else {
+        bookings[idx] = d;
       }
     });
     this.calendarData = {
@@ -1594,10 +1586,7 @@ export class IglooCalendar {
           onCloseDrawer={() => (this.calendarSidebarState = null)}
           open={this.calendarSidebarState?.type === 'bulk-blocks'}
         ></igl-bulk-operations-drawer>
-        <ir-rectifier-drawer
-          onCloseDrawer={() => (this.calendarSidebarState = null)}
-          open={this.calendarSidebarState?.type === 'rectifier'}
-        ></ir-rectifier-drawer>
+        <ir-rectifier-drawer onCloseDrawer={() => (this.calendarSidebarState = null)} open={this.calendarSidebarState?.type === 'rectifier'}></ir-rectifier-drawer>
         <igl-blocked-date-drawer
           onBlockedDateDrawerClosed={e => {
             e.stopImmediatePropagation();
