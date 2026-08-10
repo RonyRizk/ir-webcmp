@@ -43,10 +43,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-arrivals-table --> ir-booking-number-cell
   ir-arrivals-table --> ir-booked-by-cell
   ir-arrivals-table --> ir-guest-name-cell
@@ -195,6 +195,7 @@ graph TD;
   ir-payment-summary --> ir-payment-analytics
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
+  ir-button --> ir-icons
   ir-applicable-policies --> ir-custom-button
   ir-applicable-policies --> ir-icons
   ir-booking-city-ledger --> ir-empty-state

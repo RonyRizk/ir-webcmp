@@ -54,15 +54,16 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-title --> ir-icon
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
   ir-phone-input --> ir-combobox
+  ir-button --> ir-icons
   style ir-guest-info fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

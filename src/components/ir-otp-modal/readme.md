@@ -58,17 +58,18 @@ Type: `Promise<void>`
 
 ### Depends on
 
+- [ir-dialog](../ui/ir-dialog)
 - [ir-spinner](../ui/ir-spinner)
 - [ir-otp](ir-otp)
-- [ir-button](../ui/ir-button)
+- [ir-custom-button](../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-interceptor --> ir-otp-modal
   ir-test-cmp --> ir-otp-modal
   style ir-otp-modal fill:#f9f,stroke:#333,stroke-width:4px

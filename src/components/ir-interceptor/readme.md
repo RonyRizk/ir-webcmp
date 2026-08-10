@@ -52,10 +52,10 @@
 ```mermaid
 graph TD;
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   igl-book-property-container --> ir-interceptor
   igloo-calendar --> ir-interceptor
   ir-agents --> ir-interceptor

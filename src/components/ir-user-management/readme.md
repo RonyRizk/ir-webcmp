@@ -43,10 +43,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-user-management-table --> ir-custom-button
   ir-user-management-table --> ir-user-form-panel-drawer
   ir-user-management-table --> ir-dialog
@@ -61,6 +61,7 @@ graph TD;
   ir-user-form-panel --> ir-reset-password
   ir-password-validator --> requirement-check
   requirement-check --> ir-icons
+  ir-button --> ir-icons
   ir-sidebar --> ir-icon
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast

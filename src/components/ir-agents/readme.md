@@ -44,10 +44,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-agents-table --> ir-custom-button
   ir-agents-table --> ir-empty-state
   ir-agent-editor-drawer --> ir-drawer

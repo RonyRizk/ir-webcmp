@@ -1,77 +1,81 @@
 :host {
   display: block;
 }
-:root {
-  --otp-modal-padding: 1.5rem;
-}
-.modal-backdrop {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-}
-.otp-modal-header {
-  border-bottom: 0px !important;
-}
 .otp-modal {
-  z-index: 9999999 !important;
-  border: none;
-  padding: 0 !important;
-  box-sizing: border-box;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 0.35rem;
-  outline: 0;
-}
-.otp-modal-content {
-  background-color: white;
-  border: none;
-  border-radius: 0.35rem;
-  outline: 0;
-}
-.otp-modal-title {
-  margin-bottom: 0;
-  line-height: 1.45;
-}
-.otp-modal-body {
-  max-height: 100% !important;
-  padding: 0 var(--otp-modal-padding);
+  --ir-dialog-width: fit-content;
 }
 .otp-modal-header {
   display: flex;
   justify-content: space-between;
-  padding: var(--otp-modal-padding);
   padding-bottom: 1rem;
-  border-top-left-radius: 0.35rem;
-  border-top-right-radius: 0.35rem;
+  border-bottom: 0;
 }
-.otp-modal-dialog {
-  z-index: 9999999 !important;
+.otp-modal-title {
+  margin-bottom: 0;
+  line-height: 1.45;
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
 }
-.otp-modal-footer {
-  border-top: 0 !important;
+.otp-modal-body {
   display: flex;
-  gap: 0.5rem;
   flex-direction: column;
-  padding: var(--otp-modal-padding);
-  padding-top: 0.5rem !important;
+  align-items: center;
+  max-height: 100%;
 }
 .verification-message {
   max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.otp-error {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+.otp-resend-timer {
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+}
+.otp-resend-btn {
+  margin-top: 0.25rem;
+}
+.otp-modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  border-top: 0;
+}
+.otp-modal-footer ir-custom-button {
+  display: block;
+  width: 100%;
+}
+.otp-modal-footer ir-custom-button::part(base) {
+  width: 100%;
 }
 .modal-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 250px;
   width: 80vw;
 }
 @media (min-width: 768px) {
-  .otp-modal-dialog,
-  .otp-modal-content {
-    width: fit-content !important;
-  }
   .otp-modal-footer {
     flex-direction: row;
     align-items: center;
   }
+  .otp-modal-footer ir-custom-button {
+    flex: 1 1 0;
+  }
   .modal-loading-container {
-    width: 380px !important;
+    width: 380px;
   }
   .verification-message {
-    max-width: 350px !important;
+    max-width: 350px;
   }
 }

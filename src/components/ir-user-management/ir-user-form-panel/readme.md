@@ -66,9 +66,10 @@ graph TD;
   ir-reset-password --> ir-password-validator
   ir-reset-password --> ir-custom-button
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
+  ir-otp-modal --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-title --> ir-icon

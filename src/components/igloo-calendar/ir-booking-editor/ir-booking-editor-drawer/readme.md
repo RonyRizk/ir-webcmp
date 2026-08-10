@@ -57,10 +57,10 @@ graph TD;
   ir-booking-editor --> igl-room-type
   ir-booking-editor --> ir-booking-editor-form
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item

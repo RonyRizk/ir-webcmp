@@ -77,12 +77,13 @@ graph TD;
   ir-login --> ir-icons
   ir-login --> ir-button
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
+  ir-button --> ir-icons
   ir-booking-new-form --> ir-custom-button
   ir-booking-new-form --> ir-booking-editor-drawer
   ir-booking-editor-drawer --> ir-custom-button

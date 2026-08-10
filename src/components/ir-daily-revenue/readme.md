@@ -49,10 +49,10 @@ graph TD;
   ir-page --> ir-interceptor
   ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-revenue-summary --> ir-metric-card
@@ -202,6 +202,7 @@ graph TD;
   ir-payment-summary --> ir-payment-analytics
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
+  ir-button --> ir-icons
   ir-applicable-policies --> ir-custom-button
   ir-applicable-policies --> ir-icons
   ir-booking-city-ledger --> ir-empty-state

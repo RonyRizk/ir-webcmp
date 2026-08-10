@@ -133,6 +133,7 @@
  - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
  - [ir-monthly-bookings-report-filter](../../ir-monthly-bookings-report/ir-monthly-bookings-report-filter)
  - [ir-notifications](../../ir-notifications)
+ - [ir-otp-modal](../../ir-otp-modal)
  - [ir-pagination](../../ir-pagination)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-payment-folio](../../ir-booking-details/ir-payment-details/ir-payment-folio)
@@ -262,6 +263,7 @@ graph TD;
   ir-monthly-bookings-report --> ir-custom-button
   ir-monthly-bookings-report-filter --> ir-custom-button
   ir-notifications --> ir-custom-button
+  ir-otp-modal --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-payment-details --> ir-custom-button
   ir-payment-folio --> ir-custom-button

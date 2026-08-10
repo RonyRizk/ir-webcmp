@@ -33,12 +33,13 @@ graph TD;
   ir-booking-email-logs --> ir-input-text
   ir-booking-email-logs --> ir-button
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
+  ir-button --> ir-icons
   ir-secure-tasks --> ir-booking-email-logs
   style ir-booking-email-logs fill:#f9f,stroke:#333,stroke-width:4px
 ```

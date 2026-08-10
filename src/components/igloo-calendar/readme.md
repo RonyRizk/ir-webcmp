@@ -90,10 +90,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
   igl-to-be-assigned --> ir-spinner
@@ -132,6 +132,7 @@ graph TD;
   igl-split-booking --> ir-radio
   igl-split-booking --> ir-select
   ir-title --> ir-icon
+  ir-button --> ir-icons
   igl-rate-extender-drawer --> ir-drawer
   igl-rate-extender-drawer --> igl-rate-extender-form
   igl-rate-extender-drawer --> ir-custom-button

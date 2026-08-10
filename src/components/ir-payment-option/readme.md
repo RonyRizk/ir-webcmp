@@ -46,9 +46,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
+  ir-otp-modal --> ir-custom-button
   ir-button --> ir-icons
   ir-sidebar --> ir-icon
   ir-option-details --> ir-title

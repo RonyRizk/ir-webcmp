@@ -71,7 +71,6 @@ Type: `Promise<void>`
  - [ir-login](../../ir-login)
  - [ir-modal](../ir-modal)
  - [ir-option-details](../../ir-payment-option/ir-option-details)
- - [ir-otp-modal](../../ir-otp-modal)
  - [ir-payment-action](../../ir-booking-details/ir-payment-details/ir-payment-actions/ir-payment-action)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-room-nights](../../igloo-calendar/ir-room-nights)
@@ -105,7 +104,6 @@ graph TD;
   ir-login --> ir-button
   ir-modal --> ir-button
   ir-option-details --> ir-button
-  ir-otp-modal --> ir-button
   ir-payment-action --> ir-button
   ir-payment-option --> ir-button
   ir-room-nights --> ir-button

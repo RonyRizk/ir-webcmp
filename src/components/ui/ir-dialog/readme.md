@@ -77,6 +77,7 @@ Type: `Promise<void>`
  - [ir-hk-staff-tasks](../../ir-housekeeping/ir-hk-staff-tasks)
  - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-hold-transaction-dialog](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table/ir-hold-transaction-dialog)
+ - [ir-otp-modal](../../ir-otp-modal)
  - [ir-payment-details](../../ir-booking-details/ir-payment-details)
  - [ir-preview-screen-dialog](../../ir-preview-screen-dialog)
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
@@ -114,6 +115,7 @@ graph TD;
   ir-hk-staff-tasks --> ir-dialog
   ir-hk-tasks --> ir-dialog
   ir-hold-transaction-dialog --> ir-dialog
+  ir-otp-modal --> ir-dialog
   ir-payment-details --> ir-dialog
   ir-preview-screen-dialog --> ir-dialog
   ir-property-switcher --> ir-dialog

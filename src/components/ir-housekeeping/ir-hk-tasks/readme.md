@@ -52,10 +52,10 @@ graph TD;
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
   ir-interceptor --> ir-otp-modal
+  ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
-  ir-otp-modal --> ir-button
-  ir-button --> ir-icons
+  ir-otp-modal --> ir-custom-button
   ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
   ir-filter-card --> ir-custom-button
@@ -69,6 +69,7 @@ graph TD;
   ir-tasks-card --> ir-custom-button
   ir-tasks-table-pagination --> ir-button
   ir-tasks-table-pagination --> ir-pagination
+  ir-button --> ir-icons
   ir-pagination --> ir-custom-button
   ir-hk-archive-drawer --> ir-drawer
   ir-hk-archive-drawer --> ir-date-range-filter
