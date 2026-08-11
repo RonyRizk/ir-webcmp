@@ -3,7 +3,7 @@ import { Component, Event, EventEmitter, h, Host, Prop, State, Watch } from '@st
 @Component({
   tag: 'ir-otp',
   styleUrl: 'ir-otp.css',
-  scoped: true,
+  shadow: true,
 })
 export class IrOtp {
   /**

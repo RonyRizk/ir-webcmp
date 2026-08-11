@@ -8,7 +8,7 @@ import { z } from 'zod';
 @Component({
   tag: 'ir-otp-modal',
   styleUrl: 'ir-otp-modal.css',
-  scoped: false,
+  shadow: true,
 })
 export class IrOtpModal {
   @Prop() language: string = 'en';
@@ -243,7 +243,7 @@ export class IrOtpModal {
                 )}
               </section>
 
-              <div slot="footer" class="otp-modal-footer">
+              <div slot="footer" class="ir-dialog__footer">
                 <ir-custom-button variant="neutral" appearance="filled" size="m" onClickHandler={() => this.handleCancelClicked()}>
                   {locales.entries.Lcz_Cancel}
                 </ir-custom-button>

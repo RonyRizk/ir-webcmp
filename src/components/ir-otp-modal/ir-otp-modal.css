@@ -1,5 +1,10 @@
+
 :host {
   display: block;
+  box-sizing: border-box;
+}
+:host(*){
+    box-sizing: border-box;
 }
 .otp-modal {
   --ir-dialog-width: fit-content;
@@ -11,52 +16,54 @@
   border-bottom: 0;
 }
 .otp-modal-title {
-  margin-bottom: 0;
-  line-height: 1.45;
-  font-family: var(--wa-font-family-heading);
-  font-weight: var(--wa-font-weight-heading);
-  line-height: var(--wa-line-height-condensed);
-  text-wrap: balance;
+  margin: 0;
+  font-family: var(--wa-font-family-heading) !important;
+  font-weight: var(--wa-font-weight-heading) !important;
+  line-height: var(--wa-line-height-condensed) !important;
+  text-wrap: balance !important;
+  font-size: var(--wa-font-size-l);
 }
 .otp-modal-body {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /*align-items: center;*/
   max-height: 100%;
 }
 .verification-message {
+  font-size: var(--wa-font-size-m);
   max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin: 0;
+  text-align: flex-start;
+  padding-bottom: 1rem;
+
 }
 .otp-error {
   margin: 0.25rem 0 0;
   padding: 0;
   font-size: 0.875em;
-  color: #dc3545;
+  color: var(--wa-color-danger-fill-loud);
 }
 .otp-resend-timer {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   font-size: 0.875em;
 }
 .otp-resend-btn {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: var(--wa-font-size-s);
 }
 .otp-modal-footer {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
   width: 100%;
   border-top: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
 }
-.otp-modal-footer ir-custom-button {
-  display: block;
-  width: 100%;
-}
-.otp-modal-footer ir-custom-button::part(base) {
-  width: 100%;
-}
+
 .modal-loading-container {
   display: flex;
   align-items: center;
@@ -65,13 +72,6 @@
   width: 80vw;
 }
 @media (min-width: 768px) {
-  .otp-modal-footer {
-    flex-direction: row;
-    align-items: center;
-  }
-  .otp-modal-footer ir-custom-button {
-    flex: 1 1 0;
-  }
   .modal-loading-container {
     width: 380px;
   }
