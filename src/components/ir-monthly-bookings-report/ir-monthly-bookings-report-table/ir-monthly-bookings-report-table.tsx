@@ -20,7 +20,8 @@ export class IrMonthlyBookingsReportTable {
               <tr>
                 <th class="text-center">Date</th>
                 <th class="text-center">Units booked</th>
-                <th class="text-center">Total guests</th>
+                <th class="text-center">Adults</th>
+                <th class="text-center">Children</th>
                 <th class="text-right">
                   <ir-tooltip customSlot message="Average Daily Rate" alignment="end">
                     <span slot="tooltip-trigger">ADR</span>
@@ -33,7 +34,7 @@ export class IrMonthlyBookingsReportTable {
             <tbody>
               {this.reports.length === 0 && (
                 <tr>
-                  <td colSpan={6} class="empty-row">
+                  <td colSpan={7} class="empty-row">
                     <ir-empty-state message="No data found"></ir-empty-state>
                   </td>
                 </tr>
@@ -54,8 +55,14 @@ export class IrMonthlyBookingsReportTable {
                     </td>
                     <td class="text-center">
                       <div class="cell-stack">
-                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{report.total_guests}</p>
-                        {report.last_year?.total_guests > 0 && <p class="value--previous">{report.last_year?.total_guests}</p>}
+                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{report.adults}</p>
+                        {report.last_year?.total_guests > 0 && <p class="value--previous">{report.last_year?.adults}</p>}
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <div class="cell-stack">
+                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{report.children}</p>
+                        {report.last_year?.total_guests > 0 && <p class="value--previous">{report.last_year?.children}</p>}
                       </div>
                     </td>
                     <td class="text-right">
@@ -90,7 +97,7 @@ export class IrMonthlyBookingsReportTable {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={5}></td>
+                <td colSpan={6}></td>
                 <td class="legend-cell">
                   <div class="legend-row">
                     <div class="legend-item">

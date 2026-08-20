@@ -106,6 +106,8 @@ export class IrMonthlyBookingsReport {
     try {
       const getReportObj = (report: DailyStat): DailyReport => {
         return {
+          adults: report.Adults,
+          children: report.Children,
           day: report.Date,
           units_booked: report.Units_booked,
           occupancy_percent: report.Occupancy,

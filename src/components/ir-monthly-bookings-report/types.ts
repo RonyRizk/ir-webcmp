@@ -9,6 +9,8 @@ export type BaseDailyReport = {
   units_booked: number;
   adr: number;
   rooms_revenue: number;
+  adults: number;
+  children: number;
   total_guests: number;
 };
 export type DailyReport = BaseDailyReport & {
