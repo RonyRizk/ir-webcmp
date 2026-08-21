@@ -39,9 +39,9 @@
   .report-content-row {
     flex-direction: row;
   }
-  .filters-card {
+  /* .filters-card {
     max-width: 300px;
-  }
+  } */
 }
 
 .report-table-card {
