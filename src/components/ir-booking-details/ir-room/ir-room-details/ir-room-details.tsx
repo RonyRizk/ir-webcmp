@@ -100,14 +100,14 @@ export class IrRoomDetails {
         </div>
         {(this.includeDepartureTime || this.booking.is_direct) && (
           <div class="booking-room__departure-row">
-            {this.booking.is_direct && (
-              <div class="booking-room__time-item">
-                <span class="booking-room__departure-label">Expected arrival time:</span>
-                <ir-custom-button link appearance="plain" variant="brand" onClickHandler={() => this.openArrivalDialog.emit()}>
-                  {this.room.arrival_time?.description || 'Not provided'}
-                </ir-custom-button>
-              </div>
-            )}
+            {/* {this.booking.is_direct && ( */}
+            <div class="booking-room__time-item">
+              <span class="booking-room__departure-label">Expected arrival time:</span>
+              <ir-custom-button link appearance="plain" variant="brand" onClickHandler={() => this.openArrivalDialog.emit()}>
+                {this.room.arrival_time?.description || 'Not provided'}
+              </ir-custom-button>
+            </div>
+            {/* )} */}
             {this.includeDepartureTime && (
               <div class="booking-room__time-item">
                 <span class="booking-room__departure-label">Departure time:</span>
