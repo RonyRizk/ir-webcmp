@@ -14,12 +14,6 @@
   padding: 0.05rem 0.5rem;
   height: auto;
 }
-/* #region numeric alignment */
-.cell--align-end {
-  text-align: right !important;
-}
-/* #endregion */
-
 /* #region doc number */
 .stmt-table__doc-number {
   font-variant-numeric: tabular-nums;

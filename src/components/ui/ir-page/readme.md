@@ -19,6 +19,8 @@
 | --------------- | ----------- |
 | `"body"`        |             |
 | `"description"` |             |
+| `"header"`      |             |
+| `"main"`        |             |
 | `"title"`       |             |
 
 
@@ -30,6 +32,7 @@
  - [ir-city-ledger](../../ir-city-ledger)
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-dp-report](../../ir-dp-report)
+ - [ir-extra-services-settings](../../ir-extra-services-settings)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
  - [ir-gap-nights](../../ir-gap-nights)
  - [ir-housekeeping](../../ir-housekeeping)
@@ -40,6 +43,7 @@
  - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-test-cmp](../../ir-test-cmp)
  - [ir-unbookable-rooms](../../ir-unbookable-rooms)
+ - [ir-uninvoiced-bookings](../../ir-uninvoiced-bookings)
 
 ### Depends on
 
@@ -62,6 +66,7 @@ graph TD;
   ir-city-ledger --> ir-page
   ir-daily-revenue --> ir-page
   ir-dp-report --> ir-page
+  ir-extra-services-settings --> ir-page
   ir-fiscal-documents --> ir-page
   ir-gap-nights --> ir-page
   ir-housekeeping --> ir-page
@@ -72,6 +77,7 @@ graph TD;
   ir-tax-service-categories --> ir-page
   ir-test-cmp --> ir-page
   ir-unbookable-rooms --> ir-page
+  ir-uninvoiced-bookings --> ir-page
   style ir-page fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

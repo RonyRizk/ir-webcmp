@@ -1,0 +1,49 @@
+@import url('../../../common/table.css');
+
+:host {
+  display: block;
+}
+
+.uninvoiced-bookings-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+  background-color: var(--wa-color-surface-default, #fff);
+}
+
+.table--container {
+  overflow-x: auto;
+}
+.uninvoiced-bookings-table__booking-nbr-cell::part(booking-reference) {
+  display: none;
+}
+.uninvoiced-bookings__dates-cell::part(checkin-container) {
+  display: none;
+}
+.uninvoiced-bookings-table__pagination {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
+}
+
+.uninvoiced-bookings-table__booking-nbr-cell::part(container) {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+}
+.uninvoiced-bookings__services {
+  padding: 0;
+  margin: 0;
+}
+/*lg*/
+@media (min-width: 1024px) {
+  :host {
+    max-width: var(--max-screen-width);
+    margin-inline: auto;
+  }
+  .table--container {
+    min-width: var(--max-screen-width);
+  }
+}

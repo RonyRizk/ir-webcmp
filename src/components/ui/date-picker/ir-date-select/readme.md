@@ -88,8 +88,9 @@ Type: `Promise<void>`
 
  - [igl-bulk-block](../../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
  - [igl-bulk-stop-sale](../../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
- - [igl-cal-header](../../../igloo-calendar/igl-cal-header)
+ - [igl-cal-header-toolbar](../../../igloo-calendar/igl-cal-header/igl-cal-header-toolbar)
  - [ir-arrivals-filters](../../../ir-arrivals/ir-arrivals-filters)
+ - [ir-booking-editor-header](../../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-city-ledger-transaction-form](../../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form)
  - [ir-date-range-filter](../../ir-date-range-filter)
  - [ir-departures-filter](../../../ir-departures/ir-departures-filter)
@@ -111,8 +112,9 @@ graph TD;
   ir-date-select --> ir-air-date-picker
   igl-bulk-block --> ir-date-select
   igl-bulk-stop-sale --> ir-date-select
-  igl-cal-header --> ir-date-select
+  igl-cal-header-toolbar --> ir-date-select
   ir-arrivals-filters --> ir-date-select
+  ir-booking-editor-header --> ir-date-select
   ir-city-ledger-transaction-form --> ir-date-select
   ir-date-range-filter --> ir-date-select
   ir-departures-filter --> ir-date-select

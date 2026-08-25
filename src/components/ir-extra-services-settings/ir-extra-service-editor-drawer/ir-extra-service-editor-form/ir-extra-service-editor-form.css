@@ -1,0 +1,36 @@
+.extra-service-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.extra-service-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.extra-service-form__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.extra-service-form__day-use {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--wa-color-neutral-border-quiet, #abaeb9);
+  border-radius: 0.5rem;
+}
+
+.extra-service-form__day-use-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.extra-service-form__day-use-times > * {
+  flex: 1 1 10rem;
+}

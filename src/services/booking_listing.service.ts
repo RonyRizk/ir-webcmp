@@ -1,9 +1,10 @@
+import { IExposedBookingsCriteria } from '@/models/IrBookingListing';
 import booking_listing, { ExposedBookingsParams, initializeUserSelection } from '@/stores/booking_listing.store';
 import { extras, isPrivilegedUser } from '@/utils/utils';
 import axios from 'axios';
 
 export class BookingListingService {
-  public async getExposedBookingsCriteria(property_id: number) {
+  public async getExposedBookingsCriteria(property_id: number): Promise<IExposedBookingsCriteria> {
     const { data } = await axios.post(`/Get_Exposed_Bookings_Criteria`, {
       property_id,
     });
@@ -14,6 +15,7 @@ export class BookingListingService {
     booking_listing.types = result.types;
     booking_listing.balance_filter = result.balance_filter;
     initializeUserSelection();
+    return result;
   }
 
   public async getExposedBookings(params: ExposedBookingsParams, options?: { append?: boolean; skipStore?: boolean }) {

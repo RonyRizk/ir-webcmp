@@ -43,7 +43,7 @@ export class IrBookingListingTable {
     const sumOfOccupancy = ({ adult_nbr, children_nbr, infant_nbr }: Occupancy) => {
       return (adult_nbr ?? 0) + (children_nbr ?? 0) + (infant_nbr ?? 0);
     };
-    return booking.rooms.reduce((prev, cur) => {
+    return booking.rooms?.reduce((prev, cur) => {
       return sumOfOccupancy(cur.occupancy) + prev;
     }, 0);
   }

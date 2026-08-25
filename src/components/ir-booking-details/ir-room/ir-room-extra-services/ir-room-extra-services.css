@@ -1,0 +1,132 @@
+.booking-room__extra-services {
+  margin-top: 0.5rem;
+}
+.booking-room__extra-services {
+  margin-inline-start: calc(1.25rem + var(--wa-space-sm, 0.5rem));
+}
+.booking-room__extra-services wa-divider {
+  border-color: var(--wa-color-neutral-fill-loud);
+  margin-block: 0.35rem;
+}
+.booking-room__extra-services::part(body) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1em;
+}
+.booking-room__extra-services::part(header) {
+  padding-inline: 1em;
+  border-width: 0;
+  padding-bottom: 0;
+}
+.booking-room__extra-services-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wa-space-xs, 0.25rem);
+}
+.booking-room__extra-services-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.booking-room__extra-services-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 50%;
+  background: var(--wa-color-brand-fill-quiet, #eff6ff);
+  color: var(--wa-color-brand-fill-loud, var(--wa-color-brand-600));
+}
+.booking-room__extra-services-icon wa-icon {
+  font-size: 0.8rem;
+}
+.booking-room__extra-services-title {
+  font-size: var(--wa-font-size-m, 1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--wa-color-neutral-900, #18181b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.booking-room__extra-services-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  font-size: var(--wa-font-size-2xs, 0.7rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--wa-color-brand-on-loud, #fff);
+  background: var(--wa-color-brand-fill-loud, var(--wa-color-brand-600));
+}
+.booking-room__extra-services-add::part(base) {
+  transition: background-color var(--wa-transition-fast, 100ms) var(--wa-transition-easing);
+}
+.booking-room__extra-services-pinned,
+.booking-room__extra-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.booking-room__extra-services-details,
+.booking-room__extra-services-details::part(base) {
+  background: transparent;
+  border: none;
+}
+.booking-room__extra-services-details::part(header) {
+  min-height: auto;
+  padding: 0.125rem 0;
+  border-radius: 0;
+}
+.booking-room__extra-services-details::part(content) {
+  padding: 0.5rem 0 0;
+}
+.booking-room__extra-services-details::part(base) {
+  --wa-transition-duration: var(--wa-transition-normal, 200ms);
+}
+.booking-room__extra-services-toggle-label {
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--wa-color-brand-fill-loud, var(--wa-color-brand-600));
+}
+.booking-room__extra-services-group {
+  padding-left: 0.625rem;
+  border-left: 3px solid transparent;
+}
+.booking-room__extra-services-group--guest {
+  border-left-color: var(--wa-color-neutral-300, #d4d4d8);
+}
+.booking-room__extra-services-group--agent {
+  border-left-color: var(--wa-color-brand-fill-loud, #3b82f6);
+}
+.booking-room__extra-services-group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: var(--wa-font-size-2xs, 0.7rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--wa-color-neutral-500, #71717a);
+}
+.booking-room__extra-services-group-label--agent {
+  color: var(--wa-color-primary-600, #2563eb);
+}
+.booking-room__extra-services-empty {
+  margin: 0;
+  padding: 0.375rem 0;
+  font-size: var(--wa-font-size-xs, 0.85rem);
+  color: var(--wa-color-neutral-400, #a1a1aa);
+  font-style: italic;
+}

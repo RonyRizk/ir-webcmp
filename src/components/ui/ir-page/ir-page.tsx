@@ -13,8 +13,8 @@ export class IrPage {
       <Host>
         <ir-interceptor></ir-interceptor>
         <ir-toast></ir-toast>
-        <main class="ir-page__container">
-          <header class="tax-page__header">
+        <main part="main" class="ir-page__container">
+          <header part="header" class="tax-page__header">
             <slot name="heading">
               <div class="tax-page__heading">
                 <h3 part="title" class="page-title">

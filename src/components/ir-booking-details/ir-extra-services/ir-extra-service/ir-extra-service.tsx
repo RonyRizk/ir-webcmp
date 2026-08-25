@@ -5,7 +5,8 @@ import locales from '@/stores/locales.store';
 import moment from 'moment';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { isAgentMode } from '../../functions';
+import { _formatTime, isAgentMode } from '../../functions';
+import calendar_data from '@/stores/calendar-data';
 import { IEntries } from '@/models/property';
 import { Agent } from '@/services/agents/type';
 import type { ClTx } from '@/services/city-ledger/types';
@@ -66,12 +67,24 @@ export class IrExtraService {
     }
   }
 
+  private get category(): IEntries | undefined {
+    return this.svcCategories?.find(c => c.CODE_NAME === this.service?.category?.code);
+  }
+
+  private get categoryLabel(): string | null {
+    const category = this.category;
+    return category ? getEntryValue({ entry: category, language: this.language }) : null;
+  }
+
   private get description() {
-    const category = this.svcCategories?.find(c => c.CODE_NAME === this.service?.category?.code);
-    if (category) {
+    const categoryLabel = this.categoryLabel;
+    if (categoryLabel) {
       return (
         <span>
-          <span>{getEntryValue({ entry: category, language: this.language })}: </span>
+          <span>
+            {categoryLabel}
+            {this.service.description ? ':' : ''}{' '}
+          </span>
           {this.service.description}
         </span>
       );
@@ -83,27 +96,56 @@ export class IrExtraService {
     return this.clTransactions.find(tx => tx.REL_ENTITY_KEY === this.service.system_id) ?? null;
   }
 
+  private get linkedUnitName(): string | null {
+    if (this.service?.pr_id == null) {
+      return null;
+    }
+    for (const roomtype of calendar_data.property?.roomtypes ?? []) {
+      const physicalRoom = (roomtype.physicalrooms ?? []).find((pr: { id: number; name: string }) => pr.id === this.service.pr_id);
+      if (physicalRoom) {
+        return physicalRoom.name;
+      }
+    }
+    return null;
+  }
+  /**
+   * Opens the existing day-use reservation's details drawer — same `showBookingPopup`/`EDIT_BOOKING`
+   * path `igl-booking-event-hover`'s "Edit booking" action uses, so `igloo-calendar.tsx`'s existing
+   * `editBookingItem` wiring picks it up without any new plumbing.
+   */
+  private formatDayUseTime(time: string): string {
+    const [hour, minute] = time.split(':');
+    return _formatTime(hour, minute);
+  }
   render() {
     const agentMode = isAgentMode(this.agent);
     const tx = this.matchedTx;
     const statusTag = tx ? <ir-cl-status-tag transaction={{ _rowId: '', ...mapClTxToFolioRow(tx), balance: 0 }} size="extra-small"></ir-cl-status-tag> : null;
+    const unitName = this.linkedUnitName;
+    const hasMeta = !!(this.service.start_date || unitName || statusTag);
     return (
       <Host>
         <div class="es-row">
           <div class="es-content">
-            <p class="es-description">{this.description}</p>
-            {this.service.start_date ? (
-              <div class="es-date">
-                {/* <wa-icon name="calendar" style={{ fontSize: '0.75rem' }}></wa-icon> */}
-                {this.service.end_date ? (
-                  <ir-date-view from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
-                ) : (
-                  <span>{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')}</span>
-                )}
+            <p class="es-description">
+              {this.description}
+              {this.service.category.code === 'DUZ' && (
+                <span>
+                  : {this.formatDayUseTime(this.service.from_time)} – {this.formatDayUseTime(this.service.to_time)}
+                </span>
+              )}
+            </p>
+            {hasMeta && (
+              <div class="es-meta">
+                {this.service.start_date &&
+                  (this.service.end_date && this.service?.category?.code !== 'DUZ' ? (
+                    <ir-date-view class="es-meta-date" from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
+                  ) : (
+                    <span class="es-meta-date">{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')} </span>
+                  ))}
+                {unitName && <ir-unit-tag unit={unitName}></ir-unit-tag>}
                 {statusTag}
               </div>
-            ) : (
-              statusTag
             )}
           </div>
 
@@ -137,8 +179,16 @@ export class IrExtraService {
                 }
               }}
             >
-              <wa-button class="es-action-trigger" slot="trigger" size="s" appearance="plain" id={`actions-room-${this.service.system_id}`} variant="neutral">
-                <wa-icon class="es-action-trigger-icon" label="Actions" name="ellipsis-vertical"></wa-icon>
+              <wa-button
+                class="es-action-trigger"
+                slot="trigger"
+                size="s"
+                appearance="plain"
+                id={`extra-service-actions-${this.service.system_id}`}
+                variant="neutral"
+                aria-label="Service actions"
+              >
+                <wa-icon class="es-action-trigger-icon" name="ellipsis-vertical"></wa-icon>
               </wa-button>
               <wa-dropdown-item value="edit">Edit</wa-dropdown-item>
               {agentMode && <wa-dropdown-item value="toggle">Re-assign to {this.service.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}

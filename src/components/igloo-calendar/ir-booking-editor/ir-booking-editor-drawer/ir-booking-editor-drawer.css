@@ -4,3 +4,9 @@
 .booking-editor__drawer::part(dialog) {
   overflow: hidden;
 }
+.booking-editor__mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-inline-end: 1rem;
+}

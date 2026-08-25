@@ -5,6 +5,9 @@
   margin: 0;
   padding: 0;
 }
+.payments-container {
+  background-color: var(--wa-color-surface-default);
+}
 .payments-container::part(body) {
   padding: 0;
   padding-bottom: calc(1.5rem - var(--wa-space-s));

@@ -181,6 +181,19 @@ export class IrBookingEditorHeader {
     setBookingDraft({ dates: event.detail });
   }
 
+  private handleDayUseDateChange(date: moment.Moment | null): void {
+    if (!date) {
+      return;
+    }
+    resetAvailability();
+    setBookingDraft({
+      dates: {
+        checkIn: moment(date),
+        checkOut: moment(date).add(1, 'day'),
+      },
+    });
+  }
+
   private handleSourceChange(event: Event): void {
     this.stopEvent(event);
     resetAvailability();
@@ -268,6 +281,7 @@ export class IrBookingEditorHeader {
     const { sources } = booking_store.selects;
     const { adults, children } = booking_store.bookingDraft.occupancy;
     const { checkIn, checkOut } = booking_store.bookingDraft.dates;
+    const { dayUse } = booking_store.bookingDraft;
 
     return (
       <Host>
@@ -301,7 +315,7 @@ export class IrBookingEditorHeader {
           )}
 
           <div class="booking-editor-header__container">
-            {!this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM', 'SPLIT_BOOKING']) && (
+            {!this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM', 'SPLIT_BOOKING']) && !dayUse && (
               <wa-select
                 size="s"
                 placeholder={locales.entries.Lcz_Source}
@@ -313,27 +327,40 @@ export class IrBookingEditorHeader {
                 {sources.map(option => (option.type === 'LABEL' ? <small>{option.description}</small> : <wa-option value={option.id?.toString()}>{option.description}</wa-option>))}
               </wa-select>
             )}
-            <ir-validator
-              class="booking-editor__date-validator"
-              showErrorMessage
-              value={booking_store.bookingDraft.dates}
-              schema={this.datesSchema}
-              style={{ position: 'relative' }}
-            >
-              <ir-date-range
-                class="booking-editor__date-range"
-                defaultData={{
-                  fromDate: checkIn?.format('YYYY-MM-DD') ?? '',
-                  toDate: checkOut?.format('YYYY-MM-DD') ?? '',
-                }}
-                variant="booking"
-                withDateDifference
-                minDate={this.minDate}
-                maxDate={this.maxDate}
-                onDateRangeChange={this.handleDateRangeChange.bind(this)}
-              />
-            </ir-validator>
-            {!this.bookingEditorService.isEventType('EDIT_BOOKING') && (
+            {dayUse ? (
+              <ir-validator class="booking-editor__date-validator" showErrorMessage value={checkIn?.format('YYYY-MM-DD')} schema={z.string().min(1, 'Date is required')}>
+                <ir-date-select
+                  date={checkIn?.format('YYYY-MM-DD')}
+                  minDate={moment().format('YYYY-MM-DD')}
+                  emitEmptyDate={true}
+                  onDateChanged={e => this.handleDayUseDateChange(e.detail.start)}
+                >
+                  <wa-icon part="calendar-icon" slot="start" variant="regular" name="calendar"></wa-icon>
+                </ir-date-select>
+              </ir-validator>
+            ) : (
+              <ir-validator
+                class="booking-editor__date-validator"
+                showErrorMessage
+                value={booking_store.bookingDraft.dates}
+                schema={this.datesSchema}
+                style={{ position: 'relative' }}
+              >
+                <ir-date-range
+                  class="booking-editor__date-range"
+                  defaultData={{
+                    fromDate: checkIn?.format('YYYY-MM-DD') ?? '',
+                    toDate: checkOut?.format('YYYY-MM-DD') ?? '',
+                  }}
+                  variant="booking"
+                  withDateDifference
+                  minDate={this.minDate}
+                  maxDate={this.maxDate}
+                  onDateRangeChange={this.handleDateRangeChange.bind(this)}
+                />
+              </ir-validator>
+            )}
+            {!this.bookingEditorService.isEventType(['EDIT_BOOKING', 'EDIT_DAY_USE']) && (
               <Fragment>
                 <ir-validator value={adults} schema={this.adultsSchema}>
                   <wa-select

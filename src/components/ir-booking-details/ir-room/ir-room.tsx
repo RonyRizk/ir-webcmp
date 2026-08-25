@@ -1,20 +1,17 @@
-import { Component, h, Prop, EventEmitter, Event, Listen, State, Element, Host, Fragment, Watch } from '@stencil/core';
-import { _getDay, isAgentMode } from '../functions';
-import { Booking, IUnit, Occupancy, Room, SharedPerson } from '@/models/booking.dto';
+import { Component, h, Prop, EventEmitter, Event, Listen, State, Element, Host, Watch } from '@stencil/core';
+import { Booking, ExtraService, IUnit, Room, SharedPerson } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { formatName } from '@/utils/booking';
 import locales from '@/stores/locales.store';
-import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
-import { formatAmount } from '@/utils/utils';
 import { IEntries } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { OpenSidebarEvent, RoomGuestsPayload } from '../types';
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { ClTx } from '@/services/city-ledger/types';
-import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
-import { HbPreference } from '@/types/enums';
+import { IrRoomHeaderAction } from './ir-room-header/ir-room-header';
 export type RoomModalReason = 'delete' | 'checkin' | 'checkout' | null;
+
 @Component({
   tag: 'ir-room',
   styleUrl: 'ir-room.css',
@@ -39,6 +36,7 @@ export class IrRoom {
   @Prop() roomsInfo;
   @Prop() bedPreferences: IEntries[];
   @Prop() departureTime: IEntries[];
+  @Prop() arrivalTime: IEntries[];
   // Booleans Conditions
   @Prop() hasRoomEdit: boolean = false;
   @Prop() hasRoomDelete: boolean = false;
@@ -49,6 +47,9 @@ export class IrRoom {
 
   @Prop() clTransactions: ClTx[] = [];
 
+  /** `_SVC_CATEGORY` setup entries, used to label extra services in the room's extra-services section. */
+  @Prop() svcCategories: IEntries[] = [];
+
   @State() collapsed: boolean = true;
   @State() isLoading: boolean = false;
   @State() isToggling: boolean = false;
@@ -58,6 +59,8 @@ export class IrRoom {
   @State() isOpen: boolean = false;
   @State() isPricingDrawerOpen: boolean = false;
   @State() isHbDialogOpen: boolean = false;
+  @State() isDepartureDialogOpen: boolean = false;
+  @State() isArrivalDialogOpen: boolean = false;
 
   // Event Emitters
   @Event({ bubbles: true, composed: true }) deleteFinished: EventEmitter<string>;
@@ -67,6 +70,7 @@ export class IrRoom {
   @Event({ bubbles: true, composed: true }) editInitiated: EventEmitter<TIglBookPropertyPayload>;
   @Event() resetBookingEvt: EventEmitter<null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
+  @Event({ bubbles: true, composed: true }) addExtraServiceToUnit: EventEmitter<{ pr_id: number }>;
 
   private modal: HTMLIrDialogElement;
   private toggleDialogRef: HTMLIrAssignmentToggleDialogElement;
@@ -85,6 +89,25 @@ export class IrRoom {
       this.pressCheckIn.emit(this.room);
     } else if (target.id == 'checkout') {
       this.pressCheckOut.emit(this.room);
+    }
+  }
+
+  /**
+   * Early-check-in / late-checkout are managed exclusively through the arrival/departure time
+   * dialogs (price + time are set together there) — intercept edits on those categories and open
+   * the matching dialog instead of letting the generic extra-service edit panel handle them.
+   */
+  @Listen('editExtraService')
+  handleEditExtraService(e: CustomEvent<ExtraService>) {
+    const code = e.detail?.category?.code;
+    if (code === 'ECI') {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      this.isArrivalDialogOpen = true;
+    } else if (code === 'LCO') {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      this.isDepartureDialogOpen = true;
     }
   }
   @Watch('room')
@@ -256,73 +279,6 @@ export class IrRoom {
     }
   }
 
-  private async updateDepartureTime(code: string) {
-    try {
-      await this.bookingService.setDepartureTime({
-        property_id: this.property_id,
-        code,
-        room_identifier: this.room.identifier,
-      });
-      this.toast.emit({
-        type: 'success',
-        description: '',
-        title: 'Saved Successfully',
-        position: 'top-right',
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  private formatVariation({ infant_nbr, adult_nbr, children_nbr }: Occupancy) {
-    const adultCount = adult_nbr > 0 ? adult_nbr : 0;
-    const childCount = children_nbr > 0 ? children_nbr : 0;
-    const infantCount = infant_nbr > 0 ? infant_nbr : 0;
-
-    const adultLabel = adultCount > 1 ? locales.entries.Lcz_Adults.toLowerCase() : locales.entries.Lcz_Adult.toLowerCase();
-    const childLabel = childCount > 1 ? locales.entries.Lcz_Children.toLowerCase() : locales.entries.Lcz_Child.toLowerCase();
-    const infantLabel = infantCount > 1 ? locales.entries.Lcz_Infants.toLowerCase() : locales.entries.Lcz_Infant.toLowerCase();
-
-    const parts = [];
-    if (adultCount > 0) {
-      parts.push(`${adultCount} ${adultLabel}`);
-    }
-    if (childCount > 0) {
-      parts.push(`${childCount} ${childLabel}`);
-    }
-    if (infantCount > 0) {
-      parts.push(`${infantCount} ${infantLabel}`);
-    }
-
-    return parts.join('&nbsp&nbsp&nbsp&nbsp');
-  }
-  private getSmokingLabel() {
-    if (this.booking.is_direct) {
-      if (!this.room.smoking_option) {
-        return null;
-      }
-      const currRT = calendar_data.roomsInfo.find(rt => rt.id === this.room.roomtype.id);
-      if (currRT) {
-        const smoking_option = currRT['smoking_option']?.allowed_smoking_options;
-        if (smoking_option) {
-          return smoking_option.find(s => s.code === this.room.smoking_option)?.description;
-        }
-        return null;
-      }
-      return null;
-    }
-    return this.room.ota_meta?.smoking_preferences;
-  }
-
-  private getBedName() {
-    if (this.booking.is_direct) {
-      const bed = this.bedPreferences.find(p => p.CODE_NAME === this.room?.bed_preference?.toString());
-      if (!bed) {
-        return;
-      }
-      return bed[`CODE_VALUE_${this.language}`] ?? bed.CODE_VALUE_EN;
-    }
-    return this.room.ota_meta?.bed_preferences;
-  }
   private renderModalMessage() {
     switch (this.modalReason) {
       case 'delete':
@@ -361,16 +317,39 @@ export class IrRoom {
       },
     });
   }
-  private get isHalfBoard() {
-    return this.room?.rateplan?.meal_plan?.code === '003' && calendar_data.property.is_frontdesk_enabled;
+  private get unitId(): number | null {
+    return (this.room.unit as IUnit)?.id ?? null;
   }
 
-  private get acmTxByDate(): Map<string, ClTx> {
-    return new Map(this.clTransactions.filter(tx => tx.CATEGORY === 'ACM' && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
+  private handleAddExtraServiceToUnit() {
+    const pr_id = this.unitId;
+    if (!pr_id) {
+      return;
+    }
+    this.addExtraServiceToUnit.emit({ pr_id });
+  }
+
+  private handleHeaderAction(action: IrRoomHeaderAction) {
+    switch (action) {
+      case 'edit':
+        this.handleEditClick();
+        break;
+      case 'edit-rates':
+        this.isPricingDrawerOpen = true;
+        break;
+      case 'delete':
+        this.openModal('delete');
+        break;
+      case 'toggle':
+        this.toggleDialogRef.openModal();
+        break;
+      case 'add-extra-service':
+        this.handleAddExtraServiceToUnit();
+        break;
+    }
   }
 
   render() {
-    const bed = this.getBedName();
     return (
       <Host>
         <div class="booking-room__header-row">
@@ -383,323 +362,49 @@ export class IrRoom {
               class="booking-room_summary"
               style={{ width: '100%', cursor: 'default' }}
             >
-              <div class="booking-room__summary-row">
-                <p class="booking-room__summary-text">
-                  <span class="booking-room__summary-highlight">{this.myRoomTypeFoodCat || ''} </span> {this.mealCodeName}{' '}
-                  {this.room.rateplan.is_non_refundable && ` - ${locales.entries.Lcz_NonRefundable}`}{' '}
-                  {this.isHalfBoard && (
-                    <wa-button
-                      size="xs"
-                      class="booking-room__meal-report-button"
-                      appearance="filled"
-                      variant={this.room?.hb_preference ? 'brand' : 'warning'}
-                      onClick={() => (this.isHbDialogOpen = true)}
-                    >
-                      {this.room?.hb_preference === HbPreference.Lunch ? 'With lunch' : this.room?.hb_preference === HbPreference.Dinner ? 'With dinner' : 'Choose lunch or dinner'}
-                    </wa-button>
-                  )}
-                </p>
-
-                {/*this.room.My_Room_type.My_Room_type_desc[0].CUSTOM_TXT || ''*/}
-                <div class="booking-room__price-row">
-                  <span class="booking-room__price">{formatAmount(this.currency, this.room['gross_total'])}</span>
-
-                  {this.isEditable && (this.hasRoomEdit || this.hasRoomDelete) && (
-                    <div class="booking-room__actions">
-                      <wa-dropdown
-                        onwa-show={e => {
-                          e.stopImmediatePropagation();
-                          e.stopPropagation();
-                        }}
-                        onwa-hide={e => {
-                          e.stopImmediatePropagation();
-                          e.stopPropagation();
-                        }}
-                        onwa-select={async e => {
-                          switch ((e.detail as any).item.value) {
-                            case 'edit':
-                              this.handleEditClick();
-                              break;
-                            case 'edit-rates':
-                              this.isPricingDrawerOpen = true;
-                              break;
-                            case 'delete':
-                              this.openModal('delete');
-                              break;
-                            case 'toggle':
-                              this.toggleDialogRef.openModal();
-                              break;
-                          }
-                        }}
-                      >
-                        <ir-custom-button
-                          slot="trigger"
-                          size="s"
-                          class="booking-room__edit-button"
-                          appearance="plain"
-                          id={`actions-room-${this.room.identifier}`}
-                          iconBtn
-                          variant="neutral"
-                          style={{ marginBottom: '4px' }}
-                        >
-                          <wa-icon style={{ fontSize: '1rem' }} label="Actions" name="ellipsis-vertical"></wa-icon>
-                        </ir-custom-button>
-                        {this.hasRoomEdit && <wa-dropdown-item value="edit">Edit unit</wa-dropdown-item>}
-                        {this.hasRoomEdit && <wa-dropdown-item value="edit-rates">Edit nightly rates</wa-dropdown-item>}
-                        {isAgentMode(this.agent) && this.hasRoomEdit && <wa-dropdown-item value="toggle">Re-assign {this.room.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
-                        {this.hasRoomDelete && (
-                          <wa-dropdown-item value="delete" variant="danger">
-                            Delete
-                          </wa-dropdown-item>
-                        )}
-                      </wa-dropdown>
-                      {/* {this.hasRoomEdit && this.isEditable && (
-                      <Fragment>
-                        <wa-tooltip for={`edit-room-${this.room.identifier}`}>Edit {this.room.roomtype.name}</wa-tooltip>
-                        <ir-custom-button
-                          iconBtn
-                          id={`edit-room-${this.room.identifier}`}
-                          class="booking-room__edit-button"
-                          onClickHandler={this.handleEditClick.bind(this)}
-                          variant="neutral"
-                          size="s"
-                          appearance="plain"
-                        >
-                          <wa-icon label="Edit room" class="booking-room__edit-icon" name="edit" style={{ fontSize: '1rem' }}></wa-icon>
-                        </ir-custom-button>
-                      </Fragment>
-                    )} */}
-
-                      {/* {this.hasRoomDelete && this.isEditable && (
-                      <Fragment>
-                        <wa-tooltip for={`delete-room-${this.room.identifier}`}>Delete {this.room.roomtype.name}</wa-tooltip>
-                        <ir-custom-button
-                          iconBtn
-                          id={`delete-room-${this.room.identifier}`}
-                          class="booking-room__delete-button"
-                          onClickHandler={this.openModal.bind(this, 'delete')}
-                          variant="danger"
-                          size="s"
-                          appearance="plain"
-                        >
-                          <wa-icon label="Delete room" class="booking-room__delete-icon" name="trash-can" style={{ fontSize: '1rem' }}></wa-icon>
-                        </ir-custom-button>
-                      </Fragment>
-                    )} */}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div class="booking-room__dates-row">
-                <ir-date-view
-                  format={'ddd, MMM DD, YYYY'}
-                  class="booking-room__date-view"
-                  from_date={this.room.from_date}
-                  to_date={this.room.to_date}
-                  showDateDifference={false}
-                ></ir-date-view>
-                {!isSingleUnit(this.room.roomtype.id) && calendar_data.is_frontdesk_enabled && this.room.unit && (
-                  // <div class={'d-flex justify-content-center align-items-center'}>
-                  //   <ir-tooltip message={(this.room.unit as IUnit).name} customSlot>
-                  //     <span slot="tooltip-trigger" class={`light-blue-bg  ${this.hasCheckIn || this.hasCheckOut ? 'mr-2' : ''} `}>
-                  //       {(this.room.unit as IUnit).name}
-                  //     </span>
-                  //   </ir-tooltip>
-                  // </div>
-                  <ir-unit-tag unit={(this.room.unit as IUnit).name}></ir-unit-tag>
-                )}
-                {this.hasCheckIn && (
-                  <ir-custom-button onClickHandler={this.handleCheckIn.bind(this)} id="checkin" appearance="outlined" variant="brand">
-                    {locales.entries.Lcz_CheckIn}
-                  </ir-custom-button>
-                )}
-                {this.hasCheckOut && (
-                  <ir-custom-button
-                    appearance="outlined"
-                    variant="brand"
-                    onClickHandler={() => {
-                      this.modalReason = 'checkout';
-                    }}
-                    id="checkout"
-                  >
-                    {locales.entries.Lcz_CheckOut}
-                  </ir-custom-button>
-                )}
-              </div>
-              <div class="booking-room__guest-row">
-                <p class="booking-room__text-reset booking-room__guest-name">{`${this.mainGuest.first_name || ''} ${this.mainGuest.last_name || ''}`}</p>
-                {this.room.rateplan.selected_variation.adult_nbr > 0 &&
-                  (this.room.unit ? (
-                    <Fragment>
-                      <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>View guests</wa-tooltip>
-                      <ir-custom-button link onClickHandler={() => this.showGuestModal()} id={`view-guest-btn-${this.room.identifier}`} variant="brand" appearance="plain">
-                        <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
-                      </ir-custom-button>
-                    </Fragment>
-                  ) : (
-                    <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
-                  ))}
-                {bed && <p class="booking-room__text-reset booking-room__bed-info">({bed})</p>}
-              </div>
-              {this.includeDepartureTime && (
-                <div class="booking-room__departure-row">
-                  <p class="booking-room__text-reset booking-room__departure-label">Expected departure time:</p>
-                  {/* <ir-select
-                  selectedValue={this.room.departure_time?.code}
-                  showFirstOption={false}
-                  onSelectChange={e => {
-                    this.updateDepartureTime(e.detail);
-                  }}
-                  data={this.departureTime?.map(d => ({
-                    text: d[`CODE_VALUE_${this.language?.toUpperCase()}`] ?? d[`CODE_VALUE_EN`],
-                    value: d.CODE_NAME,
-                  }))}
-                ></ir-select> */}
-                  <wa-select
-                    onchange={e => {
-                      this.updateDepartureTime((e.target as any).value);
-                    }}
-                    style={{ width: '140px' }}
-                    size="s"
-                    placeholder="Not provided"
-                    value={this.room.departure_time?.code}
-                    defaultValue={this.room.departure_time?.code}
-                  >
-                    {this.departureTime?.map(dt => (
-                      <wa-option key={dt.CODE_NAME} value={dt.CODE_NAME}>
-                        {dt[`CODE_VALUE_${this.language?.toUpperCase()}`] ?? dt[`CODE_VALUE_EN`]}
-                      </wa-option>
-                    ))}
-                  </wa-select>
-                </div>
-              )}
+              <ir-room-header
+                room={this.room}
+                myRoomTypeFoodCat={this.myRoomTypeFoodCat}
+                mealCodeName={this.mealCodeName}
+                currency={this.currency}
+                isEditable={this.isEditable}
+                hasRoomEdit={this.hasRoomEdit}
+                hasRoomDelete={this.hasRoomDelete}
+                agent={this.agent}
+                onAction={e => this.handleHeaderAction(e.detail)}
+                onOpenHbDialog={() => (this.isHbDialogOpen = true)}
+              ></ir-room-header>
+              <ir-room-details
+                room={this.room}
+                booking={this.booking}
+                mainGuest={this.mainGuest}
+                bedPreferences={this.bedPreferences}
+                language={this.language}
+                includeDepartureTime={this.includeDepartureTime}
+                hasCheckIn={this.hasCheckIn}
+                hasCheckOut={this.hasCheckOut}
+                onCheckIn={() => this.handleCheckIn()}
+                onCheckOut={() => (this.modalReason = 'checkout')}
+                onViewGuests={() => this.showGuestModal()}
+                onOpenArrivalDialog={() => (this.isArrivalDialogOpen = true)}
+                onOpenDepartureDialog={() => (this.isDepartureDialogOpen = true)}
+              ></ir-room-details>
             </div>
 
-            {!this.collapsed && (
-              <div class="booking-room__details-container">
-                <div class="booking-room__breakdown-row">
-                  {/* <div class="booking-room__breakdown-label-wrapper">
-                    <p class="booking-room__breakdown-label">{`${locales.entries.Lcz_Breakdown}:`}</p>
-                  </div> */}
-                  <div class="booking-room__breakdown-table">
-                    <table>
-                      {this.room.days.length > 0 &&
-                        (() => {
-                          const acmTxByDate = this.acmTxByDate;
-                          return this.room.days.map(room => {
-                            const tx = acmTxByDate.get(room.date);
-                            return (
-                              <tr>
-                                <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">{_getDay(room.date)}</td>
-                                <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, room.amount)}</td>
-                                {room.cost > 0 && room.cost !== null && (
-                                  <td class="booking-room__cell booking-room__cell--left booking-room__cell--pad-left night-cost">{formatAmount(this.currency, room.cost)}</td>
-                                )}
-                                <td class="booking-room__cell booking-room__cell--pad-left">
-                                  {tx && <ir-cl-status-tag transaction={{ _rowId: '', ...mapClTxToFolioRow(tx), balance: 0 }} size="extra-small"></ir-cl-status-tag>}
-                                </td>
-                              </tr>
-                            );
-                          });
-                        })()}
-                      <tr class={''}>
-                        <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right subtotal_row">{locales.entries.Lcz_SubTotal}</th>
-                        <th class="booking-room__cell booking-room__cell--right subtotal_row">{formatAmount(this.currency, this.room.total)}</th>
-                        {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
-                          <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">{formatAmount(this.currency, this.room.cost)}</th>
-                        )}
-                      </tr>
-                      {this.booking.is_direct ? (
-                        <Fragment>
-                          {(() => {
-                            const filtered_data = calendar_data.taxes.filter(tx => tx.pct > 0 && tx.is_exlusive);
-                            return filtered_data.map(d => {
-                              const amount = d.is_exlusive
-                                ? // Tax is added on top
-                                  this.room.total * d.pct
-                                : // Tax is included in total → extract it
-                                  this.room.total - this.room.total / (1 + d.pct);
-
-                              return (
-                                <tr>
-                                  <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                    <span class={'booking-room__cell-tax-name'}>
-                                      {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
-                                    </span>
-                                  </td>
-                                  <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, amount / 100)}</td>
-                                  {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
-                                    <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">
-                                      {formatAmount(this.currency, (this.room.cost * d.pct) / 100)}
-                                    </td>
-                                  )}
-                                </tr>
-                              );
-                            });
-                          })()}
-                          {this.room.inclusive_taxes?.CALCULATED_INCLUSIVE_TAXES?.map(d => (
-                            <tr>
-                              <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                <span class={'booking-room__cell-tax-name'}>
-                                  {locales.entries.Lcz_Including} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
-                                </span>
-                              </td>
-                              <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, d.CALCULATED_VALUE)}</td>
-                              {/* {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
-                                <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">
-                                  {formatAmount(this.currency, (this.room.cost * d.pct) / 100)}
-                                </td>
-                              )} */}
-                            </tr>
-                          ))}
-                        </Fragment>
-                      ) : (
-                        <Fragment>
-                          {(() => {
-                            const filtered_data = this.room.ota_taxes.filter(tx => tx.amount > 0);
-                            return filtered_data.map(d => {
-                              return (
-                                <tr>
-                                  <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
-                                    <span class={'booking-room__cell-tax-name'}>
-                                      {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name}
-                                    </span>
-                                  </td>
-                                  <td class="booking-room__cell booking-room__cell--right">
-                                    {d.currency.symbol}
-                                    {d.amount}
-                                  </td>
-                                </tr>
-                              );
-                            });
-                          })()}
-                        </Fragment>
-                      )}
-                    </table>
-                  </div>
-                </div>
-                <ir-label labelText={`${locales.entries.Lcz_SmokingOptions}:`} display="inline" content={this.getSmokingLabel()}></ir-label>
-                {this.booking.is_direct && (
-                  <Fragment>
-                    {this.room.rateplan.cancelation && (
-                      <ir-label labelText={`${locales.entries.Lcz_Cancellation}:`} display="inline" content={this.room.rateplan.cancelation || ''} renderContentAsHtml></ir-label>
-                    )}
-                    {this.room.rateplan.guarantee && (
-                      <ir-label labelText={`${locales.entries.Lcz_Guarantee}:`} display="inline" content={this.room.rateplan.guarantee || ''} renderContentAsHtml></ir-label>
-                    )}
-                  </Fragment>
-                )}
-                {this.room.ota_meta && (
-                  <div>
-                    <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} display="inline" content={this.room.ota_meta.meal_plan}></ir-label>
-                    <ir-label labelText={`${locales.entries.Lcz_Policies}:`} display="inline" content={this.room.ota_meta.policies}></ir-label>
-                  </div>
-                )}
-                {/* {this.bookingEvent.is_direct && <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} content={this.mealCodeName}></ir-label>} */}
-              </div>
-            )}
+            {!this.collapsed && <ir-room-breakdown room={this.room} booking={this.booking} currency={this.currency} clTransactions={this.clTransactions}></ir-room-breakdown>}
           </div>
         </div>
+        <ir-room-extra-services
+          room={this.room}
+          booking={this.booking}
+          isEditable={this.isEditable}
+          agent={this.agent}
+          currency={this.currency}
+          language={this.language}
+          svcCategories={this.svcCategories}
+          clTransactions={this.clTransactions}
+          onRequestAddExtraService={() => this.handleAddExtraServiceToUnit()}
+        ></ir-room-extra-services>
         <ir-assignment-toggle-dialog ref={el => (this.toggleDialogRef = el)} loading={this.isToggling} onConfirmToggle={() => this.toggleRoomAgent()}>
           <span slot="message">
             Move {this.room.roomtype.name} {this.room.rateplan.short_name} {(this.room.unit as IUnit)?.name} to{' '}
@@ -780,6 +485,44 @@ export class IrRoom {
             }
           }}
         ></ir-hb-preference-dialog>
+        <ir-departure-time-dialog
+          room={this.room}
+          booking={this.booking}
+          open={this.isDepartureDialogOpen}
+          property_id={this.property_id}
+          departureTime={this.departureTime}
+          language={this.language}
+          booking_nbr={this.booking.booking_nbr}
+          currency_id={this.booking.currency.id}
+          currencySymbol={this.currency}
+          onDepartureTimeClose={(e: CustomEvent<{ saved: boolean }>) => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.isDepartureDialogOpen = false;
+            if (e.detail.saved) {
+              this.resetBookingEvt.emit(null);
+            }
+          }}
+        ></ir-departure-time-dialog>
+        <ir-arrival-time-dialog
+          room={this.room}
+          booking={this.booking}
+          open={this.isArrivalDialogOpen}
+          property_id={this.property_id}
+          arrivalTime={this.arrivalTime}
+          language={this.language}
+          booking_nbr={this.booking.booking_nbr}
+          currency_id={this.booking.currency.id}
+          currencySymbol={this.currency}
+          onArrivalTimeClose={(e: CustomEvent<{ saved: boolean }>) => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.isArrivalDialogOpen = false;
+            if (e.detail.saved) {
+              this.resetBookingEvt.emit(null);
+            }
+          }}
+        ></ir-arrival-time-dialog>
       </Host>
     );
   }

@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.extra-services-table__action {
+  display: flex;
+  min-width: 60px;
+  justify-content: flex-end;
+}
+
+.extra-services-table__muted {
+  font-size: 0.8125rem;
+  color: var(--wa-color-text-quiet, var(--wa-color-neutral-on-quiet));
+  white-space: normal !important;
+}

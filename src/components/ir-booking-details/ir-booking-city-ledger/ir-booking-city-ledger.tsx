@@ -169,7 +169,7 @@ export class IrBookingCityLedger {
     }
     return (
       <Host>
-        <wa-card class="booking-city-ledger__card">
+        <wa-card appearance="plain" class="booking-city-ledger__card">
           <div slot="header" class="booking-city-ledger__header-title">
             <p class="font-size-large p-0 m-0"> Agent Folio</p>
           </div>

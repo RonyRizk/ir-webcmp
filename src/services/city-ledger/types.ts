@@ -10,7 +10,7 @@ export const CategorySchema = z.string().nullable();
 /** Optional transaction category code. */
 export type Category = z.infer<typeof CategorySchema>;
 
-export const RelEntitySchema = z.enum(['TBL_BSAD', 'TBL_BSP']);
+export const RelEntitySchema = z.enum(['TBL_BSAD', 'TBL_BSP', 'TBL_BSE']);
 /** Related entity table name for a city-ledger record. */
 export type RelEntity = z.infer<typeof RelEntitySchema>;
 

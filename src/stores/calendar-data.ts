@@ -54,6 +54,7 @@ const initialState: CalendarStore = {
   is_automatic_check_in_out: false,
 };
 export const { state: calendar_data, onChange: onCalendarDatesChange } = createStore<CalendarStore>(initialState);
+
 export function isSingleUnit(id: number) {
   if (calendar_data.roomHistory[id]) {
     return calendar_data.roomHistory[id];
@@ -67,7 +68,8 @@ export function isSingleUnit(id: number) {
   calendar_data.roomHistory[id] = result;
   return result;
 }
-export const isOptimReadOnly = () => {
+
+export function isOptimReadOnly() {
   const optimIntegration = hasOptim();
 
   if (!optimIntegration) {
@@ -75,8 +77,18 @@ export const isOptimReadOnly = () => {
   }
 
   return optimIntegration.is_read_only;
-};
-export const hasOptim = () => {
+}
+
+export function hasOptim() {
   return calendar_data?.property?.linked_pms?.find(p => p.partner.code?.toUpperCase() === 'OPTIM');
-};
+}
+export function getExtraServiceDefaultPrice(serviceKey: string) {
+  return calendar_data?.property?.extra_info.find(ei => ei.key === `SVC_DEFAULT_PRICE_${serviceKey}`)?.value;
+}
+export function getDayUseBlockState(): '0' | '1' | undefined {
+  return calendar_data?.property?.extra_info.find(ei => ei.key === 'DAY_USE_BLOCK')?.value as '0' | '1' | undefined;
+}
+export function getBabyCotPricingModel(): string | undefined {
+  return calendar_data?.property?.extra_info.find(ei => ei.key === 'BABY_COT_PRICING_MODEL')?.value || 'Night';
+}
 export default calendar_data;

@@ -1,7 +1,9 @@
 :host {
   display: block;
 }
-
+.booking-rooms__card {
+  background-color: var(--wa-color-surface-default);
+}
 .booking-details__date-view-header {
   font-size: 1.1rem !important;
 }

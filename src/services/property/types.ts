@@ -1,5 +1,8 @@
 import moment from 'moment';
 import { z } from 'zod';
+import { BookingNumberSchema, DateSchema, PropertyIdSchema, TaxTypesSchema } from '../commonSchemas';
+import { Booking } from '@/models/booking.dto';
+import { BookingInvoiceInfo } from '@/components/ir-invoice/types';
 
 export type FetchedProperty = {
   A_NAME: string;
@@ -39,7 +42,7 @@ export interface MonthlyStatsResults {
   Total_Guests: number;
 }
 export const SetPropertyCalendarExtraParamsSchema = z.object({
-  property_id: z.number(),
+  property_id: PropertyIdSchema,
   value: z.string(),
 });
 export type SetPropertyCalendarExtraParams = z.infer<typeof SetPropertyCalendarExtraParamsSchema>;
@@ -64,7 +67,7 @@ export const AllowedPropertiesSchema = z.array(z.object({ id: z.number(), name: 
 export type AllowedProperties = z.infer<typeof AllowedPropertiesSchema>;
 
 export const SetRoomCalendarExtraParamsSchema = z.object({
-  property_id: z.number(),
+  property_id: PropertyIdSchema,
   room_identifier: z.string(),
   value: z.string(),
 });
@@ -76,7 +79,7 @@ export const FetchNotificationsResultSchema = z.array(z.object({ message: z.stri
 export type FetchNotificationsResult = z.infer<typeof FetchNotificationsResultSchema>;
 
 export const ExposedRectifierParamsSchema = z.object({
-  property_id: z.coerce.number(),
+  property_id: PropertyIdSchema,
   room_type_ids: z.array(z.number()).min(1),
   from: z.string().refine(date => {
     const _date = moment(date, 'YYYY-MM-DD');
@@ -96,7 +99,7 @@ export const ExposedRectifierParamsSchema = z.object({
 export type ExposedRectifierParams = z.infer<typeof ExposedRectifierParamsSchema>;
 
 export const FetchUnBookableRoomsSchema = z.object({
-  property_ids: z.array(z.number()),
+  property_ids: z.array(PropertyIdSchema),
   period_to_check: z.coerce.number(),
   consecutive_period: z.coerce.number(),
 });
@@ -138,35 +141,42 @@ export const TaxCategorySchema = z.object({
   category: CategorySchema,
   taxation_mode: CategorySchema,
   pct: z.number(),
+  default_price: z.number().nullable().optional(),
   property_id: z.number().optional(),
 });
 export type TaxCategory = z.infer<typeof TaxCategorySchema>;
 
 export const HandleExposedPropertyTaxCategoriesParamsSchema = z.object({
-  property_id: z.number(),
+  property_id: PropertyIdSchema,
   VAT_INCLUDED_CODE: z.string(),
   VAT_PC: z.number(),
   CITY_TAX_INCLUDED_CODE: z.string(),
   CITY_TAX_PCT: z.number(),
   SERVICE_CHARGE_INCLUDED_CODE: z.string(),
-  SERVICE_CHARGE_PCT: z.number(),
+  BABY_COT_PRICING_MODEL: z.string(),
+  SERVICE_CHARGE_PCT: z.number().optional(),
   tax_categories: z.array(TaxCategorySchema),
   TAXATION_STRATEGY: z.string(),
+  DAY_USE_BLOCK: z
+    .union([z.literal('0'), z.literal('1')])
+    .nullable()
+    .optional()
+    .default(null),
 });
 export type HandleExposedPropertyTaxCategoriesParams = z.infer<typeof HandleExposedPropertyTaxCategoriesParamsSchema>;
 export const SetPropertyGapConfigParamsSchema = z.object({
-  property_id: z.number(),
+  property_id: PropertyIdSchema,
   gap_rule_code: z.string(),
   gap_lookahead_days: z.number(),
 });
 
 export type SetPropertyGapConfigParams = z.infer<typeof SetPropertyGapConfigParamsSchema>;
 export const GetUnifiedFolioParamsSchema = z.object({
-  property_id: z.number().int(),
+  property_id: PropertyIdSchema,
 
-  from_date: z.string().date().nullable(),
+  from_date: DateSchema.nullable(),
 
-  to_date: z.string().date().nullable(),
+  to_date: DateSchema.nullable(),
 
   target_type: z.string().nullable(),
 
@@ -240,10 +250,59 @@ export interface GetUnifiedFolioResponse {
 }
 
 export const PrintGuestFolioDocParamsSchema = z.object({
-  property_id: z.number(),
-  booking_nbr: z.string(),
+  property_id: PropertyIdSchema,
+  booking_nbr: BookingNumberSchema,
   mode: z.string(),
   reference: z.string(),
   extras: z.string().optional(),
 });
 export type PrintGuestFolioDocParams = z.infer<typeof PrintGuestFolioDocParamsSchema>;
+
+export const GetExposedBookingsByInvoicedStatusParamsSchema = z.object({
+  property_id: PropertyIdSchema,
+  booking_nbr: BookingNumberSchema,
+  from_date: DateSchema,
+  to_date: DateSchema,
+  source: z.string().optional(),
+  is_totally_invoiced: z.boolean().optional().default(false),
+  start_row: z.number().default(0),
+  end_row: z.number(),
+});
+export type GetExposedBookingsByInvoicedStatusParams = z.infer<typeof GetExposedBookingsByInvoicedStatusParamsSchema>;
+
+export type ExposedBookingByInvoicedStatus = Booking & { invoice_info: BookingInvoiceInfo };
+
+export type GetExposedBookingsByInvoicedStatusResult = {
+  bookings: ExposedBookingByInvoicedStatus[];
+  total_count: number;
+};
+
+export const GetDayUseBookingsForCalendarParamsSchema = z.object({
+  property_id: PropertyIdSchema,
+  from_date: DateSchema,
+  to_date: DateSchema,
+});
+export type GetDayUseBookingsForCalendarParams = z.infer<typeof GetDayUseBookingsForCalendarParamsSchema>;
+
+export type DayUseBookings = {
+  bh_id: number;
+  book_nbr: string;
+  from_time: string;
+  gross_amount: number;
+  guest_first_name: string;
+  guest_last_name: string;
+  net_amount: number;
+  room_type_id: number;
+  service_price: number;
+  target_date: string;
+  tax_amount: number;
+  to_time: string;
+  unit_id: number;
+};
+
+export const CalculateNetAmountParamsSchema = z.object({
+  property_id: PropertyIdSchema,
+  amount: z.number(),
+  taxes_to_include: TaxTypesSchema,
+});
+export type CalculateNetAmountParams = z.infer<typeof CalculateNetAmountParamsSchema>;

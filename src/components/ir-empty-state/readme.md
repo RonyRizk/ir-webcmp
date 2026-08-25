@@ -24,6 +24,8 @@
 
 ### Used by
 
+ - [igl-day-use-bookings](../igloo-calendar/igl-day-use-bookings)
+ - [igl-day-use-unit-list](../igloo-calendar/ir-booking-editor/igl-day-use-unit-list)
  - [ir-agents-table](../ir-agents/ir-agents-table)
  - [ir-arrivals-table](../ir-arrivals/ir-arrivals-table)
  - [ir-booking-city-ledger](../ir-booking-details/ir-booking-city-ledger)
@@ -33,6 +35,8 @@
  - [ir-dp-report-chart](../ir-dp-report/ir-dp-report-chart)
  - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
  - [ir-extra-services](../ir-booking-details/ir-extra-services)
+ - [ir-extra-services-settings](../ir-extra-services-settings)
+ - [ir-extra-services-table](../ir-extra-services-settings/ir-extra-services-table)
  - [ir-guest-billing](../ir-billing/ir-guest-billing)
  - [ir-hk-archive-drawer](../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-invoice-form](../ir-invoice/ir-invoice-form)
@@ -47,10 +51,13 @@
  - [ir-revenue-table](../ir-daily-revenue/ir-revenue-table)
  - [ir-sales-by-channel-table](../ir-sales-by-channel/ir-sales-by-channel-table)
  - [ir-sales-table](../ir-sales-by-country/ir-sales-table)
+ - [ir-unvoiced-bookings-table](../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
 ```mermaid
 graph TD;
+  igl-day-use-bookings --> ir-empty-state
+  igl-day-use-unit-list --> ir-empty-state
   ir-agents-table --> ir-empty-state
   ir-arrivals-table --> ir-empty-state
   ir-booking-city-ledger --> ir-empty-state
@@ -60,6 +67,8 @@ graph TD;
   ir-dp-report-chart --> ir-empty-state
   ir-dp-report-table --> ir-empty-state
   ir-extra-services --> ir-empty-state
+  ir-extra-services-settings --> ir-empty-state
+  ir-extra-services-table --> ir-empty-state
   ir-guest-billing --> ir-empty-state
   ir-hk-archive-drawer --> ir-empty-state
   ir-invoice-form --> ir-empty-state
@@ -74,6 +83,7 @@ graph TD;
   ir-revenue-table --> ir-empty-state
   ir-sales-by-channel-table --> ir-empty-state
   ir-sales-table --> ir-empty-state
+  ir-unvoiced-bookings-table --> ir-empty-state
   style ir-empty-state fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

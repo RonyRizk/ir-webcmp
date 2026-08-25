@@ -80,7 +80,7 @@ export class IrPaymentsFolio {
   }
   render() {
     return (
-      <wa-card class=" payments-container">
+      <wa-card appearance="plain" class=" payments-container">
         <div slot="header" class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
           <p class="font-size-large p-0 m-0">Guest Folio</p>
           <HelpDocButton message="Help" href="https://help.igloorooms.com/extranet/booking-details/guest-folio" />

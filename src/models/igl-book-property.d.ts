@@ -4,7 +4,7 @@ export type TPropertyButtonsTypes = 'cancel' | 'save' | 'back' | 'book' | 'bookA
 export type TSourceOption = { id: string; value: string; tag: string; description: string; string; type: string; code: string };
 export type TSourceOptions = { id: string; value: string; tag: string; description: string; string; type: string; code: string };
 export type TAdultChildConstraints = { adult_max_nbr: number | null; child_max_nbr: number | null; child_max_age: number | null };
-export type TEventType = 'BLOCK_DATES' | 'SPLIT_BOOKING' | 'BAR_BOOKING' | 'ADD_ROOM' | 'EDIT_BOOKING' | 'PLUS_BOOKING';
+export type TEventType = 'BLOCK_DATES' | 'SPLIT_BOOKING' | 'BAR_BOOKING' | 'ADD_ROOM' | 'EDIT_BOOKING' | 'PLUS_BOOKING' | 'EDIT_DAY_USE';
 export type BookingSource = {
   code: string;
   description: string;
@@ -23,6 +23,8 @@ export interface IglBookPropertyPayload {
   TITLE: string;
   event_type: TEventType;
   defaultDateRange: IDefaultDateRange;
+  /** Opens the booking editor drawer with the day-use toggle pre-enabled. */
+  dayUse?: boolean;
 }
 
 export interface IDefaultDateRange {

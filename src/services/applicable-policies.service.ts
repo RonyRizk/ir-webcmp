@@ -81,7 +81,7 @@ export class ApplicablePoliciesService {
     try {
       const requests: Promise<GroupedPoliciesResponse>[] = [];
 
-      groupedRooms.forEach(grouping => {
+      groupedRooms?.forEach(grouping => {
         const basePayload = {
           booking_nbr,
           currency_id: currency.id,

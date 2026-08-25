@@ -172,6 +172,16 @@ export class IglLegend {
               </div>
               <p class="fd-legend__row-title">Housekeeping reported issue</p>
             </div>
+            <div class="fd-legend__row">
+              <div class={'fd-legend__shape'}>
+                <div class={'legend_rectangle'} style={{ background: 'var(--wa-color-success-fill-loud)', opacity: '0.6' }}></div>
+              </div>
+              <p class="fd-legend__row-title --day-use">
+                <span>Day use</span>
+                <div class={'legend_rectangle'} style={{ background: 'var(--wa-color-brand-fill-loud)', opacity: '0.6' }}></div>
+                <div class={'legend_rectangle'} style={{ background: 'rgb(160, 160, 160)', opacity: '0.6' }}></div>
+              </p>
+            </div>
             <wa-divider></wa-divider>
             <h5 class="fd-legend__section-title">Use custom colors</h5>
             {calendar_data.property.calendar_extra?.booking_colors.map((legendInfo, index) => {

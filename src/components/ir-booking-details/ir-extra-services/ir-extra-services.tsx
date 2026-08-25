@@ -18,22 +18,49 @@ export class IrExtraServices {
   @Prop() clTransactions: ClTx[] = [];
 
   private renderServiceList(services: Booking['extra_services']) {
-    return services.map((service, index) => (
+    return services.map((service, index) => {
+      if (service.room_identifier) {
+        return null;
+      }
+      return (
+        <Fragment>
+          <ir-extra-service
+            language={this.language}
+            svcCategories={this.svcCategories}
+            booking={this.booking}
+            bookingNumber={this.booking.booking_nbr}
+            currencySymbol={this.booking.currency.symbol}
+            key={service.booking_system_id}
+            service={service}
+            agent={this.agent}
+            clTransactions={this.clTransactions}
+          ></ir-extra-service>
+          {index !== services.length - 1 && <wa-divider></wa-divider>}
+        </Fragment>
+      );
+    });
+  }
+
+  private extraServicesHeaderActions() {
+    return this.booking.is_room_less ? (
+      <div slot="header-actions" class={'extra-services__header-actions'}>
+        <ir-custom-button id="room-add" size="s" appearance="outlined" variant="neutral">
+          <wa-icon name="plus" slot="start"></wa-icon>
+          Add stay
+        </ir-custom-button>
+        <ir-custom-button id="extra_service_btn" size="s" appearance="outlined" variant="neutral">
+          <wa-icon name="plus" slot="start"></wa-icon>
+          Add service
+        </ir-custom-button>
+      </div>
+    ) : (
       <Fragment>
-        <ir-extra-service
-          language={this.language}
-          svcCategories={this.svcCategories}
-          booking={this.booking}
-          bookingNumber={this.booking.booking_nbr}
-          currencySymbol={this.booking.currency.symbol}
-          key={service.booking_system_id}
-          service={service}
-          agent={this.agent}
-          clTransactions={this.clTransactions}
-        ></ir-extra-service>
-        {index !== services.length - 1 && <wa-divider></wa-divider>}
+        <wa-tooltip for="extra_service_btn">Add extra service</wa-tooltip>
+        <ir-custom-button slot="header-actions" id="extra_service_btn" size="s" appearance="plain" variant="neutral">
+          <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
+        </ir-custom-button>
       </Fragment>
-    ));
+    );
   }
 
   render() {
@@ -46,15 +73,12 @@ export class IrExtraServices {
 
       return (
         <Host>
-          <wa-card>
+          <wa-card appearance="plain" class="extra-service__card">
             <p slot="header" class={'font-size-large p-0 m-0'}>
               {locales.entries.Lcz_ExtraServices}
             </p>
-            <wa-tooltip for="extra_service_btn">Add extra service</wa-tooltip>
-            <ir-custom-button slot="header-actions" id="extra_service_btn" size="s" appearance="plain" variant="neutral">
-              <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
-            </ir-custom-button>
 
+            {this.extraServicesHeaderActions()}
             {services.length === 0 ? (
               <ir-empty-state showIcon={false}></ir-empty-state>
             ) : (
@@ -87,14 +111,12 @@ export class IrExtraServices {
 
     return (
       <Host>
-        <wa-card>
+        <wa-card appearance="plain" class="extra-service__card">
           <p slot="header" class={'font-size-large p-0 m-0 '}>
             {locales.entries.Lcz_ExtraServices}
           </p>
-          <wa-tooltip for="extra_service_btn">Add extra service</wa-tooltip>
-          <ir-custom-button slot="header-actions" id="extra_service_btn" size="s" appearance="plain" variant="neutral">
-            <wa-icon name="plus" style={{ fontSize: '1rem' }}></wa-icon>
-          </ir-custom-button>
+
+          {this.extraServicesHeaderActions()}
           {services.length === 0 && <ir-empty-state showIcon={false}></ir-empty-state>}
           {this.renderServiceList(services)}
         </wa-card>

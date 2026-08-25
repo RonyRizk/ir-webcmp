@@ -72,25 +72,36 @@ graph TD;
   ir-booking-editor --> ir-spinner
   ir-booking-editor --> ir-interceptor
   ir-booking-editor --> ir-booking-editor-header
+  ir-booking-editor --> igl-day-use-unit-list
   ir-booking-editor --> igl-room-type
   ir-booking-editor --> ir-booking-editor-form
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> ir-date-select
   ir-booking-editor-header --> ir-date-range
   ir-booking-editor-header --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-date-range --> ir-input
   ir-date-range --> ir-custom-date-range
+  igl-day-use-unit-list --> ir-empty-state
+  igl-day-use-unit-list --> ir-input
+  igl-day-use-unit-list --> ir-custom-button
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
   ir-booking-editor-form --> ir-date-view
+  ir-booking-editor-form --> ir-booking-editor-day-use
   ir-booking-editor-form --> igl-application-info
   ir-booking-editor-form --> ir-picker
   ir-booking-editor-form --> ir-picker-item
   ir-booking-editor-form --> ir-custom-button
   ir-booking-editor-form --> ir-booking-editor-guest-form
   ir-booking-editor-form --> ir-service-assignee-select
+  ir-booking-editor-day-use --> ir-unit-tag
+  ir-booking-editor-day-use --> ir-validator
+  ir-booking-editor-day-use --> ir-input
   igl-application-info --> ir-validator
   igl-application-info --> ir-input
   ir-booking-editor-guest-form --> ir-input

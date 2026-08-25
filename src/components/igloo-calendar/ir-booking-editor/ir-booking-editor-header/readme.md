@@ -7,14 +7,14 @@
 
 ## Properties
 
-| Property            | Attribute             | Description                                              | Type                                                                                 | Default          |
-| ------------------- | --------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------- |
-| `booking`           | --                    | Booking context used for edit, add-room, and split flows | `Booking`                                                                            | `undefined`      |
-| `checkIn`           | `check-in`            | Fixed check-in date (YYYY-MM-DD), if applicable          | `string`                                                                             | `undefined`      |
-| `checkOut`          | `check-out`           | Fixed check-out date (YYYY-MM-DD), if applicable         | `string`                                                                             | `undefined`      |
-| `isBlockConversion` | `is-block-conversion` |                                                          | `boolean`                                                                            | `undefined`      |
-| `isLoading`         | `is-loading`          |                                                          | `boolean`                                                                            | `undefined`      |
-| `mode`              | `mode`                | Controls header behavior and date constraints            | `"ADD_ROOM" \| "BAR_BOOKING" \| "EDIT_BOOKING" \| "PLUS_BOOKING" \| "SPLIT_BOOKING"` | `'PLUS_BOOKING'` |
+| Property            | Attribute             | Description                                              | Type                                                                                                   | Default          |
+| ------------------- | --------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| `booking`           | --                    | Booking context used for edit, add-room, and split flows | `Booking`                                                                                              | `undefined`      |
+| `checkIn`           | `check-in`            | Fixed check-in date (YYYY-MM-DD), if applicable          | `string`                                                                                               | `undefined`      |
+| `checkOut`          | `check-out`           | Fixed check-out date (YYYY-MM-DD), if applicable         | `string`                                                                                               | `undefined`      |
+| `isBlockConversion` | `is-block-conversion` |                                                          | `boolean`                                                                                              | `undefined`      |
+| `isLoading`         | `is-loading`          |                                                          | `boolean`                                                                                              | `undefined`      |
+| `mode`              | `mode`                | Controls header behavior and date constraints            | `"ADD_ROOM" \| "BAR_BOOKING" \| "EDIT_BOOKING" \| "EDIT_DAY_USE" \| "PLUS_BOOKING" \| "SPLIT_BOOKING"` | `'PLUS_BOOKING'` |
 
 
 ## Events
@@ -23,6 +23,13 @@
 | ------------------- | ----------- | ---------------------- |
 | `checkAvailability` |             | `CustomEvent<void>`    |
 | `guestSelected`     |             | `CustomEvent<Booking>` |
+
+
+## Shadow Parts
+
+| Part              | Description |
+| ----------------- | ----------- |
+| `"calendar-icon"` |             |
 
 
 ## Dependencies
@@ -36,6 +43,7 @@
 - [ir-validator](../../../ui/ir-validator)
 - [ir-picker](../../../ui/ir-picker)
 - [ir-picker-item](../../../ui/ir-picker/ir-picker-item)
+- [ir-date-select](../../../ui/date-picker/ir-date-select)
 - [ir-date-range](../../../ui/ir-date-range)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
@@ -45,8 +53,11 @@ graph TD;
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> ir-date-select
   ir-booking-editor-header --> ir-date-range
   ir-booking-editor-header --> ir-custom-button
+  ir-date-select --> ir-input
+  ir-date-select --> ir-air-date-picker
   ir-date-range --> ir-input
   ir-date-range --> ir-custom-date-range
   ir-booking-editor --> ir-booking-editor-header

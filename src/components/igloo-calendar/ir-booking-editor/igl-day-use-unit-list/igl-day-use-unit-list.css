@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.day-use-unit-list__grid {
+  display: grid;
+  grid-template-columns: minmax(50px, max-content) 200px 1fr;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  width: 100%;
+  animation: day-use-unit-list-in var(--wa-transition-normal, 180ms) ease-out both;
+}
+.day-use-unit-list__infos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+.day-use-unit-list__empty-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: day-use-unit-list-in var(--wa-transition-normal, 180ms) ease-out both;
+}
+
+@keyframes day-use-unit-list-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-use-unit-list__grid,
+  .day-use-unit-list__empty-container {
+    animation: none;
+  }
+}
+.day-use-unit-list__roomtype-name {
+  grid-column: 1 / -1;
+  margin: 1rem 0 0;
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
+  font-size: var(--wa-font-size-m);
+  margin-bottom: 0.5rem;
+}
+
+.day-use-unit-list__roomtype-name:first-child {
+  margin-top: 0;
+}
+
+/*
+ * One grid item per unit, spanning every column of the outer grid so its background
+ * reads as a single full-width bar instead of 3 separately-boxed cells. `subgrid` maps
+ * its own columns back onto the parent's tracks so price/button stay aligned across rows.
+ */
+.day-use-unit-list__row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+  min-height: var(--wa-form-control-height, 2.25rem);
+  border-radius: var(--wa-border-radius-m);
+  transition: background-color var(--wa-transition-fast, 120ms) ease;
+}
+
+.day-use-unit-list__row--current {
+  background-color: var(--wa-color-brand-fill-quiet);
+}
+
+.day-use-unit-list__unit-name {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  color: var(--wa-color-text-normal);
+  margin-inline-start: 1rem;
+}
+
+.day-use-unit-list__day-status-icon {
+  margin-inline-start: 0.25rem;
+  vertical-align: middle;
+  color: var(--wa-color-warning-fill-loud);
+}
+
+.day-use-unit-list__day-status-text {
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-warning-fill-loud);
+  white-space: nowrap;
+}
+
+.day-use-unit-list__price-input {
+  width: 100%;
+}
+
+.day-use-unit-list__book-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-self: start;
+}
+
+.day-use-unit-list__current-tag {
+  flex-shrink: 0;
+}

@@ -32,6 +32,7 @@
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-dp-report](../../ir-dp-report)
+ - [ir-uninvoiced-bookings](../../ir-uninvoiced-bookings)
 
 ### Depends on
 
@@ -57,6 +58,7 @@ graph TD;
   ir-booking-details --> ir-guest-info-drawer
   ir-booking-listing --> ir-guest-info-drawer
   ir-dp-report --> ir-guest-info-drawer
+  ir-uninvoiced-bookings --> ir-guest-info-drawer
   style ir-guest-info-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

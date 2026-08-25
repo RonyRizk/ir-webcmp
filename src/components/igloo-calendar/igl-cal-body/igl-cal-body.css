@@ -1,6 +1,20 @@
 :host {
   display: block;
   color: var(--wa-color-text-normal);
+
+  /* -----------------------------------------------------------------------
+     Day-use cell indicator — tunable knobs. Change values here; the rules
+     further down reference these variables so related sizes/colors stay in
+     sync automatically (e.g. the badge's corner offset is derived from its
+     own size below, not a second hardcoded number).
+     ----------------------------------------------------------------------- */
+  --day-use-badge-dot-size: 15px;
+  --day-use-badge-hit-size: 19px;
+  --day-use-badge-border-width: 1.5px;
+  --day-use-badge-ring-width: 1.5px;
+  --day-use-color-future: var(--wa-color-success-fill-loud, #2e7d32);
+  --day-use-color-staying: var(--wa-color-brand-fill-loud, #1976d2);
+  --day-use-color-past: rgb(160, 160, 160);
 }
 
 .bodyContainer {
@@ -125,6 +139,176 @@
 
 .selectedDay {
   background-color: #f9f9c9 !important;
+}
+
+/* =========================================================================
+   Day-use cell indicator — corner badge, color-coded by future/staying/past.
+   Sizes/colors are CSS variables set on :host at the top of this file —
+   adjust values there, the rules below just consume them.
+   ========================================================================= */
+
+.dayUseBooked {
+  /* Tint via color-mix, not the element's own `opacity` — opacity < 1 creates a new stacking
+     context on this cell, which traps the badge's z-index (a descendant) so it only ranks
+     against content inside this same cell. It becomes meaningless against the neighboring
+     cell's z-index: auto, which then wins purely by being later in DOM order — no z-index value
+     on the badge could ever fix that. color-mix produces the same translucent look without it. */
+  background-color: var(--day-use-color, var(--day-use-color-past)) !important;
+  background-color: color-mix(in srgb, var(--day-use-color, var(--day-use-color-past)) 60%, transparent) !important;
+}
+.dayUseBooked:hover {
+  /* Tint via color-mix, not the element's own `opacity` — opacity < 1 creates a new stacking
+     context on this cell, which traps the badge's z-index (a descendant) so it only ranks
+     against content inside this same cell. It becomes meaningless against the neighboring
+     cell's z-index: auto, which then wins purely by being later in DOM order — no z-index value
+     on the badge could ever fix that. color-mix produces the same translucent look without it. */
+  background-color: var(--day-use-color, var(--day-use-color-past)) !important;
+  background-color: color-mix(in srgb, var(--day-use-color, var(--day-use-color-past)) 80%, transparent) !important;
+}
+
+/* Not yet started (today before its start time, or a future date). */
+.dayUseBooked--future {
+  --day-use-color: var(--day-use-color-future);
+}
+
+/* Currently in its window (from_time ≤ now ≤ to_time, today). */
+.dayUseBooked--staying {
+  --day-use-color: var(--day-use-color-staying);
+}
+
+/* Window has ended. */
+.dayUseBooked--past {
+  --day-use-color: var(--day-use-color-past);
+}
+
+/* Centered on the cell's top-right corner point — sits at the edge, half outside the cell's own
+   box. That overlaps the neighboring cell to the right (same row, a later DOM sibling with its
+   own opaque background), so a high z-index is required to keep painting on top of it. */
+.dayUseBadge {
+  position: absolute;
+  inset-block-start: calc(var(--day-use-badge-hit-size) / -2);
+  inset-inline-end: calc(var(--day-use-badge-hit-size) / -2);
+  width: var(--day-use-badge-hit-size);
+  height: var(--day-use-badge-hit-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 100;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Hidden until the cell is hovered/focused — kept out of the way for cells you're not
+     looking at, cheap to reveal (opacity only) for the one you are. */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--wa-transition-fast, 150ms) ease-out;
+}
+
+.roomCell:hover .dayUseBadge,
+.roomCell:focus-within .dayUseBadge {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* No hover on touch — stay visible so it's not undiscoverable there. */
+@media (hover: none) {
+  .dayUseBadge {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.dayUseBadge__dot {
+  /* flex-shrink: 0 matters here — without it, if --day-use-badge-dot-size is ever set larger
+     than --day-use-badge-hit-size (its flex container), the browser's default flex-shrink
+     squishes only the width (the flex main axis) to fit, leaving height alone — silently turning
+     the "circle" into an ellipse instead of just overflowing the container, which is what we
+     actually want when the dot is deliberately bigger than the hit box. */
+  flex-shrink: 0;
+  width: var(--day-use-badge-dot-size);
+  height: var(--day-use-badge-dot-size);
+  border-radius: 50%;
+  z-index: 100;
+  /* inherited from the ancestor .dayUseBooked--future/--staying/--past */
+  background: var(--day-use-color, var(--day-use-color-past));
+  /* white ring for contrast against any cell background, plus a real drop shadow for depth */
+  box-shadow:
+    0 0 0 var(--day-use-badge-ring-width) var(--wa-color-surface-default, #fff),
+    0 1px 3px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--wa-transition-fast, 150ms) ease-out,
+    box-shadow var(--wa-transition-fast, 150ms) ease-out;
+}
+
+.dayUseBadge:hover .dayUseBadge__dot,
+.dayUseBadge:focus-visible .dayUseBadge__dot {
+  transform: scale(1.2);
+  box-shadow:
+    0 0 0 var(--day-use-badge-ring-width) var(--wa-color-surface-default, #fff),
+    0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.dayUseBadge:focus-visible {
+  outline: var(--wa-focus-ring, 2px solid var(--wa-color-danger-fill-loud));
+  outline-offset: 1px;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dayUseBadge__dot {
+    transition: none;
+  }
+}
+
+/* Day-use badge tooltip content — mirrors igl-day-use-bookings' booking row
+   (time, price, booking number, guest name) minus the unit tag, which is
+   redundant here since the badge already sits on that unit's cell. Text
+   colors are left unset so everything inherits the tooltip's own default
+   (--wa-tooltip-content-color), not a custom palette. */
+.dayUseTooltip__main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dayUseTooltip__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+  /* margin-block-start: 0.35rem; */
+}
+
+.dayUseTooltip__time {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+.dayUseTooltip__price {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  font-weight: var(--wa-font-weight-action, 600);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+.dayUseTooltip__number {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+.dayUseTooltip__guest {
+  flex: 1 1 auto;
+  text-align: end;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .categoryTitle {

@@ -1,0 +1,120 @@
+:host {
+  display: block;
+}
+
+.extra-services-settings__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-l);
+}
+
+.extra-services-settings__card {
+  background-color: var(--wa-color-surface-default, white);
+}
+
+.extra-services-settings__header {
+  display: flex;
+  align-items: center;
+  font-size: var(--wa-font-size-l);
+  gap: var(--wa-space-s);
+}
+
+.extra-services-settings__tax-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-3xs);
+  font-size: var(--wa-font-size-s);
+  font-weight: 400;
+  color: var(--wa-color-text-quiet);
+  padding-top: 0.25rem;
+}
+
+.extra-services-settings__tax-chip-label {
+  font-weight: 600;
+  color: var(--wa-color-text-normal);
+}
+
+/* ── Grid (mobile-first: stacked cards) ─────────────────── */
+
+.extra-services-grid__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  padding: var(--wa-space-m) 0;
+}
+
+.extra-services-grid__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-3xs);
+}
+
+.extra-services-grid__title {
+  font-size: var(--wa-font-size-m);
+  margin: 0;
+  padding: 0;
+}
+
+.extra-services-grid__hint {
+  margin: 0;
+  padding: 0;
+  font-size: var(--wa-font-size-xs);
+  color: var(--wa-color-text-quiet);
+}
+
+/* Groups the price input and Day Use block-night switch side by side on mobile. */
+.extra-services-grid__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--wa-space-m);
+}
+
+/* Collapse the empty block-night cell on non-Day-Use rows so it doesn't add stray gap on mobile. */
+.extra-services-grid__cell:empty {
+  display: none;
+}
+
+/* ── Grid (desktop: shared-column table layout) ──────────── */
+ir-extra-service-price-input,
+.extra-services-grid__cell {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .extra-services-grid {
+    display: grid;
+    /* name | tax-mode + price control | day-use block-night toggle.
+       max-content (not auto/fixed-length minmax) keeps each column sized to its content instead
+       of the track-sizing algorithm growing it into the grid container's leftover width. */
+    grid-template-columns: max-content max-content 1fr;
+    column-gap: var(--wa-space-xl);
+    align-items: center;
+  }
+
+  .extra-services-grid__row {
+    display: contents;
+  }
+
+  .extra-services-grid__controls {
+    display: contents;
+  }
+
+  .extra-services-grid__divider {
+    grid-column: 1 / -1;
+  }
+
+  .extra-services-grid__name,
+  .extra-services-grid__cell {
+    align-self: center;
+  }
+
+  .extra-services-grid__cell:empty {
+    display: block;
+  }
+  /* ir-extra-service-price-input::part(input) {
+    width: 22ch;
+  } */
+  ir-extra-service-price-input,
+  .extra-services-grid__cell {
+    width: 100%;
+  }
+}

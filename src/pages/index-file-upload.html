@@ -1,0 +1,20 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>File Upload</title>
+    <link rel="stylesheet" href="/build/ir-webcmp.css" />
+    <script type="module" src="/build/ir-webcmp.esm.js"></script>
+    <script nomodule src="/build/ir-webcmp.js"></script>
+  </head>
+
+  <body>
+    <main style="max-width: 640px; margin: 2rem auto; display: flex; flex-direction: column; gap: 2rem">
+      <ir-file-upload label="Select a file" hint="Up to 10 MB"></ir-file-upload>
+      <ir-file-upload label="Attachments" multiple accept="image/*,.pdf"></ir-file-upload>
+      <ir-file-upload label="Required upload" required size="s"></ir-file-upload>
+      <ir-file-upload label="Disabled" disabled></ir-file-upload>
+    </main>
+  </body>
+</html>

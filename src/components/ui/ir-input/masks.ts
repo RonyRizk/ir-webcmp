@@ -58,7 +58,7 @@ export const masks = {
         placeholderChar: 'm',
       },
     },
-    lazy: false,
+    lazy: true,
     placeholderChar: '_',
   },
   date: {
@@ -93,3 +93,36 @@ export const masks = {
     },
   },
 } as const;
+
+function buildTimeToMask(minHour: number) {
+  return {
+    ...masks.time,
+    blocks: {
+      ...masks.time.blocks,
+      HH: {
+        ...masks.time.blocks.HH,
+        from: minHour,
+      },
+    },
+  };
+}
+
+/**
+ * "to" time mask for a from/to time pair — same shape as `masks.time`, but the hour block's
+ * lower bound is raised to `minHour` so the field can't accept an hour earlier than the paired
+ * "from" time. Cached per hour (0-23) so the same `minHour` always yields the same object
+ * reference — `ir-input` rebuilds its IMask instance whenever the `mask` prop reference changes,
+ * so a fresh object on every render would tear down/recreate the mask on every keystroke.
+ */
+const timeToMaskCache = new Map<number, ReturnType<typeof buildTimeToMask>>();
+
+export function createTimeToMask(minHour: number) {
+  const clampedMinHour = Math.min(Math.max(Math.trunc(minHour) || 0, 0), 23);
+  const cached = timeToMaskCache.get(clampedMinHour);
+  if (cached) {
+    return cached;
+  }
+  const mask = buildTimeToMask(clampedMinHour);
+  timeToMaskCache.set(clampedMinHour, mask);
+  return mask;
+}

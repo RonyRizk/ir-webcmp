@@ -8,9 +8,12 @@ import { type FolioRow } from '../types';
 import type { ICurrency } from '@/models/property';
 import { actionableClTypes } from '@/services/city-ledger.service';
 import { ClTxTypeCode } from '@/types/enums';
+import type { ServiceCategoryOption } from '../ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/ir-city-ledger-transaction-form.schema';
 
 const DATE_DISPLAY_FORMAT = 'MMM DD, YYYY';
 const DATE_INPUT_FORMAT = 'YYYY-MM-DD';
+/** `REL_ENTITY` of CL rows that came from a booking extra service. */
+const BOOKING_SERVICE_ENTITY = 'TBL_BSE';
 
 @Component({
   tag: 'ir-city-ledger-folio-table',
@@ -49,6 +52,8 @@ export class IrCityLedgerFolioTable {
   @Prop() hasFetched: boolean = false;
   @Prop() currencySymbol: string = '$';
   @Prop() currencies: ICurrency[] = [];
+  /** `_SVC_CATEGORY` setup entries, used to label extra-service descriptions. */
+  @Prop() serviceCategoryOptions: ServiceCategoryOption[] = [];
   @Prop() hideBalanceInfo: boolean = false;
 
   // ─── State ───────────────────────────────────────────────────────────────
@@ -176,7 +181,7 @@ export class IrCityLedgerFolioTable {
     }),
     this.columnHelper.accessor('description', {
       header: 'Description',
-      cell: info => <span class="folio-table__description">{info.getValue()}</span>,
+      cell: info => <span class="folio-table__description">{this.resolveRowDescription(info.row.original)}</span>,
       enableSorting: false,
       enableGrouping: true,
     }),
@@ -267,6 +272,45 @@ export class IrCityLedgerFolioTable {
       enableGrouping: false,
     }),
   ];
+
+  /**
+   * @param {string} description - Raw DESCRIPTION from the CL row.
+   * @param {Record<string, string>} svcCategory - _SVC_CATEGORY labels, keyed by code.
+   * @returns {string} Description with the category code replaced by its label.
+   */
+  private resolveServiceDescription(description: string, svcCategory: Record<string, string>): string {
+    if (!description) return description;
+
+    const separatorIndex = description.indexOf(':');
+    const code = (separatorIndex === -1 ? description : description.slice(0, separatorIndex)).trim();
+
+    const label = svcCategory?.[code];
+    if (!label) return description;
+
+    const rest = separatorIndex === -1 ? '' : description.slice(separatorIndex + 1).trim();
+    return rest ? `${label}: ${rest}` : label;
+  }
+
+  /** `_SVC_CATEGORY` labels keyed by code, rebuilt whenever the options prop changes. */
+  private get svcCategoryLabels(): Record<string, string> {
+    return (this.serviceCategoryOptions ?? []).reduce<Record<string, string>>((acc, option) => {
+      acc[option.id] = option.label;
+      return acc;
+    }, {});
+  }
+
+  /**
+   * Extra-service rows store their description as `CATEGORY_CODE: detail`, and this screen has no
+   * category grouping to spell the code out — so the label is inlined. Every other row renders the
+   * description as it came from the API.
+   *
+   * @param {FolioRow} row - Folio row being rendered.
+   * @returns {string} Description to display.
+   */
+  private resolveRowDescription(row: FolioRow): string {
+    if (row._raw?.REL_ENTITY !== BOOKING_SERVICE_ENTITY) return row.description;
+    return this.resolveServiceDescription(row.description, this.svcCategoryLabels);
+  }
 
   // ─── Table state ─────────────────────────────────────────────────────────
 

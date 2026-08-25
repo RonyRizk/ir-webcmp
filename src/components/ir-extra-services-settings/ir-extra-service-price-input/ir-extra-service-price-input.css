@@ -1,0 +1,10 @@
+@import url('../../../common/error.css');
+
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.ir-extra-service-price-input__price-wrapper {
+  flex: 1 1 0%;
+}

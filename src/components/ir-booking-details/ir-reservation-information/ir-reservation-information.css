@@ -1,14 +1,20 @@
 :host {
   display: block;
 }
-
+.reservation-information__card {
+  background-color: var(--wa-color-surface-default);
+}
 .reservation-information {
   display: flex;
   flex-direction: column;
   gap: 0.5rem !important;
   /* --ir-reservation-label-height: 32px; */
 }
-
+.reservation__info-guest-origins {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
 .reservation-information__property-name {
   margin: 0;
   font-weight: 600;

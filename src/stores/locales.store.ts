@@ -4,8 +4,7 @@ export interface ILocale {
   direction: 'ltr' | 'rtl';
 }
 export type TLocaleEntries =
-  | (LocalizationStrings & LocalizationChannelFrontEntries & BookingListingCodes & HousekeepingLocalizedWords & LocalizationPAYMENTBACK & UserManagementWords)
-  | null;
+  (LocalizationStrings & LocalizationChannelFrontEntries & BookingListingCodes & HousekeepingLocalizedWords & LocalizationPAYMENTBACK & UserManagementWords) | null;
 export type UserManagementWords = {
   Lcz_Active: string;
   Lcz_AreYouSureToDelete: string;
@@ -93,6 +92,7 @@ export type LocalizationStrings = {
   'Lcz_AreYouSureWantToMoveAnotherUnit': string;
   'Lcz_ArrivalDate': string;
   'Lcz_ArrivalTime': string;
+  'Lcz_GuestArrivingLaterToday': string;
   'Lcz_Assign': string;
   'Lcz_AssignedAndChecIn': string;
   'Lcz_AssignmentFor': string;
@@ -108,11 +108,13 @@ export type LocalizationStrings = {
   'Lcz_Blockdates': string;
   'Lcz_BlockDatesFor': string;
   'Lcz_BlockedTill': string;
+  'Lcz_BlockedDatesBetweenSelectedDates': string;
   'Lcz_Book': string;
   'Lcz_BookAndChekcIn': string;
   'Lcz_BookedBy': string;
   'Lcz_BookedOn': string;
   'Lcz_Booking': string;
+  'Lcz_BookingBetweenSelectedDates': string;
   'Lcz_BookingCancellation': string;
   'Lcz_BookingCode': string;
   'Lcz_BookingGuarantee': string;
@@ -161,6 +163,7 @@ export type LocalizationStrings = {
   'Lcz_Date': string;
   'Lcz_Dates': string;
   'Lcz_DatesOn': string;
+  'Lcz_DayUseBookingBetweenSelectedDates': string;
   'Lcz_Delete': string;
   'Lcz_Description': string;
   'Lcz_Designation': string;
@@ -308,6 +311,7 @@ export type LocalizationStrings = {
   'Lcz_Unassigned': string;
   'Lcz_UnassignedUnits': string;
   'Lcz_UnassignedUnitsTooltip': string;
+  'Lcz_UnavailableDatesBetweenSelectedDates': string;
   'Lcz_Unit': string;
   'Lcz_Update': string;
   'Lcz_UpdateStatus': string;

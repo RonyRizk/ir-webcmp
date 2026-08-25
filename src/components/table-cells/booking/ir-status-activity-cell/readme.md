@@ -23,6 +23,7 @@
 
  - [ir-booking-listing-mobile-card](../../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-unvoiced-bookings-table](../../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Depends on
 
@@ -34,6 +35,7 @@ graph TD;
   ir-status-activity-cell --> ir-booking-status-tag
   ir-booking-listing-mobile-card --> ir-status-activity-cell
   ir-booking-listing-table --> ir-status-activity-cell
+  ir-unvoiced-bookings-table --> ir-status-activity-cell
   style ir-status-activity-cell fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

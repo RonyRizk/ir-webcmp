@@ -2,7 +2,7 @@ import { Booking } from '@/models/booking.dto';
 import locales from '@/stores/locales.store';
 import { getPrivateNote } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
-import { ICountry, IEntries } from '@/models/IBooking';
+import { ICountry } from '@/models/IBooking';
 import { _formatDate, _formatTime } from '../functions';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent } from '../types';
 
@@ -16,7 +16,6 @@ import { BookingDetailsSidebarEvents, OpenSidebarEvent } from '../types';
 export class IrReservationInformation {
   @Prop() booking: Booking;
   @Prop() countries: ICountry[];
-  @Prop() arrivalTime: IEntries[];
 
   @State() userCountry: ICountry | null = null;
   @State() isOpen: boolean;
@@ -24,7 +23,6 @@ export class IrReservationInformation {
   private reservationInformationEl?: HTMLDivElement;
   private irBookingCompanyFormRef: any;
   private irBookingExtraNoteRef: HTMLIrBookingExtraNoteElement;
-  private irArrivalTimeDialogRef: HTMLIrArrivalTimeDialogElement;
 
   componentWillLoad() {
     const guestCountryId = this.booking?.guest?.country_id;
@@ -99,7 +97,7 @@ export class IrReservationInformation {
   render() {
     const privateNote = getPrivateNote(this.booking.extras);
     return (
-      <wa-card>
+      <wa-card appearance="plain" class="reservation-information__card">
         <div class="reservation-information" ref={el => (this.reservationInformationEl = el as HTMLDivElement)}>
           <p class="reservation-information__property-name">{this.booking.property.name || ''}</p>
           {/* <ir-label
@@ -160,38 +158,22 @@ export class IrReservationInformation {
               </ir-custom-button>
             </div>
           )}
-          {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
+          <div class={'reservation__info-guest-origins'}>
+            {this.userCountry && (
+              <ir-label
+                labelText={`${locales.entries.Lcz_Country}:`}
+                isCountryImage
+                content={this.userCountry.name}
+                image={{ src: this.userCountry.flag, alt: this.userCountry.name }}
+              ></ir-label>
+            )}
+            {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
+          </div>
           {!this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>}
           {this.booking.guest.alternative_email && <ir-label labelText={`${locales.entries.Lcz_AlternativeEmail}:`} content={this.booking.guest.alternative_email}></ir-label>}
           {this.booking?.guest?.address && <ir-label labelText={`${locales.entries.Lcz_Address}:`} content={this.booking.guest.address}></ir-label>}
-          {this.userCountry && (
-            <ir-label
-              labelText={`${locales.entries.Lcz_Country}:`}
-              isCountryImage
-              content={this.userCountry.name}
-              image={{ src: this.userCountry.flag, alt: this.userCountry.name }}
-            ></ir-label>
-          )}
+
           {this.booking.guest?.notes && <ir-label display="inline" labelText={`${locales.entries.Lcz_GuestPrivateNote}:`} content={this.booking.guest?.notes}></ir-label>}
-          {this.booking.is_direct && (
-            <div class="reservation-information__row">
-              <ir-label labelText={`${locales.entries.Lcz_ArrivalTime}:`} display="flex" content={this.booking.arrival.description}></ir-label>
-              <wa-tooltip for={`edit_arrival_time`}>Edit arrival time</wa-tooltip>
-              <ir-custom-button
-                iconBtn
-                id={`edit_arrival_time`}
-                onClickHandler={e => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                  this.irArrivalTimeDialogRef.openDialog();
-                }}
-                appearance={'plain'}
-                variant={'neutral'}
-              >
-                <wa-icon name="edit" label="Edit arrival time" style={{ fontSize: '1rem' }}></wa-icon>
-              </ir-custom-button>
-            </div>
-          )}
           {this.booking.promo_key && <ir-label labelText={`${locales.entries.Lcz_Coupon}:`} content={this.booking.promo_key}></ir-label>}
           {/* {this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_AgentCode?.split(':')[0]}:`} content={this.booking.agent.name}></ir-label>} */}
           {this.booking.is_in_loyalty_mode && !this.booking.promo_key && (
@@ -237,10 +219,9 @@ export class IrReservationInformation {
               <wa-icon style={{ fontSize: '1rem' }} name="edit" label="Edit or create private note"></wa-icon>
             </ir-custom-button>
           </div>
-          <ir-booking-extra-note booking={this.booking} ref={el => (this.irBookingExtraNoteRef = el)}></ir-booking-extra-note>
-          <ir-booking-company-dialog booking={this.booking} ref={el => (this.irBookingCompanyFormRef = el)}></ir-booking-company-dialog>
         </div>
-        <ir-arrival-time-dialog booking={this.booking} arrivalTime={this.arrivalTime} ref={el => (this.irArrivalTimeDialogRef = el)}></ir-arrival-time-dialog>
+        <ir-booking-extra-note booking={this.booking} ref={el => (this.irBookingExtraNoteRef = el)}></ir-booking-extra-note>
+        <ir-booking-company-dialog booking={this.booking} ref={el => (this.irBookingCompanyFormRef = el)}></ir-booking-company-dialog>
       </wa-card>
     );
   }

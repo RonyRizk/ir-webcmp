@@ -6,6 +6,9 @@ import { PropertyService } from '@/services/property.service';
 import type { HandleExposedPropertyTaxCategoriesParams, TaxCategory } from '@/services/property/types';
 import calendar_data from '@/stores/calendar-data';
 import { showToast } from '@/utils/utils';
+import { extraServicesCategories } from '@/services/extra-services';
+import { toAccChargeRule, findAccTax } from '@/services/property/acc-tax.helpers';
+import { getTopLevelSvcCategories } from '@/utils/svc-category.utils';
 
 @Component({
   tag: 'ir-tax-service-categories',
@@ -74,32 +77,6 @@ export class IrTaxServiceCategories {
   }
 
   /**
-   * Strips non-alphanumeric characters and lowercases a string for fuzzy matching
-   * against tax names from the property data.
-   */
-  private normalizeTaxName(s: string): string {
-    return s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  }
-
-  /**
-   * Finds a tax entry by keyword from the property's taxes array.
-   * Returns undefined when no match is found — the caller should treat that as Not Applicable.
-   */
-  private findTax(keyword: string) {
-    const taxes = calendar_data.property?.taxes ?? [];
-    return taxes.find(t => this.normalizeTaxName(t.name).includes(this.normalizeTaxName(keyword)));
-  }
-
-  /**
-   * Converts a property tax entry to a ChargeRule.
-   * Returns `{ mode: '002', value: null }` (Not Applicable) when the tax is absent from the property data.
-   */
-  private toChargeRule(tax: ReturnType<IrTaxServiceCategories['findTax']>): ChargeRule {
-    if (!tax) return { mode: '002', value: null };
-    return { mode: tax.is_exlusive ? '000' : '001', value: tax.pct };
-  }
-
-  /**
    * Builds the initial charge rules map from property taxes and saved tax categories.
    * ACC (Accommodation) is seeded from the property's taxes array; service categories
    * are seeded from saved `tax_categories` or default to Not Applicable when absent.
@@ -109,9 +86,9 @@ export class IrTaxServiceCategories {
 
     const savedStrategy = calendar_data.property?.taxation_strategy?.code as TaxationStrategy | undefined;
     const accSetup: TaxAndChargeSetup = {
-      vat: this.toChargeRule(this.findTax('vat')),
-      cityTax: this.toChargeRule(this.findTax('city')),
-      serviceCharge: this.toChargeRule(this.findTax('service')),
+      vat: toAccChargeRule(findAccTax('vat')),
+      cityTax: toAccChargeRule(findAccTax('city')),
+      serviceCharge: toAccChargeRule(findAccTax('service')),
       taxationStrategy: savedStrategy ?? TaxationStrategy.Normal,
     };
 
@@ -127,11 +104,6 @@ export class IrTaxServiceCategories {
     });
 
     return rules;
-  }
-
-  private get categories() {
-    const extraServicesCategories = new Set(['ECI', 'LCO', 'BCT', 'EXB', 'HMP', 'ANP', 'BRF', 'LNC', 'DIN', 'HBD', 'FBD', 'MNB', 'DUZ']);
-    return (this.setupEntries?.svc_category ?? []).filter(s => !extraServicesCategories.has(s.CODE_NAME));
   }
 
   /** Returns a default setup for a service category with all fields set to Not Applicable. */
@@ -186,13 +158,26 @@ export class IrTaxServiceCategories {
     this.chargeCategoryRules = next;
   }
 
+  /**
+   * Top-level service categories eligible for their own VAT row here. Sub-categories grouped under
+   * a parent (e.g. Breakfast/Minibar under `ACM`) are excluded — they share the group's rate,
+   * configured on the Extra Services page instead. Synthesized group placeholders (a parent code
+   * with no `svc_category` row of its own, like `ACM`) are excluded too: `ACM`'s rate already
+   * mirrors the Accommodation row above, and it isn't a real backend category to submit.
+   */
+  private get categories() {
+    const svcCategories = this.setupEntries?.svc_category ?? [];
+    const realCodes = new Set(svcCategories.map(s => s.CODE_NAME));
+    return getTopLevelSvcCategories(svcCategories).filter(s => realCodes.has(s.CODE_NAME) && !extraServicesCategories.has(s.CODE_NAME));
+  }
+
   /** Assembles the API payload from the current charge rules state. */
   private buildPayload(): HandleExposedPropertyTaxCategoriesParams {
     const accSetup = this.chargeCategoryRules.get('ACC');
 
     const tax_categories: TaxCategory[] = this.categories.map(category => {
       const setup = this.chargeCategoryRules.get(category.CODE_NAME);
-      const taxMode = this.categories.find(v => v.CODE_NAME === setup?.vat?.mode);
+      const taxMode = (this.setupEntries?.vat_included ?? []).find(v => v.CODE_NAME === setup?.vat?.mode);
       return {
         category: { code: category.CODE_NAME, description: category.CODE_VALUE_EN },
         taxation_mode: { code: setup?.vat?.mode ?? '', description: taxMode?.CODE_VALUE_EN ?? '' },

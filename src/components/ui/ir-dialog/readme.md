@@ -68,6 +68,7 @@ Type: `Promise<void>`
  - [ir-checkout-dialog](../../ir-checkout-dialog)
  - [ir-city-ledger-folio](../../ir-city-ledger/ir-city-ledger-folio)
  - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
+ - [ir-departure-time-dialog](../../ir-booking-details/ir-room/ir-departure-time-dialog)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
@@ -106,6 +107,7 @@ graph TD;
   ir-checkout-dialog --> ir-dialog
   ir-city-ledger-folio --> ir-dialog
   ir-cl-invoice-dialog --> ir-dialog
+  ir-departure-time-dialog --> ir-dialog
   ir-extra-service --> ir-dialog
   ir-fd-confirm-dialog --> ir-dialog
   ir-ghs-onboarding --> ir-dialog

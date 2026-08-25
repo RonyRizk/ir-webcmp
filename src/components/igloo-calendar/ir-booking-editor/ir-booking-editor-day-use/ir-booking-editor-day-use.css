@@ -1,0 +1,91 @@
+:host {
+  display: contents;
+}
+
+.booking-editor__header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.booking-editor__dates {
+  line-height: 1.2;
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
+  font-size: var(--wa-font-size-m);
+}
+
+.booking-editor__total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+.booking-editor__total-label {
+  margin-right: 4px;
+}
+
+.booking-editor__total-amount {
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: var(--wa-font-size-m);
+  margin-inline-start: 2rem;
+}
+
+.booking-editor__day-use-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--wa-color-warning-fill-loud);
+  font-size: var(--wa-font-size-s);
+}
+
+.booking-editor__day-use-status-icon {
+  vertical-align: middle;
+  color: var(--wa-color-warning-fill-loud);
+}
+
+.booking-editor__day-use-hours {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.booking-editor__day-use-hours-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.booking-editor__day-use-duration {
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-s);
+  white-space: nowrap;
+}
+
+/* Vertically centers the arrow and duration text against the taller "from" field
+   (its label pushes the row's height up), instead of sitting at the row's baseline. */
+.booking-editor__day-use-hours-connector {
+  align-self: center;
+  padding-top: 1.5rem;
+}
+
+.booking-editor__day-use-hours-row ir-input {
+  width: 70px;
+}
+
+@media (min-width: 768px) {
+  .booking-editor__total {
+    margin-top: 0;
+  }
+}

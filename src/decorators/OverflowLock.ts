@@ -95,7 +95,11 @@ function ensureStyleForTag(tag: string) {
   // `.trim();
   const css = `
   :root{
-  --ir-scrollbar-width:${scrollbarWidth}px
+    --ir-scrollbar-width:${scrollbarWidth}px;
+  }
+  .wa-scroll-lock body{
+    overflow:hidden !important;
+    margin-inline-end:${scrollbarWidth}px;
   }
   `.trim();
 

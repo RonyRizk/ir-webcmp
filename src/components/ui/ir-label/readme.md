@@ -29,7 +29,7 @@
  - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-ota-service](../../ir-booking-details/ir-ota-services/ir-ota-service)
  - [ir-reservation-information](../../ir-booking-details/ir-reservation-information)
- - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-room-breakdown](../../ir-booking-details/ir-room/ir-room-breakdown)
 
 ### Graph
 ```mermaid
@@ -38,7 +38,7 @@ graph TD;
   ir-booking-guarantee --> ir-label
   ir-ota-service --> ir-label
   ir-reservation-information --> ir-label
-  ir-room --> ir-label
+  ir-room-breakdown --> ir-label
   style ir-label fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

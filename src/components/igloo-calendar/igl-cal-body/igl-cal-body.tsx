@@ -11,6 +11,9 @@ import calendar_data from '@/stores/calendar-data';
 import { PhysicalRoom, RoomType } from '@/models/booking.dto';
 import { ICountry } from '@/models/IBooking';
 import { HKIssue } from '@/models/housekeeping';
+import { DayUseBookings } from '@/services/property/types';
+import { _formatTime } from '@/components/ir-booking-details/functions';
+import { isBlockUnit, showToast } from '@/utils/utils';
 
 export type RoomCategory = RoomType & { expanded: boolean };
 
@@ -28,6 +31,8 @@ export class IglCalBody {
   @Prop() language: string;
   @Prop() countries: ICountry[];
   @Prop() highlightedDate: string;
+  /** Day-use bookings for the currently loaded date window (from `getDayUseBookingsForCalendar`) — booked units get a red 2px cell border. */
+  @Prop() dayUseBookings: DayUseBookings[] = [];
 
   @State() dragOverElement: string = '';
   @State() renderAgain: boolean = false;
@@ -43,25 +48,38 @@ export class IglCalBody {
   private newEvent: { [key: string]: any };
   private currentDate = new Date();
   private bookingMap = new Map<string | number, string | number>();
+  private roomEventsIndex = new Map<number, { start: number; end: number; isBlock: boolean }[]>();
   private interactiveTitle: HTMLIrInteractiveTitleElement[] = [];
   private dayRateMap = new Map<string, (typeof calendar_dates.days)[0]['rate']>();
   private roomsWithTodayCheckinStatus = new Set<number>();
   private categoriesWithTodayCheckinStatus = new Set<number>();
+  private roomTitleClickTimer: ReturnType<typeof setTimeout> | null = null;
+  private dayUseBookingsByKey = new Map<string, DayUseBookings>();
   // private disabledCellsCache = new Map<string, boolean>();
 
   componentWillLoad() {
     this.currentDate.setHours(0, 0, 0, 0);
     this.bookingMap = this.getBookingMap(this.getBookingData());
+    this.updateRoomEventsIndex();
     this.updateTodayCheckinStatus();
     calendar_dates.days.forEach(day => {
       this.dayRateMap.set(day.day, day.rate);
     });
     this.updateDisabledCellsCache();
+    this.updateDayUseBookingKeys();
+  }
+
+  disconnectedCallback() {
+    if (this.roomTitleClickTimer) {
+      clearTimeout(this.roomTitleClickTimer);
+      this.roomTitleClickTimer = null;
+    }
   }
 
   @Watch('calendarData')
   handleCalendarDataChange() {
     this.bookingMap = this.getBookingMap(this.getBookingData());
+    this.updateRoomEventsIndex();
     this.updateTodayCheckinStatus();
     this.updateDisabledCellsCache();
   }
@@ -69,6 +87,11 @@ export class IglCalBody {
   @Watch('today')
   handleTodayChange() {
     this.updateTodayCheckinStatus();
+  }
+
+  @Watch('dayUseBookings')
+  handleDayUseBookingsChange() {
+    this.updateDayUseBookingKeys();
   }
 
   @Listen('dragOverHighlightElement', { target: 'window' })
@@ -261,6 +284,14 @@ export class IglCalBody {
     this.newEvent = null;
   }
 
+  /** Cancels the in-progress range selection and surfaces why, shared by every conflict check in `clickCell`. */
+  private cancelSelectionWithConflictToast(title: string) {
+    this.removeNewEvent();
+    this.selectedRooms = {};
+    this.renderElement();
+    showToast({ type: 'error', title });
+  }
+
   private clickCell(roomId: number, selectedDay: any, roomCategory: RoomCategory) {
     if (!this.isScrollViewDragging && selectedDay.currentDate >= this.currentDate.getTime()) {
       let refKey = this.getSelectedCellRefName(roomId, selectedDay);
@@ -276,25 +307,28 @@ export class IglCalBody {
         this.fromRoomId = roomId;
         this.renderElement();
       } else {
-        // const keys = Object.keys(this.selectedRooms);
-        // const startDate = moment(this.selectedRooms[keys[0]].value, 'YYYY-MM-DD');
-        // const endDate = moment(selectedDay.value, 'YYYY-MM-DD');
-        // let cursor = startDate.clone().add(1, 'days');
-        // let disabledCount = 0;
+        const startValue = this.selectedRooms[Object.keys(this.selectedRooms)[0]].value;
+        const endValue = selectedDay.value;
 
-        // while (cursor.isBefore(endDate, 'day')) {
-        //   const dateKey = cursor.format('YYYY-MM-DD');
-        //   if (this.isCellDisabled(roomId, dateKey)) {
-        //     disabledCount++;
-        //   }
-        //   cursor.add(1, 'days');
-        // }
-        // if (disabledCount >= 1) {
-        //   this.selectedRooms = {};
-        //   this.fromRoomId = roomId;
-        //   this.renderElement();
-        //   return;
-        // }
+        // Cheapest checks first (indexed O(bookings-in-room)), day-loop checks last — each short-circuits the selection.
+        if (this.hasBookingConflictBetween(roomId, startValue, endValue)) {
+          this.cancelSelectionWithConflictToast(locales.entries.Lcz_BookingBetweenSelectedDates ?? 'Selection cancelled. A booking already exists within the selected dates.');
+          return;
+        }
+        if (this.hasBlockedConflictBetween(roomId, startValue, endValue)) {
+          this.cancelSelectionWithConflictToast(locales.entries.Lcz_BlockedDatesBetweenSelectedDates ?? 'Selection cancelled. These dates are blocked.');
+          return;
+        }
+        if (this.hasUnavailableCellBetween(roomId, startValue, endValue)) {
+          this.cancelSelectionWithConflictToast(locales.entries.Lcz_UnavailableDatesBetweenSelectedDates ?? 'Selection cancelled. These dates are not available.');
+          return;
+        }
+        if (this.hasDayUseBookingBetween(roomId, startValue, endValue)) {
+          this.cancelSelectionWithConflictToast(
+            locales.entries.Lcz_DayUseBookingBetweenSelectedDates ?? 'Selection cancelled. A day-use booking already exists within the selected dates.',
+          );
+          return;
+        }
 
         this.selectedRooms[refKey] = { ...selectedDay, roomId };
         this.addNewEvent(roomCategory);
@@ -334,6 +368,36 @@ export class IglCalBody {
 
     return bookingMap;
   }
+
+  /**
+   * Indexes every booking/block event in `calendarData.bookingEvents` by physical room id, with
+   * FROM_DATE/TO_DATE pre-parsed to day-level timestamps and block-vs-booking pre-classified via
+   * `isBlockUnit`. Rebuilt whenever `calendarData` changes so the range-conflict checks used during
+   * cell selection (`hasBookingConflictBetween`/`hasBlockedConflictBetween`) are O(events-in-that-room)
+   * numeric comparisons instead of scanning/parsing the full bookings array on every click.
+   */
+  private updateRoomEventsIndex() {
+    const index = new Map<number, { start: number; end: number; isBlock: boolean }[]>();
+    for (const event of this.getBookingData()) {
+      const roomId = Number(event.PR_ID);
+      if (Number.isNaN(roomId) || !event.FROM_DATE || !event.TO_DATE) {
+        continue;
+      }
+      const entry = {
+        start: moment(event.FROM_DATE, 'YYYY-MM-DD').startOf('day').valueOf(),
+        end: moment(event.TO_DATE, 'YYYY-MM-DD').startOf('day').valueOf(),
+        isBlock: isBlockUnit(event.STATUS_CODE),
+      };
+      const bucket = index.get(roomId);
+      if (bucket) {
+        bucket.push(entry);
+      } else {
+        index.set(roomId, [entry]);
+      }
+    }
+    this.roomEventsIndex = index;
+  }
+
   private getRoomtypeDayInventoryCells(addClass: string, isCategory: boolean = false, index: number) {
     return calendar_dates.days.map(dayInfo => {
       // const isActive = true;
@@ -369,11 +433,14 @@ export class IglCalBody {
       const isCurrentDate = dayInfo.day === this.today || dayInfo.day === this.highlightedDate;
       const cleaningDates = calendar_dates.cleaningTasks.has(+roomId) ? calendar_dates.cleaningTasks.get(+roomId) : null;
       const shouldBeCleaned = ['001', '003'].includes(calendar_data.cleaning_frequency?.code) ? false : cleaningDates?.has(dayInfo.value);
+      const dayUseBooking = this.getDayUseBooking(Number(roomId), dayInfo.value);
+      const dayUseStatus = dayUseBooking ? this.getDayUseStatus(dayUseBooking) : null;
+      const dayUseCellClass = dayUseBooking ? `dayUseBooked dayUseBooked--${dayUseStatus}` : '';
       return (
         <div
           class={`cellData position-relative roomCell ${isCellDisabled ? 'disabled' : ''} ${'room_' + roomId + '_' + dayInfo.day} ${isCurrentDate ? 'currentDay' : ''} ${
             this.dragOverElement === roomId + '_' + dayInfo.day ? 'dragOverHighlight' : ''
-          } ${isSelected ? 'selectedDay' : ''}`}
+          } ${isSelected ? 'selectedDay' : ''} ${dayUseCellClass}`}
           // style={!isDisabled && { '--cell-cursor': 'default' }}
           style={{ '--cell-cursor': 'default' }}
           onClick={() => {
@@ -389,14 +456,129 @@ export class IglCalBody {
           aria-current={isCurrentDate ? 'date' : undefined}
           data-room-name={roomName}
           data-dirty-room={String(shouldBeCleaned)}
+          data-day-use-booked={String(!!dayUseBooking)}
           aria-disabled={String(isDisabled)}
           aria-selected={Boolean(isSelected)}
           // tabIndex={-1}
         >
           {/* <button class={'triangle-button'} style={{ '--in-toggle-color': isDisabled ? 'green' : '#ff4961' }}></button> */}
+          {dayUseBooking && (
+            <Fragment>
+              <wa-tooltip style={{ '--max-width': 'auto' }} for={`day-use-badge_${roomId}_${dayInfo.value}`} trigger="hover">
+                <div class="dayUseTooltip__main">
+                  <span class="dayUseTooltip__time">
+                    Day use {this.formatDayUseTime(dayUseBooking.from_time)} – {this.formatDayUseTime(dayUseBooking.to_time)}
+                  </span>
+                  <span class="dayUseTooltip__price">{this.getDayUsePrice(dayUseBooking.gross_amount)}</span>
+                </div>
+                <div class="dayUseTooltip__meta">
+                  <span class="dayUseTooltip__number">#{dayUseBooking.book_nbr}</span>
+                  {this.getDayUseGuestName(dayUseBooking) && <span class="dayUseTooltip__guest">{this.getDayUseGuestName(dayUseBooking)}</span>}
+                </div>
+              </wa-tooltip>
+              <button
+                id={`day-use-badge_${roomId}_${dayInfo.value}`}
+                type="button"
+                class="dayUseBadge"
+                aria-label="Open day-use booking details"
+                onClick={e => {
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  this.openDayUseBookingDetails(dayUseBooking);
+                }}
+              >
+                <span class="dayUseBadge__dot"></span>
+              </button>
+            </Fragment>
+          )}
         </div>
       );
     });
+  }
+
+  /**
+   * Opens the existing day-use reservation's details drawer — same `showBookingPopup`/`EDIT_BOOKING`
+   * path `igl-booking-event-hover`'s "Edit booking" action uses, so `igloo-calendar.tsx`'s existing
+   * `editBookingItem` wiring picks it up without any new plumbing.
+   */
+  private formatDayUseTime(time: string): string {
+    const [hour, minute] = time.split(':');
+    return _formatTime(hour, minute);
+  }
+
+  private getDayUseGuestName(booking: DayUseBookings): string {
+    return [booking.guest_first_name, booking.guest_last_name].filter(Boolean).join(' ').trim();
+  }
+
+  private getDayUsePrice(amount: number): string {
+    const symbol = this.currency?.symbol ?? '';
+    return `${symbol}${Number(amount ?? 0).toFixed(2)}`;
+  }
+
+  private getDayUseStatus(booking: DayUseBookings): 'future' | 'staying' | 'past' {
+    const now = moment();
+    const from = moment(`${booking.target_date} ${booking.from_time}`, 'YYYY-MM-DD HH:mm');
+    const to = moment(`${booking.target_date} ${booking.to_time}`, 'YYYY-MM-DD HH:mm');
+    if (now.isBefore(from)) {
+      return 'future';
+    }
+    if (now.isAfter(to)) {
+      return 'past';
+    }
+    return 'staying';
+  }
+
+  private openDayUseBookingDetails(dayUseBooking: DayUseBookings) {
+    this.showBookingPopup.emit({
+      key: 'add',
+      data: {
+        BOOKING_NUMBER: dayUseBooking.book_nbr,
+        event_type: 'EDIT_BOOKING',
+        TITLE: `${locales.entries.Lcz_EditBookingFor ?? 'Edit Booking For'} ${''}`,
+      },
+    });
+  }
+
+  /**
+   * Opens the booking editor drawer in day-use mode with the double-clicked unit preselected
+   * (room type scoped via `roomsInfo`, today as the default day-use date).
+   */
+  private openDayUseBooking(room: PhysicalRoom, roomCategory: RoomCategory) {
+    const today = moment().format('YYYY-MM-DD');
+    this.showBookingPopup.emit({
+      key: 'add',
+      data: {
+        event_type: 'BAR_BOOKING',
+        PR_ID: room.id.toString(),
+        FROM_DATE: today,
+        TO_DATE: moment().add(1, 'day').format('YYYY-MM-DD'),
+        TITLE: `Day-Use Booking For ${roomCategory.name} ${room.name}`,
+        roomsInfo: [{ id: roomCategory.id }],
+        dayUse: true,
+      },
+    });
+  }
+
+  /**
+   * Disambiguates a single click (toggle housekeeping) from a double click (open day-use booking)
+   * on the room name cell. A native `dblclick` listener doesn't work here: the single-click handler
+   * opens a modal housekeeping dialog, which captures the second click before the browser can pair
+   * it with the first to synthesize `dblclick`. Instead we delay the single-click action briefly so a
+   * fast second click can cancel it and fire the double-click action instead.
+   */
+  private handleRoomTitleClick(room: PhysicalRoom, roomCategory: RoomCategory) {
+    if (this.roomTitleClickTimer) {
+      clearTimeout(this.roomTitleClickTimer);
+      this.roomTitleClickTimer = null;
+      this.openDayUseBooking(room, roomCategory);
+      return;
+    }
+    this.roomTitleClickTimer = setTimeout(() => {
+      this.roomTitleClickTimer = null;
+      if (calendar_data.housekeeping_enabled) {
+        this.selectedRoom = room;
+      }
+    }, 250);
   }
 
   private toggleCategory(roomCategory: RoomCategory) {
@@ -457,10 +639,7 @@ export class IglCalBody {
             data-room-has-today-checkin={String(roomHasTodayCheckin)}
             data-category-has-today-checkin={String(hasRoomWithTodayCheckin)}
             onClick={() => {
-              if (!calendar_data.housekeeping_enabled) {
-                return;
-              }
-              this.selectedRoom = room;
+              this.handleRoomTitleClick(room, roomType);
             }}
             onMouseEnter={() => {
               this.interactiveTitle[room.id]?.style?.setProperty(
@@ -609,6 +788,95 @@ export class IglCalBody {
     }
     const { disabled } = calendar_dates.disabled_cells.get(key);
     return disabled;
+  }
+
+  private updateDayUseBookingKeys() {
+    this.dayUseBookingsByKey = new Map((this.dayUseBookings ?? []).map(booking => [this.getCellKey(booking.unit_id, booking.target_date), booking]));
+  }
+
+  private getDayUseBooking(roomId: number, day: string): DayUseBookings | undefined {
+    return this.dayUseBookingsByKey.get(this.getCellKey(roomId, day));
+  }
+
+  /**
+   * True if a day-use booking for `roomId` falls strictly between `startValue` and `endValue`
+   * (both `'YYYY-MM-DD'`, either order). Endpoint-exclusive — a day-use booking on either clicked
+   * date itself doesn't block the selection.
+   */
+  private hasDayUseBookingBetween(roomId: number, startValue: string, endValue: string): boolean {
+    const start = moment(startValue, 'YYYY-MM-DD');
+    const end = moment(endValue, 'YYYY-MM-DD');
+    const [rangeStart, rangeEnd] = start.isBefore(end) ? [start, end] : [end, start];
+    const cursor = rangeStart.clone().add(1, 'days');
+    while (cursor.isBefore(rangeEnd, 'day')) {
+      if (this.getDayUseBooking(roomId, cursor.format('YYYY-MM-DD'))) {
+        return true;
+      }
+      cursor.add(1, 'days');
+    }
+    return false;
+  }
+
+  /**
+   * Shared O(events-in-room) endpoint-exclusive range-overlap test behind `hasBookingConflictBetween`
+   * and `hasBlockedConflictBetween`. Two ranges overlap (endpoints excluded) when
+   * `eventStart < rangeEnd && eventEnd > rangeStart` — a single numeric comparison per event, no
+   * per-day iteration, using the pre-parsed timestamps cached in `roomEventsIndex`.
+   */
+  private hasRoomEventConflictBetween(roomId: number, startValue: string, endValue: string, isBlock: boolean): boolean {
+    const events = this.roomEventsIndex.get(roomId);
+    if (!events || events.length === 0) {
+      return false;
+    }
+    const a = moment(startValue, 'YYYY-MM-DD').startOf('day').valueOf();
+    const b = moment(endValue, 'YYYY-MM-DD').startOf('day').valueOf();
+    const rangeStart = Math.min(a, b);
+    const rangeEnd = Math.max(a, b);
+    for (const event of events) {
+      if (event.isBlock === isBlock && event.start < rangeEnd && event.end > rangeStart) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * True if an existing (non-block) booking for `roomId` overlaps the open interval between
+   * `startValue` and `endValue` — i.e. a real booking's stay exists strictly between the two
+   * clicked dates. Endpoint-exclusive: a booking checking out or in exactly on a clicked date
+   * does not count (standard checkout-day/checkin-day overlap semantics).
+   */
+  private hasBookingConflictBetween(roomId: number, startValue: string, endValue: string): boolean {
+    return this.hasRoomEventConflictBetween(roomId, startValue, endValue, false);
+  }
+
+  /**
+   * True if a blocked-dates entry for `roomId` overlaps the open interval between `startValue`
+   * and `endValue`. Same endpoint-exclusive semantics and cached-index lookup as
+   * `hasBookingConflictBetween`, filtered to block entries instead of real bookings.
+   */
+  private hasBlockedConflictBetween(roomId: number, startValue: string, endValue: string): boolean {
+    return this.hasRoomEventConflictBetween(roomId, startValue, endValue, true);
+  }
+
+  /**
+   * True if any date strictly between `startValue` and `endValue` is disabled for `roomId` in
+   * `calendar_dates.disabled_cells` (stop-sale / zero availability). Endpoint-exclusive, same loop
+   * shape as `hasDayUseBookingBetween`; reuses the existing `isCellDisabled` cache so no new
+   * per-day data structure is needed.
+   */
+  private hasUnavailableCellBetween(roomId: number, startValue: string, endValue: string): boolean {
+    const start = moment(startValue, 'YYYY-MM-DD');
+    const end = moment(endValue, 'YYYY-MM-DD');
+    const [rangeStart, rangeEnd] = start.isBefore(end) ? [start, end] : [end, start];
+    const cursor = rangeStart.clone().add(1, 'days');
+    while (cursor.isBefore(rangeEnd, 'day')) {
+      if (this.isCellDisabled(roomId, cursor.format('YYYY-MM-DD'))) {
+        return true;
+      }
+      cursor.add(1, 'days');
+    }
+    return false;
   }
   render() {
     return (

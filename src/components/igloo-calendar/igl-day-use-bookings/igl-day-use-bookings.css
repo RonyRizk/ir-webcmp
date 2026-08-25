@@ -1,0 +1,249 @@
+:host {
+  --spacing: var(--wa-space-l);
+
+  display: block;
+  /* The parent (.dayUseBookingsContainer) gives the host height: 100% + overflow-y: auto. */
+  height: 100%;
+  color: var(--wa-color-text-normal);
+  font-size: var(--wa-font-size-s);
+  text-align: left;
+  background-color: var(--wa-color-surface-default);
+  border-inline-end: 2px solid var(--wa-color-surface-border);
+}
+
+.dub-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.dub-panel__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-family: var(--wa-font-family-heading);
+  background-color: var(--wa-color-surface-default);
+}
+
+.dub-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  padding-inline: var(--spacing);
+  padding-block: calc(var(--spacing) / 2);
+  border-bottom: 1px solid var(--wa-color-surface-border);
+}
+
+.dub-panel__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: var(--wa-font-size-l);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  font-family: var(--wa-font-family-heading);
+  color: var(--wa-color-text-normal);
+}
+
+.dub-panel__toolbar {
+  padding: var(--spacing);
+  padding-block-end: 0;
+}
+
+.dub-panel__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: var(--spacing);
+}
+
+/* Room-type group ----------------------------------------------------- */
+.dub-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dub-category__title {
+  margin: 0;
+  color: var(--wa-color-text-normal);
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  font-size: var(--wa-font-size-m);
+  text-wrap: balance;
+}
+
+.dub-category__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Booking row — a real <button>, the whole card opens the reservation. */
+.dub-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--wa-color-surface-border);
+  border-radius: var(--wa-border-radius-m, 6px);
+  background: var(--wa-color-surface-default);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--wa-transition-fast, 150ms) ease-out,
+    border-color var(--wa-transition-fast, 150ms) ease-out;
+}
+
+.dub-booking:hover {
+  background: var(--wa-color-neutral-fill-quiet);
+  border-color: var(--wa-color-neutral-border-loud);
+}
+
+.dub-booking:focus-visible {
+  outline: var(--wa-focus-ring, 2px solid var(--wa-color-brand-fill-loud));
+  outline-offset: 2px;
+}
+
+.dub-booking__main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dub-booking__price {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  color: var(--wa-color-text-normal);
+  font-weight: var(--wa-font-weight-action, 600);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+.dub-booking__number {
+  flex-shrink: 0;
+  color: var(--wa-color-text-quiet);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+.dub-booking__guest {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--wa-color-text-quiet);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dub-booking__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dub-booking__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-2xs, 0.75rem);
+}
+
+/* Status badge — the same info shown as color + text, never color alone. */
+.dub-status {
+  flex-shrink: 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: var(--wa-font-size-2xs, 0.7rem);
+  font-weight: var(--wa-font-weight-action, 600);
+  white-space: nowrap;
+}
+
+.dub-status--scheduled {
+  background: var(--wa-color-neutral-fill-quiet);
+  color: var(--wa-color-neutral-on-quiet);
+}
+
+.dub-status--upcoming {
+  background: var(--wa-color-brand-fill-quiet);
+  color: var(--wa-color-brand-on-quiet);
+}
+
+.dub-status--in-progress {
+  background: var(--wa-color-success-fill-quiet);
+  color: var(--wa-color-success-on-quiet);
+}
+
+/* Same-day stay movements (departure / arrival / turnover) on the day-use unit. */
+.dub-booking__movements {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding-block-start: 0.35rem;
+  border-top: 1px dashed var(--wa-color-surface-border);
+}
+
+.dub-movement {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: var(--wa-font-size-2xs, 0.7rem);
+  font-weight: var(--wa-font-weight-action, 600);
+  white-space: nowrap;
+}
+
+.dub-movement__icon {
+  font-size: 0.75rem;
+}
+
+.dub-movement__time {
+  font-weight: var(--wa-font-weight-normal, 400);
+  font-variant-numeric: tabular-nums;
+}
+
+.dub-movement--departure {
+  background: var(--wa-color-warning-fill-quiet);
+  color: var(--wa-color-warning-on-quiet);
+}
+
+.dub-movement--arrival {
+  background: var(--wa-color-brand-fill-quiet);
+  color: var(--wa-color-brand-on-quiet);
+}
+
+.dub-movement--turnover {
+  background: var(--wa-color-danger-fill-quiet);
+  color: var(--wa-color-danger-on-quiet);
+}
+
+/* Tooltip listing the stay(s) behind the chips — both bookings on a turnover. */
+.dub-movement-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.dub-movement-tip__line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.dub-movement-tip__label {
+  font-weight: var(--wa-font-weight-action, 600);
+}
+
+.dub-movement-tip__time {
+  font-variant-numeric: tabular-nums;
+}

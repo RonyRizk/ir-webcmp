@@ -50,7 +50,9 @@
  - [igl-bulk-block](../../igloo-calendar/igl-bulk-operations/igl-bulk-block)
  - [igl-bulk-operations-drawer](../../igloo-calendar/igl-bulk-operations/igl-bulk-operations-drawer)
  - [igl-bulk-stop-sale](../../igloo-calendar/igl-bulk-operations/igl-bulk-stop-sale)
- - [igl-cal-header](../../igloo-calendar/igl-cal-header)
+ - [igl-cal-header-toolbar](../../igloo-calendar/igl-cal-header/igl-cal-header-toolbar)
+ - [igl-day-use-bookings](../../igloo-calendar/igl-day-use-bookings)
+ - [igl-day-use-unit-list](../../igloo-calendar/ir-booking-editor/igl-day-use-unit-list)
  - [igl-hk-issues-dialog](../../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-legend](../../igloo-calendar/igl-legend)
@@ -98,11 +100,15 @@
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-date-range-filter](../ir-date-range-filter)
+ - [ir-departure-time-dialog](../../ir-booking-details/ir-room/ir-departure-time-dialog)
  - [ir-departures-table](../../ir-departures/ir-departures-table)
  - [ir-dp-report-filters](../../ir-dp-report/ir-dp-report-filters)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-extra-service-config](../../ir-booking-details/ir-extra-services/ir-extra-service-config)
+ - [ir-extra-service-editor-drawer](../../ir-extra-services-settings/ir-extra-service-editor-drawer)
  - [ir-extra-services](../../ir-booking-details/ir-extra-services)
+ - [ir-extra-services-settings](../../ir-extra-services-settings)
+ - [ir-extra-services-table](../../ir-extra-services-settings/ir-extra-services-table)
  - [ir-fd-confirm-dialog](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-table/ir-fd-confirm-dialog)
  - [ir-filter-card](../../ir-filter-card)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
@@ -150,7 +156,10 @@
  - [ir-reset-password](../../ir-reset-password)
  - [ir-revenue-row-details](../../ir-daily-revenue/ir-revenue-table/ir-revenue-row/ir-revenue-row-details)
  - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-room-details](../../ir-booking-details/ir-room/ir-room-details)
+ - [ir-room-extra-services](../../ir-booking-details/ir-room/ir-room-extra-services)
  - [ir-room-guests](../../ir-booking-details/ir-room-guests)
+ - [ir-room-header](../../ir-booking-details/ir-room/ir-room-header)
  - [ir-sales-by-channel](../../ir-sales-by-channel)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-by-channel-table](../../ir-sales-by-channel/ir-sales-by-channel-table)
@@ -165,6 +174,7 @@
  - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-test2-cmp](../../ir-test-cmp)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
+ - [ir-unvoiced-bookings-filters](../../ir-uninvoiced-bookings/ir-unvoiced-bookings-filters)
  - [ir-user-form-panel-drawer](../../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
  - [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
@@ -180,7 +190,9 @@ graph TD;
   igl-bulk-block --> ir-custom-button
   igl-bulk-operations-drawer --> ir-custom-button
   igl-bulk-stop-sale --> ir-custom-button
-  igl-cal-header --> ir-custom-button
+  igl-cal-header-toolbar --> ir-custom-button
+  igl-day-use-bookings --> ir-custom-button
+  igl-day-use-unit-list --> ir-custom-button
   igl-hk-issues-dialog --> ir-custom-button
   igl-housekeeping-dialog --> ir-custom-button
   igl-legend --> ir-custom-button
@@ -228,11 +240,15 @@ graph TD;
   ir-daily-revenue --> ir-custom-button
   ir-daily-revenue-filters --> ir-custom-button
   ir-date-range-filter --> ir-custom-button
+  ir-departure-time-dialog --> ir-custom-button
   ir-departures-table --> ir-custom-button
   ir-dp-report-filters --> ir-custom-button
   ir-extra-service --> ir-custom-button
   ir-extra-service-config --> ir-custom-button
+  ir-extra-service-editor-drawer --> ir-custom-button
   ir-extra-services --> ir-custom-button
+  ir-extra-services-settings --> ir-custom-button
+  ir-extra-services-table --> ir-custom-button
   ir-fd-confirm-dialog --> ir-custom-button
   ir-filter-card --> ir-custom-button
   ir-fiscal-documents-filters --> ir-custom-button
@@ -280,7 +296,10 @@ graph TD;
   ir-reset-password --> ir-custom-button
   ir-revenue-row-details --> ir-custom-button
   ir-room --> ir-custom-button
+  ir-room-details --> ir-custom-button
+  ir-room-extra-services --> ir-custom-button
   ir-room-guests --> ir-custom-button
+  ir-room-header --> ir-custom-button
   ir-sales-by-channel --> ir-custom-button
   ir-sales-by-channel-filters --> ir-custom-button
   ir-sales-by-channel-table --> ir-custom-button
@@ -295,6 +314,7 @@ graph TD;
   ir-tax-service-categories --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
   ir-unbookable-rooms-filters --> ir-custom-button
+  ir-unvoiced-bookings-filters --> ir-custom-button
   ir-user-form-panel-drawer --> ir-custom-button
   ir-user-management-table --> ir-custom-button
   ir-void-document-dialog --> ir-custom-button

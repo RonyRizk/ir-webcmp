@@ -1,7 +1,7 @@
 import { Booking, Guest } from '@/models/booking.dto';
 import { ICountry, ISetupEntries } from '@/models/IBooking';
 import { BookingSource, TEventType } from '@/models/igl-book-property';
-import { BeddingSetup, ISmokingOption, RatePlan, RoomType, Variation } from '@/models/property';
+import { BeddingSetup, ISmokingOption, PhysicalRoom, RatePlan, RoomType, Variation } from '@/models/property';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { calculateDaysBetweenDates } from '@/utils/booking';
 import { createStore } from '@stencil/store';
@@ -92,6 +92,29 @@ export interface BookingDraft {
     adults: number;
     children: number;
   };
+  /** Day-use toggle: single-date, unit-only, no-rate-plan booking flow. */
+  dayUse: boolean;
+  /** Step-2 arrival/departure hour strings (HH:mm) for a day-use booking. */
+  dayUseHours: {
+    from: string;
+    to: string;
+  };
+}
+
+/**
+ * Physical unit + room type picked in the day-use step-1 unit list, along with the resolved
+ * gross price and its net/tax breakdown — computed once at selection time so step 2's display
+ * and the final `doDayUse` submission always agree on the same amount.
+ */
+export interface DayUseSelection {
+  unit: PhysicalRoom;
+  roomType: RoomType;
+  /** Gross amount to charge — the hotel's default price, or net + tax when overridden. */
+  price: number;
+  netAmount: number;
+  taxAmount: number;
+  /** True when the front-desk agent typed a custom (net) price instead of the hotel's default. */
+  isCustomPrice: boolean;
 }
 
 /**
@@ -147,6 +170,7 @@ export interface BookingStore {
   selects: BookingSelects;
   bookedByGuest: BookedByGuest;
   bookedByGuestManuallyEdited: boolean;
+  dayUseSelection: DayUseSelection | null;
 }
 
 export interface ReservedRoomSelection {
@@ -192,6 +216,11 @@ const initialState: BookingStore = {
       children: null,
     },
     source: null,
+    dayUse: false,
+    dayUseHours: {
+      from: '',
+      to: '',
+    },
   },
   selects: {
     sources: [],
@@ -219,6 +248,7 @@ const initialState: BookingStore = {
   booking: null,
   fictus_booking_nbr: null,
   event_type: { type: 'PLUS_BOOKING' },
+  dayUseSelection: null,
 };
 
 export let { state: booking_store, onChange: onRoomTypeChange, reset } = createStore<BookingStore>(initialState);
@@ -260,6 +290,10 @@ export function setBookingDraft(params: Partial<BookingDraft>) {
     occupancy: {
       ...booking_store.bookingDraft.occupancy,
       ...params.occupancy,
+    },
+    dayUseHours: {
+      ...booking_store.bookingDraft.dayUseHours,
+      ...params.dayUseHours,
     },
   };
   if (params.source) {
@@ -565,6 +599,13 @@ export function getVisibleInventory(roomTypeId: number, ratePlanId: number): IRa
  */
 export function modifyBookingStore(key: keyof BookingStore, value: any) {
   booking_store[key] = value;
+}
+
+/**
+ * Sets (or clears) the physical unit + price chosen in the day-use step-1 unit list.
+ */
+export function setDayUseSelection(selection: DayUseSelection | null) {
+  booking_store.dayUseSelection = selection;
 }
 
 // -----------------------------------------------------------------------------

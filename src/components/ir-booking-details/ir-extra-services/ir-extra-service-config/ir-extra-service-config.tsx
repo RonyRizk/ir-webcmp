@@ -17,6 +17,7 @@ export class IrExtraServiceConfig {
   @Prop() service: ExtraService;
   @Prop() language: string;
   @Prop({ reflect: true }) open: boolean;
+  @Prop() defaultPrId: number | null = null;
 
   @Event() closeModal: EventEmitter<null>;
 
@@ -55,20 +56,14 @@ export class IrExtraServiceConfig {
             booking={this.booking}
             agent={this.agent}
             service={this.service}
+            defaultPrId={this.defaultPrId}
           ></ir-extra-service-config-form>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button class={`flex-fill`} size="m" appearance="filled" variant="neutral" data-drawer="close">
             {locales.entries.Lcz_Cancel}
           </ir-custom-button>
-          <ir-custom-button
-            type="submit"
-            loading={isRequestPending('/Do_Booking_Extra_Service')}
-            form="extra-service-config-form"
-            size="m"
-            class={`flex-fill`}
-            variant="brand"
-          >
+          <ir-custom-button type="submit" loading={isRequestPending('/Do_Booking_Extra_Service')} form="extra-service-config-form" size="m" class={`flex-fill`} variant="brand">
             {locales.entries.Lcz_Save}
           </ir-custom-button>
         </div>

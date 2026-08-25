@@ -10,6 +10,7 @@
 /* ── Card ──────────────────────────────────────────────────── */
 .booking-city-ledger__card {
   width: 100%;
+  background-color: var(--wa-color-surface-default);
 }
 
 .booking-city-ledger__card::part(body) {

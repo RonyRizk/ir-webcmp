@@ -42,7 +42,7 @@
  - [ir-booking-rooms](../ir-booking-details/ir-booking-rooms)
  - [ir-extra-service](../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-reallocation-form](../ir-reallocation-drawer/ir-reallocation-form)
- - [ir-room](../ir-booking-details/ir-room)
+ - [ir-room-details](../ir-booking-details/ir-room/ir-room-details)
 
 ### Graph
 ```mermaid
@@ -57,7 +57,7 @@ graph TD;
   ir-booking-rooms --> ir-date-view
   ir-extra-service --> ir-date-view
   ir-reallocation-form --> ir-date-view
-  ir-room --> ir-date-view
+  ir-room-details --> ir-date-view
   style ir-date-view fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -1,4 +1,5 @@
 import { Agent } from '@/services/agents/type';
+import type { CalendarCellType } from './IBooking';
 
 export interface RoomType {
   amenities: Amenity[];
@@ -589,7 +590,7 @@ export interface Occupancy {
 }
 
 export interface PhysicalRoom {
-  calendar_cell: any;
+  calendar_cell: CalendarCellType;
   housekeeper: Housekeeper | null;
   id: number;
   name: string;

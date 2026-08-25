@@ -94,8 +94,9 @@ export class IrBookingEditorForm {
     syncFirstRoomGuestName('first_name', guest.first_name);
     syncFirstRoomGuestName('last_name', guest.last_name);
   }
+
   render() {
-    const { dates } = booking_store.bookingDraft;
+    const { dates, dayUse } = booking_store.bookingDraft;
     let hasBookedByGuestController = false;
 
     return (
@@ -109,63 +110,61 @@ export class IrBookingEditorForm {
           this.doReservation.emit(submitter?.value);
         }}
       >
-        <div class="booking-editor__header">
-          <ir-date-view
-            class="booking-editor__dates mr-1 flex-fill font-weight-bold font-medium-1"
-            from_date={dates.checkIn}
-            to_date={dates.checkOut}
-            dateOption="DD MMM YYYY"
-          ></ir-date-view>
-
-          {this.totalRooms > 1 && (
-            <div class="booking-editor__total mt-1 mt-md-0 text-right">
-              <span class="booking-editor__total-label">{locales.entries.Lcz_TotalPrice}</span>{' '}
-              <span class="booking-editor__total-amount font-weight-bold font-medium-1">{formatAmount(calendar_data.property.currency.symbol, this.totalCost)}</span>
-            </div>
-          )}
-        </div>
-        {Object.values(booking_store.ratePlanSelections).map(val =>
-          Object.values(val).map(ratePlan => {
-            const rp = ratePlan as IRatePlanSelection;
-            if (rp.reserved === 0) {
-              return null;
-            }
-
-            return [...new Array(rp.reserved)].map((_, i) => {
-              const shouldAutoFillGuest =
-                ['BAR_BOOKING', 'PLUS_BOOKING'].includes(this.mode) &&
-                booking_store.bookedByGuest.id === -1 &&
-                !hasBookedByGuestController &&
-                !booking_store.bookedByGuestManuallyEdited;
-              if (shouldAutoFillGuest) {
-                hasBookedByGuestController = true;
-              }
-              return (
-                <igl-application-info
-                  autoFillGuest={shouldAutoFillGuest}
-                  totalNights={calculateDaysBetweenDates(dates.checkIn.format('YYYY-MM-DD'), dates.checkOut.format('YYYY-MM-DD'))}
-                  bedPreferenceType={booking_store.selects.bedPreferences}
-                  currency={calendar_data.property.currency}
-                  guestInfo={rp.guest ? rp.guest[i] : null}
-                  bookingType={this.mode}
-                  rateplanSelection={rp}
-                  key={`${rp.ratePlan.id}_${i}`}
-                  roomIndex={i}
-                  baseData={
-                    this.mode === 'EDIT_BOOKING'
-                      ? {
-                          roomtypeId: this.room.roomtype.id,
-                          unit: this.room.unit as any,
-                        }
-                      : undefined
-                  }
-                ></igl-application-info>
-              );
-            });
-          }),
+        {!dayUse && (
+          <div class="booking-editor__header">
+            <ir-date-view class="booking-editor__dates" from_date={dates.checkIn} to_date={dates.checkOut} dateOption="DD MMM YYYY"></ir-date-view>
+            {this.totalRooms > 1 && (
+              <div class="booking-editor__total">
+                <span class="booking-editor__total-label">{locales.entries.Lcz_TotalPrice}</span>{' '}
+                <span class="booking-editor__total-amount">{formatAmount(calendar_data.property.currency.symbol, this.totalCost)}</span>
+              </div>
+            )}
+          </div>
         )}
+        {dayUse && <ir-booking-editor-day-use></ir-booking-editor-day-use>}
+        {!dayUse &&
+          Object.values(booking_store.ratePlanSelections).map(val =>
+            Object.values(val).map(ratePlan => {
+              const rp = ratePlan as IRatePlanSelection;
+              if (rp.reserved === 0) {
+                return null;
+              }
+
+              return [...new Array(rp.reserved)].map((_, i) => {
+                const shouldAutoFillGuest =
+                  ['BAR_BOOKING', 'PLUS_BOOKING'].includes(this.mode) &&
+                  booking_store.bookedByGuest.id === -1 &&
+                  !hasBookedByGuestController &&
+                  !booking_store.bookedByGuestManuallyEdited;
+                if (shouldAutoFillGuest) {
+                  hasBookedByGuestController = true;
+                }
+                return (
+                  <igl-application-info
+                    autoFillGuest={shouldAutoFillGuest}
+                    totalNights={calculateDaysBetweenDates(dates.checkIn.format('YYYY-MM-DD'), dates.checkOut.format('YYYY-MM-DD'))}
+                    bedPreferenceType={booking_store.selects.bedPreferences}
+                    currency={calendar_data.property.currency}
+                    guestInfo={rp.guest ? rp.guest[i] : null}
+                    bookingType={this.mode}
+                    rateplanSelection={rp}
+                    key={`${rp.ratePlan.id}_${i}`}
+                    roomIndex={i}
+                    baseData={
+                      this.mode === 'EDIT_BOOKING'
+                        ? {
+                            roomtypeId: this.room.roomtype.id,
+                            unit: this.room.unit as any,
+                          }
+                        : undefined
+                    }
+                  ></igl-application-info>
+                );
+              });
+            }),
+          )}
         {this.bookingEditorService.isEventType(['BAR_BOOKING', 'PLUS_BOOKING']) && (
-          <section class={'mt-2'}>
+          <section class="booking-editor__booked-by-section">
             <div class="booking-editor__booked-by booking-editor__booked-by-header">
               <h4 class="booking-editor__heading booking-editor__booked-by-title">Booked by</h4>
               {booking_store.bookingDraft?.agent ? (

@@ -32,6 +32,14 @@
 | `guestSelected` | Emitted when the guest name is clicked. Sends the `identifier` for parent lookup. | `CustomEvent<string>` |
 
 
+## Shadow Parts
+
+| Part        | Description |
+| ----------- | ----------- |
+| `"contact"` |             |
+| `"loyalty"` |             |
+
+
 ## Dependencies
 
 ### Used by
@@ -41,6 +49,7 @@
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
  - [ir-dp-report-table](../../../ir-dp-report/ir-dp-report-table)
+ - [ir-unvoiced-bookings-table](../../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
 ```mermaid
@@ -50,6 +59,7 @@ graph TD;
   ir-booking-listing-table --> ir-booked-by-cell
   ir-departures-table --> ir-booked-by-cell
   ir-dp-report-table --> ir-booked-by-cell
+  ir-unvoiced-bookings-table --> ir-booked-by-cell
   style ir-booked-by-cell fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -4,7 +4,7 @@ import moment from 'moment';
 @Component({
   tag: 'ir-dates-cell',
   styleUrl: 'ir-dates-cell.css',
-  scoped: true,
+  shadow: true,
 })
 export class IrDatesCell {
   @Prop({ reflect: true }) display: 'block' | 'inline' = 'block';
@@ -24,12 +24,12 @@ export class IrDatesCell {
   render() {
     return (
       <Host>
-        <div class="date-cell__container">
+        <div part="checkin-container" class="date-cell__container">
           {this.checkInLabel && <span class="date-cell__label">{this.checkInLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckin ? 'bold' : 'auto' }}>{this.formatDate(this.checkIn)}</p>
         </div>
         {this.showArrow && <wa-icon class="date-cell__arrow" name="arrow-right"></wa-icon>}
-        <div class="date-cell__container">
+        <div part="checkout-container" class="date-cell__container">
           {this.checkoutLabel && <span class="date-cell__label">{this.checkoutLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckout ? 'bold' : 'auto' }}>{this.formatDate(this.checkOut)}</p>
         </div>

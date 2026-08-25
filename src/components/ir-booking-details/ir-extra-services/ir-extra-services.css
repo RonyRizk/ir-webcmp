@@ -1,14 +1,20 @@
 :host {
   display: block;
 }
-
+.extra-service__card {
+  background-color: var(--wa-color-surface-default);
+}
 /* ── Group wrapper ── */
 .service-group {
   padding: 0.125rem 0 0.25rem;
   border-left: 3px solid transparent;
   padding-left: 0.625rem;
 }
-
+.extra-services__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .service-group--guest {
   border-left-color: var(--wa-color-neutral-300, #d4d4d8);
 }

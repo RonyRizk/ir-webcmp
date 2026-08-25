@@ -21,10 +21,12 @@ export type SecureScreens =
   | 'agents'
   | 'channels'
   | 'tax-services'
+  | 'extra-services'
   | 'payment-options'
   | 'ghs'
   | 'meal-report'
-  | 'fiscal-documents';
+  | 'fiscal-documents'
+  | 'uninvoiced-bookings';
 
 @Component({
   tag: 'ir-secure-tasks',
@@ -137,10 +139,12 @@ export class IrSecureTasks {
     'agents',
     'channels',
     'tax-services',
+    'extra-services',
     'payment-options',
     'meal-report',
     'ghs',
     'fiscal-documents',
+    'uninvoiced-bookings',
   ]);
 
   private isValidPage(value: string): value is SecureScreens {
@@ -178,6 +182,7 @@ export class IrSecureTasks {
         { name: 'Channel Sales', value: 'channel-sales' },
         { name: 'Booking Listing', value: 'booking-listing' },
         { name: 'Fiscal Documents', value: 'fiscal-documents' },
+        { name: 'Uninvoiced Bookings', value: 'uninvoiced-bookings' },
         { name: 'Email Logs', value: 'email-logs' },
       ],
     },
@@ -188,6 +193,7 @@ export class IrSecureTasks {
         { name: 'City Ledger', value: 'city-ledger' },
         { name: 'Channels', value: 'channels' },
         { name: 'Tax & Services', value: 'tax-services' },
+        { name: 'Extra Services', value: 'extra-services' },
         { name: 'Payment Options', value: 'payment-options' },
       ],
     },
@@ -398,6 +404,8 @@ export class IrSecureTasks {
         return <ir-channel p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-channel>;
       case 'tax-services':
         return <ir-tax-service-categories p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-tax-service-categories>;
+      case 'extra-services':
+        return <ir-extra-services-settings p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-extra-services-settings>;
       case 'payment-options':
         return <ir-payment-option p={this.p} propertyid={this.propertyid.toString()} language="en" ticket={this.token.getToken()}></ir-payment-option>;
       case 'ghs':
@@ -406,6 +414,8 @@ export class IrSecureTasks {
         return <ir-meal-report propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-meal-report>;
       case 'fiscal-documents':
         return <ir-fiscal-documents p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-fiscal-documents>;
+      case 'uninvoiced-bookings':
+        return <ir-uninvoiced-bookings p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-uninvoiced-bookings>;
       default:
         return null;
     }

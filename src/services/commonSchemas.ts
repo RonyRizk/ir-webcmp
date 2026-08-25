@@ -14,6 +14,7 @@ export const DateSchema = z
     return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
   }, 'Invalid date');
 
-export const PropertyIdSchema = z.number();
+export const PropertyIdSchema = z.number().int();
 
 export const BookingNumberSchema = z.string();
+export const TaxTypesSchema = z.array(z.enum(['VAT', 'CITY_TAX', 'SERVICE_CHARGE'])).optional();

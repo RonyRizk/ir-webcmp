@@ -1,0 +1,52 @@
+:host {
+  display: contents;
+}
+.booking-room__dates-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wa-space-xs, 0.25rem);
+  align-items: center;
+}
+.booking-room__date-view {
+  flex: 1 1 150px;
+  min-width: 140px;
+  font-size: var(--wa-font-size-s);
+  width: fit-content;
+}
+.booking-room__guest-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.booking-room__text-reset {
+  margin: 0;
+  padding: 0;
+}
+.booking-room__guest-name {
+  font-weight: 600;
+}
+.booking-room__bed-info {
+  color: var(--wa-color-neutral-700);
+}
+.booking-room__departure-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wa-space-xs, 0.25rem);
+}
+.booking-room__departure-label {
+  font-weight: 500;
+}
+.booking-room__time-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/*xl*/
+@media (min-width: 1280px) {
+  .booking-room__departure-row {
+    gap: var(--wa-space-l, 1.5rem);
+  }
+}

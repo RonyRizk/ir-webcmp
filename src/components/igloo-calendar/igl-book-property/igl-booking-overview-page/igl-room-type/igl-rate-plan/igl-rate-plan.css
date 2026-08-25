@@ -12,6 +12,21 @@
   gap: 0.5rem;
 }
 
+.rate-plan.--current {
+  background-color: var(--wa-color-brand-fill-quiet);
+  /* padding-bottom: 0.5rem; */
+  border-radius: var(--wa-border-radius-m);
+  position: relative;
+}
+.rate-plan.rate-plan.--current::before {
+  border-radius: var(--wa-border-radius-m);
+  content: '';
+  position: absolute;
+  /* inset: 0; */
+  inset: -0.5rem;
+  z-index: -1;
+  background-color: var(--wa-color-brand-fill-quiet);
+}
 .rate-plan--unavailable {
   flex-direction: row;
   align-items: center;
@@ -190,6 +205,9 @@
     align-items: center;
     justify-content: flex-end;
   }
+  .rate-plan.rate-plan.--current::before {
+    inset-block-start: 0;
+  }
   .rateplan-config {
     flex-direction: row;
     align-items: center;
@@ -221,6 +239,9 @@
   .rateplan-name-container {
     width: 40%;
   }
+  .rate-plan.--current .rateplan-name-container {
+    margin-top: 0.5rem;
+  }
   .price-amount {
     max-width: 150px !important;
   }
@@ -228,6 +249,9 @@
 @media (min-width: 1024px) {
   .booking-btn {
     width: 100px;
+  }
+  .rate-plan.--current .rateplan-name-container {
+    margin-top: 0.5rem;
   }
   .fd-rateplan__price-input {
     width: 170px;
@@ -255,6 +279,7 @@
     width: 40%;
     margin-top: 0;
   }
+
   /* .rateplan-container {
     width: 40%;
   } */

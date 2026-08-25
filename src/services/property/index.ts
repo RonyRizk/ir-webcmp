@@ -5,33 +5,41 @@ import axios from 'axios';
 
 import {
   AllowedPropertiesSchema,
-  CountrySalesParams,
-  DailyRevenueReportParams,
-  ExposedRectifierParams,
   ExposedRectifierParamsSchema,
-  FetchedProperty,
   FetchNotificationsParamsSchema,
-  FetchNotificationsResult,
   FetchNotificationsResultSchema,
-  FetchUnBookableRooms,
-  FetchUnBookableRoomsResult,
   FetchUnBookableRoomsSchema,
-  GetUnifiedFolioParams,
   GetUnifiedFolioParamsSchema,
-  GetUnifiedFolioResponse,
-  GetUnifiedFolioResult,
-  HandleExposedPropertyTaxCategoriesParams,
   HandleExposedPropertyTaxCategoriesParamsSchema,
-  MonthlyStatsParams,
-  MonthlyStatsResults,
-  SetPropertyCalendarExtraParams,
   SetPropertyCalendarExtraParamsSchema,
-  SetPropertyGapConfigParams,
   SetPropertyGapConfigParamsSchema,
-  SetRoomCalendarExtraParams,
   SetRoomCalendarExtraParamsSchema,
-  PrintGuestFolioDocParams,
+  GetExposedBookingsByInvoicedStatusParamsSchema,
   PrintGuestFolioDocParamsSchema,
+  GetDayUseBookingsForCalendarParamsSchema,
+  CalculateNetAmountParamsSchema,
+  type CountrySalesParams,
+  type DailyRevenueReportParams,
+  type ExposedRectifierParams,
+  type FetchedProperty,
+  type FetchNotificationsResult,
+  type FetchUnBookableRooms,
+  type FetchUnBookableRoomsResult,
+  type GetUnifiedFolioParams,
+  type GetUnifiedFolioResponse,
+  type GetUnifiedFolioResult,
+  type HandleExposedPropertyTaxCategoriesParams,
+  type MonthlyStatsParams,
+  type MonthlyStatsResults,
+  type SetPropertyCalendarExtraParams,
+  type SetPropertyGapConfigParams,
+  type SetRoomCalendarExtraParams,
+  type PrintGuestFolioDocParams,
+  type GetExposedBookingsByInvoicedStatusParams,
+  type GetExposedBookingsByInvoicedStatusResult,
+  type DayUseBookings,
+  type GetDayUseBookingsForCalendarParams,
+  type CalculateNetAmountParams,
 } from './types';
 
 export class PropertyService {
@@ -59,6 +67,15 @@ export class PropertyService {
       throw new Error(data.ExceptionMsg);
     }
     return data;
+  }
+
+  public async getExposedBookingsByInvoicedStatus(params: GetExposedBookingsByInvoicedStatusParams): Promise<GetExposedBookingsByInvoicedStatusResult> {
+    const payload = GetExposedBookingsByInvoicedStatusParamsSchema.parse(params);
+    const { data } = await axios.post('/Get_Exposed_Bookings_By_Invoiced_Status', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
   }
 
   public async getExposedProperty(params: {
@@ -241,6 +258,22 @@ export class PropertyService {
 
   public async setExposedGapNightsPolicy(params: { property_id: number; rule_code: string; applicable_days: number }) {
     const { data } = await axios.post('/Set_Exposed_Gap_Nights_Policy', params);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
+  }
+  public async getDayUseBookingsForCalendar(params: GetDayUseBookingsForCalendarParams): Promise<DayUseBookings[]> {
+    const payload = GetDayUseBookingsForCalendarParamsSchema.parse(params);
+    const { data } = await axios.post('/Get_Day_Use_Bookings_For_Calendar', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
+  }
+  public async calculateNetAmount(params: CalculateNetAmountParams): Promise<number> {
+    const payload = CalculateNetAmountParamsSchema.parse(params);
+    const { data } = await axios.post('/Calculate_Net_Amount', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

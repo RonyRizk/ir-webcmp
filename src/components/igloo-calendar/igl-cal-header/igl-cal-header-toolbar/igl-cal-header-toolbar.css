@@ -1,0 +1,49 @@
+.stickyCell {
+  display: -ms-inline-grid;
+  display: -moz-inline-grid;
+  display: inline-grid;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  height: 82px;
+  display: inline-block;
+  vertical-align: top;
+  z-index: 2;
+}
+
+.topLeftCell {
+  border-inline-end: 1px solid var(--wa-color-surface-border);
+}
+
+.topLeftCell {
+  left: 0px;
+  z-index: 3;
+  width: 170px;
+  background-color: var(--wa-color-surface-default);
+  display: -ms-inline-grid;
+  display: -moz-inline-grid;
+  display: inline-grid;
+}
+
+.btn {
+  pointer-events: auto;
+}
+
+.header__fd-actions {
+  color: var(--wa-color-text-normal);
+  border-inline-end: 1px solid var(--wa-color-surface-border);
+}
+
+.header__fd-actions {
+  display: flex;
+  width: 170px;
+  box-sizing: border-box;
+  gap: 0.875rem;
+  color: var(--wa-color-text-normal);
+  flex-direction: column;
+}
+
+.searchContiner {
+  padding-left: 10px;
+  padding-right: 10px;
+}

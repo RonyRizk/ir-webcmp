@@ -1,11 +1,15 @@
 import { Extras, Room } from './../models/booking.dto';
 import moment from 'moment';
-import { PhysicalRoomType, MonthType, CellType, STATUS, RoomBookingDetails, RoomBlockDetails } from '../models/IBooking';
+import { PhysicalRoomType, MonthType, CellType, CalendarCellType, STATUS, RoomBookingDetails, RoomBlockDetails } from '../models/IBooking';
 import { dateDifference, isBlockUnit } from './utils';
 import axios from 'axios';
 import locales from '@/stores/locales.store';
 import calendar_dates from '@/stores/calendar-dates.store';
 import calendar_data from '@/stores/calendar-data';
+import { _formatTime } from '@/components/ir-booking-details/functions';
+
+/** `_SVC_CATEGORY` short code for Day Use, matched against `calendar_data.property.tax_categories` / `ExtraService.category.code`. */
+export const DAY_USE_CATEGORY_CODE = 'DUZ';
 
 export type SplitRole = 'fullSplit' | 'leftSplit' | 'rightSplit' | null;
 
@@ -218,8 +222,8 @@ function getDefaultData(cell: CellType, stayStatusLookup: Map<string, string>): 
         cell.My_Block_Info.NOTES !== '' && cell.My_Block_Info.NOTES !== null
           ? cell.My_Block_Info.NOTES
           : cell.STAY_STATUS_CODE === '003'
-          ? renderBlock003Date(cell.My_Block_Info.BLOCKED_TILL_DATE, cell.My_Block_Info.BLOCKED_TILL_HOUR, cell.My_Block_Info.BLOCKED_TILL_MINUTE)
-          : stayStatusLookup.get(cell.STAY_STATUS_CODE) || '',
+            ? renderBlock003Date(cell.My_Block_Info.BLOCKED_TILL_DATE, cell.My_Block_Info.BLOCKED_TILL_HOUR, cell.My_Block_Info.BLOCKED_TILL_MINUTE)
+            : stayStatusLookup.get(cell.STAY_STATUS_CODE) || '',
       RELEASE_AFTER_HOURS: cell.My_Block_Info.DESCRIPTION,
       PR_ID: cell.My_Block_Info.pr_id,
       ENTRY_DATE: cell.My_Block_Info.BLOCKED_TILL_DATE,
@@ -246,7 +250,7 @@ function getDefaultData(cell: CellType, stayStatusLookup: Map<string, string>): 
   //   console.log(moment(cell.room.from_date, 'YYYY-MM-DD').isAfter(cell.DATE) ? cell.room.from_date : cell.DATE);
   //   console.log(cell);
   // }
-  // if (cell.booking.booking_nbr.toString() === '00553011358') {
+  // if (cell.booking.booking_nbr.toString() === '34502153208') {
   //   console.log(cell);
   // }
   try {
@@ -403,6 +407,102 @@ function addOrUpdateBooking(cell: CellType, bookingsByPool: Map<string, any>, st
     bookingsByPool.set(cell.POOL, newData);
   }
 }
+/** A unit's same-day movement, derived from which half-day cells are occupied. `null` means neither — fully free or fully booked by one stay. */
+export type DayUseUnitDayStatus = 'checkin' | 'checkout' | 'turnover' | null;
+
+export interface DayUseUnitAvailability {
+  available: boolean;
+  /** @deprecated Use `dayStatus` (`'checkin' | 'turnover'`) — kept for callers that only care about the boolean. */
+  hasUpcomingCheckIn: boolean;
+  dayStatus: DayUseUnitDayStatus;
+  /** Formatted clock time (`02:00 PM`) of the checkout happening today — set when `dayStatus` is `'checkout'` or `'turnover'`. */
+  checkoutTime: string | null;
+  /** Formatted clock time (`02:00 PM`) of the checkin happening today — set when `dayStatus` is `'checkin'` or `'turnover'`. */
+  checkinTime: string | null;
+}
+
+/** `_DEPARTURE_TIME` code meaning the guest never picked one — the property's standard check-out applies. */
+const UNSET_DEPARTURE_TIME_CODE = '000';
+
+/** `_ARRIVAL_TIME` code for "Not sure yet" — same idea, the property's standard check-in applies. */
+const UNSET_ARRIVAL_TIME_CODE = '001';
+
+/** Accepts both `HH:mm` values (formatted to `hh:mm A`) and plain setup labels such as "Not sure yet". */
+function formatClockTime(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  const match = value.match(/^(\d{1,2}):(\d{2})/);
+  return match ? _formatTime(match[1], match[2]) : value.trim() || null;
+}
+
+/**
+ * A unit is unavailable for day use only when both halves of the day share the same non-empty POOL
+ * (one booking occupies the whole day) — two empty POOLs are NOT a match, since an empty POOL means
+ * "nothing touches that half-day", not a shared identity.
+ *
+ * `dayStatus` classifies same-day movement from the occupied halves:
+ * - `checkin` — left half empty, right half occupied (a fresh check-in later today).
+ * - `checkout` — left half occupied, right half empty (a checkout earlier today).
+ * - `turnover` — both halves occupied by different, non-blank POOLs (checkout then check-in same day).
+ * It's always a subset of `available` (never set for the same-non-empty-POOL case).
+ */
+export function getDayUseUnitAvailability(calendarCell: CalendarCellType | null | undefined): DayUseUnitAvailability {
+  const leftPool = calendarCell?.left_cell?.POOL ?? '';
+  const rightPool = calendarCell?.right_cell?.POOL ?? '';
+  const leftEmpty = leftPool === '';
+  const rightEmpty = rightPool === '';
+  const sameNonEmptyPool = !leftEmpty && leftPool === rightPool;
+
+  let dayStatus: DayUseUnitDayStatus = null;
+  if (leftEmpty && !rightEmpty) {
+    dayStatus = 'checkin';
+  } else if (!leftEmpty && rightEmpty) {
+    dayStatus = 'checkout';
+  } else if (!leftEmpty && !rightEmpty && leftPool !== rightPool) {
+    dayStatus = 'turnover';
+  }
+
+  let checkoutTime: string | null = null;
+  if (dayStatus === 'checkout' || dayStatus === 'turnover') {
+    const departure = calendarCell.left_cell.room?.departure_time;
+    const requested = departure?.code && departure.code !== UNSET_DEPARTURE_TIME_CODE ? departure.description : null;
+    checkoutTime = formatClockTime(requested ?? calendar_data.property?.time_constraints?.check_out_till);
+  }
+
+  let checkinTime: string | null = null;
+  if (dayStatus === 'checkin' || dayStatus === 'turnover') {
+    const arrival = calendarCell.right_cell.room?.arrival_time;
+    const requested = arrival?.code && arrival.code !== UNSET_ARRIVAL_TIME_CODE ? arrival.description : null;
+    checkinTime = formatClockTime(requested ?? calendar_data.property?.time_constraints?.check_in_from);
+  }
+
+  return {
+    available: !sameNonEmptyPool,
+    hasUpcomingCheckIn: dayStatus === 'checkin' || dayStatus === 'turnover',
+    dayStatus,
+    checkoutTime,
+    checkinTime,
+  };
+}
+
+/** Icon shown for a unit's same-day movement (`getDayUseUnitAvailability`'s `dayStatus`). */
+export const DAY_USE_STATUS_ICON: Record<Exclude<DayUseUnitDayStatus, null>, string> = {
+  checkin: 'plane-arrival',
+  checkout: 'plane-departure',
+  turnover: 'rotate',
+};
+
+/** Human-readable text for a same-day movement, incorporating the checkout/checkin clock time when known. */
+export function formatDayUseStatusText(dayStatus: Exclude<DayUseUnitDayStatus, null>, checkoutTime: string | null, checkinTime: string | null): string {
+  const checkoutText = checkoutTime ? `Check-out at ${checkoutTime}` : 'Check-out happening today';
+  const checkinText = checkinTime ? `Check-in at ${checkinTime}` : 'Check-in happening today';
+  if (dayStatus === 'turnover') {
+    return `${checkoutText}  ${checkinText}`;
+  }
+  return dayStatus === 'checkout' ? checkoutText : checkinText;
+}
+
 export function getPrivateNote(extras: Extras[] | null) {
   if (!extras) {
     return null;
@@ -412,7 +512,7 @@ export function getPrivateNote(extras: Extras[] | null) {
 
 export function transformNewBooking(data: any): RoomBookingDetails[] {
   let bookings: RoomBookingDetails[] = [];
-  const rooms = data.rooms.filter(room => !!room['assigned_units_pool']);
+  const rooms = data.rooms?.filter(room => !!room['assigned_units_pool']) ?? [];
   rooms.forEach(room => {
     const bookingFromDate = moment(room.from_date, 'YYYY-MM-DD').isAfter(moment(calendar_dates.fromDate, 'YYYY-MM-DD')) ? room.from_date : calendar_dates.fromDate;
     const bookingToDate = room.to_date;
@@ -499,8 +599,8 @@ export async function transformNewBLockedRooms(data: any): Promise<RoomBlockDeta
       data.NOTES !== '' && data.NOTES !== null
         ? data.NOTES
         : data.STAY_STATUS_CODE === '003'
-        ? renderBlock003Date(data.BLOCKED_TILL_DATE, data.BLOCKED_TILL_HOUR, data.BLOCKED_TILL_MINUTE)
-        : stayStatus.find(st => st.code === data.STAY_STATUS_CODE).value || '',
+          ? renderBlock003Date(data.BLOCKED_TILL_DATE, data.BLOCKED_TILL_HOUR, data.BLOCKED_TILL_MINUTE)
+          : stayStatus.find(st => st.code === data.STAY_STATUS_CODE).value || '',
     RELEASE_AFTER_HOURS: data.DESCRIPTION,
     PR_ID: data.pr_id,
     ENTRY_DATE: data.BLOCKED_TILL_DATE,
@@ -535,7 +635,7 @@ export function compareTime(date1: Date, date2: Date) {
 }
 
 /**
- * Creates a Date object for today at the specified hour in a given time zone.
+ * Creates a Date object for today at the specified hour (and optional minute) in a given time zone.
  * The offset is the number of hours that the target time zone is ahead of UTC.
  *
  * For example, if offset = 3 and hour = 9, then the function returns a Date
@@ -543,9 +643,10 @@ export function compareTime(date1: Date, date2: Date) {
  *
  * @param offset - The timezone offset in hours (e.g., 2, 3, etc.)
  * @param hour - The desired hour in the target time zone (0-23)
+ * @param minute - The desired minute in the target time zone (0-59)
  * @returns Date object representing the target time (in UTC)
  */
-export function createDateWithOffsetAndHour(offset: number, hour: number): Date {
+export function createDateWithOffsetAndHour(offset: number, hour: number, minute: number = 0): Date {
   const now = new Date();
   const offsetMs = offset * 60 * 60 * 1000;
   const targetTzDate = new Date(now.getTime() + offsetMs);
@@ -553,5 +654,5 @@ export function createDateWithOffsetAndHour(offset: number, hour: number): Date 
   const month = targetTzDate.getUTCMonth();
   const day = targetTzDate.getUTCDate();
   const utcHour = hour - offset;
-  return new Date(Date.UTC(year, month, day, utcHour));
+  return new Date(Date.UTC(year, month, day, utcHour, minute));
 }

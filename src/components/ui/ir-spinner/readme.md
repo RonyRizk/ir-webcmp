@@ -55,6 +55,7 @@
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
+ - [ir-unvoiced-bookings-table](../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
 ```mermaid
@@ -95,6 +96,7 @@ graph TD;
   ir-property-switcher --> ir-spinner
   ir-reallocation-form --> ir-spinner
   ir-room-guests-form --> ir-spinner
+  ir-unvoiced-bookings-table --> ir-spinner
   style ir-spinner fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

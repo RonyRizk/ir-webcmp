@@ -44,6 +44,8 @@
  - [igl-spilt-booking-form](../../igloo-calendar/igl-split-booking-drawer/igl-spilt-booking-form)
  - [ir-agent-contract](../../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
  - [ir-agent-profile](../../ir-agents/ir-agent-editor-drawer/ir-agent-profile)
+ - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
+ - [ir-booking-editor-day-use](../../igloo-calendar/ir-booking-editor/ir-booking-editor-day-use)
  - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
  - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
  - [ir-booking-pricing-form](../../ir-booking-details/ir-room/ir-booking-pricing-drawer/ir-booking-pricing-form)
@@ -55,7 +57,10 @@
  - [ir-cl-invoice-select](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/fields/ir-cl-invoice-select)
  - [ir-cl-opening-balance-fields](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/fields/ir-cl-opening-balance-fields)
  - [ir-cl-payment-fields](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/fields/ir-cl-payment-fields)
+ - [ir-departure-time-dialog](../../ir-booking-details/ir-room/ir-departure-time-dialog)
  - [ir-extra-service-config-form](../../ir-booking-details/ir-extra-services/ir-extra-service-config/ir-extra-service-config-form)
+ - [ir-extra-service-editor-form](../../ir-extra-services-settings/ir-extra-service-editor-drawer/ir-extra-service-editor-form)
+ - [ir-extra-service-price-input](../../ir-extra-services-settings/ir-extra-service-price-input)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-guest-info-form](../../ir-guest-info/ir-guest-info-form)
  - [ir-hk-user-drawer-form](../../ir-housekeeping/ir-hk-user/ir-hk-user-drawer/ir-hk-user-drawer-form)
@@ -78,6 +83,8 @@ graph TD;
   igl-spilt-booking-form --> ir-validator
   ir-agent-contract --> ir-validator
   ir-agent-profile --> ir-validator
+  ir-arrival-time-dialog --> ir-validator
+  ir-booking-editor-day-use --> ir-validator
   ir-booking-editor-guest-form --> ir-validator
   ir-booking-editor-header --> ir-validator
   ir-booking-pricing-form --> ir-validator
@@ -89,7 +96,10 @@ graph TD;
   ir-cl-invoice-select --> ir-validator
   ir-cl-opening-balance-fields --> ir-validator
   ir-cl-payment-fields --> ir-validator
+  ir-departure-time-dialog --> ir-validator
   ir-extra-service-config-form --> ir-validator
+  ir-extra-service-editor-form --> ir-validator
+  ir-extra-service-price-input --> ir-validator
   ir-fiscal-documents-filters --> ir-validator
   ir-guest-info-form --> ir-validator
   ir-hk-user-drawer-form --> ir-validator

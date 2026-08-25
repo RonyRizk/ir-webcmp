@@ -1,7 +1,9 @@
 :host {
   display: block;
 }
-
+.pickup-view__card {
+  background-color: var(--wa-color-surface-default);
+}
 .pickup-body {
   display: flex;
   flex-direction: column;

@@ -1,12 +1,13 @@
 import { Component, Event, EventEmitter, Fragment, h, Listen, Prop, State, Watch } from '@stencil/core';
 import { BlockedDatePayload, BookingEditorMode, BookingStep } from '../types';
-import { Booking } from '@/models/booking.dto';
+import { Booking, ExtraService } from '@/models/booking.dto';
 import { IBlockUnit } from '@/models/IBooking';
 import Token from '@/models/Token';
-import booking_store, { hasAtLeastOneRoomSelected, resetReserved } from '@/stores/booking.store';
+import booking_store, { hasAtLeastOneRoomSelected, resetAvailability, resetReserved, setBookingDraft, setDayUseSelection } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
 import { getReleaseHoursString } from '@/utils/utils';
+import { getDayUseUnitAvailability } from '@/utils/booking';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { IRBookingEditorService } from '../ir-booking-editor.service';
 
@@ -55,6 +56,12 @@ export class IrBookingEditorDrawer {
   /** Room identifier used by the editor. */
   @Prop() roomIdentifier: string;
 
+  /** Pre-enables the day-use toggle (e.g. double-click-on-room-title entry point). */
+  @Prop() dayUse: boolean = false;
+
+  /** The day-use extra service being edited (`mode="EDIT_DAY_USE"`) — carries its current unit/price for prefill and is updated in place via `doBookingExtraService` on submission. */
+  @Prop() extraService: ExtraService;
+
   @State() step: BookingStep = 'details';
   @State() isLoading: string;
 
@@ -77,6 +84,9 @@ export class IrBookingEditorDrawer {
     this.initializeBlockedUnitState(this.blockedUnit);
     if (this.mode) {
       booking_store.event_type = { type: this.mode };
+    }
+    if (this.dayUse) {
+      setBookingDraft({ dayUse: true });
     }
   }
 
@@ -111,6 +121,13 @@ export class IrBookingEditorDrawer {
   handleModeChange() {
     if (this.mode) {
       booking_store.event_type = { type: this.mode };
+    }
+  }
+
+  @Watch('dayUse')
+  handleDayUseChange() {
+    if (this.dayUse) {
+      setBookingDraft({ dayUse: true });
     }
   }
 
@@ -162,10 +179,15 @@ export class IrBookingEditorDrawer {
   }
 
   private get drawerLabel() {
+    if (booking_store.bookingDraft.dayUse && ['PLUS_BOOKING'].includes(this.mode)) {
+      return 'Day-Use Booking';
+    }
     if (this.label) {
       return this.label;
     }
     switch (this.mode) {
+      case 'EDIT_DAY_USE':
+        return 'Edit Day Use Booking';
       case 'SPLIT_BOOKING':
       case 'BAR_BOOKING':
       case 'ADD_ROOM':
@@ -173,6 +195,16 @@ export class IrBookingEditorDrawer {
       case 'PLUS_BOOKING':
         return 'New Booking';
     }
+  }
+
+  private handleDayUseToggle(value: string): void {
+    const checked = value === 'day-use';
+    resetAvailability();
+    setBookingDraft({
+      dayUse: checked,
+      source: checked ? booking_store.selects.sources.find(s => s.type !== 'LABEL') : booking_store.bookingDraft.source,
+    });
+    setDayUseSelection(null);
   }
 
   private goToConfirm = (e?: CustomEvent) => {
@@ -207,11 +239,30 @@ export class IrBookingEditorDrawer {
     const now = moment();
 
     const hasCheckIn = !!calendar_data?.property.is_frontdesk_enabled && !!checkIn && (checkIn.isSame(now, 'date') || now.isBetween(checkIn, checkOut, 'date'));
+
+    const isNewDayUseBooking = this.mode === 'PLUS_BOOKING' && booking_store.bookingDraft.dayUse;
+    const dayUseUnitHasUpcomingCheckIn = isNewDayUseBooking && getDayUseUnitAvailability(booking_store.dayUseSelection?.unit?.calendar_cell).hasUpcomingCheckIn;
+    const showBookAndBlockTheNight = booking_store.bookingDraft.dayUse && ['BAR_BOOKING', 'PLUS_BOOKING'].includes(this.mode) && !dayUseUnitHasUpcomingCheckIn;
+
     return (
       <Fragment>
         <ir-custom-button onClickHandler={this.goToDetails} size="m" appearance="filled" variant="neutral">
           Back
         </ir-custom-button>
+        {showBookAndBlockTheNight && (
+          <ir-custom-button
+            disabled={false}
+            form="new_booking_form"
+            loading={this.isLoading === 'book&block'}
+            value="book&block"
+            type="submit"
+            size="m"
+            appearance={'outlined'}
+            variant="brand"
+          >
+            Book and block the night
+          </ir-custom-button>
+        )}
         <ir-custom-button
           loading={this.isLoading === 'book'}
           value="book"
@@ -219,12 +270,12 @@ export class IrBookingEditorDrawer {
           disabled={false}
           type="submit"
           size="m"
-          appearance={hasCheckIn ? 'outlined' : 'accent'}
+          appearance={showBookAndBlockTheNight ? 'accent' : hasCheckIn ? 'outlined' : 'accent'}
           variant="brand"
         >
           Book
         </ir-custom-button>
-        {hasCheckIn && (
+        {hasCheckIn && !booking_store.bookingDraft.dayUse && (
           <ir-custom-button loading={this.isLoading === 'book-checkin'} value="book-checkin" form="new_booking_form" type="submit" size="m" appearance="accent" variant="brand">
             Book and check-in
           </ir-custom-button>
@@ -240,7 +291,7 @@ export class IrBookingEditorDrawer {
         <ir-custom-button data-drawer="close" size="m" appearance="filled" variant="neutral">
           Cancel
         </ir-custom-button>
-        {['PLUS_BOOKING', 'ADD_ROOM'].includes(this.mode) && (
+        {!booking_store.bookingDraft.dayUse && ['PLUS_BOOKING', 'ADD_ROOM'].includes(this.mode) && (
           <Fragment>
             {!haveRoomSelected && <wa-tooltip for="booking_editor__next-button">Please select at least one unit to continue.</wa-tooltip>}
             <ir-custom-button id="booking_editor__next-button" disabled={!haveRoomSelected} onClickHandler={this.goToConfirm} size="m" appearance="accent" variant="brand">
@@ -391,6 +442,27 @@ export class IrBookingEditorDrawer {
         label={this.drawerLabel}
         open={this.open}
       >
+        {this.step === 'details' && !this.unitId && ['PLUS_BOOKING', 'BAR_BOOKING'].includes(this.mode) && calendar_data?.property?.is_frontdesk_enabled && (
+          <div slot="header-actions" style={{ alignSelf: 'center' }}>
+            {/* <span>Manual booking</span> */}
+            {/* <wa-switch size="l" checked={booking_store.bookingDraft.dayUse} onchange={e => this.handleDayUseToggle((e.target as HTMLInputElement).checked)}>
+              Day Use
+            </wa-switch> */}
+            <wa-radio-group
+              size="s"
+              value={booking_store.bookingDraft.dayUse ? 'day-use' : 'manual'}
+              orientation="horizontal"
+              onchange={e => this.handleDayUseToggle((e.target as HTMLInputElement).value)}
+            >
+              <wa-radio appearance="button" value="manual">
+                Stay
+              </wa-radio>
+              <wa-radio appearance="button" value="day-use">
+                Day-use
+              </wa-radio>
+            </wa-radio-group>
+          </div>
+        )}
         {this.open && this.ticket && (
           <ir-booking-editor
             onLoadingChanged={e => {
@@ -415,6 +487,7 @@ export class IrBookingEditorDrawer {
             checkIn={this.checkIn}
             checkOut={this.checkOut}
             identifier={this.roomIdentifier}
+            extraService={this.extraService}
           ></ir-booking-editor>
         )}
         <div slot="footer" class="ir__drawer-footer">

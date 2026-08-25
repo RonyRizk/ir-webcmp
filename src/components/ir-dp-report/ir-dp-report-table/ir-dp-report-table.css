@@ -1,3 +1,5 @@
+@import url('../../../common/table.css');
+
 :host {
   display: block;
 }
@@ -15,10 +17,6 @@
 }
 .table--container {
   overflow-x: auto;
-}
-
-.cell--align-end {
-  text-align: right !important;
 }
 
 .dp-report-table__effect {
@@ -52,10 +50,6 @@
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
 }
-.cell--align-center {
-  text-align: center !important;
-}
-
 /* ir-booking-number-cell — center the logo against the booking number + source text block */
 .dp-report-table ir-booking-number-cell .booking-nbr-cell__container {
   align-self: center;

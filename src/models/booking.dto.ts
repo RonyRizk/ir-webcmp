@@ -291,6 +291,7 @@ export interface FinancialSnapshotEntry {
 }
 export interface Booking {
   is_source_editable: boolean;
+  is_room_less: boolean;
   charges: Charges;
   agent_booking_nbr: string;
   agent: {
@@ -357,6 +358,9 @@ export const ExtraServiceSchema = z.object({
   price: z.coerce.number().min(0.01),
   system_id: z.number().optional(),
   category: z.object({ code: z.string().nonempty() }).nullable().optional(),
+  /** Physical room (unit) id this service is linked to, when the booking has multiple units. */
+  pr_id: z.number().nullable().optional().default(null),
+  room_identifier: z.string().nullable().optional().default(null),
   agent: AgentBaseSchema.extend({
     address: z.string().nullable(),
     agent_rate_type_code: AgentBaseSchema.shape.agent_rate_type_code.nullable(),
@@ -365,6 +369,7 @@ export const ExtraServiceSchema = z.object({
     contact_name: z.string().nullable(),
     email: z.string().email().nullable(),
     is_active: z.boolean().nullable(),
+    pr_id: z.number().nullable().optional().default(null),
     is_send_guest_confirmation_email: z.boolean().nullable(),
     notes: z.string().nullable(),
     payment_mode: AgentBaseSchema.shape.payment_mode.nullable(),
@@ -372,6 +377,8 @@ export const ExtraServiceSchema = z.object({
     tax_nbr: z.string().nullable(),
     cl_post_timing: AgentBaseSchema.shape.cl_post_timing.nullable(),
   }).nullable(),
+  from_time: z.string().optional().nullable().default(null),
+  to_time: z.string().optional().nullable().default(null),
   charges: ChargesSchema.optional(),
 });
 
@@ -600,7 +607,7 @@ export interface Property {
   country: Country;
   currency: Currency;
   description: Description;
-  extra_info: Extrainfo[];
+  extra_info: ExtraInfo[];
   id: number;
   images: Image[];
   internet_offering: Internetoffering;
@@ -627,7 +634,7 @@ export interface Property {
   social_media: Socialmedia[];
   sources: Paymentmode[];
   space_theme: Spacetheme;
-  tags: Extrainfo[];
+  tags: ExtraInfo[];
   tax_nbr: string;
   tax_statement: string;
   taxation_strategy: Paymentmode;
@@ -757,7 +764,7 @@ interface Image {
   url: string;
 }
 
-interface Extrainfo {
+export interface ExtraInfo {
   key: string;
   value: string;
 }
@@ -942,11 +949,16 @@ export const ROOM_IN_OUT = {
   CHECKOUT: '002',
   IDLE: '000',
 };
+export type ArrivalTime = {
+  code: string;
+  description: string;
+};
 export interface Room {
   charges: Charges;
   hb_preference: string;
   agent: { id: number; name: string; code: string } | null;
   days: Day[];
+  arrival_time: ArrivalTime;
   applicable_policies: ExposedApplicablePolicy[];
   from_date: string;
   calendar_extra: string;

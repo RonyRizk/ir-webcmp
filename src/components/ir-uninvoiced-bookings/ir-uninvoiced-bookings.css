@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  --max-screen-width: 1200px;
+}
+/*lg*/
+@media (min-width: 1024px) {
+  .uninvoiced-bookings__page::part(header) {
+    width: var(--max-screen-width);
+    margin-inline: auto;
+  }
+}

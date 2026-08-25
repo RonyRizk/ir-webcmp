@@ -1,0 +1,34 @@
+.booking-room__meal-report-button::part(base) {
+  height: auto;
+  padding: 0.375em 0.625em;
+  font-size: var(--wa-font-size-2xs);
+}
+.booking-room__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wa-space-xs, 0.25rem);
+}
+.booking-room__summary-text {
+  margin: 0;
+  padding: 0;
+}
+.booking-room__summary-highlight {
+  font-weight: 600;
+}
+.booking-room__price-row {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-xs);
+}
+.booking-room__price {
+  font-weight: 700;
+  color: var(--wa-color-neutral-900);
+  white-space: nowrap;
+  text-align: right;
+}
+.booking-room__actions {
+  display: flex;
+  align-items: center;
+}

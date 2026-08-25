@@ -114,13 +114,13 @@ export class IrBookedByCell {
           {this.showPersons && (
             <p>
               {this.totalPersons}
-              {locales.entries.Lcz_P}
+              {locales.entries.Lcz_P ?? 'P'}
             </p>
           )}
           {this.showPrivateNoteDot && <span class="booked-by-source__private-note"></span>}
         </div>
         {this.showContactIcons && this.guest.country_phone_prefix && this.guest.mobile_without_prefix && (
-          <div class="booked-by-source__container booked-by-source__contact">
+          <div part="contact" class="booked-by-source__container booked-by-source__contact">
             <a class="booked-by-cell__button --mobile-only" href={`tel:${this.guest.country_phone_prefix}${this.guest.mobile_without_prefix.replace(/\s+/g, '')}`}>
               <wa-icon name="phone"></wa-icon>
             </a>
@@ -134,7 +134,7 @@ export class IrBookedByCell {
             </a>
           </div>
         )}
-        <div class="booked-by-source__container">
+        <div part="loyalty" class="booked-by-source__container">
           {this.showLoyaltyIcon && (
             <Fragment>
               <wa-tooltip for={loyaltyBadgeId}>{locales.entries.Lcz_LoyaltyDiscountApplied}</wa-tooltip>

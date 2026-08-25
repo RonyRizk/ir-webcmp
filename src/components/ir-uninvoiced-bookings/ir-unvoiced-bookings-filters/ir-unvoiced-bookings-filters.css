@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.uninvoiced-bookings-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uninvoiced-bookings-filters__date-picker {
+  width: 100%;
+}
+.uninvoiced-bookings-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+wa-select {
+  min-width: 12rem;
+  flex: 1;
+}
+
+@media (max-width: 767px) {
+  .uninvoiced-bookings-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 768px) {
+  .uninvoiced-bookings-filters__date-picker {
+    max-width: 350px;
+  }
+}
+
+/*lg*/
+@media (min-width: 1024px) {
+  :host {
+    width: var(--max-screen-width);
+    margin-inline: auto;
+  }
+}

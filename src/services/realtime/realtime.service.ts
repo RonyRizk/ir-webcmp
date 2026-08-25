@@ -2,7 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import type { RealtimeEventMap, RealtimeMessage, RealtimeReason } from './types';
 
 export type { RealtimeEventMap, RealtimeMessage, RealtimeReason };
-export type { UnitHkStatusChangePayload, SalesBatchPayload, AvailabilityBatchPayload } from './types';
+export type { UnitHkStatusChangePayload, SalesBatchPayload, AvailabilityBatchPayload, DayUseModifiedPayload, DayUseRemovedPayload } from './types';
 
 const REALTIME_URL = 'https://realtime.igloorooms.com/';
 

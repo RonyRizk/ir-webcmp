@@ -35,6 +35,12 @@ export class IrBookingRooms {
   @Prop() departureTime: IEntries[] = [];
 
   /**
+   * Available arrival time options for the booking.
+   * Passed down to each room when applicable.
+   */
+  @Prop() arrivalTime: IEntries[] = [];
+
+  /**
    * Enables the ability to add a new room/unit to the booking.
    */
   @Prop() hasRoomAdd: boolean = false;
@@ -76,6 +82,9 @@ export class IrBookingRooms {
    */
   @Prop() splitIndex: SplitIndex;
   @Prop() clTransactions: ClTx[] = [];
+
+  /** `_SVC_CATEGORY` setup entries, threaded down to each room's extra-services section for category labels. */
+  @Prop() svcCategories: IEntries[] = [];
 
   @Event() roomDeleteFinished: EventEmitter<string>;
 
@@ -199,6 +208,7 @@ export class IrBookingRooms {
         property_id={this.propertyId}
         language={this.language}
         departureTime={this.departureTime}
+        arrivalTime={this.arrivalTime}
         bedPreferences={this.bedPreference}
         isEditable={this.booking.is_editable}
         legendData={this.legendData}
@@ -214,6 +224,7 @@ export class IrBookingRooms {
         booking={this.booking}
         agent={this.agent}
         clTransactions={this.clTransactions}
+        svcCategories={this.svcCategories}
         bookingIndex={bookingIndex}
         onDeleteFinished={(e: CustomEvent<string>) => this.roomDeleteFinished.emit(e.detail)}
       />
@@ -298,7 +309,7 @@ export class IrBookingRooms {
     }
 
     return (
-      <wa-card>
+      <wa-card appearance="plain" class="booking-rooms__card">
         <ir-date-view class="booking-details__date-view-header" slot="header" from_date={this.booking.from_date} to_date={this.booking.to_date}></ir-date-view>
         {this.hasRoomAdd && this.booking.is_editable && (
           <Fragment>

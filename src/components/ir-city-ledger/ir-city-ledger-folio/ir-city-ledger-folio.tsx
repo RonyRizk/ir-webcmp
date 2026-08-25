@@ -364,6 +364,7 @@ export class IrCityLedgerFolio {
           toDate={this.filters?.toDate}
           currencySymbol={calendar_data.property?.currency?.symbol}
           currencies={this.currencies}
+          serviceCategoryOptions={this.serviceCategoryOptions}
           onPageChange={async e => {
             this.pageIndex = e.detail.pageIndex;
             this.pageSize = e.detail.pageSize;

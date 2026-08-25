@@ -229,14 +229,6 @@
   font-size: 0.8125rem;
 }
 
-/* Cell alignment */
-.cell--align-end {
-  text-align: right !important;
-}
-.cell--align-center {
-  text-align: center;
-}
-
 /* Status cell */
 .folio-table__status-cell {
   display: flex;

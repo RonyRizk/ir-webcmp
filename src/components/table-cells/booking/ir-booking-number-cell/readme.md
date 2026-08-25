@@ -39,6 +39,7 @@
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
  - [ir-dp-report-table](../../../ir-dp-report/ir-dp-report-table)
+ - [ir-unvoiced-bookings-table](../../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
 ```mermaid
@@ -48,6 +49,7 @@ graph TD;
   ir-booking-listing-table --> ir-booking-number-cell
   ir-departures-table --> ir-booking-number-cell
   ir-dp-report-table --> ir-booking-number-cell
+  ir-unvoiced-bookings-table --> ir-booking-number-cell
   style ir-booking-number-cell fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

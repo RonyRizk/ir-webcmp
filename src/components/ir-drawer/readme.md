@@ -39,6 +39,7 @@
  - [ir-booking-pricing-drawer](../ir-booking-details/ir-room/ir-booking-pricing-drawer)
  - [ir-city-ledger-transaction-drawer](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
  - [ir-extra-service-config](../ir-booking-details/ir-extra-services/ir-extra-service-config)
+ - [ir-extra-service-editor-drawer](../ir-extra-services-settings/ir-extra-service-editor-drawer)
  - [ir-guest-info-drawer](../ir-guest-info/ir-guest-info-drawer)
  - [ir-hk-archive-drawer](../ir-housekeeping/ir-hk-tasks/ir-hk-archive-drawer)
  - [ir-hk-unassigned-units-drawer](../ir-housekeeping/ir-hk-unassigned-units/ir-hk-unassigned-units-drawer)
@@ -67,6 +68,7 @@ graph TD;
   ir-booking-pricing-drawer --> ir-drawer
   ir-city-ledger-transaction-drawer --> ir-drawer
   ir-extra-service-config --> ir-drawer
+  ir-extra-service-editor-drawer --> ir-drawer
   ir-guest-info-drawer --> ir-drawer
   ir-hk-archive-drawer --> ir-drawer
   ir-hk-unassigned-units-drawer --> ir-drawer

@@ -38,7 +38,7 @@ export class IrPickupView {
 
     return (
       <Host>
-        <wa-card>
+        <wa-card appearance="plain" class="pickup-view__card">
           <p slot="header" class={'font-size-large p-0 m-0'}>
             {locales.entries.Lcz_Pickup}
           </p>

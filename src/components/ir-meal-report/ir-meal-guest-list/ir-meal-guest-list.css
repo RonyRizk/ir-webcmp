@@ -81,7 +81,6 @@
 
 /* Center-aligned occupancy column hugs its content instead of floating. */
 .cell--align-center {
-  text-align: center !important;
   padding-inline: 0.45rem !important;
 }
 /* #endregion */

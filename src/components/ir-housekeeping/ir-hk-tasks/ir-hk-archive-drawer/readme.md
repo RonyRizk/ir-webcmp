@@ -98,29 +98,42 @@ graph TD;
   ir-reservation-information --> ota-label
   ir-reservation-information --> ir-booking-extra-note
   ir-reservation-information --> ir-booking-company-dialog
-  ir-reservation-information --> ir-arrival-time-dialog
   ir-booking-extra-note --> ir-dialog
   ir-booking-extra-note --> ir-custom-button
   ir-booking-company-dialog --> ir-dialog
   ir-booking-company-dialog --> ir-booking-company-form
   ir-booking-company-dialog --> ir-custom-button
   ir-booking-company-form --> ir-input
-  ir-arrival-time-dialog --> ir-dialog
-  ir-arrival-time-dialog --> ir-custom-button
   ir-booking-rooms --> ir-room
   ir-booking-rooms --> ir-date-view
   ir-booking-rooms --> ir-custom-button
-  ir-room --> ir-custom-button
-  ir-room --> ir-date-view
-  ir-room --> ir-unit-tag
-  ir-room --> ir-cl-status-tag
-  ir-room --> ir-label
+  ir-room --> ir-room-header
+  ir-room --> ir-room-details
+  ir-room --> ir-room-breakdown
+  ir-room --> ir-room-extra-services
   ir-room --> ir-assignment-toggle-dialog
   ir-room --> ir-dialog
+  ir-room --> ir-custom-button
   ir-room --> ir-checkout-dialog
   ir-room --> ir-invoice
   ir-room --> ir-booking-pricing-drawer
   ir-room --> ir-hb-preference-dialog
+  ir-room --> ir-departure-time-dialog
+  ir-room --> ir-arrival-time-dialog
+  ir-room-header --> ir-custom-button
+  ir-room-details --> ir-date-view
+  ir-room-details --> ir-unit-tag
+  ir-room-details --> ir-custom-button
+  ir-room-breakdown --> ir-cl-status-tag
+  ir-room-breakdown --> ir-label
+  ir-room-extra-services --> ir-extra-service
+  ir-room-extra-services --> ir-custom-button
+  ir-extra-service --> ir-cl-status-tag
+  ir-extra-service --> ir-date-view
+  ir-extra-service --> ir-unit-tag
+  ir-extra-service --> ir-assignment-toggle-dialog
+  ir-extra-service --> ir-dialog
+  ir-extra-service --> ir-custom-button
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
@@ -167,14 +180,19 @@ graph TD;
   ir-booking-pricing-form --> ir-input
   ir-hb-preference-dialog --> ir-dialog
   ir-hb-preference-dialog --> ir-custom-button
+  ir-departure-time-dialog --> ir-dialog
+  ir-departure-time-dialog --> ir-unit-tag
+  ir-departure-time-dialog --> ir-validator
+  ir-departure-time-dialog --> ir-input
+  ir-departure-time-dialog --> ir-custom-button
+  ir-arrival-time-dialog --> ir-dialog
+  ir-arrival-time-dialog --> ir-unit-tag
+  ir-arrival-time-dialog --> ir-validator
+  ir-arrival-time-dialog --> ir-input
+  ir-arrival-time-dialog --> ir-custom-button
   ir-extra-services --> ir-extra-service
   ir-extra-services --> ir-custom-button
   ir-extra-services --> ir-empty-state
-  ir-extra-service --> ir-cl-status-tag
-  ir-extra-service --> ir-date-view
-  ir-extra-service --> ir-assignment-toggle-dialog
-  ir-extra-service --> ir-dialog
-  ir-extra-service --> ir-custom-button
   ir-pickup-view --> ir-cl-status-tag
   ir-pickup-view --> ir-custom-button
   ir-pickup-view --> ir-empty-state
@@ -281,25 +299,34 @@ graph TD;
   ir-booking-editor --> ir-spinner
   ir-booking-editor --> ir-interceptor
   ir-booking-editor --> ir-booking-editor-header
+  ir-booking-editor --> igl-day-use-unit-list
   ir-booking-editor --> igl-room-type
   ir-booking-editor --> ir-booking-editor-form
   ir-booking-editor-header --> ir-validator
   ir-booking-editor-header --> ir-picker
   ir-booking-editor-header --> ir-picker-item
+  ir-booking-editor-header --> ir-date-select
   ir-booking-editor-header --> ir-date-range
   ir-booking-editor-header --> ir-custom-button
   ir-date-range --> ir-input
   ir-date-range --> ir-custom-date-range
+  igl-day-use-unit-list --> ir-empty-state
+  igl-day-use-unit-list --> ir-input
+  igl-day-use-unit-list --> ir-custom-button
   igl-room-type --> igl-rate-plan
   igl-rate-plan --> ir-input
   igl-rate-plan --> ir-custom-button
   ir-booking-editor-form --> ir-date-view
+  ir-booking-editor-form --> ir-booking-editor-day-use
   ir-booking-editor-form --> igl-application-info
   ir-booking-editor-form --> ir-picker
   ir-booking-editor-form --> ir-picker-item
   ir-booking-editor-form --> ir-custom-button
   ir-booking-editor-form --> ir-booking-editor-guest-form
   ir-booking-editor-form --> ir-service-assignee-select
+  ir-booking-editor-day-use --> ir-unit-tag
+  ir-booking-editor-day-use --> ir-validator
+  ir-booking-editor-day-use --> ir-input
   igl-application-info --> ir-validator
   igl-application-info --> ir-input
   ir-booking-editor-guest-form --> ir-input

@@ -83,6 +83,7 @@ Styling: all inner pieces are exposed as CSS parts; the parts of each inner
  - [ir-meal-report-filters](../../ir-meal-report/ir-meal-report-filters)
  - [ir-sales-by-channel-filters](../../ir-sales-by-channel/ir-sales-by-channel-filters)
  - [ir-sales-filters](../../ir-sales-by-country/ir-sales-filters)
+ - [ir-unvoiced-bookings-filters](../../ir-uninvoiced-bookings/ir-unvoiced-bookings-filters)
 
 ### Depends on
 
@@ -108,6 +109,7 @@ graph TD;
   ir-meal-report-filters --> ir-date-range-filter
   ir-sales-by-channel-filters --> ir-date-range-filter
   ir-sales-filters --> ir-date-range-filter
+  ir-unvoiced-bookings-filters --> ir-date-range-filter
   style ir-date-range-filter fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import { Booking, ExtraService, IBookingPickupInfo, RoomInOut } from '@/models/booking.dto';
 import { IEntries } from '@/models/IBooking';
+import { PropertyIdSchema, TaxTypesSchema } from '../commonSchemas';
 
 const NumberOrStringSchema = z.union([z.number(), z.string().optional()]);
 
@@ -264,10 +265,10 @@ export const SetHbPreferencePropsSchema = z.object({
   code: z.union([z.literal('001'), z.literal('002')]),
 });
 export type SetHbPreferenceProps = z.infer<typeof SetHbPreferencePropsSchema>;
-
 export const CalculateExclusiveTaxPropsSchema = z.object({
   property_id: z.number().min(1),
   amount: z.number(),
+  taxes_to_include: TaxTypesSchema,
 });
 
 export type CalculateExclusiveTaxProps = z.infer<typeof CalculateExclusiveTaxPropsSchema>;
@@ -293,3 +294,66 @@ export const SimulateDirectBookingParamsSchema = z.object({
   booking_nbr: z.string(),
 });
 export type SimulateDirectBookingParams = z.infer<typeof SimulateDirectBookingParamsSchema>;
+
+export const DoDayUseParamsSchema = z.object({
+  language: z.string().min(1),
+  is_to_block: z.boolean().optional().default(false),
+
+  booking: z.object({
+    property: z.object({
+      id: z.number(),
+    }),
+    occupancy: z
+      .object({
+        adult_nbr: z.number().nullable(),
+        children_nbr: z.number().nullable(),
+        infant_nbr: z.number().nullable(),
+      })
+      .optional()
+      .nullable(),
+    currency: z.object({
+      id: z.number(),
+    }),
+    source: z.object({
+      code: z.string().min(1),
+    }),
+    guest: z.object({
+      first_name: z.string().min(1),
+      last_name: z.string().min(1),
+      email: z.union([z.string().trim().email(), z.literal('')]),
+      mobile: z.string(),
+    }),
+    from_date: z.string().min(1),
+    to_date: z.string().min(1),
+    status: z.object({
+      code: z.string().min(1),
+    }),
+    remark: z.string(),
+  }),
+
+  extra_service: z.object({
+    pr_id: z.number(),
+    category: z.object({
+      code: z.string().min(1),
+    }),
+    description: z.string().optional().default(''),
+    start_date: z.string().min(1),
+    end_date: z.string().min(1),
+    from_time: z.string().min(1),
+    to_time: z.string().min(1),
+    net_amount: z.number(),
+    tax_amount: z.number(),
+    gross_amount: z.number(),
+    currency_id: z.number(),
+    price: z.number(),
+  }),
+});
+
+export type DoDayUseParams = z.infer<typeof DoDayUseParamsSchema>;
+
+export const SetArrivalTimePropsSchema = z.object({
+  property_id: PropertyIdSchema,
+  room_identifier: z.string(),
+  code: z.string(),
+});
+export type SetArrivalTimeProps = z.infer<typeof SetArrivalTimePropsSchema>;

@@ -22,7 +22,7 @@
  - [ir-city-ledger-folio-table](../ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-extra-service](../../ir-booking-details/ir-extra-services/ir-extra-service)
  - [ir-pickup-view](../../ir-booking-details/ir-pickup-view)
- - [ir-room](../../ir-booking-details/ir-room)
+ - [ir-room-breakdown](../../ir-booking-details/ir-room/ir-room-breakdown)
 
 ### Graph
 ```mermaid
@@ -32,7 +32,7 @@ graph TD;
   ir-city-ledger-folio-table --> ir-cl-status-tag
   ir-extra-service --> ir-cl-status-tag
   ir-pickup-view --> ir-cl-status-tag
-  ir-room --> ir-cl-status-tag
+  ir-room-breakdown --> ir-cl-status-tag
   style ir-cl-status-tag fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

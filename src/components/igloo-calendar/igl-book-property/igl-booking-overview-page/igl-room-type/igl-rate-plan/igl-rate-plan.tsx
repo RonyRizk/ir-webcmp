@@ -166,7 +166,9 @@ export class IglRatePlan {
     // }
     return (
       <Host data-testid={`rp-${this.ratePlan.id}`}>
-        <div class={`rate-plan ${isAvailableToBook ? 'rate-plan--available' : 'rate-plan--unavailable'}`}>
+        <div
+          class={`rate-plan ${visibleInventory?.reserved === 1 && bookingType === 'EDIT_BOOKING' ? '--current' : ''} ${isAvailableToBook ? 'rate-plan--available' : 'rate-plan--unavailable'}`}
+        >
           <div data-testid={'rp_name'} class="rateplan-name-container">
             <div>
               {bookingType === 'BAR_BOOKING' ? (

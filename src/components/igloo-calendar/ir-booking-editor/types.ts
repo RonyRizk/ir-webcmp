@@ -27,8 +27,12 @@ import { z } from 'zod';
  * - PLUS_BOOKING
  *   Create a **new booking from scratch** with no predefined
  *   rooms or dates.
+ *
+ * - EDIT_DAY_USE
+ *   Edit an existing day-use extra service. Always day-use, unit-only —
+ *   the manual/day-use toggle is locked out and there's no room/rate-plan concept.
  */
-export type BookingEditorMode = 'SPLIT_BOOKING' | 'BAR_BOOKING' | 'ADD_ROOM' | 'EDIT_BOOKING' | 'PLUS_BOOKING';
+export type BookingEditorMode = 'SPLIT_BOOKING' | 'BAR_BOOKING' | 'ADD_ROOM' | 'EDIT_BOOKING' | 'PLUS_BOOKING' | 'EDIT_DAY_USE';
 
 export type BookingStep = 'details' | 'confirm';
 
@@ -53,6 +57,16 @@ export const RoomsGuestsSchema = z.array(
 export const BookedByGuestSchema = z.object({
   firstName: z.string().nonempty(),
   lastName: z.string().nonempty(),
+});
+
+const dayUseTimeSchema = z
+  .string()
+  .trim()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Enter a valid time');
+
+export const DayUseHoursSchema = z.object({
+  from: dayUseTimeSchema,
+  to: dayUseTimeSchema,
 });
 
 export type BlockedDatePayload = {

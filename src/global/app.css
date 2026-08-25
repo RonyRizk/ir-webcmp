@@ -59,10 +59,7 @@ html {
   padding: var(--wa-space-l);
   position: relative;
 }
-.wa-scroll-lock {
-  overflow: hidden;
-  margin-inline-end: var(--ir-scrollbar-width, 15px);
-}
+
 .ir-price {
   font-family: inherit;
   font-size: 1rem;
@@ -179,4 +176,58 @@ wa-card::part(base) {
 
 @page {
   margin: 0.5in;
+}
+
+.ir__field-group {
+  display: flex;
+  width: 100%;
+}
+
+:dir(rtl) .ir__field-group > :first-child::part(base),
+:dir(rtl) .ir__field-group > :first-child::part(combobox),
+:dir(ltr) .ir__field-group > :last-child::part(combobox),
+:dir(ltr) .ir__field-group > :last-child::part(base) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.ir__field-group > :first-child {
+  z-index: 1;
+}
+
+.ir__field-group .--grow {
+  flex: 1 1 0%;
+}
+
+:dir(rtl) .ir__field-group > :last-child::part(combobox),
+:dir(rtl) .ir__field-group > :last-child::part(base),
+:dir(ltr) .ir__field-group > :first-child::part(base),
+:dir(ltr) .ir__field-group > :first-child::part(combobox) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+:dir(rtl) .ir__field-group > :last-child::part(combobox),
+:dir(rtl) .ir__field-group > :last-child::part(base) {
+  border-right-width: 0;
+}
+
+.ir__field-group > :not(:first-child):not(:last-child)::part(combobox),
+.ir__field-group > :not(:first-child):not(:last-child)::part(base) {
+  border-radius: 0;
+  border-inline-start: 0;
+}
+
+:dir(ltr) .ir__field-group > :last-child::part(combobox),
+:dir(ltr) .ir__field-group > :last-child::part(base) {
+  border-left-width: 0;
+}
+
+.ir__field-group > :not(:first-child):not(:last-child)[open],
+.ir__field-group > :not(:first-child):not(:last-child):focus-within,
+.ir__field-group > :not(:first-child):not(:last-child):focus-visible,
+.ir__field-group > :last-child[open],
+.ir__field-group > :last-child:focus-visible,
+.ir__field-group > :last-child:focus-within {
+  z-index: 2;
 }

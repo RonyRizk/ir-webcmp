@@ -7,16 +7,17 @@
 
 ## Properties
 
-| Property               | Attribute                 | Description | Type                      | Default     |
-| ---------------------- | ------------------------- | ----------- | ------------------------- | ----------- |
-| `calendarData`         | --                        |             | `{ [key: string]: any; }` | `undefined` |
-| `countries`            | --                        |             | `ICountry[]`              | `undefined` |
-| `currency`             | `currency`                |             | `any`                     | `undefined` |
-| `highlightedDate`      | `highlighted-date`        |             | `string`                  | `undefined` |
-| `isScrollViewDragging` | `is-scroll-view-dragging` |             | `boolean`                 | `undefined` |
-| `language`             | `language`                |             | `string`                  | `undefined` |
-| `propertyId`           | `property-id`             |             | `number`                  | `undefined` |
-| `today`                | --                        |             | `String`                  | `undefined` |
+| Property               | Attribute                 | Description                                                                                                                           | Type                      | Default     |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
+| `calendarData`         | --                        |                                                                                                                                       | `{ [key: string]: any; }` | `undefined` |
+| `countries`            | --                        |                                                                                                                                       | `ICountry[]`              | `undefined` |
+| `currency`             | `currency`                |                                                                                                                                       | `any`                     | `undefined` |
+| `dayUseBookings`       | --                        | Day-use bookings for the currently loaded date window (from `getDayUseBookingsForCalendar`) — booked units get a red 2px cell border. | `DayUseBookings[]`        | `[]`        |
+| `highlightedDate`      | `highlighted-date`        |                                                                                                                                       | `string`                  | `undefined` |
+| `isScrollViewDragging` | `is-scroll-view-dragging` |                                                                                                                                       | `boolean`                 | `undefined` |
+| `language`             | `language`                |                                                                                                                                       | `string`                  | `undefined` |
+| `propertyId`           | `property-id`             |                                                                                                                                       | `number`                  | `undefined` |
+| `today`                | --                        |                                                                                                                                       | `String`                  | `undefined` |
 
 
 ## Events

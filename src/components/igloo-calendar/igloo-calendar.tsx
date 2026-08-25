@@ -2,7 +2,15 @@ import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, 
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
-import { realtimeService, type RealtimeReason, type UnitHkStatusChangePayload, type SalesBatchPayload, type AvailabilityBatchPayload } from '@/services/realtime/realtime.service';
+import {
+  realtimeService,
+  type RealtimeReason,
+  type UnitHkStatusChangePayload,
+  type SalesBatchPayload,
+  type AvailabilityBatchPayload,
+  type DayUseModifiedPayload,
+  type DayUseRemovedPayload,
+} from '@/services/realtime/realtime.service';
 import { EventsService } from '@/services/events.service';
 import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
@@ -19,10 +27,11 @@ import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
 import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
 import housekeeping_store from '@/stores/housekeeping.store';
-import type { SetRoomCalendarExtraParams } from '@/services/property/types';
+import type { DayUseBookings, SetRoomCalendarExtraParams } from '@/services/property/types';
+import { PropertyService } from '@/services/property.service';
 import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dialog';
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
-import { SetDepartureTimeProps } from '@/services/booking-service/types';
+import { DoDayUseParams, SetDepartureTimeProps } from '@/services/booking-service/types';
 import { HKIssue } from '@/models/housekeeping';
 // import Auth from '@/models/Auth';
 export type CalendarSidebarState = {
@@ -57,6 +66,7 @@ export class IglooCalendar {
   @State() showLegend: boolean = false;
   @State() showPaymentDetails: boolean = false;
   @State() showToBeAssigned: boolean = false;
+  @State() showDayUseBookings: boolean = false;
   @State() unassignedDates = {};
   @State() roomNightsData: IRoomNightsData | null = null;
   @State() renderAgain = false;
@@ -66,6 +76,7 @@ export class IglooCalendar {
   @State() isAuthenticated = false;
   @State() calendarSidebarState: CalendarSidebarState;
   @State() invoiceState: CheckoutRoomEvent = null;
+  @State() dayUseBookings: DayUseBookings[] = [];
 
   @Event({ bubbles: true, composed: true })
   dragOverHighlightElement: EventEmitter;
@@ -79,6 +90,7 @@ export class IglooCalendar {
 
   private bookingService: BookingService = new BookingService();
   private roomService: RoomService = new RoomService();
+  private propertyService = new PropertyService();
   private eventsService = new EventsService();
   private toBeAssignedService = new ToBeAssignedService();
   private housekeepingService = new HouseKeepingService();
@@ -399,6 +411,7 @@ export class IglooCalendar {
       this.calendarData.monthsInfo = bookingResp.months;
       calendar_dates.fromDate = this.calendarData.from_date;
       calendar_dates.toDate = this.calendarData.to_date;
+      this.fetchDayUseBookings(this.property_id, this.calendarData.from_date, this.calendarData.to_date);
 
       setTimeout(() => {
         this.scrollToElement(this.today);
@@ -415,6 +428,69 @@ export class IglooCalendar {
     } catch (error) {
       console.error('Initializing Calendar Error', error);
     }
+  }
+  /**
+   * Fetches day-use bookings for the given window and merges them into `dayUseBookings`
+   * (passed down to `<igl-cal-body>` to mark booked units with a red 2px cell border).
+   */
+  private async fetchDayUseBookings(propertyId: number, fromDate: string, toDate: string) {
+    try {
+      const bookings = await this.propertyService.getDayUseBookingsForCalendar({
+        property_id: Number(propertyId),
+        from_date: fromDate,
+        to_date: toDate,
+      });
+      this.dayUseBookings = [...this.dayUseBookings, ...bookings];
+    } catch (error) {
+      console.error('Error fetching day-use bookings for calendar', error);
+    }
+  }
+  /**
+   * Broadcast after a `Do_Day_Use` call succeeds elsewhere (e.g. another agent/tab).
+   * The socket payload doesn't carry `unit_id`/`bh_id`, so we can't build a
+   * `DayUseBookings` entry from it directly — refetch the affected window instead.
+   */
+  private async handleDayUseCreated(result: DoDayUseParams) {
+    const fromDate = result?.extra_service?.start_date ?? result?.booking?.from_date;
+    const toDate = result?.extra_service?.end_date ?? result?.booking?.to_date;
+    if (!fromDate || !toDate) {
+      return;
+    }
+    await this.fetchDayUseBookings(this.property_id, fromDate, toDate);
+  }
+  /**
+   * Broadcast when a day-use extra service is added, edited, or removed (e.g. from
+   * another agent/tab). Unlike `DAY_USE_CREATED`, this refetches the target date and
+   * *replaces* whatever we currently hold for it, so removed/edited bookings correctly
+   * disappear from units that no longer have one instead of leaving a stale entry behind.
+   */
+  private async handleDayUseModified(payload: DayUseModifiedPayload) {
+    const date = payload?.start_date;
+    if (!date) {
+      return;
+    }
+    try {
+      const bookings = await this.propertyService.getDayUseBookingsForCalendar({
+        property_id: Number(this.property_id),
+        from_date: date,
+        to_date: date,
+      });
+      this.dayUseBookings = [...this.dayUseBookings.filter(b => b.target_date !== date), ...bookings];
+    } catch (error) {
+      console.error('Error refetching day-use bookings after DAY_USE_MODIFIED', error);
+    }
+  }
+  /**
+   * Broadcast when a day-use extra service is removed. Unlike `DAY_USE_MODIFIED`, the payload
+   * carries enough to identify the exact entry (unit + date), so it's dropped locally without a refetch.
+   */
+  private handleDayUseRemoved(payload: DayUseRemovedPayload) {
+    const date = payload?.START_DATE;
+    const unitId = payload?.PR_ID;
+    if (!date || unitId == null) {
+      return;
+    }
+    this.dayUseBookings = this.dayUseBookings.filter(b => !(b.target_date === date && b.unit_id === unitId));
   }
   private async getHkIssues(property_id: number) {
     const issues = await this.housekeepingService.getHkIssues({ property_id });
@@ -466,6 +542,9 @@ export class IglooCalendar {
       SET_DEPARTURE_TIME: this.handleSetDepartureTime,
       HK_ISSUE_FOUND: this.handleHKIssueFound,
       HK_ISSUE_FIXED: this.handleHKIssueFixed,
+      DAY_USE_CREATED: this.handleDayUseCreated,
+      DAY_USE_MODIFIED: this.handleDayUseModified,
+      DAY_USE_REMOVED: this.handleDayUseRemoved,
     };
 
     const handler = reasonHandlers[reason];
@@ -978,18 +1057,32 @@ export class IglooCalendar {
       case 'showAssigned':
         calendarElement.classList.remove('showLegend');
         calendarElement.classList.remove('showToBeAssigned');
+        calendarElement.classList.remove('showDayUseBookings');
         calendarElement.classList.toggle('showToBeAssigned');
 
         this.showLegend = false;
         this.showToBeAssigned = true;
+        this.showDayUseBookings = false;
         break;
       case 'showLegend':
         calendarElement.classList.remove('showToBeAssigned');
         calendarElement.classList.remove('showLegend');
+        calendarElement.classList.remove('showDayUseBookings');
         calendarElement.classList.toggle('showLegend');
 
         this.showLegend = !this.showLegend;
         this.showToBeAssigned = false;
+        this.showDayUseBookings = false;
+        break;
+      case 'showDayUseBookings':
+        calendarElement.classList.remove('showLegend');
+        calendarElement.classList.remove('showToBeAssigned');
+        calendarElement.classList.remove('showDayUseBookings');
+        calendarElement.classList.toggle('showDayUseBookings');
+
+        this.showLegend = false;
+        this.showToBeAssigned = false;
+        this.showDayUseBookings = true;
         break;
       case 'calendar':
         let dt = new Date();
@@ -1041,6 +1134,7 @@ export class IglooCalendar {
 
   private async addDatesToCalendar(fromDate: string, toDate: string) {
     const [results] = await Promise.all([this.bookingService.getCalendarData(this.property_id, fromDate, toDate)]);
+    this.fetchDayUseBookings(this.property_id, fromDate, toDate);
 
     const newBookings = results.myBookings || [];
     this.updateBookingEventsDateRange(newBookings);
@@ -1151,6 +1245,7 @@ export class IglooCalendar {
 
     this.showLegend = false;
     this.showToBeAssigned = false;
+    this.showDayUseBookings = false;
   }
 
   private scrollViewDragPos = { top: 0, left: 0, x: 0, y: 0 };
@@ -1403,7 +1498,10 @@ export class IglooCalendar {
       <Host>
         <ir-toast></ir-toast>
         <ir-interceptor></ir-interceptor>
-        <div id="iglooCalendar" class={{ 'igl-calendar': true, 'showToBeAssigned': this.showToBeAssigned, 'showLegend': this.showLegend }}>
+        <div
+          id="iglooCalendar"
+          class={{ 'igl-calendar': true, 'showToBeAssigned': this.showToBeAssigned, 'showLegend': this.showLegend, 'showDayUseBookings': this.showDayUseBookings }}
+        >
           {this.shouldRenderCalendarView() ? (
             <Fragment data-testid="ir-calendar">
               {this.showToBeAssigned && (
@@ -1418,6 +1516,14 @@ export class IglooCalendar {
                 ></igl-to-be-assigned>
               )}
               {this.showLegend && <igl-legend class="legendContainer" legendData={this.calendarData.legendData} onOptionEvent={evt => this.onOptionSelect(evt)}></igl-legend>}
+              {this.showDayUseBookings && (
+                <igl-day-use-bookings
+                  class="dayUseBookingsContainer"
+                  calendarData={this.calendarData}
+                  dayUseBookings={this.dayUseBookings}
+                  onOptionEvent={evt => this.onOptionSelect(evt)}
+                ></igl-day-use-bookings>
+              )}
               <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
                 <div id="calendarContainer">
                   <igl-cal-header
@@ -1428,6 +1534,7 @@ export class IglooCalendar {
                     calendarData={this.calendarData}
                     highlightedDate={this.highlightedDate}
                     onOptionEvent={evt => this.onOptionSelect(evt)}
+                    dayUseBookings={this.dayUseBookings}
                   ></igl-cal-header>
                   <igl-cal-body
                     propertyId={this.property_id}
@@ -1438,6 +1545,7 @@ export class IglooCalendar {
                     highlightedDate={this.highlightedDate}
                     isScrollViewDragging={this.scrollViewDragging}
                     calendarData={this.calendarData}
+                    dayUseBookings={this.dayUseBookings}
                   ></igl-cal-body>
                   <igl-cal-footer
                     isLegendOpen={this.showLegend}
@@ -1580,6 +1688,7 @@ export class IglooCalendar {
             STATUS_CODE: (this.bookingItem as any)?.STATUS_CODE,
           }}
           checkOut={this.bookingItem?.TO_DATE}
+          dayUse={(this.bookingItem as any)?.dayUse === true}
         ></ir-booking-editor-drawer>
         <igl-bulk-operations-drawer
           property_id={this.property_id}

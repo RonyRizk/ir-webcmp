@@ -93,7 +93,7 @@ export class IrBookingEditorGuestForm {
                 onText-change={e => updateBookedByGuest({ firstName: e.detail })}
                 onChange={e => syncFirstRoomGuestName('first_name', (e.target as HTMLIrInputElement).value)}
               >
-                <p style={{ margin: '0', marginBottom: '0.5rem' }} slot="label">
+                <p style={{ margin: '0' }} slot="label">
                   <span class="booking-editor__guest-input-label --first-name-pc-label">Name</span>
                   <span class="booking-editor__guest-input-label --first-name-mobile-label">First name</span>
                 </p>
@@ -151,21 +151,23 @@ export class IrBookingEditorGuestForm {
           ></ir-mobile-input>
         </section>
         <section class={'booking-editor__form-control'}>
-          <wa-select
-            size="s"
-            label={locales.entries.Lcz_YourArrivalTime}
-            data-testid="arrival_time"
-            id={v4()}
-            defaultValue={selects.arrivalTime[0].CODE_NAME}
-            value={bookedByGuest.selectedArrivalTime}
-            onchange={event => updateBookedByGuest({ selectedArrivalTime: (event.target as HTMLSelectElement).value })}
-          >
-            {selects.arrivalTime.map(time => (
-              <wa-option value={time.CODE_NAME} selected={bookedByGuest.selectedArrivalTime === time.CODE_NAME}>
-                {time.CODE_VALUE_EN}
-              </wa-option>
-            ))}
-          </wa-select>
+          {!booking_store?.bookingDraft?.dayUse && (
+            <wa-select
+              size="s"
+              label={locales.entries.Lcz_YourArrivalTime}
+              data-testid="arrival_time"
+              id={v4()}
+              defaultValue={selects.arrivalTime[0].CODE_NAME}
+              value={bookedByGuest.selectedArrivalTime}
+              onchange={event => updateBookedByGuest({ selectedArrivalTime: (event.target as HTMLSelectElement).value })}
+            >
+              {selects.arrivalTime.map(time => (
+                <wa-option value={time.CODE_NAME} selected={bookedByGuest.selectedArrivalTime === time.CODE_NAME}>
+                  {time.CODE_VALUE_EN}
+                </wa-option>
+              ))}
+            </wa-select>
+          )}
           <wa-textarea
             onchange={event => updateBookedByGuest({ note: (event.target as HTMLTextAreaElement).value })}
             size="s"

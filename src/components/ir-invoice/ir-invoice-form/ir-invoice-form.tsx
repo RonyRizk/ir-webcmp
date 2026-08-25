@@ -1,7 +1,7 @@
-import { Booking, Room } from '@/models/booking.dto';
+import { Booking, ExtraService, Room } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { buildSplitIndex } from '@/utils/booking';
-import { formatAmount } from '@/utils/utils';
+import { formatAmount, getEntryValue } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { BookingInvoiceInfo, InvoiceableItem, ViewMode } from '../types';
@@ -10,7 +10,8 @@ import { IssueInvoiceProps } from '@/services/booking-service/types';
 import calendar_data from '@/stores/calendar-data';
 import axios from 'axios';
 import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
-import { FdTypes } from '@/types/enums';
+import { FdTypes, InOut } from '@/types/enums';
+import { _formatTime } from '@/components/ir-booking-details/functions';
 @Component({
   tag: 'ir-invoice-form',
   styleUrl: 'ir-invoice-form.css',
@@ -111,6 +112,7 @@ export class IrInvoiceForm {
   private apiDisabledItemKeys: Set<number> = new Set();
   private alreadyInvoicedItemKeys: Set<number> = new Set();
   private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2&mode=proforma';
+  private svcCategories: IEntries[] = [];
 
   componentWillLoad() {
     this.init();
@@ -168,9 +170,21 @@ export class IrInvoiceForm {
       }
     };
 
+    const today = moment().startOf('day');
     const rooms = this.booking.rooms ?? [];
     rooms.forEach(room => {
-      markIfBefore(room.system_id, room.to_date, { checkedOut: room?.in_out?.code === '002' });
+      if (typeof room.system_id !== 'number' || !this.invoicableKey.has(room.system_id) || !room.to_date) {
+        return;
+      }
+      const toDate = moment(room.to_date, 'YYYY-MM-DD', true);
+      if (!toDate.isValid() || !toDate.startOf('day').isAfter(today)) {
+        // Departure date has already arrived/passed: invoiceable without needing the checkout flag.
+        return;
+      }
+      // Departure date hasn't arrived yet: only allow if the room was already checked out early.
+      if (room?.in_out?.code !== InOut.CheckedOut) {
+        disabledKeys.add(room.system_id);
+      }
     });
 
     const pickupInfo: any = this.booking.pickup_info;
@@ -371,12 +385,14 @@ export class IrInvoiceForm {
       this.isLoading = true;
       // let invoiceInfo = this.invoiceInfo;
       // if (!this.invoiceInfo) {
-      const [booking, invoiceInfo] = await Promise.all([
+      const [booking, invoiceInfo, svcCategories] = await Promise.all([
         this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: 'en', withExtras: true }),
         this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
+        this.bookingService.getSetupEntriesByTableName('_SVC_CATEGORY'),
       ]);
 
       this.booking = { ...booking };
+      this.svcCategories = svcCategories;
       // }
 
       this.setupInvoicables(invoiceInfo);
@@ -948,7 +964,37 @@ export class IrInvoiceForm {
       </div>
     );
   }
-
+  private category(service: ExtraService): IEntries | undefined {
+    return this.svcCategories?.find(c => c.CODE_NAME === service?.category?.code);
+  }
+  private categoryLabel(service: ExtraService): string | null {
+    const category = this.category(service);
+    return category ? getEntryValue({ entry: category, language: 'en' }) : null;
+  }
+  private description(service: ExtraService) {
+    const categoryLabel = this.categoryLabel(service);
+    if (categoryLabel) {
+      return (
+        <span>
+          <span>
+            {categoryLabel}
+            {service.description ? ':' : ''}{' '}
+          </span>
+          {service.description}
+        </span>
+      );
+    }
+    return service.description;
+  }
+  /**
+   * Opens the existing day-use reservation's details drawer — same `showBookingPopup`/`EDIT_BOOKING`
+   * path `igl-booking-event-hover`'s "Edit booking" action uses, so `igloo-calendar.tsx`'s existing
+   * `editBookingItem` wiring picks it up without any new plumbing.
+   */
+  private formatDayUseTime(time: string): string {
+    const [hour, minute] = time.split(':');
+    return _formatTime(hour, minute);
+  }
   render() {
     if (this.isLoading) {
       return (
@@ -1014,8 +1060,19 @@ export class IrInvoiceForm {
                       >
                         <div class="ir-invoice__room-checkbox-container">
                           <div class={'ir-invoice__room-info'}>
-                            <span>{extra_service.description}</span>
-                            {this.getDateView(extra_service.start_date, extra_service.end_date)}
+                            <span>
+                              {this.description(extra_service)}
+                              {extra_service.category.code === 'DUZ' && (
+                                <span>
+                                  : {this.formatDayUseTime(extra_service.from_time)} – {this.formatDayUseTime(extra_service.to_time)}
+                                </span>
+                              )}
+                            </span>
+                            {extra_service.category?.code === 'DUZ' ? (
+                              <div>{moment(new Date(extra_service.start_date)).format('MMM DD, YYYY')} </div>
+                            ) : (
+                              this.getDateView(extra_service.start_date, extra_service.end_date)
+                            )}
                           </div>
                           {this.renderPriceColumn(extra_service.price, sysId)}
                         </div>

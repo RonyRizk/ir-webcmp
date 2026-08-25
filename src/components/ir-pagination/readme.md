@@ -44,6 +44,7 @@
  - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
  - [ir-fiscal-documents-table](../ir-fiscal-documents/ir-fiscal-documents-table)
  - [ir-tasks-table-pagination](../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
+ - [ir-unvoiced-bookings-table](../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Depends on
 
@@ -60,6 +61,7 @@ graph TD;
   ir-dp-report-table --> ir-pagination
   ir-fiscal-documents-table --> ir-pagination
   ir-tasks-table-pagination --> ir-pagination
+  ir-unvoiced-bookings-table --> ir-pagination
   style ir-pagination fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

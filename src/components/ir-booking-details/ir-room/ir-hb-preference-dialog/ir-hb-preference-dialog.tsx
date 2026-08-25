@@ -63,7 +63,7 @@ export class IrHbPreferenceDialog {
     return (
       <ir-dialog
         open={this.open}
-        label="Half Board 2nd Meal Preference"
+        label="Half-board 2nd Meal Preference"
         ref={el => (this.dialogRef = el)}
         onIrDialogHide={e => {
           e.preventDefault();

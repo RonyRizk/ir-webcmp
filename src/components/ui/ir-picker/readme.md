@@ -80,7 +80,7 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-book-property-header](../../igloo-calendar/igl-book-property/igl-book-property-header)
- - [igl-cal-header](../../igloo-calendar/igl-cal-header)
+ - [igl-cal-header-toolbar](../../igloo-calendar/igl-cal-header/igl-cal-header-toolbar)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [ir-booking-editor-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-form)
  - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
@@ -91,7 +91,7 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   igl-book-property-header --> ir-picker
-  igl-cal-header --> ir-picker
+  igl-cal-header-toolbar --> ir-picker
   igl-property-booked-by --> ir-picker
   ir-booking-editor-form --> ir-picker
   ir-booking-editor-header --> ir-picker

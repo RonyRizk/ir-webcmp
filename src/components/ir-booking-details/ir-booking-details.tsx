@@ -11,7 +11,7 @@ import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent, PaymentEntries, PrintScreenOptions } from './types';
 import calendar_data from '@/stores/calendar-data';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { buildSplitIndex, SplitIndex } from '@/utils/booking';
+import { buildSplitIndex, DAY_USE_CATEGORY_CODE, SplitIndex } from '@/utils/booking';
 import { AgentsService } from '@/services/agents/agents.service';
 import { Agent } from '@/services/agents/type';
 import { CityLedgerService, type ClTx } from '@/services/city-ledger';
@@ -19,6 +19,7 @@ import { mapClTxToFolioRow, FolioRow } from '@/components/ir-city-ledger/ir-city
 import { isAgentMode } from './functions';
 import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
 import { extras } from '@/utils/utils';
+import moment from 'moment';
 
 @Component({
   tag: 'ir-booking-details',
@@ -63,6 +64,7 @@ export class IrBookingDetails {
   @State() rerenderFlag = false;
   @State() roomGuest: any;
   @State() selectedService: ExtraService;
+  @State() extraServiceDefaultPrId: number | null = null;
   @State() showPaymentDetails: any;
   @State() sidebarPayload: any;
   @State() sidebarState: BookingDetailsSidebarEvents | null = null;
@@ -245,7 +247,7 @@ export class IrBookingDetails {
           REFERENCE_TYPE: '',
           FROM_DATE: this.booking.from_date,
           ARRIVAL: this.booking.arrival,
-          TO_DATE: this.booking.to_date,
+          TO_DATE: this.booking.is_room_less ? moment(this.booking.to_date, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') : this.booking.to_date,
           TITLE: `${locales.entries.Lcz_AddingUnitToBooking}# ${this.booking.booking_nbr}`,
           defaultDateRange: {
             fromDate: new Date(this.booking.from_date),
@@ -266,6 +268,7 @@ export class IrBookingDetails {
         };
         return;
       case 'extra_service_btn':
+        this.extraServiceDefaultPrId = null;
         this.sidebarState = 'extra_service';
         return;
       case 'add-payment':
@@ -310,9 +313,39 @@ export class IrBookingDetails {
     }
     await this.resetBooking();
   }
+  /**
+   * Day-use extra services aren't editable through the generic extra-service form (no rate plan,
+   * unit/date/price/hours instead) — intercept and reopen the booking editor drawer in
+   * `EDIT_DAY_USE` mode instead, prefilled from this service and the booking. Same interception
+   * pattern as `ir-room.tsx`'s ECI/LCO handling, just one level up since day-use services aren't
+   * necessarily rendered inside a room block.
+   */
   @Listen('editExtraService')
-  handleEditExtraService(e: CustomEvent) {
-    this.selectedService = e.detail;
+  handleEditExtraService(e: CustomEvent<ExtraService>) {
+    const service = e.detail;
+    if (service?.category?.code === DAY_USE_CATEGORY_CODE) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      this.bookingItem = {
+        event_type: 'EDIT_DAY_USE',
+        TITLE: `Edit Day-Use`.trim(),
+        FROM_DATE: service.start_date,
+        TO_DATE: service.start_date,
+        dayUse: true,
+        extraService: service,
+      } as any;
+      return;
+    }
+    this.selectedService = service;
+    this.extraServiceDefaultPrId = null;
+    this.sidebarState = 'extra_service';
+  }
+  @Listen('addExtraServiceToUnit')
+  handleAddExtraServiceToUnit(e: CustomEvent<{ pr_id: number }>) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    this.selectedService = null;
+    this.extraServiceDefaultPrId = e.detail.pr_id;
     this.sidebarState = 'extra_service';
   }
   @Listen('openPrintScreen')
@@ -607,33 +640,39 @@ export class IrBookingDetails {
         ></ir-booking-header>
         <div class="booking-details__booking-info">
           <div class="booking-details__info-column">
-            <ir-reservation-information arrivalTime={this.arrivalTime} countries={this.countries} booking={this.booking}></ir-reservation-information>
-            <ir-booking-rooms
-              booking={this.booking}
-              agent={this.agent}
-              propertyId={this.property_id}
-              language={this.language}
-              departureTime={this.departureTime}
-              bedPreference={this.bedPreference}
-              legendData={this.calendarData.legendData}
-              roomsInfo={this.calendarData.roomsInfo}
-              hasRoomAdd={this.hasRoomAdd}
-              hasRoomEdit={this.hasRoomEdit}
-              hasRoomDelete={this.hasRoomDelete}
-              splitIndex={this.splitIndex}
-              clTransactions={this.rawTransactions}
-              onRoomDeleteFinished={this.handleDeleteFinish}
-            ></ir-booking-rooms>
-            {/* <ir-ota-services services={this.booking.ota_services}></ir-ota-services> */}
-            <section>
-              <ir-extra-services
-                language={this.language}
-                svcCategories={this.svcCategories}
+            <ir-reservation-information countries={this.countries} booking={this.booking}></ir-reservation-information>
+            {!this.booking.is_room_less && (
+              <ir-booking-rooms
                 booking={this.booking}
                 agent={this.agent}
+                propertyId={this.property_id}
+                language={this.language}
+                departureTime={this.departureTime}
+                arrivalTime={this.arrivalTime}
+                bedPreference={this.bedPreference}
+                legendData={this.calendarData.legendData}
+                roomsInfo={this.calendarData.roomsInfo}
+                hasRoomAdd={this.hasRoomAdd}
+                hasRoomEdit={this.hasRoomEdit}
+                hasRoomDelete={this.hasRoomDelete}
+                splitIndex={this.splitIndex}
                 clTransactions={this.rawTransactions}
-              ></ir-extra-services>
-            </section>
+                svcCategories={this.svcCategories}
+                onRoomDeleteFinished={this.handleDeleteFinish}
+              ></ir-booking-rooms>
+            )}
+            {/* <ir-ota-services services={this.booking.ota_services}></ir-ota-services> */}
+            {(this.booking?.rooms?.length > 1 || this.booking.rooms.length === 0) && (
+              <section>
+                <ir-extra-services
+                  language={this.language}
+                  svcCategories={this.svcCategories}
+                  booking={this.booking}
+                  agent={this.agent}
+                  clTransactions={this.rawTransactions}
+                ></ir-extra-services>
+              </section>
+            )}
             <ir-pickup-view booking={this.booking} agent={this.agent} clTransactions={this.rawTransactions}></ir-pickup-view>
           </div>
 
@@ -697,6 +736,7 @@ export class IrBookingDetails {
         <ir-extra-service-config
           open={this.sidebarState === 'extra_service'}
           service={this.selectedService}
+          defaultPrId={this.extraServiceDefaultPrId}
           svcCategories={this.svcCategories}
           language={this.language}
           booking={this.booking}
@@ -709,6 +749,7 @@ export class IrBookingDetails {
             if (this.selectedService) {
               this.selectedService = null;
             }
+            this.extraServiceDefaultPrId = null;
           }}
         ></ir-extra-service-config>
 
@@ -772,6 +813,8 @@ export class IrBookingDetails {
           propertyid={this.propertyid as any}
           checkIn={this.bookingItem?.FROM_DATE}
           checkOut={this.bookingItem?.TO_DATE}
+          dayUse={(this.bookingItem as any)?.dayUse === true}
+          extraService={(this.bookingItem as any)?.extraService}
         ></ir-booking-editor-drawer>
 
         {/* Shared fiscal-document preview for the whole booking. `mode="all"` mounts

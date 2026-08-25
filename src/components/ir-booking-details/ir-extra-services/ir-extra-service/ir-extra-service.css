@@ -7,7 +7,7 @@
   gap: 0.75rem;
 }
 
-/* ── Left: description + date ── */
+/* ── Left: description + meta ── */
 .es-content {
   flex: 1;
   min-width: 0;
@@ -19,27 +19,27 @@
   line-height: 1.5;
   color: var(--wa-color-text-quiet, #27272a);
   word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
-.es-category-badge {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--wa-color-primary-700, #1d4ed8);
-  background: var(--wa-color-primary-50, #eff6ff);
-  border-radius: 4px;
-  padding: 1px 6px;
-  margin-right: 6px;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.es-date {
+.es-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--wa-space-2xs, 4px);
   margin-top: 5px;
   font-size: var(--wa-font-size-s);
+}
+
+.es-meta-date,
+.es-meta-date::part(base),
+.es-meta-date::part(from-date),
+.es-meta-date::part(to-date) {
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* ── Right: pricing + action ── */

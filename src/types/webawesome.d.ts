@@ -65,6 +65,7 @@ declare module '@stencil/core' {
       'wa-option': WithHTMLEvents<CustomElements['wa-option']>;
       'wa-input': WithInput<CustomElements['wa-input']>;
       'wa-icon': WithRole<CustomElements['wa-icon']>;
+      'wa-format-bytes': WithHTMLEvents<CustomElements['wa-format-bytes']>;
     }
   }
 }
