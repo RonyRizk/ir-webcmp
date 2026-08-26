@@ -51,6 +51,10 @@
  - [ir-revenue-table](../ir-daily-revenue/ir-revenue-table)
  - [ir-sales-by-channel-table](../ir-sales-by-channel/ir-sales-by-channel-table)
  - [ir-sales-table](../ir-sales-by-country/ir-sales-table)
+ - [ir-translations-entries-table](../ir-translations-manager/ir-translations-entries-table)
+ - [ir-translations-entry-form](../ir-translations-manager/ir-translations-entry-drawer/ir-translations-entry-form)
+ - [ir-translations-language-dialog](../ir-translations-manager/ir-translations-language-dialog)
+ - [ir-translations-manager](../ir-translations-manager)
  - [ir-unvoiced-bookings-table](../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
@@ -83,6 +87,10 @@ graph TD;
   ir-revenue-table --> ir-empty-state
   ir-sales-by-channel-table --> ir-empty-state
   ir-sales-table --> ir-empty-state
+  ir-translations-entries-table --> ir-empty-state
+  ir-translations-entry-form --> ir-empty-state
+  ir-translations-language-dialog --> ir-empty-state
+  ir-translations-manager --> ir-empty-state
   ir-unvoiced-bookings-table --> ir-empty-state
   style ir-empty-state fill:#f9f,stroke:#333,stroke-width:4px
 ```

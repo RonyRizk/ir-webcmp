@@ -16,6 +16,9 @@ import { groupSvcCategoriesByParent, SvcCategoryGroup } from '@/utils/svc-catego
 /** `_SVC_CATEGORY` short code for Baby Cot — only used to place the Stay/Night pricing-model select, not for grouping. */
 const BABY_COT_CATEGORY_CODE = 'BCT';
 
+/** Hidden `_SVC_CATEGORY` — only used for categories that doesn't require a default price. */
+const HIDDEN_SUB_CATEGORIES = new Set(['MNB']);
+
 /** Valid `BABY_COT_PRICING_MODEL` values — the baby cot's default price is either a flat per-stay charge or a per-night charge. */
 const BABY_COT_PRICING_MODELS = ['Stay', 'Night'] as const;
 type BabyCotPricingModel = (typeof BABY_COT_PRICING_MODELS)[number];
@@ -202,54 +205,56 @@ export class IrExtraServicesSettings {
                 </span>
               </div>
               <div class="extra-services-grid">
-                {group.categories.map((category, idx) => {
-                  const rule = this.priceCategoryRules.get(category.CODE_NAME);
-                  // const isDayUse = category.CODE_NAME === DAY_USE_CATEGORY_CODE;
-                  const isBabyCot = category.CODE_NAME === BABY_COT_CATEGORY_CODE;
-                  const isExtraBed = category.CODE_NAME === 'EXB';
-                  return [
-                    idx > 0 && (
-                      <div class="extra-services-grid__divider" key={category.CODE_NAME + 'divider' + idx}>
-                        <wa-divider></wa-divider>
-                      </div>
-                    ),
-                    <div class="extra-services-grid__row" id={category.CODE_NAME} key={category.CODE_NAME + 'row' + idx}>
-                      <div class="extra-services-grid__name">
-                        <p class="extra-services-grid__title">{getEntryValue({ entry: category, language: this.language })}</p>
-                      </div>
-                      <div class="extra-services-grid__controls">
-                        <div class="extra-services-grid__cell">
-                          {isBabyCot ? (
-                            <div class={'ir__field-group'}>
+                {group.categories
+                  .filter(c => !HIDDEN_SUB_CATEGORIES.has(c.CODE_NAME))
+                  .map((category, idx) => {
+                    const rule = this.priceCategoryRules.get(category.CODE_NAME);
+                    // const isDayUse = category.CODE_NAME === DAY_USE_CATEGORY_CODE;
+                    const isBabyCot = category.CODE_NAME === BABY_COT_CATEGORY_CODE;
+                    const isExtraBed = category.CODE_NAME === 'EXB';
+                    return [
+                      idx > 0 && (
+                        <div class="extra-services-grid__divider" key={category.CODE_NAME + 'divider' + idx}>
+                          <wa-divider></wa-divider>
+                        </div>
+                      ),
+                      <div class="extra-services-grid__row" id={category.CODE_NAME} key={category.CODE_NAME + 'row' + idx}>
+                        <div class="extra-services-grid__name">
+                          <p class="extra-services-grid__title">{getEntryValue({ entry: category, language: this.language })}</p>
+                        </div>
+                        <div class="extra-services-grid__controls">
+                          <div class="extra-services-grid__cell">
+                            {isBabyCot ? (
+                              <div class={'ir__field-group'}>
+                                <ir-extra-service-price-input
+                                  // class={'--grow'}
+                                  autoValidate={this.autoValidate}
+                                  onPriceChange={e => this.handlePriceRuleChange(category.CODE_NAME, e.detail)}
+                                  chargeRule={rule}
+                                ></ir-extra-service-price-input>
+
+                                <wa-select
+                                  value={this.babyCotPricingModel}
+                                  defaultValue={this.babyCotPricingModel}
+                                  size="s"
+                                  style={{ width: 'min-content', minWidth: '100px' }}
+                                  onchange={e => (this.babyCotPricingModel = (e.target as HTMLSelectElement).value as BabyCotPricingModel)}
+                                >
+                                  <wa-option value="Stay">Stay</wa-option>
+                                  <wa-option value="Night">Night</wa-option>
+                                </wa-select>
+                              </div>
+                            ) : (
                               <ir-extra-service-price-input
-                                // class={'--grow'}
                                 autoValidate={this.autoValidate}
                                 onPriceChange={e => this.handlePriceRuleChange(category.CODE_NAME, e.detail)}
                                 chargeRule={rule}
-                              ></ir-extra-service-price-input>
-
-                              <wa-select
-                                value={this.babyCotPricingModel}
-                                defaultValue={this.babyCotPricingModel}
-                                size="s"
-                                style={{ width: 'min-content', minWidth: '100px' }}
-                                onchange={e => (this.babyCotPricingModel = (e.target as HTMLSelectElement).value as BabyCotPricingModel)}
                               >
-                                <wa-option value="Stay">Stay</wa-option>
-                                <wa-option value="Night">Night</wa-option>
-                              </wa-select>
-                            </div>
-                          ) : (
-                            <ir-extra-service-price-input
-                              autoValidate={this.autoValidate}
-                              onPriceChange={e => this.handlePriceRuleChange(category.CODE_NAME, e.detail)}
-                              chargeRule={rule}
-                            >
-                              {isExtraBed && <span slot="end">/night</span>}
-                            </ir-extra-service-price-input>
-                          )}
-                        </div>
-                        {/* <div class="extra-services-grid__cell">
+                                {isExtraBed && <span slot="end">/night</span>}
+                              </ir-extra-service-price-input>
+                            )}
+                          </div>
+                          {/* <div class="extra-services-grid__cell">
                           {isDayUse && (
                             <wa-switch
                               checked={this.dayUseBlockNight}
@@ -260,10 +265,10 @@ export class IrExtraServicesSettings {
                             </wa-switch>
                           )}
                         </div> */}
-                      </div>
-                    </div>,
-                  ];
-                })}
+                        </div>
+                      </div>,
+                    ];
+                  })}
               </div>
             </wa-card>
           ))}

@@ -55,6 +55,8 @@
  - [ir-property-switcher](../../pms-header/ir-property-switcher)
  - [ir-reallocation-form](../../ir-reallocation-drawer/ir-reallocation-form)
  - [ir-room-guests-form](../../ir-booking-details/ir-room-guests/ir-room-guests-form)
+ - [ir-translations-entries-panel](../../ir-translations-manager/ir-translations-entries-panel)
+ - [ir-translations-manager](../../ir-translations-manager)
  - [ir-unvoiced-bookings-table](../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
 
 ### Graph
@@ -96,6 +98,8 @@ graph TD;
   ir-property-switcher --> ir-spinner
   ir-reallocation-form --> ir-spinner
   ir-room-guests-form --> ir-spinner
+  ir-translations-entries-panel --> ir-spinner
+  ir-translations-manager --> ir-spinner
   ir-unvoiced-bookings-table --> ir-spinner
   style ir-spinner fill:#f9f,stroke:#333,stroke-width:4px
 ```

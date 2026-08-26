@@ -1,0 +1,371 @@
+@import url('../../../common/table.css');
+
+:host {
+  --ir-cell-padding: 0.55rem 0.75rem;
+  --entries-table-font-size: var(--wa-font-size-s);
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Opportunistically fills whatever height its flex ancestors actually have
+     to give (see ir-translations-entries-panel.css) — `.table--container`'s
+     own max-height below is what guarantees a sane size either way. */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+:host(.--compact) {
+  --ir-cell-padding: 0.3rem 0.6rem;
+  --entries-table-font-size: var(--wa-font-size-xs, 0.8125rem);
+}
+
+:host(.--empty) {
+  padding: 1.5rem 1rem;
+}
+
+/* #region Table shell */
+
+.table--container {
+  /*
+   * Sticky cells resolve against this scroll container — but position: sticky
+   * only has any visible effect when its own reference box is what's actually
+   * scrolling. An unbounded height (auto-growing to fit every row) never
+   * scrolls internally, which silently no-ops the sticky header/key column
+   * below. Bounding the height here is what makes them real; the toolbar
+   * above stays outside this box, so it's always visible without needing to
+   * be sticky itself.
+   */
+  /* flex: 1 1 0%; */
+  min-height: 240px;
+  max-height: 50vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior-x: contain;
+  /* height: fit-content; */
+}
+/*lg*/
+@media (min-width: 1024px) {
+  .table--container {
+    max-height: 75vh;
+  }
+}
+
+.entries-table__table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: var(--entries-table-font-size);
+}
+
+.entries-table__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  color: var(--wa-color-text-quiet);
+  font-weight: var(--wa-font-weight-semibold, 600);
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.entries-table__col--drag {
+  width: 32px;
+}
+
+.entries-table__col--key {
+  width: 220px;
+}
+
+.entries-table__col--lang {
+  width: 200px;
+}
+
+.entries-table__col--actions {
+  width: 44px;
+}
+
+/* The pinned key column would otherwise eat most of a phone viewport. */
+@media (max-width: 575px) {
+  .entries-table__col--key {
+    width: 150px;
+  }
+}
+
+/* #endregion */
+
+/* #region Key column (sticky) */
+
+.ir-table-row td.entries-table__key {
+  position: sticky;
+  left: 0;
+  /* Above sibling cells so they scroll underneath. */
+  z-index: 4;
+}
+
+/* Scoped through `thead th` so it outranks the shared header rule above —
+   otherwise language headers scrolling past would paint over the pinned Key. */
+.entries-table__table thead th.entries-table__key-head {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+.last__row {
+  height: 100%;
+}
+
+/* The scroll seam needs a hard edge — a border would move with the cell's own
+   background during the hover transition, so paint it as a shadow. */
+.entries-table__key-head::after,
+.ir-table-row td.entries-table__key::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 1px;
+  background: var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+.entries-table__key-container {
+  display: flex;
+  align-items: center;
+}
+.entries-table__key-icon {
+  visibility: hidden;
+}
+.entries-table__key:hover .entries-table__key-icon {
+  visibility: visible;
+}
+
+/* Marks a key that's flagged ISVISIBLE: false — hidden from the live app, but still editable here. */
+.entries-table__key-hidden-mark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  font-size: 0.8em;
+  color: var(--wa-color-text-quiet);
+}
+
+.entries-table__key-text {
+  flex: 1;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--wa-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.95em;
+  color: var(--wa-color-text-normal);
+}
+
+/* #endregion */
+
+/* #region Drag handle */
+
+.ir-table-row td.entries-table__drag-cell {
+  padding: 0;
+  text-align: center;
+}
+
+.entries-table__drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--ir-cell-padding);
+  color: var(--wa-color-text-quiet);
+  cursor: grab;
+}
+
+.entries-table__drag-handle:active {
+  cursor: grabbing;
+}
+
+.entries-table__drag-handle.--disabled {
+  color: var(--wa-color-neutral-border-normal, #cbd5e1);
+  cursor: not-allowed;
+}
+
+.ir-table-row.entries-table__row--dragging {
+  opacity: 0.5;
+}
+
+/* Marks a row whose position no longer matches the last-loaded/saved order,
+   so a pending reorder's actual effect is visible before Save/Discard. Every
+   `<td>` already carries its own opaque background-color (needed for the
+   sticky key column to occlude content scrolling under it), which would
+   otherwise paint over a background set on the `<tr>` alone — so this
+   overrides every cell directly, at higher specificity than that base rule. */
+.ir-table-row.entries-table__row--reordered td {
+  background-color: var(--wa-color-warning-fill-quiet, #fef3c7);
+}
+
+.ir-table-row.entries-table__row--reordered td.entries-table__drag-cell {
+  box-shadow: inset 3px 0 0 var(--wa-color-warning-fill-loud, #f59e0b);
+}
+
+/* Hidden from the live app (ISVISIBLE: false) — dimmed so it reads as "off" at a glance, still fully readable/editable. */
+.ir-table-row.entries-table__row--hidden {
+  opacity: 0.6;
+}
+
+/* Soft-deleted (ISDELETED: true) — Setup still returns these rows, so they need a clear "this is gone" marker.
+   Same per-`<td>` override as `--reordered`, since the sticky key column paints its own opaque background. */
+.ir-table-row.entries-table__row--deleted td {
+  background-color: var(--wa-color-danger-fill-quiet, #fee2e2);
+}
+
+/* #endregion */
+
+/* #region Language headers */
+
+.entries-table__lang-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.entries-table__lang-code {
+  text-decoration: none;
+  cursor: help;
+}
+
+.entries-table__lang-source {
+  padding: 0.05rem 0.3rem;
+  font-size: 0.6875rem;
+  font-weight: var(--wa-font-weight-normal, 400);
+  text-transform: lowercase;
+  letter-spacing: 0;
+  color: var(--wa-color-brand-on-quiet);
+  background: var(--wa-color-brand-fill-quiet);
+  border-radius: var(--wa-border-radius-s);
+}
+
+.entries-table__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* #endregion */
+
+/* #region Value cells */
+.entries-table__value-cel {
+  height: min-content !important;
+}
+/* The edit button fills the cell edge-to-edge so its hover/focus background
+   and click target span the whole cell, not just the text. */
+.ir-table-row td.entries-table__value-cell {
+  padding: 0 !important;
+}
+
+.entries-table__cell-display {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: var(--ir-cell-padding);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: text;
+}
+
+.entries-table__cell-display:hover {
+  box-shadow: inset 0 0 0 1px var(--wa-color-neutral-border-normal, #cbd5e1);
+}
+
+.entries-table__cell-display:focus-visible {
+  outline: var(--wa-focus-ring, 2px solid var(--wa-color-brand-fill-loud));
+  outline-offset: -2px;
+}
+
+.entries-table__cell-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entries-table__cell-missing {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.85em;
+  color: var(--wa-color-warning-on-quiet, #92400e);
+  background: var(--wa-color-warning-fill-quiet, #fef3c7);
+  border-radius: var(--wa-border-radius-s);
+}
+
+/* System-protected entries (ISUPDATEABLE: false) — not a button, no hover/edit affordance. */
+.entries-table__cell-display.--readonly {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: default;
+  color: var(--wa-color-text-quiet);
+}
+
+.entries-table__cell-display.--readonly:hover {
+  box-shadow: none;
+}
+
+.entries-table__cell-lock {
+  flex: 0 0 auto;
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
+.entries-table__cell-input {
+  display: block;
+  width: 100%;
+}
+
+.entries-table__cell-input::part(base) {
+  border-radius: var(--wa-border-radius-s);
+}
+
+/* The column header already labels this field visually; the input's own
+   label prop (needed for a real accessible name) is kept in the a11y tree
+   only. */
+.entries-table__cell-input::part(label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* #endregion */
+
+.entries-table__actions {
+  text-align: center;
+}
+
+/* Row menus stay reachable on touch, but recede until the row is engaged. */
+.entries-table__actions ir-custom-button {
+  opacity: 0.45;
+  transition: opacity var(--wa-transition-fast, 150ms) ease;
+}
+
+.ir-table-row:hover .entries-table__actions ir-custom-button,
+.entries-table__actions ir-custom-button:focus-within {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .entries-table__actions ir-custom-button {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entries-table__actions ir-custom-button {
+    transition: none;
+  }
+}

@@ -110,6 +110,7 @@ Type: `Promise<void>`
  - [ir-dp-report](../../ir-dp-report)
  - [ir-fiscal-documents-filters](../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-pms-search](../../pms-header/ir-pms-search)
+ - [ir-translations-manager](../../ir-translations-manager)
 
 ### Depends on
 
@@ -123,6 +124,7 @@ graph TD;
   ir-dp-report --> ir-autocomplete
   ir-fiscal-documents-filters --> ir-autocomplete
   ir-pms-search --> ir-autocomplete
+  ir-translations-manager --> ir-autocomplete
   style ir-autocomplete fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

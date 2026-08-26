@@ -83,6 +83,16 @@ export class IrDialog {
     this.open = false;
   }
 
+  /**
+   * Nested Web Awesome components (dropdowns, selects, tooltips) emit their own
+   * composed `wa-show`/`wa-hide`, which bubble through the slot into these
+   * handlers. Acting on them would close the dialog when a menu closes, so only
+   * the dialog's own events count.
+   */
+  private isOwnEvent(e: Event): boolean {
+    return e.target === e.currentTarget;
+  }
+
   @OverflowRelease()
   private handleWaHide(e: CustomEvent<{ source: Element }>) {
     e.stopImmediatePropagation();
@@ -150,10 +160,10 @@ export class IrDialog {
   render() {
     return (
       <wa-dialog
-        onwa-hide={this.handleWaHide.bind(this)}
-        onwa-show={this.handleWaShow.bind(this)}
-        onwa-after-hide={this.handleWaAfterHide.bind(this)}
-        onwa-after-show={this.handleWaAfterShow.bind(this)}
+        onwa-hide={(e: CustomEvent<{ source: Element }>) => this.isOwnEvent(e) && this.handleWaHide(e)}
+        onwa-show={(e: CustomEvent) => this.isOwnEvent(e) && this.handleWaShow(e)}
+        onwa-after-hide={(e: CustomEvent) => this.isOwnEvent(e) && this.handleWaAfterHide(e)}
+        onwa-after-show={(e: CustomEvent) => this.isOwnEvent(e) && this.handleWaAfterShow(e)}
         label={this.label}
         id="dialog-overview"
         open={this.open}

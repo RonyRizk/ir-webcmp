@@ -52,6 +52,7 @@
  - [ir-rectifier-drawer](../ir-rectifier-drawer)
  - [ir-room-guests](../ir-booking-details/ir-room-guests)
  - [ir-test-cmp](../ir-test-cmp)
+ - [ir-translations-entry-drawer](../ir-translations-manager/ir-translations-entry-drawer)
  - [ir-user-form-panel-drawer](../ir-user-management/ir-user-form-panel/ir-user-form-panel-drawer)
 
 ### Graph
@@ -81,6 +82,7 @@ graph TD;
   ir-rectifier-drawer --> ir-drawer
   ir-room-guests --> ir-drawer
   ir-test-cmp --> ir-drawer
+  ir-translations-entry-drawer --> ir-drawer
   ir-user-form-panel-drawer --> ir-drawer
   style ir-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

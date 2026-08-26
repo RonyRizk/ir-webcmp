@@ -1,0 +1,132 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  /* A plain block host is a flex item of ir-page's `.page-body` with a
+     content-based min-width/min-height by default, which would let the
+     wide, tall table beneath it force that ancestor wider/taller than the
+     viewport instead of scrolling internally. */
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* #region Card */
+
+.entries-panel__card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--wa-color-surface-default);
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+  border-radius: var(--wa-border-radius-l, 0.75rem);
+  overflow: hidden;
+}
+
+/* #endregion */
+
+/* #region Toolbar */
+
+.entries-panel__toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.entries-panel__search {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 350px;
+}
+
+.entries-panel__status {
+  flex: 0 0 11rem;
+}
+
+/* Placeholders and the adjacent icons already carry the meaning visually; the
+   `label` props (needed for real accessible names) stay in the a11y tree only. */
+.entries-panel__search::part(label),
+.entries-panel__status::part(label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.entries-panel__search-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.4rem;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet);
+  background: var(--wa-color-neutral-fill-quiet);
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+  border-radius: var(--wa-border-radius-s);
+}
+
+@media (max-width: 575px) {
+  .entries-panel__toolbar {
+    flex-wrap: wrap;
+  }
+
+  .entries-panel__status {
+    flex: 1 1 8rem;
+  }
+}
+
+/* #endregion */
+
+/* #region Loading */
+
+.entries-panel__loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-s);
+}
+
+.entries-panel__loader-container p {
+  margin: 0;
+}
+
+/* #endregion */
+
+/* #region Footer */
+
+.entries-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-quiet);
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+
+.entries-panel__missing-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--wa-color-warning-on-quiet, #92400e);
+  cursor: pointer;
+}
+
+.entries-panel__missing-link:hover,
+.entries-panel__missing-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* #endregion */

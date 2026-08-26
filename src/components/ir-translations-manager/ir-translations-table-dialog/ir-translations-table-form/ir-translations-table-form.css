@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.table-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.table-form__error {
+  margin: -0.75rem 0 0;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-danger-on-quiet, #991b1b);
+}

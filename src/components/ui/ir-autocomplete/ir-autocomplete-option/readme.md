@@ -24,6 +24,7 @@
  - [ir-dp-report](../../../ir-dp-report)
  - [ir-fiscal-documents-filters](../../../ir-fiscal-documents/ir-fiscal-documents-filters)
  - [ir-pms-search](../../../pms-header/ir-pms-search)
+ - [ir-translations-manager](../../../ir-translations-manager)
 
 ### Graph
 ```mermaid
@@ -32,6 +33,7 @@ graph TD;
   ir-dp-report --> ir-autocomplete-option
   ir-fiscal-documents-filters --> ir-autocomplete-option
   ir-pms-search --> ir-autocomplete-option
+  ir-translations-manager --> ir-autocomplete-option
   style ir-autocomplete-option fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

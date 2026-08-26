@@ -42,6 +42,7 @@
  - [ir-sales-by-country](../../ir-sales-by-country)
  - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-test-cmp](../../ir-test-cmp)
+ - [ir-translations-manager](../../ir-translations-manager)
  - [ir-unbookable-rooms](../../ir-unbookable-rooms)
  - [ir-uninvoiced-bookings](../../ir-uninvoiced-bookings)
 
@@ -76,6 +77,7 @@ graph TD;
   ir-sales-by-country --> ir-page
   ir-tax-service-categories --> ir-page
   ir-test-cmp --> ir-page
+  ir-translations-manager --> ir-page
   ir-unbookable-rooms --> ir-page
   ir-uninvoiced-bookings --> ir-page
   style ir-page fill:#f9f,stroke:#333,stroke-width:4px

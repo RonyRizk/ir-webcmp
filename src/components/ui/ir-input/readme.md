@@ -145,6 +145,8 @@ Type: `Promise<HTMLInputElement>`
  - [ir-secure-tasks](../../ir-secure-tasks)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-tax-input](../../ir-tax-service-categories/ir-tax-input)
+ - [ir-translations-entry-form](../../ir-translations-manager/ir-translations-entry-drawer/ir-translations-entry-form)
+ - [ir-translations-table-form](../../ir-translations-manager/ir-translations-table-dialog/ir-translations-table-form)
  - [ir-unbookable-rooms-data](../../ir-unbookable-rooms/ir-unbookable-rooms-data)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
@@ -194,6 +196,8 @@ graph TD;
   ir-secure-tasks --> ir-input
   ir-tasks-header --> ir-input
   ir-tax-input --> ir-input
+  ir-translations-entry-form --> ir-input
+  ir-translations-table-form --> ir-input
   ir-unbookable-rooms-data --> ir-input
   ir-unbookable-rooms-filters --> ir-input
   ir-user-form-panel --> ir-input
