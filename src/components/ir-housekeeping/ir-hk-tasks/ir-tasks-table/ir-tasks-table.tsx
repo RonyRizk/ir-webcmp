@@ -123,6 +123,19 @@ export class IrTasksTable {
     return isTodayTask && task.status.code === 'IH';
   }
 
+  /**
+   * Marks the boundary row/group between today's tasks and future tasks.
+   * Only relevant when the list actually contains a date beyond today.
+   */
+  private isEndOfTodayBoundary(currentDate: string, nextDate?: string): boolean {
+    if (!nextDate) {
+      return false;
+    }
+    const isCurrentToday = moment(currentDate, 'YYYY-MM-DD').isSame(moment(), 'date');
+    const isNextFuture = moment(nextDate, 'YYYY-MM-DD').isAfter(moment(), 'date');
+    return isCurrentToday && isNextFuture;
+  }
+
   private taskBadges(task: Task) {
     const config = [
       { code: 'CLN', variant: 'danger', label: 'CL' },
@@ -198,16 +211,20 @@ export class IrTasksTable {
                 groups.push({ date: task.date, formattedDate: task.formatted_date, tasks: [task] });
               }
             }
-            return groups.map(group => (
-              <div key={group.date} class="mobile-date-group">
-                <p class="mobile-date-label">{group.formattedDate}</p>
-                {group.tasks.map(task => {
-                  const isCheckable = this.isCheckable(task);
-                  const isSkippable = this.isSkippable(task);
-                  return <ir-tasks-card task={task} isSkippable={isSkippable} key={task.id} isCheckable={isCheckable}></ir-tasks-card>;
-                })}
-              </div>
-            ));
+            return groups.map((group, groupIndex) => {
+              const nextGroup = groups[groupIndex + 1];
+              const isEndOfToday = this.isEndOfTodayBoundary(group.date, nextGroup?.date);
+              return (
+                <div key={group.date} class={{ 'mobile-date-group': true, 'end-of-today-group': isEndOfToday }}>
+                  <p class="mobile-date-label">{group.formattedDate}</p>
+                  {group.tasks.map(task => {
+                    const isCheckable = this.isCheckable(task);
+                    const isSkippable = this.isSkippable(task);
+                    return <ir-tasks-card task={task} isSkippable={isSkippable} key={task.id} isCheckable={isCheckable}></ir-tasks-card>;
+                  })}
+                </div>
+              );
+            });
           })()}
           <ir-tasks-table-pagination></ir-tasks-table-pagination>
         </section>
@@ -256,7 +273,7 @@ export class IrTasksTable {
                   <th class=" text-left">Tasks</th>
                   <th class="text-left">{locales.entries.Lcz_A}d</th>
                   <th class="text-left">{locales.entries.Lcz_C}h</th>
-                  <th class="text-left text-left">{locales.entries.Lcz_I}n</th>
+                  <th class="text-left">{locales.entries.Lcz_I}n</th>
                   {haveManyHousekeepers && (
                     <th class="sortable" onClick={() => this.handleSort('housekeeper')}>
                       <div class="th-sort-inner">
@@ -295,9 +312,10 @@ export class IrTasksTable {
                     </td>
                   </tr>
                 )}
-                {tasks?.map(task => {
+                {tasks?.map((task, taskIndex) => {
                   const isSelected = hkTasksStore.selectedTasks.some(t => t.id === task.id);
                   const isCheckable = this.isCheckable(task);
+                  const isEndOfToday = this.isEndOfTodayBoundary(task.date, tasks[taskIndex + 1]?.date);
                   return (
                     <tr
                       data-date={task.date}
@@ -310,7 +328,12 @@ export class IrTasksTable {
                         }
                         this.toggleSelection(task);
                       }}
-                      class={{ 'selected': isSelected, '--clickable': isCheckable, 'task-table-row ir-table-row ': true }}
+                      class={{
+                        'selected': isSelected,
+                        '--clickable': isCheckable,
+                        'end-of-today-row': isEndOfToday,
+                        'task-table-row ir-table-row ': true,
+                      }}
                       key={task.id}
                     >
                       <td class="task-row ">

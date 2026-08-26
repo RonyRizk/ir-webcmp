@@ -1,8 +1,7 @@
 import { Task, ArchivedTask } from '@/models/housekeeping';
 import { createStore } from '@stencil/store';
-import calendar_data from '@/stores/calendar-data';
 
-const defaultTasksList = [10, 20, 50, 100];
+const defaultTasksList = [20, 50, 100];
 
 export type TaskFilters = {
   cleaning_periods: { code: string };
@@ -140,18 +139,7 @@ export function updateTaskList() {
 }
 
 function getTaskList(): number[] {
-  if (!calendar_data.roomsInfo) {
-    return defaultTasksList;
-  }
-  const totalRooms = calendar_data.roomsInfo.length;
-  if (totalRooms <= 10) {
-    return defaultTasksList;
-  }
-  const calculatedList = [...Array(4)].map((_, i) => {
-    const t = totalRooms * (i + 1);
-    return i === 3 ? (t < 100 ? 100 : t) : t;
-  });
-  return calculatedList;
+  return defaultTasksList;
 }
 
 // function shouldUpdateTaskList(newTaskCount: number): boolean {

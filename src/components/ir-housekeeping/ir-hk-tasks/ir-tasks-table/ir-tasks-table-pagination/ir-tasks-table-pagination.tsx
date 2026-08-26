@@ -21,7 +21,8 @@ export class IrTasksTablePagination {
             from: start,
             to: end,
           }}
-          class="tasks-pagination"
+          allowPageSizeChange
+          // class="tasks-pagination"
           total={totalTasks}
           pages={totalPages}
           pageSize={pageSize}

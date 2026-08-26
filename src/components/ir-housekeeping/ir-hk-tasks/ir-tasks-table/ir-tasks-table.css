@@ -28,6 +28,11 @@
   background: #e2e6ea3f !important;
 }
 
+/* End-of-today divider: marks the boundary between today's tasks and future-dated tasks */
+.end-of-today-row td {
+  border-width: 3px !important;
+}
+
 /* Sortable th inner layout */
 .th-sort-inner {
   display: flex;
