@@ -507,13 +507,14 @@ graph TD;
   ir-departures-table --> ir-empty-state
   ir-departures-table --> ir-pagination
   ir-hk-tasks --> ir-loading-screen
-  ir-hk-tasks --> ir-toast
-  ir-hk-tasks --> ir-interceptor
+  ir-hk-tasks --> ir-page
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-dialog
   ir-hk-tasks --> ir-custom-button
   ir-hk-tasks --> ir-hk-archive-drawer
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
   ir-filter-card --> ir-custom-button
@@ -537,8 +538,6 @@ graph TD;
   ir-housekeeping --> ir-page
   ir-housekeeping --> ir-hk-operations-card
   ir-housekeeping --> ir-hk-team
-  ir-page --> ir-interceptor
-  ir-page --> ir-toast
   ir-hk-operations-card --> ir-input
   ir-hk-operations-card --> ir-dialog
   ir-hk-operations-card --> ir-custom-button

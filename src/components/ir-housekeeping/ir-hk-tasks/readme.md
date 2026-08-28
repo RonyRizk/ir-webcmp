@@ -30,8 +30,7 @@
 ### Depends on
 
 - [ir-loading-screen](../../ir-loading-screen)
-- [ir-toast](../../ui/ir-toast)
-- [ir-interceptor](../../ir-interceptor)
+- [ir-page](../../ui/ir-page)
 - [ir-tasks-filters](ir-tasks-filters)
 - [ir-tasks-table](ir-tasks-table)
 - [ir-dialog](../../ui/ir-dialog)
@@ -42,20 +41,21 @@
 ```mermaid
 graph TD;
   ir-hk-tasks --> ir-loading-screen
-  ir-hk-tasks --> ir-toast
-  ir-hk-tasks --> ir-interceptor
+  ir-hk-tasks --> ir-page
   ir-hk-tasks --> ir-tasks-filters
   ir-hk-tasks --> ir-tasks-table
   ir-hk-tasks --> ir-dialog
   ir-hk-tasks --> ir-custom-button
   ir-hk-tasks --> ir-hk-archive-drawer
-  ir-toast --> ir-toast-provider
-  ir-toast-provider --> ir-toast-item
+  ir-page --> ir-interceptor
+  ir-page --> ir-toast
   ir-interceptor --> ir-otp-modal
   ir-otp-modal --> ir-dialog
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-custom-button
+  ir-toast --> ir-toast-provider
+  ir-toast-provider --> ir-toast-item
   ir-tasks-filters --> ir-filter-card
   ir-tasks-filters --> ir-custom-button
   ir-filter-card --> ir-custom-button

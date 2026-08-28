@@ -27,7 +27,6 @@
  - [ir-financial-actions](../../ir-financial-actions)
  - [ir-ghs-onboarding](../../ir-ghs-onboarding)
  - [ir-guest-info](../../ir-guest-info)
- - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-login](../../ir-login)
  - [ir-page](../ir-page)
  - [ir-payment-option](../../ir-payment-option)
@@ -56,7 +55,6 @@ graph TD;
   ir-financial-actions --> ir-toast
   ir-ghs-onboarding --> ir-toast
   ir-guest-info --> ir-toast
-  ir-hk-tasks --> ir-toast
   ir-login --> ir-toast
   ir-page --> ir-toast
   ir-payment-option --> ir-toast

@@ -323,10 +323,7 @@ export class IrHkTasks {
     }
     return (
       <Host data-testid="hk_tasks_base">
-        <ir-toast></ir-toast>
-        <ir-interceptor></ir-interceptor>
-        <section class="ir-page__container ">
-          <h3 class="page-title">Housekeeping Tasks</h3>
+        <ir-page label="Daily Housekeeping Schedule">
           <div class="tasks-view">
             <ir-tasks-filters
               isLoading={this.isApplyFiltersLoading}
@@ -345,7 +342,8 @@ export class IrHkTasks {
               {/* <ir-tasks-table-pagination></ir-tasks-table-pagination> */}
             </div>
           </div>
-        </section>
+        </ir-page>
+
         <ir-dialog ref={el => (this.modal = el)} label={locales.entries.Lcz_Confirmation} lightDismiss={false}>
           <span>
             {this.modalCauses
@@ -377,9 +375,6 @@ export class IrHkTasks {
           </div>
         </ir-dialog>
         <ir-hk-archive-drawer open={this.isSidebarOpen} ticket={this.token.getToken()} propertyId={this.property_id} onDrawerClosed={() => (this.isSidebarOpen = false)} />
-        {/* <ir-title class="d-none d-md-flex" label={locales.entries.Lcz_HousekeepingTasks} justifyContent="space-between">
-            <ir-button slot="title-body" text={locales.entries.Lcz_Archive} size="sm"></ir-button>
-          </ir-title> */}
       </Host>
     );
   }

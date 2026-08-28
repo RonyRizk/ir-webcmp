@@ -35,6 +35,7 @@
  - [ir-extra-services-settings](../../ir-extra-services-settings)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
  - [ir-gap-nights](../../ir-gap-nights)
+ - [ir-hk-tasks](../../ir-housekeeping/ir-hk-tasks)
  - [ir-housekeeping](../../ir-housekeeping)
  - [ir-meal-report](../../ir-meal-report)
  - [ir-monthly-bookings-report](../../ir-monthly-bookings-report)
@@ -70,6 +71,7 @@ graph TD;
   ir-extra-services-settings --> ir-page
   ir-fiscal-documents --> ir-page
   ir-gap-nights --> ir-page
+  ir-hk-tasks --> ir-page
   ir-housekeeping --> ir-page
   ir-meal-report --> ir-page
   ir-monthly-bookings-report --> ir-page

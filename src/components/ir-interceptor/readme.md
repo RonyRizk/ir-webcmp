@@ -35,7 +35,6 @@
  - [ir-financial-actions](../ir-financial-actions)
  - [ir-ghs-onboarding](../ir-ghs-onboarding)
  - [ir-guest-info](../ir-guest-info)
- - [ir-hk-tasks](../ir-housekeeping/ir-hk-tasks)
  - [ir-login](../ir-login)
  - [ir-page](../ui/ir-page)
  - [ir-payment-option](../ir-payment-option)
@@ -67,7 +66,6 @@ graph TD;
   ir-financial-actions --> ir-interceptor
   ir-ghs-onboarding --> ir-interceptor
   ir-guest-info --> ir-interceptor
-  ir-hk-tasks --> ir-interceptor
   ir-login --> ir-interceptor
   ir-page --> ir-interceptor
   ir-payment-option --> ir-interceptor
