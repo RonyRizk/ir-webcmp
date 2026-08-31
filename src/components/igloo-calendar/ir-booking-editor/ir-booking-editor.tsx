@@ -123,7 +123,13 @@ export class IrBookingEditor {
       return;
     }
     try {
-      this.dayUseNetPrice = await this.propertyService.calculateNetAmount({ property_id: Number(this.propertyId), amount: grossAmount, taxes_to_include: ['VAT'] });
+      const isAccommodationVatExclusive = () => {
+        const accTax = calendar_data.property.taxes?.find(t => t.name === 'V.A.T');
+        return accTax?.is_exlusive;
+      };
+      this.dayUseNetPrice = isAccommodationVatExclusive()
+        ? await this.propertyService.calculateNetAmount({ property_id: Number(this.propertyId), amount: grossAmount, taxes_to_include: ['VAT'] })
+        : this.dayUsePrice;
     } catch (error) {
       console.error('Error resolving day-use net price:', error);
     }

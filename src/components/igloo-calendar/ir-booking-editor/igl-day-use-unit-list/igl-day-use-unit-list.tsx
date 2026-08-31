@@ -93,7 +93,7 @@ export class IglDayUseUnitList {
 
   render() {
     const availableRoomTypes = (this.roomTypes ?? []).filter(roomType => {
-      if (roomType.is_available_to_book) {
+      if (roomType.is_active) {
         return true;
       }
       if (roomType.physicalrooms.some(p => p.id === this.currentExtraService?.pr_id)) {
@@ -118,10 +118,12 @@ export class IglDayUseUnitList {
             {this.mode !== 'BAR_BOOKING' && (
               <p class={'m-0 p-0'}>{this.currentExtraService ? 'Edit the existing unit or switch the booking to another one.' : 'Pick a unit for day-use.'}</p>
             )}
-            <wa-callout size="s" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
-              {/* Including taxes and fees. */}
-              {calendar_data.tax_statement}
-            </wa-callout>
+            {calendar_data.property.tax_statement && (
+              <wa-callout size="s" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
+                {/* Including taxes and fees. */}
+                {calendar_data.property.tax_statement}
+              </wa-callout>
+            )}
           </div>
         )}
         <div class="day-use-unit-list__grid">
