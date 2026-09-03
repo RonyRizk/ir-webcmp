@@ -416,6 +416,9 @@ export interface IFinancial {
   gross_total: number;
   gross_cost: number;
   refunds: number;
+  booking_total: number;
+  guest_total?: number | null;
+  agent_total?: number | null;
   invoice_nbr: string;
   // gross_total_with_extras: number;
 }

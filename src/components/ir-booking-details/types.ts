@@ -20,6 +20,7 @@ export type PaymentSidebarEvent = {
 export type FolioEntryMode = 'edit' | 'new' | 'payment-action';
 export type RoomGuestsPayload = {
   roomName: string;
+  roomType?: string;
   sharing_persons: SharedPerson[];
   totalGuests: number;
   checkin: boolean;

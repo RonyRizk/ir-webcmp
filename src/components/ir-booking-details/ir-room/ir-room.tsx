@@ -306,13 +306,16 @@ export class IrRoom {
   }
   private showGuestModal(): void {
     const { adult_nbr, children_nbr, infant_nbr } = this.room.occupancy;
+    const hasUnit = !!this.room.unit;
     this.openSidebar.emit({
       type: 'room-guest',
       payload: {
         roomName: (this.room.unit as IUnit)?.name,
+        roomType: this.room.roomtype?.name,
         sharing_persons: this.room.sharing_persons,
         totalGuests: adult_nbr + children_nbr + infant_nbr,
-        checkin: this.hasCheckIn,
+        // Check-in requires an assigned unit.
+        checkin: this.hasCheckIn && hasUnit,
         identifier: this.room.identifier,
       },
     });

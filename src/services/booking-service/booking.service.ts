@@ -606,6 +606,7 @@ export class BookingService {
     include_dp_pricing,
     extras: _extras = extras,
   }: {
+    is_calculate_totals?: boolean;
     extras?: { key: string; value: unknown }[];
     booking_nbr: string;
     language: string;

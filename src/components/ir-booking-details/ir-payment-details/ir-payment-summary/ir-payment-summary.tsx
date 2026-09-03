@@ -6,7 +6,7 @@ import { formatAmount } from '@/utils/utils';
 import { Component, Host, Prop, h } from '@stencil/core';
 import { isAgentMode } from '../../functions';
 import { ClTx } from '@/services/city-ledger/types';
-import { ClTxTypeCode } from '@/types/enums';
+// import { ClTxTypeCode } from '@/types/enums';
 
 @Component({
   tag: 'ir-payment-summary',
@@ -24,38 +24,41 @@ export class IrPaymentSummary {
   @Prop() agent: Agent;
   @Prop() clTransactions: ClTx[] = [];
 
-  private allowedClOps = new Set([ClTxTypeCode.Adjustment, ClTxTypeCode.StandardChargeDebit, ClTxTypeCode.CancellationPenalty, ClTxTypeCode.Discount]);
+  // private allowedClOps = new Set([ClTxTypeCode.Adjustment, ClTxTypeCode.StandardChargeDebit, ClTxTypeCode.CancellationPenalty, ClTxTypeCode.Discount]);
 
   private shouldShowTotalCost(): boolean {
     return this.totalCost > 0 && this.totalCost !== null;
   }
 
   private get agentTotal() {
-    return (
-      (this.booking.agent_financial.gross_total ?? 0) +
-      this.clTransactions.reduce((prev, curr) => {
-        if (this.allowedClOps.has(curr.CL_TX_TYPE_CODE as any) && curr.CATEGORY === null) {
-          return prev + curr.DEBIT - curr.CREDIT;
-        }
-        return prev;
-      }, 0)
-    );
+    // return (
+    //   (this.booking.agent_financial.gross_total ?? 0) +
+    //   this.clTransactions.reduce((prev, curr) => {
+    //     if (this.allowedClOps.has(curr.CL_TX_TYPE_CODE as any) && curr.CATEGORY === null) {
+    //       return prev + curr.DEBIT - curr.CREDIT;
+    //     }
+    //     return prev;
+    //   }, 0)
+    // );
+    return this.booking?.financial?.agent_total ?? 0;
   }
 
-  private get guestTotal() {
-    return (
-      (this.booking.guest_financial.gross_total ?? 0) +
-      this.booking.financial.payments.reduce((prev, curr) => {
-        if (curr.is_city_ledger) {
-          return prev;
-        }
-        return prev + (curr.payment_type.operation === 'CR' ? (curr.payment_type.code === '009' ? curr.amount * -1 : 0) : curr.amount);
-      }, 0)
-    );
-  }
+  // private get guestTotal() {
+  //   return (
+  //     (this.booking.guest_financial.gross_total ?? 0) +
+  //     this.booking.financial.payments.reduce((prev, curr) => {
+  //       if (curr.is_city_ledger) {
+  //         return prev;
+  //       }
+  //       return prev + (curr.payment_type.operation === 'CR' ? (curr.payment_type.code === '009' ? curr.amount * -1 : 0) : curr.amount);
+  //     }, 0)
+  //   );
+
+  // }
 
   private get bookingTotal() {
-    return this.agentTotal + this.guestTotal;
+    return this.booking.financial.booking_total;
+    // return this.agentTotal + this.guestTotal;
   }
 
   render() {

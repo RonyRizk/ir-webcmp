@@ -6101,9 +6101,13 @@ export namespace Components {
         "language": string;
         "open": boolean;
         /**
-          * The name of the room currently being displayed. Used to label the room in the user interface for clarity.
+          * The name of the unit (physical room) currently assigned. Used to label the room in the user interface for clarity. When empty, the room has no assigned unit and {@link roomType} is displayed instead.
          */
         "roomName": string;
+        /**
+          * The room type name. Displayed as a fallback label when the room has no assigned unit ({@link roomName} is empty).
+         */
+        "roomType": string;
         /**
           * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
           * @default []
@@ -20732,9 +20736,13 @@ declare namespace LocalJSX {
         "onCloseModal"?: (event: IrRoomGuestsCustomEvent<null>) => void;
         "open"?: boolean;
         /**
-          * The name of the room currently being displayed. Used to label the room in the user interface for clarity.
+          * The name of the unit (physical room) currently assigned. Used to label the room in the user interface for clarity. When empty, the room has no assigned unit and {@link roomType} is displayed instead.
          */
         "roomName"?: string;
+        /**
+          * The room type name. Displayed as a fallback label when the room has no assigned unit ({@link roomName} is empty).
+         */
+        "roomType"?: string;
         /**
           * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
           * @default []
@@ -23803,6 +23811,7 @@ declare namespace LocalJSX {
     interface IrRoomGuestsAttributes {
         "open": boolean;
         "roomName": string;
+        "roomType": string;
         "identifier": string;
         "totalGuests": number;
         "checkIn": boolean;

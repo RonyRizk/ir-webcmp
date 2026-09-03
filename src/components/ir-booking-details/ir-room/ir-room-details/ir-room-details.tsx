@@ -85,17 +85,14 @@ export class IrRoomDetails {
         </div>
         <div class="booking-room__guest-row">
           <p class="booking-room__text-reset booking-room__guest-name">{`${this.mainGuest.first_name || ''} ${this.mainGuest.last_name || ''}`}</p>
-          {this.room.rateplan.selected_variation.adult_nbr > 0 &&
-            (this.room.unit ? (
-              <Fragment>
-                <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>View guests</wa-tooltip>
-                <ir-custom-button link onClickHandler={() => this.viewGuests.emit()} id={`view-guest-btn-${this.room.identifier}`} variant="brand" appearance="plain">
-                  <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
-                </ir-custom-button>
-              </Fragment>
-            ) : (
-              <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
-            ))}
+          {this.room.rateplan.selected_variation.adult_nbr > 0 && (
+            <Fragment>
+              <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>View guests</wa-tooltip>
+              <ir-custom-button link onClickHandler={() => this.viewGuests.emit()} id={`view-guest-btn-${this.room.identifier}`} variant="brand" appearance="plain">
+                <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
+              </ir-custom-button>
+            </Fragment>
+          )}
           {bed && <p class="booking-room__text-reset booking-room__bed-info">({bed})</p>}
         </div>
         {(this.includeDepartureTime || this.booking.is_direct) && (

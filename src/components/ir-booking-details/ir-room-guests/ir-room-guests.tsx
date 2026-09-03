@@ -10,10 +10,17 @@ import locales from '@/stores/locales.store';
 export class IrRoomGuests {
   @Prop() open: boolean;
   /**
-   * The name of the room currently being displayed.
-   * Used to label the room in the user interface for clarity.
+   * The name of the unit (physical room) currently assigned.
+   * Used to label the room in the user interface for clarity. When empty, the room has no
+   * assigned unit and {@link roomType} is displayed instead.
    */
   @Prop() roomName: string;
+
+  /**
+   * The room type name.
+   * Displayed as a fallback label when the room has no assigned unit ({@link roomName} is empty).
+   */
+  @Prop() roomType: string;
 
   /**
    * A unique identifier for the room.
@@ -72,7 +79,7 @@ export class IrRoomGuests {
           '--ir-drawer-padding-top': 'var(--spacing)',
           '--ir-drawer-padding-bottom': 'var(--spacing)',
         }}
-        label={this.roomName ? `Room ${this.roomName}` : 'Guest Details'}
+        label={this.roomName ? `Room ${this.roomName}` : this.roomType || 'Guest Details'}
         open={this.open}
         onDrawerHide={e => {
           e.stopImmediatePropagation();
@@ -105,7 +112,7 @@ export class IrRoomGuests {
           <ir-custom-button value="save" loading={this.isLoading === 'save'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
             {locales?.entries?.Lcz_Save ?? 'Save'}
           </ir-custom-button>
-          {this.checkIn && (
+          {this.checkIn && this.roomName && (
             <ir-custom-button value="save_checkin" loading={this.isLoading === 'save_checkin'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
               {locales.entries?.Lcz_CheckIn ?? 'Check in'}
             </ir-custom-button>

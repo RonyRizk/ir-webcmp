@@ -466,6 +466,7 @@ export class IrBookingDetails {
         this.bookingService.getExposedBooking({
           booking_nbr: this.bookingNumber,
           language: this.language,
+          is_calculate_totals: true,
           include_dp_pricing: true,
           withExtras: true,
           extras: [
@@ -583,7 +584,12 @@ export class IrBookingDetails {
   private async resetBooking() {
     try {
       this.isLoading = true;
-      const booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language, include_dp_pricing: true });
+      const booking = await this.bookingService.getExposedBooking({
+        booking_nbr: this.bookingNumber,
+        language: this.language,
+        is_calculate_totals: true,
+        include_dp_pricing: true,
+      });
       this.splitIndex = buildSplitIndex(booking.rooms);
       await this.loadAgentAndFolio(booking);
       this.booking = { ...booking };
@@ -728,6 +734,7 @@ export class IrBookingDetails {
           identifier={this.sidebarPayload?.identifier}
           bookingNumber={this.booking.booking_nbr}
           roomName={this.sidebarPayload?.roomName}
+          roomType={this.sidebarPayload?.roomType}
           totalGuests={this.sidebarPayload?.totalGuests}
           sharedPersons={this.sidebarPayload?.sharing_persons}
           slot="sidebar-body"
