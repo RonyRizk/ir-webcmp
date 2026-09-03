@@ -2,7 +2,7 @@ import type WaInput from '@awesome.me/webawesome/dist/components/input/input';
 import { flexRender, useTable } from '@/utils/useTable';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { type Cell, type Row, createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
-import { TranslationEntry, TranslationLanguage } from '../types';
+import { DuplicateInfo, TranslationEntry, TranslationLanguage } from '../types';
 import { hasValue } from '../utils';
 
 type EditingCell = { entryId: string; languageCode: string };
@@ -26,6 +26,10 @@ export class IrTranslationsEntriesTable {
   @Prop() reorderEnabled: boolean = true;
   /** Ids of rows whose position differs from the last-loaded/saved order — highlighted while a reorder is pending. */
   @Prop() changedEntryIds: Set<string> = new Set();
+  /** True when `entries` span several setup tables — rows are then broken up by collapsible per-table header rows. */
+  @Prop() groupByTable: boolean = false;
+  /** Entry id → the tables sharing that row's description; rows present here get a duplicate badge beside their key. */
+  @Prop() duplicates: Map<string, DuplicateInfo> = new Map();
 
   @Event() entryChange: EventEmitter<TranslationEntry>;
   @Event() editEntry: EventEmitter<TranslationEntry>;
@@ -41,6 +45,8 @@ export class IrTranslationsEntriesTable {
   @State() draggingId: string | null = null;
   /** `.table--container`'s current content-box width — language columns stretch to fill it instead of sitting fixed. */
   @State() containerWidth: number = 0;
+  /** Table names whose group is currently folded shut. Only meaningful while `groupByTable` is on. */
+  @State() collapsedTables: Set<string> = new Set();
 
   private cellInputRef?: WaInput;
   private lastFocusKey: string | null = null;
@@ -51,6 +57,13 @@ export class IrTranslationsEntriesTable {
   /** Latest pointer Y during a drag, read by the auto-scroll loop — not @State, it'd re-render on every dragover. */
   private dragClientY: number | null = null;
   private autoScrollRaf: number | null = null;
+  /**
+   * One tooltip serves the whole grid. Anchoring per element would mean a
+   * `wa-tooltip` per cell — ~2,300 of them in the cross-table view — so hovers are
+   * delegated and this single instance is re-anchored instead.
+   */
+  private tooltipRef?: HTMLElement & { anchor: Element | null; open: boolean };
+  private tooltipTimer?: ReturnType<typeof setTimeout>;
 
   componentWillLoad() {
     this.dragEntries = this.entries;
@@ -71,7 +84,45 @@ export class IrTranslationsEntriesTable {
   disconnectedCallback() {
     this.containerResizeObserver?.disconnect();
     this.stopAutoScroll();
+    clearTimeout(this.tooltipTimer);
   }
+
+  // #region Shared tooltip
+
+  /** Re-points the shared tooltip at whatever `[data-tooltip]` element the pointer is over. */
+  private handleTooltipOver = (event: MouseEvent) => {
+    const tooltip = this.tooltipRef;
+    if (!tooltip) {
+      return;
+    }
+    const target = (event.target as HTMLElement | null)?.closest?.('[data-tooltip]') as HTMLElement | null;
+    const text = target?.dataset.tooltip;
+    if (!target || !text) {
+      this.hideTooltip();
+      return;
+    }
+    if (tooltip.anchor === target && tooltip.open) {
+      return;
+    }
+    // Re-anchoring a visible tooltip makes the bubble skate across the grid, so it
+    // always closes first and re-opens on the new anchor after the usual hover beat.
+    clearTimeout(this.tooltipTimer);
+    tooltip.open = false;
+    this.tooltipTimer = setTimeout(() => {
+      tooltip.textContent = text;
+      tooltip.anchor = target;
+      tooltip.open = true;
+    }, 250);
+  };
+
+  private hideTooltip = () => {
+    clearTimeout(this.tooltipTimer);
+    if (this.tooltipRef) {
+      this.tooltipRef.open = false;
+    }
+  };
+
+  // #endregion
 
   /** A drag in progress owns row order locally — only resync from the parent once it's idle. */
   @Watch('entries')
@@ -286,7 +337,7 @@ export class IrTranslationsEntriesTable {
       <span
         class={`entries-table__drag-handle ${this.reorderEnabled ? '' : '--disabled'}`}
         draggable={this.reorderEnabled}
-        title={label}
+        data-tooltip={label}
         aria-label={label}
         onDragStart={(e: DragEvent) => this.handleDragStart(e, entry)}
         onDragEnd={this.handleDragEnd}
@@ -307,7 +358,7 @@ export class IrTranslationsEntriesTable {
       return (
         <span class="entries-table__cell-display --readonly" aria-label={`${ariaLabel} (read-only)`}>
           {hasValue(value) ? (
-            <span class="entries-table__cell-text" title={value}>
+            <span class="entries-table__cell-text" data-tooltip={value}>
               {value}
             </span>
           ) : (
@@ -346,7 +397,7 @@ export class IrTranslationsEntriesTable {
         onClick={() => this.startEditing(entry, language.code)}
       >
         {hasValue(value) ? (
-          <span class="entries-table__cell-text" title={value}>
+          <span class="entries-table__cell-text" data-tooltip={value}>
             {value}
           </span>
         ) : (
@@ -356,18 +407,46 @@ export class IrTranslationsEntriesTable {
     );
   }
 
+  /** The duplicate badge. Its tooltip rides the shared instance like every other hover target here. */
+  private renderDuplicateBadge(entry: TranslationEntry) {
+    const duplicate = this.duplicates.get(entry.id);
+    if (!duplicate) {
+      return null;
+    }
+    const tableCount = duplicate.tables.length;
+    // OCCURRENCES counts rows, not tables — they diverge when a description repeats
+    // inside one table, which is worth calling out rather than hiding behind a table count.
+    const label =
+      duplicate.occurrences > tableCount
+        ? `${duplicate.occurrences} entries across ${tableCount} tables: ${duplicate.tables.join(', ')}`
+        : `Appears in ${tableCount} tables: ${duplicate.tables.join(', ')}`;
+    return (
+      <span
+        class="entries-table__dup-badge"
+        data-tooltip={label}
+        aria-label={label}
+        // The whole key cell opens the entry drawer — the badge is a hover target, not a way in.
+        onClick={(event: MouseEvent) => event.stopPropagation()}
+      >
+        <wa-icon name="clone" aria-hidden="true"></wa-icon>
+        {tableCount}
+      </span>
+    );
+  }
+
   private renderKeyCell(entry: TranslationEntry) {
     const isHidden = entry.meta?.isVisible === false;
     return (
       <div class="entries-table__key-container">
         {isHidden && (
-          <span class="entries-table__key-hidden-mark" title="Hidden from the app" aria-label={`${entry.key || 'This key'} is hidden from the app`}>
+          <span class="entries-table__key-hidden-mark" data-tooltip="Hidden from the app" aria-label={`${entry.key || 'This key'} is hidden from the app`}>
             <wa-icon name="eye-slash" aria-hidden="true"></wa-icon>
           </span>
         )}
-        <span class="entries-table__key-text" title={entry.key}>
+        <span class="entries-table__key-text" data-tooltip={entry.key}>
           {entry.key}
         </span>
+        {this.renderDuplicateBadge(entry)}
         <wa-icon class="entries-table__key-icon" name="pen-to-square"></wa-icon>
       </div>
     );
@@ -376,7 +455,7 @@ export class IrTranslationsEntriesTable {
   private renderLangHead(language: TranslationLanguage) {
     return (
       <span class="entries-table__lang-head">
-        <abbr class="entries-table__lang-code" title={language.name}>
+        <abbr class="entries-table__lang-code" data-tooltip={language.name} aria-label={language.name}>
           {language.code.toUpperCase()}
         </abbr>
         {language.code === this.sourceCode && <span class="entries-table__lang-source">source</span>}
@@ -442,6 +521,15 @@ export class IrTranslationsEntriesTable {
     ];
   }
 
+  /**
+   * The language column pinned beside the key. Deliberately "whichever is
+   * leftmost" rather than a lookup by source code — pinning a column from the
+   * middle of the row would park it on top of its neighbours.
+   */
+  private get pinnedLanguageCode(): string | undefined {
+    return this.languages[0]?.code;
+  }
+
   private renderCell(cell: Cell<TranslationEntry, unknown>) {
     const columnId = cell.column.id;
     const isLangColumn = this.languages.some(language => language.code === columnId);
@@ -450,6 +538,7 @@ export class IrTranslationsEntriesTable {
         key={cell.id}
         class={{
           'entries-table__key': columnId === 'key',
+          'entries-table__source-cell': isLangColumn && columnId === this.pinnedLanguageCode,
           'entries-table__value-cell': isLangColumn,
           'entries-table__actions': columnId === 'actions',
           'entries-table__drag-cell': columnId === 'drag',
@@ -480,6 +569,64 @@ export class IrTranslationsEntriesTable {
       </tr>
     );
   }
+
+  // #region Table grouping
+
+  private toggleGroup(name: string) {
+    const next = new Set(this.collapsedTables);
+    if (next.has(name)) {
+      next.delete(name);
+    } else {
+      next.add(name);
+    }
+    this.collapsedTables = next;
+  }
+
+  private renderGroupHeader(name: string, count: number) {
+    const collapsed = this.collapsedTables.has(name);
+    return (
+      <tr key={`group:${name}`} class="entries-table__group-row">
+        <td class="entries-table__group-cell" colSpan={3 + this.languages.length}>
+          <button type="button" class="entries-table__group-toggle" aria-expanded={collapsed ? 'false' : 'true'} onClick={() => this.toggleGroup(name)}>
+            <wa-icon class="entries-table__group-chevron" name="chevron-down" aria-hidden="true"></wa-icon>
+            <span class="entries-table__group-name">{name}</span>
+            <span class="entries-table__group-count">
+              {count} key{count === 1 ? '' : 's'}
+            </span>
+          </button>
+        </td>
+      </tr>
+    );
+  }
+
+  /**
+   * Opens a group header row each time the table name changes and drops the rows
+   * of collapsed groups. Rows arrive already sorted by table, so one pass suffices
+   * and a group can never be reopened further down the list.
+   */
+  private renderGroupedRows(rows: Row<TranslationEntry>[]) {
+    const counts = new Map<string, number>();
+    rows.forEach(row => {
+      const name = row.original.tableName ?? '';
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    });
+
+    const nodes = [];
+    let currentGroup: string | null = null;
+    rows.forEach(row => {
+      const name = row.original.tableName ?? '';
+      if (name !== currentGroup) {
+        currentGroup = name;
+        nodes.push(this.renderGroupHeader(name, counts.get(name) ?? 0));
+      }
+      if (!this.collapsedTables.has(name)) {
+        nodes.push(this.renderRow(row));
+      }
+    });
+    return nodes;
+  }
+
+  // #endregion
 
   private renderEmptyState() {
     if (this.languages.length === 0) {
@@ -520,7 +667,14 @@ export class IrTranslationsEntriesTable {
 
     return (
       <Host class={this.compact ? '--compact' : ''}>
-        <div class="table--container" ref={el => (this.containerRef = el)} onDragOver={this.handleContainerDragOver}>
+        <div
+          class="table--container"
+          ref={el => (this.containerRef = el)}
+          onDragOver={this.handleContainerDragOver}
+          onMouseOver={this.handleTooltipOver}
+          onMouseLeave={this.hideTooltip}
+          onScroll={this.hideTooltip}
+        >
           <table class="table data-table entries-table__table" style={{ minWidth: `${minWidth}px` }}>
             <colgroup>
               <col class="entries-table__col--drag" />
@@ -532,7 +686,14 @@ export class IrTranslationsEntriesTable {
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} scope="col" class={{ 'entries-table__key-head': header.column.id === 'key' }}>
+                    <th
+                      key={header.id}
+                      scope="col"
+                      class={{
+                        'entries-table__key-head': header.column.id === 'key',
+                        'entries-table__source-head': header.column.id === this.pinnedLanguageCode,
+                      }}
+                    >
                       {!header.isPlaceholder && flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
@@ -540,13 +701,15 @@ export class IrTranslationsEntriesTable {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map(row => this.renderRow(row))}
+              {this.groupByTable ? this.renderGroupedRows(table.getRowModel().rows) : table.getRowModel().rows.map(row => this.renderRow(row))}
               <tr class={'last__row'}>
                 <td colSpan={10}></td>
               </tr>
             </tbody>
           </table>
         </div>
+        {/* Sits outside the scroll container so it isn't clipped by it; content and anchor are set on hover. */}
+        <wa-tooltip class="entries-table__tooltip" ref={el => (this.tooltipRef = el as any)} trigger="manual" placement="top"></wa-tooltip>
       </Host>
     );
   }

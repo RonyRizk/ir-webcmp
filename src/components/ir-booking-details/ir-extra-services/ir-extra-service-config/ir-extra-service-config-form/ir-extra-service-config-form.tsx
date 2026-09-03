@@ -12,9 +12,10 @@ import { getTopLevelSvcCategories, groupSvcCategoriesByParent } from '@/utils/sv
 import { calculateDaysBetweenDates } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { z, ZodError } from 'zod';
+import { SvcCategory } from '@/types/enums';
 
 /** Group code for accommodation-linked extra services (Breakfast, Minibar, ...) — see `KNOWN_GROUP_LABELS` in svc-category.utils. */
-const ACCOMMODATION_GROUP_CODE = 'ACM';
+const ACCOMMODATION_GROUP_CODE = SvcCategory.Accommodation;
 
 /** Early Check-In / Late Check-Out aren't selectable as an accommodation sub-category here — they're handled elsewhere in the booking flow. */
 const ACCOMMODATION_EXCLUDED_CODES = new Set(['ECI', 'LCO']);
@@ -42,7 +43,7 @@ export class IrExtraServiceConfigForm {
   @State() toDateClicked: boolean;
   @State() autoValidate: boolean;
   @State() assignee: 'agent' | 'guest' = 'guest';
-  /** Group (e.g. Accommodation/ACM) the currently selected top-level category belongs to, when it has sub-categories to pick from. */
+  /** Group (e.g. Accommodation) the currently selected top-level category belongs to, when it has sub-categories to pick from. */
   @State() selectedGroupCode: string | null = null;
   /** True once the price field has been set by user input (typed, or loaded from an existing saved service) — freezes it against further auto-recalculation. */
   @State() priceManuallyEdited: boolean = false;
@@ -89,7 +90,7 @@ export class IrExtraServiceConfigForm {
     }
   }
 
-  /** Which group (e.g. `ACM`) a leaf category code belongs to, if any — used to re-derive the group selection when editing an existing service. */
+  /** Which group (e.g. `Accommodation`) a leaf category code belongs to, if any — used to re-derive the group selection when editing an existing service. */
   private groupCodeForCategoryCode(code: string | null | undefined): string | null {
     if (!code) return null;
     for (const group of this.svcGroups.values()) {
@@ -110,7 +111,7 @@ export class IrExtraServiceConfigForm {
 
   private toCategoryOption(cat: IEntries): IEntries & { pct: number; isNotApplicable: boolean } {
     const { notApplicableCodes, taxPctByCode, realCodes, accVat } = this.taxCategoryLookup;
-    // Synthesized parent-group placeholders (e.g. Accommodation/ACM) have no `tax_categories` row of their
+    // Synthesized parent-group placeholders (e.g. Accommodation) have no `tax_categories` row of their
     // own — their rate mirrors the property's accommodation VAT, same as it does on the Extra Services page.
     if (!realCodes.has(cat.CODE_NAME)) {
       return { ...cat, pct: accVat.mode === taxationModes.NOT_APPLICABLE ? 0 : (accVat.value ?? 0), isNotApplicable: accVat.mode === taxationModes.NOT_APPLICABLE };
@@ -137,7 +138,7 @@ export class IrExtraServiceConfigForm {
     const group = this.svcGroups.get(this.selectedGroupCode);
     if (!group) return [];
     const categories = this.selectedGroupCode === ACCOMMODATION_GROUP_CODE ? group.categories.filter(cat => !ACCOMMODATION_EXCLUDED_CODES.has(cat.CODE_NAME)) : group.categories;
-    return categories.filter(cat => cat.CODE_NAME !== 'DUZ').map(cat => this.toCategoryOption(cat));
+    return categories.filter(cat => cat.CODE_NAME !== SvcCategory.DayUse).map(cat => this.toCategoryOption(cat));
   }
 
   /** The unit-link select becomes mandatory once the chosen extra service is an accommodation sub-category (Breakfast, Minibar, ...). */
@@ -301,7 +302,7 @@ export class IrExtraServiceConfigForm {
                 const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
                 const vatSuffix = category.isNotApplicable ? 'VAT - Not applicable' : `VAT ${category.pct}%`;
                 const label = (category[langKey] ?? category.CODE_VALUE_EN ?? '') + ` (${vatSuffix})`;
-                if (this.booking.is_room_less && category.CODE_NAME === 'ACM') {
+                if (this.booking.is_room_less && category.CODE_NAME === SvcCategory.Accommodation) {
                   return null;
                 }
                 return (

@@ -166,6 +166,10 @@ export interface Task {
   child: number;
   date: string;
   is_highlight: boolean;
+  base_status: {
+    code: string;
+    description: string;
+  };
   formatted_date: string;
   hint: string;
   hkm_id: number;

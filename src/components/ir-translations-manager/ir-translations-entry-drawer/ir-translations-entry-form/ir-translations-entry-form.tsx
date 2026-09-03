@@ -271,7 +271,9 @@ export class IrTranslationsEntryForm {
           placeholder="e.g. Lcz_BookingConfirmed"
           onText-change={e => this.handleKeyChange(e.detail)}
           ref={el => (this.keyInputRef = el)}
-        ></ir-input>
+        >
+          <wa-copy-button value={this.key ?? ''} slot="end"></wa-copy-button>
+        </ir-input>
         {this.isDuplicateKey && (
           <p class="entry-form__error" role="alert">
             This key already exists in this table.
@@ -304,23 +306,26 @@ export class IrTranslationsEntryForm {
           ) : (
             <div class="entry-form__fields">
               {this.languages.map(language => (
-                <wa-textarea
-                  key={language.code}
-                  class="entry-form__value-input"
-                  size="s"
-                  rows={2}
-                  resize="auto"
-                  value={this.values[language.code] ?? ''}
-                  placeholder="Enter translation…"
-                  oninput={(e: Event) => (this.values = { ...this.values, [language.code]: (e.target as HTMLTextAreaElement).value })}
-                >
-                  {/* Slotted so the source marker sits on the label line rather than below the field, where a hint would read as belonging to the next one. */}
-                  <span slot="label" class="entry-form__field-label">
-                    {language.name}
-                    <span class="entry-form__field-code">{language.code.toUpperCase()}</span>
-                    {language.isSource && <span class="entry-form__field-source">Source</span>}
-                  </span>
-                </wa-textarea>
+                <div class="entry-form__field" key={language.code} dir={language.code === 'ar' ? 'rtl' : 'ltr'}>
+                  <wa-textarea
+                    class="entry-form__value-input"
+                    id={language.code}
+                    size="s"
+                    rows={2}
+                    resize="auto"
+                    value={this.values[language.code] ?? ''}
+                    placeholder="Enter translation…"
+                    oninput={(e: Event) => (this.values = { ...this.values, [language.code]: (e.target as HTMLTextAreaElement).value })}
+                  >
+                    {/* Slotted so the source marker sits on the label line rather than below the field, where a hint would read as belonging to the next one. */}
+                    <span slot="label" class="entry-form__field-label">
+                      {language.name}
+                      <span class="entry-form__field-code">{language.code.toUpperCase()}</span>
+                      {language.isSource && <span class="entry-form__field-source">Source</span>}
+                    </span>
+                  </wa-textarea>
+                  <wa-copy-button class="entry-form__value-copy" value={this.values[language.code] ?? ''}></wa-copy-button>
+                </div>
               ))}
             </div>
           )}

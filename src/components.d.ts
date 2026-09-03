@@ -107,7 +107,7 @@ import { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 import { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
-import { TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+import { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 import { User } from "./models/Users";
 import { AllowedUser } from "./components/ir-user-management/types";
 import { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -213,7 +213,7 @@ export { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 export { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
-export { TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+export { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 export { User } from "./models/Users";
 export { AllowedUser } from "./components/ir-user-management/types";
 export { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -6816,10 +6816,25 @@ export namespace Components {
          */
         "disableActions": boolean;
         /**
+          * Disables the "New key" action outright, e.g. in the cross-table view where there is no single table to create into.
+          * @default false
+         */
+        "disableCreate": boolean;
+        /**
+          * Entry id → the tables sharing that row's description; rows present here get a duplicate badge.
+          * @default new Map()
+         */
+        "duplicates": Map<string, DuplicateInfo>;
+        /**
           * The active table's unfiltered entries — filtered internally for display.
           * @default []
          */
         "entries": TranslationEntry[];
+        /**
+          * True when `entries` span several setup tables — adds the table filter and hands the table its grouped rendering.
+          * @default false
+         */
+        "groupByTable": boolean;
         /**
           * True once a drag reorder is applied locally but not yet saved — shows the Save/Discard order buttons.
           * @default false
@@ -6835,6 +6850,11 @@ export namespace Components {
          */
         "languages": TranslationLanguage[];
         "sourceCode"?: string;
+        /**
+          * Distinct table names present in `entries`, in display order — the table filter's options.
+          * @default []
+         */
+        "tableNames": string[];
     }
     interface IrTranslationsEntriesTable {
         /**
@@ -6847,6 +6867,11 @@ export namespace Components {
          */
         "compact": boolean;
         /**
+          * Entry id → the tables sharing that row's description; rows present here get a duplicate badge beside their key.
+          * @default new Map()
+         */
+        "duplicates": Map<string, DuplicateInfo>;
+        /**
           * Rows to render, already filtered by the parent.
           * @default []
          */
@@ -6856,6 +6881,11 @@ export namespace Components {
           * @default false
          */
         "filtered": boolean;
+        /**
+          * True when `entries` span several setup tables — rows are then broken up by collapsible per-table header rows.
+          * @default false
+         */
+        "groupByTable": boolean;
         /**
           * Column order — the source language is expected first.
           * @default []
@@ -21468,10 +21498,25 @@ declare namespace LocalJSX {
          */
         "disableActions"?: boolean;
         /**
+          * Disables the "New key" action outright, e.g. in the cross-table view where there is no single table to create into.
+          * @default false
+         */
+        "disableCreate"?: boolean;
+        /**
+          * Entry id → the tables sharing that row's description; rows present here get a duplicate badge.
+          * @default new Map()
+         */
+        "duplicates"?: Map<string, DuplicateInfo>;
+        /**
           * The active table's unfiltered entries — filtered internally for display.
           * @default []
          */
         "entries"?: TranslationEntry[];
+        /**
+          * True when `entries` span several setup tables — adds the table filter and hands the table its grouped rendering.
+          * @default false
+         */
+        "groupByTable"?: boolean;
         /**
           * True once a drag reorder is applied locally but not yet saved — shows the Save/Discard order buttons.
           * @default false
@@ -21496,6 +21541,11 @@ declare namespace LocalJSX {
         "onSaveOrder"?: (event: IrTranslationsEntriesPanelCustomEvent<void>) => void;
         "onToggleVisibility"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
         "sourceCode"?: string;
+        /**
+          * Distinct table names present in `entries`, in display order — the table filter's options.
+          * @default []
+         */
+        "tableNames"?: string[];
     }
     interface IrTranslationsEntriesTable {
         /**
@@ -21508,6 +21558,11 @@ declare namespace LocalJSX {
          */
         "compact"?: boolean;
         /**
+          * Entry id → the tables sharing that row's description; rows present here get a duplicate badge beside their key.
+          * @default new Map()
+         */
+        "duplicates"?: Map<string, DuplicateInfo>;
+        /**
           * Rows to render, already filtered by the parent.
           * @default []
          */
@@ -21517,6 +21572,11 @@ declare namespace LocalJSX {
           * @default false
          */
         "filtered"?: boolean;
+        /**
+          * True when `entries` span several setup tables — rows are then broken up by collapsible per-table header rows.
+          * @default false
+         */
+        "groupByTable"?: boolean;
         /**
           * Column order — the source language is expected first.
           * @default []
@@ -23978,12 +24038,15 @@ declare namespace LocalJSX {
         "isLoading": boolean;
         "disableActions": boolean;
         "hasPendingOrder": boolean;
+        "groupByTable": boolean;
+        "disableCreate": boolean;
     }
     interface IrTranslationsEntriesTableAttributes {
         "sourceCode": string;
         "compact": boolean;
         "filtered": boolean;
         "reorderEnabled": boolean;
+        "groupByTable": boolean;
     }
     interface IrTranslationsEntryDrawerAttributes {
         "open": boolean;

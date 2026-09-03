@@ -11,7 +11,7 @@ import Token from '@/models/Token';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent, PaymentEntries, PrintScreenOptions } from './types';
 import calendar_data from '@/stores/calendar-data';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { buildSplitIndex, DAY_USE_CATEGORY_CODE, SplitIndex } from '@/utils/booking';
+import { buildSplitIndex, SplitIndex } from '@/utils/booking';
 import { AgentsService } from '@/services/agents/agents.service';
 import { Agent } from '@/services/agents/type';
 import { CityLedgerService, type ClTx } from '@/services/city-ledger';
@@ -20,6 +20,7 @@ import { isAgentMode } from './functions';
 import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
 import { extras } from '@/utils/utils';
 import moment from 'moment';
+import { SvcCategory } from '@/types/enums';
 
 @Component({
   tag: 'ir-booking-details',
@@ -323,7 +324,7 @@ export class IrBookingDetails {
   @Listen('editExtraService')
   handleEditExtraService(e: CustomEvent<ExtraService>) {
     const service = e.detail;
-    if (service?.category?.code === DAY_USE_CATEGORY_CODE) {
+    if (service?.category?.code === SvcCategory.DayUse) {
       e.stopImmediatePropagation();
       e.stopPropagation();
       this.bookingItem = {

@@ -11,6 +11,7 @@ import { IEntries } from '@/models/property';
 import { Agent } from '@/services/agents/type';
 import type { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { SvcCategory } from '@/types/enums';
 
 @Component({
   tag: 'ir-extra-service',
@@ -129,7 +130,7 @@ export class IrExtraService {
           <div class="es-content">
             <p class="es-description">
               {this.description}
-              {this.service.category.code === 'DUZ' && (
+              {this.service.category.code === SvcCategory.DayUse && (
                 <span>
                   : {this.formatDayUseTime(this.service.from_time)} – {this.formatDayUseTime(this.service.to_time)}
                 </span>
@@ -138,7 +139,7 @@ export class IrExtraService {
             {hasMeta && (
               <div class="es-meta">
                 {this.service.start_date &&
-                  (this.service.end_date && this.service?.category?.code !== 'DUZ' ? (
+                  (this.service.end_date && this.service?.category?.code !== SvcCategory.DayUse ? (
                     <ir-date-view class="es-meta-date" from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
                   ) : (
                     <span class="es-meta-date">{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')} </span>

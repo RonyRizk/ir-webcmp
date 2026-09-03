@@ -125,7 +125,7 @@ export class IrClInvoiceDialog {
           IS_LOCKED: false,
         });
 
-        // const targetCategories = ['ACM', 'TRF', 'GEN'];
+        // const targetCategories = [SvcCategory.Accommodation, 'TRF', 'GEN'];
         // const listClTxIds = [...new Set(clResult.My_Cl_tx.filter(tx => targetCategories.includes(tx.CATEGORY) && !tx.DOC_NUMBER).map(tx => tx.CL_TX_ID))];
         if (!clResult.My_Cl_tx?.length) {
           this.noResults = true;

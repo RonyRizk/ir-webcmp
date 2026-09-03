@@ -50,15 +50,20 @@ function readSetupValue(entry: SetupEntry, code: SetupLanguageCode): string {
   }
 }
 
-/** CODE_NAME is unique within a table, so it doubles as a stable local id. */
+/**
+ * CODE_NAME is unique within a table but not across tables, so the local id is
+ * table-qualified — the cross-table "missing translations" view holds rows from
+ * several tables in one list and would otherwise collide on shared codes.
+ */
 export function setupEntryToTranslationEntry(entry: SetupEntry): TranslationEntry {
   const values: Record<string, string> = {};
   for (const code of SETUP_LANGUAGE_CODES) {
     values[code] = readSetupValue(entry, code);
   }
   return {
-    id: entry.CODE_NAME,
+    id: `${entry.TBL_NAME}::${entry.CODE_NAME}`,
     key: entry.CODE_NAME,
+    tableName: entry.TBL_NAME,
     values,
     meta: {
       ownerId: entry.OWNER_ID ?? 0,

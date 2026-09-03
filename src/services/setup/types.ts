@@ -103,3 +103,50 @@ export type ExposedLanguage = z.infer<typeof ZExposedLanguageSchema>;
 
 export const ZExposedLanguagesSchema = z.array(ZExposedLanguageSchema);
 export type ExposedLanguages = z.infer<typeof ZExposedLanguagesSchema>;
+
+/* -------------------------------------------------------------------------- */
+/*                              Move Setup Entry                              */
+/* -------------------------------------------------------------------------- */
+
+export const MoveSetupEntryParamsSchema = z.object({
+  old_tbl_name: z.string(),
+  code_name: z.string(),
+  new_tbl_name: z.string(),
+});
+
+export type MoveSetupEntryParams = z.infer<typeof MoveSetupEntryParamsSchema>;
+
+/* -------------------------------------------------------------------------- */
+/*                              Move Setup Entry                              */
+/* -------------------------------------------------------------------------- */
+
+export const MissingSetupEntriesParamsSchema = z.object({
+  language: z.string(),
+});
+
+export type MissingSetupEntriesParams = z.infer<typeof MissingSetupEntriesParamsSchema>;
+
+/* -------------------------------------------------------------------------- */
+/*                       Search Setup By Description                          */
+/* -------------------------------------------------------------------------- */
+
+export const ZSearchSetupByDescriptionParamsSchema = z.object({
+  query: z.string(),
+});
+
+export type SearchSetupByDescriptionParams = z.infer<typeof ZSearchSetupByDescriptionParamsSchema>;
+
+export const ZEntrySchema = z.object({
+  CODE_NAME: z.string(),
+  TBL_NAME: z.string(),
+});
+
+export const ZDuplicatedSetupEntriesAcrossTablesSchema = z.object({
+  DESCRIPTION: z.string(),
+  ENTRIES: z.array(ZEntrySchema),
+  OCCURRENCES: z.number(),
+});
+
+export type Entry = z.infer<typeof ZEntrySchema>;
+
+export type DuplicatedSetupEntriesAcrossTables = z.infer<typeof ZDuplicatedSetupEntriesAcrossTablesSchema>;

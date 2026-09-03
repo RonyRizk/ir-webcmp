@@ -8,9 +8,6 @@ import calendar_dates from '@/stores/calendar-dates.store';
 import calendar_data from '@/stores/calendar-data';
 import { _formatTime } from '@/components/ir-booking-details/functions';
 
-/** `_SVC_CATEGORY` short code for Day Use, matched against `calendar_data.property.tax_categories` / `ExtraService.category.code`. */
-export const DAY_USE_CATEGORY_CODE = 'DUZ';
-
 export type SplitRole = 'fullSplit' | 'leftSplit' | 'rightSplit' | null;
 
 export type SplitIndex = {

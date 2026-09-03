@@ -27,10 +27,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [ir-translations-manager](..)
-
 ### Depends on
 
 - [ir-custom-button](../../ui/ir-custom-button)
@@ -43,7 +39,6 @@ graph TD;
   ir-translations-language-dialog --> ir-custom-button
   ir-translations-language-dialog --> ir-dialog
   ir-translations-language-dialog --> ir-empty-state
-  ir-translations-manager --> ir-translations-language-dialog
   style ir-translations-language-dialog fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

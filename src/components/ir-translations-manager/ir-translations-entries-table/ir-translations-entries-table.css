@@ -3,6 +3,9 @@
 :host {
   --ir-cell-padding: 0.55rem 0.75rem;
   --entries-table-font-size: var(--wa-font-size-s);
+  /* Shared by the Key colgroup entry and the source column's sticky offset — the
+     source pins exactly where the key ends, so these must stay in lockstep. */
+  --entries-table-key-width: 220px;
 
   display: flex;
   flex-direction: column;
@@ -72,7 +75,7 @@
 }
 
 .entries-table__col--key {
-  width: 220px;
+  width: var(--entries-table-key-width);
 }
 
 .entries-table__col--lang {
@@ -85,8 +88,8 @@
 
 /* The pinned key column would otherwise eat most of a phone viewport. */
 @media (max-width: 575px) {
-  .entries-table__col--key {
-    width: 150px;
+  :host {
+    --entries-table-key-width: 150px;
   }
 }
 
@@ -101,11 +104,25 @@
   z-index: 4;
 }
 
+/* The source language pins immediately after the key, so a key and the text it's
+   translated from stay together however far the other languages scroll. */
+.ir-table-row td.entries-table__source-cell {
+  position: sticky;
+  left: var(--entries-table-key-width);
+  z-index: 4;
+}
+
 /* Scoped through `thead th` so it outranks the shared header rule above —
    otherwise language headers scrolling past would paint over the pinned Key. */
 .entries-table__table thead th.entries-table__key-head {
   position: sticky;
   left: 0;
+  z-index: 5;
+}
+
+.entries-table__table thead th.entries-table__source-head {
+  position: sticky;
+  left: var(--entries-table-key-width);
   z-index: 5;
 }
 .last__row {
@@ -115,7 +132,9 @@
 /* The scroll seam needs a hard edge — a border would move with the cell's own
    background during the hover transition, so paint it as a shadow. */
 .entries-table__key-head::after,
-.ir-table-row td.entries-table__key::after {
+.ir-table-row td.entries-table__key::after,
+.entries-table__source-head::after,
+.ir-table-row td.entries-table__source-cell::after {
   content: '';
   position: absolute;
   inset-block: 0;
@@ -140,6 +159,25 @@
   display: inline-flex;
   font-size: 0.8em;
   color: var(--wa-color-text-quiet);
+}
+
+/* Flags a description that also exists in other setup tables — a data-quality hint, not an error. */
+.entries-table__dup-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-inline-start: 0.35rem;
+  padding-block: 0.05rem;
+  padding-inline: 0.3rem;
+  border: 1px solid var(--wa-color-warning-border-quiet, #fde68a);
+  border-radius: var(--wa-border-radius-s);
+  background: var(--wa-color-warning-fill-quiet);
+  color: var(--wa-color-warning-on-quiet, #92400e);
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  cursor: help;
 }
 
 .entries-table__key-text {
@@ -369,3 +407,102 @@
     transition: none;
   }
 }
+
+/* #region Shared tooltip */
+
+/* One instance serves every hover target in the grid (see the delegation in the
+   .tsx), so its body has to cope with anything from a table name to a full
+   paragraph of translated text — clamped to three lines rather than growing into
+   a wall that covers the rows it's describing. */
+/* Wider than the WA default so three lines still hold a useful amount — the clamp
+   is a height cap, and a narrow bubble would make it bite on content that easily fits. */
+.entries-table__tooltip {
+  --max-width: 22rem;
+}
+
+.entries-table__tooltip::part(body) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  /* The clamp needs a text-shaped box: `word-break` keeps an unbroken token
+     (a long key, a URL) from blowing the popup past its max-width instead. */
+  overflow-wrap: anywhere;
+}
+
+/* #endregion */
+
+/* #region Table groups (cross-table "missing translations" view) */
+
+/*
+ * Deliberately not sticky: the header row above already pins at `top: 0` with a
+ * height that varies with the language columns, so there is no fixed offset a
+ * group band could pin below without overlapping it.
+ */
+.entries-table__group-row td.entries-table__group-cell {
+  padding: 0;
+  background: var(--wa-color-neutral-fill-quiet);
+  border-block-start: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+  border-block-end: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+
+.entries-table__group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding-block: 0.4rem;
+  padding-inline: 0.6rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: var(--wa-color-text-normal);
+  cursor: pointer;
+  text-align: start;
+}
+
+.entries-table__group-toggle:hover,
+.entries-table__group-toggle:focus-visible {
+  background: var(--wa-color-neutral-fill-normal, rgba(0, 0, 0, 0.04));
+}
+
+.entries-table__group-chevron {
+  flex: 0 0 auto;
+  color: var(--wa-color-text-quiet);
+  transition: rotate var(--wa-transition-fast, 150ms) var(--wa-transition-easing, ease);
+  rotate: 0deg;
+}
+
+.entries-table__group-toggle[aria-expanded='false'] .entries-table__group-chevron {
+  rotate: -90deg;
+}
+
+:host(:dir(rtl)) .entries-table__group-toggle[aria-expanded='false'] .entries-table__group-chevron {
+  rotate: 90deg;
+}
+
+.entries-table__group-name {
+  font-weight: var(--wa-font-weight-semibold, 600);
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entries-table__group-count {
+  margin-inline-start: auto;
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entries-table__group-chevron {
+    transition: none;
+  }
+}
+
+/* #endregion */

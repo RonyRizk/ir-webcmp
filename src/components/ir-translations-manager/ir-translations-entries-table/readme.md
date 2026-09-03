@@ -7,15 +7,17 @@
 
 ## Properties
 
-| Property          | Attribute         | Description                                                                                                       | Type                    | Default     |
-| ----------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------- |
-| `changedEntryIds` | --                | Ids of rows whose position differs from the last-loaded/saved order — highlighted while a reorder is pending.     | `Set<string>`           | `new Set()` |
-| `compact`         | `compact`         |                                                                                                                   | `boolean`               | `true`      |
-| `entries`         | --                | Rows to render, already filtered by the parent.                                                                   | `TranslationEntry[]`    | `[]`        |
-| `filtered`        | `filtered`        | True when the parent's filters hid every row, so the empty state can say so.                                      | `boolean`               | `false`     |
-| `languages`       | --                | Column order — the source language is expected first.                                                             | `TranslationLanguage[]` | `[]`        |
-| `reorderEnabled`  | `reorder-enabled` | False while a search/status filter is active — reordering a filtered subset can't map cleanly onto the full list. | `boolean`               | `true`      |
-| `sourceCode`      | `source-code`     | Code of the reference language, marked in the header.                                                             | `string`                | `undefined` |
+| Property          | Attribute         | Description                                                                                                       | Type                         | Default     |
+| ----------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
+| `changedEntryIds` | --                | Ids of rows whose position differs from the last-loaded/saved order — highlighted while a reorder is pending.     | `Set<string>`                | `new Set()` |
+| `compact`         | `compact`         |                                                                                                                   | `boolean`                    | `true`      |
+| `duplicates`      | --                | Entry id → the tables sharing that row's description; rows present here get a duplicate badge beside their key.   | `Map<string, DuplicateInfo>` | `new Map()` |
+| `entries`         | --                | Rows to render, already filtered by the parent.                                                                   | `TranslationEntry[]`         | `[]`        |
+| `filtered`        | `filtered`        | True when the parent's filters hid every row, so the empty state can say so.                                      | `boolean`                    | `false`     |
+| `groupByTable`    | `group-by-table`  | True when `entries` span several setup tables — rows are then broken up by collapsible per-table header rows.     | `boolean`                    | `false`     |
+| `languages`       | --                | Column order — the source language is expected first.                                                             | `TranslationLanguage[]`      | `[]`        |
+| `reorderEnabled`  | `reorder-enabled` | False while a search/status filter is active — reordering a filtered subset can't map cleanly onto the full list. | `boolean`                    | `true`      |
+| `sourceCode`      | `source-code`     | Code of the reference language, marked in the header.                                                             | `string`                     | `undefined` |
 
 
 ## Events

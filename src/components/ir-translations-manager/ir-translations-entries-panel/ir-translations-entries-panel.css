@@ -44,10 +44,24 @@
   flex: 0 0 11rem;
 }
 
+.entries-panel__table-filter {
+  flex: 0 0 12rem;
+  min-width: 0;
+}
+
+.entries-panel__missing-filter {
+  flex: 0 1 14rem;
+  min-width: 0;
+  /* Keeps the collapsed "+n" tag from stretching the toolbar out of line with its siblings. */
+  --tag-max-size: 8ch;
+}
+
 /* Placeholders and the adjacent icons already carry the meaning visually; the
    `label` props (needed for real accessible names) stay in the a11y tree only. */
 .entries-panel__search::part(label),
-.entries-panel__status::part(label) {
+.entries-panel__status::part(label),
+.entries-panel__table-filter::part(label),
+.entries-panel__missing-filter::part(label) {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -75,7 +89,9 @@
     flex-wrap: wrap;
   }
 
-  .entries-panel__status {
+  .entries-panel__status,
+  .entries-panel__table-filter,
+  .entries-panel__missing-filter {
     flex: 1 1 8rem;
   }
 }

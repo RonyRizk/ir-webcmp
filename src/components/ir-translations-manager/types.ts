@@ -28,6 +28,8 @@ export interface TranslationEntryMeta {
 export interface TranslationEntry {
   id: string;
   key: string;
+  /** Setup table this row belongs to. Absent for entries created locally that haven't been saved yet. */
+  tableName?: string;
   /** Translated value per language code. */
   values: Record<string, string>;
   /** Absent for entries created locally that haven't been saved yet. */
@@ -38,6 +40,16 @@ export interface TranslationTable {
   id: string;
   name: string;
   entries: TranslationEntry[];
+}
+
+/**
+ * How many setup tables share one entry's description, and which ones — derived
+ * from Get_Duplicated_Setup_Entries_Across_Tables, which groups by DESCRIPTION
+ * rather than by row.
+ */
+export interface DuplicateInfo {
+  occurrences: number;
+  tables: string[];
 }
 
 /** Which rows the entries table shows, based on translation completeness or visibility. */

@@ -354,7 +354,7 @@ export class IrTasksTable {
                       <td class="task-row ">
                         <span class={{ 'highlighted-unit': task.is_highlight }}>{task.unit.name}</span>
                       </td>
-                      <td class="task-row  text-left">{task.status.description}</td>
+                      <td class="task-row  text-left">{task?.status?.code === 'NC' ? (task?.base_status?.description ?? task.status.description) : task.status.description}</td>
                       <td class="task-row  text-left">{task.hint}</td>
                       <td class="task-row  text-left">
                         <div class="th-sort-inner">{this.taskBadges(task)}</div>

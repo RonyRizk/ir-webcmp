@@ -24,8 +24,8 @@ import { PropertyService } from '@/services/property.service';
 import { showToast } from '@/utils/utils';
 import moment from 'moment';
 import { IRBookingEditorService } from './ir-booking-editor.service';
-import { DAY_USE_CATEGORY_CODE } from '@/utils/booking';
 import { ExtraService } from '@/models/booking.dto';
+import { SvcCategory } from '@/types/enums';
 
 /** bookingStatus['002'] in @/utils/booking — CONFIRMED. */
 const CONFIRMED_STATUS_CODE = '002';
@@ -74,7 +74,7 @@ export class IrBookingEditor {
   private room: Booking['rooms'][0];
 
   private get dayUsePrice(): number {
-    return Number(getExtraServiceDefaultPrice(DAY_USE_CATEGORY_CODE));
+    return Number(getExtraServiceDefaultPrice(SvcCategory.DayUse));
   }
 
   /**
@@ -101,7 +101,9 @@ export class IrBookingEditor {
       let grossAmount: number;
       if (isCustomPrice) {
         netAmount = price;
-        taxAmount = await this.bookingService.calculateExclusiveTax({ property_id: Number(this.propertyId), amount: netAmount, taxes_to_include: ['VAT'] });
+        taxAmount = this.isAccommodationVatExclusive()
+          ? await this.bookingService.calculateExclusiveTax({ property_id: Number(this.propertyId), amount: netAmount, taxes_to_include: ['VAT'] })
+          : 0;
         grossAmount = netAmount + taxAmount;
       } else {
         grossAmount = this.dayUsePrice;
@@ -114,7 +116,11 @@ export class IrBookingEditor {
       this.resolvingDayUseUnitId = null;
     }
   }
-
+  /** Resolves taxation policy on accommodation level. */
+  private isAccommodationVatExclusive = () => {
+    const accTax = calendar_data.property.taxes?.find(t => t.name === 'V.A.T');
+    return accTax?.is_exlusive;
+  };
   /** Resolves `dayUsePrice` (gross) to its net equivalent once, up front, so it's ready before the day-use unit list renders. */
   private async resolveDayUseNetPrice() {
     const grossAmount = this.dayUsePrice;
@@ -123,11 +129,7 @@ export class IrBookingEditor {
       return;
     }
     try {
-      const isAccommodationVatExclusive = () => {
-        const accTax = calendar_data.property.taxes?.find(t => t.name === 'V.A.T');
-        return accTax?.is_exlusive;
-      };
-      this.dayUseNetPrice = isAccommodationVatExclusive()
+      this.dayUseNetPrice = this.isAccommodationVatExclusive()
         ? await this.propertyService.calculateNetAmount({ property_id: Number(this.propertyId), amount: grossAmount, taxes_to_include: ['VAT'] })
         : this.dayUsePrice;
     } catch (error) {
@@ -422,13 +424,13 @@ export class IrBookingEditor {
 
     const isEditing = this.bookingEditorService.isEventType('EDIT_DAY_USE') && this.extraService;
     if (isEditing) {
-      // Do_Booking_Extra_Service now updates the existing DUZ extra service in place (keyed off its
+      // Do_Booking_Extra_Service now updates the existing Day use extra service in place (keyed off its
       // `system_id`) — unit/price/hours change, but the booking it belongs to doesn't, so no more
       // delete-then-recreate-as-a-new-booking round trip.
       const service = {
         ...this.extraService,
         pr_id: dayUseSelection.unit.id,
-        category: { code: DAY_USE_CATEGORY_CODE },
+        category: { code: SvcCategory.DayUse },
         start_date: date,
         end_date: date,
         from_time: dayUseHours.from,
@@ -474,7 +476,7 @@ export class IrBookingEditor {
       },
       extra_service: {
         pr_id: dayUseSelection.unit.id,
-        category: { code: DAY_USE_CATEGORY_CODE },
+        category: { code: SvcCategory.DayUse },
         description: '',
         start_date: date,
         end_date: date,

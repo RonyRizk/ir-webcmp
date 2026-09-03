@@ -7,7 +7,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { isAgentMode } from '@/components/ir-booking-details/functions';
 import { Agent } from '@/services/agents/type';
 import calendar_data from '@/stores/calendar-data';
-import { InvoiceableItemReason } from '@/types/enums';
+import { InvoiceableItemReason, SvcCategory } from '@/types/enums';
 
 const nightAmountSchema = z.coerce.number({ invalid_type_error: 'Required' }).min(0, 'Minimum is 0');
 
@@ -104,7 +104,7 @@ export class IrBookingPricingForm {
   }
 
   private get acmTxByDate(): Map<string, ClTx> {
-    return new Map(this.folioEntries.filter(tx => tx.CATEGORY === 'ACM' && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
+    return new Map(this.folioEntries.filter(tx => tx.CATEGORY === SvcCategory.Accommodation && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
   }
 
   private updateNight(date: string, value: string) {

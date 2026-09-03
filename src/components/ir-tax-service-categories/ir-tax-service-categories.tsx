@@ -160,9 +160,9 @@ export class IrTaxServiceCategories {
 
   /**
    * Top-level service categories eligible for their own VAT row here. Sub-categories grouped under
-   * a parent (e.g. Breakfast/Minibar under `ACM`) are excluded — they share the group's rate,
+   * a parent (e.g. Breakfast/Minibar under `Accommodation`) are excluded — they share the group's rate,
    * configured on the Extra Services page instead. Synthesized group placeholders (a parent code
-   * with no `svc_category` row of its own, like `ACM`) are excluded too: `ACM`'s rate already
+   * with no `svc_category` row of its own, like `Accommodation`) are excluded too: `Accommodation`'s rate already
    * mirrors the Accommodation row above, and it isn't a real backend category to submit.
    */
   private get categories() {

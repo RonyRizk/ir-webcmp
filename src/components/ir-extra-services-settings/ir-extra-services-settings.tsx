@@ -9,15 +9,10 @@ import { ChargeRule, TaxesSetupEntries } from '@/components/ir-tax-service-categ
 import { getExtraServiceDefaultPrice, getDayUseBlockState, getBabyCotPricingModel } from '@/stores/calendar-data';
 import { getEntryValue, showToast } from '@/utils/utils';
 import { groupSvcCategoriesByParent, SvcCategoryGroup } from '@/utils/svc-category.utils';
-
-// /** `_SVC_CATEGORY` short code for Day Use — only used to place the Block Night switch, not for grouping. */
-// const DAY_USE_CATEGORY_CODE = 'DUZ';
-
-/** `_SVC_CATEGORY` short code for Baby Cot — only used to place the Stay/Night pricing-model select, not for grouping. */
-const BABY_COT_CATEGORY_CODE = 'BCT';
+import { SvcCategory } from '@/types/enums';
 
 /** Hidden `_SVC_CATEGORY` — only used for categories that doesn't require a default price. */
-const HIDDEN_SUB_CATEGORIES = new Set(['MNB']);
+const HIDDEN_SUB_CATEGORIES = new Set([SvcCategory.Minibar]);
 
 /** Valid `BABY_COT_PRICING_MODEL` values — the baby cot's default price is either a flat per-stay charge or a per-night charge. */
 const BABY_COT_PRICING_MODELS = ['Stay', 'Night'] as const;
@@ -206,11 +201,11 @@ export class IrExtraServicesSettings {
               </div>
               <div class="extra-services-grid">
                 {group.categories
-                  .filter(c => !HIDDEN_SUB_CATEGORIES.has(c.CODE_NAME))
+                  .filter(c => !HIDDEN_SUB_CATEGORIES.has(c.CODE_NAME as any))
                   .map((category, idx) => {
                     const rule = this.priceCategoryRules.get(category.CODE_NAME);
                     // const isDayUse = category.CODE_NAME === DAY_USE_CATEGORY_CODE;
-                    const isBabyCot = category.CODE_NAME === BABY_COT_CATEGORY_CODE;
+                    const isBabyCot = category.CODE_NAME === SvcCategory.BabyCot;
                     const isExtraBed = category.CODE_NAME === 'EXB';
                     return [
                       idx > 0 && (

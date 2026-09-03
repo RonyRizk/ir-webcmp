@@ -2,9 +2,10 @@ import { PhysicalRoom, RoomType } from '@/models/property';
 import { Component, Event, EventEmitter, Fragment, Host, Prop, State, h } from '@stencil/core';
 import calendar_data, { getExtraServiceDefaultPrice } from '@/stores/calendar-data';
 import booking_store from '@/stores/booking.store';
-import { DAY_USE_CATEGORY_CODE, DAY_USE_STATUS_ICON, DayUseUnitDayStatus, formatDayUseStatusText, getDayUseUnitAvailability } from '@/utils/booking';
+import { DAY_USE_STATUS_ICON, DayUseUnitDayStatus, formatDayUseStatusText, getDayUseUnitAvailability } from '@/utils/booking';
 import { ExtraService } from '@/models/booking.dto';
 import { BookingEditorMode } from '../types';
+import { SvcCategory } from '@/types/enums';
 
 @Component({
   tag: 'igl-day-use-unit-list',
@@ -74,7 +75,7 @@ export class IglDayUseUnitList {
   }
 
   private get defaultPrice(): number {
-    const svcDefaultPrice = getExtraServiceDefaultPrice(DAY_USE_CATEGORY_CODE);
+    const svcDefaultPrice = getExtraServiceDefaultPrice(SvcCategory.DayUse);
     return svcDefaultPrice !== undefined ? Number(svcDefaultPrice) : (this.price ?? 0);
   }
 

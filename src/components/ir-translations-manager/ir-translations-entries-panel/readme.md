@@ -13,15 +13,19 @@ CRUD intents it emits.
 
 ## Properties
 
-| Property          | Attribute           | Description                                                                                                           | Type                    | Default     |
-| ----------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------- |
-| `changedEntryIds` | --                  | Ids of rows whose position differs from the last-loaded/saved order — marked in the table while a reorder is pending. | `Set<string>`           | `new Set()` |
-| `disableActions`  | `disable-actions`   | Disables the "New key" action, e.g. while another write is in flight.                                                 | `boolean`               | `false`     |
-| `entries`         | --                  | The active table's unfiltered entries — filtered internally for display.                                              | `TranslationEntry[]`    | `[]`        |
-| `hasPendingOrder` | `has-pending-order` | True once a drag reorder is applied locally but not yet saved — shows the Save/Discard order buttons.                 | `boolean`               | `false`     |
-| `isLoading`       | `is-loading`        | True while the active table's keys are still loading.                                                                 | `boolean`               | `false`     |
-| `languages`       | --                  |                                                                                                                       | `TranslationLanguage[]` | `[]`        |
-| `sourceCode`      | `source-code`       |                                                                                                                       | `string`                | `undefined` |
+| Property          | Attribute           | Description                                                                                                           | Type                         | Default     |
+| ----------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
+| `changedEntryIds` | --                  | Ids of rows whose position differs from the last-loaded/saved order — marked in the table while a reorder is pending. | `Set<string>`                | `new Set()` |
+| `disableActions`  | `disable-actions`   | Disables the "New key" action, e.g. while another write is in flight.                                                 | `boolean`                    | `false`     |
+| `disableCreate`   | `disable-create`    | Disables the "New key" action outright, e.g. in the cross-table view where there is no single table to create into.   | `boolean`                    | `false`     |
+| `duplicates`      | --                  | Entry id → the tables sharing that row's description; rows present here get a duplicate badge.                        | `Map<string, DuplicateInfo>` | `new Map()` |
+| `entries`         | --                  | The active table's unfiltered entries — filtered internally for display.                                              | `TranslationEntry[]`         | `[]`        |
+| `groupByTable`    | `group-by-table`    | True when `entries` span several setup tables — adds the table filter and hands the table its grouped rendering.      | `boolean`                    | `false`     |
+| `hasPendingOrder` | `has-pending-order` | True once a drag reorder is applied locally but not yet saved — shows the Save/Discard order buttons.                 | `boolean`                    | `false`     |
+| `isLoading`       | `is-loading`        | True while the active table's keys are still loading.                                                                 | `boolean`                    | `false`     |
+| `languages`       | --                  |                                                                                                                       | `TranslationLanguage[]`      | `[]`        |
+| `sourceCode`      | `source-code`       |                                                                                                                       | `string`                     | `undefined` |
+| `tableNames`      | --                  | Distinct table names present in `entries`, in display order — the table filter's options.                             | `string[]`                   | `[]`        |
 
 
 ## Events

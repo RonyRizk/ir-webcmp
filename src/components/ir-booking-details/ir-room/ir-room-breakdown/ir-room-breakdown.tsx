@@ -6,6 +6,7 @@ import calendar_data from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { SvcCategory } from '@/types/enums';
 
 @Component({
   tag: 'ir-room-breakdown',
@@ -19,7 +20,7 @@ export class IrRoomBreakdown {
   @Prop() clTransactions: ClTx[] = [];
 
   private get acmTxByDate(): Map<string, ClTx> {
-    return new Map(this.clTransactions.filter(tx => tx.CATEGORY === 'ACM' && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
+    return new Map(this.clTransactions.filter(tx => tx.CATEGORY === SvcCategory.Accommodation && tx.BSA_REF === this.room.identifier).map(tx => [tx.SERVICE_DATE, tx]));
   }
 
   private getSmokingLabel() {
