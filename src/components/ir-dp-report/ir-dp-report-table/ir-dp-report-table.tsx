@@ -55,15 +55,16 @@ export class IrDpReportTable {
   ];
 
   private renderEffect(row: DpReportRow) {
-    if (row.profit === 0) {
+    // Negative values (price reductions) are never shown — the effect column only reports gains.
+    const profit = row.profit > 0 ? row.profit : 0;
+    if (profit === 0) {
       return <span class="dp-report-table__effect">{formatAmount(row.currencySymbol, 0)}</span>;
     }
-    const isGain = row.profit > 0;
     return (
-      <span class={{ 'dp-report-table__effect': true, 'dp-report-table__effect--gain': isGain, 'dp-report-table__effect--loss': !isGain }}>
-        <wa-icon name={isGain ? 'arrow-trend-up' : 'arrow-trend-down'}></wa-icon>
-        {isGain ? '+' : '-'}
-        {formatAmount(row.currencySymbol, Math.abs(row.profit))}
+      <span class={{ 'dp-report-table__effect': true, 'dp-report-table__effect--gain': true }}>
+        <wa-icon name="arrow-trend-up"></wa-icon>
+        {'+'}
+        {formatAmount(row.currencySymbol, profit)}
       </span>
     );
   }

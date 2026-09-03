@@ -13,8 +13,11 @@ export class IrDpReportSummary {
     const currencySymbol = dp_report.rows[0]?.currencySymbol ?? '$';
     const loading = dp_report.isLoading;
 
-    const totalRevenue = dp_report.rows.reduce((sum, row) => sum + row.accommodationGross, 0);
-    const dpContributionPct = totalRevenue !== 0 ? Number(((summary.total_profit / totalRevenue) * 100).toFixed(1)) : 0;
+    const totalBookings = summary.total_bookings;
+    const totalNbOfProfitableBooking = dp_report.rows.filter(row => row.profit > 0).length;
+
+    // const totalRevenue = dp_report.rows.reduce((sum, row) => sum + row.accommodationGross, 0);
+    // const dpContributionPct = totalRevenue !== 0 ? Number(((summary.total_profit / totalRevenue) * 100).toFixed(1)) : 0;
 
     return (
       <Host>
@@ -25,32 +28,33 @@ export class IrDpReportSummary {
             label="Total Profit Generated"
             loading={loading}
             value={formatAmount(currencySymbol, summary.total_profit)}
-            trend={dpContributionPct}
-            caption={`from ${summary.total_bookings} booking${summary.total_bookings === 1 ? '' : 's'}`}
+            // trend={dpContributionPct}
+            caption={`from ${totalNbOfProfitableBooking} / ${totalBookings} booking${totalBookings === 1 ? '' : 's'}`}
           ></ir-metric-card>
-          <ir-metric-card
+          {/* <ir-metric-card
             class="dp-summary__metric"
             icon="chart-line"
             label="Bookings Above Base"
             loading={loading}
             value={summary.bookings_above_base}
             caption={`of ${summary.total_bookings} booking${summary.total_bookings === 1 ? '' : 's'}`}
-          ></ir-metric-card>
+          ></ir-metric-card> */}
           <ir-metric-card
             class="dp-summary__metric --gain"
             icon="arrow-trend-up"
             label="Avg Gain"
             loading={loading}
             value={formatAmount(currencySymbol, summary.avg_gain)}
-            caption={`from ${summary.bookings_above_base} booking${summary.bookings_above_base === 1 ? '' : 's'}`}
+            // caption={`from ${summary.bookings_above_base} booking${summary.bookings_above_base === 1 ? '' : 's'}`}
+            caption={`per booking`}
           ></ir-metric-card>
           <ir-metric-card
             class="dp-summary__metric --loss"
             icon="arrow-trend-down"
-            label="Avg Incentive Reduction"
+            label="Extra Bookings from Applied Incentives"
             loading={loading}
-            value={formatAmount(currencySymbol, summary.avg_loss)}
-            caption={`from ${summary.bookings_below_base} booking${summary.bookings_below_base === 1 ? '' : 's'}`}
+            value={summary.bookings_below_base}
+            caption={`${formatAmount(currencySymbol, summary.avg_loss)}/booking${summary.bookings_below_base === 1 ? '' : 's'} average reduction`}
           ></ir-metric-card>
         </div>
       </Host>
