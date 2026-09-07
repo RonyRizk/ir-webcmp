@@ -64,6 +64,16 @@ export class IrRectifier {
     return next;
   }
 
+  private getValidRoomTypeIds() {
+    const roomTypes = calendar_data.property?.roomtypes ?? [];
+    return roomTypes.map(roomtype => Number(roomtype?.id)).filter(id => Number.isFinite(id));
+  }
+
+  private toggleSelectAllRoomTypes(checked: boolean) {
+    this.showRoomTypeError = false;
+    this.updateForm({ room_type_ids: checked ? this.getValidRoomTypeIds() : [] });
+  }
+
   private updateRoomTypeSelection(roomTypeId: number, checked: boolean) {
     const nextIds = new Set(this.form.room_type_ids);
     if (checked) {
@@ -105,6 +115,9 @@ export class IrRectifier {
 
   render() {
     const roomTypes = calendar_data.property?.roomtypes ?? [];
+    const validRoomTypeIds = this.getValidRoomTypeIds();
+    const allSelected = validRoomTypeIds.length > 0 && validRoomTypeIds.every(id => this.form.room_type_ids.includes(id));
+    const someSelected = validRoomTypeIds.some(id => this.form.room_type_ids.includes(id));
     return (
       <Host>
         <form
@@ -120,6 +133,19 @@ export class IrRectifier {
             This will update the total availability of the selected room types by calculating: No. of physical rooms - Booked - Blocked - Pending
           </wa-callout>
           <div class="ir-rectifier__roomtypes">
+            {validRoomTypeIds.length > 0 && (
+              <wa-checkbox
+                class="ir-rectifier__roomtype-checkbox ir-rectifier__roomtype-checkbox--all"
+                checked={allSelected}
+                indeterminate={!allSelected && someSelected}
+                onchange={e => {
+                  const checked = (e.target as HTMLInputElement).checked;
+                  this.toggleSelectAllRoomTypes(checked);
+                }}
+              >
+                Select all
+              </wa-checkbox>
+            )}
             {roomTypes.map(roomtype => {
               const roomTypeId = Number(roomtype?.id);
               if (!Number.isFinite(roomTypeId)) {

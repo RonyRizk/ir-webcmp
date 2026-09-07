@@ -25,7 +25,7 @@ export class IrDpReportSummary {
           <ir-metric-card
             class="dp-summary__metric"
             icon="sack-dollar"
-            label="Total Profit Generated"
+            label="Extra Profit Generated"
             loading={loading}
             value={formatAmount(currencySymbol, summary.total_profit)}
             // trend={dpContributionPct}

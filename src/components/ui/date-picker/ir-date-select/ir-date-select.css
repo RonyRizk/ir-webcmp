@@ -51,6 +51,9 @@
   cursor: not-allowed !important;
   pointer-events: none;
 }
+.ir-date-select__calendar {
+  min-height: 280px;
+}
 .ir-date-select__trigger,
 .ir-date-select__input {
   width: 100%;
