@@ -1,7 +1,7 @@
 import moment, { MomentFormatSpecification } from 'moment';
 import IBooking, { ICountry, IEntries, PhysicalRoomType, PropertyRoomType } from '../models/IBooking';
 import { z } from 'zod';
-import calendarData from '@/stores/calendar-data';
+import calendarData, { calendar_data } from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { ROOM_IN_OUT } from '@/models/booking.dto';
 import { GroupedTableEntries } from '@/services/booking-service/types';
@@ -452,7 +452,7 @@ export interface CheckInParams {
  * @returns True if check-in is allowed; otherwise, false.
  */
 export function canCheckIn({ from_date, to_date, isCheckedIn }: CheckInParams): boolean {
-  if (!calendarData.checkin_enabled || calendarData.is_automatic_check_in_out || !calendarData.property.is_frontdesk_enabled) {
+  if (!calendarData.checkin_enabled || calendar_data.property.is_automatic_check_in_out || !calendar_data.property.is_frontdesk_enabled) {
     return false;
   }
   if (isCheckedIn) {
@@ -460,8 +460,8 @@ export function canCheckIn({ from_date, to_date, isCheckedIn }: CheckInParams): 
   }
   const now = moment();
   if (
-    (now.isSameOrAfter(new Date(from_date), 'days') && now.isBefore(new Date(to_date), 'days')) ||
-    now.isSame(new Date(to_date), 'days')
+    (now.isSameOrAfter(moment(from_date, 'YYYY-MM-DD'), 'date') && now.isBefore(moment(to_date, 'YYYY-MM-DD'), 'date')) ||
+    now.isSame(moment(to_date, 'YYYY-MM-DD'), 'date')
     // && !compareTime(now.toDate(), createDateWithOffsetAndHour(calendarData.checkin_checkout_hours?.offset, calendarData.checkin_checkout_hours?.hour))
   ) {
     return true;

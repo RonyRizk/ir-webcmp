@@ -5,24 +5,25 @@
 
 ## Properties
 
-| Property             | Attribute            | Description                                                                                                                  | Type      | Default     |
-| -------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `bookingNumber`      | `booking-number`     | Booking number used to fetch booking details.                                                                                | `string`  | `''`        |
-| `hasCheckIn`         | `has-check-in`       | Enables the check-in action in room components.                                                                              | `boolean` | `false`     |
-| `hasCheckOut`        | `has-check-out`      | Enables the check-out action in room components.                                                                             | `boolean` | `false`     |
-| `hasCloseButton`     | `has-close-button`   | Displays the close button in the booking header.                                                                             | `boolean` | `false`     |
-| `hasDelete`          | `has-delete`         | Enables the delete booking action.                                                                                           | `boolean` | `false`     |
-| `hasMenu`            | `has-menu`           | Displays the navigation menu button.                                                                                         | `boolean` | `false`     |
-| `hasPrint`           | `has-print`          | Enables the print booking option.                                                                                            | `boolean` | `false`     |
-| `hasReceipt`         | `has-receipt`        | Enables the receipt action in the booking header.                                                                            | `boolean` | `false`     |
-| `hasRoomAdd`         | `has-room-add`       | Allows adding new rooms to the booking.                                                                                      | `boolean` | `false`     |
-| `hasRoomDelete`      | `has-room-delete`    | Allows deleting rooms from the booking.                                                                                      | `boolean` | `false`     |
-| `hasRoomEdit`        | `has-room-edit`      | Allows editing existing rooms in the booking.                                                                                | `boolean` | `false`     |
-| `is_from_front_desk` | `is_from_front_desk` | Indicates whether the component is rendered from the front desk context. Disables interceptor and toast rendering when true. | `boolean` | `false`     |
-| `language`           | `language`           | Active language code used for translations and API requests. Defaults to 'en'.                                               | `string`  | `'en'`      |
-| `p`                  | `p`                  | Property alias or account name used when fetching exposed property data.                                                     | `string`  | `undefined` |
-| `propertyid`         | `propertyid`         | Property ID used to retrieve property-specific configuration.                                                                | `number`  | `undefined` |
-| `ticket`             | `ticket`             | Authentication token used to initialize the component. Triggers re-initialization when changed.                              | `string`  | `''`        |
+| Property                 | Attribute                  | Description                                                                                                                                                                                                                        | Type      | Default     |
+| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
+| `bookingNumber`          | `booking-number`           | Booking number used to fetch booking details.                                                                                                                                                                                      | `string`  | `''`        |
+| `checkoutRoomIdentifier` | `checkout-room-identifier` | When set, the room matching this identifier auto-opens its check-out dialog once the booking has loaded. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details. | `string`  | `undefined` |
+| `hasCheckIn`             | `has-check-in`             | Enables the check-in action in room components.                                                                                                                                                                                    | `boolean` | `false`     |
+| `hasCheckOut`            | `has-check-out`            | Enables the check-out action in room components.                                                                                                                                                                                   | `boolean` | `false`     |
+| `hasCloseButton`         | `has-close-button`         | Displays the close button in the booking header.                                                                                                                                                                                   | `boolean` | `false`     |
+| `hasDelete`              | `has-delete`               | Enables the delete booking action.                                                                                                                                                                                                 | `boolean` | `false`     |
+| `hasMenu`                | `has-menu`                 | Displays the navigation menu button.                                                                                                                                                                                               | `boolean` | `false`     |
+| `hasPrint`               | `has-print`                | Enables the print booking option.                                                                                                                                                                                                  | `boolean` | `false`     |
+| `hasReceipt`             | `has-receipt`              | Enables the receipt action in the booking header.                                                                                                                                                                                  | `boolean` | `false`     |
+| `hasRoomAdd`             | `has-room-add`             | Allows adding new rooms to the booking.                                                                                                                                                                                            | `boolean` | `false`     |
+| `hasRoomDelete`          | `has-room-delete`          | Allows deleting rooms from the booking.                                                                                                                                                                                            | `boolean` | `false`     |
+| `hasRoomEdit`            | `has-room-edit`            | Allows editing existing rooms in the booking.                                                                                                                                                                                      | `boolean` | `false`     |
+| `is_from_front_desk`     | `is_from_front_desk`       | Indicates whether the component is rendered from the front desk context. Disables interceptor and toast rendering when true.                                                                                                       | `boolean` | `false`     |
+| `language`               | `language`                 | Active language code used for translations and API requests. Defaults to 'en'.                                                                                                                                                     | `string`  | `'en'`      |
+| `p`                      | `p`                        | Property alias or account name used when fetching exposed property data.                                                                                                                                                           | `string`  | `undefined` |
+| `propertyid`             | `propertyid`               | Property ID used to retrieve property-specific configuration.                                                                                                                                                                      | `number`  | `undefined` |
+| `ticket`                 | `ticket`                   | Authentication token used to initialize the component. Triggers re-initialization when changed.                                                                                                                                    | `string`  | `''`        |
 
 
 ## Events
@@ -152,9 +153,9 @@ graph TD;
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
+  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-dialog
   ir-checkout-dialog --> ir-spinner
-  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-payment-folio
   ir-payment-folio --> ir-drawer
   ir-payment-folio --> ir-payment-folio-form

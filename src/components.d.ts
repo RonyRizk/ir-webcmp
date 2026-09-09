@@ -1423,6 +1423,10 @@ export namespace Components {
          */
         "bookingNumber": string;
         /**
+          * When set, the room matching this identifier auto-opens its check-out dialog once the booking has loaded. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details.
+         */
+        "checkoutRoomIdentifier": string;
+        /**
           * Enables the check-in action in room components.
           * @default false
          */
@@ -1507,6 +1511,10 @@ export namespace Components {
           * Booking reference number.
          */
         "bookingNumber": string;
+        /**
+          * When set, the booking-details view auto-opens the check-out dialog for the room with this identifier once the booking loads. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details.
+         */
+        "checkoutRoomIdentifier": string;
         /**
           * Language code used for localization. Defaults to English (`en`).
           * @default 'en'
@@ -1813,6 +1821,10 @@ export namespace Components {
           * The booking object containing reservation details, including rooms, status, currency, and edit permissions.
          */
         "booking": Booking;
+        /**
+          * When set, the room whose identifier matches auto-opens its check-out dialog. Used to route early check-outs triggered from other screens through the full booking details.
+         */
+        "checkoutRoomIdentifier": string;
         /**
           * @default []
          */
@@ -5974,6 +5986,11 @@ export namespace Components {
     interface IrRoom {
         "agent": Agent;
         "arrivalTime": IEntries[];
+        /**
+          * When true, this room opens its check-out dialog automatically once mounted. Set by the booking-details screen when an early check-out was initiated from another screen (departures list, calendar) and redirected here.
+          * @default false
+         */
+        "autoOpenCheckout": boolean;
         "bedPreferences": IEntries[];
         "booking": Booking;
         "bookingIndex": number;
@@ -15627,6 +15644,10 @@ declare namespace LocalJSX {
          */
         "bookingNumber"?: string;
         /**
+          * When set, the room matching this identifier auto-opens its check-out dialog once the booking has loaded. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details.
+         */
+        "checkoutRoomIdentifier"?: string;
+        /**
           * Enables the check-in action in room components.
           * @default false
          */
@@ -15719,6 +15740,10 @@ declare namespace LocalJSX {
           * Booking reference number.
          */
         "bookingNumber"?: string;
+        /**
+          * When set, the booking-details view auto-opens the check-out dialog for the room with this identifier once the booking loads. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details.
+         */
+        "checkoutRoomIdentifier"?: string;
         /**
           * Language code used for localization. Defaults to English (`en`).
           * @default 'en'
@@ -16054,6 +16079,10 @@ declare namespace LocalJSX {
           * The booking object containing reservation details, including rooms, status, currency, and edit permissions.
          */
         "booking"?: Booking;
+        /**
+          * When set, the room whose identifier matches auto-opens its check-out dialog. Used to route early check-outs triggered from other screens through the full booking details.
+         */
+        "checkoutRoomIdentifier"?: string;
         /**
           * @default []
          */
@@ -20594,6 +20623,11 @@ declare namespace LocalJSX {
     interface IrRoom {
         "agent"?: Agent;
         "arrivalTime"?: IEntries[];
+        /**
+          * When true, this room opens its check-out dialog automatically once mounted. Set by the booking-details screen when an early check-out was initiated from another screen (departures list, calendar) and redirected here.
+          * @default false
+         */
+        "autoOpenCheckout"?: boolean;
         "bedPreferences"?: IEntries[];
         "booking"?: Booking;
         "bookingIndex"?: number;
@@ -22475,6 +22509,7 @@ declare namespace LocalJSX {
         "bookingNumber": string;
         "hasCheckIn": boolean;
         "hasCheckOut": boolean;
+        "checkoutRoomIdentifier": string;
         "hasCloseButton": boolean;
         "hasDelete": boolean;
         "hasMenu": boolean;
@@ -22495,6 +22530,7 @@ declare namespace LocalJSX {
         "ticket": string;
         "language": string;
         "bookingNumber": string;
+        "checkoutRoomIdentifier": string;
     }
     interface IrBookingEditorAttributes {
         "propertyId": string;
@@ -22588,6 +22624,7 @@ declare namespace LocalJSX {
         "hasRoomEdit": boolean;
         "language": string;
         "propertyId": number;
+        "checkoutRoomIdentifier": string;
     }
     interface IrBookingStatusTagAttributes {
         "isRequestToCancel": Booking['is_requested_to_cancel'];
@@ -23793,6 +23830,7 @@ declare namespace LocalJSX {
         "hasRoomAdd": boolean;
         "hasCheckIn": boolean;
         "hasCheckOut": boolean;
+        "autoOpenCheckout": boolean;
     }
     interface IrRoomBreakdownAttributes {
         "currency": string;

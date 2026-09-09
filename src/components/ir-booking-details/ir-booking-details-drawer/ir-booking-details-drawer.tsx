@@ -40,6 +40,13 @@ export class IrBookingDetailsDrawer {
   @Prop() bookingNumber: string;
 
   /**
+   * When set, the booking-details view auto-opens the check-out dialog for the room with
+   * this identifier once the booking loads. Used to route early check-outs triggered from
+   * other screens (departures list, calendar) through the full booking details.
+   */
+  @Prop() checkoutRoomIdentifier: string;
+
+  /**
    * Emitted when the booking details drawer is closed.
    */
   @Event() bookingDetailsDrawerClosed: EventEmitter<void>;
@@ -87,6 +94,7 @@ export class IrBookingDetailsDrawer {
             bookingNumber={this.bookingNumber.toString()}
             ticket={this.ticket}
             language={this.language}
+            checkoutRoomIdentifier={this.checkoutRoomIdentifier}
             hasRoomAdd
           />
         )}

@@ -86,6 +86,12 @@ export class IrBookingRooms {
   /** `_SVC_CATEGORY` setup entries, threaded down to each room's extra-services section for category labels. */
   @Prop() svcCategories: IEntries[] = [];
 
+  /**
+   * When set, the room whose identifier matches auto-opens its check-out dialog. Used to
+   * route early check-outs triggered from other screens through the full booking details.
+   */
+  @Prop() checkoutRoomIdentifier: string;
+
   @Event() roomDeleteFinished: EventEmitter<string>;
 
   private computeRoomGroups(rooms: Room[]) {
@@ -221,6 +227,7 @@ export class IrBookingRooms {
         hasRoomDelete={this.hasRoomDelete && this.booking.status.code !== '003' && this.booking.is_direct}
         hasCheckIn={showCheckin}
         hasCheckOut={showCheckout}
+        autoOpenCheckout={!!this.checkoutRoomIdentifier && this.checkoutRoomIdentifier === room.identifier}
         booking={this.booking}
         agent={this.agent}
         clTransactions={this.clTransactions}

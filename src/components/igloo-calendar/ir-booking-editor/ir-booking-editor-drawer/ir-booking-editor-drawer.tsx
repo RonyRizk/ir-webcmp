@@ -87,7 +87,23 @@ export class IrBookingEditorDrawer {
     }
     if (this.dayUse) {
       setBookingDraft({ dayUse: true });
+      this.seedBarBookingDayUseFromHour();
     }
+  }
+
+  /**
+   * BAR_BOOKING day-use bookings start "now" — seed the day-use arrival hour to one hour
+   * from the current time so the front-desk agent isn't picking it from scratch. Only fills
+   * an empty value, so it never clobbers a manual edit or an existing booking's hours.
+   */
+  private seedBarBookingDayUseFromHour() {
+    if (this.mode !== 'BAR_BOOKING' || !booking_store.bookingDraft.dayUse) {
+      return;
+    }
+    if (booking_store.bookingDraft.dayUseHours?.from) {
+      return;
+    }
+    setBookingDraft({ dayUseHours: { ...booking_store.bookingDraft.dayUseHours, from: moment().add(1, 'hour').format('HH:mm') } });
   }
 
   @Watch('ticket')
@@ -128,6 +144,7 @@ export class IrBookingEditorDrawer {
   handleDayUseChange() {
     if (this.dayUse) {
       setBookingDraft({ dayUse: true });
+      this.seedBarBookingDayUseFromHour();
     }
   }
 
@@ -204,6 +221,9 @@ export class IrBookingEditorDrawer {
       dayUse: checked,
       source: checked ? booking_store.selects.sources.find(s => s.type !== 'LABEL') : booking_store.bookingDraft.source,
     });
+    if (checked) {
+      this.seedBarBookingDayUseFromHour();
+    }
     setDayUseSelection(null);
   }
 

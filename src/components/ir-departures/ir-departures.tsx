@@ -8,6 +8,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { PaginationChangeEvent } from '../ir-pagination/ir-pagination';
 import { CheckoutDialogCloseEvent, CheckoutRoomEvent } from '@/components';
 import calendar_data from '@/stores/calendar-data';
+import { isEarlyCheckout } from '@/utils/booking';
 
 @Component({
   tag: 'ir-departures',
@@ -27,6 +28,8 @@ export class IrDepartures {
   @State() payment: Payment;
   @State() checkoutState: CheckoutRoomEvent = null;
   @State() invoiceState: CheckoutRoomEvent = null;
+  /** Room identifier whose check-out dialog should auto-open inside the booking-details drawer (early check-out redirect). */
+  @State() checkoutRoomIdentifier: string = null;
 
   private tokenService = new Token();
   private roomService = new RoomService();
@@ -100,12 +103,16 @@ export class IrDepartures {
         calendar_data?.property ? Promise.resolve(null) : this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
-        this.getBookings(),
       ]);
 
       const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
 
       this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
+
+      // Fetch bookings only after the property/calendar data is loaded — the departures
+      // pipeline (canCheckout) reads the calendar data store, which is empty until the
+      // getExposedProperty calls above resolve.
+      await this.getBookings();
     } catch (error) {
     } finally {
       this.isPageLoading = false;
@@ -125,6 +132,15 @@ export class IrDepartures {
   private handleCheckoutRoom(event: CustomEvent<CheckoutRoomEvent>): void {
     event.stopImmediatePropagation();
     event.stopPropagation();
+    const { booking, identifier } = event.detail;
+    const room = booking?.rooms?.find(r => r.identifier === identifier);
+    // Early check-outs carry penalty / invoicing implications — handle them inside the full
+    // booking details rather than the bare inline dialog.
+    if (isEarlyCheckout(room)) {
+      this.checkoutRoomIdentifier = identifier;
+      this.bookingNumber = Number(booking.booking_nbr);
+      return;
+    }
     this.checkoutState = event.detail;
   }
   private async handlePaginationChange(event: CustomEvent<PaginationChangeEvent>) {
@@ -194,9 +210,14 @@ export class IrDepartures {
           open={!!this.bookingNumber}
           propertyId={this.propertyid as any}
           bookingNumber={this.bookingNumber?.toString()}
+          checkoutRoomIdentifier={this.checkoutRoomIdentifier}
           ticket={this.ticket}
           language={this.language}
-          onBookingDetailsDrawerClosed={() => (this.bookingNumber = null)}
+          onBookingDetailsDrawerClosed={() => {
+            this.bookingNumber = null;
+            this.checkoutRoomIdentifier = null;
+            this.getBookings();
+          }}
         ></ir-booking-details-drawer>
         <ir-payment-folio
           style={{ height: 'auto' }}

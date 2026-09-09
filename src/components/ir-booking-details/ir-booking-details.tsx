@@ -95,6 +95,13 @@ export class IrBookingDetails {
   @Prop() hasCheckOut: boolean = false;
 
   /**
+   * When set, the room matching this identifier auto-opens its check-out dialog once the
+   * booking has loaded. Used to route early check-outs triggered from other screens
+   * (departures list, calendar) through the full booking details.
+   */
+  @Prop() checkoutRoomIdentifier: string;
+
+  /**
    * Displays the close button in the booking header.
    */
   @Prop() hasCloseButton = false;
@@ -665,6 +672,7 @@ export class IrBookingDetails {
                 splitIndex={this.splitIndex}
                 clTransactions={this.rawTransactions}
                 svcCategories={this.svcCategories}
+                checkoutRoomIdentifier={this.checkoutRoomIdentifier}
                 onRoomDeleteFinished={this.handleDeleteFinish}
               ></ir-booking-rooms>
             )}

@@ -394,6 +394,20 @@ export function getRoomStatus(params: Pick<Room, 'in_out' | 'from_date' | 'to_da
   }
 }
 
+/**
+ * True when checking this room out today would fall *before* its scheduled departure date —
+ * an early check-out. Early check-outs carry penalty / reclaimed-night / invoicing
+ * implications, so callers outside the booking-details screen route them through the full
+ * booking details (where `ir-checkout-dialog` runs with complete context) instead of
+ * opening the dialog inline.
+ */
+export function isEarlyCheckout(room: Pick<Room, 'to_date'> | null | undefined): boolean {
+  if (!room?.to_date) {
+    return false;
+  }
+  return moment().startOf('day').isBefore(moment(room.to_date, 'YYYY-MM-DD'), 'day');
+}
+
 function addOrUpdateBooking(cell: CellType, bookingsByPool: Map<string, any>, stayStatusLookup: Map<string, string>): void {
   if (!cell?.POOL || bookingsByPool.has(cell.POOL)) {
     return;

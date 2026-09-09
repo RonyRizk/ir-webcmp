@@ -135,12 +135,16 @@ export class IrArrivals {
         this.roomService.fetchLanguage(this.language),
         this.bookingService.getCountries(this.language),
         this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
-        this.getBookings(),
       ]);
       this.countries = countries;
       const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
 
       this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
+
+      // Fetch bookings only after the property/calendar data is loaded — the arrivals
+      // pipeline (canCheckIn) reads `calendar_data.property`, which is null until the
+      // getExposedProperty calls above resolve.
+      await this.getBookings();
     } catch (error) {
     } finally {
       this.isPageLoading = false;

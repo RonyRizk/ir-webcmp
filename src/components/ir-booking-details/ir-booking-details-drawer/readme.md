@@ -13,13 +13,14 @@ close event when the drawer is dismissed from any source.
 
 ## Properties
 
-| Property        | Attribute        | Description                                                      | Type      | Default     |
-| --------------- | ---------------- | ---------------------------------------------------------------- | --------- | ----------- |
-| `bookingNumber` | `booking-number` | Booking reference number.                                        | `string`  | `undefined` |
-| `language`      | `language`       | Language code used for localization. Defaults to English (`en`). | `string`  | `'en'`      |
-| `open`          | `open`           | Controls whether the drawer is open.                             | `boolean` | `undefined` |
-| `propertyId`    | `property-id`    | Property ID associated with the booking.                         | `number`  | `undefined` |
-| `ticket`        | `ticket`         | Authentication or session ticket.                                | `string`  | `undefined` |
+| Property                 | Attribute                  | Description                                                                                                                                                                                                                                            | Type      | Default     |
+| ------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ----------- |
+| `bookingNumber`          | `booking-number`           | Booking reference number.                                                                                                                                                                                                                              | `string`  | `undefined` |
+| `checkoutRoomIdentifier` | `checkout-room-identifier` | When set, the booking-details view auto-opens the check-out dialog for the room with this identifier once the booking loads. Used to route early check-outs triggered from other screens (departures list, calendar) through the full booking details. | `string`  | `undefined` |
+| `language`               | `language`                 | Language code used for localization. Defaults to English (`en`).                                                                                                                                                                                       | `string`  | `'en'`      |
+| `open`                   | `open`                     | Controls whether the drawer is open.                                                                                                                                                                                                                   | `boolean` | `undefined` |
+| `propertyId`             | `property-id`              | Property ID associated with the booking.                                                                                                                                                                                                               | `number`  | `undefined` |
+| `ticket`                 | `ticket`                   | Authentication or session ticket.                                                                                                                                                                                                                      | `string`  | `undefined` |
 
 
 ## Events
@@ -139,9 +140,9 @@ graph TD;
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
+  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-dialog
   ir-checkout-dialog --> ir-spinner
-  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-payment-folio
   ir-payment-folio --> ir-drawer
   ir-payment-folio --> ir-payment-folio-form

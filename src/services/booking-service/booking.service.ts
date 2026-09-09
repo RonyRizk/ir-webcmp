@@ -231,7 +231,12 @@ export class BookingService {
 
   public async getCalendarData(propertyid: number, from_date: string, to_date: string): Promise<{ [key: string]: any }> {
     try {
-      const { data } = await axios.post(`/Get_Exposed_Calendar`, {
+      const v4Candidates = new Set([1221, 42, 26]);
+      let route = 'Get_Exposed_Calendar';
+      if (v4Candidates.has(Number(propertyid))) {
+        route += '_V4';
+      }
+      const { data } = await axios.post(`/${route}`, {
         propertyid,
         from_date,
         to_date,
@@ -241,7 +246,8 @@ export class BookingService {
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
-      const months: MonthType[] = data.My_Result.months;
+      const res = JSON.parse(data.My_Result);
+      const months: MonthType[] = res.months;
       const customMonths: { daysCount: number; monthName: string }[] = [];
       const myBooking = await getMyBookings(months);
       const days: DayData[] = months
@@ -251,9 +257,6 @@ export class BookingService {
             monthName: month.description,
           });
           return month.days.map(day => {
-            if (day['value'] === '2025-05-30') {
-              console.log(day);
-            }
             return {
               day: convertDateToCustomFormat(day.description, month.description),
               value: day.value,
@@ -272,8 +275,8 @@ export class BookingService {
         ExceptionMsg: '',
         My_Params_Get_Rooming_Data: {
           AC_ID: propertyid,
-          FROM: data.My_Params_Get_Exposed_Calendar.from_date,
-          TO: data.My_Params_Get_Exposed_Calendar.to_date,
+          FROM: data[`My_Params_${route}`].from_date,
+          TO: data[`My_Params_${route}`].to_date,
         },
         days,
         months: customMonths,

@@ -43,6 +43,12 @@ export class IrRoom {
   @Prop() hasRoomAdd: boolean = false;
   @Prop() hasCheckIn: boolean = false;
   @Prop() hasCheckOut: boolean = false;
+  /**
+   * When true, this room opens its check-out dialog automatically once mounted. Set by the
+   * booking-details screen when an early check-out was initiated from another screen
+   * (departures list, calendar) and redirected here.
+   */
+  @Prop() autoOpenCheckout: boolean = false;
   @Prop() agent: Agent;
 
   @Prop() clTransactions: ClTx[] = [];
@@ -79,6 +85,33 @@ export class IrRoom {
 
   componentWillLoad() {
     this.mainGuest = this.getMainGuest();
+  }
+
+  componentDidLoad() {
+    if (this.autoOpenCheckout) {
+      this.scheduleAutoCheckout();
+    }
+  }
+
+  @Watch('autoOpenCheckout')
+  handleAutoOpenCheckoutChange(newValue: boolean) {
+    if (newValue) {
+      this.scheduleAutoCheckout();
+    }
+  }
+
+  /**
+   * Open the check-out dialog for an early check-out redirected here from another screen.
+   * Deferred to the next frame on purpose: the dialog must first render with `open=false`
+   * so `ir-checkout-dialog`'s `@Watch('open')` (which runs its data `init()`) fires on the
+   * false → true change, and it also lets the booking-details drawer finish opening first.
+   */
+  private scheduleAutoCheckout() {
+    requestAnimationFrame(() => {
+      if (this.autoOpenCheckout && this.modalReason !== 'checkout') {
+        this.modalReason = 'checkout';
+      }
+    });
   }
   // In your class
 

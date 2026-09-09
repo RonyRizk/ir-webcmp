@@ -32,18 +32,18 @@
 ### Depends on
 
 - [ir-input](../ui/ir-input)
+- [ir-custom-button](../ui/ir-custom-button)
 - [ir-dialog](../ui/ir-dialog)
 - [ir-spinner](../ui/ir-spinner)
-- [ir-custom-button](../ui/ir-custom-button)
 - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
 
 ### Graph
 ```mermaid
 graph TD;
   ir-checkout-dialog --> ir-input
+  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-dialog
   ir-checkout-dialog --> ir-spinner
-  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-payment-folio
   ir-payment-folio --> ir-drawer
   ir-payment-folio --> ir-payment-folio-form

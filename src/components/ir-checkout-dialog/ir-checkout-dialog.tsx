@@ -11,6 +11,7 @@ import { isAgentMode } from '../ir-booking-details/functions';
 import { CityLedgerService, ClTx } from '@/services/city-ledger';
 import { FolioEntryMode, Payment, PaymentEntries } from '../ir-booking-details/types';
 import calendar_data from '@/stores/calendar-data';
+import { isEarlyCheckout } from '@/utils/booking';
 
 export type CheckoutDialogCloseEvent = { reason: 'cancel' | 'checkout' | 'openInvoice' };
 
@@ -31,6 +32,8 @@ export class IrCheckoutDialog {
   @State() isEarlyCheckout: boolean = false;
   @State() remainingDays: Day[] = [];
   @State() penaltyAmount: number = 0;
+  /** Upper bound + pre-fill for the cancellation penalty. Kept in sync with `detectEarlyCheckout` so the masked input isn't clamped below its own pre-filled value. */
+  @State() penaltyMax: number = 0;
   @State() agent: Agent;
   @State() paymentEntries: PaymentEntries;
   @State() includeInvoice: boolean = false;
@@ -82,6 +85,14 @@ export class IrCheckoutDialog {
   @Watch('open')
   handleOpenChange(newValue: boolean, oldValue: boolean) {
     if (newValue !== oldValue) {
+      this.init();
+    }
+  }
+
+  componentDidLoad() {
+    // `@Watch('open')` only fires on a change — if the dialog is mounted already open
+    // (e.g. auto-opened right after render), run the initial load here.
+    if (this.open) {
       this.init();
     }
   }
@@ -150,13 +161,15 @@ export class IrCheckoutDialog {
 
   private detectEarlyCheckout() {
     const today = moment().startOf('day');
-    const toDate = moment(this.room.to_date, 'YYYY-MM-DD');
-    this.isEarlyCheckout = today.isBefore(toDate, 'date');
+    this.isEarlyCheckout = isEarlyCheckout(this.room);
     if (this.isEarlyCheckout) {
       const todayStr = today.format('YYYY-MM-DD');
       this.remainingDays = (this.room.days ?? []).filter(d => d.date >= todayStr);
-      const total = this.remainingTotal;
+      const dueAmount = this.booking?.guest_financial?.due_amount ?? 0;
+      const rawTotal = this.booking.rooms.length === 1 ? (dueAmount >= 0 ? dueAmount : this.remainingTotal) : Math.min(this.remainingTotal, dueAmount);
+      const total = Math.max(0, rawTotal);
       this.penaltyAmount = total;
+      this.penaltyMax = total;
       this.initialPenaltyStr = total.toFixed(2);
     }
   }
@@ -244,21 +257,28 @@ export class IrCheckoutDialog {
         </div>
 
         <div class="ec-section">
-          <ir-input
-            label="Apply cancellation penalty?"
-            mask="price"
-            value={this.initialPenaltyStr}
-            defaultValue={this.initialPenaltyStr}
-            min={0}
-            max={total}
-            hint="Pre-filled from reclaimed nights. Modify or waive entirely."
-            onText-change={(e: CustomEvent<string>) => {
-              const val = parseFloat(e.detail);
-              this.penaltyAmount = isNaN(val) ? 0 : val;
-            }}
-          >
-            <span slot="start">{this.currencySymbol}</span>
-          </ir-input>
+          {this.penaltyMax > 0 ? (
+            <ir-input
+              label="Apply the full cancellation penalty?"
+              mask="price"
+              value={this.initialPenaltyStr}
+              defaultValue={this.initialPenaltyStr}
+              min={0}
+              max={this.penaltyMax}
+              hint="Pre-filled from reclaimed nights or due amount. Modify or waive entirely."
+              onText-change={(e: CustomEvent<string>) => {
+                const val = parseFloat(e.detail);
+                this.penaltyAmount = isNaN(val) ? 0 : val;
+              }}
+            >
+              <span slot="start">{this.currencySymbol}</span>
+            </ir-input>
+          ) : (
+            <wa-callout size="s" variant="success">
+              <wa-icon slot="icon" name="circle-check"></wa-icon>
+              This booking is fully paid — no cancellation penalty or outstanding balance is due.
+            </wa-callout>
+          )}
         </div>
       </div>
     );
@@ -278,22 +298,27 @@ export class IrCheckoutDialog {
     };
   }
 
-  private renderDueAmountWarning() {
+  private renderDueAmountWarning({ canCollect = true }: { canCollect?: boolean }) {
     const balance = this.booking?.guest_financial?.due_amount ?? 0;
     if (!balance || balance <= 0) return null;
 
     const amount = this.formatAmount(balance);
 
     return (
-      <button type="button" class="due-amount-btn" onClick={() => this.paymentFolioRef?.openFolio()}>
+      <div class="due-amount-btn">
         <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="money-bill-wave"></wa-icon>
           <div class={'d-flex align-items-center justify-content-between'}>
             <span>Outstanding guest balance: {amount}</span>
-            <wa-icon name="chevron-right" style={{ marginLeft: 'auto' }}></wa-icon>
+            {canCollect && (
+              <ir-custom-button variant="danger" appearance="outlined" size="xs" style={{ marginLeft: 'auto' }} onClick={() => this.paymentFolioRef?.openFolio()}>
+                Collect
+              </ir-custom-button>
+            )}
+            {/* <wa-icon name="chevron-right" ></wa-icon> */}
           </div>
         </wa-callout>
-      </button>
+      </div>
     );
   }
   private renderSameDayWarning() {
@@ -355,7 +380,7 @@ export class IrCheckoutDialog {
               ) : (
                 <Fragment>
                   <div class="checkout-dialog__callouts">
-                    {this.renderDueAmountWarning()}
+                    {this.renderDueAmountWarning({ canCollect: !isEarly })}
                     {this.renderMissingClWarning()}
                     {this.renderSameDayWarning()}
                   </div>

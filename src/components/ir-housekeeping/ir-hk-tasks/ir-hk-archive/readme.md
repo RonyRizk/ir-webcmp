@@ -123,9 +123,9 @@ graph TD;
   ir-assignment-toggle-dialog --> ir-dialog
   ir-assignment-toggle-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-input
+  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-dialog
   ir-checkout-dialog --> ir-spinner
-  ir-checkout-dialog --> ir-custom-button
   ir-checkout-dialog --> ir-payment-folio
   ir-payment-folio --> ir-drawer
   ir-payment-folio --> ir-payment-folio-form

@@ -15,7 +15,16 @@ import { EventsService } from '@/services/events.service';
 import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '@/services/toBeAssigned.service';
-import { bookingStatus, calculateDaysBetweenDates, formatName, getPrivateNote, getRoomStatus, transformNewBLockedRooms, transformNewBooking } from '@/utils/booking';
+import {
+  bookingStatus,
+  calculateDaysBetweenDates,
+  formatName,
+  getPrivateNote,
+  getRoomStatus,
+  isEarlyCheckout,
+  transformNewBLockedRooms,
+  transformNewBooking,
+} from '@/utils/booking';
 import { IRoomNightsData, IRoomNightsDataEventPayload, CalendarModalEvent } from '@/models/property-types';
 import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import calendar_dates, { addCleaningTasks, addRoomForCleaning, cleanRoom } from '@/stores/calendar-dates.store';
@@ -76,6 +85,8 @@ export class IglooCalendar {
   @State() isAuthenticated = false;
   @State() calendarSidebarState: CalendarSidebarState;
   @State() invoiceState: CheckoutRoomEvent = null;
+  /** Early check-out redirected from a calendar event popover into the full booking-details drawer. */
+  @State() checkoutRedirect: { bookingNumber: string; identifier: string } | null = null;
   @State() dayUseBookings: DayUseBookings[] = [];
 
   @Event({ bubbles: true, composed: true })
@@ -177,6 +188,18 @@ export class IglooCalendar {
     event.stopImmediatePropagation();
     event.stopPropagation();
     this.dialogData = event.detail;
+    // Early check-outs carry penalty / invoicing implications — redirect them into the full
+    // booking-details drawer (where ir-checkout-dialog runs with complete context) rather
+    // than opening the bare inline dialog.
+    if (this.dialogData.reason === 'checkout') {
+      const { booking, bookingNumber, roomIdentifier } = this.dialogData;
+      const room = booking?.rooms?.find(r => r.identifier === roomIdentifier);
+      if (isEarlyCheckout(room)) {
+        this.checkoutRedirect = { bookingNumber, identifier: roomIdentifier };
+        this.dialogData = null;
+        return;
+      }
+    }
     if (!['checkin', 'reallocate', 'checkout'].includes(this.dialogData.reason)) {
       this.calendarModalEl?.openModal();
     }
@@ -1610,12 +1633,18 @@ export class IglooCalendar {
           onCloseRoomNightsDialog={this.handleRoomNightsDialogClose.bind(this)}
         ></igl-rate-extender-drawer>
         <ir-booking-details-drawer
-          open={this.editBookingItem?.event_type === 'EDIT_BOOKING'}
+          open={this.editBookingItem?.event_type === 'EDIT_BOOKING' || !!this.checkoutRedirect}
           propertyId={this.property_id}
-          bookingNumber={this.editBookingItem && this.editBookingItem?.event_type === 'EDIT_BOOKING' ? this.editBookingItem.BOOKING_NUMBER : null}
+          bookingNumber={
+            this.checkoutRedirect?.bookingNumber ?? (this.editBookingItem && this.editBookingItem?.event_type === 'EDIT_BOOKING' ? this.editBookingItem.BOOKING_NUMBER : null)
+          }
+          checkoutRoomIdentifier={this.checkoutRedirect?.identifier}
           ticket={this.ticket}
           language={this.language}
-          onBookingDetailsDrawerClosed={() => (this.editBookingItem = null)}
+          onBookingDetailsDrawerClosed={() => {
+            this.editBookingItem = null;
+            this.checkoutRedirect = null;
+          }}
         ></ir-booking-details-drawer>
         <ir-room-guests
           open={this.calendarSidebarState?.type === 'room-guests'}
