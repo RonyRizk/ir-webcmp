@@ -233,10 +233,11 @@ export class BookingService {
     try {
       const v4Candidates = new Set([1221, 42, 26]);
       let route = 'Get_Exposed_Calendar';
-      if (v4Candidates.has(Number(propertyid))) {
+      const isCandidate = v4Candidates.has(Number(propertyid));
+      if (isCandidate) {
         route += '_V4';
       }
-      const { data } = await axios.post(`/${route}`, {
+      const { data } = await axios.post(`https://gateway.igloorooms.com/IR/${route}`, {
         propertyid,
         from_date,
         to_date,
@@ -246,7 +247,7 @@ export class BookingService {
       if (data.ExceptionMsg !== '') {
         throw new Error(data.ExceptionMsg);
       }
-      const res = JSON.parse(data.My_Result);
+      const res = isCandidate ? JSON.parse(data.My_Result) : data.My_Result;
       const months: MonthType[] = res.months;
       const customMonths: { daysCount: number; monthName: string }[] = [];
       const myBooking = await getMyBookings(months);
