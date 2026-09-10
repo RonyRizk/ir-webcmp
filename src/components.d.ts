@@ -12923,7 +12923,7 @@ declare global {
         "pressCheckIn": any;
         "pressCheckOut": any;
         "editInitiated": TIglBookPropertyPayload;
-        "resetBookingEvt": null;
+        "resetBookingEvt": Booking | null;
         "openSidebar": OpenSidebarEvent<RoomGuestsPayload1>;
         "addExtraServiceToUnit": { pr_id: number };
     }
@@ -20675,7 +20675,7 @@ declare namespace LocalJSX {
         "onOpenSidebar"?: (event: IrRoomCustomEvent<OpenSidebarEvent<RoomGuestsPayload1>>) => void;
         "onPressCheckIn"?: (event: IrRoomCustomEvent<any>) => void;
         "onPressCheckOut"?: (event: IrRoomCustomEvent<any>) => void;
-        "onResetBookingEvt"?: (event: IrRoomCustomEvent<null>) => void;
+        "onResetBookingEvt"?: (event: IrRoomCustomEvent<Booking | null>) => void;
         "onToast"?: (event: IrRoomCustomEvent<IToast>) => void;
         "property_id"?: number;
         "room"?: Room;

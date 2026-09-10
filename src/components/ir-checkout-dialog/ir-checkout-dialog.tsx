@@ -13,7 +13,7 @@ import { FolioEntryMode, Payment, PaymentEntries } from '../ir-booking-details/t
 import calendar_data from '@/stores/calendar-data';
 import { isEarlyCheckout } from '@/utils/booking';
 
-export type CheckoutDialogCloseEvent = { reason: 'cancel' | 'checkout' | 'openInvoice' };
+export type CheckoutDialogCloseEvent = { reason: 'cancel' | 'checkout' | 'openInvoice'; isEarlyCheckout?: boolean };
 
 @Component({
   tag: 'ir-checkout-dialog',
@@ -76,7 +76,7 @@ export class IrCheckoutDialog {
       });
       this.isLoading = null;
       // this.checkoutDialogClosed.emit({ reason: source === 'checkout&invoice' ? 'openInvoice' : 'checkout' });
-      this.checkoutDialogClosed.emit({ reason: this.includeInvoice ? 'openInvoice' : 'checkout' });
+      this.checkoutDialogClosed.emit({ reason: this.includeInvoice ? 'openInvoice' : 'checkout', isEarlyCheckout: this.isEarlyCheckout });
     } catch (error) {
       console.error(error);
     }

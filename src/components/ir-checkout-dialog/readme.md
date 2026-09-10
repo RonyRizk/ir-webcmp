@@ -16,9 +16,9 @@
 
 ## Events
 
-| Event                  | Description | Type                                                                |
-| ---------------------- | ----------- | ------------------------------------------------------------------- |
-| `checkoutDialogClosed` |             | `CustomEvent<{ reason: "cancel" \| "checkout" \| "openInvoice"; }>` |
+| Event                  | Description | Type                                                                                           |
+| ---------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `checkoutDialogClosed` |             | `CustomEvent<{ reason: "cancel" \| "checkout" \| "openInvoice"; isEarlyCheckout?: boolean; }>` |
 
 
 ## Dependencies

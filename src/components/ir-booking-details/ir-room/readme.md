@@ -45,7 +45,7 @@
 | `openSidebar`           |             | `CustomEvent<{ roomName: string; roomType?: string; sharing_persons: SharedPerson[]; totalGuests: number; checkin: boolean; identifier: string; booking_nbr?: string \| number; }>`                                                  |
 | `pressCheckIn`          |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
 | `pressCheckOut`         |             | `CustomEvent<any>`                                                                                                                                                                                                                   |
-| `resetBookingEvt`       |             | `CustomEvent<null>`                                                                                                                                                                                                                  |
+| `resetBookingEvt`       |             | `CustomEvent<Booking>`                                                                                                                                                                                                               |
 | `toast`                 |             | `CustomEvent<ICustomToast & Partial<IToastWithButton> \| IDefaultToast & Partial<IToastWithButton>>`                                                                                                                                 |
 
 

@@ -231,7 +231,7 @@ export class BookingService {
 
   public async getCalendarData(propertyid: number, from_date: string, to_date: string): Promise<{ [key: string]: any }> {
     try {
-      const v4Candidates = new Set([1221, 42, 26]);
+      const v4Candidates = new Set([373, 1221, 42, 26]);
       let route = 'Get_Exposed_Calendar';
       const isCandidate = v4Candidates.has(Number(propertyid));
       if (isCandidate) {

@@ -74,7 +74,7 @@ export class IrRoom {
   @Event({ bubbles: true, composed: true }) pressCheckIn: EventEmitter;
   @Event({ bubbles: true, composed: true }) pressCheckOut: EventEmitter;
   @Event({ bubbles: true, composed: true }) editInitiated: EventEmitter<TIglBookPropertyPayload>;
-  @Event() resetBookingEvt: EventEmitter<null>;
+  @Event() resetBookingEvt: EventEmitter<Booking | null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
   @Event({ bubbles: true, composed: true }) addExtraServiceToUnit: EventEmitter<{ pr_id: number }>;
 
@@ -112,6 +112,29 @@ export class IrRoom {
         this.modalReason = 'checkout';
       }
     });
+  }
+
+  /**
+   * Refresh the booking after an early check-out without letting the booking-details screen drop
+   * into its full-page loading state. `resetBookingEvt.emit()` (no detail) takes the `resetBooking()`
+   * path which toggles `isLoading` and unmounts the room list — that would tear down the invoice
+   * drawer we just opened. Emitting the freshly fetched booking as the event detail takes the
+   * no-spinner branch of `handleResetBooking`, so the screen updates and the invoice stays open.
+   */
+  private async refreshBookingSilently() {
+    try {
+      const booking = await this.bookingService.getExposedBooking({
+        booking_nbr: this.booking.booking_nbr,
+        language: this.language,
+        is_calculate_totals: true,
+        include_dp_pricing: true,
+      });
+      if (booking) {
+        this.resetBookingEvt.emit(booking);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
   // In your class
 
@@ -478,6 +501,11 @@ export class IrRoom {
             this.modalReason = null;
             if (e.detail.reason === 'openInvoice') {
               this.isOpen = true;
+              // An early check-out mutates the booking (penalty, truncated nights) — refresh the
+              // screen, but silently so the invoice drawer we just opened isn't torn down.
+              if (e.detail.isEarlyCheckout) {
+                this.refreshBookingSilently();
+              }
             } else if (e.detail.reason === 'checkout') {
               this.resetBookingEvt.emit();
             }
