@@ -47,6 +47,42 @@ export type CalendarSidebarState = {
   type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer' | 'rectifier';
   payload: any;
 };
+
+/** One `GET_UNASSIGNED_DATES` notification, normalized to the calendar's date format. */
+type UnassignedDatesRange = { fromDate: string; toDate: string };
+
+/** A span wide enough to cover several notifications with a single fetch, plus the ranges it stands for. */
+type MergedUnassignedDatesRange = UnassignedDatesRange & { sources: UnassignedDatesRange[] };
+
+/**
+ * Collapses the ranges of a batch into the fewest spans that still cover all of them. Ranges are
+ * merged when they overlap or merely touch — consecutive nights of one stay arrive as separate
+ * notifications, and the API answers `[a, c]` just as well as `[a, b]` plus `[b, c]`.
+ */
+function mergeUnassignedDatesRanges(ranges: UnassignedDatesRange[]): MergedUnassignedDatesRange[] {
+  const sorted = [...ranges].sort((a, b) => a.fromDate.localeCompare(b.fromDate) || a.toDate.localeCompare(b.toDate));
+  const merged: MergedUnassignedDatesRange[] = [];
+  for (const range of sorted) {
+    const current = merged[merged.length - 1];
+    if (current && range.fromDate <= moment(current.toDate, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD')) {
+      current.toDate = range.toDate > current.toDate ? range.toDate : current.toDate;
+      current.sources.push(range);
+      continue;
+    }
+    merged.push({ fromDate: range.fromDate, toDate: range.toDate, sources: [range] });
+  }
+  return merged;
+}
+
+/** Whether a merged fetch returned any unassigned date inside one of the ranges it covered. */
+function hasUnassignedDatesInRange(data: Record<string, unknown>, { fromDate, toDate }: UnassignedDatesRange): boolean {
+  const from = moment(fromDate, 'YYYY-MM-DD').startOf('day').valueOf();
+  const to = moment(toDate, 'YYYY-MM-DD').startOf('day').valueOf();
+  return Object.keys(data).some(key => {
+    const timestamp = parseInt(key);
+    return from <= timestamp && timestamp <= to;
+  });
+}
 @Component({
   tag: 'igloo-calendar',
   styleUrl: 'igloo-calendar.css',
@@ -130,6 +166,13 @@ export class IglooCalendar {
     onError: e => console.error('Batch Availability Update Error:', e),
   });
 
+  private unassignedDatesQueue = new BatchingQueue<UnassignedDatesRange>(this.processUnassignedDatesBatch.bind(this), {
+    batchSize: 50,
+    flushInterval: 1000,
+    maxQueueSize: 5000,
+    onError: e => console.error('Batch Unassigned Dates Error:', e),
+  });
+
   private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
   private tasksEndDate: string;
   dialogEl: HTMLIrDialogElement;
@@ -148,6 +191,7 @@ export class IglooCalendar {
   disconnectedCallback() {
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
+    this.unassignedDatesQueue.clear();
   }
 
   @Listen('deleteButton')
@@ -758,30 +802,39 @@ export class IglooCalendar {
     };
   }
 
-  private async handleGetUnassignedDates(result: any) {
+  /**
+   * Assigning a multi-room booking fires one `GET_UNASSIGNED_DATES` per unit within a second or two,
+   * each for a period that overlaps its neighbours. Rather than answer every one with its own
+   * request, notifications are queued and their periods merged, so a burst costs one fetch per
+   * distinct span. Each notification still reports on its own period once the data comes back.
+   */
+  private handleGetUnassignedDates(result: any) {
     const parsedResult = this.parseDateRange(result);
     if (
-      !this.calendarData.is_vacation_rental &&
-      new Date(parsedResult.FROM_DATE).getTime() >= this.calendarData.startingDate &&
-      new Date(parsedResult.TO_DATE).getTime() <= this.calendarData.endingDate
+      this.calendarData.is_vacation_rental ||
+      new Date(parsedResult.FROM_DATE).getTime() < this.calendarData.startingDate ||
+      new Date(parsedResult.TO_DATE).getTime() > this.calendarData.endingDate
     ) {
-      const data = await this.toBeAssignedService.getUnassignedDates(
-        this.property_id,
-        dateToFormattedString(new Date(parsedResult.FROM_DATE)),
-        dateToFormattedString(new Date(parsedResult.TO_DATE)),
-      );
+      return;
+    }
+    this.unassignedDatesQueue.offer({
+      fromDate: dateToFormattedString(new Date(parsedResult.FROM_DATE)),
+      toDate: dateToFormattedString(new Date(parsedResult.TO_DATE)),
+    });
+  }
+
+  private async processUnassignedDatesBatch(batch: UnassignedDatesRange[]) {
+    for (const merged of mergeUnassignedDatesRanges(batch)) {
+      const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, merged.fromDate, merged.toDate);
       addUnassignedDates(data);
-      this.unassignedDates = {
-        fromDate: dateToFormattedString(new Date(parsedResult.FROM_DATE)),
-        toDate: dateToFormattedString(new Date(parsedResult.TO_DATE)),
-        data,
-      };
-      if (Object.keys(data).length === 0) {
-        removeUnassignedDates(dateToFormattedString(new Date(parsedResult.FROM_DATE)), dateToFormattedString(new Date(parsedResult.TO_DATE)));
-        this.reduceAvailableUnitEvent.emit({
-          fromDate: dateToFormattedString(new Date(parsedResult.FROM_DATE)),
-          toDate: dateToFormattedString(new Date(parsedResult.TO_DATE)),
-        });
+      this.unassignedDates = { fromDate: merged.fromDate, toDate: merged.toDate, data };
+      for (const source of merged.sources) {
+        // A period the merged fetch came back empty for has nothing left to assign, exactly as when
+        // it was fetched on its own. Emitted per notification: the header counts down one unit each.
+        if (!hasUnassignedDatesInRange(data, source)) {
+          removeUnassignedDates(source.fromDate, source.toDate);
+          this.reduceAvailableUnitEvent.emit({ fromDate: source.fromDate, toDate: source.toDate });
+        }
       }
     }
   }
