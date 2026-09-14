@@ -54,24 +54,64 @@ type UnassignedDatesRange = { fromDate: string; toDate: string };
 /** A span wide enough to cover several notifications with a single fetch, plus the ranges it stands for. */
 type MergedUnassignedDatesRange = UnassignedDatesRange & { sources: UnassignedDatesRange[] };
 
+/** A burst is considered over once no notification has arrived for this long. */
+const UNASSIGNED_DATES_QUIET_MS = 500;
+/** Ceiling on how long a sustained stream can hold a flush back. */
+const UNASSIGNED_DATES_MAX_WAIT_MS = 3000;
 /**
- * Collapses the ranges of a batch into the fewest spans that still cover all of them. Ranges are
- * merged when they overlap or merely touch — consecutive nights of one stay arrive as separate
- * notifications, and the API answers `[a, c]` just as well as `[a, b]` plus `[b, c]`.
+ * What one extra round trip is worth, expressed in days of scanning. A request costs the server the
+ * query setup regardless of width, so bridging a gap narrower than this is cheaper than asking twice
+ * — and, just as importantly, spans further apart than this are left alone rather than fused into
+ * one enormous period.
+ */
+const UNASSIGNED_DATES_ROUND_TRIP_DAYS = 14;
+/** Hard ceiling on requests per flush, whatever the batch looks like. */
+const UNASSIGNED_DATES_MAX_FETCHES = 3;
+
+/** Whole days between the end of one span and the start of the next. */
+function daysBetween(earlierTo: string, laterFrom: string): number {
+  return moment(laterFrom, 'YYYY-MM-DD').diff(moment(earlierTo, 'YYYY-MM-DD'), 'days');
+}
+
+/**
+ * Collapses a batch of notification periods into the spans actually worth fetching.
+ *
+ * Adjacent periods are fused whenever the gap between them is narrower than
+ * {@link UNASSIGNED_DATES_ROUND_TRIP_DAYS} — overlapping and touching periods, the common case for a
+ * multi-room booking, always qualify. Distant clusters stay separate on purpose: widening one fetch
+ * across months of calendar to save a round trip is the trade that made these bursts expensive.
+ * Only if that still leaves more than {@link UNASSIGNED_DATES_MAX_FETCHES} spans are the *narrowest*
+ * remaining gaps bridged, one at a time, until the batch fits the budget — so the cap is paid for
+ * with the fewest possible extra days.
  */
 function mergeUnassignedDatesRanges(ranges: UnassignedDatesRange[]): MergedUnassignedDatesRange[] {
   const sorted = [...ranges].sort((a, b) => a.fromDate.localeCompare(b.fromDate) || a.toDate.localeCompare(b.toDate));
   const merged: MergedUnassignedDatesRange[] = [];
   for (const range of sorted) {
     const current = merged[merged.length - 1];
-    if (current && range.fromDate <= moment(current.toDate, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD')) {
-      current.toDate = range.toDate > current.toDate ? range.toDate : current.toDate;
-      current.sources.push(range);
+    if (current && daysBetween(current.toDate, range.fromDate) <= UNASSIGNED_DATES_ROUND_TRIP_DAYS) {
+      absorbInto(current, range.toDate, range);
       continue;
     }
     merged.push({ fromDate: range.fromDate, toDate: range.toDate, sources: [range] });
   }
+
+  while (merged.length > UNASSIGNED_DATES_MAX_FETCHES) {
+    let cheapest = 1;
+    for (let i = 2; i < merged.length; i++) {
+      if (daysBetween(merged[i - 1].toDate, merged[i].fromDate) < daysBetween(merged[cheapest - 1].toDate, merged[cheapest].fromDate)) {
+        cheapest = i;
+      }
+    }
+    const [absorbed] = merged.splice(cheapest, 1);
+    absorbInto(merged[cheapest - 1], absorbed.toDate, ...absorbed.sources);
+  }
   return merged;
+}
+
+function absorbInto(span: MergedUnassignedDatesRange, toDate: string, ...sources: UnassignedDatesRange[]) {
+  span.toDate = toDate > span.toDate ? toDate : span.toDate;
+  span.sources.push(...sources);
 }
 
 /** Whether a merged fetch returned any unassigned date inside one of the ranges it covered. */
@@ -166,12 +206,11 @@ export class IglooCalendar {
     onError: e => console.error('Batch Availability Update Error:', e),
   });
 
-  private unassignedDatesQueue = new BatchingQueue<UnassignedDatesRange>(this.processUnassignedDatesBatch.bind(this), {
-    batchSize: 50,
-    flushInterval: 1000,
-    maxQueueSize: 5000,
-    onError: e => console.error('Batch Unassigned Dates Error:', e),
-  });
+  /** Periods from `GET_UNASSIGNED_DATES` notifications waiting to be fetched as one batch. */
+  private pendingUnassignedRanges: UnassignedDatesRange[] = [];
+  private unassignedDatesQuietTimer: ReturnType<typeof setTimeout> | null = null;
+  private unassignedDatesMaxWaitTimer: ReturnType<typeof setTimeout> | null = null;
+  private isFlushingUnassignedDates = false;
 
   private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
   private tasksEndDate: string;
@@ -191,7 +230,8 @@ export class IglooCalendar {
   disconnectedCallback() {
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
-    this.unassignedDatesQueue.clear();
+    this.clearUnassignedDatesTimers();
+    this.pendingUnassignedRanges = [];
   }
 
   @Listen('deleteButton')
@@ -803,11 +843,49 @@ export class IglooCalendar {
   }
 
   /**
-   * Assigning a multi-room booking fires one `GET_UNASSIGNED_DATES` per unit within a second or two,
-   * each for a period that overlaps its neighbours. Rather than answer every one with its own
-   * request, notifications are queued and their periods merged, so a burst costs one fetch per
-   * distinct span. Each notification still reports on its own period once the data comes back.
+   * Assigning a multi-room booking fires one `GET_UNASSIGNED_DATES` per unit, all within a second or
+   * two and all for overlapping periods. Answering each one with its own request is what made these
+   * bursts expensive, so notifications are collected rather than followed:
+   *
+   * - the quiet timer restarts on every notification, so a burst is fetched once it settles;
+   * - the max-wait timer does not restart, so a sustained stream still flushes on a fixed cadence
+   *   instead of being starved by the quiet timer;
+   * - {@link isFlushingUnassignedDates} keeps exactly one request in flight; notifications arriving
+   *   meanwhile stay in `pendingUnassignedRanges` and are picked up by the trailing run, so a busy
+   *   period adds items to the next batch rather than adding requests.
    */
+  private scheduleUnassignedDatesFlush() {
+    clearTimeout(this.unassignedDatesQuietTimer);
+    this.unassignedDatesQuietTimer = setTimeout(() => this.runUnassignedDatesFlush(), UNASSIGNED_DATES_QUIET_MS);
+    this.unassignedDatesMaxWaitTimer ??= setTimeout(() => this.runUnassignedDatesFlush(), UNASSIGNED_DATES_MAX_WAIT_MS);
+  }
+
+  private async runUnassignedDatesFlush() {
+    this.clearUnassignedDatesTimers();
+    if (this.isFlushingUnassignedDates) {
+      return;
+    }
+    this.isFlushingUnassignedDates = true;
+    try {
+      await this.flushUnassignedDates();
+    } catch (error) {
+      // A failed fetch must not stop later notifications from being served.
+      console.error('Unassigned dates refresh failed:', error);
+    } finally {
+      this.isFlushingUnassignedDates = false;
+    }
+    if (this.pendingUnassignedRanges.length > 0) {
+      this.scheduleUnassignedDatesFlush();
+    }
+  }
+
+  private clearUnassignedDatesTimers() {
+    clearTimeout(this.unassignedDatesQuietTimer);
+    clearTimeout(this.unassignedDatesMaxWaitTimer);
+    this.unassignedDatesQuietTimer = null;
+    this.unassignedDatesMaxWaitTimer = null;
+  }
+
   private handleGetUnassignedDates(result: any) {
     const parsedResult = this.parseDateRange(result);
     if (
@@ -817,18 +895,24 @@ export class IglooCalendar {
     ) {
       return;
     }
-    this.unassignedDatesQueue.offer({
+    this.pendingUnassignedRanges.push({
       fromDate: dateToFormattedString(new Date(parsedResult.FROM_DATE)),
       toDate: dateToFormattedString(new Date(parsedResult.TO_DATE)),
     });
+    this.scheduleUnassignedDatesFlush();
   }
 
-  private async processUnassignedDatesBatch(batch: UnassignedDatesRange[]) {
-    for (const merged of mergeUnassignedDatesRanges(batch)) {
-      const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, merged.fromDate, merged.toDate);
+  private async flushUnassignedDates() {
+    const batch = this.pendingUnassignedRanges;
+    this.pendingUnassignedRanges = [];
+    if (batch.length === 0) {
+      return;
+    }
+    for (const span of mergeUnassignedDatesRanges(batch)) {
+      const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, span.fromDate, span.toDate);
       addUnassignedDates(data);
-      this.unassignedDates = { fromDate: merged.fromDate, toDate: merged.toDate, data };
-      for (const source of merged.sources) {
+      this.unassignedDates = { fromDate: span.fromDate, toDate: span.toDate, data };
+      for (const source of span.sources) {
         // A period the merged fetch came back empty for has nothing left to assign, exactly as when
         // it was fetched on its own. Emitted per notification: the header counts down one unit each.
         if (!hasUnassignedDatesInRange(data, source)) {

@@ -243,7 +243,7 @@ export class IrBookingEditorHeader {
       case 'SPLIT_BOOKING':
       default:
         if (this.checkIn && this.isBlockConversion) return this.checkIn;
-        return today.format('YYYY-MM-DD');
+        return today.add(-1, 'days').format('YYYY-MM-DD');
     }
   }
 

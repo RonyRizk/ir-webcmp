@@ -179,6 +179,7 @@
  - [ir-translations-entry-form](../../ir-translations-manager/ir-translations-entry-drawer/ir-translations-entry-form)
  - [ir-translations-language-dialog](../../ir-translations-manager/ir-translations-language-dialog)
  - [ir-translations-manager](../../ir-translations-manager)
+ - [ir-translations-settings-dialog](../../ir-translations-manager/ir-translations-settings-dialog)
  - [ir-translations-table-dialog](../../ir-translations-manager/ir-translations-table-dialog)
  - [ir-unbookable-rooms-filters](../../ir-unbookable-rooms/ir-unbookable-rooms-filters)
  - [ir-unvoiced-bookings-filters](../../ir-uninvoiced-bookings/ir-unvoiced-bookings-filters)
@@ -326,6 +327,7 @@ graph TD;
   ir-translations-entry-form --> ir-custom-button
   ir-translations-language-dialog --> ir-custom-button
   ir-translations-manager --> ir-custom-button
+  ir-translations-settings-dialog --> ir-custom-button
   ir-translations-table-dialog --> ir-custom-button
   ir-unbookable-rooms-filters --> ir-custom-button
   ir-unvoiced-bookings-filters --> ir-custom-button

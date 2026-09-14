@@ -20,12 +20,13 @@
 
 - [ir-autocomplete](../ui/ir-autocomplete)
 - [ir-autocomplete-option](../ui/ir-autocomplete/ir-autocomplete-option)
+- [ir-custom-button](../ui/ir-custom-button)
 - [ir-page](../ui/ir-page)
 - [ir-spinner](../ui/ir-spinner)
 - [ir-empty-state](../ir-empty-state)
-- [ir-custom-button](../ui/ir-custom-button)
 - [ir-translations-entries-panel](ir-translations-entries-panel)
 - [ir-translations-entry-drawer](ir-translations-entry-drawer)
+- [ir-translations-settings-dialog](ir-translations-settings-dialog)
 - [ir-translations-table-dialog](ir-translations-table-dialog)
 - [ir-dialog](../ui/ir-dialog)
 
@@ -34,12 +35,13 @@
 graph TD;
   ir-translations-manager --> ir-autocomplete
   ir-translations-manager --> ir-autocomplete-option
+  ir-translations-manager --> ir-custom-button
   ir-translations-manager --> ir-page
   ir-translations-manager --> ir-spinner
   ir-translations-manager --> ir-empty-state
-  ir-translations-manager --> ir-custom-button
   ir-translations-manager --> ir-translations-entries-panel
   ir-translations-manager --> ir-translations-entry-drawer
+  ir-translations-manager --> ir-translations-settings-dialog
   ir-translations-manager --> ir-translations-table-dialog
   ir-translations-manager --> ir-dialog
   ir-autocomplete --> ir-input
@@ -63,6 +65,8 @@ graph TD;
   ir-translations-entry-form --> ir-input
   ir-translations-entry-form --> ir-custom-button
   ir-translations-entry-form --> ir-empty-state
+  ir-translations-settings-dialog --> ir-dialog
+  ir-translations-settings-dialog --> ir-custom-button
   ir-translations-table-dialog --> ir-dialog
   ir-translations-table-dialog --> ir-translations-table-form
   ir-translations-table-dialog --> ir-custom-button

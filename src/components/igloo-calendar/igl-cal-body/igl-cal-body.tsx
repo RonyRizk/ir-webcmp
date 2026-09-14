@@ -293,7 +293,8 @@ export class IglCalBody {
   }
 
   private clickCell(roomId: number, selectedDay: any, roomCategory: RoomCategory) {
-    if (!this.isScrollViewDragging && selectedDay.currentDate >= this.currentDate.getTime()) {
+    const earliestSelectableDate = this.currentDate.getTime() - 86_400_000; // allow starting the selection from yesterday
+    if (!this.isScrollViewDragging && selectedDay.currentDate >= earliestSelectableDate) {
       let refKey = this.getSelectedCellRefName(roomId, selectedDay);
       if (this.selectedRooms.hasOwnProperty(refKey)) {
         this.removeNewEvent();

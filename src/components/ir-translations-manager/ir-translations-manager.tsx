@@ -5,7 +5,7 @@ import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, from, map, merge, of, switchMap, tap } from 'rxjs';
 import { buildEditSetupParams, exposedLanguagesToTranslationLanguages, setupEntryToTranslationEntry } from './setup-mapping';
 import { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
-import { USED_SETUP_TABLE_SET } from './used-setup-tables';
+import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_SETUP_TABLE_SET, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
 import { getSourceLanguage, orderLanguages, sortByDisplayOrder } from './utils';
 
 type DeleteTarget = { type: 'entry' | 'table'; id: string; label: string; detail?: string };
@@ -39,6 +39,11 @@ export class IrTranslationsManager {
   @State() tableDialogOpen: boolean = false;
   @State() tableDialogMode: 'create' | 'edit' = 'create';
   @State() tableDialogTable: TranslationTable | null = null;
+
+  @State() settingsDialogOpen: boolean = false;
+  /** Non-source language codes pinned as columns. `null` means "not customized yet" — everything is pinned. */
+  @State() pinnedLanguageCodes: string[] | null = null;
+  @State() showNotesColumn: boolean = true;
 
   @State() deleteTarget: DeleteTarget | null = null;
 
@@ -110,6 +115,10 @@ export class IrTranslationsManager {
       this.loadTables();
       this.loadDuplicatedSetupEntriesAcrossTables();
     }
+    this.usedTablesOnly = JSON.parse(localStorage.getItem(USED_TABLES_LOCAL_STORAGE_NAME)) ?? true;
+    const storedPinnedCodes = localStorage.getItem(PINNED_LANG_LOCAL_STORAGE_NAME);
+    this.pinnedLanguageCodes = storedPinnedCodes ? JSON.parse(storedPinnedCodes) : null;
+    this.showNotesColumn = JSON.parse(localStorage.getItem(SHOW_NOTES_LOCAL_STORAGE_NAME)) ?? true;
   }
 
   disconnectedCallback() {
@@ -171,7 +180,7 @@ export class IrTranslationsManager {
     try {
       const tableNames = await this.setupService.getDistinctSetupTables();
       this.tables = tableNames.map(name => ({ id: name, name, entries: [] }));
-      this.setActiveTable(this.visibleTables[0]?.id ?? null);
+      this.setActiveTable(sessionStorage.getItem(SESSION_CURRENT_TABLE) ?? this.visibleTables[0]?.id ?? null);
       // this.setActiveTable(this.tables.find(t => t.name === 'BLAbLA')?.id ?? null);
     } finally {
       this.isLoading = false;
@@ -263,7 +272,7 @@ export class IrTranslationsManager {
     return this.languages.filter(language => language.code !== sourceCode);
   }
 
-  /** True when a table survives the "used in this codebase" switch. */
+  /** True when a table survives the "used in this codebase" filter. */
   private isTableAllowed(name: string | undefined): boolean {
     return !this.usedTablesOnly || !name || USED_SETUP_TABLE_SET.has(name);
   }
@@ -273,9 +282,18 @@ export class IrTranslationsManager {
     return this.usedTablesOnly ? this.tables.filter(table => this.isTableAllowed(table.name)) : this.tables;
   }
 
-  /** Cross-table results narrowed by the same switch, so search and audits can't surface a table the picker hides. */
+  /** Cross-table results narrowed by the same filter, so search and audits can't surface a table the picker hides. */
   private get allowedCrossTableEntries(): TranslationEntry[] {
     return this.usedTablesOnly ? this.crossTableEntries.filter(entry => this.isTableAllowed(entry.tableName)) : this.crossTableEntries;
+  }
+
+  /** Non-source language codes currently shown as columns. Defaults to every one until the user unpins something. */
+  private get effectivePinnedLanguageCodes(): string[] {
+    if (this.pinnedLanguageCodes) {
+      return this.pinnedLanguageCodes;
+    }
+    const sourceCode = getSourceLanguage(this.languages)?.code;
+    return this.languages.filter(language => language.code !== sourceCode).map(language => language.code);
   }
 
   /** True once either header control is engaged — the grid then shows rows from every table. */
@@ -296,7 +314,8 @@ export class IrTranslationsManager {
   private get displayedLanguages(): TranslationLanguage[] {
     // Only a language audit has columns worth narrowing to; a plain search says nothing about which ones matter.
     if (this.missingLanguageCodes.length === 0) {
-      return this.orderedLanguages;
+      const pinned = new Set(this.effectivePinnedLanguageCodes);
+      return this.orderedLanguages.filter(language => language.code === getSourceLanguage(this.languages)?.code || pinned.has(language.code));
     }
     const source = getSourceLanguage(this.languages);
     const audited = this.languages.filter(language => this.missingLanguageCodes.includes(language.code));
@@ -397,6 +416,7 @@ export class IrTranslationsManager {
     this.activeTableId = id;
     this.tableQuery = this.tables.find(table => table.id === id)?.name ?? '';
     this.orderDirty = false;
+    sessionStorage.setItem(SESSION_CURRENT_TABLE, id);
     if (id) {
       this.loadTableEntries(id);
     }
@@ -772,10 +792,17 @@ export class IrTranslationsManager {
     this.search$.next(query);
   }
 
-  /** Narrowing the list can strand the active table off it — fall back to the first one still on offer. */
-  private handleUsedTablesOnlyChange(enabled: boolean) {
-    this.usedTablesOnly = enabled;
-    if (enabled && this.activeTable && !this.isTableAllowed(this.activeTable.name)) {
+  /** The settings dialog only ever reports its state on Save — apply the used-tables filter, pins, and notes visibility together. */
+  private handleSaveSettings(payload: { usedTablesOnly: boolean; pinnedCodes: string[]; showNotes: boolean }) {
+    this.usedTablesOnly = payload.usedTablesOnly;
+    localStorage.setItem(USED_TABLES_LOCAL_STORAGE_NAME, String(payload.usedTablesOnly));
+    this.pinnedLanguageCodes = payload.pinnedCodes;
+    localStorage.setItem(PINNED_LANG_LOCAL_STORAGE_NAME, JSON.stringify(payload.pinnedCodes));
+    this.showNotesColumn = payload.showNotes;
+    localStorage.setItem(SHOW_NOTES_LOCAL_STORAGE_NAME, String(payload.showNotes));
+    this.settingsDialogOpen = false;
+    // Narrowing the list can strand the active table off it — fall back to the first one still on offer.
+    if (this.usedTablesOnly && this.activeTable && !this.isTableAllowed(this.activeTable.name)) {
       this.setActiveTable(this.visibleTables[0]?.id ?? null);
     }
   }
@@ -886,15 +913,9 @@ export class IrTranslationsManager {
           ))}
         </wa-select>
 
-        <wa-switch
-          class="tm__used-only"
-          size="s"
-          checked={this.usedTablesOnly}
-          defaultChecked={this.usedTablesOnly}
-          onchange={(e: Event) => this.handleUsedTablesOnlyChange((e.target as HTMLInputElement).checked)}
-        >
-          Used in app
-        </wa-switch>
+        <ir-custom-button class="tm__icon-btn" appearance="outlined" variant="neutral" onClickHandler={() => (this.settingsDialogOpen = true)}>
+          <wa-icon name="gear" label="Table settings"></wa-icon>
+        </ir-custom-button>
       </div>
     );
   }
@@ -937,6 +958,7 @@ export class IrTranslationsManager {
               hasPendingOrder={this.orderDirty}
               changedEntryIds={this.changedEntryIds}
               duplicates={this.duplicates}
+              showNotes={this.showNotesColumn}
               onCreateEntry={() => this.openCreateEntry()}
               onEditEntry={(e: CustomEvent<TranslationEntry>) => this.openEditEntry(e.detail)}
               // onDuplicateEntry={(e: CustomEvent<TranslationEntry>) => this.handleDuplicateEntry(e.detail)}
@@ -964,6 +986,17 @@ export class IrTranslationsManager {
             this.entryDrawerEntry = null;
           }}
         ></ir-translations-entry-drawer>
+
+        <ir-translations-settings-dialog
+          open={this.settingsDialogOpen}
+          usedTablesOnly={this.usedTablesOnly}
+          languages={this.languages}
+          sourceCode={sourceCode}
+          pinnedCodes={this.effectivePinnedLanguageCodes}
+          showNotes={this.showNotesColumn}
+          onSaveSettings={(e: CustomEvent<{ usedTablesOnly: boolean; pinnedCodes: string[]; showNotes: boolean }>) => this.handleSaveSettings(e.detail)}
+          onCloseDialog={() => (this.settingsDialogOpen = false)}
+        ></ir-translations-settings-dialog>
 
         <ir-translations-table-dialog
           open={this.tableDialogOpen}

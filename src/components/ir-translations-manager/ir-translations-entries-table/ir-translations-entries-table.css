@@ -78,6 +78,10 @@
   width: var(--entries-table-key-width);
 }
 
+.entries-table__col--notes {
+  width: 180px;
+}
+
 .entries-table__col--lang {
   width: 200px;
 }

@@ -87,16 +87,11 @@
    ir-custom-button renders its wa-button in its own scope, so this component's
    scoped class never lands on it — but inherited properties still reach it.
    `iconBtn` is deliberately not used here; it collapses the button to the glyph. */
-.tm__table-picker .tm__icon-btn {
+.tm__table-picker .tm__icon-btn,
+.tm__page-actions > .tm__icon-btn {
   flex: 0 0 auto;
   /* width: var(--wa-form-control-height); */
   --ir-c-btn-padding: 0;
-}
-
-.tm__used-only {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  font-size: var(--wa-font-size-s, 0.875rem);
 }
 
 @media (max-width: 575px) {

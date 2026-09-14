@@ -17,6 +17,7 @@
 | `groupByTable`    | `group-by-table`  | True when `entries` span several setup tables — rows are then broken up by collapsible per-table header rows.     | `boolean`                    | `false`     |
 | `languages`       | --                | Column order — the source language is expected first.                                                             | `TranslationLanguage[]`      | `[]`        |
 | `reorderEnabled`  | `reorder-enabled` | False while a search/status filter is active — reordering a filtered subset can't map cleanly onto the full list. | `boolean`                    | `true`      |
+| `showNotes`       | `show-notes`      | Whether the notes column is included at all.                                                                      | `boolean`                    | `true`      |
 | `sourceCode`      | `source-code`     | Code of the reference language, marked in the header.                                                             | `string`                     | `undefined` |
 
 

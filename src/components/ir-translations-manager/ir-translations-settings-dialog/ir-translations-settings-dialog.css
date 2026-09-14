@@ -1,0 +1,52 @@
+:host {
+  --ir-dialog-width: 42rem;
+}
+
+.settings-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settings-dialog__section + .settings-dialog__section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+
+.settings-dialog__section-title {
+  margin: 0 0 0.5rem;
+  font-size: var(--wa-font-size-s);
+  font-weight: var(--wa-font-weight-semibold, 600);
+  color: var(--wa-color-text-normal);
+}
+
+.settings-dialog__section-hint {
+  margin: 0 0 0.6rem;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet);
+}
+
+/* #region Language checkboxes */
+
+.settings-dialog__language-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.settings-dialog__language-code {
+  color: var(--wa-color-text-quiet);
+  font-size: 0.9em;
+}
+
+/* #endregion */
+
+.settings-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+}

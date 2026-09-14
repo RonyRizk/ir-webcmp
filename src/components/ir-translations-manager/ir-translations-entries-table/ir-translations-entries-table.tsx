@@ -4,8 +4,8 @@ import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@st
 import { type Cell, type Row, createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
 import { DuplicateInfo, TranslationEntry, TranslationLanguage } from '../types';
 import { hasValue } from '../utils';
-
-type EditingCell = { entryId: string; languageCode: string };
+type Field = 'lang' | 'note';
+type EditingCell = { entryId: string; languageCode: string; field?: Field };
 
 @Component({
   tag: 'ir-translations-entries-table',
@@ -30,6 +30,8 @@ export class IrTranslationsEntriesTable {
   @Prop() groupByTable: boolean = false;
   /** Entry id → the tables sharing that row's description; rows present here get a duplicate badge beside their key. */
   @Prop() duplicates: Map<string, DuplicateInfo> = new Map();
+  /** Whether the notes column is included at all. */
+  @Prop() showNotes: boolean = true;
 
   @Event() entryChange: EventEmitter<TranslationEntry>;
   @Event() editEntry: EventEmitter<TranslationEntry>;
@@ -143,12 +145,12 @@ export class IrTranslationsEntriesTable {
     this.lastFocusKey = focusKey;
   }
 
-  private startEditing(entry: TranslationEntry, code: string) {
+  private startEditing({ entry, code, field }: { entry: TranslationEntry; code: string; field?: Field }) {
     this.draft = entry.values[code] ?? '';
-    this.editingCell = { entryId: entry.id, languageCode: code };
+    this.editingCell = { entryId: entry.id, languageCode: code, field };
   }
 
-  private commitDraft(entry: TranslationEntry, code: string) {
+  private commitDraft({ entry, code, field }: { entry: TranslationEntry; code: string; field: Field }) {
     // Idempotent per edit session — Enter/Tab commits and moves on, then the
     // outgoing input's native blur fires too (async, once it's actually
     // removed from the DOM); without this guard that blur would re-commit
@@ -156,7 +158,14 @@ export class IrTranslationsEntriesTable {
     if ((entry.values[code] ?? '') === this.draft) {
       return;
     }
-    this.entryChange.emit({ ...entry, values: { ...entry.values, [code]: this.draft } });
+    let newEntry: TranslationEntry = { ...entry };
+    if (field === 'lang') {
+      newEntry = { ...newEntry, values: { ...entry.values, [code]: this.draft } };
+    } else {
+      newEntry = { ...newEntry, meta: { ...newEntry.meta, notes: this.draft } };
+    }
+
+    this.entryChange.emit(newEntry);
   }
 
   /**
@@ -186,10 +195,10 @@ export class IrTranslationsEntriesTable {
       this.editingCell = null;
       return;
     }
-    this.startEditing(nextEntry, this.languages[nextCol].code);
+    this.startEditing({ entry: nextEntry, code: this.languages[nextCol].code });
   }
 
-  private handleCellKeyDown(event: KeyboardEvent, entry: TranslationEntry, code: string, originalValue: string) {
+  private handleCellKeyDown(event: KeyboardEvent, entry: TranslationEntry, code: string, originalValue: string, field) {
     if (event.key === 'Escape') {
       event.preventDefault();
       this.draft = originalValue;
@@ -198,21 +207,21 @@ export class IrTranslationsEntriesTable {
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      this.commitDraft(entry, code);
+      this.commitDraft({ entry, code, field });
       this.moveEditing(entry.id, code, event.shiftKey ? -1 : 1, 0);
       return;
     }
     if (event.key === 'Tab') {
       event.preventDefault();
-      this.commitDraft(entry, code);
+      this.commitDraft({ entry, code, field });
       this.moveEditing(entry.id, code, 0, event.shiftKey ? -1 : 1);
     }
   }
 
-  private handleCellBlur(entry: TranslationEntry, code: string) {
+  private handleCellBlur({ entry, code, field }: { entry: TranslationEntry; code: string; field: Field }) {
     // Keyboard navigation has already pointed editingCell at the next cell by
     // the time this fires, so only a genuine focus-out should close the editor.
-    if (this.editingCell?.entryId === entry.id && this.editingCell?.languageCode === code) {
+    if (this.editingCell?.entryId === entry.id && field === 'lang' ? this.editingCell?.languageCode === code : true) {
       this.editingCell = null;
     }
   }
@@ -349,10 +358,12 @@ export class IrTranslationsEntriesTable {
 
   // #endregion
 
-  private renderValueCell(entry: TranslationEntry, language: TranslationLanguage) {
-    const value = entry.values[language.code] ?? '';
-    const isEditing = this.editingCell?.entryId === entry.id && this.editingCell?.languageCode === language.code;
-    const ariaLabel = `${language.name} translation for ${entry.key || 'new entry'}`;
+  private renderValueCell({ entry, language, field = 'lang' }: { entry: TranslationEntry; language?: TranslationLanguage; field?: Field }) {
+    const isNote = field === 'note';
+    const value = isNote ? entry.meta?.notes : (entry.values[language.code] ?? '');
+    const isEditing =
+      this.editingCell?.entryId === entry.id && field === this.editingCell.field && (field === 'lang' ? this.editingCell?.languageCode === (language?.code ?? 'en') : true);
+    const ariaLabel = isNote ? `${entry.key} note` : `${language.name} translation for ${entry.key || 'new entry'}`;
 
     if (entry.meta?.isUpdateable === false) {
       return (
@@ -380,10 +391,10 @@ export class IrTranslationsEntriesTable {
           spellcheck={false}
           ref={el => (this.cellInputRef = el)}
           oninput={(e: Event) => (this.draft = (e.target as HTMLInputElement).value)}
-          onKeyDown={(e: KeyboardEvent) => this.handleCellKeyDown(e, entry, language.code, value)}
-          onblur={() => this.handleCellBlur(entry, language.code)}
+          onKeyDown={(e: KeyboardEvent) => this.handleCellKeyDown(e, entry, language?.code ?? 'en', value, field)}
+          onblur={() => this.handleCellBlur({ entry, code: language?.code ?? 'en', field })}
           onchange={() => {
-            this.commitDraft(entry, language.code);
+            this.commitDraft({ entry, code: language?.code ?? 'en', field });
           }}
         ></wa-input>
       );
@@ -394,7 +405,7 @@ export class IrTranslationsEntriesTable {
         type="button"
         class={`entries-table__cell-display ${hasValue(value) ? '' : '--empty'}`}
         aria-label={hasValue(value) ? `Edit ${ariaLabel}` : `Add ${ariaLabel}`}
-        onClick={() => this.startEditing(entry, language.code)}
+        onClick={() => this.startEditing({ entry, code: language?.code, field })}
       >
         {hasValue(value) ? (
           <span class="entries-table__cell-text" data-tooltip={value}>
@@ -506,11 +517,20 @@ export class IrTranslationsEntriesTable {
         header: () => 'Key',
         cell: info => this.renderKeyCell(info.row.original),
       }),
+      ...(this.showNotes
+        ? [
+            helper.display({
+              id: 'notes',
+              header: 'Notes',
+              cell: info => this.renderValueCell({ entry: info.row.original, field: 'note' }),
+            }),
+          ]
+        : []),
       ...this.languages.map(language =>
         helper.accessor(row => row.values[language.code] ?? '', {
           id: language.code,
           header: () => this.renderLangHead(language),
-          cell: info => this.renderValueCell(info.row.original, language),
+          cell: info => this.renderValueCell({ entry: info.row.original, language }),
         }),
       ),
       helper.display({
@@ -539,7 +559,7 @@ export class IrTranslationsEntriesTable {
         class={{
           'entries-table__key': columnId === 'key',
           'entries-table__source-cell': isLangColumn && columnId === this.pinnedLanguageCode,
-          'entries-table__value-cell': isLangColumn,
+          'entries-table__value-cell': isLangColumn || columnId === 'notes',
           'entries-table__actions': columnId === 'actions',
           'entries-table__drag-cell': columnId === 'drag',
         }}
@@ -586,7 +606,7 @@ export class IrTranslationsEntriesTable {
     const collapsed = this.collapsedTables.has(name);
     return (
       <tr key={`group:${name}`} class="entries-table__group-row">
-        <td class="entries-table__group-cell" colSpan={3 + this.languages.length}>
+        <td class="entries-table__group-cell" colSpan={(this.showNotes ? 4 : 3) + this.languages.length}>
           <button type="button" class="entries-table__group-toggle" aria-expanded={collapsed ? 'false' : 'true'} onClick={() => this.toggleGroup(name)}>
             <wa-icon class="entries-table__group-chevron" name="chevron-down" aria-hidden="true"></wa-icon>
             <span class="entries-table__group-name">{name}</span>
@@ -656,11 +676,12 @@ export class IrTranslationsEntriesTable {
       getCoreRowModel: getCoreRowModel(),
     });
 
-    // Fixed columns (drag handle, key, actions) stay a constant width; language
-    // columns split whatever's left in the container equally, with a 200px
-    // floor below which the table falls back to its own horizontal scroll
-    // instead of squeezing columns further.
-    const fixedColsWidth = 32 + 220 + 44;
+    // Fixed columns (drag handle, key, notes, actions) stay a constant width;
+    // language columns split whatever's left in the container equally, with a
+    // 200px floor below which the table falls back to its own horizontal
+    // scroll instead of squeezing columns further.
+    const notesColWidth = 180;
+    const fixedColsWidth = 32 + 220 + 44 + (this.showNotes ? notesColWidth : 0);
     const minLangColWidth = 200;
     const langColWidth = Math.max(minLangColWidth, Math.floor((this.containerWidth - fixedColsWidth) / this.languages.length));
     const minWidth = fixedColsWidth + langColWidth * this.languages.length;
@@ -679,6 +700,7 @@ export class IrTranslationsEntriesTable {
             <colgroup>
               <col class="entries-table__col--drag" />
               <col class="entries-table__col--key" />
+              {this.showNotes && <col class="entries-table__col--notes" style={{ width: `${notesColWidth}px` }} />}
               <col class="entries-table__col--lang" span={this.languages.length} style={{ width: `${langColWidth}px` }} />
               <col class="entries-table__col--actions" />
             </colgroup>

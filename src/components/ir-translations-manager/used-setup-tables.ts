@@ -53,6 +53,11 @@ export const USED_SETUP_TABLES = [
   '_USER_TYPE',
   '_VAT_INCLUDED',
 ] as const;
-
 /** Membership test for the list above — the manager checks this per table and per row. */
 export const USED_SETUP_TABLE_SET: ReadonlySet<string> = new Set(USED_SETUP_TABLES);
+
+export const USED_TABLES_LOCAL_STORAGE_NAME = 'IR_USED_TABLES_ONLY';
+/** Non-source language codes currently pinned as columns. Absent entirely (not just empty) means "everything pinned". */
+export const PINNED_LANG_LOCAL_STORAGE_NAME = 'IR_PINNED_LANG';
+export const SHOW_NOTES_LOCAL_STORAGE_NAME = 'IR_SHOW_NOTES_COLUMN';
+export const SESSION_CURRENT_TABLE = 'IR_CURRENT_TABLE';

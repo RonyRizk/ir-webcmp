@@ -34,6 +34,8 @@ export class IrTranslationsEntriesPanel {
   @Prop() disableCreate: boolean = false;
   /** Entry id → the tables sharing that row's description; rows present here get a duplicate badge. */
   @Prop() duplicates: Map<string, DuplicateInfo> = new Map();
+  /** Whether the notes column is included at all. */
+  @Prop() showNotes: boolean = true;
 
   @Event() createEntry: EventEmitter<void>;
   @Event() editEntry: EventEmitter<TranslationEntry>;
@@ -289,6 +291,7 @@ export class IrTranslationsEntriesPanel {
             reorderEnabled={!this.hasActiveFilters && !this.groupByTable}
             changedEntryIds={this.changedEntryIds}
             duplicates={this.duplicates}
+            showNotes={this.showNotes}
             onEntryChange={(e: CustomEvent<TranslationEntry>) => {
               this.stopPropagation(e);
               this.entryChange.emit(e.detail);

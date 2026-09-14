@@ -108,6 +108,7 @@ import { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 import { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+import { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 import { User } from "./models/Users";
 import { AllowedUser } from "./components/ir-user-management/types";
 import { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -214,6 +215,7 @@ export { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 export { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+export { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 export { User } from "./models/Users";
 export { AllowedUser } from "./components/ir-user-management/types";
 export { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -6870,6 +6872,11 @@ export namespace Components {
           * @default []
          */
         "languages": TranslationLanguage[];
+        /**
+          * Whether the notes column is included at all.
+          * @default true
+         */
+        "showNotes": boolean;
         "sourceCode"?: string;
         /**
           * Distinct table names present in `entries`, in display order — the table filter's options.
@@ -6917,6 +6924,11 @@ export namespace Components {
           * @default true
          */
         "reorderEnabled": boolean;
+        /**
+          * Whether the notes column is included at all.
+          * @default true
+         */
+        "showNotes": boolean;
         /**
           * Code of the reference language, marked in the header.
          */
@@ -7020,6 +7032,39 @@ export namespace Components {
           * Acting user id, sent as ENTRY_USER_ID on every write.
          */
         "userId": number;
+    }
+    /**
+     * Settings for the entries grid — which tables the pickers offer, which
+     * non-source languages show up as columns, and whether the notes column is
+     * shown. Every control here edits a local draft only; nothing reaches the
+     * parent (and nothing is persisted) until Save is clicked. Cancel — or
+     * dismissing the dialog any other way — drops the draft entirely.
+     */
+    interface IrTranslationsSettingsDialog {
+        /**
+          * Every language this property exposes; the pin list only ever applies to the non-source ones.
+          * @default []
+         */
+        "languages": TranslationLanguage[];
+        /**
+          * @default false
+         */
+        "open": boolean;
+        /**
+          * Non-source language codes currently shown as columns.
+          * @default []
+         */
+        "pinnedCodes": string[];
+        /**
+          * @default true
+         */
+        "showNotes": boolean;
+        "sourceCode"?: string;
+        /**
+          * Hides setup tables nothing in this codebase reads — the same filter the table pickers apply.
+          * @default true
+         */
+        "usedTablesOnly": boolean;
     }
     /**
      * Dumb open/close shell — the nested ir-translations-table-form owns the
@@ -8300,6 +8345,10 @@ export interface IrTranslationsEntryFormCustomEvent<T> extends CustomEvent<T> {
 export interface IrTranslationsLanguageDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrTranslationsLanguageDialogElement;
+}
+export interface IrTranslationsSettingsDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrTranslationsSettingsDialogElement;
 }
 export interface IrTranslationsTableDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -13621,6 +13670,31 @@ declare global {
         prototype: HTMLIrTranslationsManagerElement;
         new (): HTMLIrTranslationsManagerElement;
     };
+    interface HTMLIrTranslationsSettingsDialogElementEventMap {
+        "saveSettings": TranslationsSettingsSaved;
+        "closeDialog": void;
+    }
+    /**
+     * Settings for the entries grid — which tables the pickers offer, which
+     * non-source languages show up as columns, and whether the notes column is
+     * shown. Every control here edits a local draft only; nothing reaches the
+     * parent (and nothing is persisted) until Save is clicked. Cancel — or
+     * dismissing the dialog any other way — drops the draft entirely.
+     */
+    interface HTMLIrTranslationsSettingsDialogElement extends Components.IrTranslationsSettingsDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrTranslationsSettingsDialogElementEventMap>(type: K, listener: (this: HTMLIrTranslationsSettingsDialogElement, ev: IrTranslationsSettingsDialogCustomEvent<HTMLIrTranslationsSettingsDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrTranslationsSettingsDialogElementEventMap>(type: K, listener: (this: HTMLIrTranslationsSettingsDialogElement, ev: IrTranslationsSettingsDialogCustomEvent<HTMLIrTranslationsSettingsDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrTranslationsSettingsDialogElement: {
+        prototype: HTMLIrTranslationsSettingsDialogElement;
+        new (): HTMLIrTranslationsSettingsDialogElement;
+    };
     interface HTMLIrTranslationsTableDialogElementEventMap {
         "closeDialog": void;
         "tableSaved": { id: string; name: string; mode: 'create' | 'edit' };
@@ -14263,6 +14337,7 @@ declare global {
         "ir-translations-entry-form": HTMLIrTranslationsEntryFormElement;
         "ir-translations-language-dialog": HTMLIrTranslationsLanguageDialogElement;
         "ir-translations-manager": HTMLIrTranslationsManagerElement;
+        "ir-translations-settings-dialog": HTMLIrTranslationsSettingsDialogElement;
         "ir-translations-table-dialog": HTMLIrTranslationsTableDialogElement;
         "ir-translations-table-form": HTMLIrTranslationsTableFormElement;
         "ir-unbookable-rooms": HTMLIrUnbookableRoomsElement;
@@ -21582,6 +21657,11 @@ declare namespace LocalJSX {
         "onReorderEntries"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry[]>) => void;
         "onSaveOrder"?: (event: IrTranslationsEntriesPanelCustomEvent<void>) => void;
         "onToggleVisibility"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
+        /**
+          * Whether the notes column is included at all.
+          * @default true
+         */
+        "showNotes"?: boolean;
         "sourceCode"?: string;
         /**
           * Distinct table names present in `entries`, in display order — the table filter's options.
@@ -21636,6 +21716,11 @@ declare namespace LocalJSX {
           * @default true
          */
         "reorderEnabled"?: boolean;
+        /**
+          * Whether the notes column is included at all.
+          * @default true
+         */
+        "showNotes"?: boolean;
         /**
           * Code of the reference language, marked in the header.
          */
@@ -21751,6 +21836,44 @@ declare namespace LocalJSX {
           * Acting user id, sent as ENTRY_USER_ID on every write.
          */
         "userId"?: number;
+    }
+    /**
+     * Settings for the entries grid — which tables the pickers offer, which
+     * non-source languages show up as columns, and whether the notes column is
+     * shown. Every control here edits a local draft only; nothing reaches the
+     * parent (and nothing is persisted) until Save is clicked. Cancel — or
+     * dismissing the dialog any other way — drops the draft entirely.
+     */
+    interface IrTranslationsSettingsDialog {
+        /**
+          * Every language this property exposes; the pin list only ever applies to the non-source ones.
+          * @default []
+         */
+        "languages"?: TranslationLanguage[];
+        "onCloseDialog"?: (event: IrTranslationsSettingsDialogCustomEvent<void>) => void;
+        /**
+          * Emitted once, only when Save is clicked.
+         */
+        "onSaveSettings"?: (event: IrTranslationsSettingsDialogCustomEvent<TranslationsSettingsSaved>) => void;
+        /**
+          * @default false
+         */
+        "open"?: boolean;
+        /**
+          * Non-source language codes currently shown as columns.
+          * @default []
+         */
+        "pinnedCodes"?: string[];
+        /**
+          * @default true
+         */
+        "showNotes"?: boolean;
+        "sourceCode"?: string;
+        /**
+          * Hides setup tables nothing in this codebase reads — the same filter the table pickers apply.
+          * @default true
+         */
+        "usedTablesOnly"?: boolean;
     }
     /**
      * Dumb open/close shell — the nested ir-translations-table-form owns the
@@ -24087,6 +24210,7 @@ declare namespace LocalJSX {
         "hasPendingOrder": boolean;
         "groupByTable": boolean;
         "disableCreate": boolean;
+        "showNotes": boolean;
     }
     interface IrTranslationsEntriesTableAttributes {
         "sourceCode": string;
@@ -24094,6 +24218,7 @@ declare namespace LocalJSX {
         "filtered": boolean;
         "reorderEnabled": boolean;
         "groupByTable": boolean;
+        "showNotes": boolean;
     }
     interface IrTranslationsEntryDrawerAttributes {
         "open": boolean;
@@ -24117,6 +24242,12 @@ declare namespace LocalJSX {
         "ticket": string;
         "propertyid": number;
         "userId": number;
+    }
+    interface IrTranslationsSettingsDialogAttributes {
+        "open": boolean;
+        "usedTablesOnly": boolean;
+        "sourceCode": string;
+        "showNotes": boolean;
     }
     interface IrTranslationsTableDialogAttributes {
         "open": boolean;
@@ -24580,6 +24711,7 @@ declare namespace LocalJSX {
         "ir-translations-entry-form": Omit<IrTranslationsEntryForm, keyof IrTranslationsEntryFormAttributes> & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes]?: IrTranslationsEntryForm[K] } & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes as `attr:${K}`]?: IrTranslationsEntryFormAttributes[K] } & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes as `prop:${K}`]?: IrTranslationsEntryForm[K] };
         "ir-translations-language-dialog": Omit<IrTranslationsLanguageDialog, keyof IrTranslationsLanguageDialogAttributes> & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes]?: IrTranslationsLanguageDialog[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `attr:${K}`]?: IrTranslationsLanguageDialogAttributes[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `prop:${K}`]?: IrTranslationsLanguageDialog[K] };
         "ir-translations-manager": Omit<IrTranslationsManager, keyof IrTranslationsManagerAttributes> & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes]?: IrTranslationsManager[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `attr:${K}`]?: IrTranslationsManagerAttributes[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `prop:${K}`]?: IrTranslationsManager[K] };
+        "ir-translations-settings-dialog": Omit<IrTranslationsSettingsDialog, keyof IrTranslationsSettingsDialogAttributes> & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes]?: IrTranslationsSettingsDialog[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `attr:${K}`]?: IrTranslationsSettingsDialogAttributes[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `prop:${K}`]?: IrTranslationsSettingsDialog[K] };
         "ir-translations-table-dialog": Omit<IrTranslationsTableDialog, keyof IrTranslationsTableDialogAttributes> & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes]?: IrTranslationsTableDialog[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `attr:${K}`]?: IrTranslationsTableDialogAttributes[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `prop:${K}`]?: IrTranslationsTableDialog[K] };
         "ir-translations-table-form": Omit<IrTranslationsTableForm, keyof IrTranslationsTableFormAttributes> & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes]?: IrTranslationsTableForm[K] } & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes as `attr:${K}`]?: IrTranslationsTableFormAttributes[K] } & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes as `prop:${K}`]?: IrTranslationsTableForm[K] };
         "ir-unbookable-rooms": Omit<IrUnbookableRooms, keyof IrUnbookableRoomsAttributes> & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes]?: IrUnbookableRooms[K] } & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes as `attr:${K}`]?: IrUnbookableRoomsAttributes[K] } & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes as `prop:${K}`]?: IrUnbookableRooms[K] };
@@ -25159,6 +25291,14 @@ declare module "@stencil/core" {
             "ir-translations-entry-form": LocalJSX.IntrinsicElements["ir-translations-entry-form"] & JSXBase.HTMLAttributes<HTMLIrTranslationsEntryFormElement>;
             "ir-translations-language-dialog": LocalJSX.IntrinsicElements["ir-translations-language-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsLanguageDialogElement>;
             "ir-translations-manager": LocalJSX.IntrinsicElements["ir-translations-manager"] & JSXBase.HTMLAttributes<HTMLIrTranslationsManagerElement>;
+            /**
+             * Settings for the entries grid — which tables the pickers offer, which
+             * non-source languages show up as columns, and whether the notes column is
+             * shown. Every control here edits a local draft only; nothing reaches the
+             * parent (and nothing is persisted) until Save is clicked. Cancel — or
+             * dismissing the dialog any other way — drops the draft entirely.
+             */
+            "ir-translations-settings-dialog": LocalJSX.IntrinsicElements["ir-translations-settings-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsSettingsDialogElement>;
             /**
              * Dumb open/close shell — the nested ir-translations-table-form owns the
              * draft, validation, and the actual save call.

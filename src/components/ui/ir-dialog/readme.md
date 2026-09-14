@@ -87,6 +87,7 @@ Type: `Promise<void>`
  - [ir-test-cmp](../../ir-test-cmp)
  - [ir-translations-language-dialog](../../ir-translations-manager/ir-translations-language-dialog)
  - [ir-translations-manager](../../ir-translations-manager)
+ - [ir-translations-settings-dialog](../../ir-translations-manager/ir-translations-settings-dialog)
  - [ir-translations-table-dialog](../../ir-translations-manager/ir-translations-table-dialog)
  - [ir-user-management-table](../../ir-user-management/ir-user-management-table)
  - [ir-void-document-dialog](../../ir-booking-details/ir-void-document-dialog)
@@ -129,6 +130,7 @@ graph TD;
   ir-test-cmp --> ir-dialog
   ir-translations-language-dialog --> ir-dialog
   ir-translations-manager --> ir-dialog
+  ir-translations-settings-dialog --> ir-dialog
   ir-translations-table-dialog --> ir-dialog
   ir-user-management-table --> ir-dialog
   ir-void-document-dialog --> ir-dialog

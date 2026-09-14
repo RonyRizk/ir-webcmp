@@ -24,6 +24,7 @@ CRUD intents it emits.
 | `hasPendingOrder` | `has-pending-order` | True once a drag reorder is applied locally but not yet saved — shows the Save/Discard order buttons.                 | `boolean`                    | `false`     |
 | `isLoading`       | `is-loading`        | True while the active table's keys are still loading.                                                                 | `boolean`                    | `false`     |
 | `languages`       | --                  |                                                                                                                       | `TranslationLanguage[]`      | `[]`        |
+| `showNotes`       | `show-notes`        | Whether the notes column is included at all.                                                                          | `boolean`                    | `true`      |
 | `sourceCode`      | `source-code`       |                                                                                                                       | `string`                     | `undefined` |
 | `tableNames`      | --                  | Distinct table names present in `entries`, in display order — the table filter's options.                             | `string[]`                   | `[]`        |
 
