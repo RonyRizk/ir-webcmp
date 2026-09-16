@@ -3,10 +3,11 @@ import { SetupService, type SetupEntry } from '@/services/setup';
 import { showToast } from '@/utils/utils';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, from, map, merge, of, switchMap, tap } from 'rxjs';
+import { type DuplicateSyncPlan, planDuplicateSync } from './duplicate-sync';
 import { buildEditSetupParams, exposedLanguagesToTranslationLanguages, setupEntryToTranslationEntry } from './setup-mapping';
-import { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
+import { DuplicateInfo, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
 import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_SETUP_TABLE_SET, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
-import { getSourceLanguage, orderLanguages, sortByDisplayOrder } from './utils';
+import { buildDuplicateMap, diffValues, getSourceLanguage, orderLanguages, sortByDisplayOrder } from './utils';
 
 type DeleteTarget = { type: 'entry' | 'table'; id: string; label: string; detail?: string };
 
@@ -73,7 +74,7 @@ export class IrTranslationsManager {
   /** True while a cross-table query is in flight. */
   @State() isLoadingCrossTable: boolean = false;
 
-  /** Entry id (`TBL_NAME::CODE_NAME`) → the tables sharing that row's description. Empty until the duplicate scan lands. */
+  /** Entry id (`TBL_NAME::CODE_NAME`) → the rows in other used tables sharing that row's description. Empty until the duplicate scan lands. */
   @State() duplicates: Map<string, DuplicateInfo> = new Map();
 
   private deleteDialogRef: HTMLIrDialogElement;
@@ -150,27 +151,19 @@ export class IrTranslationsManager {
   }
   /**
    * One scan of every description shared by more than one setup table, flattened
-   * from the API's per-description grouping into a per-row lookup keyed by the same
-   * `TBL_NAME::CODE_NAME` id the entries carry. Loaded once — it describes the whole
-   * setup, not the table currently on screen. Purely decorative, so a failure leaves
-   * the badges off rather than taking the page down with it.
+   * into a per-row lookup (see `buildDuplicateMap`). Loaded once — it describes the
+   * whole setup, not the table currently on screen — and refreshed after a drawer
+   * save, since a key rename changes the id a row is filed under. A failure leaves
+   * the badges off and edits un-propagated rather than taking the page down with it.
    */
   private async loadDuplicatedSetupEntriesAcrossTables() {
     try {
-      const groups = await this.setupService.getDuplicatedSetupEntriesAcrossTables();
-      const byEntry = new Map<string, DuplicateInfo>();
-      for (const group of groups ?? []) {
-        // A description can repeat inside one table, so the tooltip lists distinct tables.
-        const tables = [...new Set(group.ENTRIES.map(entry => entry.TBL_NAME))].sort();
-        for (const entry of group.ENTRIES) {
-          byEntry.set(`${entry.TBL_NAME}::${entry.CODE_NAME}`, { occurrences: group.OCCURRENCES, tables });
-        }
-      }
-      this.duplicates = byEntry;
+      this.duplicates = buildDuplicateMap(await this.setupService.getDuplicatedSetupEntriesAcrossTables());
     } catch (error) {
       console.error(error);
     }
   }
+
   /**
    * Only the distinct table names are fetched up front, to fill the picker —
    * a table's keys aren't loaded until it's actually selected.
@@ -482,15 +475,22 @@ export class IrTranslationsManager {
     this.entryDrawerOpen = true;
   }
 
-  /** The entry form saved (and possibly soft-deleted/recreated) directly against Setup — refetch to pick up the result. */
-  private handleEntrySaved = () => {
+  /**
+   * The entry form saved (and possibly soft-deleted/recreated) directly against Setup,
+   * with the row's duplicates in the same batch — refetch to pick up the result. The
+   * duplicate map is reloaded too: a key rename changes the id a row is filed under.
+   */
+  private handleEntrySaved = (event: CustomEvent<EntrySavedDetail>) => {
+    const { syncedCount } = event.detail;
+    if (syncedCount > 0) {
+      showToast({ type: 'success', title: `Also updated ${syncedCount} duplicate ${syncedCount === 1 ? 'row' : 'rows'}` });
+    }
     if (this.isCrossTableMode) {
       this.refresh$.next();
-      return;
-    }
-    if (this.activeTableId) {
+    } else if (this.activeTableId) {
       this.loadTableEntries(this.activeTableId);
     }
+    this.loadDuplicatedSetupEntriesAcrossTables();
   };
 
   private async handleEntryChange(updatedEntry: TranslationEntry) {
@@ -505,20 +505,53 @@ export class IrTranslationsManager {
 
     this.isMutating = true;
     try {
-      const saved = await this.setupService.editSetup(
-        buildEditSetupParams({
-          ownerId: this.propertyid,
-          entryUserId: this.userId,
-          tableName,
-          key: updatedEntry.key,
-          values: updatedEntry.values,
-          meta: updatedEntry.meta,
-          touch: false,
-        }),
-      );
-      const savedEntry = setupEntryToTranslationEntry(saved);
+      const primary = buildEditSetupParams({
+        ownerId: this.propertyid,
+        entryUserId: this.userId,
+        tableName,
+        key: updatedEntry.key,
+        values: updatedEntry.values,
+        meta: updatedEntry.meta,
+        touch: false,
+      });
+      // A duplicated row's twins ride in the same Edit_Setup_Many as the row itself —
+      // one write however many tables it touches. Only when the row has none, or its
+      // twins can't be read, does it fall back to a plain Edit_Setup: the user's own
+      // change must not be held hostage by a sibling lookup.
+      const previous = previousEntries.find(entry => entry.id === updatedEntry.id);
+      let syncFailed = false;
+      const sync = await planDuplicateSync(this.setupService, {
+        siblings: this.duplicates.get(updatedEntry.id)?.siblings ?? [],
+        changedValues: diffValues(previous?.values, updatedEntry.values),
+        ownerId: this.propertyid,
+        entryUserId: this.userId,
+        touch: false,
+      }).catch((error): DuplicateSyncPlan => {
+        console.error(error);
+        syncFailed = true;
+        return { params: [], entries: [] };
+      });
+
+      if (sync.params.length > 0) {
+        await this.setupService.editSetupMany([primary, ...sync.params]);
+      } else {
+        await this.setupService.editSetup(primary);
+      }
+
+      const savedEntry = setupEntryToTranslationEntry(primary);
       this.patchEntries(entries => entries.map(entry => (entry.id === savedEntry.id ? savedEntry : entry)), tableId);
-      showToast({ type: 'success', title: 'Saved Successfully' });
+      // The cross-table view may have some of the synced rows on screen.
+      const syncedById = new Map<string, TranslationEntry>(sync.entries.map(entry => [entry.id, entry]));
+      if (this.crossTableEntries.some(entry => syncedById.has(entry.id))) {
+        this.crossTableEntries = this.crossTableEntries.map(entry => syncedById.get(entry.id) ?? entry);
+      }
+
+      const synced = sync.entries.length;
+      if (syncFailed) {
+        showToast({ type: 'error', title: 'Saved, but its duplicate rows could not be updated' });
+      } else {
+        showToast({ type: 'success', title: synced > 0 ? `Saved — also updated ${synced} duplicate ${synced === 1 ? 'row' : 'rows'}` : 'Saved Successfully' });
+      }
     } catch (error) {
       this.patchEntries(() => previousEntries, tableId);
     } finally {
@@ -975,6 +1008,7 @@ export class IrTranslationsManager {
           open={this.entryDrawerOpen}
           languages={languages}
           entry={this.entryDrawerEntry}
+          duplicateSiblings={this.entryDrawerEntry ? (this.duplicates.get(this.entryDrawerEntry.id)?.siblings ?? []) : []}
           existingKeys={this.displayedEntries.filter(entry => entry.tableName === drawerTableName).map(entry => entry.key)}
           nextDisplayOrder={this.nextDisplayOrder}
           tableName={drawerTableName}

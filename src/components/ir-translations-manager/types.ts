@@ -42,14 +42,31 @@ export interface TranslationTable {
   entries: TranslationEntry[];
 }
 
+/** Another table's row that carries the same description as the row this hangs off. */
+export interface DuplicateSibling {
+  tableName: string;
+  key: string;
+}
+
 /**
- * How many setup tables share one entry's description, and which ones — derived
+ * The rows in *other* setup tables that share one entry's description — derived
  * from Get_Duplicated_Setup_Entries_Across_Tables, which groups by DESCRIPTION
- * rather than by row.
+ * rather than by row. Restricted to USED_SETUP_TABLES and never including the
+ * row's own table: this is both what the badge counts and where a language edit
+ * is propagated to.
  */
 export interface DuplicateInfo {
-  occurrences: number;
+  siblings: DuplicateSibling[];
+  /** Distinct `siblings[].tableName`, sorted. */
   tables: string[];
+}
+
+/** What the entry form saved. */
+export interface EntrySavedDetail {
+  tableName: string;
+  key: string;
+  /** Rows in other tables that were updated in the same batch (see `planDuplicateSync`). */
+  syncedCount: number;
 }
 
 /** Which rows the entries table shows, based on translation completeness or visibility. */

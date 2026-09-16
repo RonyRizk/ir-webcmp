@@ -1,9 +1,10 @@
-import { SetupService } from '@/services/setup';
+import { type EditSetupParams, SetupService } from '@/services/setup';
 import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
+import { type DuplicateSyncPlan, planDuplicateSync } from '../../duplicate-sync';
 import { buildEditSetupParams } from '../../setup-mapping';
-import { TranslationEntry, TranslationLanguage } from '../../types';
-import { getSourceLanguage, hasValue } from '../../utils';
+import { DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage } from '../../types';
+import { diffValues, getSourceLanguage, hasValue } from '../../utils';
 
 /** Pulls a `{ "code": "translation" }` object out of an AI reply, tolerating markdown fences and surrounding prose. */
 function extractTranslationObject(text: string): Record<string, unknown> | null {
@@ -47,8 +48,11 @@ export class IrTranslationsEntryForm {
   @Prop() tableName: string;
   @Prop() ownerId: number;
   @Prop() entryUserId: number;
+  /** Rows in other used tables sharing `entry`'s description — language changes are written to them in the same batch. */
+  @Prop() duplicateSiblings: DuplicateSibling[] = [];
 
-  @Event() entrySaved: EventEmitter<void>;
+  /** Fired after the write lands, with what was saved — the manager propagates language changes to the row's duplicates from it. */
+  @Event() entrySaved: EventEmitter<EntrySavedDetail>;
   @Event() submitDisabledChange: EventEmitter<boolean>;
   @Event() isSubmittingChange: EventEmitter<boolean>;
 
@@ -211,8 +215,12 @@ export class IrTranslationsEntryForm {
     this.isSubmitting = true;
     this.isSubmittingChange.emit(true);
     try {
+      // Everything this save needs goes out as one Edit_Setup_Many: the soft-delete of
+      // a renamed key, the row itself, and its duplicates in other tables. A plain
+      // Edit_Setup is only used when there's nothing else to send.
+      const writes: EditSetupParams[] = [];
       if (keyChanged) {
-        await this.setupService.editSetup(
+        writes.push(
           buildEditSetupParams({
             ownerId: this.ownerId,
             entryUserId: this.entryUserId,
@@ -225,7 +233,7 @@ export class IrTranslationsEntryForm {
           }),
         );
       }
-      await this.setupService.editSetup(
+      writes.push(
         buildEditSetupParams({
           ownerId: this.ownerId,
           entryUserId: this.entryUserId,
@@ -237,8 +245,33 @@ export class IrTranslationsEntryForm {
           displayOrder: isNewRow ? this.nextDisplayOrder : undefined,
         }),
       );
-      showToast({ type: 'success', title: previous ? 'Key updated' : 'Key created' });
-      this.entrySaved.emit();
+
+      // Duplicates are keyed by the row as it was, so a rename still finds them. If they
+      // can't be read the user's own save still goes out, just without them.
+      let syncFailed = false;
+      const sync = previous
+        ? await planDuplicateSync(this.setupService, {
+            siblings: this.duplicateSiblings,
+            changedValues: diffValues(previous.values, this.values),
+            ownerId: this.ownerId,
+            entryUserId: this.entryUserId,
+            touch: true,
+          }).catch((error): DuplicateSyncPlan => {
+            console.error(error);
+            syncFailed = true;
+            return { params: [], entries: [] };
+          })
+        : ({ params: [], entries: [] } as DuplicateSyncPlan);
+      writes.push(...sync.params);
+
+      if (writes.length > 1) {
+        await this.setupService.editSetupMany(writes);
+      } else {
+        await this.setupService.editSetup(writes[0]);
+      }
+
+      showToast(syncFailed ? { type: 'error', title: 'Saved, but its duplicate rows could not be updated' } : { type: 'success', title: previous ? 'Key updated' : 'Key created' });
+      this.entrySaved.emit({ tableName: this.tableName, key: this.trimmedKey, syncedCount: sync.entries.length });
     } finally {
       this.isSubmitting = false;
       this.isSubmittingChange.emit(false);

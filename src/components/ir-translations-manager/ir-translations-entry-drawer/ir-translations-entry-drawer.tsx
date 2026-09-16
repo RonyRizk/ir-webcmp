@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
-import { TranslationEntry, TranslationLanguage } from '../types';
+import { DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage } from '../types';
 
 /**
  * Dumb open/close shell — the nested ir-translations-entry-form owns the
@@ -23,9 +23,11 @@ export class IrTranslationsEntryDrawer {
   @Prop() tableName: string;
   @Prop() ownerId: number;
   @Prop() entryUserId: number;
+  /** Passed through to the form — rows in other tables that share `entry`'s description. */
+  @Prop() duplicateSiblings: DuplicateSibling[] = [];
 
   @Event() closeDrawer: EventEmitter<void>;
-  @Event() entrySaved: EventEmitter<void>;
+  @Event() entrySaved: EventEmitter<EntrySavedDetail>;
 
   @State() saveDisabled: boolean = true;
   @State() isSubmitting: boolean = false;
@@ -45,12 +47,13 @@ export class IrTranslationsEntryDrawer {
             tableName={this.tableName}
             ownerId={this.ownerId}
             entryUserId={this.entryUserId}
+            duplicateSiblings={this.duplicateSiblings}
             onSubmitDisabledChange={(e: CustomEvent<boolean>) => (this.saveDisabled = e.detail)}
             onIsSubmittingChange={(e: CustomEvent<boolean>) => (this.isSubmitting = e.detail)}
-            onEntrySaved={(e: CustomEvent<void>) => {
+            onEntrySaved={(e: CustomEvent<EntrySavedDetail>) => {
               e.stopImmediatePropagation();
               e.stopPropagation();
-              this.entrySaved.emit();
+              this.entrySaved.emit(e.detail);
               this.closeDrawer.emit();
             }}
           ></ir-translations-entry-form>

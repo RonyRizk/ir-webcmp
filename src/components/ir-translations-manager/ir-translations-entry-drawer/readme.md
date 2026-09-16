@@ -12,25 +12,26 @@ draft, validation, and the actual save call.
 
 ## Properties
 
-| Property           | Attribute            | Description                                                                                 | Type                    | Default                     |
-| ------------------ | -------------------- | ------------------------------------------------------------------------------------------- | ----------------------- | --------------------------- |
-| `entry`            | --                   | The entry being edited. Null puts the drawer in create mode.                                | `TranslationEntry`      | `null`                      |
-| `entryUserId`      | `entry-user-id`      |                                                                                             | `number`                | `undefined`                 |
-| `existingKeys`     | --                   | Keys already used in the active table, for duplicate detection.                             | `string[]`              | `[]`                        |
-| `formId`           | `form-id`            |                                                                                             | `string`                | `'translations-entry-form'` |
-| `languages`        | --                   |                                                                                             | `TranslationLanguage[]` | `[]`                        |
-| `nextDisplayOrder` | `next-display-order` | DISPLAY_ORDER a brand-new key should get — one past the highest order already in the table. | `number`                | `0`                         |
-| `open`             | `open`               |                                                                                             | `boolean`               | `false`                     |
-| `ownerId`          | `owner-id`           |                                                                                             | `number`                | `undefined`                 |
-| `tableName`        | `table-name`         |                                                                                             | `string`                | `undefined`                 |
+| Property            | Attribute            | Description                                                                                 | Type                    | Default                     |
+| ------------------- | -------------------- | ------------------------------------------------------------------------------------------- | ----------------------- | --------------------------- |
+| `duplicateSiblings` | --                   | Passed through to the form — rows in other tables that share `entry`'s description.         | `DuplicateSibling[]`    | `[]`                        |
+| `entry`             | --                   | The entry being edited. Null puts the drawer in create mode.                                | `TranslationEntry`      | `null`                      |
+| `entryUserId`       | `entry-user-id`      |                                                                                             | `number`                | `undefined`                 |
+| `existingKeys`      | --                   | Keys already used in the active table, for duplicate detection.                             | `string[]`              | `[]`                        |
+| `formId`            | `form-id`            |                                                                                             | `string`                | `'translations-entry-form'` |
+| `languages`         | --                   |                                                                                             | `TranslationLanguage[]` | `[]`                        |
+| `nextDisplayOrder`  | `next-display-order` | DISPLAY_ORDER a brand-new key should get — one past the highest order already in the table. | `number`                | `0`                         |
+| `open`              | `open`               |                                                                                             | `boolean`               | `false`                     |
+| `ownerId`           | `owner-id`           |                                                                                             | `number`                | `undefined`                 |
+| `tableName`         | `table-name`         |                                                                                             | `string`                | `undefined`                 |
 
 
 ## Events
 
-| Event         | Description | Type                |
-| ------------- | ----------- | ------------------- |
-| `closeDrawer` |             | `CustomEvent<void>` |
-| `entrySaved`  |             | `CustomEvent<void>` |
+| Event         | Description | Type                            |
+| ------------- | ----------- | ------------------------------- |
+| `closeDrawer` |             | `CustomEvent<void>`             |
+| `entrySaved`  |             | `CustomEvent<EntrySavedDetail>` |
 
 
 ## Dependencies

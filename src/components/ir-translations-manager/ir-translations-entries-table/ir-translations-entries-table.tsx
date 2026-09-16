@@ -4,8 +4,51 @@ import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@st
 import { type Cell, type Row, createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
 import { DuplicateInfo, TranslationEntry, TranslationLanguage } from '../types';
 import { hasValue } from '../utils';
+
 type Field = 'lang' | 'note';
-type EditingCell = { entryId: string; languageCode: string; field?: Field };
+
+/**
+ * One navigable grid column. The drag handle is deliberately absent — it is a
+ * pointer affordance, not a cell, so arrow keys skip straight past it.
+ */
+type NavColumn = { id: string; kind: 'key' | 'note' | 'lang' | 'actions'; code?: string };
+
+/**
+ * One edit of one cell, from the moment its input opens until it commits or is
+ * cancelled. Every handler on that input closes over *this object*, which is what
+ * makes committing idempotent: Enter/Tab commits and immediately opens the next
+ * cell, and the outgoing input's trailing `change`/`blur` then finds its own
+ * session already flagged `committed` instead of writing a newer cell's draft
+ * back over the one it came from.
+ */
+type EditSession = {
+  /** `${entryId}|${columnId}` — also what `editingKey` holds, so render and session can never disagree. */
+  key: string;
+  entryId: string;
+  columnId: string;
+  field: Field;
+  /** Language code when `field === 'lang'`. */
+  code?: string;
+  /** Value as it stood when the editor opened — the only thing a commit compares against. */
+  original: string;
+  draft: string;
+  committed: boolean;
+  /** Set when editing began by typing a character over the cell; consumed once by the focus pass. */
+  seeded: boolean;
+  /** How the focus pass should place the caret: over the whole value, or after it. */
+  select: 'all' | 'end';
+  /**
+   * False until the input exists and has focus. An editor is created by a render and
+   * focused a frame later, and a fast typist gets keys in before that — while this is
+   * false the *cell* handles them on the session's behalf.
+   */
+  focused: boolean;
+};
+
+/** Rows a PageUp/PageDown jumps. */
+const PAGE_ROWS = 10;
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 @Component({
   tag: 'ir-translations-entries-table',
@@ -41,7 +84,8 @@ export class IrTranslationsEntriesTable {
   @Event() reorderEntries: EventEmitter<TranslationEntry[]>;
   @Event() toggleVisibility: EventEmitter<TranslationEntry>;
 
-  @State() editingCell: EditingCell | null = null;
+  /** `${entryId}|${columnId}` of the open editor, or null. The only edit state that needs a re-render. */
+  @State() editingKey: string | null = null;
   /** Working copy of `entries`, live-reordered while a drag is in progress. */
   @State() dragEntries: TranslationEntry[] = [];
   @State() draggingId: string | null = null;
@@ -50,10 +94,26 @@ export class IrTranslationsEntriesTable {
   /** Table names whose group is currently folded shut. Only meaningful while `groupByTable` is on. */
   @State() collapsedTables: Set<string> = new Set();
 
-  private cellInputRef?: WaInput;
-  private lastFocusKey: string | null = null;
-  /** Live text of the cell being edited. Deliberately not @State — keystrokes must not re-render the grid. */
-  private draft: string = '';
+  /**
+   * The live edit. Deliberately not @State — keystrokes must not re-render the grid,
+   * and the object identity is what makes a commit idempotent (see `EditSession`).
+   */
+  private editSession: EditSession | null = null;
+  /**
+   * The grid's single tab stop, as {visible row, navigable column} indices. Also not
+   * @State: arrow keys move it by swapping `tabindex` on two `<td>`s directly, so
+   * walking a 2,300-cell grid costs no re-renders at all.
+   */
+  private activeCell: { row: number; col: number } = { row: 0, col: 0 };
+  /** What to focus after the next render — set by anything that opens or closes an editor. */
+  private pendingFocus: 'input' | 'cell' | null = null;
+  /**
+   * The session a pending 'input' focus was scheduled for. Typing faster than the
+   * screen refreshes can queue two of these in one frame, and the first must not
+   * declare the second one's editor focused — that would hand the keys back to an
+   * input that doesn't have them yet, and they'd be lost.
+   */
+  private pendingFocusSession: EditSession | null = null;
   private containerRef?: HTMLDivElement;
   private containerResizeObserver?: ResizeObserver;
   /** Latest pointer Y during a drag, read by the auto-scroll loop — not @State, it'd re-render on every dragover. */
@@ -93,11 +153,16 @@ export class IrTranslationsEntriesTable {
 
   /** Re-points the shared tooltip at whatever `[data-tooltip]` element the pointer is over. */
   private handleTooltipOver = (event: MouseEvent) => {
+    const target = (event.target as HTMLElement | null)?.closest?.('[data-tooltip]') as HTMLElement | null;
+    this.showTooltipFor(target);
+  };
+
+  /** Shared by hover and by keyboard focus, so truncated cell text is readable either way. */
+  private showTooltipFor(target: HTMLElement | null) {
     const tooltip = this.tooltipRef;
     if (!tooltip) {
       return;
     }
-    const target = (event.target as HTMLElement | null)?.closest?.('[data-tooltip]') as HTMLElement | null;
     const text = target?.dataset.tooltip;
     if (!target || !text) {
       this.hideTooltip();
@@ -115,7 +180,7 @@ export class IrTranslationsEntriesTable {
       tooltip.anchor = target;
       tooltip.open = true;
     }, 250);
-  };
+  }
 
   private hideTooltip = () => {
     clearTimeout(this.tooltipTimer);
@@ -135,96 +200,438 @@ export class IrTranslationsEntriesTable {
   }
 
   componentDidRender() {
-    const focusKey = this.editingCell ? `${this.editingCell.entryId}:${this.editingCell.languageCode}` : null;
-    if (focusKey && focusKey !== this.lastFocusKey) {
-      // wa-input's shadow DOM hasn't necessarily finished its first Lit
-      // render synchronously after insertion, so focus() can run before the
-      // internal <input> exists — defer past that render.
-      requestAnimationFrame(() => this.cellInputRef?.focus());
-    }
-    this.lastFocusKey = focusKey;
-  }
-
-  private startEditing({ entry, code, field }: { entry: TranslationEntry; code: string; field?: Field }) {
-    this.draft = entry.values[code] ?? '';
-    this.editingCell = { entryId: entry.id, languageCode: code, field };
-  }
-
-  private commitDraft({ entry, code, field }: { entry: TranslationEntry; code: string; field: Field }) {
-    // Idempotent per edit session — Enter/Tab commits and moves on, then the
-    // outgoing input's native blur fires too (async, once it's actually
-    // removed from the DOM); without this guard that blur would re-commit
-    // using whatever cell's draft happens to be live by then.
-    if ((entry.values[code] ?? '') === this.draft) {
+    this.syncActionTabStops();
+    const pending = this.pendingFocus;
+    if (!pending) {
       return;
     }
-    let newEntry: TranslationEntry = { ...entry };
-    if (field === 'lang') {
-      newEntry = { ...newEntry, values: { ...entry.values, [code]: this.draft } };
-    } else {
-      newEntry = { ...newEntry, meta: { ...newEntry.meta, notes: this.draft } };
+    this.pendingFocus = null;
+    // wa-input's shadow DOM hasn't necessarily finished its first Lit render
+    // synchronously after insertion, so focus() can run before the internal
+    // <input> exists — defer past that render.
+    requestAnimationFrame(() => {
+      if (pending === 'cell') {
+        this.cellElement(this.activeCell.row, this.activeCell.col)?.focus();
+        return;
+      }
+      const session = this.pendingFocusSession;
+      // Superseded by a later edit, or already handled by a pass queued alongside this one.
+      if (!session || session !== this.editSession) {
+        return;
+      }
+      const input = this.cellElement(this.activeCell.row, this.activeCell.col)?.querySelector('wa-input') as WaInput | null;
+      if (!input) {
+        // This frame ran ahead of the render that creates the input; the pass queued
+        // by that render finds it. Leave the session pending for it.
+        return;
+      }
+      this.pendingFocusSession = null;
+      input.focus();
+      session.focused = true;
+      if (session.seeded) {
+        // Editing began by typing over the cell: that first character is the value now.
+        session.seeded = false;
+        input.value = session.draft;
+        input.input?.setSelectionRange(session.draft.length, session.draft.length);
+        return;
+      }
+      // focus() alone leaves the caret at position 0, so typing would prepend.
+      if (session.select === 'all') {
+        input.input?.select();
+      } else {
+        input.input?.setSelectionRange(session.draft.length, session.draft.length);
+      }
+    });
+  }
+
+  /**
+   * `ir-custom-button` renders a `wa-button` of its own, which would put a tab stop
+   * in every single row — and the grid is meant to be one tab stop, entered with Tab
+   * and walked with arrows. The trigger stays reachable through its own cell (Enter
+   * opens the menu) and by mouse; it just isn't tabbable any more.
+   *
+   * Deferred a frame because child components render after this one, so the
+   * `wa-button` doesn't exist yet on a first paint. `:not([tabindex])` keeps the
+   * sweep idempotent across re-renders.
+   */
+  private syncActionTabStops() {
+    requestAnimationFrame(() => {
+      this.containerRef?.querySelectorAll('td.entries-table__actions wa-button:not([tabindex])').forEach(button => button.setAttribute('tabindex', '-1'));
+    });
+  }
+
+  // #region Grid geometry
+
+  /** Every column arrow keys can land on, in visual order. */
+  private get navColumns(): NavColumn[] {
+    return [
+      { id: 'key', kind: 'key' },
+      ...(this.showNotes ? [{ id: 'notes', kind: 'note' } as NavColumn] : []),
+      ...this.languages.map(language => ({ id: language.code, kind: 'lang', code: language.code }) as NavColumn),
+      { id: 'actions', kind: 'actions' },
+    ];
+  }
+
+  /**
+   * Rows actually on screen. Grouped mode drops the rows of folded tables, and
+   * navigation indices have to agree with what's rendered or arrow keys would
+   * step into cells that don't exist.
+   */
+  private get visibleEntries(): TranslationEntry[] {
+    if (!this.groupByTable || this.collapsedTables.size === 0) {
+      return this.dragEntries;
     }
+    return this.dragEntries.filter(entry => !this.collapsedTables.has(entry.tableName ?? ''));
+  }
+
+  private cellValue(entry: TranslationEntry, column: NavColumn): string {
+    return column.kind === 'note' ? (entry.meta?.notes ?? '') : (entry.values[column.code] ?? '');
+  }
+
+  /** Key and Actions are navigable but never editable; system-protected rows lock their values. */
+  private isCellEditable(entry: TranslationEntry, column: NavColumn): boolean {
+    return (column.kind === 'note' || column.kind === 'lang') && entry.meta?.isUpdateable !== false;
+  }
+
+  private cellElement(row: number, col: number): HTMLTableCellElement | null {
+    return (this.containerRef?.querySelector(`td[data-row="${row}"][data-col="${col}"]`) as HTMLTableCellElement | null) ?? null;
+  }
+
+  /** Rows and columns come and go with filters — without this the single tab stop could end up on a cell that no longer exists. */
+  private clampActiveCell() {
+    this.activeCell = {
+      row: clamp(this.activeCell.row, 0, Math.max(0, this.visibleEntries.length - 1)),
+      col: clamp(this.activeCell.col, 0, Math.max(0, this.navColumns.length - 1)),
+    };
+  }
+
+  // #endregion
+
+  // #region Editing
+
+  /**
+   * `select` follows the spreadsheet convention: arriving on a cell from the keyboard
+   * selects its whole value so typing replaces it, while clicking into one puts the
+   * caret after the text so a typo can be fixed without retyping the cell.
+   */
+  private startEditing(entry: TranslationEntry, column: NavColumn, options: { initial?: string; select?: 'all' | 'end' } = {}) {
+    if (!this.isCellEditable(entry, column)) {
+      return;
+    }
+    const { initial, select = 'all' } = options;
+    const original = this.cellValue(entry, column);
+    this.editSession = {
+      key: `${entry.id}|${column.id}`,
+      entryId: entry.id,
+      columnId: column.id,
+      field: column.kind === 'note' ? 'note' : 'lang',
+      code: column.code,
+      original,
+      draft: initial ?? original,
+      committed: false,
+      seeded: initial !== undefined,
+      select,
+      focused: false,
+    };
+    this.editingKey = this.editSession.key;
+    this.pendingFocus = 'input';
+    this.pendingFocusSession = this.editSession;
+    // Park focus on the cell right now, before the render that creates the input.
+    // Otherwise focus sits on the outgoing input (about to be removed) or falls to
+    // <body> when it is, and anything typed in that gap lands where this component
+    // can't hear it. On the cell, the grid handler buffers it into this session.
+    this.cellElement(this.activeCell.row, this.activeCell.col)?.focus({ preventScroll: true });
+  }
+
+  /**
+   * Saves a session at most once, and only when its value actually moved. Each
+   * emit is a live `Edit_Setup` write plus a toast in the manager, so flagging
+   * `committed` *before* emitting matters: the trailing `change`/`blur` from the
+   * input this commit is about to replace lands right back here.
+   */
+  private commitSession(session: EditSession | null) {
+    if (!session || session.committed) {
+      return;
+    }
+    session.committed = true;
+    if (session.draft === session.original) {
+      return;
+    }
+    // Read the row back out rather than closing over it — the parent patches
+    // `entries` optimistically on every commit, so a cell edited twice in a row
+    // must build on the patched version, not the one this editor opened over.
+    const entry = this.dragEntries.find(item => item.id === session.entryId);
+    if (!entry) {
+      return;
+    }
+    const newEntry: TranslationEntry =
+      session.field === 'note' ? { ...entry, meta: { ...entry.meta, notes: session.draft } } : { ...entry, values: { ...entry.values, [session.code]: session.draft } };
 
     this.entryChange.emit(newEntry);
   }
 
-  /**
-   * Moves the edit caret through the grid, wrapping across row ends so Tab
-   * walks the whole table the way a spreadsheet does.
-   */
-  private moveEditing(entryId: string, code: string, rowDelta: number, colDelta: number) {
-    const rowIndex = this.dragEntries.findIndex(entry => entry.id === entryId);
-    const colIndex = this.languages.findIndex(language => language.code === code);
-    if (rowIndex === -1 || colIndex === -1) {
-      this.editingCell = null;
-      return;
+  private closeEditor(focusCell: boolean = true) {
+    this.editSession = null;
+    this.editingKey = null;
+    this.pendingFocusSession = null;
+    if (focusCell) {
+      this.pendingFocus = 'cell';
     }
-
-    let nextRow = rowIndex + rowDelta;
-    let nextCol = colIndex + colDelta;
-    if (nextCol >= this.languages.length) {
-      nextCol = 0;
-      nextRow += 1;
-    } else if (nextCol < 0) {
-      nextCol = this.languages.length - 1;
-      nextRow -= 1;
-    }
-
-    const nextEntry = this.dragEntries[nextRow];
-    if (!nextEntry) {
-      this.editingCell = null;
-      return;
-    }
-    this.startEditing({ entry: nextEntry, code: this.languages[nextCol].code });
   }
 
-  private handleCellKeyDown(event: KeyboardEvent, entry: TranslationEntry, code: string, originalValue: string, field) {
+  /** Escape: discard the draft, and make sure the trailing blur can't resurrect it. */
+  private cancelEditing(session: EditSession) {
+    session.committed = true;
+    this.closeEditor();
+  }
+
+  private handleEditorBlur(session: EditSession) {
+    this.commitSession(session);
+    // Keyboard navigation has already pointed `editingKey` at the next cell by the
+    // time this fires, so only a genuine focus-out should close the editor.
+    if (this.editingKey === session.key) {
+      this.editSession = null;
+      this.editingKey = null;
+    }
+  }
+
+  /**
+   * The three keys that end an edit. Shared with the cell handler, because a fast
+   * Enter-Enter or Tab-Tab can land before the next editor's input has taken focus
+   * and those keystrokes have to keep working rather than falling on the floor.
+   * Returns whether the key was one of them.
+   */
+  private handleEditKey(event: KeyboardEvent, session: EditSession): boolean {
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.draft = originalValue;
-      this.editingCell = null;
-      return;
+      this.cancelEditing(session);
+      return true;
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      this.commitDraft({ entry, code, field });
-      this.moveEditing(entry.id, code, event.shiftKey ? -1 : 1, 0);
-      return;
+      this.commitSession(session);
+      this.moveEditing(session, event.shiftKey ? -1 : 1, 0);
+      return true;
     }
     if (event.key === 'Tab') {
       event.preventDefault();
-      this.commitDraft({ entry, code, field });
-      this.moveEditing(entry.id, code, 0, event.shiftKey ? -1 : 1);
+      this.commitSession(session);
+      this.moveEditing(session, 0, event.shiftKey ? -1 : 1);
+      return true;
+    }
+    return false;
+  }
+
+  private handleEditorKeyDown(event: KeyboardEvent, session: EditSession) {
+    if (this.handleEditKey(event, session)) {
+      // The cell below must not handle this a second time.
+      event.stopPropagation();
     }
   }
 
-  private handleCellBlur({ entry, code, field }: { entry: TranslationEntry; code: string; field: Field }) {
-    // Keyboard navigation has already pointed editingCell at the next cell by
-    // the time this fires, so only a genuine focus-out should close the editor.
-    if (this.editingCell?.entryId === entry.id && field === 'lang' ? this.editingCell?.languageCode === code : true) {
-      this.editingCell = null;
+  /**
+   * Moves the open editor through the grid, wrapping across row ends so Tab walks
+   * the whole table the way a spreadsheet does. Key/Actions columns and locked
+   * rows are stepped over rather than stopped on, and running off either end
+   * leaves focus parked on the cell it started from instead of on nothing.
+   */
+  private moveEditing(session: EditSession, rowDelta: number, colDelta: number) {
+    const rows = this.visibleEntries;
+    const columns = this.navColumns;
+    const fromRow = rows.findIndex(entry => entry.id === session.entryId);
+    const fromCol = columns.findIndex(column => column.id === session.columnId);
+    if (fromRow === -1 || fromCol === -1) {
+      this.closeEditor(false);
+      return;
     }
+
+    let row = fromRow;
+    let col = fromCol;
+    const stop = () => {
+      this.activeCell = { row: fromRow, col: fromCol };
+      this.closeEditor();
+    };
+
+    // Bounded by the grid size — a table where every cell is locked must not spin.
+    for (let step = 0; step <= rows.length * columns.length; step++) {
+      if (colDelta !== 0) {
+        col += colDelta;
+        if (col >= columns.length) {
+          col = 0;
+          row += 1;
+        } else if (col < 0) {
+          col = columns.length - 1;
+          row -= 1;
+        }
+      } else {
+        row += rowDelta;
+      }
+
+      if (row < 0 || row >= rows.length) {
+        stop();
+        return;
+      }
+      if (this.isCellEditable(rows[row], columns[col])) {
+        this.activeCell = { row, col };
+        this.startEditing(rows[row], columns[col]);
+        return;
+      }
+    }
+    stop();
   }
+
+  // #endregion
+
+  // #region Keyboard navigation
+
+  /** Moves the grid's single tab stop, swapping `tabindex` on the DOM directly so no re-render is needed. */
+  private focusCell(row: number, col: number) {
+    const target = this.cellElement(row, col);
+    if (!target) {
+      return;
+    }
+    const previous = this.cellElement(this.activeCell.row, this.activeCell.col);
+    if (previous && previous !== target) {
+      previous.tabIndex = -1;
+    }
+    this.activeCell = { row, col };
+    target.tabIndex = 0;
+    // focus() would scroll the cell to the middle of the container; `nearest` keeps
+    // the grid still unless the cell is genuinely off-screen.
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    this.showTooltipFor(target.querySelector('[data-tooltip]'));
+  }
+
+  /** Click, or Shift+Tab back into the grid — whatever the browser focused becomes the tab stop. */
+  private handleCellFocus(row: number, col: number, td: HTMLTableCellElement) {
+    if (this.activeCell.row === row && this.activeCell.col === col) {
+      return;
+    }
+    const previous = this.cellElement(this.activeCell.row, this.activeCell.col);
+    if (previous && previous !== td) {
+      previous.tabIndex = -1;
+    }
+    this.activeCell = { row, col };
+    td.tabIndex = 0;
+  }
+
+  private activateCell(entry: TranslationEntry, column: NavColumn, row: number, col: number) {
+    this.activeCell = { row, col };
+    if (column.kind === 'key') {
+      this.editEntry.emit(entry);
+      return;
+    }
+    if (column.kind === 'actions') {
+      const dropdown = this.cellElement(row, col)?.querySelector('wa-dropdown') as (HTMLElement & { open: boolean }) | null;
+      if (dropdown) {
+        dropdown.open = true;
+      }
+      return;
+    }
+    this.startEditing(entry, column);
+  }
+
+  /** A key that should open a cell and become its first character, rather than being a command. */
+  private isPrintable(event: KeyboardEvent): boolean {
+    return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+  }
+
+  private handleGridKeyDown(event: KeyboardEvent, row: number, col: number) {
+    // While an editor is open it owns every key it cares about and stops those from
+    // bubbling; anything that reaches here is meant for the text field.
+    if (this.editingKey) {
+      const pending = this.editSession;
+      if (!pending || pending.focused) {
+        return;
+      }
+      // The editor exists but its input is still a frame away from focus. Everything
+      // typed in that gap belongs to it: without this, "Zed" would open the cell on
+      // "Z" alone, and a fast Enter-Enter down a column would swallow the second one.
+      if (this.handleEditKey(event, pending)) {
+        return;
+      }
+      if (this.isPrintable(event)) {
+        if (!pending.seeded) {
+          // Arriving on a cell from the keyboard selects its whole value, so the first
+          // character replaces it — exactly as it would with the input already focused.
+          pending.draft = pending.select === 'all' ? '' : pending.draft;
+          pending.seeded = true;
+        }
+        pending.draft += event.key;
+        event.preventDefault();
+      }
+      return;
+    }
+    const rows = this.visibleEntries;
+    const columns = this.navColumns;
+    const entry = rows[row];
+    const column = columns[col];
+    if (!entry || !column) {
+      return;
+    }
+    const lastRow = rows.length - 1;
+    const lastCol = columns.length - 1;
+    const jumpsToEdge = event.ctrlKey || event.metaKey;
+
+    switch (event.key) {
+      case 'ArrowRight':
+        this.focusCell(row, clamp(col + 1, 0, lastCol));
+        break;
+      case 'ArrowLeft':
+        this.focusCell(row, clamp(col - 1, 0, lastCol));
+        break;
+      case 'ArrowDown':
+        this.focusCell(clamp(row + 1, 0, lastRow), col);
+        break;
+      case 'ArrowUp':
+        this.focusCell(clamp(row - 1, 0, lastRow), col);
+        break;
+      case 'Home':
+        this.focusCell(jumpsToEdge ? 0 : row, 0);
+        break;
+      case 'End':
+        this.focusCell(jumpsToEdge ? lastRow : row, lastCol);
+        break;
+      case 'PageDown':
+        this.focusCell(clamp(row + PAGE_ROWS, 0, lastRow), col);
+        break;
+      case 'PageUp':
+        this.focusCell(clamp(row - PAGE_ROWS, 0, lastRow), col);
+        break;
+      case 'Enter':
+      case 'F2':
+      case ' ':
+        this.activateCell(entry, column, row, col);
+        break;
+      default:
+        // Typing over a cell opens it on that character, as a spreadsheet would.
+        if (this.isPrintable(event) && this.isCellEditable(entry, column)) {
+          this.activeCell = { row, col };
+          this.startEditing(entry, column, { initial: event.key });
+          break;
+        }
+        // Tab is deliberately not handled: the grid is one tab stop, so Tab leaves it.
+        return;
+    }
+    event.preventDefault();
+  }
+
+  private handleCellClick(entry: TranslationEntry, column: NavColumn, row: number, col: number) {
+    this.activeCell = { row, col };
+    if (column.kind === 'key') {
+      this.editEntry.emit(entry);
+      return;
+    }
+    // The dropdown's own trigger handles this; a click inside the open editor must
+    // not tear down the session it lands in.
+    if (column.kind === 'actions' || this.editingKey === `${entry.id}|${column.id}`) {
+      return;
+    }
+    this.startEditing(entry, column, { select: 'end' });
+  }
+
+  // #endregion
 
   private handleRowAction(action: string, entry: TranslationEntry) {
     switch (action) {
@@ -358,16 +765,17 @@ export class IrTranslationsEntriesTable {
 
   // #endregion
 
-  private renderValueCell({ entry, language, field = 'lang' }: { entry: TranslationEntry; language?: TranslationLanguage; field?: Field }) {
-    const isNote = field === 'note';
-    const value = isNote ? entry.meta?.notes : (entry.values[language.code] ?? '');
-    const isEditing =
-      this.editingCell?.entryId === entry.id && field === this.editingCell.field && (field === 'lang' ? this.editingCell?.languageCode === (language?.code ?? 'en') : true);
-    const ariaLabel = isNote ? `${entry.key} note` : `${language.name} translation for ${entry.key || 'new entry'}`;
+  private renderValueCell(entry: TranslationEntry, column: NavColumn) {
+    const isNote = column.kind === 'note';
+    const language = isNote ? undefined : this.languages.find(item => item.code === column.code);
+    const value = this.cellValue(entry, column);
+    const session = this.editSession;
+    const isEditing = !!session && session.key === `${entry.id}|${column.id}`;
+    const ariaLabel = isNote ? `${entry.key} note` : `${language?.name} translation for ${entry.key || 'new entry'}`;
 
     if (entry.meta?.isUpdateable === false) {
       return (
-        <span class="entries-table__cell-display --readonly" aria-label={`${ariaLabel} (read-only)`}>
+        <span class="entries-table__cell-display --readonly">
           {hasValue(value) ? (
             <span class="entries-table__cell-text" data-tooltip={value}>
               {value}
@@ -389,24 +797,19 @@ export class IrTranslationsEntriesTable {
           label={ariaLabel}
           autocomplete="off"
           spellcheck={false}
-          ref={el => (this.cellInputRef = el)}
-          oninput={(e: Event) => (this.draft = (e.target as HTMLInputElement).value)}
-          onKeyDown={(e: KeyboardEvent) => this.handleCellKeyDown(e, entry, language?.code ?? 'en', value, field)}
-          onblur={() => this.handleCellBlur({ entry, code: language?.code ?? 'en', field })}
-          onchange={() => {
-            this.commitDraft({ entry, code: language?.code ?? 'en', field });
-          }}
+          oninput={(e: Event) => (session.draft = (e.target as HTMLInputElement).value)}
+          onKeyDown={(e: KeyboardEvent) => this.handleEditorKeyDown(e, session)}
+          onblur={() => this.handleEditorBlur(session)}
+          // `change` fires on Enter *and* on blur, and neither is guaranteed once
+          // the input is torn down mid-render — committing is idempotent per
+          // session, so wiring both simply means the save can't be missed.
+          onchange={() => this.commitSession(session)}
         ></wa-input>
       );
     }
 
     return (
-      <button
-        type="button"
-        class={`entries-table__cell-display ${hasValue(value) ? '' : '--empty'}`}
-        aria-label={hasValue(value) ? `Edit ${ariaLabel}` : `Add ${ariaLabel}`}
-        onClick={() => this.startEditing({ entry, code: language?.code, field })}
-      >
+      <span class={`entries-table__cell-display ${hasValue(value) ? '' : '--empty'}`}>
         {hasValue(value) ? (
           <span class="entries-table__cell-text" data-tooltip={value}>
             {value}
@@ -414,7 +817,7 @@ export class IrTranslationsEntriesTable {
         ) : (
           <span class="entries-table__cell-missing">Missing</span>
         )}
-      </button>
+      </span>
     );
   }
 
@@ -424,13 +827,16 @@ export class IrTranslationsEntriesTable {
     if (!duplicate) {
       return null;
     }
+    // Other used tables only — the row's own table is never counted (see buildDuplicateMap).
     const tableCount = duplicate.tables.length;
-    // OCCURRENCES counts rows, not tables — they diverge when a description repeats
-    // inside one table, which is worth calling out rather than hiding behind a table count.
+    const rowCount = duplicate.siblings.length;
+    const tables = duplicate.tables.join(', ');
+    // Rows and tables diverge when a description repeats inside one table, which is
+    // worth calling out rather than hiding behind a table count.
     const label =
-      duplicate.occurrences > tableCount
-        ? `${duplicate.occurrences} entries across ${tableCount} tables: ${duplicate.tables.join(', ')}`
-        : `Appears in ${tableCount} tables: ${duplicate.tables.join(', ')}`;
+      rowCount > tableCount
+        ? `${rowCount} matching entries in ${tableCount} other ${tableCount === 1 ? 'table' : 'tables'} (${tables}) — language edits sync there`
+        : `Also in ${tableCount} other ${tableCount === 1 ? 'table' : 'tables'} (${tables}) — language edits sync there`;
     return (
       <span
         class="entries-table__dup-badge"
@@ -522,7 +928,7 @@ export class IrTranslationsEntriesTable {
             helper.display({
               id: 'notes',
               header: 'Notes',
-              cell: info => this.renderValueCell({ entry: info.row.original, field: 'note' }),
+              cell: info => this.renderValueCell(info.row.original, { id: 'notes', kind: 'note' }),
             }),
           ]
         : []),
@@ -530,7 +936,7 @@ export class IrTranslationsEntriesTable {
         helper.accessor(row => row.values[language.code] ?? '', {
           id: language.code,
           header: () => this.renderLangHead(language),
-          cell: info => this.renderValueCell({ entry: info.row.original, language }),
+          cell: info => this.renderValueCell(info.row.original, { id: language.code, kind: 'lang', code: language.code }),
         }),
       ),
       helper.display({
@@ -550,9 +956,16 @@ export class IrTranslationsEntriesTable {
     return this.languages[0]?.code;
   }
 
-  private renderCell(cell: Cell<TranslationEntry, unknown>) {
+  private renderCell(cell: Cell<TranslationEntry, unknown>, rowIndex: number) {
     const columnId = cell.column.id;
     const isLangColumn = this.languages.some(language => language.code === columnId);
+    const columns = this.navColumns;
+    const colIndex = columns.findIndex(column => column.id === columnId);
+    const column = colIndex === -1 ? null : columns[colIndex];
+    const entry = cell.row.original;
+    const isActive = !!column && this.activeCell.row === rowIndex && this.activeCell.col === colIndex;
+    const isLocked = entry.meta?.isUpdateable === false;
+
     return (
       <td
         key={cell.id}
@@ -563,14 +976,23 @@ export class IrTranslationsEntriesTable {
           'entries-table__actions': columnId === 'actions',
           'entries-table__drag-cell': columnId === 'drag',
         }}
-        onClick={columnId === 'key' ? () => this.editEntry.emit(cell.row.original) : undefined}
+        // The cell itself is the focus target, not the content inside it: one uniform
+        // roving tab stop for Key, Notes, language and Actions cells, and no focusable
+        // button nested inside a focusable gridcell.
+        tabindex={column ? (isActive ? '0' : '-1') : undefined}
+        data-row={column ? rowIndex : undefined}
+        data-col={column ? colIndex : undefined}
+        aria-readonly={column && (column.kind === 'note' || column.kind === 'lang') && isLocked ? 'true' : undefined}
+        onKeyDown={column ? (e: KeyboardEvent) => this.handleGridKeyDown(e, rowIndex, colIndex) : undefined}
+        onFocus={column ? (e: FocusEvent) => this.handleCellFocus(rowIndex, colIndex, e.currentTarget as HTMLTableCellElement) : undefined}
+        onClick={column ? () => this.handleCellClick(entry, column, rowIndex, colIndex) : undefined}
       >
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </td>
     );
   }
 
-  private renderRow(row: Row<TranslationEntry>) {
+  private renderRow(row: Row<TranslationEntry>, rowIndex: number) {
     const entry = row.original;
     return (
       <tr
@@ -585,7 +1007,7 @@ export class IrTranslationsEntriesTable {
         onDragOver={(e: DragEvent) => this.handleDragOver(e, entry)}
         onDrop={(e: DragEvent) => e.preventDefault()}
       >
-        {row.getVisibleCells().map(cell => this.renderCell(cell))}
+        {row.getVisibleCells().map(cell => this.renderCell(cell, rowIndex))}
       </tr>
     );
   }
@@ -633,6 +1055,9 @@ export class IrTranslationsEntriesTable {
 
     const nodes = [];
     let currentGroup: string | null = null;
+    // Counts only the rows that actually render, so `data-row` lines up with
+    // `visibleEntries` — the list arrow keys walk.
+    let visibleIndex = 0;
     rows.forEach(row => {
       const name = row.original.tableName ?? '';
       if (name !== currentGroup) {
@@ -640,7 +1065,8 @@ export class IrTranslationsEntriesTable {
         nodes.push(this.renderGroupHeader(name, counts.get(name) ?? 0));
       }
       if (!this.collapsedTables.has(name)) {
-        nodes.push(this.renderRow(row));
+        nodes.push(this.renderRow(row, visibleIndex));
+        visibleIndex += 1;
       }
     });
     return nodes;
@@ -669,6 +1095,8 @@ export class IrTranslationsEntriesTable {
       return <Host class="--empty">{this.renderEmptyState()}</Host>;
     }
 
+    this.clampActiveCell();
+
     const columns = this.buildColumns();
     const table = useTable<TranslationEntry>({
       data: this.dragEntries,
@@ -696,7 +1124,8 @@ export class IrTranslationsEntriesTable {
           onMouseLeave={this.hideTooltip}
           onScroll={this.hideTooltip}
         >
-          <table class="table data-table entries-table__table" style={{ minWidth: `${minWidth}px` }}>
+          {/* An editable grid, not a static table: one tab stop, arrow keys inside. */}
+          <table role="grid" class="table data-table entries-table__table" style={{ minWidth: `${minWidth}px` }}>
             <colgroup>
               <col class="entries-table__col--drag" />
               <col class="entries-table__col--key" />
@@ -723,7 +1152,7 @@ export class IrTranslationsEntriesTable {
               ))}
             </thead>
             <tbody>
-              {this.groupByTable ? this.renderGroupedRows(table.getRowModel().rows) : table.getRowModel().rows.map(row => this.renderRow(row))}
+              {this.groupByTable ? this.renderGroupedRows(table.getRowModel().rows) : table.getRowModel().rows.map((row, index) => this.renderRow(row, index))}
               <tr class={'last__row'}>
                 <td colSpan={10}></td>
               </tr>

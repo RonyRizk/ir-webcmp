@@ -305,10 +305,7 @@
 .entries-table__cell-display {
   display: block;
   width: 100%;
-  border: none;
-  background: transparent;
   padding: var(--ir-cell-padding);
-  font: inherit;
   text-align: left;
   color: inherit;
   cursor: text;
@@ -318,9 +315,17 @@
   box-shadow: inset 0 0 0 1px var(--wa-color-neutral-border-normal, #cbd5e1);
 }
 
-.entries-table__cell-display:focus-visible {
+/* The grid is one tab stop and the `<td>` is what takes focus, so the ring lives on
+   the cell itself. Inset, because `.table--container` scrolls and would clip an
+   outward offset against its edges. */
+.entries-table__table td:focus-visible {
   outline: var(--wa-focus-ring, 2px solid var(--wa-color-brand-fill-loud));
   outline-offset: -2px;
+}
+
+/* Keyboard focus should read like hover does — the cell is editable either way. */
+.entries-table__table td:focus-visible .entries-table__cell-display {
+  box-shadow: inset 0 0 0 1px var(--wa-color-neutral-border-normal, #cbd5e1);
 }
 
 .entries-table__cell-text {

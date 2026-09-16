@@ -107,7 +107,7 @@ import { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 import { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
-import { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+import { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 import { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 import { User } from "./models/Users";
 import { AllowedUser } from "./components/ir-user-management/types";
@@ -214,7 +214,7 @@ export { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 export { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
-export { DuplicateInfo, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+export { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 export { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 export { User } from "./models/Users";
 export { AllowedUser } from "./components/ir-user-management/types";
@@ -6940,6 +6940,11 @@ export namespace Components {
      */
     interface IrTranslationsEntryDrawer {
         /**
+          * Passed through to the form — rows in other tables that share `entry`'s description.
+          * @default []
+         */
+        "duplicateSiblings": DuplicateSibling[];
+        /**
           * The entry being edited. Null puts the drawer in create mode.
           * @default null
          */
@@ -6975,6 +6980,11 @@ export namespace Components {
      * the drawer around this form is a dumb open/close shell.
      */
     interface IrTranslationsEntryForm {
+        /**
+          * Rows in other used tables sharing `entry`'s description — language changes are written to them in the same batch.
+          * @default []
+         */
+        "duplicateSiblings": DuplicateSibling[];
         /**
           * The entry being edited. Null puts the form in create mode.
           * @default null
@@ -13601,7 +13611,7 @@ declare global {
     };
     interface HTMLIrTranslationsEntryDrawerElementEventMap {
         "closeDrawer": void;
-        "entrySaved": void;
+        "entrySaved": EntrySavedDetail;
     }
     /**
      * Dumb open/close shell — the nested ir-translations-entry-form owns the
@@ -13622,7 +13632,7 @@ declare global {
         new (): HTMLIrTranslationsEntryDrawerElement;
     };
     interface HTMLIrTranslationsEntryFormElementEventMap {
-        "entrySaved": void;
+        "entrySaved": EntrySavedDetail;
         "submitDisabledChange": boolean;
         "isSubmittingChange": boolean;
     }
@@ -21732,6 +21742,11 @@ declare namespace LocalJSX {
      */
     interface IrTranslationsEntryDrawer {
         /**
+          * Passed through to the form — rows in other tables that share `entry`'s description.
+          * @default []
+         */
+        "duplicateSiblings"?: DuplicateSibling[];
+        /**
           * The entry being edited. Null puts the drawer in create mode.
           * @default null
          */
@@ -21756,7 +21771,7 @@ declare namespace LocalJSX {
          */
         "nextDisplayOrder"?: number;
         "onCloseDrawer"?: (event: IrTranslationsEntryDrawerCustomEvent<void>) => void;
-        "onEntrySaved"?: (event: IrTranslationsEntryDrawerCustomEvent<void>) => void;
+        "onEntrySaved"?: (event: IrTranslationsEntryDrawerCustomEvent<EntrySavedDetail>) => void;
         /**
           * @default false
          */
@@ -21769,6 +21784,11 @@ declare namespace LocalJSX {
      * the drawer around this form is a dumb open/close shell.
      */
     interface IrTranslationsEntryForm {
+        /**
+          * Rows in other used tables sharing `entry`'s description — language changes are written to them in the same batch.
+          * @default []
+         */
+        "duplicateSiblings"?: DuplicateSibling[];
         /**
           * The entry being edited. Null puts the form in create mode.
           * @default null
@@ -21790,7 +21810,10 @@ declare namespace LocalJSX {
           * @default 0
          */
         "nextDisplayOrder"?: number;
-        "onEntrySaved"?: (event: IrTranslationsEntryFormCustomEvent<void>) => void;
+        /**
+          * Fired after the write lands, with what was saved — the manager propagates language changes to the row's duplicates from it.
+         */
+        "onEntrySaved"?: (event: IrTranslationsEntryFormCustomEvent<EntrySavedDetail>) => void;
         "onIsSubmittingChange"?: (event: IrTranslationsEntryFormCustomEvent<boolean>) => void;
         "onSubmitDisabledChange"?: (event: IrTranslationsEntryFormCustomEvent<boolean>) => void;
         "ownerId"?: number;
