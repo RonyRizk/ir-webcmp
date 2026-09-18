@@ -15,7 +15,6 @@
 | `propertyid`      | `propertyid`       |             | `number`                  | `undefined` |
 | `to_date`         | `to_date`          |             | `string`                  | `undefined` |
 | `today`           | --                 |             | `String`                  | `undefined` |
-| `unassignedDates` | `unassigned-dates` |             | `any`                     | `undefined` |
 
 
 ## Events

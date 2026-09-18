@@ -1,4 +1,5 @@
-import { Component, Host, Prop, State, h, Event, EventEmitter } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { CalendarAssignedEvent, UnassignedCategory } from '@/services/unassigned-units/types';
 
 @Component({
   tag: 'igl-tba-category-view',
@@ -7,62 +8,37 @@ import { Component, Host, Prop, State, h, Event, EventEmitter } from '@stencil/c
 })
 export class IglTbaCategoryView {
   @Prop() calendarData: { [key: string]: any };
-  @Prop() selectedDate;
-  @Prop() categoriesData: { [key: string]: any } = {};
-  @Prop() categoryId;
-  @Prop({ mutable: true }) eventDatas;
-  @Prop() categoryIndex;
+  @Prop() category: UnassignedCategory;
+  @Prop() selectedDate: string;
+  @Prop() categoryIndex: number;
 
-  @State() renderAgain: boolean = false;
+  @Event() assignUnitEvent: EventEmitter<{ identifier: string }>;
 
-  @Event() assignUnitEvent: EventEmitter<{ [key: string]: any }>;
-
-  handleAssignRoomEvent(event: CustomEvent<{ [key: string]: any }>) {
-    event.stopImmediatePropagation();
+  private handleAssignRoom = (event: CustomEvent<CalendarAssignedEvent>) => {
     event.stopPropagation();
-
-    const opt: { [key: string]: any } = event.detail;
-    this.eventDatas = this.eventDatas.filter(eventData => eventData.ID != opt.data.ID);
-    this.calendarData.bookingEvents.push(opt.data);
-    this.assignUnitEvent.emit({
-      key: 'assignUnit',
-      data: {
-        RT_ID: this.categoryId,
-        selectedDate: this.selectedDate,
-        assignEvent: opt.data,
-        calendarData: this.calendarData,
-      },
-    });
-    // if(this.localEventDatas.length){
-    this.renderView();
-    // }
-  }
-
-  getEventView(categoryId, eventDatas) {
-    return eventDatas.map((eventData, ind) => (
-      <igl-tba-booking-view
-        calendarData={this.calendarData}
-        selectedDate={this.selectedDate}
-        eventData={eventData}
-        categoriesData={this.categoriesData}
-        categoryId={categoryId}
-        categoryIndex={this.categoryIndex}
-        eventIndex={ind}
-        onAssignRoomEvent={evt => this.handleAssignRoomEvent(evt)}
-      ></igl-tba-booking-view>
-    ));
-  }
-
-  renderView() {
-    this.renderAgain = !this.renderAgain;
-  }
+    this.calendarData.bookingEvents.push(event.detail);
+    this.assignUnitEvent.emit({ identifier: event.detail.identifier });
+  };
 
   render() {
+    const { roomTypeId, roomTypeName, rooms } = this.category;
     return (
       <Host>
         <div class="tba-category">
-          <h5 class="tba-category__title">{this.categoriesData[this.categoryId]?.name}</h5>
-          {this.getEventView(this.categoryId, this.eventDatas)}
+          <h5 class="tba-category__title">{roomTypeName}</h5>
+          {rooms.map((room, index) => (
+            <igl-tba-booking-view
+              key={room.room_identifier}
+              calendarData={this.calendarData}
+              selectedDate={this.selectedDate}
+              room={room}
+              roomTypeId={roomTypeId}
+              roomTypeName={roomTypeName}
+              categoryIndex={this.categoryIndex}
+              eventIndex={index}
+              onAssignRoomEvent={this.handleAssignRoom}
+            ></igl-tba-booking-view>
+          ))}
         </div>
       </Host>
     );

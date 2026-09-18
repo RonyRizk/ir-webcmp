@@ -1,32 +1,30 @@
 # igl-tba-booking-view
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property         | Attribute        | Description | Type                      | Default     |
-| ---------------- | ---------------- | ----------- | ------------------------- | ----------- |
-| `calendarData`   | --               |             | `{ [key: string]: any; }` | `undefined` |
-| `categoriesData` | --               |             | `{ [key: string]: any; }` | `{}`        |
-| `categoryId`     | `category-id`    |             | `any`                     | `undefined` |
-| `categoryIndex`  | `category-index` |             | `any`                     | `undefined` |
-| `eventData`      | --               |             | `{ [key: string]: any; }` | `{}`        |
-| `eventIndex`     | `event-index`    |             | `any`                     | `undefined` |
-| `selectedDate`   | `selected-date`  |             | `any`                     | `undefined` |
+| Property        | Attribute        | Description | Type                      | Default     |
+| --------------- | ---------------- | ----------- | ------------------------- | ----------- |
+| `calendarData`  | --               |             | `{ [key: string]: any; }` | `undefined` |
+| `categoryIndex` | `category-index` |             | `number`                  | `undefined` |
+| `eventIndex`    | `event-index`    |             | `number`                  | `undefined` |
+| `room`          | --               |             | `UnassignedRoomEntry`     | `undefined` |
+| `roomTypeId`    | `room-type-id`   |             | `number`                  | `undefined` |
+| `roomTypeName`  | `room-type-name` |             | `string`                  | `undefined` |
+| `selectedDate`  | `selected-date`  |             | `string`                  | `undefined` |
 
 
 ## Events
 
 | Event                               | Description | Type                                                                                                                                                       |
 | ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `addToBeAssignedEvent`              |             | `CustomEvent<any>`                                                                                                                                         |
-| `assignRoomEvent`                   |             | `CustomEvent<{ [key: string]: any; }>`                                                                                                                     |
-| `highlightToBeAssignedBookingEvent` |             | `CustomEvent<any>`                                                                                                                                         |
+| `addToBeAssignedEvent`              |             | `CustomEvent<{ key: "tobeAssignedEvents"; data: (CalendarUnitPreviewEvent \| CalendarAssignedEvent)[]; }>`                                                 |
+| `assignRoomEvent`                   |             | `CustomEvent<CalendarAssignedEvent>`                                                                                                                       |
+| `highlightToBeAssignedBookingEvent` |             | `CustomEvent<{ key: "highlightBookingId"; data: { bookingId: string; fromDate?: string; }; }>`                                                             |
 | `openCalendarSidebar`               |             | `CustomEvent<{ type: "split" \| "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks" \| "reallocate-drawer" \| "rectifier"; payload: any; }>` |
-| `scrollPageToRoom`                  |             | `CustomEvent<any>`                                                                                                                                         |
+| `scrollPageToRoom`                  |             | `CustomEvent<{ key: "scrollPageToRoom"; id: number; refClass: string; }>`                                                                                  |
 
 
 ## Dependencies

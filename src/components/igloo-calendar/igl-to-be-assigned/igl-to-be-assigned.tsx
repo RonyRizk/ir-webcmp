@@ -1,10 +1,23 @@
-import { Component, Host, h, Prop, Event, EventEmitter, State, Listen, Watch } from '@stencil/core';
-import { ToBeAssignedService } from '@/services/toBeAssigned.service';
-import { dateToFormattedString } from '@/utils/utils';
+import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
+import { UnassignedUnitsService } from '@/services/unassigned-units';
+import { UnassignedCategory, UnassignedRoomTypeGroup } from '@/services/unassigned-units/types';
+import { groupIntoCategories } from '@/services/unassigned-units/utils';
+import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
-import { getUnassignedDates } from '@/stores/unassigned_dates.store';
-//import { updateCategories } from '@/utils/events.utils';
+import { getUnassignedUnitsDateKeys, getUnassignedUnitsForDate, removeUnassignedRoom, replaceUnassignedUnitsRange } from '@/stores/unassigned-units.store';
+import { formatDate } from '@/utils/utils';
+
+interface CategoriesCache {
+  source: UnassignedRoomTypeGroup[];
+  property: unknown;
+  value: UnassignedCategory[];
+}
+
+/** `igloo-calendar`'s `calendar` option scrolls to the day *after* the epoch it receives, so hand it the previous local midnight. */
+function calendarScrollTarget(isoDate: string): number {
+  return moment(isoDate, 'YYYY-MM-DD').subtract(1, 'day').valueOf();
+}
 
 @Component({
   tag: 'igl-to-be-assigned',
@@ -12,284 +25,165 @@ import { getUnassignedDates } from '@/stores/unassigned_dates.store';
   scoped: true,
 })
 export class IglToBeAssigned {
-  @Prop() unassignedDatesProp: any;
   @Prop() propertyid: number;
-  @Prop() from_date: string;
-  @Prop() to_date: string;
-  @Prop({ mutable: true }) calendarData: { [key: string]: any };
+  @Prop() calendarData: { [key: string]: any };
 
-  @State() loadingMessage: string;
-  @State() showDatesList: boolean = false;
-  @State() renderAgain: boolean = false;
-  @State() orderedDatesList: any[] = [];
-  @State() noScroll = false;
-  @State() selectedDateDisplay: string = '';
+  @State() selectedDate: string | null = null;
+  @State() isLoading = true;
 
-  @Event() optionEvent: EventEmitter<{ [key: string]: any }>;
-  @Event({ bubbles: true, composed: true })
-  reduceAvailableUnitEvent: EventEmitter<{ [key: string]: any }>;
-  @Event() showBookingPopup: EventEmitter;
-  @Event({ bubbles: true, composed: true }) addToBeAssignedEvent: EventEmitter;
-  @Event({ bubbles: true, composed: true })
-  highlightToBeAssignedBookingEvent: EventEmitter;
+  @Event() optionEvent: EventEmitter<{ key: string; data?: unknown }>;
+  @Event() showBookingPopup: EventEmitter<{ key: 'calendar'; data: number; noScroll: boolean }>;
+  @Event({ bubbles: true, composed: true }) addToBeAssignedEvent: EventEmitter<{ key: 'tobeAssignedEvents'; data: [] }>;
+  @Event({ bubbles: true, composed: true }) highlightToBeAssignedBookingEvent: EventEmitter<{ key: 'highlightBookingId'; data: { bookingId: string } }>;
 
-  private isGotoToBeAssignedDate: boolean = false;
-  private isLoading: boolean = true;
-  private selectedDate = null;
-  private data: { [key: string]: any } = {};
-  private today = new Date();
-  private categoriesData: { [key: string]: any } = {};
-  private toBeAssignedService: ToBeAssignedService = new ToBeAssignedService();
-  private unassignedDates: any;
+  private readonly unassignedUnitsService = new UnassignedUnitsService();
+  private categoriesCache: CategoriesCache | null = null;
+  private refreshToken = 0;
 
   componentWillLoad() {
-    this.reArrangeData();
-    this.loadingMessage = locales.entries.Lcz_FetchingUnAssignedUnits;
+    this.selectedDate = getUnassignedUnitsDateKeys()[0] ?? null;
+    this.verifySelectedDate();
   }
 
-  @Watch('unassignedDatesProp')
-  handleUnassignedDatesToBeAssignedChange(newValue: any) {
-    const { fromDate, toDate, data } = newValue;
-    let dt = new Date(fromDate);
-    dt.setHours(0);
-    dt.setMinutes(0);
-    dt.setSeconds(0);
-    let endDate = dt.getTime();
-    while (endDate <= new Date(toDate).getTime()) {
-      if (data && !data[endDate] && this.unassignedDates.hasOwnProperty(endDate)) {
-        delete this.unassignedDates[endDate];
-      } else if (data && data[endDate]) {
-        this.unassignedDates[endDate] = data[endDate];
-      }
-      endDate = moment(endDate).add(1, 'days').toDate().getTime();
-    }
-    this.data = { ...this.unassignedDates };
-    this.orderedDatesList = Object.keys(this.data).sort((a, b) => parseInt(a) - parseInt(b));
-
-    if (this.orderedDatesList.length) {
-      if (this.selectedDate === null) {
-        this.selectedDate = this.orderedDatesList[0];
-      }
-      if (this.selectedDate && this.data[this.selectedDate]) {
-        this.selectedDateDisplay = this.data[this.selectedDate]?.dateStr || this.selectedDateDisplay;
-        this.showForDate(this.selectedDate, false);
-      } else {
-        this.isLoading = false;
-        this.renderView();
-      }
-    } else {
-      this.selectedDate = null;
-      this.selectedDateDisplay = '';
-      this.isLoading = false;
-      this.renderView();
-    }
-  }
-  handleAssignUnit(event: CustomEvent<{ [key: string]: any }>) {
-    const opt: { [key: string]: any } = event.detail;
-    const data = opt.data;
-    event.stopImmediatePropagation();
-    event.stopPropagation();
-
-    if (opt?.key === 'assignUnit' && this.data) {
-      // Verify data.selectedDate exists in this.data
-      if (data?.selectedDate && this.data[data.selectedDate]) {
-        // Check if categories exist and there's only one category
-        if (this.data[data.selectedDate]?.categories && Object.keys(this.data[data.selectedDate]?.categories || {})?.length === 1) {
-          this.isLoading = true;
-          this.noScroll = true;
-        }
-
-        // Make sure all required properties exist before filtering
-        if (
-          data?.RT_ID &&
-          this.data[data.selectedDate]?.categories &&
-          this.data[data.selectedDate].categories[data.RT_ID] &&
-          Array.isArray(this.data[data.selectedDate].categories[data.RT_ID]) &&
-          data?.assignEvent?.ID
-        ) {
-          this.data[data.selectedDate].categories[data.RT_ID] = this.data[data.selectedDate].categories[data.RT_ID].filter(
-            eventData => eventData && eventData.ID !== data.assignEvent.ID,
-          );
-        }
-
-        // Only update calendarData if it exists in the data
-        if (data?.calendarData) {
-          this.calendarData = data.calendarData;
-        }
-
-        this.renderView();
-      }
-    }
-  }
-
-  async updateCategories(key, calendarData) {
-    try {
-      //console.log("called")
-      let categorisedRooms = {};
-      const result = await this.toBeAssignedService.getUnassignedRooms(
-        { from_date: calendarData.from_date, to_date: calendarData.to_date },
-        this.propertyid,
-        dateToFormattedString(new Date(+key)),
-        calendarData.roomsInfo,
-        calendarData.formattedLegendData,
-      );
-      result.forEach(room => {
-        if (!categorisedRooms.hasOwnProperty(room.RT_ID)) {
-          categorisedRooms[room.RT_ID] = [room];
-        } else {
-          categorisedRooms[room.RT_ID].push(room);
-        }
-      });
-      this.unassignedDates[key].categories = categorisedRooms;
-    } catch (error) {
-      //  toastr.error(error);
-    }
-  }
-
-  async reArrangeData() {
-    try {
-      this.today.setHours(0, 0, 0, 0);
-      this.calendarData.roomsInfo.forEach(category => {
-        this.categoriesData[category.id] = {
-          name: category.name,
-          roomsList: category.physicalrooms,
-          roomIds: category.physicalrooms.map(room => {
-            return room.id;
-          }),
-        };
-      });
-
-      this.selectedDate = null;
-      //this.unassignedDates = await this.toBeAssignedService.getUnassignedDates(this.propertyid, dateToFormattedString(new Date()), this.to_date);
-      this.unassignedDates = getUnassignedDates();
-      console.log(this.unassignedDates);
-
-      this.data = this.unassignedDates;
-      this.orderedDatesList = Object.keys(this.data).sort((a, b) => parseInt(a) - parseInt(b));
-
-      if (!this.selectedDate && this.orderedDatesList.length) {
-        this.selectedDate = this.orderedDatesList[0];
-        this.selectedDateDisplay = this.data[this.selectedDate]?.dateStr || '';
-      } else if (!this.orderedDatesList.length) {
-        this.selectedDateDisplay = '';
-      }
-    } catch (error) {
-      console.error('Error fetching unassigned dates:', error);
-      //  toastr.error(error);
-    }
-  }
-  async componentDidLoad() {
-    setTimeout(() => {
-      if (!this.isGotoToBeAssignedDate && Object.keys(this.unassignedDates).length > 0) {
-        //console.log(this.isGotoToBeAssignedDate);
-        const firstKey = Object.keys(this.unassignedDates)[0];
-
-        this.showForDate(firstKey);
-      }
-    }, 100);
-  }
   @Listen('gotoToBeAssignedDate', { target: 'window' })
-  async gotoDate(event: CustomEvent) {
-    this.isGotoToBeAssignedDate = true;
-    this.showForDate(event.detail.data);
-    this.showDatesList = false;
-    this.renderView();
+  handleGotoDate(event: CustomEvent<{ data: number }>) {
+    this.selectDate(moment(event.detail.data).format('YYYY-MM-DD'));
   }
+
+  /** A card was highlighted: scroll the calendar to that booking's first night. */
   @Listen('highlightToBeAssignedBookingEvent')
-  handleToBeAssignedDate(e: CustomEvent) {
-    this.showBookingPopup.emit({
-      key: 'calendar',
-      data: new Date(e.detail.data.fromDate).getTime() - 86400000,
-      noScroll: false,
-    });
+  handleBookingHighlight(event: CustomEvent<{ data?: { fromDate?: string } }>) {
+    const fromDate = event.detail?.data?.fromDate;
+    if (fromDate) {
+      this.showBookingPopup.emit({ key: 'calendar', data: calendarScrollTarget(fromDate), noScroll: false });
+    }
   }
-  async showForDate(dateStamp, withLoading = true) {
+
+  /** Re-reads one date from the API and makes the store match it, in case a realtime update was missed. Owns the panel's loader, so every caller shows one. */
+  private async refreshDate(date: string) {
+    const token = ++this.refreshToken;
+    this.isLoading = true;
     try {
-      if (withLoading) {
-        this.isLoading = true;
-        // Reflect the picked date immediately and flush a render so the spinner
-        // is visible while updateCategories() is fetching.
-        this.selectedDate = dateStamp;
-        this.renderView();
-      }
-      if (this.showDatesList) {
-        this.showUnassignedDate();
-      }
-      await this.updateCategories(dateStamp, this.calendarData);
-      this.addToBeAssignedEvent.emit({ key: 'tobeAssignedEvents', data: [] });
-      this.showBookingPopup.emit({
-        key: 'calendar',
-        data: parseInt(dateStamp) - 86400000,
-        noScroll: this.noScroll,
+      const entries = await this.unassignedUnitsService.getAggregatedUnAssignedRoomsByDateRange({
+        propertyid: this.propertyid,
+        from_date: date,
+        to_date: date,
       });
-      if (this.isGotoToBeAssignedDate) {
-        this.isGotoToBeAssignedDate = false;
+      // A newer refresh started while this one was in flight — let it own the store and the loader.
+      if (token !== this.refreshToken) {
+        return;
       }
-      this.isLoading = false;
-      this.selectedDate = dateStamp;
-      this.selectedDateDisplay = this.data[dateStamp]?.dateStr || this.selectedDateDisplay;
-      this.renderView();
+      replaceUnassignedUnitsRange(date, date, entries);
     } catch (error) {
-      // toastr.error(error);
+      console.error('Unassigned units refresh failed:', error);
+    } finally {
+      if (token === this.refreshToken) {
+        this.isLoading = false;
+      }
     }
   }
 
-  getDay(dt) {
-    const currentDate = new Date(dt);
-    const locale = 'default'; //'en-US';
-    const dayOfWeek = this.getLocalizedDayOfWeek(currentDate, locale);
-    // const monthName = currentDate.toLocaleString("default", { month: 'short' })
-    return dayOfWeek + ' ' + currentDate.getDate() + ', ' + currentDate.getFullYear();
+  /** One single-day refresh on open; every later date switch reads the store only. */
+  private async verifySelectedDate() {
+    const date = this.selectedDate;
+    if (!date) {
+      this.isLoading = false;
+      return;
+    }
+    await this.refreshDate(date);
+    const dates = getUnassignedUnitsDateKeys();
+    this.selectDate(dates.includes(date) ? date : (dates[0] ?? null));
   }
 
-  getLocalizedDayOfWeek(date, locale) {
-    const options = { weekday: 'short' };
-    return date.toLocaleDateString(locale, options);
-  }
-
-  handleOptionEvent(key, data = '') {
-    this.highlightToBeAssignedBookingEvent.emit({
-      key: 'highlightBookingId',
-      data: { bookingId: '----' },
-    });
+  private selectDate(date: string | null) {
+    this.selectedDate = date;
     this.addToBeAssignedEvent.emit({ key: 'tobeAssignedEvents', data: [] });
-    this.optionEvent.emit({ key, data });
-  }
-
-  showUnassignedDate() {
-    this.showDatesList = !this.showDatesList;
-  }
-
-  getToBeAssignedEntities() {
-    // toBeAssignedEvents
-  }
-
-  getCategoryView() {
-    if (this.orderedDatesList.length && this.selectedDate && this.data[this.selectedDate]) {
-      return Object.entries(this.data[this.selectedDate].categories).map(([id, eventDatas], ind) => (
-        <igl-tba-category-view
-          calendarData={this.calendarData}
-          selectedDate={this.selectedDate}
-          categoryId={id}
-          categoryIndex={ind}
-          categoriesData={this.categoriesData}
-          eventDatas={eventDatas}
-          onAssignUnitEvent={evt => this.handleAssignUnit(evt)}
-        ></igl-tba-category-view>
-      ));
-    } else {
-      return null;
+    if (date) {
+      this.showBookingPopup.emit({ key: 'calendar', data: calendarScrollTarget(date), noScroll: false });
     }
   }
 
-  renderView() {
-    this.renderAgain = !this.renderAgain;
+  /** Memoized on the store entry's identity (and the property's, since names come from it): unrelated re-renders skip the grouping. */
+  private categoriesFor(date: string): UnassignedCategory[] {
+    const source = getUnassignedUnitsForDate(date);
+    const { property } = calendar_data;
+    const cache = this.categoriesCache;
+    if (cache && cache.source === source && cache.property === property) {
+      return cache.value;
+    }
+    const value = groupIntoCategories(source);
+    this.categoriesCache = { source, property, value };
+    return value;
+  }
+
+  private handleDateChange = (event: Event) => {
+    this.selectDate((event.target as HTMLSelectElement).value || null);
+  };
+
+  /**
+   * Fired by `igl-tba-category-view` only after `assignUnit` succeeded. The room is dropped right away so the
+   * card disappears without waiting, then the day is re-read — behind the panel's loader — so the panel matches
+   * the server even if the realtime update for this assignment never arrives.
+   */
+  private handleAssignUnit = (event: CustomEvent<{ identifier: string }>) => {
+    event.stopPropagation();
+    removeUnassignedRoom(event.detail.identifier);
+    if (this.selectedDate) {
+      this.refreshDate(this.selectedDate);
+    }
+  };
+
+  private handleClose = () => {
+    this.highlightToBeAssignedBookingEvent.emit({ key: 'highlightBookingId', data: { bookingId: '----' } });
+    this.addToBeAssignedEvent.emit({ key: 'tobeAssignedEvents', data: [] });
+    this.optionEvent.emit({ key: 'closeSideMenu' });
+  };
+
+  private renderEmptyState(message: string, subtitle?: string) {
+    return (
+      <div class="tba-panel__empty">
+        <ir-empty-state message={message}>
+          <span slot="icon" class="tba-panel__empty-icon">
+            <wa-icon name="circle-check"></wa-icon>
+          </span>
+          {subtitle && <span class="tba-panel__empty-subtitle">{subtitle}</span>}
+        </ir-empty-state>
+      </div>
+    );
+  }
+
+  private renderBody(hasDates: boolean, categories: UnassignedCategory[]) {
+    if (this.isLoading) {
+      return (
+        <div class="tba-panel__loading">
+          <ir-spinner></ir-spinner>
+        </div>
+      );
+    }
+    if (!hasDates) {
+      return this.renderEmptyState(locales.entries.Lcz_AllBookingsAreAssigned);
+    }
+    if (categories.length === 0) {
+      return this.renderEmptyState(locales.entries.Lcz_AllAssignForThisDay, formatDate(this.selectedDate, 'YYYY-MM-DD'));
+    }
+    return categories.map((category, index) => (
+      <igl-tba-category-view
+        key={category.roomTypeId}
+        calendarData={this.calendarData}
+        selectedDate={this.selectedDate}
+        category={category}
+        categoryIndex={index}
+        onAssignUnitEvent={this.handleAssignUnit}
+      ></igl-tba-category-view>
+    ));
   }
 
   render() {
-    const selectedDateData = this.selectedDate ? this.data[this.selectedDate] : null;
-    const isEmpty = Object.keys(this.data).length === 0;
-    const hasDates = this.orderedDatesList.length > 0;
+    const dates = getUnassignedUnitsDateKeys();
+    // Once its last room is assigned the selected date leaves the store; keep it listed so the
+    // dropdown doesn't go blank under the user. It drops off as soon as another date is picked.
+    const options = this.selectedDate && !dates.includes(this.selectedDate) ? [...dates, this.selectedDate].sort() : dates;
+    const categories = this.selectedDate ? this.categoriesFor(this.selectedDate) : [];
 
     return (
       <Host>
@@ -299,41 +193,31 @@ export class IglToBeAssigned {
               <h2 class="tba-panel__title" id="to-be-assigned-title">
                 {locales.entries.Lcz_Assignments}
               </h2>
-              <ir-custom-button size="m" appearance="plain" variant="neutral" onClickHandler={() => this.handleOptionEvent('closeSideMenu')}>
+              <ir-custom-button size="m" appearance="plain" variant="neutral" onClickHandler={this.handleClose}>
                 <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
               </ir-custom-button>
             </header>
 
-            {hasDates && (
+            {options.length > 0 && (
               <div class="tba-panel__toolbar">
                 <wa-select
                   size="s"
                   aria-label={locales.entries.Lcz_Assignments}
-                  value={this.selectedDate ? this.selectedDate.toString() : ''}
-                  defaultValue={this.selectedDate ? this.selectedDate.toString() : ''}
-                  onchange={evt => this.showForDate((evt.target as HTMLSelectElement).value)}
+                  value={this.selectedDate ?? ''}
+                  defaultValue={this.selectedDate ?? ''}
+                  onchange={this.handleDateChange}
                 >
-                  {this.orderedDatesList.map(ordDate => (
-                    <wa-option value={ordDate.toString()}>{this.data[ordDate].dateStr}</wa-option>
+                  {options.map(date => (
+                    <wa-option key={date} value={date}>
+                      {formatDate(date, 'YYYY-MM-DD')}
+                    </wa-option>
                   ))}
                 </wa-select>
               </div>
             )}
           </div>
 
-          <div class="tba-panel__body">
-            {isEmpty ? (
-              <p class="tba-panel__empty">{locales.entries.Lcz_AllBookingsAreAssigned}</p>
-            ) : this.isLoading ? (
-              <div class="tba-panel__loading">
-                <ir-spinner></ir-spinner>
-              </div>
-            ) : selectedDateData && Object.keys(selectedDateData.categories).length ? (
-              this.getCategoryView()
-            ) : (
-              <p class="tba-panel__empty">{locales.entries.Lcz_AllAssignForThisDay}</p>
-            )}
-          </div>
+          <div class="tba-panel__body">{this.renderBody(dates.length > 0, categories)}</div>
         </div>
       </Host>
     );

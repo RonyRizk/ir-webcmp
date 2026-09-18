@@ -1,7 +1,7 @@
 import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
+import { addTwoMonthToDate, computeEndDate, convertDMYToISO, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
 import {
   realtimeService,
   type RealtimeReason,
@@ -14,7 +14,7 @@ import {
 import { EventsService } from '@/services/events.service';
 import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
-import { ToBeAssignedService } from '@/services/toBeAssigned.service';
+import { UnassignedUnitsService } from '@/services/unassigned-units';
 import {
   bookingStatus,
   calculateDaysBetweenDates,
@@ -30,7 +30,7 @@ import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import calendar_dates, { addCleaningTasks, addRoomForCleaning, cleanRoom } from '@/stores/calendar-dates.store';
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
-import { addUnassignedDates, handleUnAssignedDatesChange, removeUnassignedDates } from '@/stores/unassigned_dates.store';
+import { beginUnassignedUnitsFetch, onUnassignedUnitsChange, replaceUnassignedUnitsRange } from '@/stores/unassigned-units.store';
 import Token from '@/models/Token';
 import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
@@ -47,6 +47,12 @@ export type CalendarSidebarState = {
   type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer' | 'rectifier';
   payload: any;
 };
+
+/** `YYYY-MM-DD` from anything moment can read as a date (plain ISO, ISO with a time, …); `''` if it can't. */
+function toIsoDate(value: unknown): string {
+  const parsed = moment(typeof value === 'string' ? value.trim() : value, moment.ISO_8601);
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '';
+}
 
 /** One `GET_UNASSIGNED_DATES` notification, normalized to the calendar's date format. */
 type UnassignedDatesRange = { fromDate: string; toDate: string };
@@ -114,15 +120,6 @@ function absorbInto(span: MergedUnassignedDatesRange, toDate: string, ...sources
   span.sources.push(...sources);
 }
 
-/** Whether a merged fetch returned any unassigned date inside one of the ranges it covered. */
-function hasUnassignedDatesInRange(data: Record<string, unknown>, { fromDate, toDate }: UnassignedDatesRange): boolean {
-  const from = moment(fromDate, 'YYYY-MM-DD').startOf('day').valueOf();
-  const to = moment(toDate, 'YYYY-MM-DD').startOf('day').valueOf();
-  return Object.keys(data).some(key => {
-    const timestamp = parseInt(key);
-    return from <= timestamp && timestamp <= to;
-  });
-}
 @Component({
   tag: 'igloo-calendar',
   styleUrl: 'igloo-calendar.css',
@@ -152,7 +149,6 @@ export class IglooCalendar {
   @State() showPaymentDetails: boolean = false;
   @State() showToBeAssigned: boolean = false;
   @State() showDayUseBookings: boolean = false;
-  @State() unassignedDates = {};
   @State() roomNightsData: IRoomNightsData | null = null;
   @State() renderAgain = false;
   @State() showBookProperty: boolean = false;
@@ -169,8 +165,6 @@ export class IglooCalendar {
   dragOverHighlightElement: EventEmitter;
   @Event({ bubbles: true, composed: true }) moveBookingTo: EventEmitter;
   @Event() calculateUnassignedDates: EventEmitter;
-  @Event({ bubbles: true, composed: true })
-  reduceAvailableUnitEvent: EventEmitter<{ fromDate: string; toDate: string }>;
   @Event({ bubbles: true }) revertBooking: EventEmitter;
   @Event() openCalendarSidebar: EventEmitter<CalendarSidebarState>;
   @Event() showRoomNightsDialog: EventEmitter<IRoomNightsData>;
@@ -179,7 +173,7 @@ export class IglooCalendar {
   private roomService: RoomService = new RoomService();
   private propertyService = new PropertyService();
   private eventsService = new EventsService();
-  private toBeAssignedService = new ToBeAssignedService();
+  private unassignedUnitsService = new UnassignedUnitsService();
   private housekeepingService = new HouseKeepingService();
   // private auth = new Auth();
   private countries: ICountry[] = [];
@@ -398,8 +392,8 @@ export class IglooCalendar {
       from: this.from_date,
       to: this.to_date,
     };
-    handleUnAssignedDatesChange('unassigned_dates', newValue => {
-      if (Object.keys(newValue).length === 0 && this.highlightedDate !== '') {
+    onUnassignedUnitsChange('byDate', newMap => {
+      if (newMap.size === 0 && this.highlightedDate !== '') {
         this.highlightedDate = '';
       }
     });
@@ -430,10 +424,11 @@ export class IglooCalendar {
     this.calendarData.adultChildConstraints = roomResp['My_Result'].adult_child_constraints;
     this.calendarData.legendData = this.getLegendData(roomResp);
     this.calendarData.is_vacation_rental = roomResp['My_Result'].is_vacation_rental;
-    this.calendarData.from_date = bookingResp.My_Params_Get_Rooming_Data.FROM;
-    this.calendarData.to_date = bookingResp.My_Params_Get_Rooming_Data.TO;
-    this.calendarData.startingDate = new Date(bookingResp.My_Params_Get_Rooming_Data.FROM).getTime();
-    this.calendarData.endingDate = new Date(bookingResp.My_Params_Get_Rooming_Data.TO).getTime();
+    // The server echoes the range back; pin it to YYYY-MM-DD so range math and API calls can rely on the format.
+    this.calendarData.from_date = toIsoDate(bookingResp.My_Params_Get_Rooming_Data.FROM);
+    this.calendarData.to_date = toIsoDate(bookingResp.My_Params_Get_Rooming_Data.TO);
+    this.calendarData.startingDate = moment(this.calendarData.from_date, 'YYYY-MM-DD').valueOf();
+    this.calendarData.endingDate = moment(this.calendarData.to_date, 'YYYY-MM-DD').valueOf();
     this.calendarData.formattedLegendData = formatLegendColors(this.calendarData.legendData);
     let bookings = bookingResp.myBookings || [];
     bookings = bookings.filter(bookingEvent => {
@@ -524,10 +519,7 @@ export class IglooCalendar {
         this.scrollToElement(this.today);
       }, 200);
       if (!this.calendarData.is_vacation_rental) {
-        const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, this.from_date, this.to_date);
-        this.unassignedDates = { fromDate: this.from_date, toDate: this.to_date, data: { ...this.unassignedDates, ...data } };
-        this.calendarData = { ...this.calendarData, unassignedDates: data };
-        addUnassignedDates(data);
+        await this.fetchUnassignedUnitsRange(this.from_date, this.to_date);
       }
       this.unsubscribeRealtime = realtimeService.subscribe(this.property_id, async msg => {
         await this.handleSocketMessage(msg.reason, msg.payload);
@@ -626,7 +618,6 @@ export class IglooCalendar {
   }
 
   private async handleSocketMessage(reason: RealtimeReason, result: any) {
-    console.log({ [reason]: result });
     const reasonHandlers: Partial<Record<RealtimeReason, (payload: any) => any>> = {
       DORESERVATION: this.handleDoReservation,
       BLOCK_EXPOSED_UNIT: this.handleBlockExposedUnit,
@@ -887,19 +878,45 @@ export class IglooCalendar {
   }
 
   private handleGetUnassignedDates(result: any) {
-    const parsedResult = this.parseDateRange(result);
-    if (
-      this.calendarData.is_vacation_rental ||
-      new Date(parsedResult.FROM_DATE).getTime() < this.calendarData.startingDate ||
-      new Date(parsedResult.TO_DATE).getTime() > this.calendarData.endingDate
-    ) {
+    if (this.calendarData.is_vacation_rental) {
       return;
     }
-    this.pendingUnassignedRanges.push({
-      fromDate: dateToFormattedString(new Date(parsedResult.FROM_DATE)),
-      toDate: dateToFormattedString(new Date(parsedResult.TO_DATE)),
-    });
+    const { from_date: loadedFrom, to_date: loadedTo } = this.calendarData;
+    if (!loadedFrom || !loadedTo) {
+      return;
+    }
+    const parsedResult = this.parseDateRange(result);
+    const notifiedFrom = toIsoDate(parsedResult.FROM_DATE);
+    const notifiedTo = toIsoDate(parsedResult.TO_DATE);
+    if (!notifiedFrom || !notifiedTo) {
+      console.warn('GET_UNASSIGNED_DATES payload has no usable range:', result);
+      return;
+    }
+    // YYYY-MM-DD strings compare correctly as-is, and staying on strings avoids the day shift that
+    // `Date` parsing causes west of UTC. A stay may start before or end after the loaded range;
+    // only the part that overlaps it needs re-reading.
+    const fromDate = notifiedFrom > loadedFrom ? notifiedFrom : loadedFrom;
+    const toDate = notifiedTo < loadedTo ? notifiedTo : loadedTo;
+    if (fromDate > toDate) {
+      return;
+    }
+    this.pendingUnassignedRanges.push({ fromDate, toDate });
     this.scheduleUnassignedDatesFlush();
+  }
+
+  /** Every unassigned-units read goes through here so the header can show the range as in flight. */
+  private async fetchUnassignedUnitsRange(fromDate: string, toDate: string) {
+    const release = beginUnassignedUnitsFetch(fromDate, toDate);
+    try {
+      const entries = await this.unassignedUnitsService.getAggregatedUnAssignedRoomsByDateRange({
+        propertyid: this.property_id,
+        from_date: fromDate,
+        to_date: toDate,
+      });
+      replaceUnassignedUnitsRange(fromDate, toDate, entries);
+    } finally {
+      release();
+    }
   }
 
   private async flushUnassignedDates() {
@@ -909,17 +926,9 @@ export class IglooCalendar {
       return;
     }
     for (const span of mergeUnassignedDatesRanges(batch)) {
-      const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, span.fromDate, span.toDate);
-      addUnassignedDates(data);
-      this.unassignedDates = { fromDate: span.fromDate, toDate: span.toDate, data };
-      for (const source of span.sources) {
-        // A period the merged fetch came back empty for has nothing left to assign, exactly as when
-        // it was fetched on its own. Emitted per notification: the header counts down one unit each.
-        if (!hasUnassignedDatesInRange(data, source)) {
-          removeUnassignedDates(source.fromDate, source.toDate);
-          this.reduceAvailableUnitEvent.emit({ fromDate: source.fromDate, toDate: source.toDate });
-        }
-      }
+      // Authoritative and sparse: replacing the whole span handles both new/changed dates and dates
+      // that just emptied out, in one call — no per-source diff-check needed.
+      await this.fetchUnassignedUnitsRange(span.fromDate, span.toDate);
     }
   }
 
@@ -928,8 +937,12 @@ export class IglooCalendar {
     const pairs = str.split('|');
 
     pairs.forEach(pair => {
-      const res = pair.split(':');
-      result[res[0]] = res[1];
+      // Split on the first colon only: a value with a time part ("2026-09-10 00:00:00") has colons of its own.
+      const separator = pair.indexOf(':');
+      if (separator === -1) {
+        return;
+      }
+      result[pair.slice(0, separator).trim()] = pair.slice(separator + 1).trim();
     });
     return result;
   }
@@ -1329,14 +1342,7 @@ export class IglooCalendar {
         bookingEvents: [...this.calendarData.bookingEvents, ...bookings],
       };
       if (Math.abs(moment().diff(moment(fromDate, 'YYYY-MM-DD'), 'days')) <= 10) {
-        const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, fromDate, toDate);
-        this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
-        this.unassignedDates = {
-          fromDate,
-          toDate,
-          data,
-        };
-        addUnassignedDates(data);
+        await this.fetchUnassignedUnitsRange(fromDate, toDate);
       }
     } else {
       this.calendarData.endingDate = new Date(toDate).getTime();
@@ -1370,14 +1376,7 @@ export class IglooCalendar {
         monthsInfo: [...this.calendarData.monthsInfo, ...newMonths],
         bookingEvents: [...this.calendarData.bookingEvents, ...bookings],
       };
-      const data = await this.toBeAssignedService.getUnassignedDates(this.property_id, fromDate, toDate);
-      this.calendarData.unassignedDates = { ...this.calendarData.unassignedDates, ...data };
-      this.unassignedDates = {
-        fromDate,
-        toDate,
-        data,
-      };
-      addUnassignedDates(data);
+      await this.fetchUnassignedUnitsRange(fromDate, toDate);
     }
   }
   async handleDateSearch(dates: { start: Moment; end: Moment }) {
@@ -1666,9 +1665,6 @@ export class IglooCalendar {
             <Fragment data-testid="ir-calendar">
               {this.showToBeAssigned && (
                 <igl-to-be-assigned
-                  unassignedDatesProp={this.unassignedDates}
-                  to_date={this.to_date}
-                  from_date={this.from_date}
                   propertyid={this.property_id}
                   class="tobeAssignedContainer"
                   calendarData={this.calendarData}
@@ -1687,7 +1683,6 @@ export class IglooCalendar {
               <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
                 <div id="calendarContainer">
                   <igl-cal-header
-                    unassignedDates={this.unassignedDates}
                     to_date={this.to_date}
                     propertyid={this.property_id}
                     today={this.today}

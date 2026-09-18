@@ -159,9 +159,10 @@ graph TD;
   igloo-calendar --> igl-bulk-operations-drawer
   igloo-calendar --> ir-rectifier-drawer
   igloo-calendar --> igl-blocked-date-drawer
+  igl-to-be-assigned --> ir-empty-state
+  igl-to-be-assigned --> ir-spinner
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
-  igl-to-be-assigned --> ir-spinner
   igl-tba-category-view --> igl-tba-booking-view
   igl-legend --> ir-custom-button
   igl-legend --> ir-success-loader

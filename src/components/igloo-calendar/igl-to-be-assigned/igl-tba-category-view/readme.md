@@ -1,27 +1,23 @@
 # igl-tba-category-view
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property         | Attribute        | Description | Type                      | Default     |
-| ---------------- | ---------------- | ----------- | ------------------------- | ----------- |
-| `calendarData`   | --               |             | `{ [key: string]: any; }` | `undefined` |
-| `categoriesData` | --               |             | `{ [key: string]: any; }` | `{}`        |
-| `categoryId`     | `category-id`    |             | `any`                     | `undefined` |
-| `categoryIndex`  | `category-index` |             | `any`                     | `undefined` |
-| `eventDatas`     | `event-datas`    |             | `any`                     | `undefined` |
-| `selectedDate`   | `selected-date`  |             | `any`                     | `undefined` |
+| Property        | Attribute        | Description | Type                      | Default     |
+| --------------- | ---------------- | ----------- | ------------------------- | ----------- |
+| `calendarData`  | --               |             | `{ [key: string]: any; }` | `undefined` |
+| `category`      | --               |             | `UnassignedCategory`      | `undefined` |
+| `categoryIndex` | `category-index` |             | `number`                  | `undefined` |
+| `selectedDate`  | `selected-date`  |             | `string`                  | `undefined` |
 
 
 ## Events
 
 | Event             | Description | Type                                   |
 | ----------------- | ----------- | -------------------------------------- |
-| `assignUnitEvent` |             | `CustomEvent<{ [key: string]: any; }>` |
+| `assignUnitEvent` |             | `CustomEvent<{ identifier: string; }>` |
 
 
 ## Dependencies

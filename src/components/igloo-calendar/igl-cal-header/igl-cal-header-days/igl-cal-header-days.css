@@ -85,8 +85,91 @@
 
 .fd-header__badge-btn {
   all: unset;
+  /* `all: unset` leaves the button inline, and transforms are ignored on inline boxes. */
+  display: inline-block;
   cursor: pointer;
 }
 .fd-header__badge-btn:hover .fd-header__badge {
   background-color: color-mix(in oklab, var(--wa-color-fill-loud, var(--wa-color-neutral-fill-loud)), var(--wa-color-mix-hover));
+}
+
+/* Entrance: plays once per screen open, gated by .is-revealing (dropped shortly after mount). Each
+   button's animation-delay is set inline by the component, radiating outward from today's cell. */
+.headersContainer.is-revealing .fd-header__badge-btn {
+  animation: fd-header-badge-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes fd-header-badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Count-up: the digit ticks 0 → N after its pill lands. `--fd-count` is registered as an integer so the
+   keyframe interpolates in whole steps; `counter()` turns it into text. Outside the reveal the span is
+   replaced by plain text, so this only ever runs once per screen open. */
+@property --fd-count {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.headersContainer.is-revealing .fd-header__badge-count::before {
+  content: counter(fd-count);
+  counter-reset: fd-count var(--fd-count);
+  animation: fd-header-count-up 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: inherit;
+}
+
+@keyframes fd-header-count-up {
+  from {
+    --fd-count: 0;
+  }
+  to {
+    --fd-count: var(--fd-count-target);
+  }
+}
+
+/* Fetching: every badge inside a range whose unassigned-units read is in flight breathes. Cells of
+   one range toggle in the same render, so they breathe in phase and read as a single loading region. */
+.preventPageScroll.is-loading wa-badge {
+  animation: fd-header-badge-breathe 1200ms ease-in-out infinite;
+}
+
+@keyframes fd-header-badge-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headersContainer.is-revealing .fd-header__badge-btn {
+    animation: fd-header-badge-fade 200ms ease-out both;
+  }
+  .headersContainer.is-revealing .fd-header__badge-count::before {
+    animation: none;
+    --fd-count: var(--fd-count-target);
+  }
+  .preventPageScroll.is-loading wa-badge {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes fd-header-badge-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

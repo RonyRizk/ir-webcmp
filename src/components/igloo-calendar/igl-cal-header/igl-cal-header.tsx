@@ -1,9 +1,8 @@
-import { Component, Event, EventEmitter, Host, Prop, h, State, Listen, Watch } from '@stencil/core';
-import { ToBeAssignedService } from '@/services/toBeAssigned.service';
-import { dateToFormattedString } from '@/utils/utils';
+import { Component, Event, EventEmitter, Host, Prop, h, State } from '@stencil/core';
+import { convertDMYToISO } from '@/utils/utils';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
-import { handleUnAssignedDatesChange } from '@/stores/unassigned_dates.store';
+import { getUnassignedUnitsCountForDate, isUnassignedUnitsDateLoading } from '@/stores/unassigned-units.store';
 import { DayUseBookings } from '@/components';
 import { RoomListItem } from './types';
 
@@ -23,34 +22,19 @@ export class IglCalHeader {
   @Prop() calendarData: { [key: string]: any };
   @Prop() today: String;
   @Prop() propertyid: number;
-  @Prop() unassignedDates;
   @Prop() to_date: string;
   @Prop() highlightedDate: string;
   @Prop() dayUseBookings: DayUseBookings[] = [];
 
   @State() renderAgain: boolean = false;
-  @State() unassignedRoomsNumber: any = {};
   private roomsList: RoomListItem[] = [];
-  private toBeAssignedService = new ToBeAssignedService();
 
   componentWillLoad() {
     try {
       this.initializeRoomsList();
-
-      if (!this.calendarData.is_vacation_rental) {
-        handleUnAssignedDatesChange('unassigned_dates', newValue => {
-          if (Object.keys(newValue).length > 0) {
-            this.fetchAndAssignUnassignedRooms();
-          }
-        });
-      }
     } catch (error) {
       console.error('Error in componentWillLoad:', error);
     }
-  }
-  @Watch('unassignedDates')
-  handleCalendarDataChanged() {
-    this.fetchAndAssignUnassignedRooms();
   }
   private initializeRoomsList() {
     this.roomsList = [];
@@ -59,53 +43,27 @@ export class IglCalHeader {
     });
   }
 
-  private async fetchAndAssignUnassignedRooms() {
-    await this.assignRoomsToDate();
-  }
-
-  private async assignRoomsToDate() {
-    try {
-      const { fromDate, toDate, data } = this.unassignedDates;
-      let dt = new Date(fromDate);
-      dt.setHours(0, 0, 0, 0);
-      let endDate = dt.getTime();
-      while (endDate <= new Date(toDate).getTime()) {
-        const selectedDate = moment(endDate).format('D_M_YYYY');
-        if (data[endDate]) {
-          const result = await this.toBeAssignedService.getUnassignedRooms(
-            { from_date: this.calendarData.from_date, to_date: this.calendarData.to_date },
-            this.propertyid,
-            dateToFormattedString(new Date(endDate)),
-            this.calendarData.roomsInfo,
-            this.calendarData.formattedLegendData,
-          );
-          this.unassignedRoomsNumber[selectedDate] = result.length;
-        } else if (this.unassignedRoomsNumber[selectedDate]) {
-          const res = this.unassignedRoomsNumber[selectedDate] - 1;
-          this.unassignedRoomsNumber[selectedDate] = res < 0 ? 0 : res;
-        }
-        const newEndDate = moment(endDate).add(1, 'days').toDate();
-        newEndDate.setHours(0, 0, 0, 0);
-        endDate = newEndDate.getTime();
-        this.renderView();
+  /** Reads the unassigned-units store live (auto-subscribes on render), keyed by `dayInfo.day` (D_M_YYYY) after conversion to ISO. */
+  private getUnassignedRoomsNumberMap(): { [key: string]: number } {
+    const map: { [key: string]: number } = {};
+    (this.calendarData.days ?? []).forEach((dayInfo: { day: string }) => {
+      const count = getUnassignedUnitsCountForDate(convertDMYToISO(dayInfo.day));
+      if (count > 0) {
+        map[dayInfo.day] = count;
       }
-    } catch (error) {
-      console.error(error);
-    }
+    });
+    return map;
   }
 
-  @Listen('reduceAvailableUnitEvent', { target: 'window' })
-  handleReduceAvailableUnitEvent(event: CustomEvent<{ fromDate: string; toDate: string }>) {
-    event.stopImmediatePropagation();
-    event.stopPropagation();
-    const { fromDate, toDate } = event.detail;
-    let endDate = new Date(fromDate).getTime();
-    while (endDate < new Date(toDate).getTime()) {
-      const selectedDate = moment(endDate).format('D_M_YYYY');
-      this.unassignedRoomsNumber[selectedDate] = this.unassignedRoomsNumber[selectedDate] - 1;
-      endDate = moment(endDate).add(1, 'days').toDate().getTime();
-    }
-    this.renderView();
+  /** Days (D_M_YYYY) whose unassigned-units fetch is still in flight — same store subscription as the count map. */
+  private getUnassignedLoadingDaysMap(): { [key: string]: boolean } {
+    const map: { [key: string]: boolean } = {};
+    (this.calendarData.days ?? []).forEach((dayInfo: { day: string }) => {
+      if (isUnassignedUnitsDateLoading(convertDMYToISO(dayInfo.day))) {
+        map[dayInfo.day] = true;
+      }
+    });
+    return map;
   }
 
   handleOptionEvent(key, data: any = '') {
@@ -191,7 +149,8 @@ export class IglCalHeader {
           highlightedDate={this.highlightedDate}
           monthsInfo={this.calendarData.monthsInfo}
           days={this.calendarData.days}
-          unassignedRoomsNumber={{ ...this.unassignedRoomsNumber }}
+          unassignedRoomsNumber={this.getUnassignedRoomsNumberMap()}
+          loadingDays={this.getUnassignedLoadingDaysMap()}
           onDayBadgeClicked={this.handleDayBadgeClicked}
         ></igl-cal-header-days>
       </Host>

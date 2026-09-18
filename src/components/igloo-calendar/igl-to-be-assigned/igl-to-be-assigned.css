@@ -72,6 +72,35 @@ can stretch to full height while the header stays pinned at the top. */
   justify-content: center;
 }
 
+/* Empty states sit in the vertical middle, like the loading state, instead of hugging the top. */
 .tba-panel__empty {
-  margin: 0;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block: var(--spacing);
+}
+
+.tba-panel__empty ir-empty-state::part(message) {
+  font-size: var(--wa-font-size-m);
+}
+
+/* Nothing left to assign is good news — success tone rather than the default "no records" look. */
+.tba-panel__empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+  background: var(--wa-color-success-fill-quiet);
+  color: var(--wa-color-success-fill-loud);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tba-panel__empty-subtitle {
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-quiet);
 }

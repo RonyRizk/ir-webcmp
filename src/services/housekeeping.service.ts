@@ -174,7 +174,7 @@ export class HouseKeepingService {
     highlight_window?: string;
     is_export_to_excel?: boolean;
   }) {
-    const { data } = await axios.post('/Get_HK_Tasks', params);
+    const { data } = await axios.post('https://gateway.igloorooms.com/IR/Get_HK_Tasks', params);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

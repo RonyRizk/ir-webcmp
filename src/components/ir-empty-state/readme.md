@@ -26,6 +26,7 @@
 
  - [igl-day-use-bookings](../igloo-calendar/igl-day-use-bookings)
  - [igl-day-use-unit-list](../igloo-calendar/ir-booking-editor/igl-day-use-unit-list)
+ - [igl-to-be-assigned](../igloo-calendar/igl-to-be-assigned)
  - [ir-agents-table](../ir-agents/ir-agents-table)
  - [ir-arrivals-table](../ir-arrivals/ir-arrivals-table)
  - [ir-booking-city-ledger](../ir-booking-details/ir-booking-city-ledger)
@@ -62,6 +63,7 @@
 graph TD;
   igl-day-use-bookings --> ir-empty-state
   igl-day-use-unit-list --> ir-empty-state
+  igl-to-be-assigned --> ir-empty-state
   ir-agents-table --> ir-empty-state
   ir-arrivals-table --> ir-empty-state
   ir-booking-city-ledger --> ir-empty-state

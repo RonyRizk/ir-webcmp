@@ -23,6 +23,7 @@ import { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components
 import { Currency, ICurrency as ICurrency1, IEntries as IEntries1, IProperty, PhysicalRoom, RatePlan, RoomType } from "./models/property";
 import { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 import { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
+import { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
 import { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
 import { IrActionButton } from "./components/table-cells/booking/ir-actions-cell/ir-actions-cell";
 import { Agent } from "./services/agents/type";
@@ -130,6 +131,7 @@ export { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components
 export { Currency, ICurrency as ICurrency1, IEntries as IEntries1, IProperty, PhysicalRoom, RatePlan, RoomType } from "./models/property";
 export { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 export { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
+export { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
 export { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
 export { IrActionButton } from "./components/table-cells/booking/ir-actions-cell/ir-actions-cell";
 export { Agent } from "./services/agents/type";
@@ -471,7 +473,6 @@ export namespace Components {
         "propertyid": number;
         "to_date": string;
         "today": String;
-        "unassignedDates": any;
     }
     /**
      * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
@@ -486,6 +487,11 @@ export namespace Components {
         "days": DayInfo[];
         "highlightedDate": string;
         "isVacationRental": boolean;
+        /**
+          * Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe.
+          * @default {}
+         */
+        "loadingDays": { [key: string]: boolean };
         /**
           * @default []
          */
@@ -692,36 +698,22 @@ export namespace Components {
     }
     interface IglTbaBookingView {
         "calendarData": { [key: string]: any };
-        /**
-          * @default {}
-         */
-        "categoriesData": { [key: string]: any };
-        "categoryId": any;
-        "categoryIndex": any;
-        /**
-          * @default {}
-         */
-        "eventData": { [key: string]: any };
-        "eventIndex": any;
-        "selectedDate": any;
+        "categoryIndex": number;
+        "eventIndex": number;
+        "room": UnassignedRoomEntry;
+        "roomTypeId": number;
+        "roomTypeName": string;
+        "selectedDate": string;
     }
     interface IglTbaCategoryView {
         "calendarData": { [key: string]: any };
-        /**
-          * @default {}
-         */
-        "categoriesData": { [key: string]: any };
-        "categoryId": any;
-        "categoryIndex": any;
-        "eventDatas": any;
-        "selectedDate": any;
+        "category": UnassignedCategory;
+        "categoryIndex": number;
+        "selectedDate": string;
     }
     interface IglToBeAssigned {
         "calendarData": { [key: string]: any };
-        "from_date": string;
         "propertyid": number;
-        "to_date": string;
-        "unassignedDatesProp": any;
     }
     interface IglooCalendar {
         "baseUrl": string;
@@ -4547,7 +4539,7 @@ export namespace Components {
     interface IrInterceptor {
         /**
           * List of endpoint paths that should trigger loader logic and OTP handling.
-          * @default ['/Get_Exposed_Calendar', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']
+          * @default ['/Get_Exposed_Calendar', '/Get_Exposed_Calendar_V4', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']
          */
         "handledEndpoints": string[];
         /**
@@ -9049,11 +9041,11 @@ declare global {
         new (): HTMLIglSplitBookingDrawerElement;
     };
     interface HTMLIglTbaBookingViewElementEventMap {
-        "highlightToBeAssignedBookingEvent": any;
+        "highlightToBeAssignedBookingEvent": { key: 'highlightBookingId'; data: { bookingId: string; fromDate?: string } };
         "openCalendarSidebar": CalendarSidebarState;
-        "addToBeAssignedEvent": any;
-        "scrollPageToRoom": any;
-        "assignRoomEvent": { [key: string]: any };
+        "addToBeAssignedEvent": { key: 'tobeAssignedEvents'; data: (CalendarUnitPreviewEvent | CalendarAssignedEvent)[] };
+        "scrollPageToRoom": { key: 'scrollPageToRoom'; id: number | null; refClass: string };
+        "assignRoomEvent": CalendarAssignedEvent;
     }
     interface HTMLIglTbaBookingViewElement extends Components.IglTbaBookingView, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglTbaBookingViewElementEventMap>(type: K, listener: (this: HTMLIglTbaBookingViewElement, ev: IglTbaBookingViewCustomEvent<HTMLIglTbaBookingViewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -9070,7 +9062,7 @@ declare global {
         new (): HTMLIglTbaBookingViewElement;
     };
     interface HTMLIglTbaCategoryViewElementEventMap {
-        "assignUnitEvent": { [key: string]: any };
+        "assignUnitEvent": { identifier: string };
     }
     interface HTMLIglTbaCategoryViewElement extends Components.IglTbaCategoryView, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglTbaCategoryViewElementEventMap>(type: K, listener: (this: HTMLIglTbaCategoryViewElement, ev: IglTbaCategoryViewCustomEvent<HTMLIglTbaCategoryViewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -9087,11 +9079,10 @@ declare global {
         new (): HTMLIglTbaCategoryViewElement;
     };
     interface HTMLIglToBeAssignedElementEventMap {
-        "optionEvent": { [key: string]: any };
-        "reduceAvailableUnitEvent": { [key: string]: any };
-        "showBookingPopup": any;
-        "addToBeAssignedEvent": any;
-        "highlightToBeAssignedBookingEvent": any;
+        "optionEvent": { key: string; data?: unknown };
+        "showBookingPopup": { key: 'calendar'; data: number; noScroll: boolean };
+        "addToBeAssignedEvent": { key: 'tobeAssignedEvents'; data: [] };
+        "highlightToBeAssignedBookingEvent": { key: 'highlightBookingId'; data: { bookingId: string } };
     }
     interface HTMLIglToBeAssignedElement extends Components.IglToBeAssigned, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIglToBeAssignedElementEventMap>(type: K, listener: (this: HTMLIglToBeAssignedElement, ev: IglToBeAssignedCustomEvent<HTMLIglToBeAssignedElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -9111,7 +9102,6 @@ declare global {
         "dragOverHighlightElement": any;
         "moveBookingTo": any;
         "calculateUnassignedDates": any;
-        "reduceAvailableUnitEvent": { fromDate: string; toDate: string };
         "revertBooking": any;
         "openCalendarSidebar": CalendarSidebarState1;
         "showRoomNightsDialog": IRoomNightsData;
@@ -14680,7 +14670,6 @@ declare namespace LocalJSX {
         "propertyid"?: number;
         "to_date"?: string;
         "today"?: String;
-        "unassignedDates"?: any;
     }
     /**
      * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
@@ -14695,6 +14684,11 @@ declare namespace LocalJSX {
         "days"?: DayInfo[];
         "highlightedDate"?: string;
         "isVacationRental"?: boolean;
+        /**
+          * Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe.
+          * @default {}
+         */
+        "loadingDays"?: { [key: string]: boolean };
         /**
           * @default []
          */
@@ -14935,47 +14929,32 @@ declare namespace LocalJSX {
     }
     interface IglTbaBookingView {
         "calendarData"?: { [key: string]: any };
-        /**
-          * @default {}
-         */
-        "categoriesData"?: { [key: string]: any };
-        "categoryId"?: any;
-        "categoryIndex"?: any;
-        /**
-          * @default {}
-         */
-        "eventData"?: { [key: string]: any };
-        "eventIndex"?: any;
-        "onAddToBeAssignedEvent"?: (event: IglTbaBookingViewCustomEvent<any>) => void;
-        "onAssignRoomEvent"?: (event: IglTbaBookingViewCustomEvent<{ [key: string]: any }>) => void;
-        "onHighlightToBeAssignedBookingEvent"?: (event: IglTbaBookingViewCustomEvent<any>) => void;
+        "categoryIndex"?: number;
+        "eventIndex"?: number;
+        "onAddToBeAssignedEvent"?: (event: IglTbaBookingViewCustomEvent<{ key: 'tobeAssignedEvents'; data: (CalendarUnitPreviewEvent | CalendarAssignedEvent)[] }>) => void;
+        "onAssignRoomEvent"?: (event: IglTbaBookingViewCustomEvent<CalendarAssignedEvent>) => void;
+        "onHighlightToBeAssignedBookingEvent"?: (event: IglTbaBookingViewCustomEvent<{ key: 'highlightBookingId'; data: { bookingId: string; fromDate?: string } }>) => void;
         "onOpenCalendarSidebar"?: (event: IglTbaBookingViewCustomEvent<CalendarSidebarState>) => void;
-        "onScrollPageToRoom"?: (event: IglTbaBookingViewCustomEvent<any>) => void;
-        "selectedDate"?: any;
+        "onScrollPageToRoom"?: (event: IglTbaBookingViewCustomEvent<{ key: 'scrollPageToRoom'; id: number | null; refClass: string }>) => void;
+        "room"?: UnassignedRoomEntry;
+        "roomTypeId"?: number;
+        "roomTypeName"?: string;
+        "selectedDate"?: string;
     }
     interface IglTbaCategoryView {
         "calendarData"?: { [key: string]: any };
-        /**
-          * @default {}
-         */
-        "categoriesData"?: { [key: string]: any };
-        "categoryId"?: any;
-        "categoryIndex"?: any;
-        "eventDatas"?: any;
-        "onAssignUnitEvent"?: (event: IglTbaCategoryViewCustomEvent<{ [key: string]: any }>) => void;
-        "selectedDate"?: any;
+        "category"?: UnassignedCategory;
+        "categoryIndex"?: number;
+        "onAssignUnitEvent"?: (event: IglTbaCategoryViewCustomEvent<{ identifier: string }>) => void;
+        "selectedDate"?: string;
     }
     interface IglToBeAssigned {
         "calendarData"?: { [key: string]: any };
-        "from_date"?: string;
-        "onAddToBeAssignedEvent"?: (event: IglToBeAssignedCustomEvent<any>) => void;
-        "onHighlightToBeAssignedBookingEvent"?: (event: IglToBeAssignedCustomEvent<any>) => void;
-        "onOptionEvent"?: (event: IglToBeAssignedCustomEvent<{ [key: string]: any }>) => void;
-        "onReduceAvailableUnitEvent"?: (event: IglToBeAssignedCustomEvent<{ [key: string]: any }>) => void;
-        "onShowBookingPopup"?: (event: IglToBeAssignedCustomEvent<any>) => void;
+        "onAddToBeAssignedEvent"?: (event: IglToBeAssignedCustomEvent<{ key: 'tobeAssignedEvents'; data: [] }>) => void;
+        "onHighlightToBeAssignedBookingEvent"?: (event: IglToBeAssignedCustomEvent<{ key: 'highlightBookingId'; data: { bookingId: string } }>) => void;
+        "onOptionEvent"?: (event: IglToBeAssignedCustomEvent<{ key: string; data?: unknown }>) => void;
+        "onShowBookingPopup"?: (event: IglToBeAssignedCustomEvent<{ key: 'calendar'; data: number; noScroll: boolean }>) => void;
         "propertyid"?: number;
-        "to_date"?: string;
-        "unassignedDatesProp"?: any;
     }
     interface IglooCalendar {
         "baseUrl"?: string;
@@ -14987,7 +14966,6 @@ declare namespace LocalJSX {
         "onDragOverHighlightElement"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onMoveBookingTo"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onOpenCalendarSidebar"?: (event: IglooCalendarCustomEvent<CalendarSidebarState1>) => void;
-        "onReduceAvailableUnitEvent"?: (event: IglooCalendarCustomEvent<{ fromDate: string; toDate: string }>) => void;
         "onRevertBooking"?: (event: IglooCalendarCustomEvent<any>) => void;
         "onShowRoomNightsDialog"?: (event: IglooCalendarCustomEvent<IRoomNightsData>) => void;
         "p"?: string;
@@ -19109,7 +19087,7 @@ declare namespace LocalJSX {
     interface IrInterceptor {
         /**
           * List of endpoint paths that should trigger loader logic and OTP handling.
-          * @default ['/Get_Exposed_Calendar', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']
+          * @default ['/Get_Exposed_Calendar', '/Get_Exposed_Calendar_V4', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit']
          */
         "handledEndpoints"?: string[];
         /**
@@ -22371,7 +22349,6 @@ declare namespace LocalJSX {
     }
     interface IglCalHeaderAttributes {
         "propertyid": number;
-        "unassignedDates": string;
         "to_date": string;
         "highlightedDate": string;
     }
@@ -22452,22 +22429,18 @@ declare namespace LocalJSX {
         "open": boolean;
     }
     interface IglTbaBookingViewAttributes {
+        "roomTypeId": number;
+        "roomTypeName": string;
         "selectedDate": string;
-        "categoryId": string;
-        "categoryIndex": string;
-        "eventIndex": string;
+        "categoryIndex": number;
+        "eventIndex": number;
     }
     interface IglTbaCategoryViewAttributes {
         "selectedDate": string;
-        "categoryId": string;
-        "eventDatas": string;
-        "categoryIndex": string;
+        "categoryIndex": number;
     }
     interface IglToBeAssignedAttributes {
-        "unassignedDatesProp": string;
         "propertyid": number;
-        "from_date": string;
-        "to_date": string;
     }
     interface IglooCalendarAttributes {
         "propertyid": number;

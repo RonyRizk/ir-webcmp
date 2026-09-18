@@ -13,7 +13,7 @@ export class IrInterceptor {
   /**
    * List of endpoint paths that should trigger loader logic and OTP handling.
    */
-  @Prop({ reflect: true }) handledEndpoints = ['/Get_Exposed_Calendar', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit'];
+  @Prop({ reflect: true }) handledEndpoints = ['/Get_Exposed_Calendar', '/Get_Exposed_Calendar_V4', '/ReAllocate_Exposed_Room', '/Get_Exposed_Bookings', '/UnBlock_Exposed_Unit'];
 
   /**
    * List of endpoints for which to suppress toast messages.
@@ -118,7 +118,7 @@ export class IrInterceptor {
     //   config.params.Ticket = this.ticket;
     // }
     if (this.isHandledEndpoint(extractedUrl) && this.isPageLoadingStopped !== extractedUrl) {
-      if (extractedUrl !== '/Get_Exposed_Calendar') {
+      if (!extractedUrl.includes('/Get_Exposed_Calendar')) {
         this.isLoading = true;
       } else {
         if (this.endpointsCount > 0) {
@@ -126,7 +126,7 @@ export class IrInterceptor {
         }
       }
     }
-    if (extractedUrl === '/Get_Exposed_Calendar') {
+    if (extractedUrl.includes('/Get_Exposed_Calendar')) {
       this.endpointsCount = this.endpointsCount + 1;
     }
     return config;

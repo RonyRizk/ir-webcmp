@@ -26,7 +26,6 @@
 | `dragOverHighlightElement` |             | `CustomEvent<any>`                                                                                                                                         |
 | `moveBookingTo`            |             | `CustomEvent<any>`                                                                                                                                         |
 | `openCalendarSidebar`      |             | `CustomEvent<{ type: "split" \| "room-guests" \| "booking-details" \| "add-days" \| "bulk-blocks" \| "reallocate-drawer" \| "rectifier"; payload: any; }>` |
-| `reduceAvailableUnitEvent` |             | `CustomEvent<{ fromDate: string; toDate: string; }>`                                                                                                       |
 | `revertBooking`            |             | `CustomEvent<any>`                                                                                                                                         |
 | `showRoomNightsDialog`     |             | `CustomEvent<IRoomNightsData>`                                                                                                                             |
 
@@ -96,9 +95,10 @@ graph TD;
   ir-otp-modal --> ir-spinner
   ir-otp-modal --> ir-otp
   ir-otp-modal --> ir-custom-button
+  igl-to-be-assigned --> ir-empty-state
+  igl-to-be-assigned --> ir-spinner
   igl-to-be-assigned --> igl-tba-category-view
   igl-to-be-assigned --> ir-custom-button
-  igl-to-be-assigned --> ir-spinner
   igl-tba-category-view --> igl-tba-booking-view
   igl-legend --> ir-custom-button
   igl-legend --> ir-success-loader

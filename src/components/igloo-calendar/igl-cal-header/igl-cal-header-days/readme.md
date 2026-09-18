@@ -14,14 +14,15 @@ calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — d
 
 ## Properties
 
-| Property                | Attribute            | Description                                                                                             | Type                         | Default     |
-| ----------------------- | -------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
-| `days`                  | --                   |                                                                                                         | `DayInfo[]`                  | `[]`        |
-| `highlightedDate`       | `highlighted-date`   |                                                                                                         | `string`                     | `undefined` |
-| `isVacationRental`      | `is-vacation-rental` |                                                                                                         | `boolean`                    | `undefined` |
-| `monthsInfo`            | --                   |                                                                                                         | `MonthInfo[]`                | `[]`        |
-| `today`                 | --                   |                                                                                                         | `String`                     | `undefined` |
-| `unassignedRoomsNumber` | --                   | Unassigned-unit counts keyed by `dayInfo.day`, falling back to `dayInfo.unassigned_units_nbr` per cell. | `{ [key: string]: number; }` | `{}`        |
+| Property                | Attribute            | Description                                                                                             | Type                          | Default     |
+| ----------------------- | -------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------- |
+| `days`                  | --                   |                                                                                                         | `DayInfo[]`                   | `[]`        |
+| `highlightedDate`       | `highlighted-date`   |                                                                                                         | `string`                      | `undefined` |
+| `isVacationRental`      | `is-vacation-rental` |                                                                                                         | `boolean`                     | `undefined` |
+| `loadingDays`           | --                   | Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe.    | `{ [key: string]: boolean; }` | `{}`        |
+| `monthsInfo`            | --                   |                                                                                                         | `MonthInfo[]`                 | `[]`        |
+| `today`                 | --                   |                                                                                                         | `String`                      | `undefined` |
+| `unassignedRoomsNumber` | --                   | Unassigned-unit counts keyed by `dayInfo.day`, falling back to `dayInfo.unassigned_units_nbr` per cell. | `{ [key: string]: number; }`  | `{}`        |
 
 
 ## Events
