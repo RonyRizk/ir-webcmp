@@ -1,5 +1,5 @@
 import { Component, h, Prop, State, Event, EventEmitter, Fragment } from '@stencil/core';
-import { Booking, ExtraService, IUnit, Room } from '@/models/booking.dto';
+import { Booking, ExtraService, Room } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { IEntries } from '@/models/IBooking';
 import { ClTx } from '@/services/city-ledger/types';
@@ -27,10 +27,6 @@ export class IrRoomExtraServices {
   @State() expandedGroups: Set<string> = new Set();
 
   @Event() requestAddExtraService: EventEmitter<void>;
-
-  private get unitId(): number | null {
-    return (this.room.unit as IUnit)?.id ?? null;
-  }
 
   /** Extra services linked to this unit via `room_identifier`. */
   private get roomExtraServices(): ExtraService[] {
@@ -125,10 +121,7 @@ export class IrRoomExtraServices {
 
   render() {
     const services = this.roomExtraServices;
-    const canAdd = this.isEditable && !!this.unitId;
-    if (!canAdd && services.length === 0) {
-      return null;
-    }
+
     const total = services.length;
     const inAgentMode = isAgentMode(this.agent);
     const guestServices = inAgentMode ? services.filter(s => s.agent === null || s.agent === undefined) : [];
@@ -143,22 +136,18 @@ export class IrRoomExtraServices {
             {total > 0 && <span class="booking-room__extra-services-count">{total}</span>}
           </span>
 
-          {canAdd && (
-            <Fragment>
-              <wa-tooltip for={`add-extra-service-${this.room.identifier}`}>Add extra service</wa-tooltip>
-              <ir-custom-button
-                id={`add-extra-service-${this.room.identifier}`}
-                class="booking-room__extra-services-add"
-                iconBtn
-                size="s"
-                appearance="plain"
-                variant="brand"
-                onClickHandler={() => this.requestAddExtraService.emit()}
-              >
-                <wa-icon style={{ fontSize: '0.9rem' }} label="Add extra service" name="plus"></wa-icon>
-              </ir-custom-button>
-            </Fragment>
-          )}
+          <wa-tooltip for={`add-extra-service-${this.room.identifier}`}>Add extra service</wa-tooltip>
+          <ir-custom-button
+            id={`add-extra-service-${this.room.identifier}`}
+            class="booking-room__extra-services-add"
+            iconBtn
+            size="s"
+            appearance="plain"
+            variant="brand"
+            onClickHandler={() => this.requestAddExtraService.emit()}
+          >
+            <wa-icon style={{ fontSize: '0.9rem' }} label="Add extra service" name="plus"></wa-icon>
+          </ir-custom-button>
         </div>
         {inAgentMode ? (
           <Fragment>

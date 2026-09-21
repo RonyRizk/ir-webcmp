@@ -9,7 +9,7 @@ import { findAccTax, toAccChargeRule } from '@/services/property/acc-tax.helpers
 import calendar_data, { getExtraServiceDefaultPrice, getBabyCotPricingModel } from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { getTopLevelSvcCategories, groupSvcCategoriesByParent } from '@/utils/svc-category.utils';
-import { calculateDaysBetweenDates } from '@/utils/booking';
+import { calculateDaysBetweenDates, formatName } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { z, ZodError } from 'zod';
 import { SvcCategory } from '@/types/enums';
@@ -34,8 +34,8 @@ export class IrExtraServiceConfigForm {
   @Prop() service: ExtraService;
   @Prop() svcCategories: IEntries[] = [];
   @Prop() language: string;
-  /** Pre-selected unit (physical room) id to link a new service to, e.g. when added from ir-room's quick-add action. */
-  @Prop() defaultPrId: number | null = null;
+  /** Pre-selected room identifier to link a new service to, e.g. when added from ir-room's quick-add action. */
+  @Prop() defaultIdentifier: string | null = null;
 
   @State() s_service: ExtraService;
   @State() error: boolean;
@@ -146,20 +146,23 @@ export class IrExtraServiceConfigForm {
     return this.selectedGroupCode === ACCOMMODATION_GROUP_CODE;
   }
 
-  private get unitOptions(): { id: number; identifier: string; label: string }[] {
-    return (this.booking?.rooms ?? [])
-      .filter(room => room.unit && typeof room.unit === 'object')
-      .map(room => ({ id: (room.unit as IUnit).id, identifier: room.identifier, label: `${room.roomtype?.name ?? ''} ${(room.unit as IUnit).name}`.trim() }));
+  /** One option per booked room, keyed by `room.identifier`. Assigned rooms show their unit name; unassigned ones show the room guest's name instead so they can still be told apart. */
+  private get unitOptions(): { identifier: string; label: string }[] {
+    return (this.booking?.rooms ?? []).map(room => {
+      const isAssigned = !!room.unit && typeof room.unit === 'object';
+      const suffix = isAssigned ? (room.unit as IUnit).name : formatName(room.guest?.first_name ?? null, room.guest?.last_name ?? null);
+      return { identifier: room.identifier, label: `${room.roomtype?.name ?? ''} ${suffix ?? ''}`.trim() };
+    });
   }
 
   private get showUnitLink(): boolean {
-    return (this.booking?.rooms?.length ?? 0) > 1 && this.unitOptions.length > 0;
+    return (this.booking?.rooms?.length ?? 0) > 1;
   }
 
-  /** The room identifier to link a new service to: an explicit default (e.g. from ir-room's quick-add, given as a unit id), or the booking's single unit when there's no choice to make. */
+  /** The room identifier to link a new service to: an explicit default (e.g. from ir-room's quick-add, given as a room identifier), or the booking's single room when there's no choice to make. */
   private get effectiveRoomIdentifier(): string | null {
-    if (this.defaultPrId != null) {
-      return this.unitOptions.find(option => option.id === this.defaultPrId)?.identifier ?? null;
+    if (this.defaultIdentifier != null) {
+      return this.unitOptions.find(option => option.identifier === this.defaultIdentifier)?.identifier ?? null;
     }
     return this.unitOptions.length === 1 ? this.unitOptions[0].identifier : null;
   }

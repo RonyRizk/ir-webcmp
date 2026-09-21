@@ -76,7 +76,7 @@ export class IrRoom {
   @Event({ bubbles: true, composed: true }) editInitiated: EventEmitter<TIglBookPropertyPayload>;
   @Event() resetBookingEvt: EventEmitter<Booking | null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
-  @Event({ bubbles: true, composed: true }) addExtraServiceToUnit: EventEmitter<{ pr_id: number }>;
+  @Event({ bubbles: true, composed: true }) addExtraServiceToUnit: EventEmitter<{ identifier: string }>;
 
   private modal: HTMLIrDialogElement;
   private toggleDialogRef: HTMLIrAssignmentToggleDialogElement;
@@ -376,16 +376,9 @@ export class IrRoom {
       },
     });
   }
-  private get unitId(): number | null {
-    return (this.room.unit as IUnit)?.id ?? null;
-  }
 
   private handleAddExtraServiceToUnit() {
-    const pr_id = this.unitId;
-    if (!pr_id) {
-      return;
-    }
-    this.addExtraServiceToUnit.emit({ pr_id });
+    this.addExtraServiceToUnit.emit({ identifier: this.room.identifier });
   }
 
   private handleHeaderAction(action: IrRoomHeaderAction) {

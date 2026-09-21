@@ -17,7 +17,7 @@ export class IrExtraServiceConfig {
   @Prop() service: ExtraService;
   @Prop() language: string;
   @Prop({ reflect: true }) open: boolean;
-  @Prop() defaultPrId: number | null = null;
+  @Prop() defaultIdentifier: string | null = null;
 
   @Event() closeModal: EventEmitter<null>;
 
@@ -56,7 +56,7 @@ export class IrExtraServiceConfig {
             booking={this.booking}
             agent={this.agent}
             service={this.service}
-            defaultPrId={this.defaultPrId}
+            defaultIdentifier={this.defaultIdentifier}
           ></ir-extra-service-config-form>
         )}
         <div slot="footer" class={'ir__drawer-footer'}>

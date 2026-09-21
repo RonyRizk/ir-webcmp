@@ -190,11 +190,11 @@ export class IrBookingRooms {
   }
 
   private handleRoomCheckin(room: Room): boolean {
+    if (!room.unit) {
+      return false;
+    }
     return canCheckIn({ from_date: room.from_date, to_date: room.to_date, isCheckedIn: room.in_out?.code === ROOM_IN_OUT.CHECKIN });
     // if (!calendar_data.checkin_enabled || calendar_data.is_automatic_check_in_out) {
-    //   return false;
-    // }
-    // if (!room.unit) {
     //   return false;
     // }
     // if (room.in_out && room.in_out.code !== '000') {

@@ -76,7 +76,7 @@ export class IrPaymentAnalytics {
           The dynamic pricing effect is calculated at the time the booking is created and remains fixed thereafter, serving as an indicator of the additional profit generated or of
           the incentive price reduction.
         </wa-tooltip>
-        <wa-callout id={`dp-effect-callout-${this.booking?.booking_nbr}`} class={`dp-effect-callout --${tone}`} variant={calloutVariant} size="small">
+        <wa-callout id={`dp-effect-callout-${this.booking?.booking_nbr}`} class={`dp-effect-callout --${tone}`} variant={calloutVariant} size="s">
           <wa-icon class="dp-effect-icon" slot="icon" name="wand-magic-sparkles"></wa-icon>
           <div class="booking-dp-effect">
             <p class="booking-dp-effect__label">Dynamic pricing {isOptimReadOnly() ? 'lost profit' : 'effect'}</p>

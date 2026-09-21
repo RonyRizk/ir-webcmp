@@ -65,7 +65,7 @@ export class IrBookingDetails {
   @State() rerenderFlag = false;
   @State() roomGuest: any;
   @State() selectedService: ExtraService;
-  @State() extraServiceDefaultPrId: number | null = null;
+  @State() extraServiceDefaultIdentifier: string | null = null;
   @State() showPaymentDetails: any;
   @State() sidebarPayload: any;
   @State() sidebarState: BookingDetailsSidebarEvents | null = null;
@@ -83,11 +83,6 @@ export class IrBookingDetails {
    * Booking number used to fetch booking details.
    */
   @Prop() bookingNumber: string = '';
-
-  /**
-   * Enables the check-in action in room components.
-   */
-  @Prop() hasCheckIn: boolean = false;
 
   /**
    * Enables the check-out action in room components.
@@ -276,7 +271,7 @@ export class IrBookingDetails {
         };
         return;
       case 'extra_service_btn':
-        this.extraServiceDefaultPrId = null;
+        this.extraServiceDefaultIdentifier = null;
         this.sidebarState = 'extra_service';
         return;
       case 'add-payment':
@@ -345,15 +340,15 @@ export class IrBookingDetails {
       return;
     }
     this.selectedService = service;
-    this.extraServiceDefaultPrId = null;
+    this.extraServiceDefaultIdentifier = null;
     this.sidebarState = 'extra_service';
   }
   @Listen('addExtraServiceToUnit')
-  handleAddExtraServiceToUnit(e: CustomEvent<{ pr_id: number }>) {
+  handleAddExtraServiceToUnit(e: CustomEvent<{ identifier: string }>) {
     e.stopImmediatePropagation();
     e.stopPropagation();
     this.selectedService = null;
-    this.extraServiceDefaultPrId = e.detail.pr_id;
+    this.extraServiceDefaultIdentifier = e.detail.identifier;
     this.sidebarState = 'extra_service';
   }
   @Listen('openPrintScreen')
@@ -752,7 +747,7 @@ export class IrBookingDetails {
         <ir-extra-service-config
           open={this.sidebarState === 'extra_service'}
           service={this.selectedService}
-          defaultPrId={this.extraServiceDefaultPrId}
+          defaultIdentifier={this.extraServiceDefaultIdentifier}
           svcCategories={this.svcCategories}
           language={this.language}
           booking={this.booking}
@@ -765,7 +760,7 @@ export class IrBookingDetails {
             if (this.selectedService) {
               this.selectedService = null;
             }
-            this.extraServiceDefaultPrId = null;
+            this.extraServiceDefaultIdentifier = null;
           }}
         ></ir-extra-service-config>
 

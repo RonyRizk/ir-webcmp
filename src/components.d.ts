@@ -1421,11 +1421,6 @@ export namespace Components {
          */
         "checkoutRoomIdentifier": string;
         /**
-          * Enables the check-in action in room components.
-          * @default false
-         */
-        "hasCheckIn": boolean;
-        /**
           * Enables the check-out action in room components.
           * @default false
          */
@@ -3446,7 +3441,7 @@ export namespace Components {
         /**
           * @default null
          */
-        "defaultPrId": number | null;
+        "defaultIdentifier": string | null;
         "language": string;
         "open": boolean;
         "service": ExtraService;
@@ -3459,10 +3454,10 @@ export namespace Components {
         "agent": Agent;
         "booking": Booking;
         /**
-          * Pre-selected unit (physical room) id to link a new service to, e.g. when added from ir-room's quick-add action.
+          * Pre-selected room identifier to link a new service to, e.g. when added from ir-room's quick-add action.
           * @default null
          */
-        "defaultPrId": number | null;
+        "defaultIdentifier": string | null;
         "language": string;
         "service": ExtraService;
         /**
@@ -12974,7 +12969,7 @@ declare global {
         "editInitiated": TIglBookPropertyPayload;
         "resetBookingEvt": Booking | null;
         "openSidebar": OpenSidebarEvent<RoomGuestsPayload1>;
-        "addExtraServiceToUnit": { pr_id: number };
+        "addExtraServiceToUnit": { identifier: string };
     }
     interface HTMLIrRoomElement extends Components.IrRoom, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrRoomElementEventMap>(type: K, listener: (this: HTMLIrRoomElement, ev: IrRoomCustomEvent<HTMLIrRoomElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -15711,11 +15706,6 @@ declare namespace LocalJSX {
          */
         "checkoutRoomIdentifier"?: string;
         /**
-          * Enables the check-in action in room components.
-          * @default false
-         */
-        "hasCheckIn"?: boolean;
-        /**
           * Enables the check-out action in room components.
           * @default false
          */
@@ -17918,7 +17908,7 @@ declare namespace LocalJSX {
         /**
           * @default null
          */
-        "defaultPrId"?: number | null;
+        "defaultIdentifier"?: string | null;
         "language"?: string;
         "onCloseModal"?: (event: IrExtraServiceConfigCustomEvent<null>) => void;
         "open"?: boolean;
@@ -17932,10 +17922,10 @@ declare namespace LocalJSX {
         "agent"?: Agent;
         "booking"?: Booking;
         /**
-          * Pre-selected unit (physical room) id to link a new service to, e.g. when added from ir-room's quick-add action.
+          * Pre-selected room identifier to link a new service to, e.g. when added from ir-room's quick-add action.
           * @default null
          */
-        "defaultPrId"?: number | null;
+        "defaultIdentifier"?: string | null;
         "language"?: string;
         "onCloseModal"?: (event: IrExtraServiceConfigFormCustomEvent<null>) => void;
         "onResetBookingEvt"?: (event: IrExtraServiceConfigFormCustomEvent<null>) => void;
@@ -20732,7 +20722,7 @@ declare namespace LocalJSX {
         "legendData"?: any;
         "mealCodeName"?: string;
         "myRoomTypeFoodCat"?: string;
-        "onAddExtraServiceToUnit"?: (event: IrRoomCustomEvent<{ pr_id: number }>) => void;
+        "onAddExtraServiceToUnit"?: (event: IrRoomCustomEvent<{ identifier: string }>) => void;
         "onDeleteFinished"?: (event: IrRoomCustomEvent<string>) => void;
         "onEditInitiated"?: (event: IrRoomCustomEvent<TIglBookPropertyPayload>) => void;
         "onOpenSidebar"?: (event: IrRoomCustomEvent<OpenSidebarEvent<RoomGuestsPayload1>>) => void;
@@ -22626,7 +22616,6 @@ declare namespace LocalJSX {
     }
     interface IrBookingDetailsAttributes {
         "bookingNumber": string;
-        "hasCheckIn": boolean;
         "hasCheckOut": boolean;
         "checkoutRoomIdentifier": string;
         "hasCloseButton": boolean;
@@ -23215,11 +23204,11 @@ declare namespace LocalJSX {
     interface IrExtraServiceConfigAttributes {
         "language": string;
         "open": boolean;
-        "defaultPrId": number | null;
+        "defaultIdentifier": string | null;
     }
     interface IrExtraServiceConfigFormAttributes {
         "language": string;
-        "defaultPrId": number | null;
+        "defaultIdentifier": string | null;
     }
     interface IrExtraServiceEditorDrawerAttributes {
         "open": boolean;

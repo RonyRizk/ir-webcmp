@@ -234,22 +234,15 @@ export class ApplicablePoliciesService {
 
         filteredBrackets = [...this.mergeBracketsByAmount(filteredBrackets)];
 
-        if (!room.rateplan.is_non_refundable) {
+        if (room.rateplan.is_non_refundable) {
+          // Non-refundable rooms are always 100% of the total price from the day the booking was made
+          filteredBrackets = [this.buildFullChargeBracket(room, this._booking.booked_on.date)];
+        } else {
           const inDate = moment(room.from_date, 'YYYY-MM-DD', true);
           const outDate = moment(room.to_date, 'YYYY-MM-DD', true);
           const stayNights = outDate.isValid() && inDate.isValid() ? outDate.diff(inDate, 'days') : 0;
           const fullChargeDate = stayNights > 1 ? inDate.clone().add(1, 'day').format('YYYY-MM-DD') : inDate.format('YYYY-MM-DD');
-          filteredBrackets.push({
-            amount: room.total,
-            amount_formatted: '',
-            code: '',
-            currency_id: this._booking.currency.id,
-            due_on: fullChargeDate,
-            due_on_formatted: '',
-            gross_amount: room.gross_total,
-            gross_amount_formatted: '',
-            statement: '100% of total price',
-          });
+          filteredBrackets.push(this.buildFullChargeBracket(room, fullChargeDate));
 
           filteredBrackets.sort((a, b) => {
             const aDate = moment(a.due_on, 'YYYY-MM-DD', true);
@@ -270,6 +263,23 @@ export class ApplicablePoliciesService {
     });
 
     return statements;
+  }
+
+  /**
+   * Builds a synthetic bracket charging 100% of the room's total price from the given date.
+   */
+  private buildFullChargeBracket(room: Room, dueOn: string): ExposedApplicablePolicy['brackets'][number] {
+    return {
+      amount: room.total,
+      amount_formatted: '',
+      code: '',
+      currency_id: this._booking.currency.id,
+      due_on: dueOn,
+      due_on_formatted: '',
+      gross_amount: room.gross_total,
+      gross_amount_formatted: '',
+      statement: '100% of total price',
+    };
   }
 
   /**
