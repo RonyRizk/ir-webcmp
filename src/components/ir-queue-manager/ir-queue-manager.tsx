@@ -115,8 +115,8 @@ export class IrQueueManager {
 
           <div class="queue-grid">
             {this.data.map(d => (
-              <wa-card>
-                <p slot="header">
+              <wa-details open={false}>
+                <p slot="summary" style={{padding:"0","margin":"0"}}>
                   {d.q_name} ({d.total_pending} total pending)
                 </p>
 
@@ -138,7 +138,7 @@ export class IrQueueManager {
                     </div>
                   );
                 })}
-              </wa-card>
+              </wa-details>
             ))}
           </div>
         </div>
