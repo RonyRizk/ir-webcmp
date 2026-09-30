@@ -34,14 +34,15 @@ export class IrRoomNights {
   @State() isEndDateBeforeFromDate: boolean = false;
   @State() defaultTotalNights = 0;
   @State() isInputFocused = -1;
-  @State() dates: { from_date: Date; to_date: Date } = { from_date: new Date(), to_date: new Date() };
+  /** `YYYY-MM-DD` */
+  @State() dates: { from_date: string; to_date: string } = { from_date: '', to_date: '' };
 
   @Event() closeRoomNightsDialog: EventEmitter<IRoomNightsDataEventPayload>;
 
   private bookingService = new BookingService();
 
   componentWillLoad() {
-    this.dates = { from_date: new Date(this.fromDate), to_date: new Date(this.toDate) };
+    this.dates = { from_date: this.fromDate, to_date: this.toDate };
     this.init();
   }
 
@@ -51,12 +52,7 @@ export class IrRoomNights {
   private async init() {
     try {
       const { from_date } = this.defaultDates;
-      if (moment(from_date, 'YYYY-MM-DD').isBefore(moment(this.fromDate, 'YYYY-MM-DD'))) {
-        this.dates.from_date = new Date(from_date);
-      } else {
-        this.dates.from_date = new Date(this.fromDate);
-      }
-      this.dates.to_date = new Date(this.toDate);
+      this.dates = { from_date: from_date < this.fromDate ? from_date : this.fromDate, to_date: this.toDate };
       this.bookingEvent = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
       if (this.bookingEvent) {
         const filteredRooms = this.bookingEvent.rooms.filter(room => room.identifier === this.identifier);
@@ -201,8 +197,8 @@ export class IrRoomNights {
       oldRooms[selectedRoomIndex] = {
         ...oldRooms[selectedRoomIndex],
         days: this.rates,
-        to_date: moment(this.dates.to_date).format('YYYY-MM-DD'),
-        from_date: moment(this.dates.from_date).format('YYYY-MM-DD'),
+        to_date: this.dates.to_date,
+        from_date: this.dates.from_date,
       };
       const body = {
         assign_units: true,
@@ -214,8 +210,8 @@ export class IrRoomNights {
         agent: this.bookingEvent.agent,
         booking: {
           booking_nbr: this.bookingNumber,
-          from_date: moment(this.dates.from_date).format('YYYY-MM-DD'),
-          to_date: moment(this.dates.to_date).format('YYYY-MM-DD'),
+          from_date: this.dates.from_date,
+          to_date: this.dates.to_date,
           remark: this.bookingEvent.remark,
           property: this.bookingEvent.property,
           source: this.bookingEvent.source,
@@ -256,10 +252,7 @@ export class IrRoomNights {
             <p class={'mt-2 text-secondary'}>{locales.entries['Lcz_CheckingRoomAvailability ']}</p>
           ) : (
             <Fragment>
-              <p class={'font-weight-bold font-medium-1'}>{`${formatDate(moment(this.dates.from_date).format('YYYY-MM-DD'), 'YYYY-MM-DD')} - ${formatDate(
-                moment(this.dates.to_date).format('YYYY-MM-DD'),
-                'YYYY-MM-DD',
-              )}`}</p>
+              <p class={'font-weight-bold font-medium-1'}>{`${formatDate(this.dates.from_date, 'YYYY-MM-DD')} - ${formatDate(this.dates.to_date, 'YYYY-MM-DD')}`}</p>
               <p class={'font-medium-1 mb-0'}>
                 {`${this.selectedRoom.rateplan.name}`} {this.selectedRoom.rateplan.is_non_refundable && <span class={'irfontgreen'}>{locales.entries.Lcz_NonRefundable}</span>}
               </p>

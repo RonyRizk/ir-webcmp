@@ -11,6 +11,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { Booking } from '@/models/booking.dto';
 import { z } from 'zod';
 import { showToast } from '@/utils/utils';
+import { ISO_FORMAT } from '@/utils/calendar-dates';
 
 @Component({
   tag: 'igl-book-property-header',
@@ -192,17 +193,16 @@ export class IglBookPropertyHeader {
         title: locales.entries.Lcz_ChooseBookingNumber,
       });
     } else if (this.isEventType('ADD_ROOM') || this.isEventType('SPLIT_BOOKING')) {
-      const initialToDate = moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date));
-      const initialFromDate = moment(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date));
-      const selectedFromDate = moment(new Date(this.dateRangeData.fromDate));
-      const selectedToDate = moment(new Date(this.dateRangeData.toDate));
-      if (selectedToDate.isBefore(initialFromDate) || selectedFromDate.isAfter(initialToDate)) {
+      const initialToDate: string = this.bookedByInfoData.to_date || this.defaultDaterange.to_date;
+      const initialFromDate: string = this.bookedByInfoData.from_date || this.defaultDaterange.from_date;
+      const { fromDate: selectedFromDate, toDate: selectedToDate } = this.dateRangeData;
+      if (selectedToDate < initialFromDate || selectedFromDate > initialToDate) {
         showToast({
           type: 'error',
-          title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace(
-            '%1',
-            moment(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date)).format('ddd, DD MMM YYYY'),
-          ).replace('%2', moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date)).format('ddd, DD MMM YYYY'))}  `,
+          title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace('%1', moment(initialFromDate, ISO_FORMAT).format('ddd, DD MMM YYYY')).replace(
+            '%2',
+            moment(initialToDate, ISO_FORMAT).format('ddd, DD MMM YYYY'),
+          )}  `,
         });
         return;
       } else if (Number(occupancy.adults) === 0) {

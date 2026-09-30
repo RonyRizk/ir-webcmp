@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Host, Prop, h, State } from '@stencil/core';
-import { convertDMYToISO } from '@/utils/utils';
+import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 import moment from 'moment';
 import locales from '@/stores/locales.store';
 import { getUnassignedUnitsCountForDate, isUnassignedUnitsDateLoading } from '@/stores/unassigned-units.store';
@@ -20,7 +20,8 @@ export class IglCalHeader {
     [key: string]: any;
   }>;
   @Prop() calendarData: { [key: string]: any };
-  @Prop() today: String;
+  /** `YYYY-MM-DD` */
+  @Prop() today: string;
   @Prop() propertyid: number;
   @Prop() to_date: string;
   @Prop() highlightedDate: string;
@@ -43,24 +44,24 @@ export class IglCalHeader {
     });
   }
 
-  /** Reads the unassigned-units store live (auto-subscribes on render), keyed by `dayInfo.day` (D_M_YYYY) after conversion to ISO. */
+  /** Reads the unassigned-units store live (auto-subscribes on render), keyed by `dayInfo.value` (`YYYY-MM-DD`). */
   private getUnassignedRoomsNumberMap(): { [key: string]: number } {
     const map: { [key: string]: number } = {};
-    (this.calendarData.days ?? []).forEach((dayInfo: { day: string }) => {
-      const count = getUnassignedUnitsCountForDate(convertDMYToISO(dayInfo.day));
+    (this.calendarData.days ?? []).forEach((dayInfo: { value: string }) => {
+      const count = getUnassignedUnitsCountForDate(dayInfo.value);
       if (count > 0) {
-        map[dayInfo.day] = count;
+        map[dayInfo.value] = count;
       }
     });
     return map;
   }
 
-  /** Days (D_M_YYYY) whose unassigned-units fetch is still in flight — same store subscription as the count map. */
+  /** Days (`YYYY-MM-DD`) whose unassigned-units fetch is still in flight — same store subscription as the count map. */
   private getUnassignedLoadingDaysMap(): { [key: string]: boolean } {
     const map: { [key: string]: boolean } = {};
-    (this.calendarData.days ?? []).forEach((dayInfo: { day: string }) => {
-      if (isUnassignedUnitsDateLoading(convertDMYToISO(dayInfo.day))) {
-        map[dayInfo.day] = true;
+    (this.calendarData.days ?? []).forEach((dayInfo: { value: string }) => {
+      if (isUnassignedUnitsDateLoading(dayInfo.value)) {
+        map[dayInfo.value] = true;
       }
     });
     return map;
@@ -70,34 +71,24 @@ export class IglCalHeader {
     this.optionEvent.emit({ key, data });
   }
 
-  getStringDateFormat(dt) {
-    return dt.getFullYear() + '-' + (dt.getMonth() < 9 ? '0' : '') + (dt.getMonth() + 1) + '-' + (dt.getDate() <= 9 ? '0' : '') + dt.getDate();
-  }
-
   getNewBookingModel() {
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let from_date = this.getStringDateFormat(today);
-    today.setDate(today.getDate() + 1);
-    today.setHours(0, 0, 0, 0);
-    let to_date = this.getStringDateFormat(today);
+    const from_date = todayISO();
+    const to_date = addDaysISO(from_date, 1);
     return {
       ID: '',
       NAME: '',
       EMAIL: '',
       PHONE: '',
       REFERENCE_TYPE: 'PHONE',
-      FROM_DATE: from_date, // "2023-07-09",
-      TO_DATE: to_date, // "2023-07-11",
+      FROM_DATE: from_date,
+      TO_DATE: to_date,
       roomsInfo: this.calendarData.roomsInfo,
       TITLE: locales.entries.Lcz_NewBooking,
       event_type: 'PLUS_BOOKING',
       legendData: this.calendarData.formattedLegendData,
       defaultDateRange: {
-        fromDate: new Date(from_date), //new Date("2023-09-10"),
-        fromDateStr: '', //"10 Sep 2023",
-        toDate: new Date(to_date), //new Date("2023-09-15"),
-        toDateStr: '', // "15 Sep 2023",
+        fromDate: from_date,
+        toDate: to_date,
         dateDifference: 0,
         editabled: true,
         message: '',
@@ -122,12 +113,12 @@ export class IglCalHeader {
     this.gotoRoomEvent.emit({ key: 'gotoRoom', roomId: e.detail.roomId });
   };
 
-  private handleDayBadgeClicked = (e: CustomEvent<{ day: string; currentDate: any }>) => {
+  private handleDayBadgeClicked = (e: CustomEvent<{ date: string }>) => {
     this.handleOptionEvent('showAssigned');
     setTimeout(() => {
       this.gotoToBeAssignedDate.emit({
         key: 'gotoToBeAssignedDate',
-        data: e.detail.currentDate,
+        data: e.detail.date,
       });
     }, 100);
   };

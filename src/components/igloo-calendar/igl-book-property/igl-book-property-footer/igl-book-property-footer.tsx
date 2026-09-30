@@ -3,7 +3,7 @@ import { TPropertyButtonsTypes } from '../../../../models/igl-book-property';
 import locales from '@/stores/locales.store';
 import { TIcons } from '@/components/ui/ir-icons/icons';
 import calendar_data from '@/stores/calendar-data';
-import moment from 'moment';
+import { todayISO } from '@/utils/calendar-dates';
 import { NativeButton } from '@/components/ui/ir-custom-button/ir-custom-button';
 
 @Component({
@@ -119,7 +119,7 @@ export class IglBookPropertyFooter {
         </Host>
       );
     }
-    const showBookAndCheckin = calendar_data.checkin_enabled && moment(new Date(this.dateRangeData?.fromDate)).isSame(new Date(), 'day');
+    const showBookAndCheckin = calendar_data.checkin_enabled && this.dateRangeData?.fromDate === todayISO();
     return (
       <Fragment>
         {this.isEditOrAddRoomEvent ? (

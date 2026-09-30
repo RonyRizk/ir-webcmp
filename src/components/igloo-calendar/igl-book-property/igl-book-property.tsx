@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h, Listen, Fragment } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { dateToFormattedString, getReleaseHoursString, handleBodyOverflow } from '@/utils/utils';
+import { getReleaseHoursString, handleBodyOverflow } from '@/utils/utils';
+import { ISO_FORMAT } from '@/utils/calendar-dates';
 import { ICountry, IEntries, RoomBlockDetails } from '@/models/IBooking';
 import { IPageTwoDataUpdateProps } from '@/models/models';
 import { IglBookPropertyService } from './igl-book-property.service';
@@ -21,7 +22,8 @@ import booking_store, {
 import moment from 'moment';
 import { BookingGuestSchema, RoomGuestSchema } from './types';
 export type IHistoryEntry = {
-  dates: { checkIn: Date; checkOut: Date };
+  /** `YYYY-MM-DD` */
+  dates: { checkIn: string; checkOut: string };
   adults: number;
   children: number;
 };
@@ -41,14 +43,11 @@ export class IglBookProperty {
   @Prop() adultChildConstraints: TAdultChildConstraints;
 
   @State() renderAgain: boolean = false;
-  @State() dateRangeData: { [key: string]: any };
+  /** `fromDate`/`toDate` are `YYYY-MM-DD`. */
+  @State() dateRangeData: { fromDate: string; toDate: string; dateDifference: number; [key: string]: any };
   @State() defaultData: any;
   @State() isLoading: string;
-  @State() bookingHistory: Array<{
-    dates: { checkIn: Date; checkOut: Date };
-    adults: number;
-    children: number;
-  }> = [];
+  @State() bookingHistory: IHistoryEntry[] = [];
 
   @Event() closeBookingWindow: EventEmitter<{ [key: string]: any }>;
   @Event() blockedCreated: EventEmitter<RoomBlockDetails>;
@@ -138,8 +137,8 @@ export class IglBookProperty {
     const opt: { [key: string]: any } = event.detail;
     this.updateBookingHistory({
       dates: {
-        checkIn: new Date(this.dateRangeData.fromDate),
-        checkOut: new Date(new Date(opt.data.toDate)),
+        checkIn: this.dateRangeData.fromDate,
+        checkOut: opt.data.toDate,
       },
     });
     if (opt.key === 'selectedDateRange') {
@@ -148,7 +147,6 @@ export class IglBookProperty {
         this.defaultData.roomsInfo = [];
       } else if (booking_store.bookingDraft.occupancy.adults) {
         // this.checkBookingAvailability();
-        // this.checkBookingAvailability(dateToFormattedString(new Date(this.dateRangeData.fromDate)), dateToFormattedString(new Date(this.dateRangeData.toDate)));
       }
     }
   }
@@ -216,8 +214,8 @@ export class IglBookProperty {
 
     const newEntry: IHistoryEntry = {
       dates: {
-        checkIn: partialData.dates?.checkIn || lastEntry?.dates?.checkIn || new Date(this.dateRangeData.fromDate),
-        checkOut: partialData.dates?.checkOut || lastEntry?.dates?.checkOut || new Date(this.dateRangeData.toDate),
+        checkIn: partialData.dates?.checkIn || lastEntry?.dates?.checkIn || this.dateRangeData.fromDate,
+        checkOut: partialData.dates?.checkOut || lastEntry?.dates?.checkOut || this.dateRangeData.toDate,
       },
       adults: partialData.adults ?? lastEntry?.adults ?? booking_store.bookingDraft.occupancy?.adults,
       children: partialData.children ?? lastEntry?.children ?? booking_store.bookingDraft.occupancy.children,
@@ -248,8 +246,8 @@ export class IglBookProperty {
     this.dateRangeData = { ...this.defaultData.defaultDateRange };
     setBookingDraft({
       dates: {
-        checkIn: moment(this.defaultData.defaultDateRange.fromDate),
-        checkOut: moment(this.defaultData.defaultDateRange.toDate),
+        checkIn: moment(this.defaultData.defaultDateRange.fromDate, ISO_FORMAT),
+        checkOut: moment(this.defaultData.defaultDateRange.toDate, ISO_FORMAT),
       },
     });
   }
@@ -413,8 +411,7 @@ export class IglBookProperty {
   private async checkBookingAvailability() {
     resetBookingStore(false);
     const { source, occupancy } = booking_store.bookingDraft;
-    const from_date = moment(this.dateRangeData.fromDate).format('YYYY-MM-DD');
-    const to_date = moment(this.dateRangeData.toDate).format('YYYY-MM-DD');
+    const { fromDate: from_date, toDate: to_date } = this.dateRangeData;
     const is_in_agent_mode = source?.type === 'TRAVEL_AGENCY';
     try {
       const room_type_ids_to_update = this.isEventType('EDIT_BOOKING') ? [this.defaultData.RATE_TYPE] : [];
@@ -435,8 +432,8 @@ export class IglBookProperty {
         room_type_ids_to_update,
       });
       if (!this.isEventType('EDIT_BOOKING')) {
-        this.defaultData.defaultDateRange.fromDate = new Date(this.dateRangeData.fromDate);
-        this.defaultData.defaultDateRange.toDate = new Date(this.dateRangeData.toDate);
+        this.defaultData.defaultDateRange.fromDate = this.dateRangeData.fromDate;
+        this.defaultData.defaultDateRange.toDate = this.dateRangeData.toDate;
       }
       this.defaultData = { ...this.defaultData, roomsInfo: data };
       if (this.isEventType('EDIT_BOOKING') && !this.updatedBooking) {
@@ -589,8 +586,8 @@ export class IglBookProperty {
       : (() => {
           const releaseData = getReleaseHoursString(+this.blockDatesData.RELEASE_AFTER_HOURS);
           return {
-            from_date: dateToFormattedString(this.defaultData.defaultDateRange.fromDate),
-            to_date: dateToFormattedString(this.defaultData.defaultDateRange.toDate),
+            from_date: this.defaultData.defaultDateRange.fromDate,
+            to_date: this.defaultData.defaultDateRange.toDate,
             NOTES: this.blockDatesData.OPTIONAL_REASON || '',
             pr_id: this.defaultData.PR_ID.toString(),
             STAY_STATUS_CODE: this.blockDatesData.OUT_OF_SERVICE ? '004' : this.blockDatesData.RELEASE_AFTER_HOURS === 0 ? '002' : '003',

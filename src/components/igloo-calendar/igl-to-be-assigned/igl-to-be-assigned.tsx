@@ -1,5 +1,4 @@
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
-import moment from 'moment';
 import { UnassignedUnitsService } from '@/services/unassigned-units';
 import { UnassignedCategory, UnassignedRoomTypeGroup } from '@/services/unassigned-units/types';
 import { groupIntoCategories } from '@/services/unassigned-units/utils';
@@ -12,11 +11,6 @@ interface CategoriesCache {
   source: UnassignedRoomTypeGroup[];
   property: unknown;
   value: UnassignedCategory[];
-}
-
-/** `igloo-calendar`'s `calendar` option scrolls to the day *after* the epoch it receives, so hand it the previous local midnight. */
-function calendarScrollTarget(isoDate: string): number {
-  return moment(isoDate, 'YYYY-MM-DD').subtract(1, 'day').valueOf();
 }
 
 @Component({
@@ -32,7 +26,8 @@ export class IglToBeAssigned {
   @State() isLoading = true;
 
   @Event() optionEvent: EventEmitter<{ key: string; data?: unknown }>;
-  @Event() showBookingPopup: EventEmitter<{ key: 'calendar'; data: number; noScroll: boolean }>;
+  /** `data` is the `YYYY-MM-DD` day to scroll to. */
+  @Event() showBookingPopup: EventEmitter<{ key: 'calendar'; data: string; noScroll: boolean }>;
   @Event({ bubbles: true, composed: true }) addToBeAssignedEvent: EventEmitter<{ key: 'tobeAssignedEvents'; data: [] }>;
   @Event({ bubbles: true, composed: true }) highlightToBeAssignedBookingEvent: EventEmitter<{ key: 'highlightBookingId'; data: { bookingId: string } }>;
 
@@ -46,8 +41,8 @@ export class IglToBeAssigned {
   }
 
   @Listen('gotoToBeAssignedDate', { target: 'window' })
-  handleGotoDate(event: CustomEvent<{ data: number }>) {
-    this.selectDate(moment(event.detail.data).format('YYYY-MM-DD'));
+  handleGotoDate(event: CustomEvent<{ data: string }>) {
+    this.selectDate(event.detail.data);
   }
 
   /** A card was highlighted: scroll the calendar to that booking's first night. */
@@ -55,7 +50,7 @@ export class IglToBeAssigned {
   handleBookingHighlight(event: CustomEvent<{ data?: { fromDate?: string } }>) {
     const fromDate = event.detail?.data?.fromDate;
     if (fromDate) {
-      this.showBookingPopup.emit({ key: 'calendar', data: calendarScrollTarget(fromDate), noScroll: false });
+      this.showBookingPopup.emit({ key: 'calendar', data: fromDate, noScroll: false });
     }
   }
 
@@ -99,7 +94,7 @@ export class IglToBeAssigned {
     this.selectedDate = date;
     this.addToBeAssignedEvent.emit({ key: 'tobeAssignedEvents', data: [] });
     if (date) {
-      this.showBookingPopup.emit({ key: 'calendar', data: calendarScrollTarget(date), noScroll: false });
+      this.showBookingPopup.emit({ key: 'calendar', data: date, noScroll: false });
     }
   }
 

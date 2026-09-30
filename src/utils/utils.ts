@@ -7,6 +7,7 @@ import { ROOM_IN_OUT } from '@/models/booking.dto';
 import { GroupedTableEntries } from '@/services/booking-service/types';
 import { Toast } from '@/components/ir-toast-provider/ir-toast-provider';
 import { TPositions } from '@/components/ui/ir-toast/toast';
+import { nightsBetween } from './calendar-dates';
 
 /** Supported language codes that map to `CODE_VALUE_*` fields on {@link IEntries}. */
 export type EntryLanguage = 'en' | 'ar' | 'de' | 'el' | 'fr' | 'he' | 'pl' | 'ru' | 'ua';
@@ -53,21 +54,6 @@ export function getEntryValue({ entry, language = 'en' }: { entry: IEntries; lan
   if (english) return english;
 
   return entry.CODE_NAME;
-}
-
-export function convertDateToCustomFormat(dayWithWeekday: string, monthWithYear: string, format: string = 'D_M_YYYY'): string {
-  const dateStr = `${dayWithWeekday.split(' ')[1]} ${monthWithYear}`;
-  const date = moment(dateStr, 'DD MMM YYYY');
-  if (!date.isValid()) {
-    throw new Error('Invalid Date');
-  }
-  return date.format(format);
-}
-
-export function convertDateToTime(dayWithWeekday: string, monthWithYear: string): number {
-  const date = moment(dayWithWeekday + ' ' + monthWithYear, 'ddd DD MMM YYYY').toDate();
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
 }
 
 export interface SelectOption {
@@ -184,10 +170,9 @@ export function showToast(toast: Toast & { position?: TPositions }) {
 
   document.body.dispatchEvent(event);
 }
+/** Nights between two `YYYY-MM-DD` days. */
 export function dateDifference(FROM_DATE: string, TO_DATE: string): number {
-  const startDate = new Date(FROM_DATE);
-  const endDate = new Date(TO_DATE);
-  return Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  return nightsBetween(FROM_DATE, TO_DATE);
 }
 export const getBrowserLanguage = (): string => {
   const defaultLang = 'en';
@@ -302,25 +287,9 @@ export function getReleaseHoursString(releaseDate: number) {
   };
 }
 
-export function computeEndDate(startDate: string, numberOfDays: number): string {
-  const dateObj = moment(startDate, 'D_M_YYYY');
-  dateObj.add(numberOfDays, 'days');
-  return dateObj.format('YYYY-MM-DD');
-}
-
-export function convertDMYToISO(date: string) {
-  const dateObj = moment(date, 'D_M_YYYY');
-  return dateObj.format('YYYY-MM-DD');
-}
-export function addTwoMonthToDate(date: Date) {
-  return moment(date).add(2, 'months').format('YYYY-MM-DD');
-}
 export function formatDate(dateString, option = 'DD MMM YYYY') {
   const formattedDate = moment(dateString, option).format('ddd, DD MMM YYYY');
   return formattedDate;
-}
-export function getNextDay(date: Date) {
-  return moment(date).add(1, 'days').format('YYYY-MM-DD');
 }
 
 export function convertDatePrice(date: string) {

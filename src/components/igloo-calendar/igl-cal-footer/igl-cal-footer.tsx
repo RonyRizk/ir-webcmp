@@ -12,7 +12,8 @@ export class IglCalFooter {
   @Event() optionEvent: EventEmitter<{ [key: string]: any }>;
   @Prop() calendarData: { [key: string]: any };
   @Prop() isLegendOpen: boolean = false;
-  @Prop() today: String;
+  /** `YYYY-MM-DD` */
+  @Prop() today: string;
   @Prop() highlightedDate: string;
 
   private _today = moment().format('YYYY-MM-DD');
@@ -58,7 +59,7 @@ export class IglCalFooter {
               class={{
                 'dayTitle full-height align-items-center': true,
                 'weekend': isWeekend(dayInfo.value),
-                'currentDay': dayInfo.value === this._today || this.highlightedDate === dayInfo.day,
+                'currentDay': dayInfo.value === this._today || this.highlightedDate === dayInfo.value,
               }}
             >
               {dayInfo.dayDisplayName}

@@ -253,10 +253,8 @@ export class IrBookingDetails {
           TO_DATE: this.booking.is_room_less ? moment(this.booking.to_date, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') : this.booking.to_date,
           TITLE: `${locales.entries.Lcz_AddingUnitToBooking}# ${this.booking.booking_nbr}`,
           defaultDateRange: {
-            fromDate: new Date(this.booking.from_date),
-            fromDateStr: '',
-            toDate: new Date(this.booking.to_date),
-            toDateStr: '',
+            fromDate: this.booking.from_date,
+            toDate: this.booking.to_date,
             dateDifference: 0,
             message: '',
           },

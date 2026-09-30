@@ -13,12 +13,12 @@
 
 ## Events
 
-| Event                               | Description | Type                                                                        |
-| ----------------------------------- | ----------- | --------------------------------------------------------------------------- |
-| `addToBeAssignedEvent`              |             | `CustomEvent<{ key: "tobeAssignedEvents"; data: []; }>`                     |
-| `highlightToBeAssignedBookingEvent` |             | `CustomEvent<{ key: "highlightBookingId"; data: { bookingId: string; }; }>` |
-| `optionEvent`                       |             | `CustomEvent<{ key: string; data?: unknown; }>`                             |
-| `showBookingPopup`                  |             | `CustomEvent<{ key: "calendar"; data: number; noScroll: boolean; }>`        |
+| Event                               | Description                                  | Type                                                                        |
+| ----------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+| `addToBeAssignedEvent`              |                                              | `CustomEvent<{ key: "tobeAssignedEvents"; data: []; }>`                     |
+| `highlightToBeAssignedBookingEvent` |                                              | `CustomEvent<{ key: "highlightBookingId"; data: { bookingId: string; }; }>` |
+| `optionEvent`                       |                                              | `CustomEvent<{ key: string; data?: unknown; }>`                             |
+| `showBookingPopup`                  | `data` is the `YYYY-MM-DD` day to scroll to. | `CustomEvent<{ key: "calendar"; data: string; noScroll: boolean; }>`        |
 
 
 ## Dependencies

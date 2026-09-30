@@ -17,7 +17,7 @@
 | `isScrollViewDragging` | `is-scroll-view-dragging` |                                                                                                                                       | `boolean`                 | `undefined` |
 | `language`             | `language`                |                                                                                                                                       | `string`                  | `undefined` |
 | `propertyId`           | `property-id`             |                                                                                                                                       | `number`                  | `undefined` |
-| `today`                | --                        |                                                                                                                                       | `String`                  | `undefined` |
+| `today`                | `today`                   | `YYYY-MM-DD`                                                                                                                          | `string`                  | `undefined` |
 
 
 ## Events

@@ -28,10 +28,10 @@ export interface IglBookPropertyPayload {
 }
 
 export interface IDefaultDateRange {
-  fromDate: Date;
-  fromDateStr: string;
-  toDate: Date;
-  toDateStr: string;
+  /** `YYYY-MM-DD` */
+  fromDate: string;
+  /** `YYYY-MM-DD` */
+  toDate: string;
   dateDifference: number;
   editable?: boolean;
   message: string;

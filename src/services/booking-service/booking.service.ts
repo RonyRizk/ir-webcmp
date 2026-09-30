@@ -2,7 +2,7 @@ import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRe
 import { DayData } from '../../models/DayType';
 import axios from 'axios';
 import { BookingDetails, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthType, ZIEntrySchema } from '../../models/IBooking';
-import { convertDateToCustomFormat, convertDateToTime, dateToFormattedString, extras } from '../../utils/utils';
+import { extras } from '../../utils/utils';
 import { getMyBookings } from '../../utils/booking';
 import { Booking, Day, ExtraService, Guest, IBookingPickupInfo, IPmsLog, RoomInOut } from '../../models/booking.dto';
 import booking_store from '@/stores/booking.store';
@@ -48,8 +48,10 @@ import { BookingInvoiceInfo, BookingInvoiceInfoSchema } from '@/components/ir-in
 export interface IBookingParams {
   bookedByInfoData: any;
   check_in: boolean;
-  fromDate: Date;
-  toDate: Date;
+  /** `YYYY-MM-DD` */
+  fromDate: string;
+  /** `YYYY-MM-DD` */
+  toDate: string;
   guestData;
   totalNights: number;
   source: { code: string; description: string };
@@ -259,9 +261,7 @@ export class BookingService {
           });
           return month.days.map(day => {
             return {
-              day: convertDateToCustomFormat(day.description, month.description),
               value: day.value,
-              currentDate: convertDateToTime(day.description, month.description),
               dayDisplayName: day.description,
               rate: day.room_types,
               unassigned_units_nbr: day.unassigned_units_nbr,
@@ -741,8 +741,8 @@ export class BookingService {
     pr_id,
   }: IBookingParams) {
     try {
-      const fromDateStr = dateToFormattedString(fromDate);
-      const toDateStr = dateToFormattedString(toDate);
+      const fromDateStr = fromDate;
+      const toDateStr = toDate;
       let guest: any = {
         email: bookedByInfoData.email === '' ? null : bookedByInfoData.email || null,
         first_name: bookedByInfoData.firstName,

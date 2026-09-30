@@ -5,6 +5,7 @@ import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import { Component, Host, State, h, Prop, Watch, Event, EventEmitter, Fragment } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
+import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 @Component({
   tag: 'igl-book-property-container',
   styleUrl: 'igl-book-property-container.css',
@@ -83,15 +84,12 @@ export class IglBookPropertyContainer {
     this.bookingItem = null;
   }
   handleTriggerClicked() {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = todayISO();
     (this.bookingItem as IglBookPropertyPayloadPlusBooking) = {
       FROM_DATE: this.from_date,
       defaultDateRange: {
-        fromDate: new Date(),
-        fromDateStr: '',
-        toDate: tomorrow,
-        toDateStr: '',
+        fromDate: today,
+        toDate: addDaysISO(today, 1),
         dateDifference: 0,
         message: '',
       },

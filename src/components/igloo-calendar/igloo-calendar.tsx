@@ -1,7 +1,8 @@
 import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { addTwoMonthToDate, computeEndDate, convertDMYToISO, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
+import { formatLegendColors, isBlockUnit } from '@/utils/utils';
+import { addDaysISO, addMonthsISO, ISO_FORMAT, nightsBetween, todayISO } from '@/utils/calendar-dates';
 import {
   realtimeService,
   type RealtimeReason,
@@ -48,10 +49,10 @@ export type CalendarSidebarState = {
   payload: any;
 };
 
-/** `YYYY-MM-DD` from anything moment can read as a date (plain ISO, ISO with a time, …); `''` if it can't. */
+/** The `YYYY-MM-DD` day the server sent (it may append a time); `''` if there is none. Taken verbatim — never parsed, so no timezone can shift it. */
 function toIsoDate(value: unknown): string {
-  const parsed = moment(typeof value === 'string' ? value.trim() : value, moment.ISO_8601);
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '';
+  const match = typeof value === 'string' ? /^\d{4}-\d{2}-\d{2}/.exec(value.trim()) : null;
+  return match ? match[0] : '';
 }
 
 /** One `GET_UNASSIGNED_DATES` notification, normalized to the calendar's date format. */
@@ -76,7 +77,7 @@ const UNASSIGNED_DATES_MAX_FETCHES = 3;
 
 /** Whole days between the end of one span and the start of the next. */
 function daysBetween(earlierTo: string, laterFrom: string): number {
-  return moment(laterFrom, 'YYYY-MM-DD').diff(moment(earlierTo, 'YYYY-MM-DD'), 'days');
+  return nightsBetween(earlierTo, laterFrom);
 }
 
 /**
@@ -179,7 +180,8 @@ export class IglooCalendar {
   private countries: ICountry[] = [];
   private visibleCalendarCells: { x: any[]; y: any[] } = { x: [], y: [] };
   private scrollContainer: HTMLElement;
-  private today: String = '';
+  /** `YYYY-MM-DD` */
+  private today: string = '';
   private reachedEndOfCalendar = false;
 
   private unsubscribeRealtime: (() => void) | null = null;
@@ -348,7 +350,7 @@ export class IglooCalendar {
         this.visibleCalendarCells.x.push({
           left: htmlElement.offsetLeft + topLeftCell.offsetWidth,
           width: htmlElement.offsetWidth,
-          id: htmlElement.getAttribute('data-day'),
+          id: htmlElement.getAttribute('data-date'),
         });
       });
 
@@ -427,15 +429,9 @@ export class IglooCalendar {
     // The server echoes the range back; pin it to YYYY-MM-DD so range math and API calls can rely on the format.
     this.calendarData.from_date = toIsoDate(bookingResp.My_Params_Get_Rooming_Data.FROM);
     this.calendarData.to_date = toIsoDate(bookingResp.My_Params_Get_Rooming_Data.TO);
-    this.calendarData.startingDate = moment(this.calendarData.from_date, 'YYYY-MM-DD').valueOf();
-    this.calendarData.endingDate = moment(this.calendarData.to_date, 'YYYY-MM-DD').valueOf();
     this.calendarData.formattedLegendData = formatLegendColors(this.calendarData.legendData);
     let bookings = bookingResp.myBookings || [];
-    bookings = bookings.filter(bookingEvent => {
-      const toDate = moment(bookingEvent.TO_DATE, 'YYYY-MM-DD');
-      const fromDate = moment(bookingEvent.FROM_DATE, 'YYYY-MM-DD');
-      return !toDate.isSame(fromDate);
-    });
+    bookings = bookings.filter(bookingEvent => bookingEvent.TO_DATE !== bookingEvent.FROM_DATE);
     this.calendarData.bookingEvents = bookings;
 
     this.calendarData.toBeAssignedEvents = [];
@@ -505,9 +501,7 @@ export class IglooCalendar {
       this.showPaymentDetails = paymentMethods.some(item => item.code === '001' || item.code === '004');
       this.updateBookingEventsDateRange(this.calendarData.bookingEvents);
       this.updateBookingEventsDateRange(this.calendarData.toBeAssignedEvents);
-      this.today = this.transformDateForScroll(new Date());
-      let startingDay: Date = new Date(this.calendarData.startingDate);
-      startingDay.setHours(0, 0, 0, 0);
+      this.today = todayISO();
       this.days = bookingResp.days;
       this.calendarData.days = this.days;
       this.calendarData.monthsInfo = bookingResp.months;
@@ -989,16 +983,11 @@ export class IglooCalendar {
   private updateBookingEventsDateRange(eventData) {
     eventData.forEach(bookingEvent => {
       bookingEvent.legendData = this.calendarData.formattedLegendData;
-      bookingEvent.defaultDateRange = {};
-      bookingEvent.defaultDateRange.fromDate = new Date(bookingEvent.FROM_DATE + 'T00:00:00');
-      bookingEvent.defaultDateRange.fromDateStr = this.getDateStr(bookingEvent.defaultDateRange.fromDate);
-      bookingEvent.defaultDateRange.fromDateTimeStamp = bookingEvent.defaultDateRange.fromDate.getTime();
-
-      bookingEvent.defaultDateRange.toDate = new Date(bookingEvent.TO_DATE + 'T00:00:00');
-      bookingEvent.defaultDateRange.toDateStr = this.getDateStr(bookingEvent.defaultDateRange.toDate);
-      bookingEvent.defaultDateRange.toDateTimeStamp = bookingEvent.defaultDateRange.toDate.getTime();
-
-      bookingEvent.defaultDateRange.dateDifference = bookingEvent.NO_OF_DAYS;
+      bookingEvent.defaultDateRange = {
+        fromDate: bookingEvent.FROM_DATE,
+        toDate: bookingEvent.TO_DATE,
+        dateDifference: bookingEvent.NO_OF_DAYS,
+      };
       bookingEvent.roomsInfo = [...this.calendarData.roomsInfo];
       if (!isBlockUnit(bookingEvent.STATUS_CODE)) {
         // if (calendar_data.checkin_enabled) {
@@ -1026,41 +1015,6 @@ export class IglooCalendar {
       }
     });
   }
-  /**
-   *
-   *private updateBookingEventsDateRange(eventData) {
-    const now = moment();
-    eventData.forEach(bookingEvent => {
-      bookingEvent.legendData = this.calendarData.formattedLegendData;
-      bookingEvent.defaultDateRange = {};
-      bookingEvent.defaultDateRange.fromDate = new Date(bookingEvent.FROM_DATE + 'T00:00:00');
-      bookingEvent.defaultDateRange.fromDateStr = this.getDateStr(bookingEvent.defaultDateRange.fromDate);
-      bookingEvent.defaultDateRange.fromDateTimeStamp = bookingEvent.defaultDateRange.fromDate.getTime();
-
-      bookingEvent.defaultDateRange.toDate = new Date(bookingEvent.TO_DATE + 'T00:00:00');
-      bookingEvent.defaultDateRange.toDateStr = this.getDateStr(bookingEvent.defaultDateRange.toDate);
-      bookingEvent.defaultDateRange.toDateTimeStamp = bookingEvent.defaultDateRange.toDate.getTime();
-
-      bookingEvent.defaultDateRange.dateDifference = bookingEvent.NO_OF_DAYS;
-      bookingEvent.roomsInfo = [...this.calendarData.roomsInfo];
-      if (!isBlockUnit(bookingEvent.STATUS_CODE)) {
-        const toDate = moment(bookingEvent.TO_DATE, 'YYYY-MM-DD');
-        const fromDate = moment(bookingEvent.FROM_DATE, 'YYYY-MM-DD');
-        if (bookingEvent.STATUS !== 'PENDING') {
-          if (fromDate.isSame(now, 'day') && now.hour() >= 12) {
-            bookingEvent.STATUS = bookingStatus['000'];
-          } else if (now.isAfter(fromDate, 'day') && now.isBefore(toDate, 'day')) {
-            bookingEvent.STATUS = bookingStatus['000'];
-          } else if (toDate.isSame(now, 'day') && now.hour() < 12) {
-            bookingEvent.STATUS = bookingStatus['000'];
-          } else if ((toDate.isSame(now, 'day') && now.hour() >= 12) || toDate.isBefore(now, 'day')) {
-            bookingEvent.STATUS = bookingStatus['003'];
-          }
-        }
-      }
-    });
-  }
-   */
   private processSalesBatch(batch: SalesBatchPayload[]) {
     const days = [...calendar_dates.days];
     const disabled_cells = new Map(calendar_dates.disabled_cells);
@@ -1164,14 +1118,11 @@ export class IglooCalendar {
     return aData['My_Result'].calendar_legends;
   }
 
-  private getDateStr(date, locale = 'default') {
-    return date.getDate() + ' ' + date.toLocaleString(locale, { month: 'short' }) + ' ' + date.getFullYear();
-  }
-
-  private scrollToElement(goToDate) {
+  /** Scrolls the grid so the `YYYY-MM-DD` day column is in view. */
+  private scrollToElement(goToDate: string) {
     this.scrollContainer = this.scrollContainer || this.element.querySelector('.calendarScrollContainer');
     const topLeftCell = this.element.querySelector('.topLeftCell');
-    const gotoDay = this.element.querySelector('.day-' + goToDate);
+    const gotoDay = this.element.querySelector(`.headerCell[data-date="${goToDate}"]`);
     if (gotoDay) {
       this.scrollContainer.scrollTo({ left: 0 });
       const gotoRect = gotoDay.getBoundingClientRect();
@@ -1215,10 +1166,6 @@ export class IglooCalendar {
     }
   }
 
-  private transformDateForScroll(date: Date) {
-    return moment(date).format('D_M_YYYY');
-  }
-
   shouldRenderCalendarView() {
     // console.log("rendering...")
     return this.calendarData && this.calendarData.days && this.calendarData.days.length;
@@ -1257,21 +1204,21 @@ export class IglooCalendar {
         this.showToBeAssigned = false;
         this.showDayUseBookings = true;
         break;
-      case 'calendar':
-        let dt = new Date();
+      case 'calendar': {
+        // Either a date-picker range (`{ start, end }` moments) or a `YYYY-MM-DD` day to scroll to (to-be-assigned).
+        let targetDate: string;
         if (opt.data.start !== undefined && opt.data.end !== undefined) {
-          dt = opt.data.start.toDate();
+          targetDate = opt.data.start.format(ISO_FORMAT);
           this.handleDateSearch(opt.data);
         } else {
-          //scroll to unassigned dates
-          dt = new Date(opt.data);
-          dt.setDate(dt.getDate() + 1);
+          targetDate = opt.data;
           if (!opt?.noScroll) {
-            this.scrollToElement(dt.getDate() + '_' + (dt.getMonth() + 1) + '_' + dt.getFullYear());
+            this.scrollToElement(targetDate);
           }
         }
-        this.highlightedDate = this.transformDateForScroll(dt);
+        this.highlightedDate = targetDate;
         break;
+      }
       case 'search':
         break;
       case 'bulk':
@@ -1311,8 +1258,7 @@ export class IglooCalendar {
 
     const newBookings = results.myBookings || [];
     this.updateBookingEventsDateRange(newBookings);
-    if (new Date(fromDate).getTime() < new Date(this.calendarData.startingDate).getTime()) {
-      this.calendarData.startingDate = new Date(fromDate).getTime();
+    if (fromDate < this.calendarData.from_date) {
       this.calendarData.from_date = fromDate;
       calendar_dates.fromDate = this.calendarData.from_date;
       this.days = [...results.days, ...this.days];
@@ -1345,7 +1291,6 @@ export class IglooCalendar {
         await this.fetchUnassignedUnitsRange(fromDate, toDate);
       }
     } else {
-      this.calendarData.endingDate = new Date(toDate).getTime();
       this.calendarData.to_date = toDate;
       calendar_dates.toDate = this.calendarData.to_date;
       let newMonths = [...results.months];
@@ -1380,20 +1325,20 @@ export class IglooCalendar {
     }
   }
   async handleDateSearch(dates: { start: Moment; end: Moment }) {
-    const startDate = moment(dates.start).toDate();
-    const defaultFromDate = moment(this.calDates.from).toDate();
-    const endDate = dates.end.toDate();
-    const defaultToDate = this.calendarData.endingDate;
-    if (startDate.getTime() < new Date(this.calDates.from).getTime()) {
-      await this.addDatesToCalendar(moment(startDate).add(-1, 'days').format('YYYY-MM-DD'), moment(defaultFromDate).add(-1, 'days').format('YYYY-MM-DD'));
-      this.calDates = { ...this.calDates, from: dates.start.add(-1, 'days').format('YYYY-MM-DD') };
-      this.scrollToElement(this.transformDateForScroll(startDate));
-    } else if (startDate.getTime() > defaultFromDate.getTime() && startDate.getTime() < defaultToDate && endDate.getTime() < defaultToDate) {
-      this.scrollToElement(this.transformDateForScroll(startDate));
-    } else if (startDate.getTime() > defaultToDate) {
-      const nextDay = getNextDay(new Date(this.calendarData.endingDate));
-      await this.addDatesToCalendar(nextDay, moment(endDate).add(2, 'months').format('YYYY-MM-DD'));
-      this.scrollToElement(this.transformDateForScroll(startDate));
+    const startDate = dates.start.format(ISO_FORMAT);
+    const endDate = dates.end.format(ISO_FORMAT);
+    const loadedFrom = this.calDates.from;
+    const loadedTo = this.calendarData.to_date;
+    if (startDate < loadedFrom) {
+      const newFrom = addDaysISO(startDate, -1);
+      await this.addDatesToCalendar(newFrom, addDaysISO(loadedFrom, -1));
+      this.calDates = { ...this.calDates, from: newFrom };
+      this.scrollToElement(startDate);
+    } else if (startDate > loadedFrom && startDate < loadedTo && endDate < loadedTo) {
+      this.scrollToElement(startDate);
+    } else if (startDate > loadedTo) {
+      await this.addDatesToCalendar(addDaysISO(loadedTo, 1), addMonthsISO(endDate, 2));
+      this.scrollToElement(startDate);
     }
   }
 
@@ -1446,7 +1391,7 @@ export class IglooCalendar {
   private calendarScrolling() {
     if (this.scrollContainer) {
       if (this.highlightedDate) {
-        const highlightedElement = document.querySelector(`.day-${this.highlightedDate}`);
+        const highlightedElement = document.querySelector(`.headerCell[data-date="${this.highlightedDate}"]`);
         if (highlightedElement) {
           const { left, right } = highlightedElement.getBoundingClientRect();
           const isVisible = left >= 0 && right <= window.innerWidth;
@@ -1470,9 +1415,8 @@ export class IglooCalendar {
             if (monthRect.x + monthRect.width <= rightX && !this.reachedEndOfCalendar) {
               this.reachedEndOfCalendar = true;
               //await this.addNextTwoMonthsToCalendar();
-              const nextTwoMonths = addTwoMonthToDate(new Date(this.calendarData.endingDate));
-              const nextDay = getNextDay(new Date(this.calendarData.endingDate));
-              await this.addDatesToCalendar(nextDay, nextTwoMonths);
+              const loadedTo = this.calendarData.to_date;
+              await this.addDatesToCalendar(addDaysISO(loadedTo, 1), addMonthsISO(loadedTo, 2));
               this.reachedEndOfCalendar = false;
             }
           }
@@ -1531,8 +1475,8 @@ export class IglooCalendar {
         toRoomId: (yElement && yElement.id) || 'revert',
         moveToDay: (xElement && xElement.id) || 'revert',
         pool: currentPosition.pool,
-        from_date: convertDMYToISO(xElement && xElement.id),
-        to_date: computeEndDate(xElement && xElement.id, currentPosition.nbOfDays),
+        from_date: xElement?.id,
+        to_date: xElement ? addDaysISO(xElement.id, currentPosition.nbOfDays) : undefined,
       });
     }
   }

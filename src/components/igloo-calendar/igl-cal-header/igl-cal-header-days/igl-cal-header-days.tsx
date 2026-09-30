@@ -15,7 +15,7 @@ const REVEAL_TOTAL_MS = REVEAL_STEP_MS * REVEAL_MAX_STEPS + Math.max(REVEAL_DURA
 /**
  * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
  * cells (unassigned-units badge, day title, occupancy percent). `.headersContainer`/`.headerCell`
- * and each cell's `data-day` attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
+ * and each cell's `data-date` (`YYYY-MM-DD`) attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
  * calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — do not rename them.
  */
 @Component({
@@ -25,13 +25,14 @@ const REVEAL_TOTAL_MS = REVEAL_STEP_MS * REVEAL_MAX_STEPS + Math.max(REVEAL_DURA
 })
 export class IglCalHeaderDays {
   @Prop() isVacationRental: boolean;
-  @Prop() today: String;
+  /** `YYYY-MM-DD` */
+  @Prop() today: string;
   @Prop() highlightedDate: string;
   @Prop() monthsInfo: MonthInfo[] = [];
   @Prop() days: DayInfo[] = [];
-  /** Unassigned-unit counts keyed by `dayInfo.day`, falling back to `dayInfo.unassigned_units_nbr` per cell. */
+  /** Unassigned-unit counts keyed by `dayInfo.value` (`YYYY-MM-DD`), falling back to `dayInfo.unassigned_units_nbr` per cell. */
   @Prop() unassignedRoomsNumber: { [key: string]: number } = {};
-  /** Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe. */
+  /** Days (keyed by `dayInfo.value`) whose unassigned-units fetch is still in flight; their badges breathe. */
   @Prop() loadingDays: { [key: string]: boolean } = {};
 
   /**
@@ -42,7 +43,7 @@ export class IglCalHeaderDays {
   @State() private revealing = true;
 
   /** Emitted only when a badge with a non-zero count is clicked — a zero-count badge is inert. */
-  @Event() dayBadgeClicked: EventEmitter<{ day: string; currentDate: any }>;
+  @Event() dayBadgeClicked: EventEmitter<{ date: string }>;
 
   private revealTimer: ReturnType<typeof setTimeout>;
 
@@ -88,8 +89,8 @@ export class IglCalHeaderDays {
   }
 
   private handleBadgeClick(dayInfo: DayInfo) {
-    if (this.unassignedRoomsNumber[dayInfo.day] || 0) {
-      this.dayBadgeClicked.emit({ day: dayInfo.day, currentDate: dayInfo.currentDate });
+    if (this.unassignedRoomsNumber[dayInfo.value] || 0) {
+      this.dayBadgeClicked.emit({ date: dayInfo.value });
     }
   }
 
@@ -100,7 +101,7 @@ export class IglCalHeaderDays {
 
   render() {
     const todayIndex = Math.max(
-      this.days.findIndex(dayInfo => dayInfo.day === this.today),
+      this.days.findIndex(dayInfo => dayInfo.value === this.today),
       0,
     );
     return (
@@ -114,16 +115,13 @@ export class IglCalHeaderDays {
             ))}
           </div>
           {this.days.map((dayInfo, index) => {
-            const count = this.unassignedRoomsNumber[dayInfo.day] || dayInfo.unassigned_units_nbr;
+            const count = this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr;
             const revealDelay = this.getRevealDelay(index, todayIndex);
             return (
-              <div
-                class={`headerCell align-items-center ${'day-' + dayInfo.day} ${dayInfo.day === this.today || dayInfo.day === this.highlightedDate ? 'currentDay' : ''}`}
-                data-day={dayInfo.day}
-              >
+              <div class={`headerCell align-items-center ${dayInfo.value === this.today || dayInfo.value === this.highlightedDate ? 'currentDay' : ''}`} data-date={dayInfo.value}>
                 {!this.isVacationRental && (
-                  <div class={{ 'preventPageScroll': true, 'is-loading': !!this.loadingDays[dayInfo.day] }} onClick={() => this.handleBadgeClick(dayInfo)}>
-                    {this.unassignedRoomsNumber[dayInfo.day] || dayInfo.unassigned_units_nbr !== 0 ? (
+                  <div class={{ 'preventPageScroll': true, 'is-loading': !!this.loadingDays[dayInfo.value] }} onClick={() => this.handleBadgeClick(dayInfo)}>
+                    {this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr !== 0 ? (
                       <button class={'fd-header__badge-btn'} style={this.revealing ? { animationDelay: `${revealDelay}ms` } : undefined}>
                         <wa-badge class="fd-header__badge" variant={'brand'} appearance={'accent'} pill>
                           {this.revealing ? (
@@ -140,7 +138,7 @@ export class IglCalHeaderDays {
                     ) : (
                       <wa-badge variant={'neutral'} appearance={'filled'} pill>
                         {' '}
-                        {this.unassignedRoomsNumber[dayInfo.day] || dayInfo.unassigned_units_nbr}
+                        {this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr}
                       </wa-badge>
                     )}
                   </div>

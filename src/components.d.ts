@@ -452,7 +452,10 @@ export namespace Components {
         "isScrollViewDragging": boolean;
         "language": string;
         "propertyId": number;
-        "today": String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today": string;
     }
     interface IglCalFooter {
         "calendarData": { [key: string]: any };
@@ -461,7 +464,10 @@ export namespace Components {
           * @default false
          */
         "isLegendOpen": boolean;
-        "today": String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today": string;
     }
     interface IglCalHeader {
         "calendarData": { [key: string]: any };
@@ -472,12 +478,15 @@ export namespace Components {
         "highlightedDate": string;
         "propertyid": number;
         "to_date": string;
-        "today": String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today": string;
     }
     /**
      * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
      * cells (unassigned-units badge, day title, occupancy percent). `.headersContainer`/`.headerCell`
-     * and each cell's `data-day` attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
+     * and each cell's `data-date` (`YYYY-MM-DD`) attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
      * calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — do not rename them.
      */
     interface IglCalHeaderDays {
@@ -488,7 +497,7 @@ export namespace Components {
         "highlightedDate": string;
         "isVacationRental": boolean;
         /**
-          * Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe.
+          * Days (keyed by `dayInfo.value`) whose unassigned-units fetch is still in flight; their badges breathe.
           * @default {}
          */
         "loadingDays": { [key: string]: boolean };
@@ -496,9 +505,12 @@ export namespace Components {
           * @default []
          */
         "monthsInfo": MonthInfo[];
-        "today": String;
         /**
-          * Unassigned-unit counts keyed by `dayInfo.day`, falling back to `dayInfo.unassigned_units_nbr` per cell.
+          * `YYYY-MM-DD`
+         */
+        "today": string;
+        /**
+          * Unassigned-unit counts keyed by `dayInfo.value` (`YYYY-MM-DD`), falling back to `dayInfo.unassigned_units_nbr` per cell.
           * @default {}
          */
         "unassignedRoomsNumber": { [key: string]: number };
@@ -3004,7 +3016,7 @@ export namespace Components {
          */
         "dateLabel": string;
         /**
-          * Initial date values. Expects `{ fromDate: string | Date, toDate: string | Date }`. Re-initializes dates whenever this prop reference changes.
+          * Initial date values as `YYYY-MM-DD` strings: `{ fromDate, toDate }`. `selectedDateRange` is emitted in the same format. Re-initializes dates whenever this prop reference changes.
          */
         "defaultData": { [key: string]: any };
         /**
@@ -8756,12 +8768,12 @@ declare global {
         new (): HTMLIglCalHeaderElement;
     };
     interface HTMLIglCalHeaderDaysElementEventMap {
-        "dayBadgeClicked": { day: string; currentDate: any };
+        "dayBadgeClicked": { date: string };
     }
     /**
      * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
      * cells (unassigned-units badge, day title, occupancy percent). `.headersContainer`/`.headerCell`
-     * and each cell's `data-day` attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
+     * and each cell's `data-date` (`YYYY-MM-DD`) attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
      * calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — do not rename them.
      */
     interface HTMLIglCalHeaderDaysElement extends Components.IglCalHeaderDays, HTMLStencilElement {
@@ -9075,7 +9087,7 @@ declare global {
     };
     interface HTMLIglToBeAssignedElementEventMap {
         "optionEvent": { key: string; data?: unknown };
-        "showBookingPopup": { key: 'calendar'; data: number; noScroll: boolean };
+        "showBookingPopup": { key: 'calendar'; data: string; noScroll: boolean };
         "addToBeAssignedEvent": { key: 'tobeAssignedEvents'; data: [] };
         "highlightToBeAssignedBookingEvent": { key: 'highlightBookingId'; data: { bookingId: string } };
     }
@@ -14636,7 +14648,10 @@ declare namespace LocalJSX {
         "onScrollPageToRoom"?: (event: IglCalBodyCustomEvent<any>) => void;
         "onShowBookingPopup"?: (event: IglCalBodyCustomEvent<any>) => void;
         "propertyId"?: number;
-        "today"?: String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today"?: string;
     }
     interface IglCalFooter {
         "calendarData"?: { [key: string]: any };
@@ -14646,7 +14661,10 @@ declare namespace LocalJSX {
          */
         "isLegendOpen"?: boolean;
         "onOptionEvent"?: (event: IglCalFooterCustomEvent<{ [key: string]: any }>) => void;
-        "today"?: String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today"?: string;
     }
     interface IglCalHeader {
         "calendarData"?: { [key: string]: any };
@@ -14664,12 +14682,15 @@ declare namespace LocalJSX {
         "onOptionEvent"?: (event: IglCalHeaderCustomEvent<{ [key: string]: any }>) => void;
         "propertyid"?: number;
         "to_date"?: string;
-        "today"?: String;
+        /**
+          * `YYYY-MM-DD`
+         */
+        "today"?: string;
     }
     /**
      * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
      * cells (unassigned-units badge, day title, occupancy percent). `.headersContainer`/`.headerCell`
-     * and each cell's `data-day` attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
+     * and each cell's `data-date` (`YYYY-MM-DD`) attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
      * calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — do not rename them.
      */
     interface IglCalHeaderDays {
@@ -14680,7 +14701,7 @@ declare namespace LocalJSX {
         "highlightedDate"?: string;
         "isVacationRental"?: boolean;
         /**
-          * Days (keyed by `dayInfo.day`) whose unassigned-units fetch is still in flight; their badges breathe.
+          * Days (keyed by `dayInfo.value`) whose unassigned-units fetch is still in flight; their badges breathe.
           * @default {}
          */
         "loadingDays"?: { [key: string]: boolean };
@@ -14691,10 +14712,13 @@ declare namespace LocalJSX {
         /**
           * Emitted only when a badge with a non-zero count is clicked — a zero-count badge is inert.
          */
-        "onDayBadgeClicked"?: (event: IglCalHeaderDaysCustomEvent<{ day: string; currentDate: any }>) => void;
-        "today"?: String;
+        "onDayBadgeClicked"?: (event: IglCalHeaderDaysCustomEvent<{ date: string }>) => void;
         /**
-          * Unassigned-unit counts keyed by `dayInfo.day`, falling back to `dayInfo.unassigned_units_nbr` per cell.
+          * `YYYY-MM-DD`
+         */
+        "today"?: string;
+        /**
+          * Unassigned-unit counts keyed by `dayInfo.value` (`YYYY-MM-DD`), falling back to `dayInfo.unassigned_units_nbr` per cell.
           * @default {}
          */
         "unassignedRoomsNumber"?: { [key: string]: number };
@@ -14948,7 +14972,10 @@ declare namespace LocalJSX {
         "onAddToBeAssignedEvent"?: (event: IglToBeAssignedCustomEvent<{ key: 'tobeAssignedEvents'; data: [] }>) => void;
         "onHighlightToBeAssignedBookingEvent"?: (event: IglToBeAssignedCustomEvent<{ key: 'highlightBookingId'; data: { bookingId: string } }>) => void;
         "onOptionEvent"?: (event: IglToBeAssignedCustomEvent<{ key: string; data?: unknown }>) => void;
-        "onShowBookingPopup"?: (event: IglToBeAssignedCustomEvent<{ key: 'calendar'; data: number; noScroll: boolean }>) => void;
+        /**
+          * `data` is the `YYYY-MM-DD` day to scroll to.
+         */
+        "onShowBookingPopup"?: (event: IglToBeAssignedCustomEvent<{ key: 'calendar'; data: string; noScroll: boolean }>) => void;
         "propertyid"?: number;
     }
     interface IglooCalendar {
@@ -17401,7 +17428,7 @@ declare namespace LocalJSX {
          */
         "dateLabel"?: string;
         /**
-          * Initial date values. Expects `{ fromDate: string | Date, toDate: string | Date }`. Re-initializes dates whenever this prop reference changes.
+          * Initial date values as `YYYY-MM-DD` strings: `{ fromDate, toDate }`. `selectedDateRange` is emitted in the same format. Re-initializes dates whenever this prop reference changes.
          */
         "defaultData"?: { [key: string]: any };
         /**
@@ -22329,21 +22356,25 @@ declare namespace LocalJSX {
     interface IglCalBodyAttributes {
         "isScrollViewDragging": boolean;
         "propertyId": number;
+        "today": string;
         "currency": string;
         "language": string;
         "highlightedDate": string;
     }
     interface IglCalFooterAttributes {
         "isLegendOpen": boolean;
+        "today": string;
         "highlightedDate": string;
     }
     interface IglCalHeaderAttributes {
+        "today": string;
         "propertyid": number;
         "to_date": string;
         "highlightedDate": string;
     }
     interface IglCalHeaderDaysAttributes {
         "isVacationRental": boolean;
+        "today": string;
         "highlightedDate": string;
     }
     interface IglCalHeaderToolbarAttributes {
@@ -24746,7 +24777,7 @@ declare module "@stencil/core" {
             /**
              * The `.headersContainer` sticky bar of `igl-cal-header`: the month row plus the per-day header
              * cells (unassigned-units badge, day title, occupancy percent). `.headersContainer`/`.headerCell`
-             * and each cell's `data-day` attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
+             * and each cell's `data-date` (`YYYY-MM-DD`) attribute are read directly by `igloo-calendar.tsx`'s drag-bounds
              * calculation (`document.querySelectorAll('.headersContainer .headerCell')`) — do not rename them.
              */
             "igl-cal-header-days": LocalJSX.IntrinsicElements["igl-cal-header-days"] & JSXBase.HTMLAttributes<HTMLIglCalHeaderDaysElement>;

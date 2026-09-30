@@ -14,6 +14,7 @@ import { HKIssue } from '@/models/housekeeping';
 import { DayUseBookings } from '@/services/property/types';
 import { _formatTime } from '@/components/ir-booking-details/functions';
 import { isBlockUnit, showToast } from '@/utils/utils';
+import { addDaysISO, nightsBetween, todayISO } from '@/utils/calendar-dates';
 
 export type RoomCategory = RoomType & { expanded: boolean };
 
@@ -26,7 +27,8 @@ export class IglCalBody {
   @Prop() isScrollViewDragging: boolean;
   @Prop() propertyId: number;
   @Prop() calendarData: { [key: string]: any };
-  @Prop() today: String;
+  /** `YYYY-MM-DD` */
+  @Prop() today: string;
   @Prop() currency;
   @Prop() language: string;
   @Prop() countries: ICountry[];
@@ -46,7 +48,6 @@ export class IglCalBody {
 
   private fromRoomId: number = -1;
   private newEvent: { [key: string]: any };
-  private currentDate = new Date();
   private bookingMap = new Map<string | number, string | number>();
   private roomEventsIndex = new Map<number, { start: number; end: number; isBlock: boolean }[]>();
   private interactiveTitle: HTMLIrInteractiveTitleElement[] = [];
@@ -58,12 +59,11 @@ export class IglCalBody {
   // private disabledCellsCache = new Map<string, boolean>();
 
   componentWillLoad() {
-    this.currentDate.setHours(0, 0, 0, 0);
     this.bookingMap = this.getBookingMap(this.getBookingData());
     this.updateRoomEventsIndex();
     this.updateTodayCheckinStatus();
     calendar_dates.days.forEach(day => {
-      this.dayRateMap.set(day.day, day.rate);
+      this.dayRateMap.set(day.value, day.rate);
     });
     this.updateDisabledCellsCache();
     this.updateDayUseBookingKeys();
@@ -102,7 +102,7 @@ export class IglCalBody {
   @Listen('gotoRoomEvent', { target: 'window' })
   gotoRoom(event: CustomEvent) {
     let roomId = event.detail.roomId;
-    let category = this.getRoomCategoryByRoomId(roomId);
+    let category = this.getRoomTypeById(roomId);
     if (!category.expanded) {
       this.toggleCategory(category);
       setTimeout(() => {
@@ -138,7 +138,7 @@ export class IglCalBody {
     });
   }
 
-  private getRoomCategoryByRoomId(roomId) {
+  private getRoomTypeById(roomId) {
     return this.calendarData.roomsInfo.find(roomCategory => {
       return this.getRoomtypeUnits(roomCategory).find(room => this.getRoomId(room) === roomId);
     });
@@ -156,8 +156,8 @@ export class IglCalBody {
     return this.getRoomtypeUnits(roomCategory).length;
   }
 
-  private getRoomtypeUnits(roomCategory: RoomCategory) {
-    return (roomCategory && roomCategory.physicalrooms) || [];
+  private getRoomtypeUnits(roomtype: RoomCategory) {
+    return (roomtype && roomtype.physicalrooms) || [];
   }
 
   private getRoomName(roomInfo) {
@@ -181,7 +181,7 @@ export class IglCalBody {
   }
 
   private getSelectedCellRefName(roomId, selectedDay) {
-    return 'room_' + roomId + '_' + selectedDay.currentDate;
+    return 'room_' + roomId + '_' + selectedDay.value;
   }
 
   // getSplitBookingEvents(newEvent) {
@@ -191,10 +191,7 @@ export class IglCalBody {
     console.log(newEvent.FROM_DATE);
     return this.getBookingData().some(bookingEvent => {
       if (!['003', '002', '004'].includes(bookingEvent.STATUS_CODE)) {
-        if (
-          new Date(newEvent.FROM_DATE).getTime() >= new Date(bookingEvent.FROM_DATE).getTime() &&
-          new Date(newEvent.FROM_DATE).getTime() <= new Date(bookingEvent.TO_DATE).getTime()
-        ) {
+        if (newEvent.FROM_DATE >= bookingEvent.FROM_DATE && newEvent.FROM_DATE <= bookingEvent.TO_DATE) {
           return bookingEvent;
         }
       }
@@ -203,17 +200,10 @@ export class IglCalBody {
 
   private addNewEvent(roomCategory) {
     let keys = Object.keys(this.selectedRooms);
-    let startDate: Date, endDate: Date;
-
-    if (this.selectedRooms[keys[0]].currentDate < this.selectedRooms[keys[1]].currentDate) {
-      startDate = new Date(this.selectedRooms[keys[0]].currentDate);
-      endDate = new Date(this.selectedRooms[keys[1]].currentDate);
-    } else {
-      startDate = new Date(this.selectedRooms[keys[1]].currentDate);
-      endDate = new Date(this.selectedRooms[keys[0]].currentDate);
-    }
-
-    const dateDifference = Math.round(Math.abs((endDate.getTime() - startDate.getTime()) / 86_400_000));
+    const first: string = this.selectedRooms[keys[0]].value;
+    const second: string = this.selectedRooms[keys[1]].value;
+    const [startDate, endDate] = first < second ? [first, second] : [second, first];
+    const dateDifference = nightsBetween(startDate, endDate);
     this.newEvent = {
       ID: 'NEW_TEMP_EVENT',
       NAME: <span>&nbsp;</span>,
@@ -221,8 +211,8 @@ export class IglCalBody {
       PHONE: '',
       convertBooking: false,
       REFERENCE_TYPE: 'PHONE',
-      FROM_DATE: startDate.getFullYear() + '-' + this.getTwoDigitNumStr(startDate.getMonth() + 1) + '-' + this.getTwoDigitNumStr(startDate.getDate()),
-      TO_DATE: endDate.getFullYear() + '-' + this.getTwoDigitNumStr(endDate.getMonth() + 1) + '-' + this.getTwoDigitNumStr(endDate.getDate()),
+      FROM_DATE: startDate,
+      TO_DATE: endDate,
       BALANCE: '',
       NOTES: '',
       RELEASE_AFTER_HOURS: 0,
@@ -242,10 +232,8 @@ export class IglCalBody {
       event_type: 'BAR_BOOKING',
       STATUS: 'TEMP-EVENT',
       defaultDateRange: {
-        fromDate: null,
-        fromDateStr: '',
-        toDate: null,
-        toDateStr: '',
+        fromDate: startDate,
+        toDate: endDate,
         dateDifference,
         editable: false,
         message: 'Including 5.00% City Tax - Excluding 11.00% VAT',
@@ -255,10 +243,6 @@ export class IglCalBody {
     let popupTitle = roomCategory.name + ' ' + this.getRoomName(this.getRoomById(this.getRoomtypeUnits(roomCategory), this.selectedRooms[keys[0]].roomId));
     this.newEvent.BLOCK_DATES_TITLE = `${locales.entries.Lcz_BlockDatesFor} ${popupTitle}`;
     this.newEvent.TITLE += popupTitle;
-    this.newEvent.defaultDateRange.toDate = new Date(this.newEvent.TO_DATE + 'T00:00:00');
-    this.newEvent.defaultDateRange.fromDate = new Date(this.newEvent.FROM_DATE + 'T00:00:00');
-    this.newEvent.defaultDateRange.fromDateStr = this.getDateStr(this.newEvent.defaultDateRange.fromDate);
-    this.newEvent.defaultDateRange.toDateStr = this.getDateStr(this.newEvent.defaultDateRange.toDate);
     this.newEvent.ENTRY_DATE = new Date().toISOString();
     this.newEvent.legendData = this.calendarData.formattedLegendData;
 
@@ -269,14 +253,6 @@ export class IglCalBody {
 
     this.getBookingData().push(this.newEvent);
     return this.newEvent;
-  }
-
-  private getTwoDigitNumStr(num) {
-    return num <= 9 ? '0' + num : num;
-  }
-
-  private getDateStr(date, locale = 'default') {
-    return date.getDate() + ' ' + date.toLocaleString(locale, { month: 'short' }) + ' ' + date.getFullYear();
   }
 
   private removeNewEvent() {
@@ -293,8 +269,8 @@ export class IglCalBody {
   }
 
   private clickCell(roomId: number, selectedDay: any, roomCategory: RoomCategory) {
-    const earliestSelectableDate = this.currentDate.getTime() - 86_400_000; // allow starting the selection from yesterday
-    if (!this.isScrollViewDragging && selectedDay.currentDate >= earliestSelectableDate) {
+    const earliestSelectableDate = addDaysISO(todayISO(), -1); // allow starting the selection from yesterday
+    if (!this.isScrollViewDragging && selectedDay.value >= earliestSelectableDate) {
       let refKey = this.getSelectedCellRefName(roomId, selectedDay);
       if (this.selectedRooms.hasOwnProperty(refKey)) {
         this.removeNewEvent();
@@ -404,8 +380,8 @@ export class IglCalBody {
       // const isActive = true;
       return (
         <div
-          class={`cellData  font-weight-bold categoryPriceColumn ${addClass + '_' + dayInfo.day} ${
-            dayInfo.day === this.today || dayInfo.day === this.highlightedDate ? 'currentDay' : ''
+          class={`cellData  font-weight-bold categoryPriceColumn ${addClass + '_' + dayInfo.value} ${
+            dayInfo.value === this.today || dayInfo.value === this.highlightedDate ? 'currentDay' : ''
           }`}
         >
           {isCategory ? (
@@ -431,7 +407,7 @@ export class IglCalBody {
       const prevDate = moment(dayInfo.value, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD');
       const isDisabled = (isCellDisabled && Object.keys(this.selectedRooms).length === 0) || (isCellDisabled && this.isCellDisabled(Number(roomId), prevDate));
       const isSelected = this.selectedRooms.hasOwnProperty(this.getSelectedCellRefName(roomId, dayInfo));
-      const isCurrentDate = dayInfo.day === this.today || dayInfo.day === this.highlightedDate;
+      const isCurrentDate = dayInfo.value === this.today || dayInfo.value === this.highlightedDate;
       const cleaningDates = calendar_dates.cleaningTasks.has(+roomId) ? calendar_dates.cleaningTasks.get(+roomId) : null;
       const shouldBeCleaned = ['001', '003'].includes(calendar_data.cleaning_frequency?.code) ? false : cleaningDates?.has(dayInfo.value);
       const dayUseBooking = this.getDayUseBooking(Number(roomId), dayInfo.value);
@@ -439,8 +415,8 @@ export class IglCalBody {
       const dayUseCellClass = dayUseBooking ? `dayUseBooked dayUseBooked--${dayUseStatus}` : '';
       return (
         <div
-          class={`cellData position-relative roomCell ${isCellDisabled ? 'disabled' : ''} ${'room_' + roomId + '_' + dayInfo.day} ${isCurrentDate ? 'currentDay' : ''} ${
-            this.dragOverElement === roomId + '_' + dayInfo.day ? 'dragOverHighlight' : ''
+          class={`cellData position-relative roomCell ${isCellDisabled ? 'disabled' : ''} ${isCurrentDate ? 'currentDay' : ''} ${
+            this.dragOverElement === roomId + '_' + dayInfo.value ? 'dragOverHighlight' : ''
           } ${isSelected ? 'selectedDay' : ''} ${dayUseCellClass}`}
           // style={!isDisabled && { '--cell-cursor': 'default' }}
           style={{ '--cell-cursor': 'default' }}

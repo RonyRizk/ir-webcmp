@@ -92,11 +92,14 @@ export class IrInterceptor {
     axios.interceptors.request.use(this.handleRequest.bind(this), this.handleError.bind(this));
     axios.interceptors.response.use(this.handleResponse.bind(this), this.handleError.bind(this));
   }
+  private getLastPathSegment(url: string): string {
+    return `/${new URL(url, 'http://dummy.local').pathname.split('/').filter(Boolean).pop()}`;
+  }
   /**
    * Removes query params from URL for consistent endpoint matching.
    */
   private extractEndpoint(url: string): string {
-    return url.split('?')[0];
+    return this.getLastPathSegment(url.split('?')[0]);
   }
 
   /**
@@ -112,6 +115,7 @@ export class IrInterceptor {
    */
   private handleRequest(config: AxiosRequestConfig) {
     const extractedUrl = this.extractEndpoint(config.url);
+    console.log({ extractedUrl });
     interceptor_requests[extractedUrl] = 'pending';
     config.params = config.params || {};
     // if (this.ticket) {

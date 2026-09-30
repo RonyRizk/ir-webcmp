@@ -7,12 +7,12 @@
 
 ## Properties
 
-| Property          | Attribute          | Description | Type                      | Default     |
-| ----------------- | ------------------ | ----------- | ------------------------- | ----------- |
-| `calendarData`    | --                 |             | `{ [key: string]: any; }` | `undefined` |
-| `highlightedDate` | `highlighted-date` |             | `string`                  | `undefined` |
-| `isLegendOpen`    | `is-legend-open`   |             | `boolean`                 | `false`     |
-| `today`           | --                 |             | `String`                  | `undefined` |
+| Property          | Attribute          | Description  | Type                      | Default     |
+| ----------------- | ------------------ | ------------ | ------------------------- | ----------- |
+| `calendarData`    | --                 |              | `{ [key: string]: any; }` | `undefined` |
+| `highlightedDate` | `highlighted-date` |              | `string`                  | `undefined` |
+| `isLegendOpen`    | `is-legend-open`   |              | `boolean`                 | `false`     |
+| `today`           | `today`            | `YYYY-MM-DD` | `string`                  | `undefined` |
 
 
 ## Events

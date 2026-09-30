@@ -4,6 +4,7 @@ import { buildSplitIndex, calculateDaysBetweenDates, getSplitRole, transformNewB
 import { checkMealPlan, formatAmount, isBlockUnit, SelectOption, showToast } from '@/utils/utils';
 import { IRoomNightsData, CalendarModalEvent } from '@/models/property-types';
 import moment from 'moment';
+import { addDaysISO } from '@/utils/calendar-dates';
 import { EventsService } from '@/services/events.service';
 import locales from '@/stores/locales.store';
 import { ICountry } from '@/models/IBooking';
@@ -204,15 +205,11 @@ export class IglBookingEvent {
                 let fromDate = oldFromDate;
                 let toDate = oldToDate;
                 if (this.isShrinking) {
-                  if (moment(from_date, 'YYYY-MM-DD').isAfter(moment(oldFromDate, 'YYYY-MM-DD')) && moment(to_date, 'YYYY-MM-DD').isBefore(moment(oldToDate, 'YYYY-MM-DD'))) {
+                  if (from_date > oldFromDate && to_date < oldToDate) {
                     fromDate = oldFromDate;
                     toDate = to_date;
                   } else {
-                    shrinkingDirection = moment(from_date, 'YYYY-MM-DD').isAfter(moment(oldFromDate, 'YYYY-MM-DD'))
-                      ? 'left'
-                      : moment(to_date, 'YYYY-MM-DD').isBefore(moment(oldToDate, 'YYYY-MM-DD'))
-                        ? 'right'
-                        : null;
+                    shrinkingDirection = from_date > oldFromDate ? 'left' : to_date < oldToDate ? 'right' : null;
                     if (shrinkingDirection === 'left') {
                       fromDate = from_date;
                     }
@@ -223,13 +220,13 @@ export class IglBookingEvent {
                   }
                 } else {
                   console.log('stretching');
-                  if (moment(from_date, 'YYYY-MM-DD').isBefore(moment(oldFromDate, 'YYYY-MM-DD'))) {
+                  if (from_date < oldFromDate) {
                     fromDate = from_date;
-                    const newToDate = moment(from_date, 'YYYY-MM-DD').add(diffDays, 'days');
-                    toDate = newToDate.isBefore(moment(to_date, 'YYYY-MM-DD'), 'days') ? to_date : newToDate.format('YYYY-MM-DD');
-                  } else if (moment(to_date, 'YYYY-MM-DD').isAfter(moment(oldToDate, 'YYYY-MM-DD'))) {
+                    const newToDate = addDaysISO(from_date, diffDays);
+                    toDate = newToDate < to_date ? to_date : newToDate;
+                  } else if (to_date > oldToDate) {
                     toDate = to_date;
-                    fromDate = moment(to_date, 'YYYY-MM-DD').subtract(diffDays, 'days').format('YYYY-MM-DD');
+                    fromDate = addDaysISO(to_date, -diffDays);
                   }
                 }
                 console.warn({ fromDate, toDate });
@@ -421,10 +418,7 @@ export class IglBookingEvent {
         //   status: '200',
         // };
       } else {
-        if (
-          moment(from_date, 'YYYY-MM-DD').isSame(moment(this.bookingEvent.FROM_DATE, 'YYYY-MM-DD')) &&
-          moment(to_date, 'YYYY-MM-DD').isSame(moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD'))
-        ) {
+        if (from_date === this.bookingEvent.FROM_DATE && to_date === this.bookingEvent.TO_DATE) {
           const initialRT = this.findRoomType(this.bookingEvent.PR_ID);
           const targetRT = this.findRoomType(toRoomId);
           if (initialRT === targetRT) {
@@ -501,20 +495,15 @@ export class IglBookingEvent {
     }
   }
 
-  checkIfSlotOccupied(toRoomId, from_date, to_date) {
-    const fromTime = moment(from_date, 'YYYY-MM-DD');
-    const toTime = moment(to_date, 'YYYY-MM-DD');
-    const isOccupied = this.allBookingEvents
+  checkIfSlotOccupied(toRoomId, from_date: string, to_date: string) {
+    return this.allBookingEvents
       .filter(event => event.ID !== 'NEW_TEMP_EVENT')
       .some(event => {
         if (event.POOL === this.bookingEvent.POOL) {
           return false;
         }
-        const eventFromTime = moment(event.FROM_DATE, 'YYYY-MM-DD').add(1, 'days');
-        const eventToTime = moment(event.TO_DATE, 'YYYY-MM-DD');
-        return event.PR_ID === +toRoomId && toTime.isSameOrAfter(eventFromTime) && fromTime.isBefore(eventToTime);
+        return event.PR_ID === +toRoomId && to_date >= addDaysISO(event.FROM_DATE, 1) && from_date < event.TO_DATE;
       });
-    return isOccupied;
   }
 
   renderAgain() {
@@ -553,12 +542,13 @@ export class IglBookingEvent {
     return this.bookingEvent.PR_ID;
   }
 
-  getEventStartingDate() {
-    return new Date(this.bookingEvent.FROM_DATE);
+  /** The bar starts mid-cell when its stay began before the loaded window (dates are `YYYY-MM-DD`, so string order is date order). */
+  private isSkewedStart() {
+    return !this.isNewEvent() && this.bookingEvent.defaultDates.from_date < this.bookingEvent.FROM_DATE;
   }
 
-  getEventEndingDate() {
-    return new Date(this.bookingEvent.TO_DATE);
+  private isSkewedEnd() {
+    return !this.isNewEvent() && this.bookingEvent.defaultDates.to_date > this.bookingEvent.TO_DATE;
   }
 
   getEventType() {
@@ -607,10 +597,9 @@ export class IglBookingEvent {
   }
 
   getPosition() {
-    let startingDate = this.getEventStartingDate();
-    let startingCellClass = '.room_' + this.getBookedRoomId() + '_' + startingDate.getDate() + '_' + (startingDate.getMonth() + 1) + '_' + startingDate.getFullYear();
+    const startingCellSelector = `.roomCell[data-room-id="${this.getBookedRoomId()}"][data-date="${this.bookingEvent.FROM_DATE}"]`;
     let bodyContainer = document.querySelector('.bodyContainer');
-    let startingCell = document.querySelector(startingCellClass);
+    let startingCell = document.querySelector(startingCellSelector);
     let pos = { top: '0', left: '0', width: '0', height: '20px' };
     if (startingCell && bodyContainer && startingCell.getBoundingClientRect() && bodyContainer.getBoundingClientRect()) {
       let bodyContainerRect = bodyContainer.getBoundingClientRect();
@@ -619,20 +608,11 @@ export class IglBookingEvent {
       pos.top = boundingRect.top + boundingRect.height / 2 - this.vertSpace - bodyContainerRect.top + 'px';
       // pos.left = boundingRect.left + this.dayWidth / 2 + this.eventSpace / 2 - bodyContainerRect.left + 'px';
       // pos.width = this.getStayDays() * this.dayWidth - this.eventSpace + 'px';
-      pos.left =
-        boundingRect.left +
-        (!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? 0 : this.dayWidth / 2) +
-        this.eventSpace / 2 -
-        bodyContainerRect.left +
-        'px';
-      pos.width =
-        (this.getStayDays() + (!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? 0.5 : 0)) *
-          this.dayWidth -
-        this.eventSpace +
-        'px';
+      pos.left = boundingRect.left + (this.isSkewedStart() ? 0 : this.dayWidth / 2) + this.eventSpace / 2 - bodyContainerRect.left + 'px';
+      pos.width = (this.getStayDays() + (this.isSkewedStart() ? 0.5 : 0)) * this.dayWidth - this.eventSpace + 'px';
     } else {
       console.log(this.bookingEvent);
-      console.log('Locating event cell failed ', startingCellClass);
+      console.log('Locating event cell failed ', startingCellSelector);
     }
     //console.log(pos);
     return pos;
@@ -783,9 +763,7 @@ export class IglBookingEvent {
           },
         });
       } else {
-        const finalWidth =
-          this.finalWidth -
-          (!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? this.dayWidth / 2 : 0);
+        const finalWidth = this.finalWidth - (this.isSkewedStart() ? this.dayWidth / 2 : 0);
         const numberOfDays = Math.round(finalWidth / this.dayWidth);
         console.log(finalWidth, this.dayWidth, numberOfDays);
         let initialStayDays = this.getStayDays();
@@ -801,7 +779,7 @@ export class IglBookingEvent {
             // set TO_DATE = FROM_DATE + numberOfDays
           }
           // const nbrOfDays =
-          // !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? numberOfDays - 1 : numberOfDays;
+          // this.isSkewedStart() ? numberOfDays - 1 : numberOfDays;
           this.dragOverEventData.emit({
             id: 'STRETCH_OVER_END',
             data: {
@@ -813,7 +791,7 @@ export class IglBookingEvent {
               nbOfDays: numberOfDays,
             },
           });
-          const offset = !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? +this.dayWidth / 2 : 0;
+          const offset = this.isSkewedStart() ? +this.dayWidth / 2 : 0;
           this.element.style.width = `${numberOfDays * this.dayWidth - this.eventSpace + offset}px`;
         } else {
           this.element.style.left = `${this.initialLeft}px`;
@@ -975,8 +953,8 @@ export class IglBookingEvent {
           class={{
             'bookingEventBase': true,
             'pending': pending,
-            'skewedLeft': !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)),
-            'skewedRight': !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.to_date)).isAfter(new Date(this.bookingEvent.TO_DATE)),
+            'skewedLeft': this.isSkewedStart(),
+            'skewedRight': this.isSkewedEnd(),
             // 'striped-bar vertical': this.bookingEvent.STATUS === 'IN-HOUSE',
             'striped-bar animated': isBlockUnit(this.bookingEvent.STATUS_CODE) && this.bookingEvent.STATUS_CODE === '003',
             'border border-dark ota-booking-event':
@@ -1014,18 +992,14 @@ export class IglBookingEvent {
         {/* {(this.bookingEvent.is_direct || isBlockUnit(this.bookingEvent.STATUS_CODE)) && ( */}
         <Fragment>
           <div
-            class={`bookingEventDragHandle leftSide ${
-              !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? 'skewedLeft' : ''
-            }
-            ${!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.to_date)).isAfter(new Date(this.bookingEvent.TO_DATE)) ? 'skewedRight' : ''}`}
+            class={`bookingEventDragHandle leftSide ${this.isSkewedStart() ? 'skewedLeft' : ''}
+            ${this.isSkewedEnd() ? 'skewedRight' : ''}`}
             onTouchStart={event => this.startDragging(event, 'leftSide')}
             onMouseDown={event => this.startDragging(event, 'leftSide')}
           ></div>
           <div
-            class={`bookingEventDragHandle rightSide ${
-              !this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.from_date)).isBefore(new Date(this.bookingEvent.FROM_DATE)) ? 'skewedLeft' : ''
-            }
-              ${!this.isNewEvent() && moment(new Date(this.bookingEvent.defaultDates.to_date)).isAfter(new Date(this.bookingEvent.TO_DATE)) ? 'skewedRight' : ''}`}
+            class={`bookingEventDragHandle rightSide ${this.isSkewedStart() ? 'skewedLeft' : ''}
+              ${this.isSkewedEnd() ? 'skewedRight' : ''}`}
             onTouchStart={event => this.startDragging(event, 'rightSide')}
             onMouseDown={event => this.startDragging(event, 'rightSide')}
           ></div>

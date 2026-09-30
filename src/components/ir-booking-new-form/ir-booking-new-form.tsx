@@ -1,5 +1,6 @@
 import { IglBookPropertyPayloadPlusBooking } from '@/models/igl-book-property';
 import { Component, Host, Prop, State, h } from '@stencil/core';
+import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 
 @Component({
   tag: 'ir-booking-new-form',
@@ -14,15 +15,12 @@ export class IrBookingNewForm {
   @State() bookingItem: IglBookPropertyPayloadPlusBooking | null = null;
 
   private handleTriggerClicked() {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = todayISO();
     (this.bookingItem as IglBookPropertyPayloadPlusBooking) = {
       FROM_DATE: undefined,
       defaultDateRange: {
-        fromDate: new Date(),
-        fromDateStr: '',
-        toDate: tomorrow,
-        toDateStr: '',
+        fromDate: today,
+        toDate: addDaysISO(today, 1),
         dateDifference: 0,
         message: '',
       },

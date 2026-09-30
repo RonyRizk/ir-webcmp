@@ -3,6 +3,7 @@ import { canCheckIn, findCountry, formatAmount } from '@/utils/utils';
 import { ICountry } from '@/models/IBooking';
 import { EventsService } from '@/services/events.service';
 import moment from 'moment';
+import { todayISO } from '@/utils/calendar-dates';
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { CalendarModalEvent } from '@/models/property-types';
@@ -49,19 +50,24 @@ export class IglBookingEventHover {
     if (selectedRt) {
       this.shouldHideUnassignUnit = selectedRt.physicalrooms.length === 1;
     }
-    if (moment(this.bookingEvent.TO_DATE, 'YYYY-MM-DD').isBefore(moment())) {
+    // TO_DATE's midnight is already behind "now" once the departure day arrives.
+    if (this.bookingEvent.TO_DATE <= todayISO()) {
       this.hideButtons = true;
     }
     this.baseColor = this.getEventLegend().color;
     this.bookingColor = this.bookingEvent.ROOM_INFO?.calendar_extra ? this.bookingEvent.ROOM_INFO?.calendar_extra?.booking_color : null;
-    this.canCheckInOrCheckout = moment().isSameOrAfter(new Date(this.bookingEvent.FROM_DATE), 'days') && moment().isBefore(new Date(this.bookingEvent.TO_DATE), 'days');
+    this.canCheckInOrCheckout = this.isStayingToday();
+  }
+
+  /** Today falls on one of the booked nights (`FROM_DATE` ≤ today < `TO_DATE`). */
+  private isStayingToday() {
+    const today = todayISO();
+    return today >= this.bookingEvent.FROM_DATE && today < this.bookingEvent.TO_DATE;
   }
 
   @Watch('bookingEvent')
   handleBookingEventChange(newValue, oldValue) {
-    if (newValue !== oldValue)
-      this.canCheckInOrCheckout =
-        moment(new Date()).isSameOrAfter(new Date(this.bookingEvent.FROM_DATE), 'days') && moment(new Date()).isBefore(new Date(this.bookingEvent.TO_DATE), 'days');
+    if (newValue !== oldValue) this.canCheckInOrCheckout = this.isStayingToday();
   }
 
   @Listen('keydown', { target: 'body' })
@@ -190,7 +196,7 @@ export class IglBookingEventHover {
     const now = moment();
     if (
       this.bookingEvent.ROOM_INFO?.in_out?.code === '000' &&
-      moment().isSameOrAfter(new Date(this.bookingEvent.TO_DATE), 'days') &&
+      todayISO() >= this.bookingEvent.TO_DATE &&
       compareTime(now.toDate(), createDateWithOffsetAndHour(calendar_data.checkin_checkout_hours?.offset, calendar_data.checkin_checkout_hours?.hour))
     ) {
       return true;
@@ -210,25 +216,14 @@ export class IglBookingEventHover {
     this.handleBookingOption('EDIT_BOOKING');
   }
 
-  private getStringDateFormat(dt) {
-    return dt.getFullYear() + '-' + (dt.getMonth() < 9 ? '0' : '') + (dt.getMonth() + 1) + '-' + (dt.getDate() <= 9 ? '0' : '') + dt.getDate();
-  }
-
   private handleAddRoom() {
-    let fromDate = new Date(this.bookingEvent.FROM_DATE);
-    fromDate.setHours(0, 0, 0, 0);
-    let from_date_str = this.getStringDateFormat(fromDate);
-
-    let toDate = new Date(this.bookingEvent.TO_DATE);
-    //toDate.setDate(toDate.getDate() + 1);
-    toDate.setHours(0, 0, 0, 0);
-    let to_date_str = this.getStringDateFormat(toDate);
+    const { FROM_DATE, TO_DATE } = this.bookingEvent;
     let eventData = {
       ID: '',
       NAME: '',
       BOOKING_NUMBER: this.bookingEvent.BOOKING_NUMBER,
-      FROM_DATE: from_date_str, // "2023-07-09",
-      TO_DATE: to_date_str, // "2023-07-11",
+      FROM_DATE,
+      TO_DATE,
       roomsInfo: this.bookingEvent.roomsInfo,
       ARRIVAL: this.bookingEvent.ARRIVAL,
       ADD_ROOM_TO_BOOKING: this.bookingEvent.ID,
@@ -240,10 +235,8 @@ export class IglBookingEventHover {
       SOURCE: this.bookingEvent.SOURCE,
       booking: this.bookingEvent?.base_booking,
       defaultDateRange: {
-        fromDate: fromDate,
-        fromDateStr: '',
-        toDate: toDate,
-        toDateStr: '',
+        fromDate: FROM_DATE,
+        toDate: TO_DATE,
         dateDifference: 0,
         editabled: true,
         message: 'Including 5.00% City Tax - Excluding 11.00% VAT',

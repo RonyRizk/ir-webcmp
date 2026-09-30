@@ -37,7 +37,7 @@ export class IrDateRange {
   @Prop({ reflect: true }) size: 's' | 'm' | 'l' = 's';
 
   /**
-   * Initial date values. Expects `{ fromDate: string | Date, toDate: string | Date }`.
+   * Initial date values as `YYYY-MM-DD` strings: `{ fromDate, toDate }`. `selectedDateRange` is emitted in the same format.
    * Re-initializes dates whenever this prop reference changes.
    */
   @Prop() defaultData: { [key: string]: any };
@@ -135,13 +135,12 @@ export class IrDateRange {
 
   private initializeDates() {
     if (this.defaultData) {
+      // `YYYY-MM-DD` parsed as a local day — `new Date('YYYY-MM-DD')` would be UTC midnight (the previous day west of UTC).
       if (this.defaultData.fromDate) {
-        this.fromDate = new Date(this.defaultData.fromDate);
-        this.fromDate.setHours(0, 0, 0, 0);
+        this.fromDate = moment(this.defaultData.fromDate, 'YYYY-MM-DD').toDate();
       }
       if (this.defaultData.toDate) {
-        this.toDate = new Date(this.defaultData.toDate);
-        this.toDate.setHours(0, 0, 0, 0);
+        this.toDate = moment(this.defaultData.toDate, 'YYYY-MM-DD').toDate();
       }
     }
     if (this.fromDate && this.toDate) {
@@ -169,10 +168,8 @@ export class IrDateRange {
     const endMoment = moment(end);
 
     this.handleDateSelectEvent('selectedDateRange', {
-      fromDate: start.getTime(),
-      toDate: end.getTime(),
-      fromDateStr: startMoment.format('DD MMM YYYY'),
-      toDateStr: endMoment.format('DD MMM YYYY'),
+      fromDate: startMoment.format('YYYY-MM-DD'),
+      toDate: endMoment.format('YYYY-MM-DD'),
       dateDifference: this.totalNights,
     });
     this.dateRangeChange.emit({ checkIn: startMoment, checkOut: endMoment });

@@ -33,7 +33,8 @@ export class IglRateExtenderForm {
   @State() inventory: number | null = null;
   @State() isEndDateBeforeFromDate: boolean = false;
   @State() defaultTotalNights = 0;
-  @State() dates: { from_date: Date; to_date: Date } = { from_date: new Date(), to_date: new Date() };
+  /** `YYYY-MM-DD` */
+  @State() dates: { from_date: string; to_date: string } = { from_date: '', to_date: '' };
 
   @Event() closeRoomNightsDialog: EventEmitter<IRoomNightsDataEventPayload>;
   @Event() loadingChanged: EventEmitter<boolean>;
@@ -45,7 +46,7 @@ export class IglRateExtenderForm {
   private shouldScrollToFirstEnabled = false;
 
   componentWillLoad() {
-    this.dates = { from_date: new Date(this.fromDate), to_date: new Date(this.toDate) };
+    this.dates = { from_date: this.fromDate, to_date: this.toDate };
     this.init();
   }
 
@@ -74,12 +75,7 @@ export class IglRateExtenderForm {
       this.initialLoading = true;
       this.inputRefs = [];
       const { from_date } = this.defaultDates;
-      if (moment(from_date, 'YYYY-MM-DD').isBefore(moment(this.fromDate, 'YYYY-MM-DD'))) {
-        this.dates.from_date = new Date(from_date);
-      } else {
-        this.dates.from_date = new Date(this.fromDate);
-      }
-      this.dates.to_date = new Date(this.toDate);
+      this.dates = { from_date: from_date < this.fromDate ? from_date : this.fromDate, to_date: this.toDate };
       this.booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
       if (this.booking) {
         const filteredRooms = this.booking.rooms.filter(room => room.identifier === this.identifier);
@@ -207,8 +203,8 @@ export class IglRateExtenderForm {
       oldRooms[selectedRoomIndex] = {
         ...oldRooms[selectedRoomIndex],
         days: this.rates,
-        to_date: moment(this.dates.to_date).format('YYYY-MM-DD'),
-        from_date: moment(this.dates.from_date).format('YYYY-MM-DD'),
+        to_date: this.dates.to_date,
+        from_date: this.dates.from_date,
       };
       const body = {
         assign_units: true,
@@ -220,8 +216,8 @@ export class IglRateExtenderForm {
         agent: this.booking.agent,
         booking: {
           booking_nbr: this.bookingNumber,
-          from_date: moment(this.dates.from_date).format('YYYY-MM-DD'),
-          to_date: moment(this.dates.to_date).format('YYYY-MM-DD'),
+          from_date: this.dates.from_date,
+          to_date: this.dates.to_date,
           remark: this.booking.remark,
           property: this.booking.property,
           source: this.booking.source,
@@ -276,8 +272,7 @@ export class IglRateExtenderForm {
           )}
         </section>
         <p class="rate-form__date-range">
-          {formatDate(moment(this.dates.from_date).format('YYYY-MM-DD'), 'YYYY-MM-DD')} <wa-icon name="arrow-right"></wa-icon>{' '}
-          {formatDate(moment(this.dates.to_date).format('YYYY-MM-DD'), 'YYYY-MM-DD')}
+          {formatDate(this.dates.from_date, 'YYYY-MM-DD')} <wa-icon name="arrow-right"></wa-icon> {formatDate(this.dates.to_date, 'YYYY-MM-DD')}
         </p>
         {(this.inventory === 0 || this.inventory === null) && (
           <wa-callout size="s" variant="danger" class="rate-form__availability-callout">
@@ -298,7 +293,7 @@ export class IglRateExtenderForm {
                 value={day.amount.toString()}
                 defaultValue={day.amount.toString()}
                 mask={'price'}
-                label={moment(day.date).format('ddd, MMM D')}
+                label={moment(day.date, 'YYYY-MM-DD').format('ddd, MMM D')}
               >
                 <span slot="start">{currency_symbol}</span>
               </ir-input>

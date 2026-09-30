@@ -171,9 +171,6 @@ export class IrRoom {
     this.mainGuest = this.getMainGuest();
   }
 
-  private getDateStr(date, locale = 'default') {
-    return date.getDate() + ' ' + date.toLocaleString(locale, { month: 'short' }) + ' ' + date.getFullYear();
-  }
   private handleEditClick() {
     this.editInitiated.emit({
       event_type: 'EDIT_BOOKING',
@@ -187,10 +184,8 @@ export class IrRoom {
       TITLE: `${locales.entries.Lcz_EditBookingFor} ${this.room?.roomtype?.name} ${(this.room?.unit as IUnit)?.name || ''}`,
       defaultDateRange: {
         dateDifference: this.room.days.length,
-        fromDate: new Date(this.room.from_date + 'T00:00:00'),
-        fromDateStr: this.getDateStr(new Date(this.room.from_date + 'T00:00:00')),
-        toDate: new Date(this.room.to_date + 'T00:00:00'),
-        toDateStr: this.getDateStr(new Date(this.room.to_date + 'T00:00:00')),
+        fromDate: this.room.from_date,
+        toDate: this.room.to_date,
         message: '',
       },
       bed_preference: this.room.bed_preference,

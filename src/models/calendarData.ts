@@ -6,7 +6,6 @@ export interface CalendarDataDetails {
   adultChildConstraints: TAdultChildConstraints;
   allowedBookingSources: IAllowedBookingSources[];
   currency: IPickupCurrency;
-  endingDate: number;
   taxes: ITaxes[];
   cleaning_frequency: {
     code: string;
@@ -16,7 +15,6 @@ export interface CalendarDataDetails {
   is_vacation_rental: boolean;
   legendData: ILegendData[];
   roomsInfo: RoomDetail[];
-  startingDate: number;
   language: string;
   toBeAssignedEvents: [];
   max_nights: number;

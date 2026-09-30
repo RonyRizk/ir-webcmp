@@ -1,12 +1,11 @@
 import { RoomType } from './property';
 
 export interface DayData {
-  day: string;
   dayDisplayName: string;
-  currentDate: number;
   tobeAssignedCount?: number | undefined;
   rate: RoomType[];
   unassigned_units_nbr: number;
   occupancy: number;
+  /** The day's only identity: `YYYY-MM-DD`, as returned by the API. */
   value: string;
 }

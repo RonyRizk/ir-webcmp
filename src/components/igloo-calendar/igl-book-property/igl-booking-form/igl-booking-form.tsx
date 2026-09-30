@@ -148,12 +148,7 @@ export class IglBookingForm {
         }}
       >
         <div class="d-flex flex-wrap">
-          <ir-date-view
-            class="mr-1 flex-fill font-weight-bold font-medium-1"
-            from_date={new Date(this.dateRangeData.fromDate)}
-            to_date={new Date(this.dateRangeData.toDate)}
-            dateOption="DD MMM YYYY"
-          ></ir-date-view>
+          <ir-date-view class="mr-1 flex-fill font-weight-bold font-medium-1" from_date={this.dateRangeData.fromDate} to_date={this.dateRangeData.toDate}></ir-date-view>
           {this.guestData.length > 1 && (
             <div class="mt-1 mt-md-0 text-right">
               {locales.entries.Lcz_TotalPrice} <span class="font-weight-bold font-medium-1">{formatAmount(this.currency.symbol, this.bookingData.TOTAL_PRICE || '0')}</span>

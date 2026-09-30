@@ -154,8 +154,10 @@ export class IglBookPropertyService {
     auto_check_in,
   }: {
     identifier: string | null;
-    check_in: Date;
-    check_out: Date;
+    /** `YYYY-MM-DD` */
+    check_in: string;
+    /** `YYYY-MM-DD` */
+    check_out: string;
     override_unit: boolean;
     unit: string;
     notes: string | null;
@@ -184,8 +186,8 @@ export class IglBookPropertyService {
                 infant_nbr: guest?.infant_nbr ?? null,
               },
               bed_preference: guest?.bed_preference ?? null,
-              from_date: moment(check_in).format('YYYY-MM-DD'),
-              to_date: moment(check_out).format('YYYY-MM-DD'),
+              from_date: check_in,
+              to_date: check_out,
               notes,
               check_in: auto_check_in,
               days: this.generateDailyRates(rateplan, i),
@@ -216,8 +218,7 @@ export class IglBookPropertyService {
         throw new Error('Invalid context: Missing date range data.');
       }
 
-      const fromDate = new Date(context.dateRangeData.fromDate);
-      const toDate = new Date(context.dateRangeData.toDate);
+      const { fromDate, toDate } = context.dateRangeData as { fromDate: string; toDate: string };
 
       const generateNewRooms = (identifier = null, check_in: boolean = false) => {
         return this.getBookedRooms({
@@ -290,8 +291,8 @@ export class IglBookPropertyService {
             extras: [...extras.filter(e => e.key !== 'payment_code'), { key: 'payment_code', value: booking_store.selectedPaymentMethod?.code }],
             agent: isAgent ? { id: sourceOption.tag } : null,
             booking: {
-              from_date: moment(fromDate).format('YYYY-MM-DD'),
-              to_date: moment(toDate).format('YYYY-MM-DD'),
+              from_date: fromDate,
+              to_date: toDate,
               remark: bookedByInfoData.message || null,
               booking_nbr: '',
               property: {
