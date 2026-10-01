@@ -115,7 +115,6 @@ export class IrInterceptor {
    */
   private handleRequest(config: AxiosRequestConfig) {
     const extractedUrl = this.extractEndpoint(config.url);
-    console.log({ extractedUrl });
     interceptor_requests[extractedUrl] = 'pending';
     config.params = config.params || {};
     // if (this.ticket) {

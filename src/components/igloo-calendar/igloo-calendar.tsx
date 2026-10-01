@@ -37,7 +37,7 @@ import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
 import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
 import housekeeping_store from '@/stores/housekeeping.store';
-import type { DayUseBookings, SetRoomCalendarExtraParams } from '@/services/property/types';
+import type { DayUseBookings, ExposedRectifierParams, SetRoomCalendarExtraParams } from '@/services/property/types';
 import { PropertyService } from '@/services/property.service';
 import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dialog';
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
@@ -620,6 +620,7 @@ export class IglooCalendar {
       DELETE_CALENDAR_POOL: this.handleDeleteCalendarPool,
       GET_UNASSIGNED_DATES: this.handleGetUnassignedDates,
       UPDATE_CALENDAR_AVAILABILITY: r => this.availabilityQueue.offer(r),
+      UPDATE_CALENDAR_AVAILABILITIES: this.handleUpdateCalendarAvailabilities,
       CHANGE_IN_DUE_AMOUNT: this.handleChangeInDueAmount,
       CHANGE_IN_BOOK_STATUS: this.handleChangeInBookStatus,
       NON_TECHNICAL_CHANGE_IN_BOOKING: this.handleNonTechnicalChangeInBooking,
@@ -896,6 +897,61 @@ export class IglooCalendar {
     }
     this.pendingUnassignedRanges.push({ fromDate, toDate });
     this.scheduleUnassignedDatesFlush();
+  }
+
+  /**
+   * Broadcast when the server rectified availability for a period. Re-reads `Get_Exposed_Calendar` for
+   * that period, clamped to the loaded range — nights outside it aren't rendered, so they aren't fetched.
+   */
+  private async handleUpdateCalendarAvailabilities(payload: ExposedRectifierParams) {
+    const { from_date: loadedFrom, to_date: loadedTo } = this.calendarData;
+    if (!loadedFrom || !loadedTo) {
+      return;
+    }
+    const notifiedFrom = toIsoDate(payload?.from);
+    const notifiedTo = toIsoDate(payload?.to);
+    if (!notifiedFrom || !notifiedTo) {
+      console.warn('UPDATE_CALENDAR_AVAILABILITIES payload has no usable range:', payload);
+      return;
+    }
+    const fromDate = notifiedFrom > loadedFrom ? notifiedFrom : loadedFrom;
+    const toDate = notifiedTo < loadedTo ? notifiedTo : loadedTo;
+    if (fromDate > toDate) {
+      return;
+    }
+    try {
+      const results = await this.bookingService.getCalendarData(this.property_id, fromDate, toDate);
+      this.applyRefreshedDays(results.days ?? []);
+    } catch (error) {
+      console.error('Error refetching calendar availabilities after UPDATE_CALENDAR_AVAILABILITIES', error);
+    }
+  }
+
+  /**
+   * Replaces loaded days with freshly fetched ones (matched by date) and recomputes their disabled cells.
+   * Writes to the store only — reassigning `calendarData` would make igl-cal-body rebuild the disabled-cells
+   * cache from stop-sale alone and drop the cells disabled for zero inventory.
+   */
+  private applyRefreshedDays(freshDays: typeof calendar_dates.days) {
+    if (freshDays.length === 0) {
+      return;
+    }
+    const freshByDate = new Map(freshDays.map(day => [day.value, day]));
+    calendar_dates.days = calendar_dates.days.map(day => freshByDate.get(day.value) ?? day);
+    this.days = this.days.map(day => freshByDate.get(day.value) ?? day);
+    this.calendarData.days = this.days;
+
+    const disabled_cells = new Map(calendar_dates.disabled_cells);
+    for (const day of freshDays) {
+      for (const room_type of day.rate ?? []) {
+        const isClosed = !room_type.is_available_to_book;
+        const disabled = isClosed || room_type.exposed_inventory?.rts === 0;
+        for (const room of room_type.physicalrooms ?? []) {
+          disabled_cells.set(`${room.id}_${day.value}`, { disabled, reason: isClosed ? 'stop_sale' : 'inventory' });
+        }
+      }
+    }
+    calendar_dates['disabled_cells'] = disabled_cells;
   }
 
   /** Every unassigned-units read goes through here so the header can show the range as in flight. */
