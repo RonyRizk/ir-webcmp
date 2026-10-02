@@ -265,7 +265,7 @@ export class PropertyService {
   }
   public async getDayUseBookingsForCalendar(params: GetDayUseBookingsForCalendarParams): Promise<DayUseBookings[]> {
     const payload = GetDayUseBookingsForCalendarParamsSchema.parse(params);
-    const { data } = await axios.post('https://gateway.igloorooms.com/IR/Get_Day_Use_Bookings_For_Calendar', payload);
+    const { data } = await axios.post('/Get_Day_Use_Bookings_For_Calendar', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

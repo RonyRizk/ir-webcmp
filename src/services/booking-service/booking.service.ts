@@ -239,7 +239,7 @@ export class BookingService {
       if (isCandidate) {
         route += '_V4';
       }
-      const { data } = await axios.post(`https://gateway.igloorooms.com/IR/${route}`, {
+      const { data } = await axios.post(`/${route}`, {
         propertyid,
         from_date,
         to_date,

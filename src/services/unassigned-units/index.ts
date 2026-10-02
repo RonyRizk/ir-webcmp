@@ -28,7 +28,7 @@ export class UnassignedUnitsService {
   }
   public async getAggregatedUnAssignedRoomsByDateRange(params: GetAggregatedUnAssignedRoomsByDateRangeParams): Promise<GetAggregatedUnAssignedRoomsByDateRangeResult> {
     const payload = GetAggregatedUnAssignedRoomsByDateRangeParamsSchema.parse(params);
-    const { data } = await axios.post('https://gateway.igloorooms.com/IR/Get_UnAssigned_Dates_Light', payload);
+    const { data } = await axios.post('/Get_UnAssigned_Dates_Light', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
