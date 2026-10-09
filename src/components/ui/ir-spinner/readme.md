@@ -39,6 +39,7 @@
  - [ir-cl-invoice-preview](../../printing/previews/city-ledger/ir-cl-invoice-preview)
  - [ir-cl-receipt-preview](../../printing/previews/city-ledger/ir-cl-receipt-preview)
  - [ir-cl-statement-preview](../../printing/previews/city-ledger/ir-cl-statement-preview)
+ - [ir-clone-rates](../../ir-clone-rates)
  - [ir-dp-report-chart](../../ir-dp-report/ir-dp-report-chart)
  - [ir-dp-report-table](../../ir-dp-report/ir-dp-report-table)
  - [ir-events-log](../../ir-booking-details/ir-booking-header/events-log)
@@ -82,6 +83,7 @@ graph TD;
   ir-cl-invoice-preview --> ir-spinner
   ir-cl-receipt-preview --> ir-spinner
   ir-cl-statement-preview --> ir-spinner
+  ir-clone-rates --> ir-spinner
   ir-dp-report-chart --> ir-spinner
   ir-dp-report-table --> ir-spinner
   ir-events-log --> ir-spinner

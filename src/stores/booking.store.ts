@@ -202,8 +202,12 @@ export const bookedByGuestBaseData = {
 // -----------------------------------------------------------------------------
 // Store Initialization
 // -----------------------------------------------------------------------------
-const initialState: BookingStore = {
-  bookedByGuest: bookedByGuestBaseData,
+/**
+ * Builds a fresh initial state on every call so `reset()` never re-uses nested objects
+ * (or `moment()` dates) from a previous session.
+ */
+const createInitialState = (): BookingStore => ({
+  bookedByGuest: { ...bookedByGuestBaseData },
   bookedByGuestManuallyEdited: false,
   bookingDraft: {
     agent: null,
@@ -249,9 +253,9 @@ const initialState: BookingStore = {
   fictus_booking_nbr: null,
   event_type: { type: 'PLUS_BOOKING' },
   dayUseSelection: null,
-};
+});
 
-export let { state: booking_store, onChange: onRoomTypeChange, reset } = createStore<BookingStore>(initialState);
+export let { state: booking_store, onChange: onRoomTypeChange, reset } = createStore<BookingStore>(createInitialState);
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -508,9 +512,6 @@ export function updateRoomParams({ ratePlanId, roomTypeId, params }: { roomTypeI
  * Reserves a number of rooms for a rate plan and bootstraps its selection entry if needed.
  */
 export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTypeId: number; ratePlanId: number; rooms: number; guest?: RatePlanGuest[] }) {
-  if (!booking_store.ratePlanSelections[roomTypeId]) {
-    booking_store.ratePlanSelections[roomTypeId] = {};
-  }
   const roomType = booking_store.roomTypes?.find(r => r.id === roomTypeId);
   if (!roomType) {
     throw new Error(`Invalid room type id ${roomTypeId}`);
@@ -523,8 +524,10 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   if (guest) {
     newGuest = guest;
   }
-  if (!booking_store.ratePlanSelections[roomTypeId][ratePlanId]) {
-    booking_store.ratePlanSelections[roomTypeId][ratePlanId] = {
+  // Build on copies — mutating the store's nested objects in place bypasses change detection.
+  const roomTypeSelection = { ...(booking_store.ratePlanSelections[roomTypeId] ?? {}) };
+  if (!roomTypeSelection[ratePlanId]) {
+    roomTypeSelection[ratePlanId] = {
       guestName: [],
       reserved: 0,
       view_mode: '001',
@@ -555,9 +558,9 @@ export function reserveRooms({ ratePlanId, roomTypeId, rooms, guest }: { roomTyp
   booking_store.ratePlanSelections = {
     ...booking_store.ratePlanSelections,
     [Number(roomTypeId)]: {
-      ...booking_store.ratePlanSelections[Number(roomTypeId)],
+      ...roomTypeSelection,
       [ratePlanId]: {
-        ...booking_store.ratePlanSelections[roomTypeId][ratePlanId],
+        ...roomTypeSelection[ratePlanId],
         reserved: rooms,
         checkoutVariations: [],
         guest: newGuest,

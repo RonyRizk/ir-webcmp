@@ -53,13 +53,14 @@ import { StatementFilters } from "./components/ir-city-ledger/ir-city-ledger-sta
 import { StatementFilters as StatementFilters1 } from "./components/ir-city-ledger/ir-city-ledger-statements/ir-city-ledger-statements-filter/ir-city-ledger-statements-filter";
 import { ZodIssue, ZodType, ZodTypeAny } from "zod";
 import { CreateInvoiceFormValues } from "./components/ir-city-ledger/ir-cl-invoice-dialog/ir-cl-invoice-form/ir-cl-invoice-form";
+import { ReviewRow } from "./components/ir-clone-rates/clone-rates.utils";
 import { Row } from "@tanstack/table-core";
 import { ColumnAutocompleteSelectionChange } from "./components/ir-table/ir-column-autocomplete/ir-column-autocomplete";
 import { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
 import { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
 import { Moment as Moment1 } from "moment/min/moment-with-locales";
 import { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
-import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from "./components/ir-daily-revenue/types";
+import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption } from "./components/ir-daily-revenue/types";
 import { DateRangeChangeEvent } from "./components/ui/ir-date-range/ir-date-range";
 import { QuickDatePreset } from "./components/ui/ir-date-range-filter/ir-date-range-filter";
 import { DateChangeEvent } from "./components/ui/date-picker/ir-date-select/ir-date-select";
@@ -161,13 +162,14 @@ export { StatementFilters } from "./components/ir-city-ledger/ir-city-ledger-sta
 export { StatementFilters as StatementFilters1 } from "./components/ir-city-ledger/ir-city-ledger-statements/ir-city-ledger-statements-filter/ir-city-ledger-statements-filter";
 export { ZodIssue, ZodType, ZodTypeAny } from "zod";
 export { CreateInvoiceFormValues } from "./components/ir-city-ledger/ir-cl-invoice-dialog/ir-cl-invoice-form/ir-cl-invoice-form";
+export { ReviewRow } from "./components/ir-clone-rates/clone-rates.utils";
 export { Row } from "@tanstack/table-core";
 export { ColumnAutocompleteSelectionChange } from "./components/ir-table/ir-column-autocomplete/ir-column-autocomplete";
 export { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
 export { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
 export { Moment as Moment1 } from "moment/min/moment-with-locales";
 export { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
-export { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from "./components/ir-daily-revenue/types";
+export { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption } from "./components/ir-daily-revenue/types";
 export { DateRangeChangeEvent } from "./components/ui/ir-date-range/ir-date-range";
 export { QuickDatePreset } from "./components/ui/ir-date-range-filter/ir-date-range-filter";
 export { DateChangeEvent } from "./components/ui/date-picker/ir-date-select/ir-date-select";
@@ -2628,6 +2630,49 @@ export namespace Components {
         "size": 'default' | 'extra-small';
         "transaction": FolioRow1 | FiscalDocument;
     }
+    interface IrCloneRates {
+        /**
+          * @default 'en'
+         */
+        "language": string;
+        /**
+          * `drawer` drops the page shell and the inline Review button; the host drawer submits `#clone-rates-form` from its footer.
+          * @default 'page'
+         */
+        "mode": 'page' | 'drawer';
+        "p": string;
+        "propertyid": number;
+        "ticket": string;
+    }
+    interface IrCloneRatesDrawer {
+        /**
+          * @default 'en'
+         */
+        "language": string;
+        /**
+          * @default false
+         */
+        "open": boolean;
+        "p": string;
+        "propertyid": number;
+        "ticket": string;
+    }
+    interface IrCloneRatesReview {
+        /**
+          * Shows the Confirm button as busy and blocks Go back while the copy request is in flight.
+          * @default false
+         */
+        "loading": boolean;
+        /**
+          * @default false
+         */
+        "open": boolean;
+        /**
+          * Summary lines rendered as label/value pairs.
+          * @default []
+         */
+        "rows": ReviewRow[];
+    }
     interface IrCollapsableRow {
         "row": Row<any>;
     }
@@ -2905,6 +2950,10 @@ export namespace Components {
     interface IrDailyRevenueFilters {
         "isLoading": boolean;
         "payments": GroupedFolioPayment;
+        /**
+          * @default []
+         */
+        "sources": RevenueSourceOption[];
     }
     interface IrDatePicker {
         /**
@@ -3101,6 +3150,11 @@ export namespace Components {
           * @default 'absolute'
          */
         "quickDatesMode": 'absolute' | 'range';
+        /**
+          * Displays the range without letting the user change it: the pickers never open and the clear/calendar buttons are hidden.
+          * @default false
+         */
+        "readonly": boolean;
         /**
           * Flow after picking a from-date: - `'auto'`: the to-picker opens automatically so the user completes the range in one pass. - `'manual'` (default): nothing opens; the user clicks the to-field themselves.
           * @default 'manual'
@@ -7362,6 +7416,11 @@ export namespace Components {
     }
     interface IrWeekdaySelector {
         /**
+          * When true, at least one weekday must stay selected: the last remaining selected weekday is disabled so it can't be unchecked.
+          * @default false
+         */
+        "required": boolean;
+        /**
           * Initial list of selected weekdays (numeric values).
           * @default []
          */
@@ -7822,6 +7881,18 @@ export interface IrClReceiptPreviewCustomEvent<T> extends CustomEvent<T> {
 export interface IrClStatementPreviewCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrClStatementPreviewElement;
+}
+export interface IrCloneRatesCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrCloneRatesElement;
+}
+export interface IrCloneRatesDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrCloneRatesDrawerElement;
+}
+export interface IrCloneRatesReviewCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrCloneRatesReviewElement;
 }
 export interface IrColumnAutocompleteCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -10589,6 +10660,58 @@ declare global {
     var HTMLIrClStatusTagElement: {
         prototype: HTMLIrClStatusTagElement;
         new (): HTMLIrClStatusTagElement;
+    };
+    interface HTMLIrCloneRatesElementEventMap {
+        "ratesCloned": void;
+    }
+    interface HTMLIrCloneRatesElement extends Components.IrCloneRates, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrCloneRatesElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesElement, ev: IrCloneRatesCustomEvent<HTMLIrCloneRatesElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrCloneRatesElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesElement, ev: IrCloneRatesCustomEvent<HTMLIrCloneRatesElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrCloneRatesElement: {
+        prototype: HTMLIrCloneRatesElement;
+        new (): HTMLIrCloneRatesElement;
+    };
+    interface HTMLIrCloneRatesDrawerElementEventMap {
+        "cloneRatesDrawerClosed": void;
+    }
+    interface HTMLIrCloneRatesDrawerElement extends Components.IrCloneRatesDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrCloneRatesDrawerElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesDrawerElement, ev: IrCloneRatesDrawerCustomEvent<HTMLIrCloneRatesDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrCloneRatesDrawerElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesDrawerElement, ev: IrCloneRatesDrawerCustomEvent<HTMLIrCloneRatesDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrCloneRatesDrawerElement: {
+        prototype: HTMLIrCloneRatesDrawerElement;
+        new (): HTMLIrCloneRatesDrawerElement;
+    };
+    interface HTMLIrCloneRatesReviewElementEventMap {
+        "goBack": void;
+        "confirmClone": void;
+    }
+    interface HTMLIrCloneRatesReviewElement extends Components.IrCloneRatesReview, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrCloneRatesReviewElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesReviewElement, ev: IrCloneRatesReviewCustomEvent<HTMLIrCloneRatesReviewElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrCloneRatesReviewElementEventMap>(type: K, listener: (this: HTMLIrCloneRatesReviewElement, ev: IrCloneRatesReviewCustomEvent<HTMLIrCloneRatesReviewElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrCloneRatesReviewElement: {
+        prototype: HTMLIrCloneRatesReviewElement;
+        new (): HTMLIrCloneRatesReviewElement;
     };
     interface HTMLIrCollapsableRowElement extends Components.IrCollapsableRow, HTMLStencilElement {
     }
@@ -14125,6 +14248,9 @@ declare global {
         "ir-cl-receipt-preview": HTMLIrClReceiptPreviewElement;
         "ir-cl-statement-preview": HTMLIrClStatementPreviewElement;
         "ir-cl-status-tag": HTMLIrClStatusTagElement;
+        "ir-clone-rates": HTMLIrCloneRatesElement;
+        "ir-clone-rates-drawer": HTMLIrCloneRatesDrawerElement;
+        "ir-clone-rates-review": HTMLIrCloneRatesReviewElement;
         "ir-collapsable-row": HTMLIrCollapsableRowElement;
         "ir-column-autocomplete": HTMLIrColumnAutocompleteElement;
         "ir-combobox": HTMLIrComboboxElement;
@@ -17015,6 +17141,62 @@ declare namespace LocalJSX {
         "size"?: 'default' | 'extra-small';
         "transaction": FolioRow1 | FiscalDocument;
     }
+    interface IrCloneRates {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
+        /**
+          * `drawer` drops the page shell and the inline Review button; the host drawer submits `#clone-rates-form` from its footer.
+          * @default 'page'
+         */
+        "mode"?: 'page' | 'drawer';
+        /**
+          * Fired after the rates were copied successfully.
+         */
+        "onRatesCloned"?: (event: IrCloneRatesCustomEvent<void>) => void;
+        "p"?: string;
+        "propertyid"?: number;
+        "ticket"?: string;
+    }
+    interface IrCloneRatesDrawer {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
+        /**
+          * Fired when the drawer closes: Cancel, the close button, Escape, light dismiss, or a successful copy. The parent should set `open` to false.
+         */
+        "onCloneRatesDrawerClosed"?: (event: IrCloneRatesDrawerCustomEvent<void>) => void;
+        /**
+          * @default false
+         */
+        "open"?: boolean;
+        "p"?: string;
+        "propertyid"?: number;
+        "ticket"?: string;
+    }
+    interface IrCloneRatesReview {
+        /**
+          * Shows the Confirm button as busy and blocks Go back while the copy request is in flight.
+          * @default false
+         */
+        "loading"?: boolean;
+        "onConfirmClone"?: (event: IrCloneRatesReviewCustomEvent<void>) => void;
+        /**
+          * Fired by Go back, the close button or Escape. The parent should set `open` to false.
+         */
+        "onGoBack"?: (event: IrCloneRatesReviewCustomEvent<void>) => void;
+        /**
+          * @default false
+         */
+        "open"?: boolean;
+        /**
+          * Summary lines rendered as label/value pairs.
+          * @default []
+         */
+        "rows"?: ReviewRow[];
+    }
     interface IrCollapsableRow {
         "row"?: Row<any>;
     }
@@ -17317,6 +17499,10 @@ declare namespace LocalJSX {
         "isLoading"?: boolean;
         "onFetchNewReports"?: (event: IrDailyRevenueFiltersCustomEvent<DailyPaymentFilter>) => void;
         "payments"?: GroupedFolioPayment;
+        /**
+          * @default []
+         */
+        "sources"?: RevenueSourceOption[];
     }
     interface IrDatePicker {
         /**
@@ -17534,6 +17720,11 @@ declare namespace LocalJSX {
           * @default 'absolute'
          */
         "quickDatesMode"?: 'absolute' | 'range';
+        /**
+          * Displays the range without letting the user change it: the pickers never open and the clear/calendar buttons are hidden.
+          * @default false
+         */
+        "readonly"?: boolean;
         /**
           * Flow after picking a from-date: - `'auto'`: the to-picker opens automatically so the user completes the range in one pass. - `'manual'` (default): nothing opens; the user clicks the to-field themselves.
           * @default 'manual'
@@ -22212,6 +22403,11 @@ declare namespace LocalJSX {
          */
         "onWeekdayChange"?: (event: IrWeekdaySelectorCustomEvent<number[]>) => void;
         /**
+          * When true, at least one weekday must stay selected: the last remaining selected weekday is disabled so it can't be unchecked.
+          * @default false
+         */
+        "required"?: boolean;
+        /**
           * Initial list of selected weekdays (numeric values).
           * @default []
          */
@@ -23024,6 +23220,24 @@ declare namespace LocalJSX {
     interface IrClStatusTagAttributes {
         "size": 'default' | 'extra-small';
     }
+    interface IrCloneRatesAttributes {
+        "ticket": string;
+        "p": string;
+        "language": string;
+        "propertyid": number;
+        "mode": 'page' | 'drawer';
+    }
+    interface IrCloneRatesDrawerAttributes {
+        "open": boolean;
+        "ticket": string;
+        "p": string;
+        "language": string;
+        "propertyid": number;
+    }
+    interface IrCloneRatesReviewAttributes {
+        "open": boolean;
+        "loading": boolean;
+    }
     interface IrColumnAutocompleteAttributes {
         "placeholder": string;
         "selectAllLabel": string;
@@ -23131,6 +23345,7 @@ declare namespace LocalJSX {
         "maxDate": string;
         "selectionMode": 'auto' | 'manual';
         "withClear": boolean;
+        "readonly": boolean;
         "label": string;
     }
     interface IrDateSelectAttributes {
@@ -24356,6 +24571,9 @@ declare namespace LocalJSX {
         "blurEvent": string;
         "validationDebounce": number;
     }
+    interface IrWeekdaySelectorAttributes {
+        "required": boolean;
+    }
     interface OtaLabelAttributes {
         "label": string;
         "maxVisibleItems": number;
@@ -24508,6 +24726,9 @@ declare namespace LocalJSX {
         "ir-cl-receipt-preview": Omit<IrClReceiptPreview, keyof IrClReceiptPreviewAttributes> & { [K in keyof IrClReceiptPreview & keyof IrClReceiptPreviewAttributes]?: IrClReceiptPreview[K] } & { [K in keyof IrClReceiptPreview & keyof IrClReceiptPreviewAttributes as `attr:${K}`]?: IrClReceiptPreviewAttributes[K] } & { [K in keyof IrClReceiptPreview & keyof IrClReceiptPreviewAttributes as `prop:${K}`]?: IrClReceiptPreview[K] };
         "ir-cl-statement-preview": Omit<IrClStatementPreview, keyof IrClStatementPreviewAttributes> & { [K in keyof IrClStatementPreview & keyof IrClStatementPreviewAttributes]?: IrClStatementPreview[K] } & { [K in keyof IrClStatementPreview & keyof IrClStatementPreviewAttributes as `attr:${K}`]?: IrClStatementPreviewAttributes[K] } & { [K in keyof IrClStatementPreview & keyof IrClStatementPreviewAttributes as `prop:${K}`]?: IrClStatementPreview[K] };
         "ir-cl-status-tag": Omit<IrClStatusTag, keyof IrClStatusTagAttributes> & { [K in keyof IrClStatusTag & keyof IrClStatusTagAttributes]?: IrClStatusTag[K] } & { [K in keyof IrClStatusTag & keyof IrClStatusTagAttributes as `attr:${K}`]?: IrClStatusTagAttributes[K] } & { [K in keyof IrClStatusTag & keyof IrClStatusTagAttributes as `prop:${K}`]?: IrClStatusTag[K] };
+        "ir-clone-rates": Omit<IrCloneRates, keyof IrCloneRatesAttributes> & { [K in keyof IrCloneRates & keyof IrCloneRatesAttributes]?: IrCloneRates[K] } & { [K in keyof IrCloneRates & keyof IrCloneRatesAttributes as `attr:${K}`]?: IrCloneRatesAttributes[K] } & { [K in keyof IrCloneRates & keyof IrCloneRatesAttributes as `prop:${K}`]?: IrCloneRates[K] };
+        "ir-clone-rates-drawer": Omit<IrCloneRatesDrawer, keyof IrCloneRatesDrawerAttributes> & { [K in keyof IrCloneRatesDrawer & keyof IrCloneRatesDrawerAttributes]?: IrCloneRatesDrawer[K] } & { [K in keyof IrCloneRatesDrawer & keyof IrCloneRatesDrawerAttributes as `attr:${K}`]?: IrCloneRatesDrawerAttributes[K] } & { [K in keyof IrCloneRatesDrawer & keyof IrCloneRatesDrawerAttributes as `prop:${K}`]?: IrCloneRatesDrawer[K] };
+        "ir-clone-rates-review": Omit<IrCloneRatesReview, keyof IrCloneRatesReviewAttributes> & { [K in keyof IrCloneRatesReview & keyof IrCloneRatesReviewAttributes]?: IrCloneRatesReview[K] } & { [K in keyof IrCloneRatesReview & keyof IrCloneRatesReviewAttributes as `attr:${K}`]?: IrCloneRatesReviewAttributes[K] } & { [K in keyof IrCloneRatesReview & keyof IrCloneRatesReviewAttributes as `prop:${K}`]?: IrCloneRatesReview[K] };
         "ir-collapsable-row": IrCollapsableRow;
         "ir-column-autocomplete": Omit<IrColumnAutocomplete, keyof IrColumnAutocompleteAttributes> & { [K in keyof IrColumnAutocomplete & keyof IrColumnAutocompleteAttributes]?: IrColumnAutocomplete[K] } & { [K in keyof IrColumnAutocomplete & keyof IrColumnAutocompleteAttributes as `attr:${K}`]?: IrColumnAutocompleteAttributes[K] } & { [K in keyof IrColumnAutocomplete & keyof IrColumnAutocompleteAttributes as `prop:${K}`]?: IrColumnAutocomplete[K] };
         "ir-combobox": Omit<IrCombobox, keyof IrComboboxAttributes> & { [K in keyof IrCombobox & keyof IrComboboxAttributes]?: IrCombobox[K] } & { [K in keyof IrCombobox & keyof IrComboboxAttributes as `attr:${K}`]?: IrComboboxAttributes[K] } & { [K in keyof IrCombobox & keyof IrComboboxAttributes as `prop:${K}`]?: IrCombobox[K] };
@@ -24746,7 +24967,7 @@ declare namespace LocalJSX {
         "ir-user-management-table": Omit<IrUserManagementTable, keyof IrUserManagementTableAttributes> & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes]?: IrUserManagementTable[K] } & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes as `attr:${K}`]?: IrUserManagementTableAttributes[K] } & { [K in keyof IrUserManagementTable & keyof IrUserManagementTableAttributes as `prop:${K}`]?: IrUserManagementTable[K] };
         "ir-validator": Omit<IrValidator, keyof IrValidatorAttributes> & { [K in keyof IrValidator & keyof IrValidatorAttributes]?: IrValidator[K] } & { [K in keyof IrValidator & keyof IrValidatorAttributes as `attr:${K}`]?: IrValidatorAttributes[K] } & { [K in keyof IrValidator & keyof IrValidatorAttributes as `prop:${K}`]?: IrValidator[K] };
         "ir-void-document-dialog": IrVoidDocumentDialog;
-        "ir-weekday-selector": IrWeekdaySelector;
+        "ir-weekday-selector": Omit<IrWeekdaySelector, keyof IrWeekdaySelectorAttributes> & { [K in keyof IrWeekdaySelector & keyof IrWeekdaySelectorAttributes]?: IrWeekdaySelector[K] } & { [K in keyof IrWeekdaySelector & keyof IrWeekdaySelectorAttributes as `attr:${K}`]?: IrWeekdaySelectorAttributes[K] } & { [K in keyof IrWeekdaySelector & keyof IrWeekdaySelectorAttributes as `prop:${K}`]?: IrWeekdaySelector[K] };
         "ota-label": Omit<OtaLabel, keyof OtaLabelAttributes> & { [K in keyof OtaLabel & keyof OtaLabelAttributes]?: OtaLabel[K] } & { [K in keyof OtaLabel & keyof OtaLabelAttributes as `attr:${K}`]?: OtaLabelAttributes[K] } & { [K in keyof OtaLabel & keyof OtaLabelAttributes as `prop:${K}`]?: OtaLabel[K] };
         "requirement-check": Omit<RequirementCheck, keyof RequirementCheckAttributes> & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes]?: RequirementCheck[K] } & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes as `attr:${K}`]?: RequirementCheckAttributes[K] } & { [K in keyof RequirementCheck & keyof RequirementCheckAttributes as `prop:${K}`]?: RequirementCheck[K] };
     }
@@ -24947,6 +25168,9 @@ declare module "@stencil/core" {
             "ir-cl-receipt-preview": LocalJSX.IntrinsicElements["ir-cl-receipt-preview"] & JSXBase.HTMLAttributes<HTMLIrClReceiptPreviewElement>;
             "ir-cl-statement-preview": LocalJSX.IntrinsicElements["ir-cl-statement-preview"] & JSXBase.HTMLAttributes<HTMLIrClStatementPreviewElement>;
             "ir-cl-status-tag": LocalJSX.IntrinsicElements["ir-cl-status-tag"] & JSXBase.HTMLAttributes<HTMLIrClStatusTagElement>;
+            "ir-clone-rates": LocalJSX.IntrinsicElements["ir-clone-rates"] & JSXBase.HTMLAttributes<HTMLIrCloneRatesElement>;
+            "ir-clone-rates-drawer": LocalJSX.IntrinsicElements["ir-clone-rates-drawer"] & JSXBase.HTMLAttributes<HTMLIrCloneRatesDrawerElement>;
+            "ir-clone-rates-review": LocalJSX.IntrinsicElements["ir-clone-rates-review"] & JSXBase.HTMLAttributes<HTMLIrCloneRatesReviewElement>;
             "ir-collapsable-row": LocalJSX.IntrinsicElements["ir-collapsable-row"] & JSXBase.HTMLAttributes<HTMLIrCollapsableRowElement>;
             "ir-column-autocomplete": LocalJSX.IntrinsicElements["ir-column-autocomplete"] & JSXBase.HTMLAttributes<HTMLIrColumnAutocompleteElement>;
             "ir-combobox": LocalJSX.IntrinsicElements["ir-combobox"] & JSXBase.HTMLAttributes<HTMLIrComboboxElement>;

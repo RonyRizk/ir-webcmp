@@ -15,6 +15,12 @@ export class IrWeekdaySelector {
   @Prop() weekdays: number[] = [];
 
   /**
+   * When true, at least one weekday must stay selected:
+   * the last remaining selected weekday is disabled so it can't be unchecked.
+   */
+  @Prop() required: boolean = false;
+
+  /**
    * Internal state tracking currently selected weekdays.
    */
   @State() selectedWeekdays: Set<number> = new Set(this.weekdays);
@@ -70,12 +76,14 @@ export class IrWeekdaySelector {
     this.weekdayChange.emit(Array.from(this.selectedWeekdays));
   }
   render() {
+    const isLastSelected = this.required && this.selectedWeekdays.size === 1;
     return (
       <Host class="my-1 d-flex align-items-center" style={{ gap: '1.1rem' }}>
         {this._weekdays.map(w => (
           <wa-checkbox
             checked={this.selectedWeekdays.has(w.value)}
             defaultChecked={this.selectedWeekdays.has(w.value)}
+            disabled={isLastSelected && this.selectedWeekdays.has(w.value)}
             onchange={e => this.toggleWeekDays({ checked: (e.target as HTMLInputElement).checked, weekDay: w.value })}
           >
             {w.label}

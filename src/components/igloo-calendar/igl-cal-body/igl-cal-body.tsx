@@ -864,6 +864,7 @@ export class IglCalBody {
             {this.getBookingData()?.map(bookingEvent => {
               return (
                 <igl-booking-event
+                  key={bookingEvent.ID}
                   data-testid={`booking_${bookingEvent.BOOKING_NUMBER}`}
                   data-room-name={bookingEvent.roomsInfo?.find(r => r.id === bookingEvent.RATE_TYPE)?.physicalrooms.find(r => r.id === bookingEvent.PR_ID)?.name}
                   language={this.language}

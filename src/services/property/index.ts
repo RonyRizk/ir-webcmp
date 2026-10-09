@@ -40,6 +40,8 @@ import {
   type DayUseBookings,
   type GetDayUseBookingsForCalendarParams,
   type CalculateNetAmountParams,
+  CloneRatesParamsSchema,
+  CloneRatesParams,
 } from './types';
 
 export class PropertyService {
@@ -218,7 +220,13 @@ export class PropertyService {
     }
     return data.My_Result;
   }
-
+  public async cloneRates(params: CloneRatesParams): Promise<void> {
+    const payload = CloneRatesParamsSchema.parse(params);
+    const { data } = await axios.post('/Clone_Rates', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+  }
   public async setExposedCleaningFrequency(params: { property_id: number; code: string }) {
     const { data } = await axios.post('/Set_Exposed_Cleaning_Frequency', params);
     if (data.ExceptionMsg !== '') {

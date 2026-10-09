@@ -4,11 +4,18 @@ import { extras, isPrivilegedUser } from '@/utils/utils';
 import axios from 'axios';
 
 export class BookingListingService {
-  public async getExposedBookingsCriteria(property_id: number): Promise<IExposedBookingsCriteria> {
+  /**
+   * Fetches the bookings criteria without touching the booking listing store.
+   */
+  public async fetchExposedBookingsCriteria(property_id: number): Promise<IExposedBookingsCriteria> {
     const { data } = await axios.post(`/Get_Exposed_Bookings_Criteria`, {
       property_id,
     });
-    const result = data.My_Result;
+    return data.My_Result;
+  }
+
+  public async getExposedBookingsCriteria(property_id: number): Promise<IExposedBookingsCriteria> {
+    const result = await this.fetchExposedBookingsCriteria(property_id);
     booking_listing.channels = result.channels;
     booking_listing.settlement_methods = result.settlement_methods;
     booking_listing.statuses = result.statuses;

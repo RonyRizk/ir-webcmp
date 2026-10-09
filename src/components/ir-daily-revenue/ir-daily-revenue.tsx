@@ -1,10 +1,12 @@
 import Token from '@/models/Token';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { BookingListingService } from '@/services/booking_listing.service';
 import { PropertyService } from '@/services/property.service';
 import { RoomService } from '@/services/room.service';
 import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, SidebarOpenEvent } from './types';
+import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption, SidebarOpenEvent } from './types';
+import { ICriteriaChannel } from '@/models/IrBookingListing';
 import { v4 } from 'uuid';
 import moment from 'moment';
 import { PaymentEntries } from '../ir-booking-details/types';
@@ -30,13 +32,16 @@ export class IrDailyRevenue {
     from_date: null,
     to_date: null,
     users: null,
+    source: null,
   };
   @State() sideBarEvent: SidebarOpenEvent | null;
+  @State() sources: RevenueSourceOption[] = [];
 
   private tokenService = new Token();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
   private bookingService = new BookingService();
+  private bookingListingService = new BookingListingService();
   private paymentEntries: PaymentEntries;
 
   @Event() preventPageLoad: EventEmitter<null>;
@@ -108,6 +113,8 @@ export class IrDailyRevenue {
         this.bookingService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
         this.getPaymentReports(),
         this.roomService.fetchLanguage(this.language),
+        // The source filter is optional; don't let a criteria failure block the report
+        this.bookingListingService.fetchExposedBookingsCriteria(propertyId).catch(() => null),
       ];
       if (propertyId) {
         requests.push(
@@ -120,7 +127,8 @@ export class IrDailyRevenue {
         );
       }
 
-      const [setupEntries] = await Promise.all(requests);
+      const [setupEntries, , , criteria] = await Promise.all(requests);
+      this.sources = this.buildSourceOptions(criteria?.channels ?? []);
       const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
       this.paymentEntries = {
         groups: pay_type_group,
@@ -132,6 +140,24 @@ export class IrDailyRevenue {
     } finally {
       this.isPageLoading = false;
     }
+  }
+
+  /**
+   * All direct channels collapse into a single "Direct" option whose value is their comma-separated values;
+   * every other channel stays its own option.
+   */
+  private buildSourceOptions(channels: ICriteriaChannel[]): RevenueSourceOption[] {
+    const directValues = channels.filter(c => c.is_direct).map(c => c.value);
+    const options: RevenueSourceOption[] = [];
+    if (directValues.length) {
+      options.push({ label: 'Direct', value: directValues.join(',') });
+    }
+    for (const channel of channels) {
+      if (!channel.is_direct) {
+        options.push({ label: channel.name, value: channel.value });
+      }
+    }
+    return options;
   }
 
   private groupPaymentsByName(payments: FolioPayment[]): GroupedFolioPayment {
@@ -179,6 +205,7 @@ export class IrDailyRevenue {
           to_date: this.filters.date ? this.filters.date : this.filters.to_date,
           property_id: this.property_id?.toString(),
           is_export_to_excel: isExportToExcel,
+          source: this.filters.source,
         }),
       ];
       if (!isExportToExcel && !excludeYesterday && this.filters.date) {
@@ -188,6 +215,7 @@ export class IrDailyRevenue {
             to_date: moment(this.filters.date, 'YYYY-MM-DD').add(-1, 'days').format('YYYY-MM-DD'),
             property_id: this.property_id?.toString(),
             is_export_to_excel: isExportToExcel,
+            source: this.filters.source,
           }),
         );
       }
@@ -236,7 +264,7 @@ export class IrDailyRevenue {
             paymentEntries={this.paymentEntries}
           ></ir-revenue-summary>
           <div class="revenue-content-row">
-            <ir-daily-revenue-filters isLoading={this.isLoading === 'filter'} payments={this.groupedPayment}></ir-daily-revenue-filters>
+            <ir-daily-revenue-filters isLoading={this.isLoading === 'filter'} payments={this.groupedPayment} sources={this.sources}></ir-daily-revenue-filters>
             <ir-revenue-table filters={this.filters} class="revenue-table-card" paymentEntries={this.paymentEntries} payments={this.groupedPayment}></ir-revenue-table>
           </div>
         </ir-page>

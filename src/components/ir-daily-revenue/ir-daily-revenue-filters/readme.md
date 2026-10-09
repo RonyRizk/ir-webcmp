@@ -11,13 +11,14 @@
 | ----------- | ------------ | ----------- | ----------------------------- | ----------- |
 | `isLoading` | `is-loading` |             | `boolean`                     | `undefined` |
 | `payments`  | --           |             | `Map<string, FolioPayment[]>` | `undefined` |
+| `sources`   | --           |             | `RevenueSourceOption[]`       | `[]`        |
 
 
 ## Events
 
-| Event             | Description | Type                                                                                   |
-| ----------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `fetchNewReports` |             | `CustomEvent<{ from_date?: string; to_date?: string; date?: string; users: string; }>` |
+| Event             | Description | Type                                                                                                   |
+| ----------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
+| `fetchNewReports` |             | `CustomEvent<{ from_date?: string; to_date?: string; date?: string; users: string; source: string; }>` |
 
 
 ## Dependencies

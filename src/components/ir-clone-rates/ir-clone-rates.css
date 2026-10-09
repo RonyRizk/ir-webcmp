@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  --clone-rates-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* One readable column: every card, callout and control shares the same edges. */
+.clone-rates__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-l);
+  max-inline-size: 48rem;
+}
+
+.clone-rates__card {
+  margin-bottom: var(--wa-space-s);
+}
+
+.clone-rates__card::part(body) {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s);
+}
+
+.clone-rates__divider {
+  --spacing: 0;
+}
+
+/* ir-weekday-selector adds Bootstrap `my-1` (margin with !important) to its host; the card gap already spaces it.
+   Its host is a single non-wrapping flex row, which overflows the card on phones. */
+ir-weekday-selector.clone-rates__weekdays {
+  margin-block: 0 !important;
+  flex-wrap: wrap;
+}
+
+.clone-rates__question {
+  margin: 0;
+  font-family: var(--wa-font-family-heading);
+  font-weight: var(--wa-font-weight-heading);
+  line-height: var(--wa-line-height-condensed);
+  text-wrap: balance;
+  font-size: var(--wa-font-size-m);
+}
+
+.clone-rates__room-types {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-l);
+}
+
+.clone-rates__room-type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s);
+}
+
+.clone-rates__room-type-name {
+  margin: 0;
+  font-size: var(--wa-font-size-s);
+  font-weight: var(--wa-font-weight-semibold);
+  color: var(--wa-color-text-quiet);
+}
+
+/* Indented to line up with the "Select all" checkbox label, nesting plans under their room type. */
+.clone-rates__rate-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--wa-space-m) var(--wa-space-l);
+  /* checkbox box + its gap to the label */
+  padding-inline-start: calc(var(--wa-form-control-toggle-size) + 0.5em);
+}
+
+.clone-rates__amount {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-xs);
+}
+
+/* Conditionally mounted content eases in instead of popping. */
+.clone-rates__amount,
+.clone-rates__error {
+  animation: clone-rates-reveal 200ms var(--clone-rates-ease-out);
+}
+
+@keyframes clone-rates-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.clone-rates__loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 12rem;
+}
+
+.clone-rates__actions {
+  display: flex;
+  gap: var(--wa-space-s);
+}
+
+@media (min-width: 768px) {
+  .clone-rates__source,
+  .clone-rates__dates,
+  .clone-rates__adjustment,
+  .clone-rates__amount {
+    max-inline-size: 26rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clone-rates__amount,
+  .clone-rates__error {
+    animation-name: clone-rates-fade;
+  }
+}
+
+@keyframes clone-rates-fade {
+  from {
+    opacity: 0;
+  }
+}

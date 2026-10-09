@@ -30,6 +30,7 @@
 
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-city-ledger](../../ir-city-ledger)
+ - [ir-clone-rates](../../ir-clone-rates)
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-dp-report](../../ir-dp-report)
  - [ir-extra-services-settings](../../ir-extra-services-settings)
@@ -66,6 +67,7 @@ graph TD;
   ir-toast-provider --> ir-toast-item
   ir-booking-listing --> ir-page
   ir-city-ledger --> ir-page
+  ir-clone-rates --> ir-page
   ir-daily-revenue --> ir-page
   ir-dp-report --> ir-page
   ir-extra-services-settings --> ir-page

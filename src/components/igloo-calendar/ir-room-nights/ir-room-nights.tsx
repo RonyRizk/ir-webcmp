@@ -208,6 +208,7 @@ export class IrRoomNights {
         pickup_info: this.bookingEvent.pickup_info,
         extra_services: this.bookingEvent.extra_services,
         agent: this.bookingEvent.agent,
+        target_room_identifier: this.identifier,
         booking: {
           booking_nbr: this.bookingNumber,
           from_date: this.dates.from_date,

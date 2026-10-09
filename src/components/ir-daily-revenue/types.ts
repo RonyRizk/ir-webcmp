@@ -24,4 +24,10 @@ export type DailyPaymentFilter = {
   to_date?: string;
   date?: string;
   users: string | null;
+  /** Comma-separated channel values; null means all sources. */
+  source: string | null;
+};
+export type RevenueSourceOption = {
+  label: string;
+  value: string;
 };

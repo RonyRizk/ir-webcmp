@@ -25,6 +25,8 @@ export type DailyRevenueReportParams = {
   to_date: string;
   property_id: string;
   is_export_to_excel: boolean;
+  /** Comma-separated channel values; empty/null means all sources. */
+  source?: string | null;
 };
 export type MonthlyStatsParams = {
   property_id: number;
@@ -306,3 +308,16 @@ export const CalculateNetAmountParamsSchema = z.object({
   taxes_to_include: TaxTypesSchema,
 });
 export type CalculateNetAmountParams = z.infer<typeof CalculateNetAmountParamsSchema>;
+
+export const CloneRatesParamsSchema = z.object({
+  AC_ID: z.number().int().nullish(),
+  SOURCE_FROM_DATE: z.string(),
+  SOURCE_TO_DATE: z.string(),
+  TARGET_FROM_DATE: z.string(),
+  VALUE_TO_ADD: z.number().nullish(),
+  PERCENTAGE_TO_ADD: z.number().nullish(),
+  SELECTED_ROOM_TYPE_IDS: z.array(z.number().int()),
+  DAYS_OF_WEEK: z.array(z.number().int()),
+  IS_COPY_MLS: z.boolean().nullish(),
+});
+export type CloneRatesParams = z.infer<typeof CloneRatesParamsSchema>;

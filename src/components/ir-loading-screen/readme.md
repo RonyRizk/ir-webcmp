@@ -22,6 +22,7 @@
  - [ir-booking-listing](../ir-booking-listing)
  - [ir-channel](../ir-channel)
  - [ir-city-ledger](../ir-city-ledger)
+ - [ir-clone-rates](../ir-clone-rates)
  - [ir-daily-revenue](../ir-daily-revenue)
  - [ir-departures](../ir-departures)
  - [ir-dp-report](../ir-dp-report)
@@ -54,6 +55,7 @@ graph TD;
   ir-booking-listing --> ir-loading-screen
   ir-channel --> ir-loading-screen
   ir-city-ledger --> ir-loading-screen
+  ir-clone-rates --> ir-loading-screen
   ir-daily-revenue --> ir-loading-screen
   ir-departures --> ir-loading-screen
   ir-dp-report --> ir-loading-screen

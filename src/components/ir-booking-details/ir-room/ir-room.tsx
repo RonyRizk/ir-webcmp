@@ -305,6 +305,7 @@ export class IrRoom {
         is_pms: true,
         is_direct: true,
         agent: this.booking.agent,
+        target_room_identifier: this.room.identifier,
         booking: {
           booking_nbr: this.booking.booking_nbr,
           from_date: this.booking.from_date,

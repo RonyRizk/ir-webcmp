@@ -132,6 +132,7 @@ export class IrBookingPricingForm {
         promo_key,
         extras: extras ?? [],
         agent: this.booking.agent,
+        target_room_identifier: this.room.identifier,
         booking: { ...rest, rooms: updatedRooms, agent: this.booking.agent },
         extra_services,
         pickup_info,

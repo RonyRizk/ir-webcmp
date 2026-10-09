@@ -97,6 +97,9 @@
  - [ir-city-ledger-transaction-drawer](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer)
  - [ir-cl-fiscal-document-preview](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview)
  - [ir-cl-invoice-dialog](../../ir-city-ledger/ir-cl-invoice-dialog)
+ - [ir-clone-rates](../../ir-clone-rates)
+ - [ir-clone-rates-drawer](../../ir-clone-rates/ir-clone-rates-drawer)
+ - [ir-clone-rates-review](../../ir-clone-rates/ir-clone-rates-review)
  - [ir-daily-revenue](../../ir-daily-revenue)
  - [ir-daily-revenue-filters](../../ir-daily-revenue/ir-daily-revenue-filters)
  - [ir-date-range-filter](../ir-date-range-filter)
@@ -245,6 +248,9 @@ graph TD;
   ir-city-ledger-transaction-drawer --> ir-custom-button
   ir-cl-fiscal-document-preview --> ir-custom-button
   ir-cl-invoice-dialog --> ir-custom-button
+  ir-clone-rates --> ir-custom-button
+  ir-clone-rates-drawer --> ir-custom-button
+  ir-clone-rates-review --> ir-custom-button
   ir-daily-revenue --> ir-custom-button
   ir-daily-revenue-filters --> ir-custom-button
   ir-date-range-filter --> ir-custom-button

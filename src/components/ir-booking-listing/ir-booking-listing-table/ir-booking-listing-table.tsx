@@ -6,7 +6,7 @@ import { getPrivateNote } from '@/utils/booking';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Component, Event, EventEmitter, Host, State, h } from '@stencil/core';
 import { BookingListingService } from '@/services/booking_listing.service';
-import { isPrivilegedUser } from '@/utils/utils';
+import { isBookingModified, isPrivilegedUser } from '@/utils/utils';
 
 @Component({
   tag: 'ir-booking-listing-table',
@@ -101,7 +101,7 @@ export class IrBookingListingTable {
   private renderRow(booking: Booking) {
     const rowKey = `${booking.booking_nbr}`;
     const totalPersons = this.calculateTotalPersons(booking);
-    const lastManipulation = booking.ota_manipulations ? booking.ota_manipulations[booking.ota_manipulations.length - 1] : null;
+    const { lastManipulation, modified } = isBookingModified(booking);
 
     return (
       <tr class="ir-table-row" key={rowKey}>
@@ -164,7 +164,7 @@ export class IrBookingListingTable {
           <ir-status-activity-cell
             lastManipulation={lastManipulation}
             showManipulationBadge={!!lastManipulation}
-            showModifiedBadge={!lastManipulation && booking.events?.length > 0 && booking.events[0].type.toLowerCase() === 'modified'}
+            showModifiedBadge={modified}
             status={booking.status}
             isRequestToCancel={booking.is_requested_to_cancel}
             bookingNumber={booking.booking_nbr}

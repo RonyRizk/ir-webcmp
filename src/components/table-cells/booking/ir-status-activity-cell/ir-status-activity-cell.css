@@ -3,8 +3,8 @@
   display: block;
   font-size: 0.93rem;
 }
-.status-activity__manipulation {
-  color: var(--wa-color-danger);
+.status-activity__modified {
+  color: var(--wa-color-danger-fill-loud) !important;
 }
 .status-activity__modified,
 .status-activity__manipulation {

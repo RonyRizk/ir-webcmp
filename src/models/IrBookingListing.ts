@@ -5,6 +5,7 @@ export interface IExposedBookingsCriteria {
   settlement_methods: ISettlementMethods[];
   statuses: ICriteriaStatuses[];
   types: ICriteriaTypes[];
+  balance_filter: { name: string; value: string }[];
 }
 export interface ICriteriaChannel {
   is_direct: boolean;

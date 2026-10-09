@@ -3,7 +3,7 @@ import IBooking, { ICountry, IEntries, PhysicalRoomType, PropertyRoomType } from
 import { z } from 'zod';
 import calendarData, { calendar_data } from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
-import { ROOM_IN_OUT } from '@/models/booking.dto';
+import { Booking, ROOM_IN_OUT } from '@/models/booking.dto';
 import { GroupedTableEntries } from '@/services/booking-service/types';
 import { Toast } from '@/components/ir-toast-provider/ir-toast-provider';
 import { TPositions } from '@/components/ui/ir-toast/toast';
@@ -305,6 +305,21 @@ export function getDaysArray(date1: string, date2: string) {
   }
 
   return dates;
+}
+/**
+ * Checks if a booking was modified without an OTA manipulation.
+ *
+ * @param booking - The booking to check.
+ * @returns The modification status and latest OTA manipulation.
+ */
+export function isBookingModified(booking: Booking) {
+  const manipulations = booking?.ota_manipulations;
+
+  const lastManipulation = Array.isArray(manipulations) && manipulations.length > 0 ? (manipulations[manipulations.length - 1] ?? null) : null;
+
+  const modified = !lastManipulation && Array.isArray(booking?.events) && typeof booking.events[0]?.type === 'string' && booking.events[0].type.toLowerCase() === 'modified';
+
+  return { modified, lastManipulation };
 }
 export function renderTime(time: number) {
   return time < 10 ? time.toString().padStart(2, '0') : time.toString();

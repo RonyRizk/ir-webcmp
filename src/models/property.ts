@@ -626,6 +626,7 @@ export interface RatePlan {
   is_booking_engine_enabled: boolean;
   is_channel_enabled: boolean;
   is_closed: boolean | null;
+  is_derived?: boolean;
   is_non_refundable: boolean;
   is_targeting_travel_agency: boolean;
   name: string;

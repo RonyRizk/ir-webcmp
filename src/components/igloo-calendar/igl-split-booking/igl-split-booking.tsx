@@ -184,6 +184,7 @@ export class IglSplitBooking {
         promo_key: this.booking.promo_key,
         extras: this.booking.extras,
         agent: this.booking.agent,
+        target_room_identifier: this.room.identifier,
         booking: {
           from_date: this.booking.from_date,
           to_date: this.booking.to_date,

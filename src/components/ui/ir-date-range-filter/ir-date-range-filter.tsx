@@ -105,6 +105,9 @@ export class IrDateRangeFilter {
   /** Shows an ✕ button next to each filled side that clears just that side. */
   @Prop() withClear: boolean = true;
 
+  /** Displays the range without letting the user change it: the pickers never open and the clear/calendar buttons are hidden. */
+  @Prop({ reflect: true }) readonly: boolean = false;
+
   /**
    * Visible label rendered above the control. It names the group for assistive
    * technology (replacing the default visually-hidden "Date range selector") and,
@@ -265,14 +268,14 @@ export class IrDateRangeFilter {
               type="button"
               part="text-btn"
               class={`drf-text-btn${!fromLabel ? ' drf-text-btn--placeholder' : ''}`}
-              onClick={() => this.fromDateSelectRef?.show()}
-              aria-haspopup="dialog"
+              onClick={() => !this.readonly && this.fromDateSelectRef?.show()}
+              aria-haspopup={this.readonly ? undefined : 'dialog'}
               aria-label={fromLabel ? `Start date: ${fromLabel}` : 'Select start date'}
             >
               {fromLabel ?? 'From'}
             </button>
 
-            {fromLabel && this.withClear && (
+            {fromLabel && this.withClear && !this.readonly && (
               <button type="button" part="clear-btn" class="drf-clear-btn" onClick={() => this.clearDate('from')} aria-label="Clear start date">
                 <wa-icon name="xmark" />
               </button>
@@ -286,6 +289,7 @@ export class IrDateRangeFilter {
               minDate={this.minDate}
               maxDate={this.maxDate}
               emitEmptyDate
+              disabled={this.readonly}
               class="drf-date-select"
               onDateChanged={evt => this.selectDate(evt.detail.start, 'from')}
             >
@@ -322,14 +326,14 @@ export class IrDateRangeFilter {
               type="button"
               part="text-btn"
               class={`drf-text-btn${!toLabel ? ' drf-text-btn--placeholder' : ''}`}
-              onClick={() => this.toDateSelectRef?.show()}
-              aria-haspopup="dialog"
+              onClick={() => !this.readonly && this.toDateSelectRef?.show()}
+              aria-haspopup={this.readonly ? undefined : 'dialog'}
               aria-label={toLabel ? `End date: ${toLabel}` : 'Select end date'}
             >
               {toLabel ?? 'To'}
             </button>
 
-            {toLabel && this.withClear && (
+            {toLabel && this.withClear && !this.readonly && (
               <button type="button" part="clear-btn" class="drf-clear-btn" onClick={() => this.clearDate('to')} aria-label="Clear end date">
                 <wa-icon name="xmark" />
               </button>
@@ -343,6 +347,7 @@ export class IrDateRangeFilter {
               minDate={toMinDate}
               maxDate={this.maxDate}
               emitEmptyDate
+              disabled={this.readonly}
               class="drf-date-select"
               onDateChanged={evt => this.selectDate(evt.detail.start, 'to')}
             >

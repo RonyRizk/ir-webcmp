@@ -1,4 +1,4 @@
-import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { buildSplitIndex, calculateDaysBetweenDates, getSplitRole, transformNewBooking } from '@/utils/booking';
 import { checkMealPlan, formatAmount, isBlockUnit, SelectOption, showToast } from '@/utils/utils';
@@ -77,11 +77,31 @@ export class IglBookingEvent {
 
   componentWillLoad() {
     window.addEventListener('click', this.handleClickOutsideBind);
+  }
 
-    this.bookingEvent.SPLIT_INDEX = buildSplitIndex(this.bookingEvent.ROOMS);
-    if (this.bookingEvent.SPLIT_INDEX) {
-      this.role = getSplitRole(this.bookingEvent.SPLIT_INDEX, this.bookingEvent.IDENTIFIER) ?? '';
+  /**
+   * Drag/resize writes `left`/`width` straight onto the element, but the vdom only re-applies a style
+   * when its own computed value changes — so when the stay itself changes, write the new geometry back.
+   */
+  @Watch('bookingEvent')
+  handleBookingEventChange(newValue: { [key: string]: any }, oldValue: { [key: string]: any }) {
+    if (!oldValue || this.isNewEvent()) {
+      return;
     }
+    const geometryChanged = ['FROM_DATE', 'TO_DATE', 'NO_OF_DAYS', 'PR_ID'].some(key => newValue[key] !== oldValue[key]);
+    if (!geometryChanged) {
+      return;
+    }
+    this.isStretch = false;
+    this.isShrinking = null;
+    const { top, left, width } = this.getPosition();
+    if (width === '0') {
+      // Starting cell not in the DOM; leave the geometry to the next render.
+      return;
+    }
+    this.element.style.top = top;
+    this.element.style.left = left;
+    this.element.style.width = width;
   }
 
   componentDidLoad() {
@@ -636,6 +656,9 @@ export class IglBookingEvent {
 
     this.showEventInfo(false);
     this.isStretch = side !== 'move';
+    if (this.isStretch) {
+      this.role = this.computeSplitRole() ?? '';
+    }
     if (side === 'move') {
       this.initialX = event.clientX || event.touches[0].clientX;
       this.initialY = event.clientY || event.touches[0].clientY;

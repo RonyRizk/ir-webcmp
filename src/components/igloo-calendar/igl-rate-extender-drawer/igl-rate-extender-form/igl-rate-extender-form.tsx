@@ -214,6 +214,7 @@ export class IglRateExtenderForm {
         pickup_info: this.booking.pickup_info,
         extra_services: this.booking.extra_services,
         agent: this.booking.agent,
+        target_room_identifier: this.identifier,
         booking: {
           booking_nbr: this.bookingNumber,
           from_date: this.dates.from_date,

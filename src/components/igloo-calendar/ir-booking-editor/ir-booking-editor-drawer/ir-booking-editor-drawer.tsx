@@ -3,7 +3,7 @@ import { BlockedDatePayload, BookingEditorMode, BookingStep } from '../types';
 import { Booking, ExtraService } from '@/models/booking.dto';
 import { IBlockUnit } from '@/models/IBooking';
 import Token from '@/models/Token';
-import booking_store, { hasAtLeastOneRoomSelected, resetAvailability, resetReserved, setBookingDraft, setDayUseSelection } from '@/stores/booking.store';
+import booking_store, { hasAtLeastOneRoomSelected, resetAvailability, resetBookingStore, resetReserved, setBookingDraft, setDayUseSelection } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
 import { getReleaseHoursString } from '@/utils/utils';
@@ -76,12 +76,37 @@ export class IrBookingEditorDrawer {
   private wasBlockedUnit = false;
   private didAdjustBlockedUnit = false;
   private originalBlockPayload?: IBlockUnit;
+  /** Bumped on every open so each session mounts a fresh `ir-booking-editor`. */
+  private sessionKey = 0;
 
   componentWillLoad() {
     if (this.token) {
       this.token.setToken(this.ticket);
     }
     this.initializeBlockedUnitState(this.blockedUnit);
+    if (this.open) {
+      resetBookingStore(true);
+    }
+    this.seedStore();
+  }
+
+  /**
+   * The drawer stays mounted between sessions, so the store is cleared and reseeded on every
+   * open rather than relying on the editor's `disconnectedCallback` alone.
+   */
+  @Watch('open')
+  handleOpenChange(newValue: boolean, oldValue: boolean) {
+    if (!newValue || oldValue) {
+      return;
+    }
+    resetBookingStore(true);
+    this.seedStore();
+    this.sessionKey++;
+    this.step = 'details';
+  }
+
+  /** Seeds the store from the drawer's props (mode, day-use pre-selection). */
+  private seedStore() {
     if (this.mode) {
       booking_store.event_type = { type: this.mode };
     }
@@ -485,6 +510,7 @@ export class IrBookingEditorDrawer {
         )}
         {this.open && this.ticket && (
           <ir-booking-editor
+            key={`booking-editor-${this.sessionKey}`}
             onLoadingChanged={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();

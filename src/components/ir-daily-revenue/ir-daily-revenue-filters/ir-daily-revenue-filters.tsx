@@ -1,6 +1,6 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
-import { DailyPaymentFilter, GroupedFolioPayment } from '../types';
+import { DailyPaymentFilter, GroupedFolioPayment, RevenueSourceOption } from '../types';
 import locales from '@/stores/locales.store';
 
 @Component({
@@ -11,6 +11,7 @@ import locales from '@/stores/locales.store';
 export class IrDailyRevenueFilters {
   @Prop() payments: GroupedFolioPayment;
   @Prop() isLoading: boolean;
+  @Prop() sources: RevenueSourceOption[] = [];
 
   @State() users: Set<string> = new Set();
   @State() filters: DailyPaymentFilter;
@@ -19,6 +20,7 @@ export class IrDailyRevenueFilters {
     from_date: moment().format('YYYY-MM-DD'),
     to_date: moment().format('YYYY-MM-DD'),
     users: null,
+    source: null,
   };
 
   @Event() fetchNewReports: EventEmitter<DailyPaymentFilter>;
@@ -71,6 +73,23 @@ export class IrDailyRevenueFilters {
   render() {
     return (
       <ir-filter-card>
+        <wa-select
+          label={locales.entries?.Lcz_Source ?? 'Source'}
+          size="s"
+          value={this.filters?.source ?? ''}
+          defaultValue={this.filters?.source ?? ''}
+          onchange={(e: CustomEvent) => {
+            const value = (e.target as HTMLSelectElement).value;
+            this.updateFilter({ source: value || null });
+          }}
+        >
+          <wa-option value="">All sources</wa-option>
+          {this.sources.map(({ label, value }) => (
+            <wa-option key={value} value={value}>
+              {label}
+            </wa-option>
+          ))}
+        </wa-select>
         <wa-select
           label="Selected period"
           size="s"

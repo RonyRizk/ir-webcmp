@@ -8,7 +8,7 @@ import calendar_data from '@/stores/calendar-data';
 import { isAgentMode } from '../functions';
 import { Agent } from '@/services/agents/type';
 import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
-import { showToast } from '@/utils/utils';
+import { isBookingModified, showToast } from '@/utils/utils';
 
 @Component({
   tag: 'ir-booking-header',
@@ -127,7 +127,7 @@ export class IrBookingHeader {
   }
 
   render() {
-    const lastManipulation = this.booking.ota_manipulations ? this.booking.ota_manipulations[this.booking.ota_manipulations.length - 1] : null;
+    const { modified, lastManipulation } = isBookingModified(this.booking);
     const showPms = (calendar_data.property?.linked_pms || [])?.findIndex(lp => lp?.is_active && lp?.bookings_integration_mode?.code === '001') !== -1;
     return (
       <div class="booking-header">
@@ -174,7 +174,7 @@ export class IrBookingHeader {
                         Change source
                       </ir-custom-button>
                     )}
-                    {lastManipulation && (
+                    {modified && (
                       <Fragment>
                         <p id={`booking-${this.booking.booking_nbr}-modified`} class="booking-header__modified">
                           Modified
@@ -182,9 +182,11 @@ export class IrBookingHeader {
 
                         <wa-tooltip for={`booking-${this.booking.booking_nbr}-modified`}>
                           <div>
-                            <p class="m-0">
-                              Modified by {lastManipulation?.user} at {lastManipulation?.date} {lastManipulation?.hour}:{lastManipulation?.minute}.
-                            </p>
+                            {lastManipulation && (
+                              <p class="m-0">
+                                Modified by {lastManipulation?.user} at {lastManipulation?.date} {lastManipulation?.hour}:{lastManipulation?.minute}.
+                              </p>
+                            )}
                             <p class="m-0">{this.alertMessage}</p>
                           </div>
                         </wa-tooltip>

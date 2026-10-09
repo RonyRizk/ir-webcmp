@@ -121,6 +121,7 @@ Type: `Promise<HTMLInputElement>`
  - [ir-city-ledger-fiscal-documents-filters](../../ir-city-ledger/ir-city-ledger-fiscal-documents/ir-city-ledger-fiscal-documents-filters)
  - [ir-city-ledger-folio-filters](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-filters)
  - [ir-city-ledger-transaction-form](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form)
+ - [ir-clone-rates](../../ir-clone-rates)
  - [ir-date-range](../ir-date-range)
  - [ir-date-select](../date-picker/ir-date-select)
  - [ir-departure-time-dialog](../../ir-booking-details/ir-room/ir-departure-time-dialog)
@@ -172,6 +173,7 @@ graph TD;
   ir-city-ledger-fiscal-documents-filters --> ir-input
   ir-city-ledger-folio-filters --> ir-input
   ir-city-ledger-transaction-form --> ir-input
+  ir-clone-rates --> ir-input
   ir-date-range --> ir-input
   ir-date-select --> ir-input
   ir-departure-time-dialog --> ir-input

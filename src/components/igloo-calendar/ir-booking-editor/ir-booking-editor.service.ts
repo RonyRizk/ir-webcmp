@@ -296,7 +296,7 @@ export class IRBookingEditorService {
           const newRooms = await generateNewRooms(room.identifier, room.in_out?.code === '001', room);
           rooms[toBeEditedRoomIndex] = { ...newRooms[0] };
 
-          newBooking = modifyBookingDetails(booking, rooms);
+          newBooking = { ...modifyBookingDetails(booking, rooms), target_room_identifier: room.identifier };
 
           break;
         }

@@ -261,7 +261,7 @@ export class IglBookPropertyService {
           const filteredRooms = booking.rooms.filter(r => r.identifier !== currentRoomType.identifier);
           console.log('currentRoomType', currentRoomType);
           const newRooms = generateNewRooms(currentRoomType.identifier, currentRoomType.in_out?.code === '001');
-          newBooking = modifyBookingDetails(booking, [...filteredRooms, ...newRooms]);
+          newBooking = { ...modifyBookingDetails(booking, [...filteredRooms, ...newRooms]), target_room_identifier: currentRoomType.identifier };
           break;
         }
         case 'ADD_ROOM':
