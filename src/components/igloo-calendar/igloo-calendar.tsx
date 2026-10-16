@@ -62,7 +62,7 @@ type UnassignedDatesRange = { fromDate: string; toDate: string };
 type MergedUnassignedDatesRange = UnassignedDatesRange & { sources: UnassignedDatesRange[] };
 
 /** A burst is considered over once no notification has arrived for this long. */
-const UNASSIGNED_DATES_QUIET_MS = 500;
+const UNASSIGNED_DATES_QUIET_MS = 2000;
 /** Ceiling on how long a sustained stream can hold a flush back. */
 const UNASSIGNED_DATES_MAX_WAIT_MS = 3000;
 /**
@@ -873,6 +873,12 @@ export class IglooCalendar {
   }
 
   private handleGetUnassignedDates(result: any) {
+    const parsedResult = this.parseDateRange(result);
+    this.queueUnassignedDatesRefresh(parsedResult.FROM_DATE, parsedResult.TO_DATE, 'GET_UNASSIGNED_DATES', result);
+  }
+
+  /** Queues an unassigned-units re-read for the part of `[from, to]` that overlaps the loaded range. */
+  private queueUnassignedDatesRefresh(from: string, to: string, reason: RealtimeReason, payload: unknown) {
     if (this.calendarData.is_vacation_rental) {
       return;
     }
@@ -880,11 +886,10 @@ export class IglooCalendar {
     if (!loadedFrom || !loadedTo) {
       return;
     }
-    const parsedResult = this.parseDateRange(result);
-    const notifiedFrom = toIsoDate(parsedResult.FROM_DATE);
-    const notifiedTo = toIsoDate(parsedResult.TO_DATE);
+    const notifiedFrom = toIsoDate(from);
+    const notifiedTo = toIsoDate(to);
     if (!notifiedFrom || !notifiedTo) {
-      console.warn('GET_UNASSIGNED_DATES payload has no usable range:', result);
+      console.warn(`${reason} payload has no usable range:`, payload);
       return;
     }
     // YYYY-MM-DD strings compare correctly as-is, and staying on strings avoids the day shift that
@@ -1022,6 +1027,10 @@ export class IglooCalendar {
         return event;
       }),
     };
+    // A cancelled booking frees its unassigned rooms for the stay's dates.
+    if (result.status_code === '003') {
+      this.queueUnassignedDatesRefresh(result.from_date, result.to_date, 'CHANGE_IN_BOOK_STATUS', result);
+    }
   }
 
   private handleNonTechnicalChangeInBooking(result: any) {
