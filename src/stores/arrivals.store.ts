@@ -1,4 +1,5 @@
 import { Booking, Room } from '@/models/booking.dto';
+import { roomArrivalMinutes, sortRoomsByTime } from '@/utils/room-movement-time';
 import { canCheckIn } from '@/utils/utils';
 import { createStore } from '@stencil/store';
 import moment from 'moment';
@@ -24,6 +25,8 @@ export interface ArrivalsStore {
   inHouseBookings: Booking[];
   futureBookings: Booking[];
   searchTerm: string;
+  /** Lists each room on its own row ordered by arrival time, rooms without one first (the dashboard). */
+  sortByTime: boolean;
   pagination: ArrivalsPagination;
   today: string;
 }
@@ -36,6 +39,7 @@ const initialState: ArrivalsStore = {
   needsCheckInBookings: [],
   inHouseBookings: [],
   searchTerm: '',
+  sortByTime: false,
   pagination: {
     currentPage: 1,
     pageSize: 20,
@@ -107,12 +111,20 @@ function runArrivalsPipeline() {
   const bookingsForToday = getBookingsForDate(arrivalsStore.bookings, arrivalsStore.today);
   const searchedBookings = filterBookingsBySearch(bookingsForToday, arrivalsStore.searchTerm);
 
-  arrivalsStore.filteredBookings = searchedBookings;
-  arrivalsStore.paginatedBookings = searchedBookings;
+  const order = (bookings: Booking[]) => (arrivalsStore.sortByTime ? sortRoomsByTime(bookings, roomArrivalMinutes) : bookings);
+
+  arrivalsStore.filteredBookings = order(searchedBookings);
+  arrivalsStore.paginatedBookings = arrivalsStore.filteredBookings;
   const split = splitBookingsByStatus(searchedBookings);
-  arrivalsStore.needsCheckInBookings = split.needsCheckIn;
-  arrivalsStore.inHouseBookings = split.inHouse;
-  arrivalsStore.futureBookings = split.futureRooms;
+  arrivalsStore.needsCheckInBookings = order(split.needsCheckIn);
+  arrivalsStore.inHouseBookings = order(split.inHouse);
+  arrivalsStore.futureBookings = order(split.futureRooms);
+}
+
+/** Orders the rooms by arrival time, each on its own row (the dashboard), or keeps the API's booking order. */
+export function setArrivalsSortByTime(enabled: boolean) {
+  arrivalsStore.sortByTime = enabled;
+  runArrivalsPipeline();
 }
 
 function getBookingsForDate(bookings: Booking[], date: string) {

@@ -1,0 +1,351 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+.stats__card {
+  --spacing: var(--wa-space-l);
+  border: 0;
+  border-radius: var(--wa-border-radius-l);
+  background: var(--wa-color-surface-default);
+}
+
+.stats__card::part(body) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+/* Takes the rail's spare height, which ir-dashboard stretches to the table's on desktop. */
+.stats__card--occupancy {
+  flex: 1 1 auto;
+}
+
+.stats__card--performance {
+  flex: none;
+}
+
+/* Capitalized card title ("Today's Occupancy", "Performance"). */
+.stats__title {
+  margin: 0;
+  font-family: var(--wa-font-family-heading);
+  font-size: var(--wa-font-size-m);
+  font-weight: var(--wa-font-weight-semibold);
+  line-height: var(--wa-line-height-condensed);
+  text-transform: capitalize;
+  color: var(--wa-color-text-normal);
+}
+
+.stats__occupancy,
+.stats__units,
+.stats__unit,
+.stats__kpis {
+  transition: opacity 150ms ease;
+}
+
+/* Day change: keep the old figures on screen, dimmed, until the new ones land. */
+.stats--loading {
+  opacity: 0.55;
+}
+
+/* Soft brand-tinted tile behind each icon. */
+.stats__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--wa-border-radius-m);
+  background-color: var(--wa-color-brand-fill-quiet);
+  color: var(--wa-color-brand-on-quiet);
+  font-size: 1.125rem;
+}
+
+.stats__icon--round {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  border-radius: var(--wa-border-radius-circle);
+  font-size: 1.375rem;
+}
+
+.stats__occupancy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s);
+  padding-block-end: var(--wa-space-xs);
+}
+
+.stats__occupancy-figure {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-m);
+}
+
+.stats__occupancy-value {
+  unicode-bidi: isolate;
+  font-size: var(--wa-font-size-3xl);
+  font-weight: var(--wa-font-weight-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-normal);
+}
+
+.stats__booked {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+  font-weight: var(--wa-font-weight-semibold);
+  color: var(--wa-color-text-normal);
+}
+
+.stats__bar {
+  --track-height: 0.5rem;
+  --indicator-color: var(--wa-color-success-fill-loud);
+  --track-color: var(--wa-color-neutral-fill-quiet);
+  margin-block-start: var(--wa-space-xs);
+}
+
+.stats__bar::part(indicator) {
+  /* A day change slides the bar to its new length: ease-in-out, kept under 300ms. */
+  transition: width 280ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Unit breakdown: two columns; spacing alone separates the figures, aligned with the card title. */
+.stats__units {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--wa-space-m) var(--wa-space-l);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Without the front desk only Booked and Pending remain: one under the other in the desktop rail, side by side above the tables. */
+@media (min-width: 992px) {
+  .stats__units--stacked {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.stats__unit {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--wa-space-s);
+  row-gap: 0.125rem;
+}
+
+.stats__dot {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border-radius: var(--wa-border-radius-circle);
+  background-color: var(--stats-dot-color, var(--wa-color-brand-fill-loud));
+}
+
+.stats__dot--blocked {
+  --stats-dot-color: var(--wa-color-danger-fill-loud);
+}
+
+.stats__unit-value {
+  font-size: var(--wa-font-size-xl);
+  font-weight: var(--wa-font-weight-bold);
+  line-height: var(--wa-line-height-condensed);
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-normal);
+}
+
+/* Under the count, lined up with it rather than with the dot. */
+/* Quiet like the KPI labels, so the eye lands on the figures first. */
+.stats__unit-label {
+  grid-column: 2;
+  font-size: var(--wa-font-size-s);
+  line-height: var(--wa-line-height-condensed);
+  color: var(--wa-color-text-quiet);
+}
+
+/* Lcz_Available comes back lowercase ("available"); the label starts with a capital like its siblings. */
+.stats__unit-label::first-letter {
+  text-transform: uppercase;
+}
+
+/* Performance KPIs, one under the other on every screen: icon tile, then the amount over its label. */
+.stats__kpis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats__kpi {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-m);
+}
+
+/* A size container, so the amount can scale to the width it's actually given. */
+.stats__kpi-text {
+  container-type: inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+/*
+ * Amounts are never cut: the font shrinks to fit the amount on one line (`--kpi-chars` is its length, each character
+ * about 0.62em wide in bold tabular figures), between the small size and `--kpi-max-size`. Only an amount still too
+ * long at the small size wraps, onto as many lines as it needs.
+ */
+.stats__kpi-value {
+  --kpi-max-size: var(--wa-font-size-xl);
+  /* Keep "€ 3,500.00" in one order inside RTL text. */
+  unicode-bidi: isolate;
+  font-size: clamp(var(--wa-font-size-s), calc(100cqi / (var(--kpi-chars, 10) * 0.62)), var(--kpi-max-size));
+  font-weight: var(--wa-font-weight-bold);
+  line-height: var(--wa-line-height-condensed);
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-normal);
+  overflow-wrap: anywhere;
+}
+
+.stats__kpi-label {
+  overflow: hidden;
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-quiet);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Phones and tablets: the rail sits above the tables, so it's kept as short as possible to leave them more of the screen. */
+@media (max-width: 991px) {
+  :host {
+    gap: var(--wa-space-s);
+  }
+
+  .stats__card {
+    --spacing: var(--wa-space-m);
+  }
+
+  .stats__card::part(body) {
+    gap: var(--wa-space-s);
+  }
+
+  /* KPIs stay one under the other, as on desktop, so each amount gets the card's full width. */
+  .stats__units,
+  .stats__kpis {
+    row-gap: var(--wa-space-s);
+  }
+
+  .stats__kpi {
+    gap: var(--wa-space-s);
+  }
+
+  .stats__kpi .stats__icon {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Tablets: the two cards sit side by side instead of one over the other. */
+@media (min-width: 576px) and (max-width: 991px) {
+  :host {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Skeletons shown until each part's first figures arrive. */
+.stats__skeleton {
+  inline-size: 70%;
+  block-size: 1.125rem;
+  min-block-size: 0;
+}
+
+.stats__skeleton::part(indicator) {
+  border-radius: var(--wa-border-radius-s);
+}
+
+.stats__skeleton--occupancy {
+  inline-size: 11rem;
+  block-size: 3.5rem;
+}
+
+.stats__skeleton--booked {
+  inline-size: 10rem;
+}
+
+.stats__skeleton--bar {
+  inline-size: 100%;
+  block-size: 0.5rem;
+  margin-block-start: var(--wa-space-xs);
+}
+
+.stats__skeleton--unit {
+  grid-column: 1 / -1;
+  block-size: 2.5rem;
+}
+
+/* Exactly one line of the amount's font, so the card doesn't move when the figures land. */
+.stats__skeleton--kpi {
+  inline-size: 6rem;
+  font-size: var(--wa-font-size-xl);
+  line-height: var(--wa-line-height-condensed);
+  block-size: 1lh;
+}
+
+/* Short desktop rails (ir-dashboard sets `density` from the rail's height): tighten the spacing. */
+:host([density='compact']),
+:host([density='tight']) {
+  gap: var(--wa-space-s);
+}
+
+:host([density='compact']) .stats__card,
+:host([density='tight']) .stats__card {
+  --spacing: var(--wa-space-m);
+}
+
+:host([density='compact']) .stats__card::part(body),
+:host([density='tight']) .stats__card::part(body) {
+  gap: var(--wa-space-s);
+}
+
+:host([density='compact']) .stats__units,
+:host([density='tight']) .stats__units,
+:host([density='compact']) .stats__kpis,
+:host([density='tight']) .stats__kpis {
+  row-gap: var(--wa-space-s);
+}
+
+:host([density='tight']) .stats__occupancy-value {
+  font-size: var(--wa-font-size-2xl);
+}
+
+:host([density='tight']) .stats__icon--round {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+}
+
+:host([density='tight']) .stats__unit-value {
+  font-size: var(--wa-font-size-l);
+}
+
+/* Caps the amount one size down; it still shrinks further when its space is narrower. */
+:host([density='tight']) .stats__kpi-value {
+  --kpi-max-size: var(--wa-font-size-l);
+}
+
+/* Reduced motion keeps the dimming fade (it explains the refresh) and drops only the bar's movement. */
+@media (prefers-reduced-motion: reduce) {
+  .stats__bar::part(indicator) {
+    transition: none;
+  }
+
+  .stats__skeleton::part(indicator) {
+    animation: none;
+  }
+}

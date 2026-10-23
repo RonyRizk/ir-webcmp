@@ -33,6 +33,7 @@
  - [ir-city-ledger](../ir-city-ledger)
  - [ir-city-ledger-folio-table](../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-clone-rates](../ir-clone-rates)
+ - [ir-dashboard-bookings-table](../ir-dashboard/ir-dashboard-bookings-table)
  - [ir-departures-table](../ir-departures/ir-departures-table)
  - [ir-dp-report-chart](../ir-dp-report/ir-dp-report-chart)
  - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
@@ -71,6 +72,7 @@ graph TD;
   ir-city-ledger --> ir-empty-state
   ir-city-ledger-folio-table --> ir-empty-state
   ir-clone-rates --> ir-empty-state
+  ir-dashboard-bookings-table --> ir-empty-state
   ir-departures-table --> ir-empty-state
   ir-dp-report-chart --> ir-empty-state
   ir-dp-report-table --> ir-empty-state

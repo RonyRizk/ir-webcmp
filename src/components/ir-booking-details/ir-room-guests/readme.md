@@ -35,6 +35,7 @@
  - [igloo-calendar](../../igloo-calendar)
  - [ir-arrivals](../../ir-arrivals)
  - [ir-booking-details](..)
+ - [ir-dashboard-arrivals](../../ir-dashboard/ir-dashboard-arrivals)
 
 ### Depends on
 
@@ -58,6 +59,7 @@ graph TD;
   igloo-calendar --> ir-room-guests
   ir-arrivals --> ir-room-guests
   ir-booking-details --> ir-room-guests
+  ir-dashboard-arrivals --> ir-room-guests
   style ir-room-guests fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

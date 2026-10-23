@@ -1,9 +1,9 @@
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Booking } from '@/models/booking.dto';
 import { departuresStore } from '@/stores/departures.store';
-import locales from '@/stores/locales.store';
-import { Component, Event, EventEmitter, Host, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import moment from 'moment';
+import locales from '@/stores/locales.store';
 export type CheckoutRoomEvent = {
   booking: Booking;
   identifier: string;
@@ -14,6 +14,14 @@ export type CheckoutRoomEvent = {
   scoped: true,
 })
 export class IrDeparturesTable {
+  /** Hides the pagination footer, for hosts that load the whole day in one page (the dashboard). */
+  @Prop() hidePagination: boolean = false;
+  /**
+   * For properties without front desk (PMS): check-out status isn't tracked, so every room departing on the store's day is
+   * listed in one list, without overdue marks or the actions column.
+   */
+  @Prop() pmsDisabled: boolean = false;
+
   @Event() checkoutRoom: EventEmitter<CheckoutRoomEvent>;
   @Event() requestPageChange: EventEmitter<PaginationChangeEvent>;
   @Event() requestPageSizeChange: EventEmitter<PaginationChangeEvent>;
@@ -49,7 +57,7 @@ export class IrDeparturesTable {
   }
   private renderRow(booking: Booking, room: Booking['rooms'][number], index: number, showAction: boolean, isFuture) {
     const rowKey = `${booking.booking_nbr}-${room?.identifier ?? index}`;
-    const isOverdueCheckout = moment(room.to_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'));
+    const isOverdueCheckout = !this.pmsDisabled && moment(room.to_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'));
     return (
       <tr class="ir-table-row" key={rowKey}>
         <td class="sticky-column">
@@ -83,29 +91,61 @@ export class IrDeparturesTable {
             removeBalance
           ></ir-balance-cell>
         </td>
-        <td>
-          <div class="departures-table__actions-cell">
-            {showAction ? (
-              <ir-actions-cell
-                onIrAction={e => {
-                  e.stopImmediatePropagation();
-                  e.stopPropagation();
-                  this.checkoutRoom.emit({
-                    booking: booking,
-                    identifier: room.identifier,
-                  });
-                }}
-                buttons={isOverdueCheckout ? ['overdue_check_out'] : ['check_out']}
-              ></ir-actions-cell>
-            ) : isFuture ? (
-              ''
-            ) : (
-              'In-house'
-            )}
-          </div>
-        </td>
+        {!this.pmsDisabled && (
+          <td>
+            <div class="departures-table__actions-cell">
+              {showAction ? (
+                <ir-actions-cell
+                  onIrAction={e => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    this.checkoutRoom.emit({
+                      booking: booking,
+                      identifier: room.identifier,
+                    });
+                  }}
+                  buttons={isOverdueCheckout ? ['overdue_check_out'] : ['check_out']}
+                ></ir-actions-cell>
+              ) : isFuture ? (
+                ''
+              ) : (
+                'In-house'
+              )}
+            </div>
+          </td>
+        )}
       </tr>
     );
+  }
+
+  /** Non-PMS rows: every room departing on the store's day, in the store's order. */
+  private renderDepartingRooms() {
+    const { filteredBookings, today } = departuresStore;
+    const departing = filteredBookings.flatMap(booking => (booking.rooms ?? []).filter(room => room.to_date === today).map(room => ({ booking, room })));
+    return departing.map(({ booking, room }, index) => this.renderRow(booking, room, index, false, false));
+  }
+
+  private renderBody() {
+    const { needsCheckOutBookings, futureRooms, outBookings } = departuresStore;
+    const columnCount = this.pmsDisabled ? 5 : 6;
+    const rows = this.pmsDisabled
+      ? this.renderDepartingRooms()
+      : [
+          ...(this.renderSection({ bookings: futureRooms, isFuture: true }) ?? []),
+          ...(this.renderSection({ bookings: needsCheckOutBookings, showAction: true }) ?? []),
+          ...(this.renderSection({ bookings: outBookings }) ?? []),
+        ];
+    const isEmpty = this.pmsDisabled ? !rows.length : !needsCheckOutBookings.length && !outBookings.length;
+    return [
+      ...rows,
+      isEmpty && (
+        <tr>
+          <td colSpan={columnCount} class="empty-row">
+            <ir-empty-state></ir-empty-state>
+          </td>
+        </tr>
+      ),
+    ];
   }
 
   private handlePageChange(event: CustomEvent<PaginationChangeEvent>) {
@@ -143,7 +183,7 @@ export class IrDeparturesTable {
                 <th class="text-center">
                   Balance
                   {/* <wa-tooltip for="balance-info">Booking balance click to settle.</wa-tooltip> */}
-                  <div style={{ width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
+                  <div style={{ width: 'fit-content', marginInline: 'auto' }}>
                     <ir-custom-button
                       id="balance-info"
                       style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
@@ -155,24 +195,13 @@ export class IrDeparturesTable {
                     </ir-custom-button>
                   </div>
                 </th>
-                <th></th>
+                {!this.pmsDisabled && <th></th>}
               </tr>
             </thead>
-            <tbody>
-              {this.renderSection({ bookings: futureRooms, isFuture: true })}
-              {this.renderSection({ bookings: needsCheckOutBookings, showAction: true })}
-              {this.renderSection({ bookings: outBookings })}
-              {!needsCheckOutBookings.length && !outBookings.length && (
-                <tr>
-                  <td colSpan={6} class="empty-row">
-                    <ir-empty-state></ir-empty-state>
-                  </td>
-                </tr>
-              )}
-            </tbody>
+            <tbody>{this.renderBody()}</tbody>
           </table>
         </div>
-        {(needsCheckOutBookings.length > 0 || outBookings.length > 0 || futureRooms.length > 0) && (
+        {!this.hidePagination && (needsCheckOutBookings.length > 0 || outBookings.length > 0 || futureRooms.length > 0) && (
           <ir-pagination
             class="data-table--pagination"
             showing={pagination.showing}

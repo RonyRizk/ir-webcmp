@@ -63,7 +63,7 @@ export class IrBalanceCell {
                   appearance="outlined"
                 >
                   <span>{this.financial.cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} </span>
-                  {formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}
+                  <span class="amount">{formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}</span>
                 </ir-custom-button>
               )
             : this.hasAmount(this.guestFinancial?.due_amount) && (
@@ -108,7 +108,7 @@ export class IrBalanceCell {
                               appearance="outlined"
                             >
                               <span>{this.financial.cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} </span>
-                              {formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}
+                              <span class="amount">{formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}</span>
                             </ir-custom-button>
                           )
                         : this.financial.due_amount !== 0 && (
@@ -133,7 +133,7 @@ export class IrBalanceCell {
                               variant="danger"
                               appearance="outlined"
                             >
-                              {formatAmount(this.currencySymbol, this.financial.due_amount)}
+                              <span class="amount">{formatAmount(this.currencySymbol, this.financial.due_amount)}</span>
                             </ir-custom-button>
                           );
                     }
@@ -143,7 +143,7 @@ export class IrBalanceCell {
                   variant="danger"
                   appearance="outlined"
                 >
-                  {formatAmount(this.currencySymbol, this.guestFinancial?.due_amount)}
+                  <span class="amount">{formatAmount(this.currencySymbol, this.guestFinancial?.due_amount)}</span>
                 </ir-custom-button>
               )}
         </div>

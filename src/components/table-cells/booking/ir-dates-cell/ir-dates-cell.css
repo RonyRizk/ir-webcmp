@@ -25,3 +25,12 @@
   font-size: 0.8rem;
   color: var(--wa-color-text-quiet, #6b7280);
 }
+
+/* Latin-formatted dates ("09 Oct 2026") keep their order inside RTL text. */
+.date-cell__container p {
+  unicode-bidi: plaintext;
+}
+
+.date-cell__arrow:dir(rtl) {
+  scale: -1 1;
+}

@@ -2,17 +2,25 @@ import { IrActionButton } from '@/components/table-cells/booking/ir-actions-cell
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Booking, IUnit } from '@/models/booking.dto';
 import { arrivalsStore } from '@/stores/arrivals.store';
-import locales from '@/stores/locales.store';
-import { Component, Event, EventEmitter, Host, State, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { RoomGuestsPayload } from '@/components/ir-booking-details/types';
 
+import locales from '@/stores/locales.store';
 @Component({
   tag: 'ir-arrivals-table',
   styleUrls: ['ir-arrivals-table.css', '../../../common/table.css'],
   scoped: true,
 })
 export class IrArrivalsTable {
+  /** Hides the pagination footer, for hosts that load the whole day in one page (the dashboard). */
+  @Prop() hidePagination: boolean = false;
+  /**
+   * For properties without front desk (PMS): check-in status isn't tracked, so every room arriving on the store's day is
+   * listed in one list, without overdue marks or the actions column.
+   */
+  @Prop() pmsDisabled: boolean = false;
+
   @State() selectedBooking: Booking;
 
   @Event() requestPageChange: EventEmitter<PaginationChangeEvent>;
@@ -70,7 +78,7 @@ export class IrArrivalsTable {
   }
   private renderRow(booking: Booking, room: Booking['rooms'][number], index: number, showAction: boolean) {
     const rowKey = `${booking.booking_nbr}-${room?.identifier ?? index}`;
-    const isOverdueCheckIn = moment(room.from_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'), 'dates');
+    const isOverdueCheckIn = !this.pmsDisabled && moment(room.from_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'), 'dates');
 
     return (
       <tr class="ir-table-row" key={rowKey}>
@@ -106,27 +114,59 @@ export class IrArrivalsTable {
             removeBalance
           ></ir-balance-cell>
         </td>
-        <td>
-          <div class="arrivals-table__actions-cell">
-            {!room.unit ? (
-              <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>Not assigned</span>
-            ) : showAction ? (
-              <ir-actions-cell
-                buttons={isOverdueCheckIn ? ['overdue_check_in'] : ['check_in']}
-                onIrAction={e => {
-                  this.selectedBooking = booking;
-                  this.handleActionsClicked(e);
-                }}
-              ></ir-actions-cell>
-            ) : room.in_out.code === '001' ? (
-              'In-house'
-            ) : (
-              ''
-            )}
-          </div>
-        </td>
+        {!this.pmsDisabled && this.renderActionsCell(booking, room, isOverdueCheckIn, showAction)}
       </tr>
     );
+  }
+
+  private renderActionsCell(booking: Booking, room: Booking['rooms'][number], isOverdueCheckIn: boolean, showAction: boolean) {
+    return (
+      <td>
+        <div class="arrivals-table__actions-cell">
+          {!room.unit ? (
+            <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>Not assigned</span>
+          ) : showAction ? (
+            <ir-actions-cell
+              buttons={isOverdueCheckIn ? ['overdue_check_in'] : ['check_in']}
+              onIrAction={e => {
+                this.selectedBooking = booking;
+                this.handleActionsClicked(e);
+              }}
+            ></ir-actions-cell>
+          ) : room.in_out.code === '001' ? (
+            'In-house'
+          ) : (
+            ''
+          )}
+        </div>
+      </td>
+    );
+  }
+
+  /** Non-PMS rows: every room arriving on the store's day, in the store's order. */
+  private renderArrivingRooms() {
+    const { filteredBookings, today } = arrivalsStore;
+    const arriving = filteredBookings.flatMap(booking => (booking.rooms ?? []).filter(room => room.from_date === today).map(room => ({ booking, room })));
+    return arriving.map(({ booking, room }, index) => this.renderRow(booking, room, index, false));
+  }
+
+  private renderBody() {
+    const { needsCheckInBookings, inHouseBookings, futureBookings } = arrivalsStore;
+    const columnCount = this.pmsDisabled ? 5 : 6;
+    const rows = this.pmsDisabled
+      ? this.renderArrivingRooms()
+      : [...(this.renderSection(futureBookings) ?? []), ...(this.renderSection(needsCheckInBookings, true) ?? []), ...(this.renderSection(inHouseBookings) ?? [])];
+    const isEmpty = this.pmsDisabled ? !rows.length : !needsCheckInBookings.length && !inHouseBookings.length;
+    return [
+      ...rows,
+      isEmpty && (
+        <tr>
+          <td colSpan={columnCount} class="empty-row">
+            <ir-empty-state></ir-empty-state>
+          </td>
+        </tr>
+      ),
+    ];
   }
 
   private handlePageChange(event: CustomEvent<PaginationChangeEvent>) {
@@ -142,7 +182,7 @@ export class IrArrivalsTable {
   }
 
   render() {
-    const { needsCheckInBookings, inHouseBookings, futureBookings, pagination } = arrivalsStore;
+    const { pagination } = arrivalsStore;
     return (
       <Host>
         <div class="table--container">
@@ -163,7 +203,7 @@ export class IrArrivalsTable {
                 <th>Dates</th>
                 <th class="text-center">
                   Balance
-                  <div style={{ width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
+                  <div style={{ width: 'fit-content', marginInline: 'auto' }}>
                     <ir-custom-button
                       id="balance-info"
                       style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
@@ -175,36 +215,27 @@ export class IrArrivalsTable {
                     </ir-custom-button>
                   </div>
                 </th>
-                <th></th>
+                {!this.pmsDisabled && <th></th>}
               </tr>
             </thead>
-            <tbody>
-              {this.renderSection(futureBookings)}
-              {this.renderSection(needsCheckInBookings, true)}
-              {this.renderSection(inHouseBookings)}
-              {!needsCheckInBookings.length && !inHouseBookings.length && (
-                <tr>
-                  <td colSpan={6} class="empty-row">
-                    <ir-empty-state></ir-empty-state>
-                  </td>
-                </tr>
-              )}
-            </tbody>
+            <tbody>{this.renderBody()}</tbody>
           </table>
         </div>
-        <ir-pagination
-          class="data-table--pagination"
-          showing={pagination.showing}
-          total={pagination.total}
-          pages={pagination.totalPages}
-          pageSize={pagination.pageSize}
-          currentPage={pagination.currentPage}
-          allowPageSizeChange={false}
-          pageSizes={[pagination.pageSize]}
-          recordLabel={locales.entries?.Lcz_Bookings ?? 'Bookings'}
-          onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
-          onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
-        ></ir-pagination>
+        {!this.hidePagination && (
+          <ir-pagination
+            class="data-table--pagination"
+            showing={pagination.showing}
+            total={pagination.total}
+            pages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            currentPage={pagination.currentPage}
+            allowPageSizeChange={false}
+            pageSizes={[pagination.pageSize]}
+            recordLabel={locales.entries?.Lcz_Bookings ?? 'Bookings'}
+            onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
+            onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
+          ></ir-pagination>
+        )}
       </Host>
     );
   }

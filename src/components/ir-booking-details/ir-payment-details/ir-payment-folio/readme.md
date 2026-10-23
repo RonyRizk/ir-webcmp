@@ -56,6 +56,7 @@ Type: `Promise<void>`
  - [ir-booking-details](../..)
  - [ir-booking-listing](../../../ir-booking-listing)
  - [ir-checkout-dialog](../../../ir-checkout-dialog)
+ - [ir-dashboard](../../../ir-dashboard)
  - [ir-departures](../../../ir-departures)
  - [ir-financial-actions](../../../ir-financial-actions)
 
@@ -80,6 +81,7 @@ graph TD;
   ir-booking-details --> ir-payment-folio
   ir-booking-listing --> ir-payment-folio
   ir-checkout-dialog --> ir-payment-folio
+  ir-dashboard --> ir-payment-folio
   ir-departures --> ir-payment-folio
   ir-financial-actions --> ir-payment-folio
   style ir-payment-folio fill:#f9f,stroke:#333,stroke-width:4px

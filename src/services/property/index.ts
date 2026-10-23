@@ -17,7 +17,9 @@ import {
   GetExposedBookingsByInvoicedStatusParamsSchema,
   PrintGuestFolioDocParamsSchema,
   GetDayUseBookingsForCalendarParamsSchema,
+  CloneRatesParamsSchema,
   CalculateNetAmountParamsSchema,
+  GetDeletedBookingsParamsSchema,
   type CountrySalesParams,
   type DailyRevenueReportParams,
   type ExposedRectifierParams,
@@ -40,8 +42,9 @@ import {
   type DayUseBookings,
   type GetDayUseBookingsForCalendarParams,
   type CalculateNetAmountParams,
-  CloneRatesParamsSchema,
-  CloneRatesParams,
+  type CloneRatesParams,
+  type GetDeletedBookingsParams,
+  type GetDeletedBookings,
 } from './types';
 
 export class PropertyService {
@@ -60,6 +63,14 @@ export class PropertyService {
       throw new Error(data.ExceptionMsg);
     }
     return data;
+  }
+  public async getDeletedBookings(params: GetDeletedBookingsParams): Promise<GetDeletedBookings> {
+    const payload = GetDeletedBookingsParamsSchema.parse(params);
+    const { data } = await axios.post('/Get_Deleted_Bookings', payload);
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    return data.My_Result;
   }
 
   public async setPropertyGapConfig(params: SetPropertyGapConfigParams) {

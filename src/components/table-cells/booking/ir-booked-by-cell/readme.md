@@ -47,6 +47,7 @@
  - [ir-arrivals-table](../../../ir-arrivals/ir-arrivals-table)
  - [ir-booking-listing-mobile-card](../../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-dashboard-bookings-table](../../../ir-dashboard/ir-dashboard-bookings-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
  - [ir-dp-report-table](../../../ir-dp-report/ir-dp-report-table)
  - [ir-unvoiced-bookings-table](../../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
@@ -57,6 +58,7 @@ graph TD;
   ir-arrivals-table --> ir-booked-by-cell
   ir-booking-listing-mobile-card --> ir-booked-by-cell
   ir-booking-listing-table --> ir-booked-by-cell
+  ir-dashboard-bookings-table --> ir-booked-by-cell
   ir-departures-table --> ir-booked-by-cell
   ir-dp-report-table --> ir-booked-by-cell
   ir-unvoiced-bookings-table --> ir-booked-by-cell

@@ -8,10 +8,12 @@ import { Component, h, Host, Prop } from '@stencil/core';
 export class IrPage {
   @Prop() label: string;
   @Prop() description: string;
+  /** Endpoints that show the embedded interceptor's full-page loader. Omit to keep the interceptor's default list. */
+  @Prop() handledEndpoints?: string[];
   render() {
     return (
       <Host>
-        <ir-interceptor></ir-interceptor>
+        <ir-interceptor {...(this.handledEndpoints ? { handledEndpoints: this.handledEndpoints } : {})}></ir-interceptor>
         <ir-toast></ir-toast>
         <main part="main" class="ir-page__container">
           <header part="header" class="tax-page__header">

@@ -1,7 +1,7 @@
 import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 import { DayData } from '../../models/DayType';
 import axios from 'axios';
-import { BookingDetails, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthType, ZIEntrySchema } from '../../models/IBooking';
+import { BookingDetails, DayType, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthType, ZIEntrySchema } from '../../models/IBooking';
 import { extras } from '../../utils/utils';
 import { getMyBookings } from '../../utils/booking';
 import { Booking, Day, ExtraService, Guest, IBookingPickupInfo, IPmsLog, RoomInOut } from '../../models/booking.dto';
@@ -231,26 +231,38 @@ export class BookingService {
     return data.My_Result;
   }
 
+  /** Properties served by the V4 calendar endpoint, which returns `My_Result` as a JSON string. */
+  private getExposedCalendarRoute(propertyid: number): { route: string; isV4: boolean } {
+    const v4Candidates = new Set([373, 1221, 42, 26]);
+    const isV4 = v4Candidates.has(Number(propertyid));
+    return { route: isV4 ? 'Get_Exposed_Calendar_V4' : 'Get_Exposed_Calendar', isV4 };
+  }
+
+  private async postExposedCalendar(propertyid: number, from_date: string, to_date: string) {
+    const { route, isV4 } = this.getExposedCalendarRoute(propertyid);
+    const { data } = await axios.post(`/${route}`, {
+      propertyid,
+      from_date,
+      to_date,
+      extras,
+      include_sales_rate_plans: true,
+    });
+    if (data.ExceptionMsg !== '') {
+      throw new Error(data.ExceptionMsg);
+    }
+    const res = isV4 ? JSON.parse(data.My_Result) : data.My_Result;
+    return { route, data, months: res.months as MonthType[] };
+  }
+
+  /** Raw calendar days for the range, without the booking mapping `getCalendarData` does. */
+  public async fetchExposedCalendarDays(propertyid: number, from_date: string, to_date: string): Promise<DayType[]> {
+    const { months } = await this.postExposedCalendar(propertyid, from_date, to_date);
+    return (months ?? []).flatMap(month => month.days);
+  }
+
   public async getCalendarData(propertyid: number, from_date: string, to_date: string): Promise<{ [key: string]: any }> {
     try {
-      const v4Candidates = new Set([373, 1221, 42, 26]);
-      let route = 'Get_Exposed_Calendar';
-      const isCandidate = v4Candidates.has(Number(propertyid));
-      if (isCandidate) {
-        route += '_V4';
-      }
-      const { data } = await axios.post(`/${route}`, {
-        propertyid,
-        from_date,
-        to_date,
-        extras,
-        include_sales_rate_plans: true,
-      });
-      if (data.ExceptionMsg !== '') {
-        throw new Error(data.ExceptionMsg);
-      }
-      const res = isCandidate ? JSON.parse(data.My_Result) : data.My_Result;
-      const months: MonthType[] = res.months;
+      const { route, data, months } = await this.postExposedCalendar(propertyid, from_date, to_date);
       const customMonths: { daysCount: number; monthName: string }[] = [];
       const myBooking = await getMyBookings(months);
       const days: DayData[] = months

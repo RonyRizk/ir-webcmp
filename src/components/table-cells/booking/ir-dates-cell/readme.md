@@ -1,7 +1,5 @@
 # ir-dates-cell
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -34,6 +32,7 @@
  - [ir-arrivals-table](../../../ir-arrivals/ir-arrivals-table)
  - [ir-booking-listing-mobile-card](../../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-dashboard-bookings-table](../../../ir-dashboard/ir-dashboard-bookings-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
  - [ir-dp-report-table](../../../ir-dp-report/ir-dp-report-table)
  - [ir-unvoiced-bookings-table](../../../ir-uninvoiced-bookings/ir-unvoiced-bookings-table)
@@ -44,6 +43,7 @@ graph TD;
   ir-arrivals-table --> ir-dates-cell
   ir-booking-listing-mobile-card --> ir-dates-cell
   ir-booking-listing-table --> ir-dates-cell
+  ir-dashboard-bookings-table --> ir-dates-cell
   ir-departures-table --> ir-dates-cell
   ir-dp-report-table --> ir-dates-cell
   ir-unvoiced-bookings-table --> ir-dates-cell

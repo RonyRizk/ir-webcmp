@@ -55,8 +55,8 @@ graph TD;
   ir-departures-table --> ir-dates-cell
   ir-departures-table --> ir-balance-cell
   ir-departures-table --> ir-actions-cell
-  ir-departures-table --> ir-custom-button
   ir-departures-table --> ir-empty-state
+  ir-departures-table --> ir-custom-button
   ir-departures-table --> ir-pagination
   ir-unit-cell --> ir-unit-tag
   ir-balance-cell --> ir-custom-button

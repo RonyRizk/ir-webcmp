@@ -64,6 +64,7 @@ Resolves once the drawer state is updated.
 ### Used by
 
  - [igloo-calendar](../igloo-calendar)
+ - [ir-dashboard-departures](../ir-dashboard/ir-dashboard-departures)
  - [ir-departures](../ir-departures)
  - [ir-guest-billing](../ir-billing/ir-guest-billing)
  - [ir-room](../ir-booking-details/ir-room)
@@ -111,6 +112,7 @@ graph TD;
   ir-guest-document-preview --> ir-preview-screen-dialog
   ir-guest-document-preview --> ir-custom-button
   igloo-calendar --> ir-invoice
+  ir-dashboard-departures --> ir-invoice
   ir-departures --> ir-invoice
   ir-guest-billing --> ir-invoice
   ir-room --> ir-invoice

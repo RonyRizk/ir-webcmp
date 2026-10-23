@@ -20,6 +20,7 @@
  - [ir-arrivals-table](../../../ir-arrivals/ir-arrivals-table)
  - [ir-booking-listing-mobile-card](../../../ir-booking-listing/ir-booking-listing-mobile-card)
  - [ir-booking-listing-table](../../../ir-booking-listing/ir-booking-listing-table)
+ - [ir-dashboard-bookings-table](../../../ir-dashboard/ir-dashboard-bookings-table)
  - [ir-departures-table](../../../ir-departures/ir-departures-table)
 
 ### Depends on
@@ -33,6 +34,7 @@ graph TD;
   ir-arrivals-table --> ir-unit-cell
   ir-booking-listing-mobile-card --> ir-unit-cell
   ir-booking-listing-table --> ir-unit-cell
+  ir-dashboard-bookings-table --> ir-unit-cell
   ir-departures-table --> ir-unit-cell
   style ir-unit-cell fill:#f9f,stroke:#333,stroke-width:4px
 ```

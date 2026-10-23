@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fills the height ir-dashboard hands this panel on desktop, so long lists scroll inside the table, not the page. */
+ir-departures-table {
+  flex: 1 1 auto;
+  min-block-size: var(--dashboard-table-min-block-size, 60vh);
+  /* Always the panel's full width: the standalone page's 1920px cap doesn't apply on the dashboard. */
+  inline-size: 100%;
+  max-inline-size: none;
+  /* No outer border on the dashboard; the standalone departures page keeps it. */
+  border: 0;
+}

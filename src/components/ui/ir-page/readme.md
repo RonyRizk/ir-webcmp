@@ -7,10 +7,11 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default     |
-| ------------- | ------------- | ----------- | -------- | ----------- |
-| `description` | `description` |             | `string` | `undefined` |
-| `label`       | `label`       |             | `string` | `undefined` |
+| Property           | Attribute     | Description                                                                                                   | Type       | Default     |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| `description`      | `description` |                                                                                                               | `string`   | `undefined` |
+| `handledEndpoints` | --            | Endpoints that show the embedded interceptor's full-page loader. Omit to keep the interceptor's default list. | `string[]` | `undefined` |
+| `label`            | `label`       |                                                                                                               | `string`   | `undefined` |
 
 
 ## Shadow Parts
@@ -32,6 +33,7 @@
  - [ir-city-ledger](../../ir-city-ledger)
  - [ir-clone-rates](../../ir-clone-rates)
  - [ir-daily-revenue](../../ir-daily-revenue)
+ - [ir-dashboard](../../ir-dashboard)
  - [ir-dp-report](../../ir-dp-report)
  - [ir-extra-services-settings](../../ir-extra-services-settings)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
@@ -69,6 +71,7 @@ graph TD;
   ir-city-ledger --> ir-page
   ir-clone-rates --> ir-page
   ir-daily-revenue --> ir-page
+  ir-dashboard --> ir-page
   ir-dp-report --> ir-page
   ir-extra-services-settings --> ir-page
   ir-fiscal-documents --> ir-page

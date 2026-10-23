@@ -321,3 +321,11 @@ export const CloneRatesParamsSchema = z.object({
   IS_COPY_MLS: z.boolean().nullish(),
 });
 export type CloneRatesParams = z.infer<typeof CloneRatesParamsSchema>;
+
+export const GetDeletedBookingsParamsSchema = z.object({
+  property_id: PropertyIdSchema,
+  date: DateSchema,
+});
+export type GetDeletedBookingsParams = z.infer<typeof GetDeletedBookingsParamsSchema>;
+
+export type GetDeletedBookings = Booking[];

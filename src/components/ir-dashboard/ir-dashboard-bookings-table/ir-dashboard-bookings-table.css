@@ -1,0 +1,54 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  /* On desktop ir-dashboard stretches this to the panel's height, so long lists scroll inside the table, not the page. */
+  min-block-size: var(--dashboard-table-min-block-size, 60vh);
+  background-color: var(--wa-color-surface-default);
+  overflow: hidden;
+}
+
+/* Content height, shrinking to scroll once the rows outgrow the host. */
+:host .table--container {
+  flex: 0 1 auto;
+  block-size: auto;
+  min-block-size: 0;
+}
+
+/* Header stays put while the rows scroll. A border on a sticky cell scrolls away with the collapsed table, so the rule is drawn as a shadow. */
+:host .data-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 3;
+  border-block-end-color: transparent !important;
+  box-shadow: inset 0 -1px 0 var(--wa-color-neutral-border-normal);
+}
+
+.data-table {
+  inline-size: 100%;
+  margin: 0;
+}
+
+.data-table p {
+  margin: 0;
+}
+
+/* A booking's rooms, one under the other. */
+.units-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-2xs);
+}
+
+.data-table th,
+.data-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Compact on phones — keep the table, scroll horizontally. */
+@media (max-width: 768px) {
+  :host {
+    --ir-cell-padding: var(--wa-space-2xs) var(--wa-space-xs);
+    font-size: var(--wa-font-size-s);
+  }
+}

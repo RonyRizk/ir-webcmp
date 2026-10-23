@@ -5,6 +5,7 @@ import { checkUserAuthState, manageAnchorSession } from '@/utils/utils';
 import { Component, Element, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 
 export type SecureScreens =
+  | 'dashboard'
   | 'hk'
   | 'tasks'
   | 'daily-revenue'
@@ -123,6 +124,7 @@ export class IrSecureTasks {
   }
 
   private readonly validPages = new Set<SecureScreens>([
+    'dashboard',
     'hk',
     'tasks',
     'daily-revenue',
@@ -167,6 +169,7 @@ export class IrSecureTasks {
     },
     {
       routes: [
+        { name: 'Dashboard', value: 'dashboard' },
         { name: 'Front Desk', value: 'front' },
         { name: 'Arrivals', value: 'arrivals' },
         { name: 'Departures', value: 'departures' },
@@ -360,6 +363,8 @@ export class IrSecureTasks {
 
   renderPage() {
     switch (this.currentPage) {
+      case 'dashboard':
+        return <ir-dashboard p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-dashboard>;
       case 'front':
         return (
           <div style={{ flex: '1 1 0%', display: 'block' }}>

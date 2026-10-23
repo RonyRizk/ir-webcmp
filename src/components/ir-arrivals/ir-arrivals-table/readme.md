@@ -5,6 +5,14 @@
 <!-- Auto Generated Below -->
 
 
+## Properties
+
+| Property         | Attribute         | Description                                                                                                                                                                           | Type      | Default |
+| ---------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| `hidePagination` | `hide-pagination` | Hides the pagination footer, for hosts that load the whole day in one page (the dashboard).                                                                                           | `boolean` | `false` |
+| `pmsDisabled`    | `pms-disabled`    | For properties without front desk (PMS): check-in status isn't tracked, so every room arriving on the store's day is listed in one list, without overdue marks or the actions column. | `boolean` | `false` |
+
+
 ## Events
 
 | Event                   | Description | Type                                                                                                                                                                                |
@@ -19,6 +27,7 @@
 ### Used by
 
  - [ir-arrivals](..)
+ - [ir-dashboard-arrivals](../../ir-dashboard/ir-dashboard-arrivals)
 
 ### Depends on
 
@@ -29,8 +38,8 @@
 - [ir-dates-cell](../../table-cells/booking/ir-dates-cell)
 - [ir-balance-cell](../../table-cells/booking/ir-balance-cell)
 - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
-- [ir-custom-button](../../ui/ir-custom-button)
 - [ir-empty-state](../../ir-empty-state)
+- [ir-custom-button](../../ui/ir-custom-button)
 - [ir-pagination](../../ir-pagination)
 
 ### Graph
@@ -43,14 +52,15 @@ graph TD;
   ir-arrivals-table --> ir-dates-cell
   ir-arrivals-table --> ir-balance-cell
   ir-arrivals-table --> ir-actions-cell
-  ir-arrivals-table --> ir-custom-button
   ir-arrivals-table --> ir-empty-state
+  ir-arrivals-table --> ir-custom-button
   ir-arrivals-table --> ir-pagination
   ir-unit-cell --> ir-unit-tag
   ir-balance-cell --> ir-custom-button
   ir-actions-cell --> ir-custom-button
   ir-pagination --> ir-custom-button
   ir-arrivals --> ir-arrivals-table
+  ir-dashboard-arrivals --> ir-arrivals-table
   style ir-arrivals-table fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -39,6 +39,7 @@ close event when the drawer is dismissed from any source.
  - [ir-booking-listing](../../ir-booking-listing)
  - [ir-city-ledger-folio-table](../../ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-folio-table)
  - [ir-daily-revenue](../../ir-daily-revenue)
+ - [ir-dashboard](../../ir-dashboard)
  - [ir-departures](../../ir-departures)
  - [ir-dp-report](../../ir-dp-report)
  - [ir-fiscal-documents](../../ir-fiscal-documents)
@@ -345,6 +346,7 @@ graph TD;
   ir-booking-listing --> ir-booking-details-drawer
   ir-city-ledger-folio-table --> ir-booking-details-drawer
   ir-daily-revenue --> ir-booking-details-drawer
+  ir-dashboard --> ir-booking-details-drawer
   ir-departures --> ir-booking-details-drawer
   ir-dp-report --> ir-booking-details-drawer
   ir-fiscal-documents --> ir-booking-details-drawer

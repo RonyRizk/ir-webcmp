@@ -18,3 +18,10 @@
   align-items: center;
   justify-content: flex-end;
 }
+/* Keep "€ 3,500.00" in one order inside RTL text. */
+.ir-price,
+.amount {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}

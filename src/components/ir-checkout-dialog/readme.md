@@ -26,6 +26,7 @@
 ### Used by
 
  - [igloo-calendar](../igloo-calendar)
+ - [ir-dashboard-departures](../ir-dashboard/ir-dashboard-departures)
  - [ir-departures](../ir-departures)
  - [ir-room](../ir-booking-details/ir-room)
 
@@ -54,6 +55,7 @@ graph TD;
   ir-date-select --> ir-input
   ir-date-select --> ir-air-date-picker
   igloo-calendar --> ir-checkout-dialog
+  ir-dashboard-departures --> ir-checkout-dialog
   ir-departures --> ir-checkout-dialog
   ir-room --> ir-checkout-dialog
   style ir-checkout-dialog fill:#f9f,stroke:#333,stroke-width:4px
