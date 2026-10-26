@@ -620,6 +620,7 @@ export class BookingService {
     language,
     withExtras = true,
     include_dp_pricing,
+    is_calculate_totals=false,
     extras: _extras = extras,
   }: {
     is_calculate_totals?: boolean;
@@ -633,6 +634,7 @@ export class BookingService {
       const { data } = await axios.post(`/Get_Exposed_Booking`, {
         booking_nbr,
         language,
+        is_calculate_totals,
         is_check_invoice_info: calendar_data?.property?.is_frontdesk_enabled,
         extras: withExtras ? _extras : null,
         is_calculate_dp_effect: include_dp_pricing,
