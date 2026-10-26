@@ -1,8 +1,8 @@
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Booking } from '@/models/booking.dto';
 import { departuresStore } from '@/stores/departures.store';
+import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
-import moment from 'moment';
 import locales from '@/stores/locales.store';
 export type CheckoutRoomEvent = {
   booking: Booking;
@@ -57,7 +57,10 @@ export class IrDeparturesTable {
   }
   private renderRow(booking: Booking, room: Booking['rooms'][number], index: number, showAction: boolean, isFuture) {
     const rowKey = `${booking.booking_nbr}-${room?.identifier ?? index}`;
-    const isOverdueCheckout = !this.pmsDisabled && moment(room.to_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'));
+    // Overdue relative to the store's day (the dashboard's selected day), not the real today.
+    const isOverdueCheckout = !this.pmsDisabled && room.to_date < departuresStore.today;
+    // Automatic properties still list rooms awaiting check-out, but the system checks them out, so no button.
+    const isAutomaticCheckOut = !!calendar_data.property?.is_automatic_check_in_out;
     return (
       <tr class="ir-table-row" key={rowKey}>
         <td class="sticky-column">
@@ -89,12 +92,13 @@ export class IrDeparturesTable {
             currencySymbol={booking.currency.symbol}
             financial={booking.financial}
             removeBalance
+            paymentDate={departuresStore.today}
           ></ir-balance-cell>
         </td>
         {!this.pmsDisabled && (
           <td>
             <div class="departures-table__actions-cell">
-              {showAction ? (
+              {showAction && !isAutomaticCheckOut ? (
                 <ir-actions-cell
                   onIrAction={e => {
                     e.stopImmediatePropagation();

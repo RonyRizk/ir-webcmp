@@ -11,20 +11,20 @@ const render = (date: string) =>
   });
 
 describe('ir-dashboard-date-navigator', () => {
-  it('reaches two days either side of today', () => {
+  it('reaches two days ahead of today', () => {
     expect(MAX_DAY_OFFSET).toBe(2);
   });
 
-  it('lists the days from two back to two ahead, checking the selected one and marking today', async () => {
+  it('lists the days from today to two ahead, with no past days, checking the selected one and marking today', async () => {
     const today = todayISO();
     const page = await render(addDaysISO(today, 1));
     // wa-dropdown-item isn't defined in spec pages, so its props land as attributes.
     const items = Array.from(page.root.querySelectorAll('wa-dropdown-item'));
     const value = (item: Element) => item.getAttribute('value');
-    expect(items.map(value)).toEqual([-2, -1, 0, 1, 2].map(offset => addDaysISO(today, offset)));
+    expect(items.map(value)).toEqual([0, 1, 2].map(offset => addDaysISO(today, offset)));
     expect(items.filter(item => item.hasAttribute('checked')).map(value)).toEqual([addDaysISO(today, 1)]);
-    expect(items[2].querySelector('.date-navigator__today')).not.toBeNull();
-    expect(items[3].querySelector('.date-navigator__today')).toBeNull();
+    expect(items[0].querySelector('.date-navigator__today')).not.toBeNull();
+    expect(items[1].querySelector('.date-navigator__today')).toBeNull();
   });
 
   it('shows the selected day in the trigger', async () => {
@@ -40,8 +40,8 @@ describe('ir-dashboard-date-navigator', () => {
     const dropdown = page.root.querySelector('wa-dropdown');
     const select = (value: string) => dropdown.dispatchEvent(new CustomEvent('wa-select', { detail: { item: { value } } }));
     select(today);
-    select(addDaysISO(today, -2));
+    select(addDaysISO(today, 2));
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(addDaysISO(today, -2));
+    expect(spy).toHaveBeenCalledWith(addDaysISO(today, 2));
   });
 });

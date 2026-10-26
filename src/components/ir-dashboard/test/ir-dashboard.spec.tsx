@@ -87,8 +87,8 @@ describe('dashboard helpers', () => {
   });
 
   it('sums available and total units from the exposed inventory across room types', () => {
-    const inventory = (rts: number, total: number) => ({ exposed_inventory: { rts, total } });
-    expect(sumUnits([inventory(3, 10), inventory(2, 8), { exposed_inventory: null }], date)).toEqual({
+    const inventory = (rts: number, total: number) => ({ is_active: true, exposed_inventory: { rts, total } });
+    expect(sumUnits([inventory(3, 10), inventory(2, 8), { is_active: true, exposed_inventory: null }], date)).toEqual({
       available: 5,
       outOfService: 0,
       blocked: 0,
@@ -97,14 +97,34 @@ describe('dashboard helpers', () => {
   });
 
   it('leaves a total the calendar does not return undefined', () => {
-    expect(sumUnits([{ exposed_inventory: { rts: 4 } }, { exposed_inventory: { rts: 3 } }], date).total).toBeUndefined();
+    expect(
+      sumUnits(
+        [
+          { is_active: true, exposed_inventory: { rts: 4 } },
+          { is_active: true, exposed_inventory: { rts: 3 } },
+        ],
+        date,
+      ).total,
+    ).toBeUndefined();
+  });
+
+  it('counts only active room types', () => {
+    const blocked = {
+      calendar_cell: { left_cell: null, right_cell: { Is_Available: false, STAY_STATUS_CODE: '004', My_Block_Info: { from_date: date, to_date: '2026-10-10' } } as any },
+    };
+    const roomTypes = [
+      { is_active: true, exposed_inventory: { rts: 3, total: 10 }, physicalrooms: [blocked] },
+      { is_active: false, exposed_inventory: { rts: 2, total: 8 }, physicalrooms: [blocked] },
+    ];
+    expect(sumUnits(roomTypes, date)).toEqual({ available: 3, outOfService: 1, blocked: 0, total: 10 });
+    expect(countBlockedUnits(roomTypes, date)).toEqual({ outOfService: 1, blocked: 0 });
   });
 
   describe('blocked units', () => {
     const block = (code: string, from_date: string, to_date: string, Is_Available = false) =>
       ({ Is_Available, STAY_STATUS_CODE: code, My_Block_Info: { from_date, to_date } }) as any;
     const unit = (right_cell?: any, left_cell?: any) => ({ calendar_cell: { left_cell: left_cell ?? null, right_cell: right_cell ?? null } });
-    const roomType = (...physicalrooms: any[]) => ({ exposed_inventory: { rts: 0 }, physicalrooms });
+    const roomType = (...physicalrooms: any[]) => ({ is_active: true, exposed_inventory: { rts: 0 }, physicalrooms });
 
     it('counts out-of-service (004) and blocked (002, 003) units across every room type', () => {
       const roomTypes = [

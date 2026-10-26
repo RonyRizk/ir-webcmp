@@ -6,7 +6,7 @@ import { MAX_DAY_OFFSET } from '../dashboard.helpers';
 
 /**
  * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
- * `MAX_DAY_OFFSET` before today to `MAX_DAY_OFFSET` after it.
+ * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
  */
 @Component({
   tag: 'ir-dashboard-date-navigator',
@@ -30,7 +30,7 @@ export class IrDashboardDateNavigator {
 
   render() {
     const today = todayISO();
-    const days = Array.from({ length: MAX_DAY_OFFSET * 2 + 1 }, (_, index) => addDaysISO(today, index - MAX_DAY_OFFSET));
+    const days = Array.from({ length: MAX_DAY_OFFSET + 1 }, (_, index) => addDaysISO(today, index));
     // Locale- and calendar-aware (Gregorian or Hijri), like every other displayed date.
     const label = (day: ISODate) => moment(day, 'YYYY-MM-DD').format('dddd, D MMMM');
 

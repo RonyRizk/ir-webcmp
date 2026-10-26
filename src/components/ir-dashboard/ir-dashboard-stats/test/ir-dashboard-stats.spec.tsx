@@ -55,12 +55,12 @@ describe('ir-dashboard-stats', () => {
     expect(page.root.querySelector('.stats__occupancy-value').textContent).toBe('99.9%');
   });
 
-  it('shows only booked and pending, without occupancy or RevPAR, for non-PMS properties', async () => {
+  it('shows only booked and pending, without occupancy, ADR or RevPAR, for non-PMS properties', async () => {
     const page = await render({ isPms: false });
     expect(page.root.querySelector('.stats__occupancy')).toBeNull();
     expect(page.root.querySelector('wa-progress-bar')).toBeNull();
     expect(unitLabels(page.root)).toEqual(['Booked', 'Pending']);
     expect(page.root.querySelector('.stats__units').classList.contains('stats__units--stacked')).toBe(true);
-    expect(kpiLabels(page.root)).toEqual(['Room Revenue', 'ADR']);
+    expect(kpiLabels(page.root)).toEqual(['Room Revenue']);
   });
 });

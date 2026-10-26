@@ -11,7 +11,7 @@ The figures come from three requests (monthly stats, calendar, pending bookings)
 skeleton until it arrives.
 
 Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
-figures (the dashboard skips the calendar request for them) — and no RevPAR.
+figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
 
 ## Properties
 

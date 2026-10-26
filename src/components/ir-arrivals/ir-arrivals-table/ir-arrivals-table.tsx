@@ -2,8 +2,8 @@ import { IrActionButton } from '@/components/table-cells/booking/ir-actions-cell
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Booking, IUnit } from '@/models/booking.dto';
 import { arrivalsStore } from '@/stores/arrivals.store';
+import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
-import moment from 'moment';
 import { RoomGuestsPayload } from '@/components/ir-booking-details/types';
 
 import locales from '@/stores/locales.store';
@@ -78,7 +78,8 @@ export class IrArrivalsTable {
   }
   private renderRow(booking: Booking, room: Booking['rooms'][number], index: number, showAction: boolean) {
     const rowKey = `${booking.booking_nbr}-${room?.identifier ?? index}`;
-    const isOverdueCheckIn = !this.pmsDisabled && moment(room.from_date, 'YYYY-MM-DD').startOf('day').isBefore(moment().startOf('day'), 'dates');
+    // Overdue relative to the store's day (the dashboard's selected day), not the real today.
+    const isOverdueCheckIn = !this.pmsDisabled && room.from_date < arrivalsStore.today;
 
     return (
       <tr class="ir-table-row" key={rowKey}>
@@ -112,6 +113,7 @@ export class IrArrivalsTable {
             currencySymbol={booking.currency.symbol}
             financial={booking.financial}
             removeBalance
+            paymentDate={arrivalsStore.today}
           ></ir-balance-cell>
         </td>
         {!this.pmsDisabled && this.renderActionsCell(booking, room, isOverdueCheckIn, showAction)}
@@ -120,12 +122,14 @@ export class IrArrivalsTable {
   }
 
   private renderActionsCell(booking: Booking, room: Booking['rooms'][number], isOverdueCheckIn: boolean, showAction: boolean) {
+    // Automatic properties still list rooms awaiting check-in, but the system checks them in, so no button.
+    const isAutomaticCheckIn = !!calendar_data.property?.is_automatic_check_in_out;
     return (
       <td>
         <div class="arrivals-table__actions-cell">
           {!room.unit ? (
             <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>Not assigned</span>
-          ) : showAction ? (
+          ) : showAction && !isAutomaticCheckIn ? (
             <ir-actions-cell
               buttons={isOverdueCheckIn ? ['overdue_check_in'] : ['check_in']}
               onIrAction={e => {

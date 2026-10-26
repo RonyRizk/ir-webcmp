@@ -20,12 +20,18 @@ export class IrBalanceCell {
   @Prop() bookingNumber!: string;
   @Prop() currencySymbol!: string;
   @Prop() removeBalance: boolean;
+  /** Date (`YYYY-MM-DD`) the payment is recorded on, e.g. the dashboard's selected day. Defaults to today. */
+  @Prop() paymentDate: string;
 
   @Event({ composed: true, bubbles: true }) payBookingBalance: EventEmitter<{ booking_nbr: string; payment: Payment }>;
 
   /** A balance amount is actionable only when it is a non-zero, non-null number. */
   private hasAmount(value: number | null | undefined): boolean {
     return value !== null && value !== undefined && value !== 0;
+  }
+
+  private get recordDate(): string {
+    return this.paymentDate || moment().format('YYYY-MM-DD');
   }
 
   render() {
@@ -48,7 +54,7 @@ export class IrBalanceCell {
                       payment: {
                         amount: Math.abs(this.financial.cancelation_penality_as_if_today),
                         currency: calendar_data.property.currency,
-                        date: moment().format('YYYY-MM-DD'),
+                        date: this.recordDate,
                         designation: null,
                         payment_method: null,
                         payment_type: { code: this.financial.cancelation_penality_as_if_today < 0 ? '010' : '001', description: null, operation: 'CR' },
@@ -74,7 +80,7 @@ export class IrBalanceCell {
                       payment: {
                         amount: Math.abs(this.guestFinancial?.due_amount),
                         currency: calendar_data.property.currency,
-                        date: moment().format('YYYY-MM-DD'),
+                        date: this.recordDate,
                         designation: null,
                         payment_method: null,
                         payment_type: { code: '001', description: null, operation: 'CR' },
@@ -93,7 +99,7 @@ export class IrBalanceCell {
                                   payment: {
                                     amount: Math.abs(this.financial.cancelation_penality_as_if_today),
                                     currency: calendar_data.property.currency,
-                                    date: moment().format('YYYY-MM-DD'),
+                                    date: this.recordDate,
                                     designation: null,
                                     payment_method: null,
                                     payment_type: { code: this.financial.cancelation_penality_as_if_today < 0 ? '010' : '001', description: null, operation: null },
@@ -119,7 +125,7 @@ export class IrBalanceCell {
                                   payment: {
                                     amount: Math.abs(this.financial.due_amount),
                                     currency: calendar_data.property.currency,
-                                    date: moment().format('YYYY-MM-DD'),
+                                    date: this.recordDate,
                                     designation: null,
                                     payment_method: null,
                                     payment_type: { code: '001', description: null, operation: null },

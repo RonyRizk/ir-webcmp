@@ -11,11 +11,12 @@ with its rooms' units stacked in the Unit cell.
 
 ## Properties
 
-| Property       | Attribute       | Description                                                                             | Type                                            | Default     |
-| -------------- | --------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------- |
-| `bookings`     | --              |                                                                                         | `Booking[]`                                     | `[]`        |
-| `emptyMessage` | `empty-message` |                                                                                         | `string`                                        | `undefined` |
-| `variant`      | `variant`       | In-house drops the Balance and Status columns that Bookings and Cancellations end with. | `"cancellations" \| "inHouse" \| "newBookings"` | `'inHouse'` |
+| Property       | Attribute       | Description                                                                                                                      | Type                                            | Default     |
+| -------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------- |
+| `bookings`     | --              |                                                                                                                                  | `Booking[]`                                     | `[]`        |
+| `date`         | `date`          | The dashboard's selected day: balance payments (e.g. a cancellation's charge or refund) are recorded on it rather than on today. | `string`                                        | `undefined` |
+| `emptyMessage` | `empty-message` |                                                                                                                                  | `string`                                        | `undefined` |
+| `variant`      | `variant`       | In-house drops the Balance and Status columns that Bookings and Cancellations end with.                                          | `"cancellations" \| "inHouse" \| "newBookings"` | `'inHouse'` |
 
 
 ## Dependencies

@@ -191,12 +191,15 @@ function isNeedsCheckIn(room: Room) {
     from_date: room.from_date,
     to_date: room.to_date,
     isCheckedIn: room.in_out.code === '001',
+    skipAutoCheckIn: true,
+    date: arrivalsStore.today,
   });
 }
 
 function isFutureCheckIn(room: Room) {
   const code = room.in_out?.code ?? '';
-  return code === '000' && moment().startOf('date').isBefore(moment(room.from_date, 'YYYY-MM-DD').startOf('day'));
+  // Relative to the store's day (the dashboard's selected day), not the real today.
+  return code === '000' && arrivalsStore.today < room.from_date;
 }
 
 function isInHouse(room: Room) {

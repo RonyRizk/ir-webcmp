@@ -1295,6 +1295,10 @@ export namespace Components {
         "guestFinancial": Booking['guest_financial'];
         "isDirect": boolean;
         "label": string;
+        /**
+          * Date (`YYYY-MM-DD`) the payment is recorded on, e.g. the dashboard's selected day. Defaults to today.
+         */
+        "paymentDate": string;
         "removeBalance": boolean;
         "statusCode": string;
     }
@@ -3036,6 +3040,10 @@ export namespace Components {
           * @default []
          */
         "bookings": Booking[];
+        /**
+          * The dashboard's selected day: balance payments (e.g. a cancellation's charge or refund) are recorded on it rather than on today.
+         */
+        "date": ISODate;
         "emptyMessage": string;
         /**
           * In-house drops the Balance and Status columns that Bookings and Cancellations end with.
@@ -3045,7 +3053,7 @@ export namespace Components {
     }
     /**
      * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
-     * `MAX_DAY_OFFSET` before today to `MAX_DAY_OFFSET` after it.
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface IrDashboardDateNavigator {
         /**
@@ -3072,7 +3080,7 @@ export namespace Components {
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
      * skeleton until it arrives.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
-     * figures (the dashboard skips the calendar request for them) — and no RevPAR.
+     * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
     interface IrDashboardStats {
         "currencySymbol": string;
@@ -11102,7 +11110,7 @@ declare global {
     }
     /**
      * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
-     * `MAX_DAY_OFFSET` before today to `MAX_DAY_OFFSET` after it.
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface HTMLIrDashboardDateNavigatorElement extends Components.IrDashboardDateNavigator, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrDashboardDateNavigatorElementEventMap>(type: K, listener: (this: HTMLIrDashboardDateNavigatorElement, ev: IrDashboardDateNavigatorCustomEvent<HTMLIrDashboardDateNavigatorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -11145,7 +11153,7 @@ declare global {
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
      * skeleton until it arrives.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
-     * figures (the dashboard skips the calendar request for them) — and no RevPAR.
+     * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
     interface HTMLIrDashboardStatsElement extends Components.IrDashboardStats, HTMLStencilElement {
     }
@@ -15986,6 +15994,10 @@ declare namespace LocalJSX {
         "isDirect": boolean;
         "label"?: string;
         "onPayBookingBalance"?: (event: IrBalanceCellCustomEvent<{ booking_nbr: string; payment: Payment }>) => void;
+        /**
+          * Date (`YYYY-MM-DD`) the payment is recorded on, e.g. the dashboard's selected day. Defaults to today.
+         */
+        "paymentDate"?: string;
         "removeBalance"?: boolean;
         "statusCode": string;
     }
@@ -17865,6 +17877,10 @@ declare namespace LocalJSX {
           * @default []
          */
         "bookings"?: Booking[];
+        /**
+          * The dashboard's selected day: balance payments (e.g. a cancellation's charge or refund) are recorded on it rather than on today.
+         */
+        "date"?: ISODate;
         "emptyMessage"?: string;
         /**
           * In-house drops the Balance and Status columns that Bookings and Cancellations end with.
@@ -17874,7 +17890,7 @@ declare namespace LocalJSX {
     }
     /**
      * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
-     * `MAX_DAY_OFFSET` before today to `MAX_DAY_OFFSET` after it.
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface IrDashboardDateNavigator {
         /**
@@ -17909,7 +17925,7 @@ declare namespace LocalJSX {
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
      * skeleton until it arrives.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
-     * figures (the dashboard skips the calendar request for them) — and no RevPAR.
+     * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
     interface IrDashboardStats {
         "currencySymbol"?: string;
@@ -23269,6 +23285,7 @@ declare namespace LocalJSX {
         "bookingNumber": string;
         "currencySymbol": string;
         "removeBalance": boolean;
+        "paymentDate": string;
     }
     interface IrBillingAttributes {
         "isAllServicesAgentOwned": boolean;
@@ -23790,6 +23807,7 @@ declare namespace LocalJSX {
     interface IrDashboardBookingsTableAttributes {
         "variant": DashboardBookingsTableVariant;
         "emptyMessage": string;
+        "date": ISODate;
     }
     interface IrDashboardDateNavigatorAttributes {
         "date": ISODate;
@@ -25739,7 +25757,7 @@ declare module "@stencil/core" {
             "ir-dashboard-bookings-table": LocalJSX.IntrinsicElements["ir-dashboard-bookings-table"] & JSXBase.HTMLAttributes<HTMLIrDashboardBookingsTableElement>;
             /**
              * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
-             * `MAX_DAY_OFFSET` before today to `MAX_DAY_OFFSET` after it.
+             * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
              */
             "ir-dashboard-date-navigator": LocalJSX.IntrinsicElements["ir-dashboard-date-navigator"] & JSXBase.HTMLAttributes<HTMLIrDashboardDateNavigatorElement>;
             /**
@@ -25753,7 +25771,7 @@ declare module "@stencil/core" {
              * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
              * skeleton until it arrives.
              * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
-             * figures (the dashboard skips the calendar request for them) — and no RevPAR.
+             * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
              */
             "ir-dashboard-stats": LocalJSX.IntrinsicElements["ir-dashboard-stats"] & JSXBase.HTMLAttributes<HTMLIrDashboardStatsElement>;
             "ir-date-picker": LocalJSX.IntrinsicElements["ir-date-picker"] & JSXBase.HTMLAttributes<HTMLIrDatePickerElement>;

@@ -7,17 +7,18 @@
 
 ## Properties
 
-| Property                      | Attribute         | Description | Type                  | Default     |
-| ----------------------------- | ----------------- | ----------- | --------------------- | ----------- |
-| `bookingNumber` _(required)_  | `booking-number`  |             | `string`              | `undefined` |
-| `currencySymbol` _(required)_ | `currency-symbol` |             | `string`              | `undefined` |
-| `display`                     | `display`         |             | `"block" \| "inline"` | `'block'`   |
-| `financial` _(required)_      | --                |             | `IFinancial`          | `undefined` |
-| `guestFinancial` _(required)_ | --                |             | `IFinancial`          | `undefined` |
-| `isDirect` _(required)_       | `is-direct`       |             | `boolean`             | `undefined` |
-| `label`                       | `label`           |             | `string`              | `undefined` |
-| `removeBalance`               | `remove-balance`  |             | `boolean`             | `undefined` |
-| `statusCode` _(required)_     | `status-code`     |             | `string`              | `undefined` |
+| Property                      | Attribute         | Description                                                                                           | Type                  | Default     |
+| ----------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------- | --------------------- | ----------- |
+| `bookingNumber` _(required)_  | `booking-number`  |                                                                                                       | `string`              | `undefined` |
+| `currencySymbol` _(required)_ | `currency-symbol` |                                                                                                       | `string`              | `undefined` |
+| `display`                     | `display`         |                                                                                                       | `"block" \| "inline"` | `'block'`   |
+| `financial` _(required)_      | --                |                                                                                                       | `IFinancial`          | `undefined` |
+| `guestFinancial` _(required)_ | --                |                                                                                                       | `IFinancial`          | `undefined` |
+| `isDirect` _(required)_       | `is-direct`       |                                                                                                       | `boolean`             | `undefined` |
+| `label`                       | `label`           |                                                                                                       | `string`              | `undefined` |
+| `paymentDate`                 | `payment-date`    | Date (`YYYY-MM-DD`) the payment is recorded on, e.g. the dashboard's selected day. Defaults to today. | `string`              | `undefined` |
+| `removeBalance`               | `remove-balance`  |                                                                                                       | `boolean`             | `undefined` |
+| `statusCode` _(required)_     | `status-code`     |                                                                                                       | `string`              | `undefined` |
 
 
 ## Events

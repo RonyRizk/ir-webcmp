@@ -1,5 +1,6 @@
 import type { Booking, Room } from '@/models/booking.dto';
 import locales from '@/stores/locales.store';
+import type { ISODate } from '@/utils/calendar-dates';
 import { Component, Host, Prop, h } from '@stencil/core';
 
 export type DashboardBookingsTableVariant = 'inHouse' | 'newBookings' | 'cancellations';
@@ -19,6 +20,8 @@ export class IrDashboardBookingsTable {
   /** In-house drops the Balance and Status columns that Bookings and Cancellations end with. */
   @Prop() variant: DashboardBookingsTableVariant = 'inHouse';
   @Prop() emptyMessage: string;
+  /** The dashboard's selected day: balance payments (e.g. a cancellation's charge or refund) are recorded on it rather than on today. */
+  @Prop() date: ISODate;
 
   private isSameGuest(booking: Booking, room: Room) {
     const normalize = (g?: { first_name?: string; last_name?: string }) => `${g?.first_name ?? ''}${g?.last_name ?? ''}`.replace(/\s+/g, '').toLowerCase();
@@ -86,6 +89,7 @@ export class IrDashboardBookingsTable {
           statusCode={booking.status?.code}
           currencySymbol={booking.currency?.symbol}
           financial={booking.financial}
+          paymentDate={this.date}
         ></ir-balance-cell>
       </td>,
       <td>

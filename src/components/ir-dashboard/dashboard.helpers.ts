@@ -35,16 +35,16 @@ export function countUnassignedArrivals(bookings: Booking[], date: ISODate): num
 }
 
 /**
- * Rooms whose arrival day is before `today` and that still aren't checked in — the rows the arrivals table marks overdue.
- * `today` is the real day, not the dashboard's selected one, so the card agrees with the table.
+ * Rooms whose arrival day is before `date` and that still aren't checked in — the rows the arrivals table marks overdue.
+ * `date` is the dashboard's selected day, which the table also measures overdue against (the store's day), so the card agrees with it.
  */
-export function countOverdueArrivals(bookings: Booking[], today: ISODate): number {
-  return roomsOf(bookings).filter(room => room.from_date < today && (room.in_out?.code ?? ROOM_IN_OUT.IDLE) === ROOM_IN_OUT.IDLE).length;
+export function countOverdueArrivals(bookings: Booking[], date: ISODate): number {
+  return roomsOf(bookings).filter(room => room.from_date < date && (room.in_out?.code ?? ROOM_IN_OUT.IDLE) === ROOM_IN_OUT.IDLE).length;
 }
 
-/** Rooms whose departure day is before `today` and that are still checked in — the rows the departures table marks overdue. */
-export function countOverdueDepartures(bookings: Booking[], today: ISODate): number {
-  return roomsOf(bookings).filter(room => room.to_date < today && room.in_out?.code === ROOM_IN_OUT.CHECKIN).length;
+/** Rooms whose departure day is before `date` (the selected day) and that are still checked in — the rows the departures table marks overdue. */
+export function countOverdueDepartures(bookings: Booking[], date: ISODate): number {
+  return roomsOf(bookings).filter(room => room.to_date < date && room.in_out?.code === ROOM_IN_OUT.CHECKIN).length;
 }
 
 /** Units arriving on `date` — counted per room, not per booking. Non-PMS properties count these instead of the rooms to check in. */
@@ -90,8 +90,11 @@ export function filterInHouse(bookings: Booking[], date: ISODate): Booking[] {
   });
 }
 
-/** A calendar day's room type: its exposed inventory plus each unit's half-day cells. */
-export type CalendarDayRoomType = Pick<RoomType, 'exposed_inventory'> & { physicalrooms?: { calendar_cell?: CalendarCellType | null }[] | null };
+/** A calendar day's room type: its active flag, exposed inventory and each unit's half-day cells. */
+export type CalendarDayRoomType = Pick<RoomType, 'exposed_inventory' | 'is_active'> & { physicalrooms?: { calendar_cell?: CalendarCellType | null }[] | null };
+
+/** The room types the dashboard counts: only active ones (`is_active` true). */
+const activeRoomTypes = <T extends Pick<RoomType, 'is_active'>>(roomTypes: T[]): T[] => (roomTypes ?? []).filter(rt => rt.is_active);
 
 /**
  * The block holding a unit on `date`, detected like the calendar does (`getMyBookings` in utils/booking): an unavailable
@@ -109,13 +112,13 @@ function blockOn(cell: CalendarCellType | null | undefined, date: ISODate): Cell
 }
 
 /**
- * Counts the units blocked on `date` across every room type, each unit once: out of service (status 004) and blocked
+ * Counts the units blocked on `date` across every active room type, each unit once: out of service (status 004) and blocked
  * (the other block statuses, 002 and 003).
  */
 export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODate): Pick<DashboardUnits, 'outOfService' | 'blocked'> {
   let outOfService = 0;
   let blocked = 0;
-  for (const unit of (roomTypes ?? []).flatMap(rt => rt.physicalrooms ?? [])) {
+  for (const unit of activeRoomTypes(roomTypes).flatMap(rt => rt.physicalrooms ?? [])) {
     const block = blockOn(unit.calendar_cell, date);
     if (!block) {
       continue;
@@ -130,15 +133,16 @@ export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODat
 }
 
 /**
- * The day's unit breakdown: available and total units summed from the calendar's per-room-type `exposed_inventory`
+ * The day's unit breakdown across active room types: available and total units summed from the calendar's per-room-type `exposed_inventory`
  * (a count no room type returns stays `undefined` rather than reading as 0), out of service and blocked counted from the units' cells.
  */
 export function sumUnits(roomTypes: CalendarDayRoomType[], date: ISODate): DashboardUnits {
-  const inventories = (roomTypes ?? []).map(rt => rt.exposed_inventory).filter(Boolean);
+  const active = activeRoomTypes(roomTypes);
+  const inventories = active.map(rt => rt.exposed_inventory).filter(Boolean);
   const sum = (field: string) => (inventories.some(inv => typeof inv[field] === 'number') ? inventories.reduce((total, inv) => total + (inv[field] ?? 0), 0) : undefined);
   return {
     available: sum('rts') ?? 0,
-    ...countBlockedUnits(roomTypes, date),
+    ...countBlockedUnits(active, date),
     total: sum('total'),
   };
 }

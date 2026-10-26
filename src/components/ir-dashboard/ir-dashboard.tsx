@@ -201,7 +201,9 @@ export class IrDashboard {
   }
 
   componentDidLoad() {
-    this.fitToPage();
+    // The density is read from the laid-out rail, so it can't be set in componentWillLoad; measuring on the next frame
+    // keeps the state change out of componentDidLoad (which Stencil warns about as an extra re-render).
+    this.scheduleFitToPage();
     window.addEventListener('resize', this.scheduleFitToPage);
     this.pageResizeObserver = new ResizeObserver(this.scheduleFitToPage);
     this.pageResizeObserver.observe(document.body);
@@ -654,7 +656,6 @@ export class IrDashboard {
   }
 
   private get counts(): DashboardCounts {
-    const today = todayISO();
     return {
       // Arrivals and departures count the rows their table renders (one per room), overdue ones included: the overdue
       // note only flags them. Without the front desk the tables list only the rooms arriving / departing that day.
@@ -662,11 +663,11 @@ export class IrDashboard {
         ? countRooms([...arrivalsStore.futureBookings, ...arrivalsStore.needsCheckInBookings, ...arrivalsStore.inHouseBookings])
         : countArrivingUnits(arrivalsStore.filteredBookings, this.selectedDate),
       unassignedArrivals: countUnassignedArrivals(arrivalsStore.bookings, this.selectedDate),
-      overdueArrivals: countOverdueArrivals(arrivalsStore.bookings, today),
+      overdueArrivals: countOverdueArrivals(arrivalsStore.bookings, this.selectedDate),
       departures: this.isPms
         ? countRooms([...departuresStore.futureRooms, ...departuresStore.needsCheckOutBookings, ...departuresStore.outBookings])
         : countDepartingUnits(departuresStore.filteredBookings, this.selectedDate),
-      overdueDepartures: countOverdueDepartures(departuresStore.bookings, today),
+      overdueDepartures: countOverdueDepartures(departuresStore.bookings, this.selectedDate),
       inHouse: countRooms(this.inHouse),
       inHouseGuests: sumOccupancy(this.inHouse),
       bookings: this.newBookings.length,
@@ -746,9 +747,23 @@ export class IrDashboard {
       case 'inHouse':
         return <ir-dashboard-bookings-table variant="inHouse" bookings={this.inHouse} emptyMessage="No guests in-house."></ir-dashboard-bookings-table>;
       case 'bookings':
-        return <ir-dashboard-bookings-table variant="newBookings" bookings={this.newBookings} emptyMessage="No bookings made on this day."></ir-dashboard-bookings-table>;
+        return (
+          <ir-dashboard-bookings-table
+            variant="newBookings"
+            date={this.selectedDate}
+            bookings={this.newBookings}
+            emptyMessage="No bookings made on this day."
+          ></ir-dashboard-bookings-table>
+        );
       case 'cancellations':
-        return <ir-dashboard-bookings-table variant="cancellations" bookings={this.cancellations} emptyMessage="No cancellations on this day."></ir-dashboard-bookings-table>;
+        return (
+          <ir-dashboard-bookings-table
+            variant="cancellations"
+            date={this.selectedDate}
+            bookings={this.cancellations}
+            emptyMessage="No cancellations on this day."
+          ></ir-dashboard-bookings-table>
+        );
     }
   }
 

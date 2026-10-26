@@ -30,7 +30,7 @@ type FigureState = { loaded: boolean; refreshing: boolean };
  * skeleton until it arrives.
  *
  * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
- * figures (the dashboard skips the calendar request for them) — and no RevPAR.
+ * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
  */
 @Component({
   tag: 'ir-dashboard-stats',
@@ -69,11 +69,11 @@ export class IrDashboardStats {
 
   /** Units the property has: the calendar's total, else the physical rooms of its room types. */
   private get totalUnits(): number | undefined {
-    if (this.units?.total != null) {
-      return this.units.total;
-    }
-    const roomTypes = calendar_data.property?.roomtypes;
-    return roomTypes?.length ? roomTypes.reduce((total, rt) => total + (rt.physicalrooms?.length ?? 0), 0) : undefined;
+    // if (this.units?.total != null) {
+    //   return this.units.total;
+    // }
+    const roomTypes = calendar_data.property?.roomtypes?.filter(rt => rt.is_active);
+    return roomTypes?.length ? roomTypes.reduce((total, rt) => total + (rt.physicalrooms?.filter(p => p.is_active)?.length ?? 0), 0) : undefined;
   }
 
   /** "Today's occupancy" on today, otherwise the day itself ("Saturday, 17 Oct."); the card title is capitalized in CSS. */
@@ -179,7 +179,7 @@ export class IrDashboardStats {
         <h2 class="stats__title">Performance</h2>
         <ul class={{ 'stats__kpis': true, 'stats--loading': !!performance && this.performanceLoading }} aria-label="Revenue" aria-busy={!performance ? 'true' : null}>
           {this.renderKpi('coins', 'Room Revenue', performance?.roomRevenue)}
-          {this.renderKpi('chart-simple', 'ADR', performance?.adr)}
+          {this.isPms && this.renderKpi('chart-simple', 'ADR', performance?.adr)}
           {this.isPms && this.renderKpi('arrow-trend-up', 'RevPAR', performance ? computeRevPar(performance.adr, performance.occupancy) : undefined)}
         </ul>
       </wa-card>
