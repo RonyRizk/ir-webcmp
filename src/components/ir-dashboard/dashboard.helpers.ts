@@ -1,7 +1,7 @@
 import { ROOM_IN_OUT, type Booking, type Room } from '@/models/booking.dto';
 import type { CalendarCellType, CellType } from '@/models/IBooking';
 import type { RoomType } from '@/models/property';
-import type { DashboardUnits } from '@/services/dashboard/types';
+import type { DashboardOccupancy, DashboardUnits, OccupancyFigure } from '@/services/dashboard/types';
 import type { RealtimeEventMap } from '@/services/realtime/types';
 import type { ISODate } from '@/utils/calendar-dates';
 import { isBlockUnit } from '@/utils/utils';
@@ -90,11 +90,24 @@ export function filterInHouse(bookings: Booking[], date: ISODate): Booking[] {
   });
 }
 
+/** A calendar day's unit: its id, active flag and half-day cells. */
+export type CalendarDayUnit = { id?: number; is_active?: boolean; calendar_cell?: CalendarCellType | null };
+
 /** A calendar day's room type: its active flag, exposed inventory and each unit's half-day cells. */
-export type CalendarDayRoomType = Pick<RoomType, 'exposed_inventory' | 'is_active'> & { physicalrooms?: { calendar_cell?: CalendarCellType | null }[] | null };
+export type CalendarDayRoomType = Pick<RoomType, 'exposed_inventory' | 'is_active'> & Partial<Pick<RoomType, 'id' | 'is_virtual'>> & { physicalrooms?: CalendarDayUnit[] | null };
+
+/**
+ * What the property's own room types say about the calendar's, for a calendar that leaves the flags out:
+ * the virtual room types' ids and the inactive units' ids.
+ */
+export type PropertyFlags = { virtualIds?: ReadonlySet<number>; inactiveUnitIds?: ReadonlySet<number> };
 
 /** The room types the dashboard counts: only active ones (`is_active` true). */
 const activeRoomTypes = <T extends Pick<RoomType, 'is_active'>>(roomTypes: T[]): T[] => (roomTypes ?? []).filter(rt => rt.is_active);
+
+/** The units the dashboard counts: only active ones — not flagged `is_active` false by the calendar or the property. */
+const activeUnits = (roomType: CalendarDayRoomType, { inactiveUnitIds }: PropertyFlags = {}): CalendarDayUnit[] =>
+  (roomType.physicalrooms ?? []).filter(unit => unit.is_active !== false && !(unit.id != null && inactiveUnitIds?.has(unit.id)));
 
 /**
  * The block holding a unit on `date`, detected like the calendar does (`getMyBookings` in utils/booking): an unavailable
@@ -112,13 +125,13 @@ function blockOn(cell: CalendarCellType | null | undefined, date: ISODate): Cell
 }
 
 /**
- * Counts the units blocked on `date` across every active room type, each unit once: out of service (status 004) and blocked
- * (the other block statuses, 002 and 003).
+ * Counts the units blocked on `date` across every active unit of every active room type, each unit once: out of service
+ * (status 004) and blocked (the other block statuses, 002 and 003).
  */
-export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODate): Pick<DashboardUnits, 'outOfService' | 'blocked'> {
+export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODate, flags?: PropertyFlags): Pick<DashboardUnits, 'outOfService' | 'blocked'> {
   let outOfService = 0;
   let blocked = 0;
-  for (const unit of activeRoomTypes(roomTypes).flatMap(rt => rt.physicalrooms ?? [])) {
+  for (const unit of activeRoomTypes(roomTypes).flatMap(rt => activeUnits(rt, flags))) {
     const block = blockOn(unit.calendar_cell, date);
     if (!block) {
       continue;
@@ -133,17 +146,76 @@ export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODat
 }
 
 /**
- * The day's unit breakdown across active room types: available and total units summed from the calendar's per-room-type `exposed_inventory`
- * (a count no room type returns stays `undefined` rather than reading as 0), out of service and blocked counted from the units' cells.
+ * Whether a unit is booked for the night of `date`: an unavailable half-day cell that isn't a block and whose room's stay
+ * covers that night (the departure day doesn't count).
  */
-export function sumUnits(roomTypes: CalendarDayRoomType[], date: ISODate): DashboardUnits {
+function isBookedOn(cell: CalendarCellType | null | undefined, date: ISODate): boolean {
+  return [cell?.right_cell, cell?.left_cell].some(half => {
+    if (half?.Is_Available !== false || isBlockUnit(half.STAY_STATUS_CODE)) {
+      return false;
+    }
+    const from_date = half.room?.from_date;
+    const to_date = half.room?.to_date;
+    return !!from_date && !!to_date && from_date <= date && date < to_date;
+  });
+}
+
+/**
+ * A room type's booked and total units. The total is its active units — never `exposed_inventory.total`, which counts
+ * inactive ones too. Booked is the inventory's count, else counted from the active units' cells.
+ */
+function roomTypeOccupancy(roomType: CalendarDayRoomType, date: ISODate, flags?: PropertyFlags): Pick<OccupancyFigure, 'booked' | 'total'> {
+  const inventory = roomType.exposed_inventory ?? {};
+  const units = activeUnits(roomType, flags);
+  return {
+    booked: typeof inventory.booked === 'number' ? inventory.booked : units.filter(unit => isBookedOn(unit.calendar_cell, date)).length,
+    total: units.length,
+  };
+}
+
+function occupancyOf(roomTypes: CalendarDayRoomType[], date: ISODate, flags?: PropertyFlags): OccupancyFigure {
+  let booked = 0;
+  let total = 0;
+  for (const roomType of roomTypes) {
+    const figure = roomTypeOccupancy(roomType, date, flags);
+    booked += figure.booked;
+    total += figure.total;
+  }
+  return { booked, total, percent: total > 0 ? (booked / total) * 100 : 0 };
+}
+
+/**
+ * The day's occupancy across the active units of active room types, real and virtual apart. A room type is virtual when the
+ * calendar flags it (`is_virtual`) or its id is in `flags.virtualIds`. `virtual` is `undefined` when no room type is virtual.
+ */
+export function computeOccupancy(roomTypes: CalendarDayRoomType[], date: ISODate, flags: PropertyFlags = {}): DashboardOccupancy {
+  const active = activeRoomTypes(roomTypes);
+  const isVirtual = (rt: CalendarDayRoomType) => rt.is_virtual ?? (rt.id != null && !!flags.virtualIds?.has(rt.id));
+  const virtual = active.filter(isVirtual);
+  return {
+    real: occupancyOf(
+      active.filter(rt => !isVirtual(rt)),
+      date,
+      flags,
+    ),
+    virtual: virtual.length ? occupancyOf(virtual, date, flags) : undefined,
+  };
+}
+
+/**
+ * The day's unit breakdown across active room types: available and total units summed from the calendar's per-room-type `exposed_inventory`
+ * (a count no room type returns stays `undefined` rather than reading as 0), out of service and blocked counted from the active units' cells,
+ * and the occupancy of real and virtual room types (see `computeOccupancy`).
+ */
+export function sumUnits(roomTypes: CalendarDayRoomType[], date: ISODate, flags?: PropertyFlags): DashboardUnits {
   const active = activeRoomTypes(roomTypes);
   const inventories = active.map(rt => rt.exposed_inventory).filter(Boolean);
   const sum = (field: string) => (inventories.some(inv => typeof inv[field] === 'number') ? inventories.reduce((total, inv) => total + (inv[field] ?? 0), 0) : undefined);
   return {
     available: sum('rts') ?? 0,
-    ...countBlockedUnits(active, date),
+    ...countBlockedUnits(active, date, flags),
     total: sum('total'),
+    occupancy: computeOccupancy(active, date, flags),
   };
 }
 

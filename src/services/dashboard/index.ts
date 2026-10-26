@@ -4,6 +4,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { BookingListingService } from '@/services/booking_listing.service';
 import { PropertyService } from '@/services/property';
 import type { ExposedBookingsParams } from '@/stores/booking_listing.store';
+import calendar_data from '@/stores/calendar-data';
 import type { DashboardDayParams, DashboardPerformance, DashboardUnits } from './types';
 
 export * from './types';
@@ -30,7 +31,16 @@ export class DashboardService {
   public async getUnitsSummary({ property_id, date }: DashboardDayParams): Promise<DashboardUnits> {
     const days = await this.bookingService.fetchExposedCalendarDays(property_id, date, date);
     const day = days.find(d => d.value === date) ?? days[0];
-    return sumUnits(day?.room_types ?? [], date);
+    // The property's room types flag the virtual ones and the inactive units too, in case the calendar leaves the flags out.
+    const roomTypes = calendar_data.property?.roomtypes ?? [];
+    const virtualIds = new Set(roomTypes.filter(rt => rt.is_virtual).map(rt => rt.id));
+    const inactiveUnitIds = new Set(
+      roomTypes
+        .flatMap(rt => rt.physicalrooms ?? [])
+        .filter(unit => unit.is_active === false)
+        .map(unit => unit.id),
+    );
+    return sumUnits(day?.room_types ?? [], date, { virtualIds, inactiveUnitIds });
   }
 
   /** Rooms checked in whose stay covers `date`. */

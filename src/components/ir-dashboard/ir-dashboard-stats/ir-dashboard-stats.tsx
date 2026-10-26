@@ -1,4 +1,4 @@
-import type { DashboardPerformance, DashboardUnits } from '@/services/dashboard';
+import type { DashboardPerformance, DashboardUnits, OccupancyFigure } from '@/services/dashboard';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
 import { todayISO, type ISODate } from '@/utils/calendar-dates';
@@ -23,11 +23,31 @@ const UNIT_LEGEND: Partial<Record<UnitTone, { id: string; fallback: string }>> =
 /** Where a unit's figure stands: `loaded` false shows a skeleton, `refreshing` dims the figure. */
 type FigureState = { loaded: boolean; refreshing: boolean };
 
+/** Real units belong to physical room types, virtual ("fake") ones to room types flagged `is_virtual`. */
+type OccupancyKind = 'real' | 'virtual';
+
+const OCCUPANCY_LABEL: Record<OccupancyKind, string> = {
+  real: 'Real units',
+  virtual: 'Fake units',
+};
+
+/** Gives each instance's bar segments their own ids, which the tooltips anchor to. */
+let barIds = 0;
+
+const clampPercent = (percent: number) => Math.min(Math.max(percent ?? 0, 0), 100);
+
+/** Rounding must never claim a full house: 99.96% reads 99.9%, not 100%. */
+const shownPercent = (percent: number) => {
+  const clamped = clampPercent(percent);
+  return clamped < 100 ? Math.min(clamped, 99.9) : 100;
+};
+
 /**
  * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
  * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
  * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
- * skeleton until it arrives.
+ * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
+ * have any units, fake units in grey beside them, sharing one bar.
  *
  * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
  * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
@@ -58,6 +78,8 @@ export class IrDashboardStats {
   /** How tightly the cards are drawn; ir-dashboard steps it down when the desktop rail is short. */
   @Prop({ reflect: true }) density: RailDensity = 'regular';
 
+  private readonly barId = `stats-occupancy-${++barIds}`;
+
   /** The property's colour for a unit's legend entry, so the dot matches the calendar. */
   private legendColor(tone: UnitTone): string | undefined {
     const legend = UNIT_LEGEND[tone];
@@ -65,15 +87,6 @@ export class IrDashboardStats {
       return undefined;
     }
     return calendar_data.property?.calendar_legends?.find(l => l.id?.toString() === legend.id)?.color ?? legend.fallback;
-  }
-
-  /** Units the property has: the calendar's total, else the physical rooms of its room types. */
-  private get totalUnits(): number | undefined {
-    // if (this.units?.total != null) {
-    //   return this.units.total;
-    // }
-    const roomTypes = calendar_data.property?.roomtypes?.filter(rt => rt.is_active);
-    return roomTypes?.length ? roomTypes.reduce((total, rt) => total + (rt.physicalrooms?.filter(p => p.is_active)?.length ?? 0), 0) : undefined;
   }
 
   /** "Today's occupancy" on today, otherwise the day itself ("Saturday, 17 Oct."); the card title is capitalized in CSS. */
@@ -93,42 +106,93 @@ export class IrDashboardStats {
       );
     }
     const color = this.legendColor(tone);
+    // Every unit stays visible; a count with nothing behind it reads as 0.
+    const count = formatCount(value ?? 0);
     return (
       <li class={{ 'stats__unit': true, 'stats--loading': refreshing }}>
         <span class={`stats__dot stats__dot--${tone}`} style={color ? { '--stats-dot-color': color } : undefined} aria-hidden="true"></span>
-        {/* Every unit stays visible; a count with nothing behind it reads as 0. */}
-        <span class="stats__unit-value">{formatCount(value ?? 0)}</span>
+        {/* The CSS sizes the font from the count's length so it always fits its column. */}
+        <span class="stats__unit-value" style={{ '--unit-chars': String(count.length) }}>
+          {count}
+        </span>
         <span class="stats__unit-label">{label}</span>
       </li>
     );
   }
 
-  /** Occupancy figure, units booked and the bar (PMS only). */
+  /** One occupancy figure: the percentage over its label and the units booked. */
+  private renderOccupancyFigure(kind: OccupancyKind, figure: OccupancyFigure) {
+    const percent = formatPercent(shownPercent(figure.percent), { maximumFractionDigits: 1 });
+    return (
+      <div class={`stats__figure stats__figure--${kind}`}>
+        {/* The CSS sizes the font from the percentage's length so it always fits the figure's width. */}
+        <span class="stats__occupancy-value" style={{ '--figure-chars': String(percent.length) }}>
+          {percent}
+        </span>
+        <span class="stats__figure-label">{OCCUPANCY_LABEL[kind]}</span>
+        <span class="stats__booked">{`${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}</span>
+      </div>
+    );
+  }
+
+  /**
+   * One stretch of the bar: as wide as its share of all units (never too narrow to hover), filled to its occupancy,
+   * with a tooltip spelling out the figure.
+   */
+  private renderBarSegment(kind: OccupancyKind, figure: OccupancyFigure) {
+    const id = `${this.barId}-${kind}`;
+    const percent = formatPercent(shownPercent(figure.percent), { maximumFractionDigits: 1 });
+    return [
+      <div
+        id={id}
+        class={`stats__segment stats__segment--${kind}`}
+        style={{ flexGrow: String(Math.max(figure.total, 1)) }}
+        role="progressbar"
+        tabindex="0"
+        aria-label={OCCUPANCY_LABEL[kind]}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={String(clampPercent(figure.percent))}
+        aria-valuetext={`${percent}, ${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}
+      >
+        <span class="stats__segment-fill" style={{ inlineSize: `${clampPercent(figure.percent)}%` }}></span>
+      </div>,
+      <wa-tooltip for={id}>
+        <span class="stats__tooltip">
+          <strong>{`${OCCUPANCY_LABEL[kind]}: ${percent}`}</strong>
+          <span>{`${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}</span>
+        </span>
+      </wa-tooltip>,
+    ];
+  }
+
+  /** Occupancy of real units and, when the property has fake units, of those; then the bar (PMS only). */
   private renderOccupancy() {
-    const performance = this.performance;
-    if (!performance) {
+    const occupancy = this.units?.occupancy;
+    if (!occupancy) {
       return (
         <div class="stats__occupancy" aria-hidden="true">
           <wa-skeleton effect="pulse" class="stats__skeleton stats__skeleton--occupancy"></wa-skeleton>
-          <wa-skeleton effect="pulse" class="stats__skeleton stats__skeleton--booked"></wa-skeleton>
           <wa-skeleton effect="pulse" class="stats__skeleton stats__skeleton--bar"></wa-skeleton>
         </div>
       );
     }
-    const occupancy = Math.min(Math.max(performance.occupancy, 0), 100);
-    // Rounding must never claim a full house: 99.96% reads 99.9%, not 100%.
-    const shownOccupancy = occupancy < 100 ? Math.min(occupancy, 99.9) : 100;
-    const total = this.totalUnits;
+    const { real } = occupancy;
+    // Virtual room types without a single active unit aren't mentioned at all.
+    const virtual = occupancy.virtual?.total ? occupancy.virtual : undefined;
     return (
-      <div class={{ 'stats__occupancy': true, 'stats--loading': this.performanceLoading }}>
+      <div class={{ 'stats__occupancy': true, 'stats__occupancy--split': !!virtual, 'stats--loading': this.unitsLoading }}>
         <div class="stats__occupancy-figure">
           <span class="stats__icon stats__icon--round" aria-hidden="true">
             <wa-icon name="bed"></wa-icon>
           </span>
-          <span class="stats__occupancy-value">{formatPercent(shownOccupancy, { maximumFractionDigits: 1 })}</span>
+          {this.renderOccupancyFigure('real', real)}
+          {virtual && this.renderOccupancyFigure('virtual', virtual)}
         </div>
-        {total !== undefined && <p class="stats__booked">{`${formatCount(performance.bookedUnits ?? 0)} of ${formatCount(total)} units booked`}</p>}
-        <wa-progress-bar class="stats__bar" value={occupancy} label={locales.entries?.Lcz_Occupancy ?? 'Occupancy'}></wa-progress-bar>
+        <div class="stats__bar" role="group" aria-label={locales.entries?.Lcz_Occupancy ?? 'Occupancy'}>
+          {this.renderBarSegment('real', real)}
+          {virtual && this.renderBarSegment('virtual', virtual)}
+        </div>
       </div>
     );
   }

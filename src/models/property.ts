@@ -12,6 +12,8 @@ export interface RoomType {
   inventory: number;
   is_active: boolean;
   is_bed_configuration_enabled: boolean;
+  /** A virtual (fake) room type: its units aren't physical rooms. */
+  is_virtual?: boolean;
   main_image: Image | null;
   name: string;
   is_available_to_book: boolean;
@@ -593,6 +595,7 @@ export interface PhysicalRoom {
   calendar_cell: CalendarCellType;
   housekeeper: Housekeeper | null;
   id: number;
+  is_active?: boolean;
   name: string;
 }
 

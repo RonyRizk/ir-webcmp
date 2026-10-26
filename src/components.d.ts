@@ -3078,7 +3078,8 @@ export namespace Components {
      * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
      * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
-     * skeleton until it arrives.
+     * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
+     * have any units, fake units in grey beside them, sharing one bar.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
      * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
@@ -11151,7 +11152,8 @@ declare global {
      * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
      * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
-     * skeleton until it arrives.
+     * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
+     * have any units, fake units in grey beside them, sharing one bar.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
      * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
@@ -17923,7 +17925,8 @@ declare namespace LocalJSX {
      * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
      * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
      * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
-     * skeleton until it arrives.
+     * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
+     * have any units, fake units in grey beside them, sharing one bar.
      * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
      * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
      */
@@ -25769,7 +25772,8 @@ declare module "@stencil/core" {
              * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
              * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
              * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
-             * skeleton until it arrives.
+             * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
+             * have any units, fake units in grey beside them, sharing one bar.
              * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
              * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
              */

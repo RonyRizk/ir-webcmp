@@ -35,6 +35,7 @@
   line-height: var(--wa-line-height-condensed);
   text-transform: capitalize;
   color: var(--wa-color-text-normal);
+  overflow-wrap: anywhere;
 }
 
 .stats__occupancy,
@@ -77,39 +78,130 @@
   padding-block-end: var(--wa-space-xs);
 }
 
+/* Icon, then the real figure and, when there are virtual room types, the fake one beside it behind a hairline. */
 .stats__occupancy-figure {
   display: flex;
   align-items: center;
   gap: var(--wa-space-m);
+  min-inline-size: 0;
 }
 
+/* Figures share the row's width equally; a size container, so the percentage can scale to the width it's given. */
+.stats__figure {
+  container-type: inline-size;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-inline-size: 0;
+}
+
+/* Secondary to the real figure: a size smaller, greyed, and set off by a divider. */
+.stats__figure--virtual {
+  padding-inline-start: var(--wa-space-m);
+  border-inline-start: 1px solid var(--wa-color-neutral-border-quiet);
+  --stats-figure-color: var(--wa-color-text-quiet);
+}
+
+/*
+ * Like the KPI amounts: the font shrinks to fit the percentage on one line (`--figure-chars` is its length), between the
+ * medium size and `--figure-max-size`.
+ */
 .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-3xl);
   unicode-bidi: isolate;
-  font-size: var(--wa-font-size-3xl);
+  margin-block-end: 0.25rem;
+  font-size: clamp(var(--wa-font-size-m), calc(100cqi / (var(--figure-chars, 5) * 0.62)), var(--figure-max-size));
   font-weight: var(--wa-font-weight-bold);
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--wa-color-text-normal);
+  color: var(--stats-figure-color, var(--wa-color-text-normal));
+  overflow-wrap: anywhere;
 }
 
-.stats__booked {
-  margin: 0;
-  font-size: var(--wa-font-size-m);
+.stats__figure--virtual .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-2xl);
+}
+
+/* Both figures side by side: a step smaller each, with the smaller icon tile, so "99.9%" twice still fits the narrow rail. */
+.stats__occupancy--split .stats__icon--round {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  font-size: 1.125rem;
+}
+
+.stats__occupancy--split .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-2xl);
+}
+
+.stats__occupancy--split .stats__figure--virtual .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-xl);
+}
+
+.stats__figure-label {
+  font-size: var(--wa-font-size-s);
   font-weight: var(--wa-font-weight-semibold);
-  color: var(--wa-color-text-normal);
+  line-height: var(--wa-line-height-condensed);
+  color: var(--stats-figure-color, var(--wa-color-text-normal));
+  overflow-wrap: anywhere;
 }
 
+/* Wraps between words (and, failing that, inside a long count) rather than overflow the figure. */
+.stats__booked {
+  font-size: var(--wa-font-size-xs);
+  line-height: var(--wa-line-height-condensed);
+  font-variant-numeric: tabular-nums;
+  color: var(--wa-color-text-quiet);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * One bar for both kinds: each segment is as wide as its share of all units (flex-grow is its unit count) and filled
+ * to its own occupancy — green for real units, grey for fake ones.
+ */
 .stats__bar {
-  --track-height: 0.5rem;
-  --indicator-color: var(--wa-color-success-fill-loud);
-  --track-color: var(--wa-color-neutral-fill-quiet);
+  display: flex;
+  gap: 3px;
   margin-block-start: var(--wa-space-xs);
 }
 
-.stats__bar::part(indicator) {
-  /* A day change slides the bar to its new length: ease-in-out, kept under 300ms. */
-  transition: width 280ms cubic-bezier(0.77, 0, 0.175, 1);
+.stats__segment {
+  position: relative;
+  flex: 1 1 0;
+  /* A property with a handful of fake units still gets a segment wide enough to point at. */
+  min-inline-size: 2.5rem;
+  block-size: 0.5rem;
+  overflow: hidden;
+  border-radius: var(--wa-border-radius-pill);
+  background-color: var(--wa-color-neutral-fill-quiet);
+  cursor: default;
+  outline-offset: 2px;
+}
+
+.stats__segment:focus-visible {
+  outline: var(--wa-focus-ring);
+}
+
+.stats__segment-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: inherit;
+  background-color: var(--wa-color-success-fill-loud);
+  /* A day change slides the fill to its new length: ease-in-out, kept under 300ms. */
+  transition: inline-size 280ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.stats__segment--virtual .stats__segment-fill {
+  background-color: var(--wa-color-neutral-fill-loud);
+}
+
+.stats__tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Unit breakdown: two columns; spacing alone separates the figures, aligned with the card title. */
@@ -129,7 +221,9 @@
   }
 }
 
+/* A size container, so the count can scale to its column. */
 .stats__unit {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -148,12 +242,18 @@
   --stats-dot-color: var(--wa-color-danger-fill-loud);
 }
 
+/*
+ * The font shrinks to fit the count on one line beside its dot (`--unit-chars` is its length), between the smallest size
+ * and `--unit-max-size`; only a count still too long at the smallest size wraps.
+ */
 .stats__unit-value {
-  font-size: var(--wa-font-size-xl);
+  --unit-max-size: var(--wa-font-size-xl);
+  font-size: clamp(var(--wa-font-size-2xs), calc((100cqi - 0.875rem - var(--wa-space-s)) / (var(--unit-chars, 2) * 0.62)), var(--unit-max-size));
   font-weight: var(--wa-font-weight-bold);
   line-height: var(--wa-line-height-condensed);
   font-variant-numeric: tabular-nums;
   color: var(--wa-color-text-normal);
+  overflow-wrap: anywhere;
 }
 
 /* Under the count, lined up with it rather than with the dot. */
@@ -163,6 +263,7 @@
   font-size: var(--wa-font-size-s);
   line-height: var(--wa-line-height-condensed);
   color: var(--wa-color-text-quiet);
+  overflow-wrap: anywhere;
 }
 
 /* Lcz_Available comes back lowercase ("available"); the label starts with a capital like its siblings. */
@@ -275,10 +376,6 @@
   block-size: 3.5rem;
 }
 
-.stats__skeleton--booked {
-  inline-size: 10rem;
-}
-
 .stats__skeleton--bar {
   inline-size: 100%;
   block-size: 0.5rem;
@@ -322,7 +419,16 @@
 }
 
 :host([density='tight']) .stats__occupancy-value {
-  font-size: var(--wa-font-size-2xl);
+  --figure-max-size: var(--wa-font-size-2xl);
+}
+
+:host([density='tight']) .stats__figure--virtual .stats__occupancy-value,
+:host([density='tight']) .stats__occupancy--split .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-xl);
+}
+
+:host([density='tight']) .stats__occupancy--split .stats__figure--virtual .stats__occupancy-value {
+  --figure-max-size: var(--wa-font-size-l);
 }
 
 :host([density='tight']) .stats__icon--round {
@@ -331,7 +437,7 @@
 }
 
 :host([density='tight']) .stats__unit-value {
-  font-size: var(--wa-font-size-l);
+  --unit-max-size: var(--wa-font-size-l);
 }
 
 /* Caps the amount one size down; it still shrinks further when its space is narrower. */
@@ -341,7 +447,7 @@
 
 /* Reduced motion keeps the dimming fade (it explains the refresh) and drops only the bar's movement. */
 @media (prefers-reduced-motion: reduce) {
-  .stats__bar::part(indicator) {
+  .stats__segment-fill {
     transition: none;
   }
 
