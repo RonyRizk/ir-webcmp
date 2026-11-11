@@ -142,7 +142,6 @@ graph TD;
   ir-dashboard --> ir-dashboard-departures
   ir-dashboard --> ir-dashboard-bookings-table
   ir-dashboard --> ir-page
-  ir-dashboard --> ir-dashboard-date-navigator
   ir-dashboard --> ir-dashboard-stats
   ir-dashboard --> ir-booking-details-drawer
   ir-dashboard --> ir-payment-folio
@@ -233,6 +232,7 @@ graph TD;
   ir-status-activity-cell --> ir-booking-status-tag
   ir-page --> ir-interceptor
   ir-page --> ir-toast
+  ir-dashboard-stats --> ir-dashboard-date-navigator
   ir-booking-details-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-booking-details
   ir-booking-details --> ir-spinner

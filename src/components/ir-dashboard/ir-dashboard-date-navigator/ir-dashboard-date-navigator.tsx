@@ -5,8 +5,8 @@ import locales from '@/stores/locales.store';
 import { MAX_DAY_OFFSET } from '../dashboard.helpers';
 
 /**
- * Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
- * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+ * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
+ * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
  */
 @Component({
   tag: 'ir-dashboard-date-navigator',
@@ -36,7 +36,7 @@ export class IrDashboardDateNavigator {
 
     return (
       <Host>
-        <wa-dropdown class="date-navigator" placement="bottom-end" onwa-select={e => this.handleSelect(e as CustomEvent<{ item: HTMLElement & { value: string } }>)}>
+        <wa-dropdown class="date-navigator" placement="bottom-start" onwa-select={e => this.handleSelect(e as CustomEvent<{ item: HTMLElement & { value: string } }>)}>
           <button type="button" slot="trigger" class="date-navigator__trigger" aria-label="Select date">
             <wa-icon class="date-navigator__icon" name="calendar-days" aria-hidden="true"></wa-icon>
             <time class="date-navigator__date" dateTime={this.date}>

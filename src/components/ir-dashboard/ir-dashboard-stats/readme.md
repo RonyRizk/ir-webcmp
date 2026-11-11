@@ -5,11 +5,12 @@
 
 ## Overview
 
-Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
-performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
+Left-hand stats rail: the day picker (ir-dashboard-date-navigator, whose pick is re-emitted as `dateChange`), then an
+occupancy card (the day's occupancy, units booked and the unit breakdown) and a performance card with the day's
+room-revenue KPIs. The occupancy card takes the rail's spare height.
 The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
 skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
-have any units, fake units in grey beside them, sharing one bar.
+have any units, fake units in grey beside them; the bar shows the real units only.
 
 Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
 figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
@@ -30,15 +31,27 @@ figures (the dashboard skips the calendar request for them) — and no ADR or Re
 | `unitsLoading`       | `units-loading`       | Dims the calendar unit figures while a newer day's are in flight.                                     | `boolean`                                         | `false`     |
 
 
+## Events
+
+| Event        | Description                                                                        | Type                  |
+| ------------ | ---------------------------------------------------------------------------------- | --------------------- |
+| `dateChange` | Emitted with the new day when the user picks another day in the rail's day picker. | `CustomEvent<string>` |
+
+
 ## Dependencies
 
 ### Used by
 
  - [ir-dashboard](..)
 
+### Depends on
+
+- [ir-dashboard-date-navigator](../ir-dashboard-date-navigator)
+
 ### Graph
 ```mermaid
 graph TD;
+  ir-dashboard-stats --> ir-dashboard-date-navigator
   ir-dashboard --> ir-dashboard-stats
   style ir-dashboard-stats fill:#f9f,stroke:#333,stroke-width:4px
 ```

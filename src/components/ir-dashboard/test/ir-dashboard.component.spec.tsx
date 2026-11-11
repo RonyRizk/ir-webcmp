@@ -176,7 +176,7 @@ async function showTab(page: SpecPage, name: string) {
 
 /** Picks a day without waiting out the debounce, so nothing is fetched yet. */
 async function pickDate(page: SpecPage, date: string) {
-  emit($(page, 'ir-dashboard-date-navigator'), 'dateChange', date);
+  emit($(page, 'ir-dashboard-stats'), 'dateChange', date);
   await flush(page);
 }
 
@@ -623,7 +623,7 @@ describe('ir-dashboard', () => {
       await pickDate(page, TOMORROW);
       await pickDate(page, inTwoDays);
 
-      expect(prop($(page, 'ir-dashboard-date-navigator'), 'date')).toBe(inTwoDays);
+      expect(prop($(page, 'ir-dashboard-stats'), 'date')).toBe(inTwoDays);
       expect(mockDashboardService.getDayPerformance).not.toHaveBeenCalled();
       expect(mockLoaders.loadArrivals).not.toHaveBeenCalled();
       // The previous day's figures stay on screen, dimmed, while the user is still choosing.
@@ -647,7 +647,7 @@ describe('ir-dashboard', () => {
 
       await changeDate(page, TOMORROW);
 
-      expect(prop($(page, 'ir-dashboard-date-navigator'), 'date')).toBe(TOMORROW);
+      expect(prop($(page, 'ir-dashboard-stats'), 'date')).toBe(TOMORROW);
       // The previous day's data is stale: the visible panel and its count go back to skeletons.
       expect(isPanelSkeleton(page, 'inHouse')).toBe(true);
       expect(tabCount(page, 'inHouse')).toBeNull();

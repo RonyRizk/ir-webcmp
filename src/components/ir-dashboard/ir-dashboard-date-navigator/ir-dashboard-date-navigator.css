@@ -1,10 +1,15 @@
 :host {
-  display: inline-block;
+  display: block;
 }
 
-/* The pill in the page header: calendar icon, the selected day, chevron. */
+.date-navigator {
+  display: block;
+}
+
+/* The pill at the top of the stats rail, as wide as the rail: calendar icon, the selected day, chevron. */
 .date-navigator__trigger {
-  display: inline-flex;
+  display: flex;
+  inline-size: 100%;
   align-items: center;
   gap: var(--wa-space-s);
   min-block-size: 3rem;
@@ -42,14 +47,13 @@
   font-size: 1.125rem;
 }
 
-/*
- * Room for the longest day name ("Wednesday, 30 September"), so the right-aligned pill keeps one width while the user
- * steps through days instead of its icon jumping sideways; the chevron stays pinned to the end.
- */
+/* Takes the pill's spare width, so the chevron stays pinned to the end; a day name too long for a narrow rail truncates. */
 .date-navigator__date {
   flex: 1 1 auto;
-  min-inline-size: 13.5em;
+  min-inline-size: 0;
+  overflow: hidden;
   text-align: start;
+  text-overflow: ellipsis;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -83,25 +87,5 @@
 
   .date-navigator__chevron {
     transition: none;
-  }
-}
-
-/* Phones: the pill fills the header row under the title. */
-@media (max-width: 575px) {
-  :host {
-    display: block;
-    inline-size: 100%;
-  }
-
-  .date-navigator {
-    display: block;
-  }
-
-  .date-navigator__trigger {
-    inline-size: 100%;
-  }
-
-  .date-navigator__date {
-    min-inline-size: 0;
   }
 }

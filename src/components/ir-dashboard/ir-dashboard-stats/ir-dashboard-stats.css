@@ -4,6 +4,11 @@
   gap: var(--wa-space-m);
 }
 
+/* The day picker at the top of the rail keeps its own height; the occupancy card takes the spare. */
+.stats__date {
+  flex: none;
+}
+
 .stats__card {
   --spacing: var(--wa-space-l);
   border: 0;
@@ -156,22 +161,11 @@
   overflow-wrap: anywhere;
 }
 
-/*
- * One bar for both kinds: each segment is as wide as its share of all units (flex-grow is its unit count) and filled
- * to its own occupancy — green for real units, grey for fake ones.
- */
+/* The real units' occupancy: a pill track filled to the percentage. */
 .stats__bar {
-  display: flex;
-  gap: 3px;
-  margin-block-start: var(--wa-space-xs);
-}
-
-.stats__segment {
   position: relative;
-  flex: 1 1 0;
-  /* A property with a handful of fake units still gets a segment wide enough to point at. */
-  min-inline-size: 2.5rem;
   block-size: 0.5rem;
+  margin-block-start: var(--wa-space-xs);
   overflow: hidden;
   border-radius: var(--wa-border-radius-pill);
   background-color: var(--wa-color-neutral-fill-quiet);
@@ -179,11 +173,11 @@
   outline-offset: 2px;
 }
 
-.stats__segment:focus-visible {
+.stats__bar:focus-visible {
   outline: var(--wa-focus-ring);
 }
 
-.stats__segment-fill {
+.stats__bar-fill {
   position: absolute;
   inset-block: 0;
   inset-inline-start: 0;
@@ -191,10 +185,6 @@
   background-color: var(--wa-color-success-fill-loud);
   /* A day change slides the fill to its new length: ease-in-out, kept under 300ms. */
   transition: inline-size 280ms cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-.stats__segment--virtual .stats__segment-fill {
-  background-color: var(--wa-color-neutral-fill-loud);
 }
 
 .stats__tooltip {
@@ -358,6 +348,11 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  /* The day picker spans both cards above them. */
+  .stats__date {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Skeletons shown until each part's first figures arrive. */
@@ -447,7 +442,7 @@
 
 /* Reduced motion keeps the dimming fade (it explains the refresh) and drops only the bar's movement. */
 @media (prefers-reduced-motion: reduce) {
-  .stats__segment-fill {
+  .stats__bar-fill {
     transition: none;
   }
 

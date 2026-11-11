@@ -313,11 +313,13 @@ export function getDaysArray(date1: string, date2: string) {
  * @returns The modification status and latest OTA manipulation.
  */
 export function isBookingModified(booking: Booking) {
-  const manipulations = booking?.ota_manipulations;
+  const manipulations = booking?.ota_manipulations ?? [];
 
   const lastManipulation = Array.isArray(manipulations) && manipulations.length > 0 ? (manipulations[manipulations.length - 1] ?? null) : null;
 
-  const modified = !lastManipulation && Array.isArray(booking?.events) && typeof booking.events[0]?.type === 'string' && booking.events[0].type.toLowerCase() === 'modified';
+  // const modified =
+  //   !booking.is_direct && !lastManipulation && Array.isArray(booking?.events) && typeof booking.events[0]?.type === 'string' && booking.events[0].type.toLowerCase() === 'modified';
+  const modified = !booking.is_direct && manipulations.length > 0;
 
   return { modified, lastManipulation };
 }

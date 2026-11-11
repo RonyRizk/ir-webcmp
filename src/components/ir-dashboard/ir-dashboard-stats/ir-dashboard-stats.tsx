@@ -1,10 +1,9 @@
 import type { DashboardPerformance, DashboardUnits, OccupancyFigure } from '@/services/dashboard';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { todayISO, type ISODate } from '@/utils/calendar-dates';
 import moment from 'moment';
 import { formatAmount } from '@/utils/utils';
-import { Component, Host, Prop, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import { computeRevPar, formatCount, formatPercent } from '../dashboard.helpers';
 import type { RailDensity } from '../types';
 
@@ -31,7 +30,7 @@ const OCCUPANCY_LABEL: Record<OccupancyKind, string> = {
   virtual: 'Fake units',
 };
 
-/** Gives each instance's bar segments their own ids, which the tooltips anchor to. */
+/** Gives each instance's bar its own id, which the tooltip anchors to. */
 let barIds = 0;
 
 const clampPercent = (percent: number) => Math.min(Math.max(percent ?? 0, 0), 100);
@@ -43,11 +42,12 @@ const shownPercent = (percent: number) => {
 };
 
 /**
- * Left-hand stats rail: an occupancy card (the day's occupancy, units booked and the unit breakdown) followed by a
- * performance card with the day's room-revenue KPIs. The first card takes the rail's spare height.
+ * Left-hand stats rail: the day picker (ir-dashboard-date-navigator, whose pick is re-emitted as `dateChange`), then an
+ * occupancy card (the day's occupancy, units booked and the unit breakdown) and a performance card with the day's
+ * room-revenue KPIs. The occupancy card takes the rail's spare height.
  * The figures come from three requests (monthly stats, calendar, pending bookings), so each figure shows its own
  * skeleton until it arrives. Occupancy comes from the calendar: real units and, when the property's virtual room types
- * have any units, fake units in grey beside them, sharing one bar.
+ * have any units, fake units in grey beside them; the bar shows the real units only.
  *
  * Properties without front desk (`isPms` false) see only Booked and Pending — no occupancy, no bar, no calendar
  * figures (the dashboard skips the calendar request for them) — and no ADR or RevPAR.
@@ -77,6 +77,9 @@ export class IrDashboardStats {
   @Prop() pendingLoading: boolean = false;
   /** How tightly the cards are drawn; ir-dashboard steps it down when the desktop rail is short. */
   @Prop({ reflect: true }) density: RailDensity = 'regular';
+
+  /** Emitted with the new day when the user picks another day in the rail's day picker. */
+  @Event() dateChange: EventEmitter<ISODate>;
 
   private readonly barId = `stats-occupancy-${++barIds}`;
 
@@ -135,38 +138,33 @@ export class IrDashboardStats {
     );
   }
 
-  /**
-   * One stretch of the bar: as wide as its share of all units (never too narrow to hover), filled to its occupancy,
-   * with a tooltip spelling out the figure.
-   */
-  private renderBarSegment(kind: OccupancyKind, figure: OccupancyFigure) {
-    const id = `${this.barId}-${kind}`;
+  /** The real units' occupancy bar, filled to its percentage, with a tooltip spelling out the figure. */
+  private renderBar(figure: OccupancyFigure) {
     const percent = formatPercent(shownPercent(figure.percent), { maximumFractionDigits: 1 });
     return [
       <div
-        id={id}
-        class={`stats__segment stats__segment--${kind}`}
-        style={{ flexGrow: String(Math.max(figure.total, 1)) }}
+        id={this.barId}
+        class="stats__bar"
         role="progressbar"
         tabindex="0"
-        aria-label={OCCUPANCY_LABEL[kind]}
+        aria-label={OCCUPANCY_LABEL.real}
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow={String(clampPercent(figure.percent))}
         aria-valuetext={`${percent}, ${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}
       >
-        <span class="stats__segment-fill" style={{ inlineSize: `${clampPercent(figure.percent)}%` }}></span>
+        <span class="stats__bar-fill" style={{ inlineSize: `${clampPercent(figure.percent)}%` }}></span>
       </div>,
-      <wa-tooltip for={id}>
+      <wa-tooltip for={this.barId}>
         <span class="stats__tooltip">
-          <strong>{`${OCCUPANCY_LABEL[kind]}: ${percent}`}</strong>
+          <strong>{`${OCCUPANCY_LABEL.real}: ${percent}`}</strong>
           <span>{`${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}</span>
         </span>
       </wa-tooltip>,
     ];
   }
 
-  /** Occupancy of real units and, when the property has fake units, of those; then the bar (PMS only). */
+  /** Occupancy of real units and, when the property has fake units, of those; then the real units' bar (PMS only). */
   private renderOccupancy() {
     const occupancy = this.units?.occupancy;
     if (!occupancy) {
@@ -189,10 +187,7 @@ export class IrDashboardStats {
           {this.renderOccupancyFigure('real', real)}
           {virtual && this.renderOccupancyFigure('virtual', virtual)}
         </div>
-        <div class="stats__bar" role="group" aria-label={locales.entries?.Lcz_Occupancy ?? 'Occupancy'}>
-          {this.renderBarSegment('real', real)}
-          {virtual && this.renderBarSegment('virtual', virtual)}
-        </div>
+        {this.renderBar(real)}
       </div>
     );
   }
@@ -250,9 +245,16 @@ export class IrDashboardStats {
     );
   }
 
+  /** Re-emits the picker's day from the rail, so the dashboard hears one event, from its own child. */
+  private handleDateChange(e: CustomEvent<ISODate>) {
+    e.stopPropagation();
+    this.dateChange.emit(e.detail);
+  }
+
   render() {
     return (
       <Host>
+        <ir-dashboard-date-navigator class="stats__date" date={this.date} onDateChange={e => this.handleDateChange(e as CustomEvent<ISODate>)}></ir-dashboard-date-navigator>
         <wa-card class="stats__card stats__card--occupancy" appearance="plain">
           <h2 class="stats__title">{this.title}</h2>
           {this.isPms && this.renderOccupancy()}

@@ -7,7 +7,7 @@ import type { ISODate } from '@/utils/calendar-dates';
 import { isBlockUnit } from '@/utils/utils';
 
 /** How many days either side of today the dashboard's day picker reaches. */
-export const MAX_DAY_OFFSET = 2;
+export const MAX_DAY_OFFSET = 7;
 
 /**
  * Page size the dashboard requests. Card counts are computed from the loaded page,
@@ -146,38 +146,31 @@ export function countBlockedUnits(roomTypes: CalendarDayRoomType[], date: ISODat
 }
 
 /**
- * Whether a unit is booked for the night of `date`: an unavailable half-day cell that isn't a block and whose room's stay
- * covers that night (the departure day doesn't count).
+ * Whether a unit is booked for the night: its right half-day cell (the night) is unavailable and holds a booking,
+ * not a block (002, 003, 004).
  */
-function isBookedOn(cell: CalendarCellType | null | undefined, date: ISODate): boolean {
-  return [cell?.right_cell, cell?.left_cell].some(half => {
-    if (half?.Is_Available !== false || isBlockUnit(half.STAY_STATUS_CODE)) {
-      return false;
-    }
-    const from_date = half.room?.from_date;
-    const to_date = half.room?.to_date;
-    return !!from_date && !!to_date && from_date <= date && date < to_date;
-  });
+function isBooked(cell: CalendarCellType | null | undefined): boolean {
+  const night = cell?.right_cell;
+  return night?.Is_Available === false && !isBlockUnit(night.STAY_STATUS_CODE);
 }
 
 /**
  * A room type's booked and total units. The total is its active units — never `exposed_inventory.total`, which counts
- * inactive ones too. Booked is the inventory's count, else counted from the active units' cells.
+ * inactive ones too. Booked is the active units booked for the night (see `isBooked`).
  */
-function roomTypeOccupancy(roomType: CalendarDayRoomType, date: ISODate, flags?: PropertyFlags): Pick<OccupancyFigure, 'booked' | 'total'> {
-  const inventory = roomType.exposed_inventory ?? {};
+function roomTypeOccupancy(roomType: CalendarDayRoomType, flags?: PropertyFlags): Pick<OccupancyFigure, 'booked' | 'total'> {
   const units = activeUnits(roomType, flags);
   return {
-    booked: typeof inventory.booked === 'number' ? inventory.booked : units.filter(unit => isBookedOn(unit.calendar_cell, date)).length,
+    booked: units.filter(unit => isBooked(unit.calendar_cell)).length,
     total: units.length,
   };
 }
 
-function occupancyOf(roomTypes: CalendarDayRoomType[], date: ISODate, flags?: PropertyFlags): OccupancyFigure {
+function occupancyOf(roomTypes: CalendarDayRoomType[], flags?: PropertyFlags): OccupancyFigure {
   let booked = 0;
   let total = 0;
   for (const roomType of roomTypes) {
-    const figure = roomTypeOccupancy(roomType, date, flags);
+    const figure = roomTypeOccupancy(roomType, flags);
     booked += figure.booked;
     total += figure.total;
   }
@@ -188,17 +181,16 @@ function occupancyOf(roomTypes: CalendarDayRoomType[], date: ISODate, flags?: Pr
  * The day's occupancy across the active units of active room types, real and virtual apart. A room type is virtual when the
  * calendar flags it (`is_virtual`) or its id is in `flags.virtualIds`. `virtual` is `undefined` when no room type is virtual.
  */
-export function computeOccupancy(roomTypes: CalendarDayRoomType[], date: ISODate, flags: PropertyFlags = {}): DashboardOccupancy {
+export function computeOccupancy(roomTypes: CalendarDayRoomType[], flags: PropertyFlags = {}): DashboardOccupancy {
   const active = activeRoomTypes(roomTypes);
   const isVirtual = (rt: CalendarDayRoomType) => rt.is_virtual ?? (rt.id != null && !!flags.virtualIds?.has(rt.id));
   const virtual = active.filter(isVirtual);
   return {
     real: occupancyOf(
       active.filter(rt => !isVirtual(rt)),
-      date,
       flags,
     ),
-    virtual: virtual.length ? occupancyOf(virtual, date, flags) : undefined,
+    virtual: virtual.length ? occupancyOf(virtual, flags) : undefined,
   };
 }
 
@@ -215,7 +207,7 @@ export function sumUnits(roomTypes: CalendarDayRoomType[], date: ISODate, flags?
     available: sum('rts') ?? 0,
     ...countBlockedUnits(active, date, flags),
     total: sum('total'),
-    occupancy: computeOccupancy(active, date, flags),
+    occupancy: computeOccupancy(active, flags),
   };
 }
 
@@ -228,6 +220,16 @@ export function computeRevPar(adr: number, occupancyPercent: number): number {
 export function formatCount(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '';
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+}
+
+/** Largest count a summary card shows in full; above it the card shows the compact form, so it never needs more than six characters. */
+const CARD_COUNT_FULL_MAX = 99_999;
+
+/** Count for a summary card: in full up to 99,999 ("98,765"), compact beyond ("123.5K", "1.2M"); empty for a missing value. */
+export function formatCardCount(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '';
+  if (Math.abs(value) <= CARD_COUNT_FULL_MAX) return formatCount(value);
+  return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 }
 
 /** `value` is a percentage (0–100), not a ratio; empty for a missing value. */

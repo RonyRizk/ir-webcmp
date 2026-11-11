@@ -5,8 +5,8 @@
 
 ## Overview
 
-Day picker for the dashboard header: a pill showing the selected day that opens a list of the days from
-today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
+from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
 
 ## Properties
 
@@ -26,12 +26,12 @@ today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
 
 ### Used by
 
- - [ir-dashboard](..)
+ - [ir-dashboard-stats](../ir-dashboard-stats)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-dashboard --> ir-dashboard-date-navigator
+  ir-dashboard-stats --> ir-dashboard-date-navigator
   style ir-dashboard-date-navigator fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

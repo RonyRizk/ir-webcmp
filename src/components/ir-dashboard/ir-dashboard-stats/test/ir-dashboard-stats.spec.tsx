@@ -32,6 +32,22 @@ describe('ir-dashboard-stats', () => {
     expect(title.endsWith('.')).toBe(true);
   });
 
+  it('tops the rail with the day picker and re-emits its pick from the rail', async () => {
+    const tomorrow = addDaysISO(todayISO(), 1);
+    const page = await render({ date: tomorrow });
+    const navigator = page.root.querySelector('ir-dashboard-date-navigator') as any;
+    expect(page.root.firstElementChild).toBe(navigator);
+    // Child components aren't registered here, so the primitive prop lands as an attribute.
+    expect(navigator.getAttribute('date')).toBe(tomorrow);
+
+    const onDateChange = jest.fn();
+    page.body.addEventListener('dateChange', onDateChange);
+    navigator.dispatchEvent(new CustomEvent('dateChange', { detail: todayISO(), bubbles: true, composed: true }));
+    expect(onDateChange).toHaveBeenCalledTimes(1);
+    expect(onDateChange.mock.calls[0][0].target).toBe(page.root);
+    expect(onDateChange.mock.calls[0][0].detail).toBe(todayISO());
+  });
+
   it('shows real and fake occupancy from the calendar, the bar, every unit row and RevPAR for PMS properties', async () => {
     const page = await render();
     expect(texts(page.root, '.stats__occupancy-value')).toEqual(['6.1%', '0%']);
@@ -41,27 +57,27 @@ describe('ir-dashboard-stats', () => {
     expect(kpiLabels(page.root)).toEqual(['Room Revenue', 'ADR', 'RevPAR']);
   });
 
-  it('splits the bar into a segment per kind, sized by its units, each with a tooltip', async () => {
+  it('draws a single bar for the real units only, with its tooltip, even when the property has fake units', async () => {
     const page = await render();
-    const segments = Array.from(page.root.querySelectorAll('.stats__segment')) as HTMLElement[];
-    expect(segments.map(s => s.style.flexGrow)).toEqual(['33', '3']);
-    expect(segments.map(s => s.getAttribute('aria-valuenow'))).toEqual([String(real.percent), '0']);
+    const bars = Array.from(page.root.querySelectorAll('.stats__bar')) as HTMLElement[];
+    expect(bars.length).toBe(1);
+    expect(bars[0].getAttribute('aria-valuenow')).toBe(String(real.percent));
     const tooltips = Array.from(page.root.querySelectorAll('wa-tooltip'));
-    expect(tooltips.map(t => t.getAttribute('for'))).toEqual(segments.map(s => s.id));
+    expect(tooltips.map(t => t.getAttribute('for'))).toEqual([bars[0].id]);
     expect(tooltips[0].textContent).toContain('Real units: 6.1%');
   });
 
-  it('shows only the real figure and segment when the property has no virtual room types', async () => {
+  it('shows only the real figure and bar when the property has no virtual room types', async () => {
     const page = await render({ unitsOverride: { ...units, occupancy: { real, virtual: undefined } } });
     expect(texts(page.root, '.stats__figure-label')).toEqual(['Real units']);
-    expect(page.root.querySelectorAll('.stats__segment').length).toBe(1);
+    expect(page.root.querySelectorAll('.stats__bar').length).toBe(1);
     expect(page.root.querySelector('.stats__occupancy--split')).toBeNull();
   });
 
   it("doesn't mention fake units when the virtual room types have none", async () => {
     const page = await render({ unitsOverride: { ...units, occupancy: { real, virtual: { booked: 0, total: 0, percent: 0 } } } });
     expect(texts(page.root, '.stats__figure-label')).toEqual(['Real units']);
-    expect(page.root.querySelectorAll('.stats__segment').length).toBe(1);
+    expect(page.root.querySelectorAll('.stats__bar').length).toBe(1);
     expect(page.root.querySelectorAll('wa-tooltip').length).toBe(1);
     expect(page.root.querySelector('.stats__occupancy--split')).toBeNull();
   });

@@ -3,12 +3,9 @@
   display: block;
 }
 
-ir-page::part(title) {
-  margin: 0;
-  font-size: var(--wa-font-size-2xl);
-  font-weight: var(--wa-font-weight-bold);
-  /* Large headings read tighter with slightly negative tracking. */
-  letter-spacing: -0.01em;
+/* No page title: the day picker lives at the top of the stats rail, so the header would only leave an empty gap. */
+ir-page::part(header) {
+  display: none;
 }
 
 .dashboard-layout {
@@ -131,9 +128,15 @@ ir-page::part(title) {
   }
 }
 
+/*
+ * A size container, so the count can scale to the card's width. `--tab-icon-space` is what the icon tile and its gap
+ * take from the count's row.
+ */
 .dashboard-tab {
+  --tab-icon-space: calc(2.75rem + var(--wa-space-s));
   display: block;
   color: var(--wa-color-text-normal);
+  container-type: inline-size;
 }
 
 /* WA's active tab draws its own underline; the card border replaces it. */
@@ -142,13 +145,20 @@ ir-page::part(title) {
   margin-block-end: 0;
 }
 
-/* Summary card: icon tile, label, count, notes. */
+/*
+ * Summary card: the count beside the icon tile, the label under both at the card's full width, then the notes, whose row
+ * takes the spare height so the notes sit at the bottom.
+ */
 .dashboard-tab::part(base) {
   display: grid;
-  /* Icon, label, count, then the notes row, which takes the spare height so the notes sit at the bottom. */
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    'count icon'
+    'label label'
+    'notes notes';
   align-items: start;
-  gap: var(--wa-space-2xs);
+  gap: var(--wa-space-2xs) var(--wa-space-s);
   block-size: 100%;
   padding: var(--wa-space-m);
   border: var(--wa-border-width-s) var(--wa-border-style) transparent;
@@ -167,12 +177,29 @@ ir-page::part(title) {
   padding: var(--wa-space-s) var(--wa-space-m);
 }
 
+.dashboard-layout--spacious .dashboard-tab__count {
+  --count-max-size: var(--wa-font-size-3xl);
+}
+
 .dashboard-layout--compact .dashboard-tab__count {
-  font-size: var(--wa-font-size-xl);
+  --count-max-size: var(--wa-font-size-xl);
 }
 
 .dashboard-layout--tight .dashboard-tab__count {
-  font-size: var(--wa-font-size-l);
+  --count-max-size: var(--wa-font-size-l);
+}
+
+/* Tight cards drop the icon tile, and the count takes the whole row. */
+.dashboard-layout--tight .dashboard-tab {
+  --tab-icon-space: 0px;
+}
+
+.dashboard-layout--tight .dashboard-tab::part(base) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'count'
+    'label'
+    'notes';
 }
 
 .dashboard-layout--tight .dashboard-tab__icon {
@@ -196,18 +223,18 @@ ir-page::part(title) {
   }
 }
 
-/* Soft brand-tinted tile behind the card's icon. */
+/* Soft brand-tinted tile behind the card's icon, in the card's top corner. */
 .dashboard-tab__icon {
+  grid-area: icon;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
-  margin-block-end: var(--wa-space-xs);
-  border-radius: var(--wa-border-radius-m);
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--wa-border-radius-l);
   background-color: var(--wa-color-brand-fill-quiet);
   color: var(--wa-color-brand-on-quiet);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   /* Swaps to white with the card's fill, so the tile never flashes a mismatched colour. */
   transition: background-color 150ms ease;
 }
@@ -217,9 +244,11 @@ ir-page::part(title) {
 }
 
 .dashboard-tab__label {
+  grid-area: label;
+  min-inline-size: 0;
   overflow: hidden;
   font-size: var(--wa-font-size-m);
-  font-weight: var(--wa-font-weight-semibold);
+  font-weight: var(--wa-font-weight-normal);
   color: var(--wa-color-text-quiet);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -234,12 +263,27 @@ ir-page::part(title) {
   color: var(--wa-color-brand-on-quiet);
 }
 
+/*
+ * Counts are never cut: the font shrinks to fit the count on one line in the width the card's padding and the icon tile
+ * leave (`--count-chars` is its length, each character about 0.62em wide in bold tabular figures), between the medium
+ * size and `--count-max-size`. Only a count still too long at the medium size wraps. Centred on the icon tile.
+ */
 .dashboard-tab__count {
-  font-size: var(--wa-font-size-2xl);
+  --count-max-size: var(--wa-font-size-2xl);
+  grid-area: count;
+  align-self: center;
+  min-inline-size: 0;
+  font-size: clamp(
+    var(--wa-font-size-m),
+    calc((100cqi - 2 * var(--wa-space-m) - 2 * var(--wa-border-width-s) - var(--tab-icon-space)) / (var(--count-chars, 1) * 0.62)),
+    var(--count-max-size)
+  );
   font-weight: var(--wa-font-weight-bold);
   line-height: 1.1;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  color: var(--wa-color-text-normal);
   transition: color 150ms ease;
 }
 
@@ -248,33 +292,35 @@ ir-page::part(title) {
  * so every card is one height, and it wraps rather than truncating, so a note's number always shows.
  */
 .dashboard-tab__notes {
+  grid-area: notes;
   display: flex;
   flex-wrap: wrap;
   align-self: end;
   gap: var(--wa-space-2xs);
-  min-block-size: 1.25rem;
+  min-block-size: 1.5rem;
+  margin-block-start: var(--wa-space-xs);
   min-inline-size: 0;
 }
 
-/* A card's action item: a small outlined pill. */
+/* A card's action item: an outlined pill. */
 .dashboard-tab__note {
-  padding: 0 var(--wa-space-xs);
+  padding: 0 var(--wa-space-s);
   border: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-warning-border-normal);
   color: var(--wa-color-warning-on-quiet);
-  font-size: var(--wa-font-size-xs);
-  font-weight: var(--wa-font-weight-semibold);
-  line-height: 1.25rem;
+  font-size: var(--wa-font-size-s);
+  font-weight: var(--wa-font-weight-normal);
+  line-height: 1.5rem;
   font-variant-numeric: tabular-nums;
   /* A note wider than a narrow card wraps inside its pill rather than being cut; the radius suits one line or two. */
   max-inline-size: 100%;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem;
   overflow-wrap: anywhere;
   text-wrap: balance;
 }
 
-/* Arrivals not checked in / guests not checked out after their day — the most urgent note, in red. */
+/* Arrivals not checked in / guests not checked out after their day — the most urgent note: red text in a soft red outline. */
 .dashboard-tab__note--overdue {
-  border-color: var(--wa-color-danger-border-normal);
+  border-color: var(--wa-color-danger-border-quiet);
   color: var(--wa-color-danger-on-quiet);
 }
 
@@ -323,7 +369,9 @@ ir-page::part(title) {
 }
 
 /* Named for screen readers; sighted users get the icon, and the full name in the tooltip. */
-.dashboard-tab__guest-label {
+.dashboard-tab__guest-label,
+/* A compact count's exact figure, for screen readers; sighted users get it in the tooltip. */
+.dashboard-tab__sr-only {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;

@@ -10,6 +10,7 @@ import {
   countRooms,
   countUnassignedArrivals,
   filterInHouse,
+  formatCardCount,
   sumOccupancy,
   sumUnits,
 } from '../dashboard.helpers';
@@ -68,6 +69,17 @@ describe('dashboard helpers', () => {
     expect(computeRevPar(100, 0)).toBe(0);
   });
 
+  it('shows card counts in full up to 99,999 and compact beyond, never past six characters', () => {
+    const full = (value: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+    expect(formatCardCount(5)).toBe('5');
+    expect(formatCardCount(99_999)).toBe(full(99_999));
+    expect(formatCardCount(100_000)).not.toBe(full(100_000));
+    for (const value of [100_000, 123_456, 999_999, 1_234_567, 123_456_789, 999_999_999]) {
+      expect(formatCardCount(value).length).toBeLessThanOrEqual(6);
+    }
+    expect(formatCardCount(null)).toBe('');
+  });
+
   it('keeps only checked-in rooms whose stay covers the date, departure day included', () => {
     const inOut = (code: '000' | '001' | '002' | null) => (code ? { code, description: '' } : null);
     const mixed = [
@@ -99,46 +111,48 @@ describe('dashboard helpers', () => {
 
   describe('occupancy', () => {
     const units = (count: number, extra: object = {}) => Array.from({ length: count }, () => ({ calendar_cell: null, ...extra }));
+    const bookedUnit = (STAY_STATUS_CODE = '001') => ({ calendar_cell: { left_cell: null, right_cell: { Is_Available: false, STAY_STATUS_CODE } as any } });
     const roomType = (booked: number, unitCount: number, extra: object = {}) => ({
       is_active: true,
-      exposed_inventory: { rts: 0, booked, total: 99 },
-      physicalrooms: units(unitCount),
+      exposed_inventory: { rts: 0, total: 99 },
+      physicalrooms: [...Array.from({ length: booked }, () => bookedUnit()), ...units(unitCount - booked)],
       ...extra,
     });
 
     it('splits booked and total units into real and virtual room types', () => {
-      const occupancy = computeOccupancy([roomType(2, 20), roomType(1, 13), roomType(1, 3, { is_virtual: true }), roomType(5, 5, { is_active: false })], date);
+      const occupancy = computeOccupancy([roomType(2, 20), roomType(1, 13), roomType(1, 3, { is_virtual: true }), roomType(5, 5, { is_active: false })]);
       expect(occupancy.real).toEqual({ booked: 3, total: 33, percent: (3 / 33) * 100 });
       expect(occupancy.virtual).toEqual({ booked: 1, total: 3, percent: (1 / 3) * 100 });
     });
 
     it("falls back to the property's virtual room type ids when the calendar leaves the flag out", () => {
-      const occupancy = computeOccupancy([roomType(2, 10, { id: 1 }), roomType(1, 4, { id: 2 })], date, { virtualIds: new Set([2]) });
+      const occupancy = computeOccupancy([roomType(2, 10, { id: 1 }), roomType(1, 4, { id: 2 })], { virtualIds: new Set([2]) });
       expect(occupancy.real.total).toBe(10);
       expect(occupancy.virtual.total).toBe(4);
     });
 
     it('counts only active units, flagged by the calendar or by the property', () => {
       const physicalrooms = [...units(3), ...units(2, { is_active: false }), { id: 7, calendar_cell: null }];
-      const occupancy = computeOccupancy([roomType(1, 0, { physicalrooms })], date, { inactiveUnitIds: new Set([7]) });
+      const occupancy = computeOccupancy([roomType(1, 0, { physicalrooms })], { inactiveUnitIds: new Set([7]) });
       expect(occupancy.real.total).toBe(3);
     });
 
     it('leaves virtual undefined without virtual room types, and reads 0% for no units', () => {
-      expect(computeOccupancy([], date)).toEqual({ real: { booked: 0, total: 0, percent: 0 }, virtual: undefined });
+      expect(computeOccupancy([])).toEqual({ real: { booked: 0, total: 0, percent: 0 }, virtual: undefined });
     });
 
-    it('counts booked and total units from the cells when the inventory lacks them', () => {
-      const cell = (from_date: string, to_date: string, STAY_STATUS_CODE = '001') => ({
-        calendar_cell: { left_cell: null, right_cell: { Is_Available: false, STAY_STATUS_CODE, room: { from_date, to_date } } as any },
-      });
+    it('counts as booked the units whose right cell holds a booking, never a block', () => {
+      const leftOnly = { calendar_cell: { left_cell: { Is_Available: false, STAY_STATUS_CODE: '001' } as any, right_cell: { Is_Available: true } as any } };
       const free = { calendar_cell: { left_cell: null, right_cell: { Is_Available: true } as any } };
-      const occupancy = computeOccupancy(
-        [{ is_active: true, exposed_inventory: { rts: 1 }, physicalrooms: [cell('2026-10-08', '2026-10-10'), cell('2026-10-07', date), free] }],
-        date,
-      );
-      // The second stay departs on `date`, so only the first is booked for the night.
-      expect(occupancy.real).toMatchObject({ booked: 1, total: 3 });
+      const occupancy = computeOccupancy([
+        {
+          is_active: true,
+          exposed_inventory: { rts: 1, booked: 9 },
+          physicalrooms: [bookedUnit('001'), bookedUnit('000'), bookedUnit('002'), bookedUnit('003'), bookedUnit('004'), leftOnly, free],
+        },
+      ]);
+      // Blocks (002, 003, 004) and a stay leaving this morning (left cell only) aren't booked; the inventory's count is ignored.
+      expect(occupancy.real).toMatchObject({ booked: 2, total: 7 });
     });
   });
 

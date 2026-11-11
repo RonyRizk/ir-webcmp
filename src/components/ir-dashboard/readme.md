@@ -5,9 +5,9 @@
 
 ## Overview
 
-PMS landing dashboard: a day picker in the page header (two days either side of today), the day's stats in the
-left rail, and a wa-tab-group, styled as summary cards, that switches between arrivals, departures, in-house,
-new bookings and cancellations. Properties without front desk (`is_frontdesk_enabled` false) get no in-house tab,
+PMS landing dashboard: the day's stats in the left rail, topped by a day picker (today and the days after it), and a
+wa-tab-group, styled as summary cards, that switches between arrivals, departures, in-house, new bookings and
+cancellations. Properties without front desk (`is_frontdesk_enabled` false) get no in-house tab,
 arrivals / departures without check-in / check-out, and a reduced stats rail.
 
 Loads in order of importance, each part showing a skeleton until its data lands:
@@ -43,7 +43,6 @@ booking whose stay covers the selected day reloads the stats plus cancellations.
 - [ir-dashboard-departures](ir-dashboard-departures)
 - [ir-dashboard-bookings-table](ir-dashboard-bookings-table)
 - [ir-page](../ui/ir-page)
-- [ir-dashboard-date-navigator](ir-dashboard-date-navigator)
 - [ir-dashboard-stats](ir-dashboard-stats)
 - [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
 - [ir-payment-folio](../ir-booking-details/ir-payment-details/ir-payment-folio)
@@ -55,7 +54,6 @@ graph TD;
   ir-dashboard --> ir-dashboard-departures
   ir-dashboard --> ir-dashboard-bookings-table
   ir-dashboard --> ir-page
-  ir-dashboard --> ir-dashboard-date-navigator
   ir-dashboard --> ir-dashboard-stats
   ir-dashboard --> ir-booking-details-drawer
   ir-dashboard --> ir-payment-folio
@@ -158,6 +156,7 @@ graph TD;
   ir-otp-modal --> ir-custom-button
   ir-toast --> ir-toast-provider
   ir-toast-provider --> ir-toast-item
+  ir-dashboard-stats --> ir-dashboard-date-navigator
   ir-booking-details-drawer --> ir-drawer
   ir-booking-details-drawer --> ir-booking-details
   ir-booking-details --> ir-spinner

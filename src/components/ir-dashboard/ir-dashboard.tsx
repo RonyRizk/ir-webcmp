@@ -25,6 +25,7 @@ import {
   countRooms,
   countUnassignedArrivals,
   DATE_CHANGE_DEBOUNCE_MS,
+  formatCardCount,
   formatCount,
   isCancellationOn,
   sumOccupancy,
@@ -65,9 +66,9 @@ const RAIL_REGULAR_MIN_HEIGHT = 650;
 const RAIL_COMPACT_MIN_HEIGHT = 570;
 
 /**
- * PMS landing dashboard: a day picker in the page header (two days either side of today), the day's stats in the
- * left rail, and a wa-tab-group, styled as summary cards, that switches between arrivals, departures, in-house,
- * new bookings and cancellations. Properties without front desk (`is_frontdesk_enabled` false) get no in-house tab,
+ * PMS landing dashboard: the day's stats in the left rail, topped by a day picker (today and the days after it), and a
+ * wa-tab-group, styled as summary cards, that switches between arrivals, departures, in-house, new bookings and
+ * cancellations. Properties without front desk (`is_frontdesk_enabled` false) get no in-house tab,
  * arrivals / departures without check-in / check-out, and a reduced stats rail.
  *
  * Loads in order of importance, each part showing a skeleton until its data lands:
@@ -686,13 +687,20 @@ export class IrDashboard {
     // Disabled only while its data is on the way (or the page itself is loading); a failed load stays clickable so showing it retries.
     // Same-day refreshes keep the loaded data on screen, so the tab stays enabled.
     const disabled = !loaded && (this.isPageLoading || !!this.loadingTabs[tab]);
+    const fullCount = loaded ? formatCount(count) : '';
+    const shownCount = loaded ? formatCardCount(count) : '';
+    // A compact count ("1.2M") shows the exact figure on hover and reads it to screen readers.
+    const isCompact = shownCount !== fullCount;
     return (
       <wa-tab slot="nav" panel={tab} class="dashboard-tab" data-tab={tab} disabled={disabled}>
+        {/* The CSS sizes the font from the count's length so it always fits beside the icon tile. */}
+        <span class="dashboard-tab__count" style={loaded ? { '--count-chars': String(shownCount.length) } : undefined} title={isCompact ? fullCount : undefined}>
+          {!loaded ? <CountSkeleton /> : isCompact ? [<span aria-hidden="true">{shownCount}</span>, <span class="dashboard-tab__sr-only">{fullCount}</span>] : shownCount}
+        </span>
+        <span class="dashboard-tab__label">{label}</span>
         <span class="dashboard-tab__icon" aria-hidden="true">
           <wa-icon name={TAB_ICONS[tab]}></wa-icon>
         </span>
-        <span class="dashboard-tab__label">{label}</span>
-        <span class="dashboard-tab__count">{loaded ? formatCount(count) : <CountSkeleton />}</span>
         {/* Wraps instead of truncating, so a note's number always shows however narrow the card is. */}
         <span class="dashboard-tab__notes">
           {loaded && unassigned > 0 && <span class="dashboard-tab__note dashboard-tab__note--unassigned">{`${formatCount(unassigned)} unassigned`}</span>}
@@ -772,12 +780,7 @@ export class IrDashboard {
     const isPms = this.isPms;
     return (
       <Host>
-        <ir-page label="Dashboard" handledEndpoints={OVERLAY_ENDPOINTS}>
-          <ir-dashboard-date-navigator
-            slot="page-header"
-            date={this.selectedDate}
-            onDateChange={e => this.handleDateChange(e as CustomEvent<ISODate>)}
-          ></ir-dashboard-date-navigator>
+        <ir-page handledEndpoints={OVERLAY_ENDPOINTS}>
           <div class={`dashboard-layout dashboard-layout--${this.railDensity}`}>
             <aside class="dashboard-aside" ref={el => (this.asideRef = el)}>
               <ir-dashboard-stats
@@ -791,6 +794,7 @@ export class IrDashboard {
                 performanceLoading={this.isPerformanceLoading}
                 unitsLoading={this.isUnitsLoading}
                 pendingLoading={this.isPendingLoading}
+                onDateChange={e => this.handleDateChange(e as CustomEvent<ISODate>)}
               ></ir-dashboard-stats>
             </aside>
             <section class="dashboard-main" aria-busy={this.isPageLoading ? 'true' : null}>
