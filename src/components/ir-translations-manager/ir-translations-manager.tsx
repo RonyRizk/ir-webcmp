@@ -4,9 +4,11 @@ import { showToast } from '@/utils/utils';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, from, map, merge, of, switchMap, tap } from 'rxjs';
 import { type DuplicateSyncPlan, planDuplicateSync } from './duplicate-sync';
+import { TRANSLATABLE_SETUP_TABLE_SET } from './displayed-setup-tables';
+import { getSyncPrompt, narrowSyncPlan } from './sync-policy';
 import { buildEditSetupParams, exposedLanguagesToTranslationLanguages, setupEntryToTranslationEntry } from './setup-mapping';
 import { DuplicateInfo, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
-import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_SETUP_TABLE_SET, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
+import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
 import { buildDuplicateMap, diffValues, getSourceLanguage, orderLanguages, sortByDisplayOrder } from './utils';
 
 type DeleteTarget = { type: 'entry' | 'table'; id: string; label: string; detail?: string };
@@ -79,6 +81,7 @@ export class IrTranslationsManager {
 
   private deleteDialogRef: HTMLIrDialogElement;
   private unsavedOrderDialogRef: HTMLIrDialogElement;
+  private syncDialogRef: HTMLIrTranslationsSyncDialogElement;
 
   private tokenService = new Token();
   private setupService = new SetupService();
@@ -173,7 +176,10 @@ export class IrTranslationsManager {
     try {
       const tableNames = await this.setupService.getDistinctSetupTables();
       this.tables = tableNames.map(name => ({ id: name, name, entries: [] }));
-      this.setActiveTable(sessionStorage.getItem(SESSION_CURRENT_TABLE) ?? this.visibleTables[0]?.id ?? null);
+      // The remembered table may since have been hidden by the "used in the app" filter.
+      const remembered = sessionStorage.getItem(SESSION_CURRENT_TABLE);
+      const restorable = this.visibleTables.some(table => table.id === remembered) ? remembered : null;
+      this.setActiveTable(restorable ?? this.visibleTables[0]?.id ?? null);
       // this.setActiveTable(this.tables.find(t => t.name === 'BLAbLA')?.id ?? null);
     } finally {
       this.isLoading = false;
@@ -265,9 +271,9 @@ export class IrTranslationsManager {
     return this.languages.filter(language => language.code !== sourceCode);
   }
 
-  /** True when a table survives the "used in this codebase" filter. */
+  /** True when a table survives the "used in the app" filter — only tables whose text is actually shown in the UI. */
   private isTableAllowed(name: string | undefined): boolean {
-    return !this.usedTablesOnly || !name || USED_SETUP_TABLE_SET.has(name);
+    return !this.usedTablesOnly || !name || TRANSLATABLE_SETUP_TABLE_SET.has(name);
   }
 
   /** The tables the picker offers — every one Setup reports, or only those the app reads. */
@@ -520,7 +526,7 @@ export class IrTranslationsManager {
       // change must not be held hostage by a sibling lookup.
       const previous = previousEntries.find(entry => entry.id === updatedEntry.id);
       let syncFailed = false;
-      const sync = await planDuplicateSync(this.setupService, {
+      let sync = await planDuplicateSync(this.setupService, {
         siblings: this.duplicates.get(updatedEntry.id)?.siblings ?? [],
         changedValues: diffValues(previous?.values, updatedEntry.values),
         ownerId: this.propertyid,
@@ -531,6 +537,18 @@ export class IrTranslationsManager {
         syncFailed = true;
         return { params: [], entries: [] };
       });
+
+      // Edits crossing into or out of a sync-guarded table need the user's say-so.
+      // Dismissing the prompt abandons the edit altogether.
+      const prompt = getSyncPrompt(tableName, sync.entries);
+      if (prompt.kind !== 'none') {
+        const answer = await this.syncDialogRef?.ask(prompt);
+        if (!answer) {
+          this.patchEntries(() => previousEntries, tableId);
+          return;
+        }
+        sync = narrowSyncPlan(sync, answer);
+      }
 
       if (sync.params.length > 0) {
         await this.setupService.editSetupMany([primary, ...sync.params]);
@@ -1061,6 +1079,8 @@ export class IrTranslationsManager {
             </ir-custom-button>
           </div>
         </ir-dialog>
+
+        <ir-translations-sync-dialog ref={el => (this.syncDialogRef = el)}></ir-translations-sync-dialog>
 
         <ir-dialog
           label="Unsaved order"

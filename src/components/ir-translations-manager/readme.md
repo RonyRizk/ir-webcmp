@@ -1,7 +1,5 @@
 # ir-translations-manager
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -29,6 +27,7 @@
 - [ir-translations-settings-dialog](ir-translations-settings-dialog)
 - [ir-translations-table-dialog](ir-translations-table-dialog)
 - [ir-dialog](../ui/ir-dialog)
+- [ir-translations-sync-dialog](ir-translations-sync-dialog)
 
 ### Graph
 ```mermaid
@@ -44,6 +43,7 @@ graph TD;
   ir-translations-manager --> ir-translations-settings-dialog
   ir-translations-manager --> ir-translations-table-dialog
   ir-translations-manager --> ir-dialog
+  ir-translations-manager --> ir-translations-sync-dialog
   ir-autocomplete --> ir-input
   ir-page --> ir-interceptor
   ir-page --> ir-toast
@@ -65,6 +65,9 @@ graph TD;
   ir-translations-entry-form --> ir-input
   ir-translations-entry-form --> ir-custom-button
   ir-translations-entry-form --> ir-empty-state
+  ir-translations-entry-form --> ir-translations-sync-dialog
+  ir-translations-sync-dialog --> ir-custom-button
+  ir-translations-sync-dialog --> ir-dialog
   ir-translations-settings-dialog --> ir-dialog
   ir-translations-settings-dialog --> ir-custom-button
   ir-translations-table-dialog --> ir-dialog

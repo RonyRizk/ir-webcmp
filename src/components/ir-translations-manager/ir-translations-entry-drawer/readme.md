@@ -1,7 +1,5 @@
 # ir-translations-entry-drawer
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -55,6 +53,9 @@ graph TD;
   ir-translations-entry-form --> ir-input
   ir-translations-entry-form --> ir-custom-button
   ir-translations-entry-form --> ir-empty-state
+  ir-translations-entry-form --> ir-translations-sync-dialog
+  ir-translations-sync-dialog --> ir-custom-button
+  ir-translations-sync-dialog --> ir-dialog
   ir-translations-manager --> ir-translations-entry-drawer
   style ir-translations-entry-drawer fill:#f9f,stroke:#333,stroke-width:4px
 ```

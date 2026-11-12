@@ -3,6 +3,7 @@ import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { type DuplicateSyncPlan, planDuplicateSync } from '../../duplicate-sync';
 import { buildEditSetupParams } from '../../setup-mapping';
+import { getSyncPrompt, narrowSyncPlan } from '../../sync-policy';
 import { DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage } from '../../types';
 import { diffValues, getSourceLanguage, hasValue } from '../../utils';
 
@@ -61,6 +62,7 @@ export class IrTranslationsEntryForm {
   @State() isSubmitting: boolean = false;
 
   private keyInputRef?: HTMLIrInputElement;
+  private syncDialogRef?: HTMLIrTranslationsSyncDialogElement;
   private setupService = new SetupService();
 
   componentWillLoad() {
@@ -249,7 +251,7 @@ export class IrTranslationsEntryForm {
       // Duplicates are keyed by the row as it was, so a rename still finds them. If they
       // can't be read the user's own save still goes out, just without them.
       let syncFailed = false;
-      const sync = previous
+      let sync = previous
         ? await planDuplicateSync(this.setupService, {
             siblings: this.duplicateSiblings,
             changedValues: diffValues(previous.values, this.values),
@@ -262,6 +264,17 @@ export class IrTranslationsEntryForm {
             return { params: [], entries: [] };
           })
         : ({ params: [], entries: [] } as DuplicateSyncPlan);
+
+      // Edits crossing into or out of a sync-guarded table need the user's say-so.
+      // Dismissing the prompt abandons the save and leaves the drawer open.
+      const prompt = getSyncPrompt(this.tableName, sync.entries);
+      if (prompt.kind !== 'none') {
+        const answer = await this.syncDialogRef?.ask(prompt);
+        if (!answer) {
+          return;
+        }
+        sync = narrowSyncPlan(sync, answer);
+      }
       writes.push(...sync.params);
 
       if (writes.length > 1) {
@@ -363,6 +376,7 @@ export class IrTranslationsEntryForm {
             </div>
           )}
         </div>
+        <ir-translations-sync-dialog ref={el => (this.syncDialogRef = el)}></ir-translations-sync-dialog>
       </form>
     );
   }

@@ -115,6 +115,7 @@ import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 import { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 import { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
+import { SyncAnswer } from "./components/ir-translations-manager/sync-policy";
 import { User } from "./models/Users";
 import { AllowedUser } from "./components/ir-user-management/types";
 import { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -228,6 +229,7 @@ export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
 export { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
 export { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
+export { SyncAnswer } from "./components/ir-translations-manager/sync-policy";
 export { User } from "./models/Users";
 export { AllowedUser } from "./components/ir-user-management/types";
 export { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog";
@@ -7317,6 +7319,17 @@ export namespace Components {
         "usedTablesOnly": boolean;
     }
     /**
+     * Asks whether a language edit should cross into or out of the sync-guarded tables
+     * (see `SYNC_GUARDED_TABLES`). Both edit paths await `ask()` mid-save, so the answer
+     * comes back as a promise rather than an event.
+     */
+    interface IrTranslationsSyncDialog {
+        /**
+          * Resolves with the user's answer, or `null` if they dismissed the dialog — the caller should then abort the save.
+         */
+        "ask": (prompt: AskablePrompt) => Promise<SyncAnswer | null>;
+    }
+    /**
      * Dumb open/close shell — the nested ir-translations-table-form owns the
      * draft, validation, and the actual save call.
      */
@@ -14134,6 +14147,17 @@ declare global {
         prototype: HTMLIrTranslationsSettingsDialogElement;
         new (): HTMLIrTranslationsSettingsDialogElement;
     };
+    /**
+     * Asks whether a language edit should cross into or out of the sync-guarded tables
+     * (see `SYNC_GUARDED_TABLES`). Both edit paths await `ask()` mid-save, so the answer
+     * comes back as a promise rather than an event.
+     */
+    interface HTMLIrTranslationsSyncDialogElement extends Components.IrTranslationsSyncDialog, HTMLStencilElement {
+    }
+    var HTMLIrTranslationsSyncDialogElement: {
+        prototype: HTMLIrTranslationsSyncDialogElement;
+        new (): HTMLIrTranslationsSyncDialogElement;
+    };
     interface HTMLIrTranslationsTableDialogElementEventMap {
         "closeDialog": void;
         "tableSaved": { id: string; name: string; mode: 'create' | 'edit' };
@@ -14786,6 +14810,7 @@ declare global {
         "ir-translations-language-dialog": HTMLIrTranslationsLanguageDialogElement;
         "ir-translations-manager": HTMLIrTranslationsManagerElement;
         "ir-translations-settings-dialog": HTMLIrTranslationsSettingsDialogElement;
+        "ir-translations-sync-dialog": HTMLIrTranslationsSyncDialogElement;
         "ir-translations-table-dialog": HTMLIrTranslationsTableDialogElement;
         "ir-translations-table-form": HTMLIrTranslationsTableFormElement;
         "ir-unbookable-rooms": HTMLIrUnbookableRoomsElement;
@@ -22591,6 +22616,13 @@ declare namespace LocalJSX {
         "usedTablesOnly"?: boolean;
     }
     /**
+     * Asks whether a language edit should cross into or out of the sync-guarded tables
+     * (see `SYNC_GUARDED_TABLES`). Both edit paths await `ask()` mid-save, so the answer
+     * comes back as a promise rather than an event.
+     */
+    interface IrTranslationsSyncDialog {
+    }
+    /**
      * Dumb open/close shell — the nested ir-translations-table-form owns the
      * draft, validation, and the actual save call.
      */
@@ -25504,6 +25536,7 @@ declare namespace LocalJSX {
         "ir-translations-language-dialog": Omit<IrTranslationsLanguageDialog, keyof IrTranslationsLanguageDialogAttributes> & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes]?: IrTranslationsLanguageDialog[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `attr:${K}`]?: IrTranslationsLanguageDialogAttributes[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `prop:${K}`]?: IrTranslationsLanguageDialog[K] };
         "ir-translations-manager": Omit<IrTranslationsManager, keyof IrTranslationsManagerAttributes> & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes]?: IrTranslationsManager[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `attr:${K}`]?: IrTranslationsManagerAttributes[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `prop:${K}`]?: IrTranslationsManager[K] };
         "ir-translations-settings-dialog": Omit<IrTranslationsSettingsDialog, keyof IrTranslationsSettingsDialogAttributes> & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes]?: IrTranslationsSettingsDialog[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `attr:${K}`]?: IrTranslationsSettingsDialogAttributes[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `prop:${K}`]?: IrTranslationsSettingsDialog[K] };
+        "ir-translations-sync-dialog": IrTranslationsSyncDialog;
         "ir-translations-table-dialog": Omit<IrTranslationsTableDialog, keyof IrTranslationsTableDialogAttributes> & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes]?: IrTranslationsTableDialog[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `attr:${K}`]?: IrTranslationsTableDialogAttributes[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `prop:${K}`]?: IrTranslationsTableDialog[K] };
         "ir-translations-table-form": Omit<IrTranslationsTableForm, keyof IrTranslationsTableFormAttributes> & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes]?: IrTranslationsTableForm[K] } & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes as `attr:${K}`]?: IrTranslationsTableFormAttributes[K] } & { [K in keyof IrTranslationsTableForm & keyof IrTranslationsTableFormAttributes as `prop:${K}`]?: IrTranslationsTableForm[K] };
         "ir-unbookable-rooms": Omit<IrUnbookableRooms, keyof IrUnbookableRoomsAttributes> & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes]?: IrUnbookableRooms[K] } & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes as `attr:${K}`]?: IrUnbookableRoomsAttributes[K] } & { [K in keyof IrUnbookableRooms & keyof IrUnbookableRoomsAttributes as `prop:${K}`]?: IrUnbookableRooms[K] };
@@ -26141,6 +26174,12 @@ declare module "@stencil/core" {
              * dismissing the dialog any other way — drops the draft entirely.
              */
             "ir-translations-settings-dialog": LocalJSX.IntrinsicElements["ir-translations-settings-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsSettingsDialogElement>;
+            /**
+             * Asks whether a language edit should cross into or out of the sync-guarded tables
+             * (see `SYNC_GUARDED_TABLES`). Both edit paths await `ask()` mid-save, so the answer
+             * comes back as a promise rather than an event.
+             */
+            "ir-translations-sync-dialog": LocalJSX.IntrinsicElements["ir-translations-sync-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsSyncDialogElement>;
             /**
              * Dumb open/close shell — the nested ir-translations-table-form owns the
              * draft, validation, and the actual save call.

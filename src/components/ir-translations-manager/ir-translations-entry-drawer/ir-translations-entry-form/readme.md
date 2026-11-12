@@ -1,7 +1,5 @@
 # ir-translations-entry-form
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -45,6 +43,7 @@ the drawer around this form is a dumb open/close shell.
 - [ir-input](../../../ui/ir-input)
 - [ir-custom-button](../../../ui/ir-custom-button)
 - [ir-empty-state](../../../ir-empty-state)
+- [ir-translations-sync-dialog](../../ir-translations-sync-dialog)
 
 ### Graph
 ```mermaid
@@ -52,6 +51,9 @@ graph TD;
   ir-translations-entry-form --> ir-input
   ir-translations-entry-form --> ir-custom-button
   ir-translations-entry-form --> ir-empty-state
+  ir-translations-entry-form --> ir-translations-sync-dialog
+  ir-translations-sync-dialog --> ir-custom-button
+  ir-translations-sync-dialog --> ir-dialog
   ir-translations-entry-drawer --> ir-translations-entry-form
   style ir-translations-entry-form fill:#f9f,stroke:#333,stroke-width:4px
 ```
