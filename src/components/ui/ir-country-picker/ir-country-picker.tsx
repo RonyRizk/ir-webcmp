@@ -1,5 +1,5 @@
 import { ICountry } from '@/models/IBooking';
-import { Component, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import { NativeWaInput } from '../ir-input/ir-input';
 
 @Component({
@@ -8,6 +8,8 @@ import { NativeWaInput } from '../ir-input/ir-input';
   scoped: true,
 })
 export class IrCountryPicker {
+  @Element() el: HTMLIrCountryPickerElement;
+
   @Prop() placeholder: string;
   /** The input's size. */
   @Prop({ reflect: true }) size: NativeWaInput['size'];
@@ -69,6 +71,11 @@ export class IrCountryPicker {
   @State() searching: boolean = false;
 
   /**
+   * Mirrors the host's `aria-invalid` attribute so it can be forwarded to the inner `ir-picker` (modern variant).
+   */
+  @State() ariaInvalidValue: string | null = null;
+
+  /**
    * Event emitted when a country is selected.
    */
   @Event() countryChange: EventEmitter<ICountry>;
@@ -76,11 +83,17 @@ export class IrCountryPicker {
   private debounceTimeout: NodeJS.Timeout;
 
   componentWillLoad() {
+    this.ariaInvalidValue = this.el.getAttribute('aria-invalid');
     this.filteredCountries = [...this.countries];
     if (this.country) {
       this.inputValue = this.country.name;
       this.selectedCountry = this.country;
     }
+  }
+
+  @Watch('aria-invalid')
+  handleAriaInvalidChange(newValue: string | null) {
+    this.ariaInvalidValue = newValue;
   }
 
   @Watch('country')
@@ -135,6 +148,7 @@ export class IrCountryPicker {
           label={this.label}
           mode="select"
           placeholder={this.placeholder}
+          aria-invalid={this.ariaInvalidValue ?? undefined}
           value={this.selectedCountry?.id?.toString()}
           onCombobox-select={e => {
             const country = this.filteredCountries.find(c => c.id.toString() === e.detail.item.value);

@@ -88,6 +88,7 @@ export class IrPicker {
   @Event({ eventName: 'input-picker-blurred' }) inputPickerBlurred!: EventEmitter<void>;
 
   componentWillLoad() {
+    this.isValid = this.hostEl.getAttribute('aria-invalid') ?? undefined;
     const hostItems = Array.from(this.hostEl?.querySelectorAll('ir-picker-item') ?? []) as PickerItemElement[];
     if (hostItems.length) {
       this.processPickerItems(hostItems);
