@@ -2,7 +2,6 @@ import { Component, Host, Prop, h, Event, EventEmitter, State, Fragment } from '
 import { TAdultChildConstraints, TPropertyButtonsTypes } from '../../../../models/igl-book-property';
 
 import moment from 'moment';
-import locales from '@/stores/locales.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import calendar_data from '@/stores/calendar-data';
 import booking_store, { setBookingDraft } from '@/stores/booking.store';
@@ -11,8 +10,10 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { Booking } from '@/models/booking.dto';
 import { z } from 'zod';
 import { showToast } from '@/utils/utils';
-import { ISO_FORMAT } from '@/utils/calendar-dates';
+import { formatDate } from '@/utils/date';
+import { formatBookingNumber, formatCount } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'igl-book-property-header',
   styleUrl: 'igl-book-property-header.css',
@@ -68,8 +69,8 @@ export class IglBookPropertyHeader {
         }}
         defaultValue={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
         value={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
-        label={`${locales.entries.Lcz_Tobooking}#`}
-        placeholder={locales.entries.Lcz_BookingNumber}
+        label={`${t('Lcz_Tobooking', { fallback: 'To booking' })}#`}
+        placeholder={t('Lcz_BookingNumber', { fallback: 'Booking number' })}
         loading={this.isLoading}
         onCombobox-select={e => {
           const booking = this.bookings?.find(b => b.booking_nbr?.toString() === e.detail.item.value);
@@ -80,7 +81,9 @@ export class IglBookPropertyHeader {
           const label = `${b.booking_nbr} ${b.guest.first_name} ${b.guest.last_name}`;
           return (
             <ir-picker-item value={b.booking_nbr?.toString()} label={label}>
-              {label}
+              {/* `label` stays Latin — `ir-picker` filters on it, so a converted
+                  label would stop matching what the user types. */}
+              {`${formatBookingNumber(b.booking_nbr)} ${b.guest.first_name} ${b.guest.last_name}`}
             </ir-picker-item>
           );
         })}
@@ -92,7 +95,7 @@ export class IglBookPropertyHeader {
     return (
       <wa-select
         size="s"
-        placeholder={locales.entries.Lcz_Source}
+        placeholder={t('Lcz_Source', { fallback: 'Source' })}
         value={booking_store.bookingDraft.source?.id?.toString()}
         defaultValue={booking_store.bookingDraft.source?.id}
         id="xSmallSelect"
@@ -136,11 +139,11 @@ export class IglBookPropertyHeader {
             }}
             value={adults?.toString()}
             defaultValue={adults?.toString()}
-            placeholder={locales.entries.Lcz_AdultsCaption}
+            placeholder={t('Lcz_Adults', { fallback: 'adults' })}
             size="s"
           >
             {Array.from(Array(this.adultChildConstraints.adult_max_nbr), (_, i) => i + 1).map(option => (
-              <wa-option value={option?.toString()}>{option}</wa-option>
+              <wa-option value={option?.toString()}>{formatCount(option)}</wa-option>
             ))}
           </wa-select>
         </ir-validator>
@@ -166,7 +169,7 @@ export class IglBookPropertyHeader {
             size="s"
           >
             {Array.from(Array(this.adultChildConstraints.child_max_nbr), (_, i) => i + 1).map(option => (
-              <wa-option value={option?.toString()}>{option}</wa-option>
+              <wa-option value={option?.toString()}>{formatCount(option)}</wa-option>
             ))}
           </wa-select>
         )}
@@ -176,12 +179,12 @@ export class IglBookPropertyHeader {
 
   private renderChildCaption() {
     const maxAge = this.adultChildConstraints.child_max_age;
-    let years = locales.entries.Lcz_Years;
+    let years = t('Lcz_Years', { fallback: 'years' });
 
     if (maxAge === 1) {
-      years = locales.entries.Lcz_Year;
+      years = t('Lcz_Year', { fallback: 'year' });
     }
-    return `${locales.entries.Lcz_ChildCaption} 0 - ${this.adultChildConstraints.child_max_age} ${years}`;
+    return `${t('Lcz_ChildCaption', { fallback: 'Child.' })} ${formatCount(0)} - ${formatCount(this.adultChildConstraints.child_max_age)} ${years}`;
   }
 
   private handleButtonClicked() {
@@ -190,7 +193,7 @@ export class IglBookPropertyHeader {
     if (this.isEventType('SPLIT_BOOKING') && Object.keys(this.bookedByInfoData).length <= 1) {
       showToast({
         type: 'error',
-        title: locales.entries.Lcz_ChooseBookingNumber,
+        title: t('Lcz_ChooseBookingNumber', { fallback: 'Choose a booking number' }),
       });
     } else if (this.isEventType('ADD_ROOM') || this.isEventType('SPLIT_BOOKING')) {
       const initialToDate: string = this.bookedByInfoData.to_date || this.defaultDaterange.to_date;
@@ -199,14 +202,11 @@ export class IglBookPropertyHeader {
       if (selectedToDate < initialFromDate || selectedFromDate > initialToDate) {
         showToast({
           type: 'error',
-          title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace('%1', moment(initialFromDate, ISO_FORMAT).format('ddd, DD MMM YYYY')).replace(
-            '%2',
-            moment(initialToDate, ISO_FORMAT).format('ddd, DD MMM YYYY'),
-          )}  `,
+          title: `${t('Lcz_CheckInDateShouldBeMAx', { fallback: 'The check-in or check-out must fall within %1 and %2.', params: [formatDate(initialFromDate, 'ddd, DD MMM YYYY'), formatDate(initialToDate, 'ddd, DD MMM YYYY')] })}  `,
         });
         return;
       } else if (Number(occupancy.adults) === 0) {
-        showToast({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests });
+        showToast({ type: 'error', title: t('Lcz_PlzSelectNumberOfGuests', { fallback: 'Please select the number of guests' }) });
         // this.adultAnimationContainer.play = true;
         this.autoValidate = true;
       } else {
@@ -216,17 +216,17 @@ export class IglBookPropertyHeader {
     // else if (this.minDate && new Date(this.dateRangeData.fromDate).getTime() > new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date).getTime()) {
     //   showToast({
     //     type: 'error',
-    //     title: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace(
+    //     title: `${t('Lcz_CheckInDateShouldBeMAx', { fallback: 'The check-in or check-out must fall within %1 and %2.' }).replace(
     //       '%1',
-    //       moment(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date)).format('ddd, DD MMM YYYY'),
-    //     ).replace('%2', moment(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date)).format('ddd, DD MMM YYYY'))}  `,
+    //       formatDate(new Date(this.bookedByInfoData.from_date || this.defaultDaterange.from_date), 'ddd, DD MMM YYYY'),
+    //     ).replace('%2', formatDate(new Date(this.bookedByInfoData.to_date || this.defaultDaterange.to_date), 'ddd, DD MMM YYYY'))}  `,
     //     description: '',
     //   });
     // }
     else if (Number(occupancy.adults) === 0) {
       // this.adultAnimationContainer.play = true;
       this.autoValidate = true;
-      showToast({ type: 'error', title: locales.entries.Lcz_PlzSelectNumberOfGuests, description: '' });
+      showToast({ type: 'error', title: t('Lcz_PlzSelectNumberOfGuests', { fallback: 'Please select the number of guests' }), description: '' });
     } else {
       this.buttonClicked.emit({ key: 'check' });
     }
@@ -265,7 +265,7 @@ export class IglBookPropertyHeader {
           <ir-date-range
             data-testid="date_picker"
             variant="booking"
-            dateLabel={locales.entries.Lcz_Dates}
+            dateLabel={t('Lcz_Dates', { fallback: 'Dates' })}
             maxDate={this.getMaxDate()}
             minDate={this.getMinDate()}
             disabled={(this.isEventType('BAR_BOOKING') && !this.wasBlockedUnit) || this.isEventType('SPLIT_BOOKING')}
@@ -294,10 +294,10 @@ export class IglBookPropertyHeader {
           /> */}
           {!this.isEventType('EDIT_BOOKING') && this.getAdultChildConstraints()}
           <ir-custom-button loading={isRequestPending('/Check_Availability')} variant="brand" onClickHandler={() => this.handleButtonClicked()}>
-            {locales.entries.Lcz_Check}
+            {t('Lcz_Check', { fallback: 'Check' })}
           </ir-custom-button>
         </div>
-        <p class="text-right message-label">{calendar_data.tax_statement}</p>
+        <p class="ir-text-end message-label">{calendar_data.tax_statement}</p>
       </Host>
     );
   }

@@ -4,6 +4,7 @@ const mockDashboardService = { getArrivals: jest.fn(), getDepartures: jest.fn() 
 // The real services pull in axios (ESM), which this jest setup can't parse.
 jest.mock('../../../services/booking-service/booking.service', () => ({ BookingService: jest.fn(() => mockBookingService) }));
 jest.mock('../../../services/dashboard', () => ({ DashboardService: jest.fn(() => mockDashboardService) }));
+jest.mock('../../../services/locale/locale.controller', () => ({ LocaleController: { language: 'en' } }));
 
 import { arrivalsStore } from '../../../stores/arrivals.store';
 import calendar_data from '../../../stores/calendar-data';
@@ -29,7 +30,7 @@ describe('dashboard.data', () => {
 
     it('loads arrivals from Get_Exposed_Bookings', async () => {
       await loadArrivals(42, DATE);
-      expect(mockDashboardService.getArrivals).toHaveBeenCalledWith({ property_id: 42, date: DATE });
+      expect(mockDashboardService.getArrivals).toHaveBeenCalledWith({ property_id: 42, date: DATE, language: 'en' });
       expect(mockBookingService.getRoomsToCheckIn).not.toHaveBeenCalled();
       expect(arrivalsStore.bookings).toHaveLength(1);
       expect(arrivalsStore.pagination.total).toBe(1);
@@ -37,7 +38,7 @@ describe('dashboard.data', () => {
 
     it('loads departures from Get_Exposed_Bookings', async () => {
       await loadDepartures(42, DATE);
-      expect(mockDashboardService.getDepartures).toHaveBeenCalledWith({ property_id: 42, date: DATE });
+      expect(mockDashboardService.getDepartures).toHaveBeenCalledWith({ property_id: 42, date: DATE, language: 'en' });
       expect(mockBookingService.getRoomsToCheckout).not.toHaveBeenCalled();
       expect(departuresStore.bookings).toHaveLength(1);
     });
@@ -51,8 +52,8 @@ describe('dashboard.data', () => {
     it('loads arrivals and departures from the PMS endpoints', async () => {
       await loadArrivals(42, DATE);
       await loadDepartures(42, DATE);
-      expect(mockBookingService.getRoomsToCheckIn).toHaveBeenCalledWith(expect.objectContaining({ property_id: '42', check_in_date: DATE }));
-      expect(mockBookingService.getRoomsToCheckout).toHaveBeenCalledWith(expect.objectContaining({ property_id: '42', check_out_date: DATE }));
+      expect(mockBookingService.getRoomsToCheckIn).toHaveBeenCalledWith(expect.objectContaining({ property_id: '42', check_in_date: DATE, language: 'en' }));
+      expect(mockBookingService.getRoomsToCheckout).toHaveBeenCalledWith(expect.objectContaining({ property_id: '42', check_out_date: DATE, language: 'en' }));
       expect(mockDashboardService.getArrivals).not.toHaveBeenCalled();
       expect(mockDashboardService.getDepartures).not.toHaveBeenCalled();
     });

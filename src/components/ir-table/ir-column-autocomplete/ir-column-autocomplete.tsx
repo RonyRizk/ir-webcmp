@@ -1,4 +1,5 @@
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 export interface ColumnAutocompleteSelectionChange {
   query: string;
@@ -13,9 +14,9 @@ export interface ColumnAutocompleteSelectionChange {
 export class IrColumnAutocomplete {
   @Prop() options: string[] = [];
   @Prop() selectedValues: string[] = [];
-  @Prop() placeholder: string = 'Search...';
-  @Prop() selectAllLabel: string = 'Select all';
-  @Prop() emptyLabel: string = 'No results found';
+  @Prop() placeholder: string;
+  @Prop() selectAllLabel: string;
+  @Prop() emptyLabel: string;
   @Prop() showSelectAll: boolean = true;
   @Prop() triggerId?: string;
 
@@ -123,12 +124,12 @@ export class IrColumnAutocomplete {
       <Host>
         <wa-popover placement="bottom" for={this.generatedTriggerId} class="column-autocomplete__popover">
           <div class="column-autocomplete__input-container">
-            <wa-input size="s" value={this.query} placeholder={this.placeholder} oninput={this.onQueryInput}></wa-input>
+            <wa-input size="s" value={this.query} placeholder={this.placeholder || t('Lcz_SearchEllipsis', { fallback: 'Search...' })} oninput={this.onQueryInput}></wa-input>
           </div>
           <div class="column-autocomplete__list">
             {this.showSelectAll && (
               <wa-checkbox checked={this.areAllFilteredSelected} indeterminate={this.areSomeFilteredSelected} onchange={this.onToggleAll}>
-                {this.selectAllLabel}
+                {this.selectAllLabel || t('Lcz_SelectAll', { fallback: 'Select all' })}
               </wa-checkbox>
             )}
             {filteredOptions.length > 0 ? (
@@ -138,7 +139,7 @@ export class IrColumnAutocomplete {
                 </wa-checkbox>
               ))
             ) : (
-              <div class="column-autocomplete__empty">{this.emptyLabel}</div>
+              <div class="column-autocomplete__empty">{this.emptyLabel || t('Lcz_NoResultsFound', { fallback: 'No results found' })}</div>
             )}
           </div>
         </wa-popover>

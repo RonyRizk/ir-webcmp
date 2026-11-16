@@ -1,4 +1,4 @@
-import { Component, Host, Listen, Prop, State, h, Event, EventEmitter, Watch, Fragment } from '@stencil/core';
+import { Component, Host, Listen, Prop, State, h, Event, EventEmitter, Watch, Fragment, forceUpdate } from '@stencil/core';
 
 import moment from 'moment';
 
@@ -11,11 +11,14 @@ import calendar_data from '@/stores/calendar-data';
 import { PhysicalRoom, RoomType } from '@/models/booking.dto';
 import { ICountry } from '@/models/IBooking';
 import { HKIssue } from '@/models/housekeeping';
+import { isRtlDirection } from '@/utils/calendar-grid';
 import { DayUseBookings } from '@/services/property/types';
 import { _formatTime } from '@/components/ir-booking-details/functions';
 import { isBlockUnit, showToast } from '@/utils/utils';
+import { formatAmount, formatNumber } from '@/utils/number';
 import { addDaysISO, nightsBetween, todayISO } from '@/utils/calendar-dates';
 
+import { t } from '@/services/locale/t';
 export type RoomCategory = RoomType & { expanded: boolean };
 
 @Component({
@@ -54,9 +57,37 @@ export class IglCalBody {
   private dayRateMap = new Map<string, (typeof calendar_dates.days)[0]['rate']>();
   private roomsWithTodayCheckinStatus = new Set<number>();
   private categoriesWithTodayCheckinStatus = new Set<number>();
+  private lastRenderedRoomTops = new Map<number, number>();
   private roomTitleClickTimer: ReturnType<typeof setTimeout> | null = null;
   private dayUseBookingsByKey = new Map<string, DayUseBookings>();
   // private disabledCellsCache = new Map<string, boolean>();
+
+  componentDidRender() {
+    // Room row offsets are read from the previously-committed DOM at the top of render(), so
+    // they're always one commit stale: on first mount that DOM doesn't exist yet, and after any
+    // row-structure change (category expand/collapse, calendarData updates adding/removing
+    // rooms) the offsets used for this pass were measured *before* the change took effect. Once
+    // the DOM actually commits here, re-measure and force one corrective re-render whenever the
+    // fresh offsets disagree with what was used, so booking bars settle on the real (current) row
+    // positions instead of stale ones — this is a vertical measurement (offsetTop), so it applies
+    // identically regardless of RTL/LTR.
+    const currentRoomTops = this.getRoomTopOffsets();
+    if (!this.roomTopsEqual(this.lastRenderedRoomTops, currentRoomTops)) {
+      forceUpdate(this);
+    }
+  }
+
+  private roomTopsEqual(a: Map<number, number>, b: Map<number, number>): boolean {
+    if (a.size !== b.size) {
+      return false;
+    }
+    for (const [roomId, top] of a) {
+      if (b.get(roomId) !== top) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   componentWillLoad() {
     this.bookingMap = this.getBookingMap(this.getBookingData());
@@ -176,6 +207,27 @@ export class IglCalBody {
     return this.calendarData.bookingEvents ?? [];
   }
 
+  /**
+   * Handed to every booking bar as a stable function reference, so a change to one booking does not
+   * give every bar a new prop value (and a re-render) - bars only need the full list when a drop lands.
+   */
+  private getAllBookingEvents = () => this.getBookingData();
+
+  /**
+   * Single batched DOM read (one querySelectorAll) shared by every booking bar, instead of
+   * each igl-booking-event independently measuring its own room row. Room row top offsets
+   * can't be derived from a fixed formula alone since rows are conditionally rendered based
+   * on category expand/collapse state owned by this component.
+   */
+  private getRoomTopOffsets(): Map<number, number> {
+    const offsets = new Map<number, number>();
+    document.querySelectorAll('.bodyContainer .roomRow .roomTitle[data-room]').forEach(element => {
+      const roomId = Number((element as HTMLElement).getAttribute('data-room'));
+      offsets.set(roomId, (element as HTMLElement).offsetTop);
+    });
+    return offsets;
+  }
+
   private addBookingDatas(aData) {
     this.addBookingDatasEvent.emit(aData);
   }
@@ -226,7 +278,7 @@ export class IglCalBody {
       TOTAL_PRICE: '',
       RATE_PLAN: '',
       ARRIVAL_TIME: '',
-      TITLE: locales.entries.Lcz_NewBookingFor,
+      TITLE: t('Lcz_NewBookingFor'),
       roomsInfo: [roomCategory],
       CATEGORY: roomCategory.name,
       event_type: 'BAR_BOOKING',
@@ -236,12 +288,12 @@ export class IglCalBody {
         toDate: endDate,
         dateDifference,
         editable: false,
-        message: 'Including 5.00% City Tax - Excluding 11.00% VAT',
+        message: t('Lcz_IncludingCityTaxExcludingVatMock', { fallback: 'Including 5.00% City Tax - Excluding 11.00% VAT' }),
       },
     };
 
     let popupTitle = roomCategory.name + ' ' + this.getRoomName(this.getRoomById(this.getRoomtypeUnits(roomCategory), this.selectedRooms[keys[0]].roomId));
-    this.newEvent.BLOCK_DATES_TITLE = `${locales.entries.Lcz_BlockDatesFor} ${popupTitle}`;
+    this.newEvent.BLOCK_DATES_TITLE = `${t('Lcz_BlockDatesFor')} ${popupTitle}`;
     this.newEvent.TITLE += popupTitle;
     this.newEvent.ENTRY_DATE = new Date().toISOString();
     this.newEvent.legendData = this.calendarData.formattedLegendData;
@@ -289,20 +341,20 @@ export class IglCalBody {
 
         // Cheapest checks first (indexed O(bookings-in-room)), day-loop checks last — each short-circuits the selection.
         if (this.hasBookingConflictBetween(roomId, startValue, endValue)) {
-          this.cancelSelectionWithConflictToast(locales.entries.Lcz_BookingBetweenSelectedDates ?? 'Selection cancelled. A booking already exists within the selected dates.');
+          this.cancelSelectionWithConflictToast(t('Lcz_BookingBetweenSelectedDates', { fallback: 'Selection cancelled. A booking already exists within the selected dates.' }));
           return;
         }
         if (this.hasBlockedConflictBetween(roomId, startValue, endValue)) {
-          this.cancelSelectionWithConflictToast(locales.entries.Lcz_BlockedDatesBetweenSelectedDates ?? 'Selection cancelled. These dates are blocked.');
+          this.cancelSelectionWithConflictToast(t('Lcz_BlockedDatesBetweenSelectedDates', { fallback: 'Selection cancelled. These dates are blocked.' }));
           return;
         }
         if (this.hasUnavailableCellBetween(roomId, startValue, endValue)) {
-          this.cancelSelectionWithConflictToast(locales.entries.Lcz_UnavailableDatesBetweenSelectedDates ?? 'Selection cancelled. These dates are not available.');
+          this.cancelSelectionWithConflictToast(t('Lcz_UnavailableDatesBetweenSelectedDates', { fallback: 'Selection cancelled. These dates are not available.' }));
           return;
         }
         if (this.hasDayUseBookingBetween(roomId, startValue, endValue)) {
           this.cancelSelectionWithConflictToast(
-            locales.entries.Lcz_DayUseBookingBetweenSelectedDates ?? 'Selection cancelled. A day-use booking already exists within the selected dates.',
+            t('Lcz_DayUseBookingBetweenSelectedDates', { fallback: 'Selection cancelled. A day-use booking already exists within the selected dates.' }),
           );
           return;
         }
@@ -387,7 +439,7 @@ export class IglCalBody {
           {isCategory ? (
             <Fragment>
               <span class={'categoryName'}>
-                {dayInfo.rate[index].exposed_inventory.rts}
+                {formatNumber(dayInfo.rate[index].exposed_inventory.rts)}
                 {/* <button class={'triangle-button'} style={{ '--in-toggle-color': isActive ? 'green' : '#ff4961' }}></button> */}
                 {/* <br />
               {dayInfo.rate[index].exposed_inventory.offline} */}
@@ -444,7 +496,7 @@ export class IglCalBody {
               <wa-tooltip style={{ '--max-width': 'auto' }} for={`day-use-badge_${roomId}_${dayInfo.value}`} trigger="hover">
                 <div class="dayUseTooltip__main">
                   <span class="dayUseTooltip__time">
-                    Day use {this.formatDayUseTime(dayUseBooking.from_time)} – {this.formatDayUseTime(dayUseBooking.to_time)}
+                    {t('Lcz_DayUse', { fallback: 'Day use' })} {this.formatDayUseTime(dayUseBooking.from_time)} – {this.formatDayUseTime(dayUseBooking.to_time)}
                   </span>
                   <span class="dayUseTooltip__price">{this.getDayUsePrice(dayUseBooking.gross_amount)}</span>
                 </div>
@@ -457,7 +509,7 @@ export class IglCalBody {
                 id={`day-use-badge_${roomId}_${dayInfo.value}`}
                 type="button"
                 class="dayUseBadge"
-                aria-label="Open day-use booking details"
+                aria-label={t('Lcz_OpenDayUseBookingDetails', { fallback: 'Open day-use booking details' })}
                 onClick={e => {
                   e.stopImmediatePropagation();
                   e.stopPropagation();
@@ -488,8 +540,7 @@ export class IglCalBody {
   }
 
   private getDayUsePrice(amount: number): string {
-    const symbol = this.currency?.symbol ?? '';
-    return `${symbol}${Number(amount ?? 0).toFixed(2)}`;
+    return formatAmount(this.currency?.symbol ?? '', Number(amount ?? 0));
   }
 
   private getDayUseStatus(booking: DayUseBookings): 'future' | 'staying' | 'past' {
@@ -511,7 +562,7 @@ export class IglCalBody {
       data: {
         BOOKING_NUMBER: dayUseBooking.book_nbr,
         event_type: 'EDIT_BOOKING',
-        TITLE: `${locales.entries.Lcz_EditBookingFor ?? 'Edit Booking For'} ${''}`,
+        TITLE: `${t('Lcz_EditBookingFor', { fallback: 'Edit Booking For' })} ${''}`,
       },
     });
   }
@@ -529,7 +580,7 @@ export class IglCalBody {
         PR_ID: room.id.toString(),
         FROM_DATE: today,
         TO_DATE: moment().add(1, 'day').format('YYYY-MM-DD'),
-        TITLE: `Day-Use Booking For ${roomCategory.name} ${room.name}`,
+        TITLE: `${t('Lcz_DayUseBookingFor', { fallback: 'Day-Use Booking For' })} ${roomCategory.name} ${room.name}`,
         roomsInfo: [{ id: roomCategory.id }],
         dayUse: true,
       },
@@ -571,7 +622,7 @@ export class IglCalBody {
     return (
       <div class="roomRow" data-has-today-checkin={String(hasRoomWithTodayCheckin)}>
         <div
-          class={`cellData text-left align-items-center roomHeaderCell categoryTitle ${'category_' + this.getCategoryId(roomType)}`}
+          class={`cellData ir-text-start align-items-center roomHeaderCell categoryTitle ${'category_' + this.getCategoryId(roomType)}`}
           onClick={() => this.toggleCategory(roomType)}
           data-has-today-checkin={String(hasRoomWithTodayCheckin)}
         >
@@ -579,7 +630,7 @@ export class IglCalBody {
             <ir-interactive-title popoverTitle={this.getCategoryName(roomType)}></ir-interactive-title>
             {/* <ir-popover popoverTitle={this.getCategoryName(roomCategory)}></ir-popover> */}
           </div>
-          {roomType.expanded ? <wa-icon name="angle-down"></wa-icon> : <wa-icon name="angle-right"></wa-icon>}
+          {roomType.expanded ? <wa-icon name="angle-down"></wa-icon> : <wa-icon class="ir-flip-rtl" name="angle-right"></wa-icon>}
         </div>
         {this.getRoomtypeDayInventoryCells('category_' + this.getCategoryId(roomType), true, index)}
       </div>
@@ -609,7 +660,7 @@ export class IglCalBody {
       return (
         <div class="roomRow" data-room-has-today-checkin={String(roomHasTodayCheckin)}>
           <div
-            class={`cellData room text-left align-items-center roomHeaderCell  roomTitle ${this.getTotalPhysicalRooms(roomType) <= 1 ? 'pl10' : ''} ${'room_' + roomId}`}
+            class={`cellData room  align-items-center roomHeaderCell  roomTitle ${this.getTotalPhysicalRooms(roomType) <= 1 ? 'pl10' : ''} ${'room_' + roomId}`}
             data-room-name={name}
             data-hk-enabled={String(calendar_data.housekeeping_enabled)}
             data-room={roomId}
@@ -656,7 +707,11 @@ export class IglCalBody {
                   )}
 
                   <div style={{ visibility: room.hk_status !== '001' ? 'visible' : 'hidden' }}>
-                    {room.hk_status !== '003' && <wa-tooltip for={`${room.id}_hk_status_icon`}>{room.hk_status === '002' ? 'This unit is dirty' : 'Inspected'}</wa-tooltip>}
+                    {room.hk_status !== '003' && (
+                      <wa-tooltip for={`${room.id}_hk_status_icon`}>
+                        {room.hk_status === '002' ? t('Lcz_ThisUnitIsDirty', { fallback: 'This unit is dirty' }) : t('Lcz_Inspected', { fallback: 'Inspected' })}
+                      </wa-tooltip>
+                    )}
                     <wa-icon
                       id={`${room.id}_hk_status_icon`}
                       name={room.hk_status === '004' ? 'check' : 'broom'}
@@ -856,8 +911,10 @@ export class IglCalBody {
     return false;
   }
   render() {
+    const roomTopOffsets = this.getRoomTopOffsets();
+    this.lastRenderedRoomTops = roomTopOffsets;
     return (
-      <Host>
+      <Host dir={isRtlDirection(locales.direction) ? 'rtl' : 'ltr'}>
         <div class="bodyContainer">
           {this.getRoomRows()}
           <div class="bookingEventsContainer preventPageScroll">
@@ -873,7 +930,8 @@ export class IglCalBody {
                   currency={this.currency}
                   data-component-id={bookingEvent.ID}
                   bookingEvent={bookingEvent}
-                  allBookingEvents={this.getBookingData()}
+                  getAllBookingEvents={this.getAllBookingEvents}
+                  roomTop={roomTopOffsets.get(Number(bookingEvent.PR_ID))}
                 ></igl-booking-event>
               );
             })}

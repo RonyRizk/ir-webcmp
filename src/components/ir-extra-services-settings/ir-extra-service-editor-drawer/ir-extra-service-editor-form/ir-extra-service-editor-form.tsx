@@ -3,6 +3,7 @@ import { ExtraServicesService } from '@/services/extra-services';
 import { AccommodationExtraCode, defaultDayUseConfig, ExtraServiceDefinition, ExtraServiceDefinitionSchema, ExtraServiceSection } from '@/services/extra-services/types';
 import { VatIncludedCodes } from '@/types/enums';
 import { showToast } from '@/utils/utils';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-extra-service-editor-form',
@@ -38,11 +39,11 @@ export class IrExtraServiceEditorForm {
       const parsed = ExtraServiceDefinitionSchema.parse(this.service);
       const saved = await this.extraServicesService.handleExposedExtraService({ extra_service: parsed });
       this.upsertExtraService.emit(saved);
-      showToast({ title: 'Saved Successfully', type: 'success' });
+      showToast({ title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }), type: 'success' });
       this.closeDrawer.emit();
     } catch (error) {
       console.error(error);
-      showToast({ title: 'Something went wrong', type: 'error' });
+      showToast({ title: t('Lcz_SomethingWentWrong', { fallback: 'Something went wrong' }), type: 'error' });
     } finally {
       this.loadingChanged.emit(false);
     }
@@ -56,8 +57,8 @@ export class IrExtraServiceEditorForm {
       <form id={this.formId} onSubmit={e => this.handleSubmit(e)} class="extra-service-form">
         <ir-validator schema={ExtraServiceDefinitionSchema.shape.name} value={service?.name} valueEvent="text-change input input-change" showErrorMessage>
           <ir-input
-            label="Name"
-            placeholder="Service name"
+            label={t('Lcz_Name', { fallback: 'Name' })}
+            placeholder={t('Lcz_ServiceNamePlaceholder', { fallback: 'Service name' })}
             value={service?.name}
             readonly={this.isAccommodation()}
             onText-change={(e: CustomEvent<string>) => this.updateField({ name: e.detail })}
@@ -66,7 +67,7 @@ export class IrExtraServiceEditorForm {
 
         <ir-validator schema={ExtraServiceDefinitionSchema.shape.default_price} value={service?.default_price} valueEvent="text-change input input-change" showErrorMessage>
           <ir-input
-            label="Default Price (USD)"
+            label={t('Lcz_DefaultPriceUsd', { fallback: 'Default Price (USD)' })}
             mask={'price'}
             value={service?.default_price?.toString()}
             onText-change={(e: CustomEvent<string>) => this.updateField({ default_price: Number(e.detail) })}
@@ -76,7 +77,7 @@ export class IrExtraServiceEditorForm {
         </ir-validator>
 
         <div class="extra-service-form__field">
-          <p class="extra-service-form__label">VAT</p>
+          <p class="extra-service-form__label">{t('Lcz_Vat', { fallback: 'VAT' })}</p>
           <wa-radio-group
             size="s"
             orientation="horizontal"
@@ -84,10 +85,10 @@ export class IrExtraServiceEditorForm {
             onwa-change={(e: CustomEvent<{ value: string }>) => this.updateField({ vat_mode: e.detail.value as ExtraServiceDefinition['vat_mode'] })}
           >
             <wa-radio appearance="button" value={VatIncludedCodes.Inclusive}>
-              Inclusive
+              {t('Lcz_Inclusive', { fallback: 'Inclusive' })}
             </wa-radio>
             <wa-radio appearance="button" value={VatIncludedCodes.Exclusive}>
-              Exclusive
+              {t('Lcz_Exclusive', { fallback: 'Exclusive' })}
             </wa-radio>
           </wa-radio-group>
         </div>
@@ -97,11 +98,11 @@ export class IrExtraServiceEditorForm {
           defaultChecked={service?.allow_price_override}
           onchange={e => this.updateField({ allow_price_override: (e.target as HTMLInputElement).checked })}
         >
-          Allow price override
+          {t('Lcz_AllowPriceOverride', { fallback: 'Allow price override' })}
         </wa-switch>
 
         <wa-switch checked={service?.is_active} defaultChecked={service?.is_active} onchange={e => this.updateField({ is_active: (e.target as HTMLInputElement).checked })}>
-          Active
+          {t('Lcz_Active', { fallback: 'Active' })}
         </wa-switch>
 
         {this.isDayUse() && (
@@ -111,19 +112,19 @@ export class IrExtraServiceEditorForm {
               defaultChecked={dayUseConfig.block_night}
               onchange={e => this.updateField({ day_use_config: { ...dayUseConfig, block_night: (e.target as HTMLInputElement).checked } })}
             >
-              Block Night
+              {t('Lcz_BlockNightSwitch', { fallback: 'Block Night' })}
             </wa-switch>
 
             {dayUseConfig.block_night && (
               <div class="extra-service-form__day-use-times">
                 <ir-input
-                  label="Default Start Time"
+                  label={t('Lcz_DefaultStartTime', { fallback: 'Default Start Time' })}
                   mask={'time'}
                   value={dayUseConfig.default_start_time}
                   onText-change={(e: CustomEvent<string>) => this.updateField({ day_use_config: { ...dayUseConfig, default_start_time: e.detail } })}
                 ></ir-input>
                 <ir-input
-                  label="Default End Time"
+                  label={t('Lcz_DefaultEndTime', { fallback: 'Default End Time' })}
                   mask={'time'}
                   value={dayUseConfig.default_end_time}
                   onText-change={(e: CustomEvent<string>) => this.updateField({ day_use_config: { ...dayUseConfig, default_end_time: e.detail } })}

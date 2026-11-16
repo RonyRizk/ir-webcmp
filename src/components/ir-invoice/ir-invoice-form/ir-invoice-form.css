@@ -9,12 +9,12 @@
   box-sizing: border-box;
 }
 .ir-invoice__service:last-child {
-  border-bottom-left-radius: var(--wa-border-radius-m);
-  border-bottom-right-radius: var(--wa-border-radius-m);
+  border-end-start-radius: var(--wa-border-radius-m);
+  border-end-end-radius: var(--wa-border-radius-m);
 }
 .ir-invoice__service:first-child {
-  border-top-left-radius: var(--wa-border-radius-m);
-  border-top-right-radius: var(--wa-border-radius-m);
+  border-start-start-radius: var(--wa-border-radius-m);
+  border-start-end-radius: var(--wa-border-radius-m);
   border-top: var(--wa-form-control-border-width) var(--wa-form-control-border-style) var(--wa-form-control-border-color);
 }
 .ir-invoice__service {
@@ -52,9 +52,13 @@
   box-sizing: border-box;
   width: 100%;
 }
+/* Split stay: one checkbox for several stacked rows. Pin the control to the first row's text line
+   (room-info padding + half the line box) instead of centering it against the whole stack. */
 .ir-invoice__checkbox.group::part(base) {
-  padding-block: var(--wa-form-control-padding-inline);
   align-items: flex-start;
+}
+.ir-invoice__checkbox.group::part(control) {
+  margin-block-start: calc(0.5rem + (1lh - var(--wa-form-control-toggle-size)) / 2);
 }
 .ir-invoice__checkbox::part(label) {
   display: flex;
@@ -70,12 +74,27 @@
 }
 .ir-invoice__room-checkbox-container.group {
   flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+.ir-invoice__group-room {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.ir-invoice__group-room + .ir-invoice__group-room {
+  border-block-start: var(--wa-form-control-border-width) dashed var(--wa-color-surface-border);
+}
+.ir-invoice__rate-plan {
+  padding-inline-start: 0.5rem;
 }
 .ir-invoice__checkbox-price {
   font-weight: 700;
   color: var(--wa-color-neutral-900);
   white-space: nowrap;
-  text-align: right;
+  text-align: end;
   flex: 1 1 0%;
 }
 .ir-invoice__price-column {
@@ -89,7 +108,7 @@
   color: var(--wa-color-gray-60);
   font-size: 0.75rem;
   line-height: 1.2;
-  text-align: right;
+  text-align: end;
 }
 .ir-invoice__form-control-label {
   display: inline-flex;
@@ -100,4 +119,10 @@
 }
 .ir-invoice__reason {
   color: var(--wa-color-danger-fill-loud);
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

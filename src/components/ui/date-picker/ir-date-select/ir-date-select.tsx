@@ -1,5 +1,7 @@
 import { ClickOutside } from '@/decorators/ClickOutside';
+import { t } from '@/services/locale/t';
 import { createSlotManager } from '@/utils/slot';
+import { formatDate } from '@/utils/date';
 import { Component, Element, Event, EventEmitter, Host, Method, Prop, State, Watch, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
 export type DateChangeEvent = {
@@ -216,12 +218,12 @@ export class IrDateSelect {
 
   private get _label(): string {
     if (this.range) {
-      return this.dates.map(d => moment(d).format('MMM DD, YYYY')).join(' → ');
+      return this.dates.map(d => formatDate(d, { style: 'medium' })).join(' → ');
     }
     if (!this.currentDate) {
       return null;
     }
-    return this.timepicker ? moment(this.currentDate).format('MMM DD, YYYY, HH:mm') : moment(this.currentDate).format('MMM DD, YYYY');
+    return formatDate(this.currentDate, { style: 'medium', withTime: this.timepicker ? 'short' : undefined });
   }
 
   render() {
@@ -246,7 +248,7 @@ export class IrDateSelect {
               aria-expanded={this.isActive ? 'true' : 'false'}
               aria-controls={this.popupId}
               aria-disabled={this.disabled ? 'true' : 'false'}
-              aria-label="Select date"
+              aria-label={t('Lcz_SelectDate', { fallback: 'Select date' })}
               onClick={!this.disabled ? this.togglePicker.bind(this) : undefined}
               onKeyDown={!this.disabled ? this.handleKeyDown.bind(this) : undefined}
             >
@@ -276,7 +278,14 @@ export class IrDateSelect {
           </div>
 
           {/* Popup */}
-          <div part="body" id={this.popupId} class="ir-date-select__calendar" role="dialog" aria-modal="false" aria-label="Date selection dialog">
+          <div
+            part="body"
+            id={this.popupId}
+            class="ir-date-select__calendar"
+            role="dialog"
+            aria-modal="false"
+            aria-label={t('Lcz_DateSelectionDialog', { fallback: 'Date selection dialog' })}
+          >
             <ir-air-date-picker
               ref={el => (this.airDatePickerRef = el)}
               withClear={this.withClear}

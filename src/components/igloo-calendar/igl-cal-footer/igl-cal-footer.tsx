@@ -1,7 +1,8 @@
-import locales from '@/stores/locales.store';
 import { isWeekend } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import moment from 'moment';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-cal-footer',
@@ -27,7 +28,7 @@ export class IglCalFooter {
   render() {
     return (
       <Host class="footerContainer">
-        <div class="footerCell bottomLeftCell align-items-center preventPageScroll" style={{ paddingLeft: '10px' }}>
+        <div class="footerCell bottomLeftCell align-items-center preventPageScroll" style={{ paddingInlineStart: '10px' }}>
           <button class="m-0 p-0 btn btn-sm  legendBtn d-flex align-items-center" style={{ gap: '0.25rem' }} onClick={() => this.handleOptionEvent('showLegend')}>
             {this.isLegendOpen ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" height={16} width={16}>
@@ -44,8 +45,8 @@ export class IglCalFooter {
                 />
               </svg>
             )}
-            <span>{locales.entries.Lcz_Legend}</span>
-            <span>v1.68</span>
+            <span>{t('Lcz_Legend')}</span>
+            <span>v1.69</span>
             {/* <ir-new-badge style={{ marginLeft: '0.25rem' }}></ir-new-badge> */}
           </button>
           {/* <div class={`${this.isOnline ? 'isOnline' : 'isOffline'}`}>
@@ -62,7 +63,7 @@ export class IglCalFooter {
                 'currentDay': dayInfo.value === this._today || this.highlightedDate === dayInfo.value,
               }}
             >
-              {dayInfo.dayDisplayName}
+              {formatDate(dayInfo.value, 'ddd D')}
             </div>
 
             {/* <div class="dayTitle">{dayInfo.dayDisplayName}</div>

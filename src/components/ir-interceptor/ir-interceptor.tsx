@@ -3,6 +3,9 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { IToast } from '@components/ui/ir-toast/toast';
 import interceptor_requests from '@/stores/ir-interceptor.store';
 import { InterceptorError } from './InterceptorError';
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { installLanguageInjector } from '@/models/language-injector';
 
 @Component({
   tag: 'ir-interceptor',
@@ -89,6 +92,7 @@ export class IrInterceptor {
    * Sets up Axios request and response interceptors.
    */
   private setupAxiosInterceptors() {
+    installLanguageInjector(() => LocaleController.language);
     axios.interceptors.request.use(this.handleRequest.bind(this), this.handleError.bind(this));
     axios.interceptors.response.use(this.handleResponse.bind(this), this.handleError.bind(this));
   }
@@ -201,13 +205,17 @@ export class IrInterceptor {
   }
   /**
    * Displays error toasts unless the endpoint is configured to suppress them.
+   *
+   * Also bound as the axios reject handler, where `error` is an error object rather than the
+   * API's (already localized) `ExceptionMsg` — those get a generic localized title instead of
+   * their English `toString()`.
    */
   private handleError(error: string, url: string, code: string) {
     const shouldSuppressToast = this.suppressToastEndpoints.includes(url);
     if (!shouldSuppressToast || (shouldSuppressToast && !code)) {
       this.toast.emit({
         type: 'error',
-        title: error,
+        title: typeof error === 'string' && error.trim() ? error : t('Lcz_SomethingWentWrong', { fallback: 'Something went wrong' }),
         description: '',
         position: 'top-right',
       });

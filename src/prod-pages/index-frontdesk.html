@@ -21,7 +21,7 @@
         * Initializes the calendar component by setting necessary properties and authenticating the user.
         * 
         * This function attempts to authenticate the user using their username and password. If the user
-        * is authenticated successfully, the authentication token (ticket) will be retrieved and assigned
+        * is authenticated successfully, the authentication ApiClient (ticket) will be retrieved and assigned
         * to the `igloo-calendar` component along with the `from_date` and `to_date` attributes.
         * 
         * The username and password are required for standard login. If the user needs to log in as an MPO,
@@ -30,7 +30,7 @@
         * Usage:
         * - Replace `username` and `password` with actual credentials.
         * - If logging in as MPO, uncomment the appropriate code and include the `aName` field.
-        * - Ensure proper token handling by storing passwords and tokens securely.
+        * - Ensure proper ApiClient handling by storing passwords and tokens securely.
         */
         const init = async () => {
             try {
@@ -42,11 +42,11 @@
                 // Select the igloo-calendar component from the DOM
                 const calendar = document.querySelector("igloo-calendar");
 
-                // Standard login to obtain a token (ticket)
-                const token = await login(username, password);
+                // Standard login to obtain a ApiClient (ticket)
+                const ApiClient = await login(username, password);
 
                 // If logging in as MPO, use the following method instead:
-                // const token = await mpoLogin({ username, password, aName });
+                // const ApiClient = await mpoLogin({ username, password, aName });
 
 
                 // If the booking listing component exists, set its `propertyid` and `ticket` attributes
@@ -61,7 +61,7 @@
                     calendar.from_date = _FROM_DATE;
                     calendar.to_date = _TO_DATE;
                     calendar.p = username;  // Sets the `p` (username) attribute
-                    calendar.ticket = token;  // Sets the `ticket` (authentication token) attribute
+                    calendar.ticket = ApiClient;  // Sets the `ticket` (authentication ApiClient) attribute
                 }
 
             } catch (error) {

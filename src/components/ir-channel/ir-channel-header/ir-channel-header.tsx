@@ -1,4 +1,5 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
+import { inlineOffset, inlineSign } from '@/utils/direction';
 
 @Component({
   tag: 'ir-channel-header',
@@ -37,11 +38,12 @@ export class IrChannelHeader {
     requestAnimationFrame(() => {
       const selectedTab = this.el.querySelector(`li.tab[data-state="selected"]`);
       if (selectedTab) {
-        const { left, width } = selectedTab.getBoundingClientRect();
-        const parentLeft = this.el.getBoundingClientRect().left;
-        const position = left - parentLeft;
-        this.activeIndicator.style.width = `${width}px`;
-        this.activeIndicator.style.transform = `translateX(${position}px)`;
+        const tabRect = selectedTab.getBoundingClientRect();
+        // Measured on the inline axis: the indicator starts at the strip's inline start,
+        // which is the right edge under RTL, so a raw physical offset walks it the wrong way.
+        const position = inlineOffset(tabRect, this.el.getBoundingClientRect());
+        this.activeIndicator.style.width = `${tabRect.width}px`;
+        this.activeIndicator.style.transform = `translateX(${position * inlineSign()}px)`;
       }
     });
   }

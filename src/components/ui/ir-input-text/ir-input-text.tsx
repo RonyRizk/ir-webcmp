@@ -2,6 +2,7 @@ import { Component, Prop, h, Event, EventEmitter, State, Watch, Element } from '
 import { v4 } from 'uuid';
 import IMask, { FactoryArg, InputMask } from 'imask';
 import { ZodType } from 'zod';
+import { withLatinDigits } from '../ir-input/masks';
 
 @Component({
   tag: 'ir-input-text',
@@ -189,7 +190,7 @@ export class IrInputText {
       return;
     }
 
-    this.maskInstance = IMask(this.inputRef, this.mask);
+    this.maskInstance = IMask(this.inputRef, withLatinDigits(this.mask));
     this.maskInstance.on('accept', () => {
       const isEmpty = this.inputRef.value.trim() === '' || this.maskInstance.unmaskedValue === '';
       if (isEmpty) {
@@ -339,7 +340,7 @@ export class IrInputText {
             ref={el => (this.inputRef = el)}
             readOnly={this.readonly}
             type={this.type}
-            class={`ir-input form-control bg-white pl-0 input-sm rate-input py-0 m-0 rateInputBorder ${this.error ? 'danger-border' : ''}`}
+            class={`ir-input form-control bg-white ir-ps-0 input-sm rate-input py-0 m-0 rateInputBorder ${this.error ? 'danger-border' : ''}`}
             onBlur={this.handleBlur.bind(this)}
             onFocus={e => {
               this.inputFocused = true;

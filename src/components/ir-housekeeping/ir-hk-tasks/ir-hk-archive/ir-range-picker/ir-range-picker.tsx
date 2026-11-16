@@ -1,5 +1,6 @@
 import { Component, Host, Listen, Prop, Event, EventEmitter, h, State } from '@stencil/core';
 import moment, { Moment } from 'moment';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-range-picker',
@@ -131,7 +132,7 @@ export class IrRangePicker {
             >
               <wa-icon name="calendar"></wa-icon>
               <p class="m-0">
-                <slot name="message">Cleaned on</slot>
+                <slot name="message">{t('Lcz_CleanedOn', { fallback: 'Cleaned on' })}</slot>
               </p>
             </div>
           )}

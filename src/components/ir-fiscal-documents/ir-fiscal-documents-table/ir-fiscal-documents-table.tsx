@@ -1,16 +1,20 @@
-import { formatAmount, getEntryValue } from '@/utils/utils';
+import { formatAmount } from '@/utils/utils';
+import { getEntryValue } from '@/services/setup';
 import { flexRender, useTable } from '@/utils/useTable';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import type { ClFiscalDocumentPreviewRequest } from '@components/ir-city-ledger/ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { CellContext, createColumnHelper, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
-import type { ICurrency, IEntries } from '@/models/property';
+import type { ICurrency, SetupEntries } from '@/models/property';
 import type { FiscalDocumentRow, FiscalFolioType } from '../types';
 import type { GuestDocumentPreviewRequest } from '../ir-guest-document-preview/types';
-import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
 import { FdTypes } from '@/types/enums';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { formatDate } from '@/utils/date';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber } from '@/utils/number';
 
 const PAGE_SIZES = [20, 50, 100];
 @Component({
@@ -27,7 +31,7 @@ export class IrFiscalDocumentsTable {
   @Prop() propertyId: number;
   @Prop() language: string = 'en';
   /** `_FD_TYPE` setup entries used to display the document type. */
-  @Prop() fdTypes: IEntries[] = [];
+  @Prop() fdTypes: SetupEntries[] = [];
   @Prop() fromDate: string | null = null;
   @Prop() toDate: string | null = null;
   @Prop() hasFetched: boolean = false;
@@ -91,7 +95,7 @@ export class IrFiscalDocumentsTable {
   private get fdTypeLabels(): Record<string, string> {
     const map: Record<string, string> = {};
     for (const entry of this.fdTypes ?? []) {
-      map[entry.CODE_NAME] = getEntryValue({ entry, language: this.language });
+      map[entry.CODE_NAME] = getEntryValue({ entry, language: LocaleController.language });
     }
     return map;
   }
@@ -128,10 +132,10 @@ export class IrFiscalDocumentsTable {
   private get columns() {
     const base = [
       this.columnHelper.accessor('DOC_DATE', {
-        header: 'Date',
+        header: t('Lcz_DateLabel', { fallback: 'Date' }),
         cell: info => {
           const row = info.row.original;
-          const date = moment(info.getValue(), 'YYYY-MM-DD').format('MMM DD, YYYY');
+          const date = formatDate(info.getValue(), 'MMM DD, YYYY');
           return (
             <div class="fiscal-table__date-cell">
               <p class="m-0 p-0">{date}</p>
@@ -142,7 +146,7 @@ export class IrFiscalDocumentsTable {
         enableSorting: true,
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
-        header: 'Doc Number',
+        header: t('Lcz_DocNumber', { fallback: 'Doc Number' }),
         cell: info => {
           const row = info.row.original;
           const value = info.getValue() ?? '';
@@ -152,14 +156,14 @@ export class IrFiscalDocumentsTable {
           const onClick = row.TARGET_TYPE === 'GUEST' ? () => this.emitGuestPreview(row) : () => this.emitPreview(row);
           return (
             <wa-button onClick={onClick} variant="brand" appearance="plain" class="fiscal-table__doc-number">
-              {value}
+              {formatBookingNumber(value)}
             </wa-button>
           );
         },
       }),
       this.columnHelper.accessor('DOC_TYPE', {
         id: 'type',
-        header: 'Type',
+        header: t('Lcz_Type', { fallback: 'Type' }),
         cell: info => {
           const code = info.row.original.FD_TYPE_CODE;
           // Display the localized `_FD_TYPE` label, falling back to the raw code.
@@ -175,7 +179,7 @@ export class IrFiscalDocumentsTable {
       identityCols.push(
         this.columnHelper.accessor('AGENT_NAME', {
           id: 'agentName',
-          header: 'Agent',
+          header: t('Lcz_Agent', { fallback: 'Agent' }),
           cell: info => <span>{info.getValue() ?? ''}</span>,
         }),
       );
@@ -185,7 +189,7 @@ export class IrFiscalDocumentsTable {
       identityCols.push(
         this.columnHelper.accessor('GUEST_NAME', {
           id: 'guestName',
-          header: 'Guest',
+          header: t('Lcz_Guest', { fallback: 'Guest' }),
           cell: info => <span>{info.getValue() ?? ''}</span>,
         }),
       );
@@ -193,7 +197,7 @@ export class IrFiscalDocumentsTable {
     identityCols.push(
       this.columnHelper.accessor('BOOKING_NUMBER', {
         id: 'bookingNumber',
-        header: 'Booking #',
+        header: t('Lcz_BookingNumberColumn', { fallback: 'Booking #' }),
         cell: info => {
           const bookingNbr = info.getValue();
           if (!bookingNbr) return <span></span>;
@@ -208,32 +212,32 @@ export class IrFiscalDocumentsTable {
     if (!this.taxableOnly) {
       identityCols.push(
         this.columnHelper.accessor('DEBIT', {
-          header: 'Debit',
+          header: t('Lcz_Debit', { fallback: 'Debit' }),
           cell: info => <span>{this.renderMoney(info.getValue())}</span>,
         }),
       );
       identityCols.push(
         this.columnHelper.accessor('CREDIT', {
-          header: 'Credit',
+          header: t('Lcz_Credit', { fallback: 'Credit' }),
           cell: info => <span>{this.renderMoney(this.getCredit(info))}</span>,
         }),
       );
     } else {
       identityCols.push(
         this.columnHelper.accessor('NET_AMOUNT', {
-          header: 'Net amount',
+          header: t('Lcz_NetAmount', { fallback: 'Net amount' }),
           cell: info => <span>{this.renderMoney(info.getValue())}</span>,
         }),
       );
       identityCols.push(
         this.columnHelper.accessor('TAX_AMOUNT', {
-          header: 'Tax amount',
+          header: t('Lcz_TaxAmount', { fallback: 'Tax amount' }),
           cell: info => <span>{this.renderMoney(info.getValue())}</span>,
         }),
       );
       identityCols.push(
         this.columnHelper.accessor('TOTAL_AMOUNT', {
-          header: 'Total',
+          header: t('Lcz_Total', { fallback: 'Total' }),
           cell: info => this.renderMoney(info.getValue()),
         }),
       );
@@ -245,7 +249,7 @@ export class IrFiscalDocumentsTable {
 
       this.columnHelper.display({
         id: 'actions',
-        header: 'Action',
+        header: t('Lcz_Action', { fallback: 'Action' }),
         cell: info => {
           const row = info.row.original;
           return (
@@ -283,12 +287,12 @@ export class IrFiscalDocumentsTable {
             <div class="fiscal-table__date-prompt-icon">
               <wa-icon name="calendar-days"></wa-icon>
             </div>
-            <p class="fiscal-table__date-prompt-title">Select a date range to get started</p>
+            <p class="fiscal-table__date-prompt-title">{t('Lcz_SelectDateRangeToGetStarted', { fallback: 'Select a date range to get started' })}</p>
             {hasDate && (
               <wa-animation iterations={1} play id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
                 <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
-                  Load Documents
+                  {t('Lcz_LoadDocuments', { fallback: 'Load Documents' })}
                 </ir-custom-button>
               </wa-animation>
             )}
@@ -356,7 +360,7 @@ export class IrFiscalDocumentsTable {
               {table.getRowModel().rows.length === 0 && (
                 <tr>
                   <td class="empty-row" colSpan={columns.length}>
-                    {this.isLoading ? <ir-spinner></ir-spinner> : 'No fiscal documents match the current filters.'}
+                    {this.isLoading ? <ir-spinner></ir-spinner> : t('Lcz_NoFiscalDocumentsMatchFilters', { fallback: 'No fiscal documents match the current filters.' })}
                   </td>
                 </tr>
               )}
@@ -373,7 +377,7 @@ export class IrFiscalDocumentsTable {
             currentPage={this.currentPage}
             allowPageSizeChange={true}
             pageSizes={PAGE_SIZES}
-            recordLabel="documents"
+            recordLabel={t('Lcz_Documents', { fallback: 'documents' })}
             onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
             onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
           ></ir-pagination>

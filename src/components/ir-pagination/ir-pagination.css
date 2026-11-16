@@ -15,8 +15,8 @@
   min-height: 2.5rem;
 }
 .pagination__current-page-select {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-inline-start: 0.5rem;
+  margin-inline-end: 0.5rem;
   max-width: 70px;
 }
 .pagination-container--disabled {
@@ -102,4 +102,10 @@
   * {
     transition: none !important;
   }
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

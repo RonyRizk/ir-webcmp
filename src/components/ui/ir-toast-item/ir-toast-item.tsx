@@ -1,4 +1,5 @@
 import { Component, Element, Event, EventEmitter, Host, Method, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 export type ToastVariants = 'neutral' | 'brand' | 'success' | 'danger' | 'warning';
 @Component({
   tag: 'ir-toast-item',
@@ -183,7 +184,7 @@ export class IrToastItem {
             <slot></slot>
           </div>
           {this.dismissible && (
-            <button part="close-button" class="close-button" type="button" aria-label="Close notification" onClick={this.handleClose}>
+            <button part="close-button" class="close-button" type="button" aria-label={t('Lcz_CloseNotification', { fallback: 'Close notification' })} onClick={this.handleClose}>
               {this.hasTimer ? (
                 <wa-progress-ring
                   part="progress-ring"

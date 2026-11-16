@@ -3,6 +3,7 @@ import moment from 'moment';
 import { FolioEntryMode, Payment, PaymentEntries } from '../../types';
 import { v4 } from 'uuid';
 import { Booking } from '@/models/booking.dto';
+import { t } from '@/services/locale/t';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -100,7 +101,7 @@ export class IrPaymentFolio {
           '--ir-drawer-padding-top': 'var(--spacing)',
           '--ir-drawer-padding-bottom': 'var(--spacing)',
         }}
-        label={this.payment?.id !== -1 ? 'Edit Folio Entry' : 'New Folio Entry'}
+        label={this.payment?.id !== -1 ? t('Lcz_EditFolioEntry', { fallback: 'Edit Folio Entry' }) : t('Lcz_NewFolioEntry', { fallback: 'New Folio Entry' })}
         open={this.isOpen}
         onDrawerHide={event => {
           event.stopImmediatePropagation();
@@ -126,7 +127,7 @@ export class IrPaymentFolio {
         )}
         <div slot="footer" class="w-100 d-flex align-items-center" style={{ gap: 'var(--wa-space-xs)' }}>
           <ir-custom-button class="flex-fill" size="m" data-drawer="close" appearance="filled" variant="neutral" onClickHandler={() => this.closeFolio()}>
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button
             form={this._id}
@@ -139,7 +140,7 @@ export class IrPaymentFolio {
             appearance={'accent'}
             variant="brand"
           >
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
           {/* {isNewPayment && ( 
           <ir-custom-button

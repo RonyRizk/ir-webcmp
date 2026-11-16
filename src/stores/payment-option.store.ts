@@ -2,13 +2,13 @@ import { createStore } from '@stencil/store';
 import { ILanguages, PaymentOption } from '@/models/payment-options';
 export interface IPaymentOptionStore {
   selectedOption: PaymentOption | null;
-  token: string;
+  ApiClient: string;
   languages: ILanguages[];
   mode: 'edit' | 'create';
 }
 const initialState: IPaymentOptionStore = {
   selectedOption: null,
-  token: null,
+  ApiClient: null,
   mode: 'create',
   languages: null,
 };

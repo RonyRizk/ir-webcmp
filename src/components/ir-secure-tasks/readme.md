@@ -8,6 +8,7 @@
 | Property        | Attribute        | Description | Type     | Default     |
 | --------------- | ---------------- | ----------- | -------- | ----------- |
 | `bookingNumber` | `booking-number` |             | `string` | `undefined` |
+| `language`      | `language`       |             | `string` | `undefined` |
 | `p`             | `p`              |             | `string` | `undefined` |
 | `propertyid`    | `propertyid`     |             | `number` | `undefined` |
 | `ticket`        | `ticket`         |             | `string` | `undefined` |
@@ -22,6 +23,7 @@
 - [ir-booking-new-form](../ir-booking-new-form)
 - [ir-custom-button](../ui/ir-custom-button)
 - [ir-input](../ui/ir-input)
+- [ir-locale-switcher](../ui/ir-locale-switcher)
 - [ir-dashboard](../ir-dashboard)
 - [igloo-calendar](../igloo-calendar)
 - [ir-arrivals](../ir-arrivals)
@@ -54,6 +56,7 @@ graph TD;
   ir-secure-tasks --> ir-booking-new-form
   ir-secure-tasks --> ir-custom-button
   ir-secure-tasks --> ir-input
+  ir-secure-tasks --> ir-locale-switcher
   ir-secure-tasks --> ir-dashboard
   ir-secure-tasks --> igloo-calendar
   ir-secure-tasks --> ir-arrivals
@@ -428,8 +431,7 @@ graph TD;
   igloo-calendar --> igl-cal-body
   igloo-calendar --> igl-cal-footer
   igloo-calendar --> ir-loading-screen
-  igloo-calendar --> ir-sidebar
-  igloo-calendar --> igl-split-booking
+  igloo-calendar --> igl-split-booking-drawer
   igloo-calendar --> igl-rate-extender-drawer
   igloo-calendar --> ir-booking-details-drawer
   igloo-calendar --> ir-room-guests
@@ -463,27 +465,24 @@ graph TD;
   igl-cal-body --> igl-housekeeping-dialog
   igl-cal-body --> igl-hk-issues-dialog
   igl-booking-event --> igl-booking-event-hover
-  igl-booking-event-hover --> ir-dropdown
-  igl-booking-event-hover --> ir-icons
-  igl-booking-event-hover --> ir-dropdown-item
+  igl-booking-event --> ir-dialog
   igl-booking-event-hover --> ir-date-view
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-custom-button
   igl-booking-event-hover --> igl-block-dates-view
-  ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
   igl-housekeeping-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-custom-button
+  igl-hk-issues-dialog --> ir-empty-state
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
-  ir-sidebar --> ir-icon
-  igl-split-booking --> ir-title
-  igl-split-booking --> ir-date-view
-  igl-split-booking --> ir-date-picker
-  igl-split-booking --> ir-button
-  igl-split-booking --> ir-radio
-  igl-split-booking --> ir-select
-  ir-title --> ir-icon
+  igl-split-booking-drawer --> ir-drawer
+  igl-split-booking-drawer --> igl-split-booking-form
+  igl-split-booking-drawer --> ir-custom-button
+  igl-split-booking-form --> ir-date-select
+  igl-split-booking-form --> ir-custom-button
+  igl-split-booking-form --> ir-empty-state
+  igl-split-booking-form --> ir-validator
   igl-rate-extender-drawer --> ir-drawer
   igl-rate-extender-drawer --> igl-rate-extender-form
   igl-rate-extender-drawer --> ir-custom-button
@@ -551,7 +550,7 @@ graph TD;
   ir-tasks-header --> ir-input
   ir-tasks-header --> ir-custom-button
   ir-tasks-card --> ir-custom-button
-  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-custom-button
   ir-tasks-table-pagination --> ir-pagination
   ir-hk-archive-drawer --> ir-drawer
   ir-hk-archive-drawer --> ir-date-range-filter
@@ -574,6 +573,7 @@ graph TD;
   ir-hk-unassigned-units --> ir-select
   ir-hk-unassigned-units --> ir-title
   ir-hk-unassigned-units --> ir-button
+  ir-title --> ir-icon
   ir-hk-user-drawer --> ir-drawer
   ir-hk-user-drawer --> ir-hk-user-drawer-form
   ir-hk-user-drawer --> ir-custom-button
@@ -693,6 +693,7 @@ graph TD;
   ir-user-form-panel --> ir-button
   ir-user-form-panel --> ir-sidebar
   ir-user-form-panel --> ir-reset-password
+  ir-sidebar --> ir-icon
   ir-reset-password --> ir-interceptor
   ir-reset-password --> ir-toast
   ir-reset-password --> ir-title
@@ -717,8 +718,9 @@ graph TD;
   ir-agent-profile --> ir-validator
   ir-agent-profile --> ir-input
   ir-agent-profile --> ir-country-picker
-  ir-agent-contract --> ir-validator
   ir-agent-contract --> ir-input
+  ir-agent-contract --> ir-empty-state
+  ir-agent-contract --> ir-validator
   ir-city-ledger --> ir-loading-screen
   ir-city-ledger --> ir-page
   ir-city-ledger --> ir-autocomplete

@@ -25,19 +25,6 @@
 | `checkChange` | Emitted when the checkbox's checked state changes. | `CustomEvent<boolean>` |
 
 
-## Dependencies
-
-### Used by
-
- - [igl-split-booking](../../igloo-calendar/igl-split-booking)
-
-### Graph
-```mermaid
-graph TD;
-  igl-split-booking --> ir-radio
-  style ir-radio fill:#f9f,stroke:#333,stroke-width:4px
-```
-
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

@@ -1,5 +1,6 @@
 import hkTasksStore, { loadMoreTasks, shouldLoadMore, updateCurrentPage, updatePageSize } from '@/stores/hk-tasks.store';
 import { Component, h, Host } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-tasks-table-pagination',
@@ -15,7 +16,11 @@ export class IrTasksTablePagination {
     const pageSizes = hkTasksStore.pagination.tasksList[0] > totalTasks ? hkTasksStore.pagination.tasksList.slice(0, 1) : hkTasksStore.pagination.tasksList;
     return (
       <Host>
-        {shouldLoadMore() && <ir-button size="sm" class="tasks-load-more" text="Load more" onClickHandler={() => loadMoreTasks(mobileCurrentPage + 1)}></ir-button>}
+        {shouldLoadMore() && (
+          <ir-custom-button variant="brand" size="s" class="tasks-load-more" onClickHandler={() => loadMoreTasks(mobileCurrentPage + 1)}>
+            {t('Lcz_LoadMore', { fallback: 'Load more' })}
+          </ir-custom-button>
+        )}
         <ir-pagination
           showing={{
             from: start,
@@ -31,7 +36,7 @@ export class IrTasksTablePagination {
           onPageChange={e => updateCurrentPage(e.detail.currentPage)}
           onPageSizeChange={e => updatePageSize(e.detail.pageSize)}
           showTotalRecords={true}
-          recordLabel="tasks"
+          recordLabel={t('Lcz_Tasks')}
         ></ir-pagination>
       </Host>
     );

@@ -1,7 +1,8 @@
 import { Component, h, Prop, State, Event, EventEmitter } from '@stencil/core';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import { PhysicalRoom, RoomHkStatus } from '@/models/booking.dto';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-housekeeping-dialog',
@@ -44,20 +45,20 @@ export class IglHousekeepingDialog {
   private getStatusLabel() {
     switch (this.selectedRoom?.hk_status) {
       case '002':
-        return 'dirty';
+        return t('Lcz_Dirty', { fallback: 'dirty' });
       case '004':
-        return 'inspected';
+        return t('Lcz_Inspected', { fallback: 'inspected' });
       default:
-        return 'clean';
+        return t('Lcz_CleanLowercase', { fallback: 'clean' });
     }
   }
 
   private middleButtonLabel() {
-    return this.selectedRoom?.hk_status === '002' ? 'Clean' : 'Dirty';
+    return this.selectedRoom?.hk_status === '002' ? t('Lcz_Clean', { fallback: 'Clean' }) : t('Lcz_DirtyLabel', { fallback: 'Dirty' });
   }
 
   private rightButtonLabel() {
-    return this.selectedRoom?.hk_status !== '004' ? 'Clean & Inspect' : 'Clean';
+    return this.selectedRoom?.hk_status !== '004' ? t('Lcz_CleanAndInspect', { fallback: 'Clean & Inspect' }) : t('Lcz_Clean', { fallback: 'Clean' });
   }
 
   // private renderModalBody() {
@@ -85,7 +86,7 @@ export class IglHousekeepingDialog {
         await this.housekeepingService.executeHKAction({
           actions: [
             {
-              description: 'Cleaned',
+              description: t('Lcz_Cleaned', { fallback: 'Cleaned' }),
               hkm_id: this.selectedRoom?.housekeeper?.id || null,
               unit_id: this.selectedRoom?.id,
               booking_nbr: this.bookingNumber,
@@ -103,12 +104,19 @@ export class IglHousekeepingDialog {
 
   render() {
     return (
-      <ir-dialog ref={el => (this.dialogRef = el)} open={this.open} label="Housekeeping Update" onIrDialogAfterHide={() => this.irAfterClose.emit()}>
-        <p style={{ margin: '0' }}>{`${this.selectedRoom?.name} is currently marked as ${this.getStatusLabel()}.`}</p>
+      <ir-dialog
+        ref={el => (this.dialogRef = el)}
+        open={this.open}
+        label={t('Lcz_HousekeepingUpdate', { fallback: 'Housekeeping Update' })}
+        onIrDialogAfterHide={() => this.irAfterClose.emit()}
+      >
+        <p style={{ margin: '0' }}>
+          {this.selectedRoom?.name} {t('Lcz_UnitCurrentlyMarkedAs', { fallback: 'is currently marked as' })} {this.getStatusLabel()}.
+        </p>
 
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
 
           <ir-custom-button

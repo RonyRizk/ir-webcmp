@@ -22,7 +22,7 @@
   --wa-color-gray-gte-60: calc(100% - (clamp(0, 60 - var(--wa-color-gray-key), 1) * 100%));
 
   /**
-    * Tokens to set text color with appropriate WCAG 2.1 contrast
+    * ApiClients to set text color with appropriate WCAG 2.1 contrast
     * If key < 60, the text color is white
     * If key >= 60, the text color is {hue}-10
     */

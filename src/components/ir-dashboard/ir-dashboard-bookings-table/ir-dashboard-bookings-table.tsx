@@ -1,5 +1,5 @@
 import type { Booking, Room } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
 import type { ISODate } from '@/utils/calendar-dates';
 import { Component, Host, Prop, h } from '@stencil/core';
 
@@ -139,18 +139,18 @@ export class IrDashboardBookingsTable {
             <thead>
               <tr>
                 <th>
-                  <bdi>Booking#</bdi>
+                  <bdi>{t('Lcz_BookingHash', { fallback: 'Booking#' })}</bdi>
                 </th>
                 <th>
                   <p>
-                    <bdi>Booked by /</bdi>
+                    <bdi>{t('Lcz_BookedBySlash', { fallback: 'Booked by /' })}</bdi>
                   </p>
-                  <p>Guest name</p>
+                  <p>{t('Lcz_GuestName', { fallback: 'Guest name' })}</p>
                 </th>
-                <th>{locales.entries?.Lcz_Unit ?? 'Unit'}</th>
-                <th>{locales.entries?.Lcz_Dates ?? 'Dates'}</th>
-                {this.hasBalanceAndStatus && <th>{locales.entries?.Lcz_Balance ?? 'Balance'}</th>}
-                {this.hasBalanceAndStatus && <th>{locales.entries?.Lcz_Status ?? 'Status'}</th>}
+                <th>{t('Lcz_Unit', { fallback: 'Unit' })}</th>
+                <th>{t('Lcz_Dates', { fallback: 'Dates' })}</th>
+                {this.hasBalanceAndStatus && <th>{t('Lcz_Balance', { fallback: 'Balance' })}</th>}
+                {this.hasBalanceAndStatus && <th>{t('Lcz_Status', { fallback: 'Status' })}</th>}
               </tr>
             </thead>
             <tbody>

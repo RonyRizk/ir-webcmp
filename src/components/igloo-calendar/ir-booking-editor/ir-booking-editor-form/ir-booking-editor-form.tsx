@@ -8,7 +8,6 @@ import booking_store, {
   updateBookedByGuest,
 } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { formatAmount } from '@/utils/utils';
 import { Component, Event, EventEmitter, Fragment, h, Listen, Prop, State } from '@stencil/core';
 import { BookingEditorMode } from '../types';
@@ -22,6 +21,7 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { isAgentMode } from '@/components/ir-booking-details/functions';
 import { IRBookingEditorService } from '../ir-booking-editor.service';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-editor-form',
   styleUrl: 'ir-booking-editor-form.css',
@@ -112,10 +112,10 @@ export class IrBookingEditorForm {
       >
         {!dayUse && (
           <div class="booking-editor__header">
-            <ir-date-view class="booking-editor__dates" from_date={dates.checkIn} to_date={dates.checkOut} dateOption="DD MMM YYYY"></ir-date-view>
+            <ir-date-view class="booking-editor__dates" from_date={dates.checkIn} to_date={dates.checkOut}></ir-date-view>
             {this.totalRooms > 1 && (
               <div class="booking-editor__total">
-                <span class="booking-editor__total-label">{locales.entries.Lcz_TotalPrice}</span>{' '}
+                <span class="booking-editor__total-label">{t('Lcz_TotalPrice', { fallback: 'Total price' })}</span>{' '}
                 <span class="booking-editor__total-amount">{formatAmount(calendar_data.property.currency.symbol, this.totalCost)}</span>
               </div>
             )}
@@ -166,7 +166,7 @@ export class IrBookingEditorForm {
         {this.bookingEditorService.isEventType(['BAR_BOOKING', 'PLUS_BOOKING']) && (
           <section class="booking-editor__booked-by-section">
             <div class="booking-editor__booked-by booking-editor__booked-by-header">
-              <h4 class="booking-editor__heading booking-editor__booked-by-title">Booked by</h4>
+              <h4 class="booking-editor__heading booking-editor__booked-by-title">{t('Lcz_BookedBy', { fallback: 'Booked by' })}</h4>
               {booking_store.bookingDraft?.agent ? (
                 <span>{booking_store.bookingDraft?.agent.name}</span>
               ) : (
@@ -174,8 +174,8 @@ export class IrBookingEditorForm {
                   <ir-picker
                     class="booking-editor__booked-by-picker"
                     appearance="filled"
-                    // placeholder="Search customer by email, name or company name"
-                    placeholder="Search customer by email or name"
+                    // placeholder={t('Lcz_SearchCustomerPlaceholder', { fallback: 'Search customer by email, name or company name' })}
+                    placeholder={t('Lcz_SearchCustomerByEmailOrName', { fallback: 'Search customer by email or name' })}
                     withClear
                     onText-change={event => this.fetchGuests(event.detail)}
                     debounce={500}
@@ -201,7 +201,7 @@ export class IrBookingEditorForm {
                       }}
                       variant="brand"
                     >
-                      Clear user
+                      {t('Lcz_ClearUser', { fallback: 'Clear user' })}
                     </ir-custom-button>
                   )}
                 </Fragment>

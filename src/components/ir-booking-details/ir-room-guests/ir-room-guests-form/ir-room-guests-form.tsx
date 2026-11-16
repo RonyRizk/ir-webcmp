@@ -1,12 +1,13 @@
 import { SharedPerson, validateSharedPerson, ZSharedPerson } from '@/models/booking.dto';
 
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Fragment, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { dateMask, defaultGuest } from '../data';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { ICountry, IEntries } from '@/models/IBooking';
+import { SetupService, getSetupEntryLabel } from '@/services/setup';
+import { ICountry, SetupEntries } from '@/models/IBooking';
 import { ZodError } from 'zod';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-room-guests-form',
   styleUrl: 'ir-room-guests-form.css',
@@ -27,7 +28,7 @@ export class IrRoomGuestsForm {
 
   /**
    * An array of people sharing the room.
-   * Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+   * Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
    */
   @Prop() sharedPersons: SharedPerson[] = [];
 
@@ -39,7 +40,7 @@ export class IrRoomGuestsForm {
 
   /**
    * A list of available countries.
-   * Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+   * Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
    */
   @Prop() countries: ICountry[];
 
@@ -62,7 +63,7 @@ export class IrRoomGuestsForm {
   @Prop() bookingNumber: string;
 
   @State() guests: SharedPerson[] = [];
-  @State() idTypes: IEntries[] = [];
+  @State() idTypes: SetupEntries[] = [];
   @State() error: Record<string, boolean> = {};
   @State() isLoading: boolean;
   @State() propertyCountry: ICountry;
@@ -74,6 +75,7 @@ export class IrRoomGuestsForm {
   @Event({ composed: true, bubbles: true }) loadingChange: EventEmitter<string>;
 
   private bookingService = new BookingService();
+  private setupService = new SetupService();
 
   componentWillLoad() {
     this.init();
@@ -83,7 +85,7 @@ export class IrRoomGuestsForm {
   private async init() {
     try {
       this.isLoading = true;
-      const [country, idTypes] = await Promise.all([this.bookingService.getUserDefaultCountry(), this.bookingService.getSetupEntriesByTableName('_ID_TYPE')]);
+      const [country, idTypes] = await Promise.all([this.bookingService.getUserDefaultCountry(), this.setupService.getSetupEntriesByTableName('_ID_TYPE')]);
       this.idTypes = idTypes;
       if (country) {
         this.propertyCountry = this.countries.find(c => c.id === country.COUNTRY_ID);
@@ -199,13 +201,13 @@ export class IrRoomGuestsForm {
         <section class={'sheet-body'}>
           <div class="">
             <div class="guest-grid guests-labels">
-              <p class="">{locales.entries.Lcz_MainGuest}</p>
+              <p class="">{t('Lcz_MainGuest', { fallback: 'Main guest' })}</p>
               <p class=""></p>
-              <p class=" ">{locales.entries.Lcz_DOB}</p>
-              <p class="">{locales.entries.Lcz_Nationality}</p>
-              <p class=" ">{locales.entries.Lcz_Documents}</p>
+              <p class=" ">{t('Lcz_DOB', { fallback: 'D.O.B.' })}</p>
+              <p class="">{t('Lcz_Nationality', { fallback: 'Nationality' })}</p>
+              <p class=" ">{t('Lcz_Documents', { fallback: 'documents' })}</p>
             </div>
-            <h5 class="main_guest_heading">{locales.entries.Lcz_MainGuest}</h5>
+            <h5 class="main_guest_heading">{t('Lcz_MainGuest', { fallback: 'Main guest' })}</h5>
             {this.guests.map((guest, idx) => {
               let isRowValid = true;
               try {
@@ -218,21 +220,21 @@ export class IrRoomGuestsForm {
                 <Fragment>
                   {idx === 1 && (
                     <div class="d-flex mx-0 px-0">
-                      <h5 class="mx-0 px-0 sharing_persons_heading">{locales.entries.Lcz_PersonsSharingRoom}</h5>
-                      <p class="mx-0 px-0 sharing_persons_label">{locales.entries.Lcz_PersonsSharingRoom}</p>
+                      <h5 class="mx-0 px-0 sharing_persons_heading">{t('Lcz_PersonsSharingRoom', { fallback: 'Persons sharing room' })}</h5>
+                      <p class="mx-0 px-0 sharing_persons_label">{t('Lcz_PersonsSharingRoom', { fallback: 'Persons sharing room' })}</p>
                     </div>
                   )}
                   <div key={idx} class="guest-grid">
                     <div class="room-guest__section">
                       <label htmlFor={`first_name_${idx}`} class="guest_label">
-                        First name
+                        {t('Lcz_FirstName', { fallback: 'First name' })}
                       </label>
                       <ir-validator class="flex-grow-1" schema={ZSharedPerson.shape.first_name}>
                         <ir-input
                           aria-invalid={String(!!this.error['first_name'] && !isRowValid)}
                           size="s"
                           id={`first_name_${idx}`}
-                          placeholder="First name"
+                          placeholder={t('Lcz_FirstName', { fallback: 'First name' })}
                           onText-change={e => this.updateGuestInfo(idx, { first_name: e.detail })}
                           value={guest.first_name}
                           maxlength={40}
@@ -240,13 +242,13 @@ export class IrRoomGuestsForm {
                       </ir-validator>
                     </div>
                     <div class="room-guest__section">
-                      <label class="guest_label">Last name</label>
+                      <label class="guest_label">{t('Lcz_LastName', { fallback: 'Last name' })}</label>
                       {/* <ir-validator class="flex-grow-1" schema={ZSharedPerson.shape.last_name}> */}
                       <ir-input
                         aria-invalid={String(!!this.error['last_name'] && !isRowValid)}
                         size="s"
                         id={`last_name_${idx}`}
-                        placeholder="Last name"
+                        placeholder={t('Lcz_LastName', { fallback: 'Last name' })}
                         onText-change={e => this.updateGuestInfo(idx, { last_name: e.detail })}
                         value={guest.last_name}
                         maxlength={40}
@@ -254,7 +256,7 @@ export class IrRoomGuestsForm {
                       {/* </ir-validator> */}
                     </div>
                     <div class="room-guest__section">
-                      <p class="guest_label">{locales.entries.Lcz_DOB}</p>
+                      <p class="guest_label">{t('Lcz_DOB', { fallback: 'D.O.B.' })}</p>
                       <ir-validator class="flex-grow-1" schema={ZSharedPerson.shape.dob}>
                         <ir-input
                           aria-invalid={String(!!this.error['dob'] && !isRowValid)}
@@ -270,14 +272,14 @@ export class IrRoomGuestsForm {
                       </ir-validator>
                     </div>
                     <div class="room-guest__section">
-                      <p class="guest_label">{locales.entries.Lcz_Nationality}</p>
+                      <p class="guest_label">{t('Lcz_Nationality', { fallback: 'Nationality' })}</p>
                       <div class="flex-grow-1">
                         <ir-country-picker
                           size="s"
                           variant="modern"
                           aria-invalid={String(!!this.error['country_id'] && !guest.country_id)}
                           propertyCountry={this.propertyCountry}
-                          id={`{locales.entries.Lcz_Nationality}_${idx}`}
+                          id={`{t('Lcz_Nationality', { fallback: 'Nationality' })}_${idx}`}
                           error={!!this.error['country_id'] && !guest.country_id}
                           country={this.countries?.find(c => c.id?.toString() === guest.country?.id?.toString())}
                           onCountryChange={e => this.updateGuestInfo(idx, { country_id: e.detail?.id?.toString() ?? null, country: e.detail })}
@@ -286,7 +288,7 @@ export class IrRoomGuestsForm {
                       </div>
                     </div>
                     <div class="room-guest__section">
-                      <p class="guest_label">{locales.entries.Lcz_Documents}</p>
+                      <p class="guest_label">{t('Lcz_Documents', { fallback: 'documents' })}</p>
                       <div class={'room-guest__info-container flex-grow-1'}>
                         <wa-select
                           class="room-guest__id-info"
@@ -306,7 +308,7 @@ export class IrRoomGuestsForm {
                           size="s"
                         >
                           {this.idTypes?.map(t => {
-                            const label = t[`CODE_VALUE_${this.language.toUpperCase()}`] ?? t[`CODE_VALUE_EN`];
+                            const label = getSetupEntryLabel(t, this.language);
                             return (
                               <wa-option value={t['CODE_NAME']} label={label}>
                                 {label}
@@ -321,7 +323,7 @@ export class IrRoomGuestsForm {
                           defaultValue={guest?.id_info?.number}
                           value={guest?.id_info?.number}
                           maxlength={18}
-                          placeholder="12345"
+                          placeholder={t('Lcz_IdNumberPlaceholder', { fallback: '12345' })}
                           onchange={e =>
                             this.updateGuestInfo(idx, {
                               id_info: {

@@ -1,5 +1,4 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
-import moment from 'moment';
 import { z } from 'zod';
 import { Booking, Room } from '@/models/booking.dto';
 import { ClTx } from '@/services/city-ledger/types';
@@ -8,8 +7,12 @@ import { isAgentMode } from '@/components/ir-booking-details/functions';
 import { Agent } from '@/services/agents/type';
 import calendar_data from '@/stores/calendar-data';
 import { InvoiceableItemReason, SvcCategory } from '@/types/enums';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
 
-const nightAmountSchema = z.coerce.number({ invalid_type_error: 'Required' }).min(0, 'Minimum is 0');
+// Built per call: zod fixes messages at construction, and the locale is not loaded when this module is.
+const nightAmountSchema = () => z.coerce.number({ invalid_type_error: t('Lcz_Required', { fallback: 'Required' }) }).min(0, t('Lcz_MinimumIsZero', { fallback: 'Minimum is 0' }));
 
 type NightEntry = {
   date: string;
@@ -84,7 +87,7 @@ export class IrBookingPricingForm {
   private async checkInvoiceStatus() {
     this.isCheckingInvoice = true;
     try {
-      const info = await this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr });
+      const info = await this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language });
       const accommodationItem = (info.invoiceable_items ?? []).find(item => item.key === this.room.system_id);
       this.invoiceLocked = accommodationItem.reason.code === InvoiceableItemReason.AlreadyInvoiced;
     } catch {
@@ -99,7 +102,7 @@ export class IrBookingPricingForm {
     if (this.invoiceLocked) return false;
     return this.nights.every(n => {
       if (n.isLocked) return true;
-      return nightAmountSchema.safeParse(n.amount).success;
+      return nightAmountSchema().safeParse(n.amount).success;
     });
   }
 
@@ -164,7 +167,10 @@ export class IrBookingPricingForm {
         {hasDisabledInput && (
           <wa-callout variant="warning" size="s">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-            Locked nightly rates cannot be edited in case they have been invoiced. You can void the invoice with a credit note to update the rates and recreate a new one
+            {t('Lcz_LockedNightlyRatesWarning', {
+              fallback:
+                'Locked nightly rates cannot be edited in case they have been invoiced. You can void the invoice with a credit note to update the rates and recreate a new one',
+            })}
           </wa-callout>
         )}
 
@@ -176,10 +182,10 @@ export class IrBookingPricingForm {
 
         <div style={{ marginBottom: '0.5rem' }}></div>
         {this.nights.map(night => (
-          <ir-validator key={night.date} class="pricing-form__input-validator" schema={nightAmountSchema} value={night.amount}>
+          <ir-validator key={night.date} class="pricing-form__input-validator" schema={nightAmountSchema()} value={night.amount}>
             <ir-input
               class="pricing-form__input"
-              label={moment(night.date).format('ddd, MMM D')}
+              label={formatDate(night.date, 'ddd, MMM D')}
               value={night.amount}
               mask="price"
               disabled={night.isLocked || allDisabled || this.isSubmitting}

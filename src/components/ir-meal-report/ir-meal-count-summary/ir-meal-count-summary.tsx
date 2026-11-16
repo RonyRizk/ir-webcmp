@@ -1,8 +1,10 @@
 import { Component, Host, Prop, h } from '@stencil/core';
-import moment from 'moment';
 import { MealCountDaySummary } from '@/services/meal-report/types';
 import { flexRender, useTable } from '@/utils/useTable';
 import { createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-meal-count-summary',
@@ -15,9 +17,9 @@ export class IrMealCountSummary {
   private columnHelper = createColumnHelper<MealCountDaySummary>();
 
   private mealMeta: Record<string, { label: string; icon: string; color: string }> = {
-    breakfast: { label: 'Breakfast', icon: 'mug-saucer', color: 'var(--wa-color-brand-fill-loud)' },
-    lunch: { label: 'Lunch', icon: 'utensils', color: 'var(--wa-color-success-fill-loud)' },
-    dinner: { label: 'Dinner', icon: 'moon', color: 'var(--wa-color-warning-fill-loud)' },
+    breakfast: { label: t('Lcz_Breakfast', { fallback: 'Breakfast' }), icon: 'mug-saucer', color: 'var(--wa-color-brand-fill-loud)' },
+    lunch: { label: t('Lcz_Lunch', { fallback: 'Lunch' }), icon: 'utensils', color: 'var(--wa-color-success-fill-loud)' },
+    dinner: { label: t('Lcz_Dinner', { fallback: 'Dinner' }), icon: 'moon', color: 'var(--wa-color-warning-fill-loud)' },
   };
 
   private renderMealHeader = (key: string) => {
@@ -32,24 +34,33 @@ export class IrMealCountSummary {
 
   private columns = [
     this.columnHelper.accessor('Date', {
-      header: 'Date',
-      cell: info => <span class="meal-count__date">{moment(info.getValue()).format('ddd, MMM DD')}</span>,
+      header: t('Lcz_DateLabel', { fallback: 'Date' }),
+      cell: info => <span class="meal-count__date">{formatDate(info.getValue(), 'ddd, MMM DD')}</span>,
     }),
     this.columnHelper.group({
       id: 'breakfast',
       header: () => this.renderMealHeader('breakfast'),
 
-      columns: [this.columnHelper.accessor('Breakfast_Ad', { header: 'Ad' }), this.columnHelper.accessor('Breakfast_Ch', { header: 'Ch' })],
+      columns: [
+        this.columnHelper.accessor('Breakfast_Ad', { header: t('Lcz_Ad', { fallback: 'Ad' }), cell: info => formatCount(info.getValue()) }),
+        this.columnHelper.accessor('Breakfast_Ch', { header: t('Lcz_Ch', { fallback: 'Ch' }), cell: info => formatCount(info.getValue()) }),
+      ],
     }),
     this.columnHelper.group({
       id: 'lunch',
       header: () => this.renderMealHeader('lunch'),
-      columns: [this.columnHelper.accessor('Lunch_Ad', { header: 'Ad' }), this.columnHelper.accessor('Lunch_Ch', { header: 'Ch' })],
+      columns: [
+        this.columnHelper.accessor('Lunch_Ad', { header: t('Lcz_Ad', { fallback: 'Ad' }), cell: info => formatCount(info.getValue()) }),
+        this.columnHelper.accessor('Lunch_Ch', { header: t('Lcz_Ch', { fallback: 'Ch' }), cell: info => formatCount(info.getValue()) }),
+      ],
     }),
     this.columnHelper.group({
       id: 'dinner',
       header: () => this.renderMealHeader('dinner'),
-      columns: [this.columnHelper.accessor('Dinner_Ad', { header: 'Ad' }), this.columnHelper.accessor('Dinner_Ch', { header: 'Ch' })],
+      columns: [
+        this.columnHelper.accessor('Dinner_Ad', { header: t('Lcz_Ad', { fallback: 'Ad' }), cell: info => formatCount(info.getValue()) }),
+        this.columnHelper.accessor('Dinner_Ch', { header: t('Lcz_Ch', { fallback: 'Ch' }), cell: info => formatCount(info.getValue()) }),
+      ],
     }),
   ];
 
@@ -63,7 +74,7 @@ export class IrMealCountSummary {
       return (
         <Host>
           <div class="meal-count__empty">
-            <ir-empty-state message="No summary data available for the current filters."></ir-empty-state>
+            <ir-empty-state message={t('Lcz_NoSummaryDataAvailable', { fallback: 'No summary data available for the current filters.' })}></ir-empty-state>
           </div>
         </Host>
       );
@@ -147,13 +158,13 @@ export class IrMealCountSummary {
             </tbody>
             <tfoot>
               <tr class="meal-count__total-row">
-                <td class="cell--align-start meal-count__total-label">Total</td>
-                <td class="meal-count__cell--ad meal-count__total-value">{totals.Breakfast_Ad}</td>
-                <td class="meal-count__cell--ch meal-count__total-muted">{totals.Breakfast_Ch}</td>
-                <td class="meal-count__cell--ad meal-count__total-value">{totals.Lunch_Ad}</td>
-                <td class="meal-count__cell--ch meal-count__total-muted">{totals.Lunch_Ch}</td>
-                <td class="meal-count__cell--ad meal-count__total-value">{totals.Dinner_Ad}</td>
-                <td class="meal-count__cell--ch meal-count__total-muted">{totals.Dinner_Ch}</td>
+                <td class="cell--align-start meal-count__total-label">{t('Lcz_Total', { fallback: 'Total' })}</td>
+                <td class="meal-count__cell--ad meal-count__total-value">{formatCount(totals.Breakfast_Ad)}</td>
+                <td class="meal-count__cell--ch meal-count__total-muted">{formatCount(totals.Breakfast_Ch)}</td>
+                <td class="meal-count__cell--ad meal-count__total-value">{formatCount(totals.Lunch_Ad)}</td>
+                <td class="meal-count__cell--ch meal-count__total-muted">{formatCount(totals.Lunch_Ch)}</td>
+                <td class="meal-count__cell--ad meal-count__total-value">{formatCount(totals.Dinner_Ad)}</td>
+                <td class="meal-count__cell--ch meal-count__total-muted">{formatCount(totals.Dinner_Ch)}</td>
               </tr>
             </tfoot>
           </table>

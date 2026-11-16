@@ -1,5 +1,6 @@
 import { departuresStore, setDeparturesReferenceDate, setDeparturesSearchTerm } from '@/stores/departures.store';
 import { Component, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-departures-filter',
@@ -28,7 +29,7 @@ export class IrDeparturesFilter {
         <ir-input
           withClear
           class="departures-filters__search-bar"
-          placeholder="Search guests or bookings"
+          placeholder={t('Lcz_SearchGuestsOrBookings', { fallback: 'Search guests or bookings' })}
           value={departuresStore.searchTerm}
           onText-change={this.handleSearchChange}
         >

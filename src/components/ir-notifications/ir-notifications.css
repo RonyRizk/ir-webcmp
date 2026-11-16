@@ -13,7 +13,7 @@
 .header-notification-badge {
   position: absolute;
   top: -5px;
-  right: -5px;
+  inset-inline-end: -5px;
   z-index: 1;
 }
 
@@ -112,4 +112,10 @@
   width: 0.5rem;
   border-radius: 0.25rem;
   background-color: var(--wa-color-brand-fill-loud);
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

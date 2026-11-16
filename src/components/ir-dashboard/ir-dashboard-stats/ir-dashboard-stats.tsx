@@ -1,10 +1,12 @@
 import type { DashboardPerformance, DashboardUnits, OccupancyFigure } from '@/services/dashboard';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
 import { todayISO, type ISODate } from '@/utils/calendar-dates';
-import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { formatCount, formatPercent } from '@/utils/number';
 import { formatAmount } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
-import { computeRevPar, formatCount, formatPercent } from '../dashboard.helpers';
+import { computeRevPar } from '../dashboard.helpers';
 import type { RailDensity } from '../types';
 
 type UnitTone = 'available' | 'booked' | 'pending' | 'out-of-service' | 'blocked';
@@ -25,10 +27,11 @@ type FigureState = { loaded: boolean; refreshing: boolean };
 /** Real units belong to physical room types, virtual ("fake") ones to room types flagged `is_virtual`. */
 type OccupancyKind = 'real' | 'virtual';
 
-const OCCUPANCY_LABEL: Record<OccupancyKind, string> = {
-  real: 'Real units',
-  virtual: 'Fake units',
-};
+/** Resolved at render, not at import, when the locale tables are still empty. */
+const occupancyLabel = (kind: OccupancyKind): string => (kind === 'virtual' ? t('Lcz_FakeUnits', { fallback: 'Fake units' }) : t('Lcz_RealUnits', { fallback: 'Real units' }));
+
+/** "12 of 40 booked" */
+const bookedOfTotal = (figure: OccupancyFigure): string => t('Lcz_BookedOfTotal', { fallback: '%1 of %2 booked', params: [formatCount(figure.booked), formatCount(figure.total)] });
 
 /** Gives each instance's bar its own id, which the tooltip anchors to. */
 let barIds = 0;
@@ -95,9 +98,9 @@ export class IrDashboardStats {
   /** "Today's occupancy" on today, otherwise the day itself ("Saturday, 17 Oct."); the card title is capitalized in CSS. */
   private get title(): string {
     if (!this.date || this.date === todayISO()) {
-      return "Today's occupancy";
+      return t('Lcz_TodaysOccupancy', { fallback: "Today's occupancy" });
     }
-    return `${moment(this.date, 'YYYY-MM-DD').format('dddd, D MMM')}.`;
+    return `${formatDate(this.date, 'dddd, D MMM')}.`;
   }
 
   private renderUnit(value: number | undefined, label: string, tone: UnitTone, { loaded, refreshing }: FigureState) {
@@ -132,8 +135,8 @@ export class IrDashboardStats {
         <span class="stats__occupancy-value" style={{ '--figure-chars': String(percent.length) }}>
           {percent}
         </span>
-        <span class="stats__figure-label">{OCCUPANCY_LABEL[kind]}</span>
-        <span class="stats__booked">{`${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}</span>
+        <span class="stats__figure-label">{occupancyLabel(kind)}</span>
+        <span class="stats__booked">{bookedOfTotal(figure)}</span>
       </div>
     );
   }
@@ -147,18 +150,18 @@ export class IrDashboardStats {
         class="stats__bar"
         role="progressbar"
         tabindex="0"
-        aria-label={OCCUPANCY_LABEL.real}
+        aria-label={occupancyLabel('real')}
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow={String(clampPercent(figure.percent))}
-        aria-valuetext={`${percent}, ${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}
+        aria-valuetext={`${percent}, ${bookedOfTotal(figure)}`}
       >
         <span class="stats__bar-fill" style={{ inlineSize: `${clampPercent(figure.percent)}%` }}></span>
       </div>,
       <wa-tooltip for={this.barId}>
         <span class="stats__tooltip">
-          <strong>{`${OCCUPANCY_LABEL.real}: ${percent}`}</strong>
-          <span>{`${formatCount(figure.booked)} of ${formatCount(figure.total)} booked`}</span>
+          <strong>{`${occupancyLabel('real')}: ${percent}`}</strong>
+          <span>{bookedOfTotal(figure)}</span>
         </span>
       </wa-tooltip>,
     ];
@@ -198,12 +201,16 @@ export class IrDashboardStats {
     const stats: FigureState = { loaded: !!performance, refreshing: this.performanceLoading };
     const pending: FigureState = { loaded: pendingUnits != null, refreshing: this.pendingLoading };
     return (
-      <ul class={{ 'stats__units': true, 'stats__units--stacked': !this.isPms }} aria-label="Units" aria-busy={(this.isPms && !units) || !performance ? 'true' : null}>
-        {this.isPms && this.renderUnit(units?.available, 'Available', 'available', calendar)}
-        {this.renderUnit(performance?.bookedUnits, 'Booked', 'booked', stats)}
-        {this.renderUnit(pendingUnits, 'Pending', 'pending', pending)}
-        {this.isPms && this.renderUnit(units?.outOfService, 'OOS', 'out-of-service', calendar)}
-        {this.isPms && this.renderUnit(units?.blocked, 'Blocked', 'blocked', calendar)}
+      <ul
+        class={{ 'stats__units': true, 'stats__units--stacked': !this.isPms }}
+        aria-label={t('Lcz_Units', { fallback: 'Units' })}
+        aria-busy={(this.isPms && !units) || !performance ? 'true' : null}
+      >
+        {this.isPms && this.renderUnit(units?.available, t('Lcz_Available', { fallback: 'Available' }), 'available', calendar)}
+        {this.renderUnit(performance?.bookedUnits, t('Lcz_Booked', { fallback: 'Booked' }), 'booked', stats)}
+        {this.renderUnit(pendingUnits, t('Lcz_Pending', { fallback: 'Pending' }), 'pending', pending)}
+        {this.isPms && this.renderUnit(units?.outOfService, t('Lcz_OOS', { fallback: 'OOS' }), 'out-of-service', calendar)}
+        {this.isPms && this.renderUnit(units?.blocked, t('Lcz_Blocked', { fallback: 'Blocked' }), 'blocked', calendar)}
       </ul>
     );
   }
@@ -235,11 +242,15 @@ export class IrDashboardStats {
     const performance = this.performance;
     return (
       <wa-card class="stats__card stats__card--performance" appearance="plain">
-        <h2 class="stats__title">Performance</h2>
-        <ul class={{ 'stats__kpis': true, 'stats--loading': !!performance && this.performanceLoading }} aria-label="Revenue" aria-busy={!performance ? 'true' : null}>
-          {this.renderKpi('coins', 'Room Revenue', performance?.roomRevenue)}
-          {this.isPms && this.renderKpi('chart-simple', 'ADR', performance?.adr)}
-          {this.isPms && this.renderKpi('arrow-trend-up', 'RevPAR', performance ? computeRevPar(performance.adr, performance.occupancy) : undefined)}
+        <h2 class="stats__title">{t('Lcz_Performance', { fallback: 'Performance' })}</h2>
+        <ul
+          class={{ 'stats__kpis': true, 'stats--loading': !!performance && this.performanceLoading }}
+          aria-label={t('Lcz_Revenue', { fallback: 'Revenue' })}
+          aria-busy={!performance ? 'true' : null}
+        >
+          {this.renderKpi('coins', t('Lcz_RoomRevenue', { fallback: 'Room Revenue' }), performance?.roomRevenue)}
+          {this.isPms && this.renderKpi('chart-simple', t('Lcz_Adr', { fallback: 'ADR' }), performance?.adr)}
+          {this.isPms && this.renderKpi('arrow-trend-up', t('Lcz_RevPar', { fallback: 'RevPAR' }), performance ? computeRevPar(performance.adr, performance.occupancy) : undefined)}
         </ul>
       </wa-card>
     );

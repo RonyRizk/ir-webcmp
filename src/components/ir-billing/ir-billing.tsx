@@ -2,6 +2,7 @@ import { Booking } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { Component, Element, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { isAgentMode } from '../ir-booking-details/functions';
+import { t } from '@/services/locale/t';
 
 export type BillingPanels = 'agent' | 'guest';
 @Component({
@@ -53,9 +54,9 @@ export class IrBilling {
           active={this.currentTab}
         >
           <wa-tab panel="guest" disabled={this.isAllServicesAgentOwned}>
-            Guest
+            {t('Lcz_Guest', { fallback: 'Guest' })}
           </wa-tab>
-          <wa-tab panel="agent">Agent</wa-tab>
+          <wa-tab panel="agent">{t('Lcz_Agent', { fallback: 'Agent' })}</wa-tab>
           <wa-tab-panel name="guest">{this.currentTab === 'guest' && <ir-guest-billing booking={this.booking}></ir-guest-billing>}</wa-tab-panel>
           <wa-tab-panel name="agent">{this.currentTab === 'agent' && <ir-agent-billing booking={this.booking}></ir-agent-billing>}</wa-tab-panel>
         </wa-tab-group>

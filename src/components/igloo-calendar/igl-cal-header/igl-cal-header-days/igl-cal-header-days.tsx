@@ -1,5 +1,7 @@
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { isWeekend } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
+import { formatCount, formatPercent } from '@/utils/number';
 import { DayInfo, MonthInfo } from '../types';
 
 /** Entrance stagger: 30ms per cell of distance from today, capped so the far tail lands within ~450ms. */
@@ -108,11 +110,13 @@ export class IglCalHeaderDays {
       <Host>
         <div class={{ 'stickyCell': true, 'headersContainer': true, 'is-revealing': this.revealing }}>
           <div class="monthsContainer">
-            {this.monthsInfo.map(monthInfo => (
-              <div class="monthCell" style={{ width: monthInfo.daysCount * 58 + 'px' }}>
-                <div class="monthTitle">{monthInfo.monthName}</div>
-              </div>
-            ))}
+            {this.monthsInfo.map(monthInfo => {
+              return (
+                <div class="monthCell" style={{ width: monthInfo.daysCount * 58 + 'px' }}>
+                  <div class="monthTitle">{formatDate(monthInfo.firstDayValue, 'MMM YYYY')}</div>
+                </div>
+              );
+            })}
           </div>
           {this.days.map((dayInfo, index) => {
             const count = this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr;
@@ -131,21 +135,21 @@ export class IglCalHeaderDays {
                               style={{ '--fd-count-target': String(count), 'animationDelay': `${revealDelay + REVEAL_COUNT_DELAY_MS}ms` }}
                             ></span>
                           ) : (
-                            count
+                            formatCount(count)
                           )}
                         </wa-badge>
                       </button>
                     ) : (
                       <wa-badge variant={'neutral'} appearance={'filled'} pill>
                         {' '}
-                        {this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr}
+                        {formatCount(this.unassignedRoomsNumber[dayInfo.value] || dayInfo.unassigned_units_nbr)}
                       </wa-badge>
                     )}
                   </div>
                 )}
 
-                <div class={{ dayTitle: true, weekend: isWeekend(dayInfo.value) }}>{dayInfo.dayDisplayName}</div>
-                <div class="dayCapacityPercent">{dayInfo.occupancy}%</div>
+                <div class={{ dayTitle: true, weekend: isWeekend(dayInfo.value) }}>{formatDate(dayInfo.value, 'ddd D')}</div>
+                <div class="dayCapacityPercent">{formatPercent(dayInfo.occupancy)}</div>
               </div>
             );
           })}

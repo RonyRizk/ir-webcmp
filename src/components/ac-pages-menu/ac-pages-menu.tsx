@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 interface ACPage {
   label: string;
   href: string;
@@ -51,7 +52,7 @@ export class AcPagesMenu {
                       <span>{page.label}</span>
                       {page.isNew && (
                         <span class="new-badge" id={page.badgeId}>
-                          new
+                          {t('Lcz_New', { fallback: 'new' })}
                         </span>
                       )}
                     </div>
@@ -77,7 +78,7 @@ export class AcPagesMenu {
                               <span>{submenu.label}</span>
                               {submenu.isNew && (
                                 <span id={submenu.badgeId} class="new-badge">
-                                  new
+                                  {t('Lcz_New', { fallback: 'new' })}
                                 </span>
                               )}
                             </div>
@@ -104,7 +105,7 @@ export class AcPagesMenu {
                     <span>{page.label}</span>
                     {page.isNew && (
                       <span id={page.badgeId} class="new-badge">
-                        new
+                        {t('Lcz_New', { fallback: 'new' })}
                       </span>
                     )}
                   </div>
@@ -146,7 +147,7 @@ export class AcPagesMenu {
                   </div>
                   {page.isNew && (
                     <span id={page.badgeId} class="new-badge">
-                      new
+                      {t('Lcz_New', { fallback: 'new' })}
                     </span>
                   )}
                 </button>
@@ -162,13 +163,13 @@ export class AcPagesMenu {
                           class="dropdown-item menu-icon-container"
                           href={submenu.href}
                         >
-                          <div class="menu-icon-container mr-auto">
+                          <div class="menu-icon-container ir-me-auto">
                             {submenu.icon && this.Icon({ name: submenu.icon })}
                             <span>{submenu.label}</span>
                           </div>
                           {submenu.isNew && (
                             <span id={submenu.badgeId} class="new-badge">
-                              new
+                              {t('Lcz_New', { fallback: 'new' })}
                             </span>
                           )}
                         </a>
@@ -187,7 +188,7 @@ export class AcPagesMenu {
                   <span>{page.label}</span>
                   {page.isNew && (
                     <span id={page.badgeId} class="new-badge">
-                      new
+                      {t('Lcz_New', { fallback: 'new' })}
                     </span>
                   )}
                 </div>

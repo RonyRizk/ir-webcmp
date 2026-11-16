@@ -1,4 +1,5 @@
 import { AttachInternals, Component, Element, Event, EventEmitter, Host, Method, Prop, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 import Quill, { QuillOptions } from 'quill';
 import { patchQuillForShadowDom } from './quill-shadow';
 import { NativeWaInput } from '../ir-input/ir-input';
@@ -192,7 +193,7 @@ let editorIdCounter = 0;
 
 @Component({
   tag: 'ir-text-editor',
-  styleUrls: ['ir-text-editor.css', 'quill.snow.css'],
+  styleUrls: ['ir-text-editor.css', 'quill.snow.css', 'quill-rtl.css'],
   shadow: { delegatesFocus: true },
   formAssociated: true,
 })
@@ -470,7 +471,7 @@ export class IrTextEditor {
       return;
     }
     if (this.required && !this.disabled && this.isEmpty) {
-      this.internals.setValidity({ valueMissing: true }, 'Please fill out this field.', this.editor.root);
+      this.internals.setValidity({ valueMissing: true }, t('Lcz_PleaseFillOutThisField', { fallback: 'Please fill out this field.' }), this.editor.root);
     } else {
       this.internals.setValidity({});
     }
@@ -500,11 +501,25 @@ export class IrTextEditor {
     return `${this.componentId}-hint`;
   }
 
+  /**
+   * Quill's snow theme renders its link-tooltip words through CSS `content`, which can't call `t()`.
+   * They're exposed as custom properties (CSS string literals) that ir-text-editor.css reads.
+   */
+  private get tooltipLabelVars(): Record<string, string> {
+    return {
+      '--ir-ql-visit-url': JSON.stringify(t('Lcz_VisitUrl', { fallback: 'Visit URL:' })),
+      '--ir-ql-enter-link': JSON.stringify(t('Lcz_EnterLink', { fallback: 'Enter link:' })),
+      '--ir-ql-edit': JSON.stringify(t('Lcz_Edit', { fallback: 'Edit' })),
+      '--ir-ql-save': JSON.stringify(t('Lcz_Save', { fallback: 'Save' })),
+      '--ir-ql-remove': JSON.stringify(t('Lcz_Remove', { fallback: 'Remove' })),
+    };
+  }
+
   render() {
     const hasLabel = !!this.label || this.hasLabelSlot;
     const hasHint = !!this.hint || this.hasHintSlot;
     return (
-      <Host>
+      <Host style={this.tooltipLabelVars}>
         <div class="field">
           {hasLabel && (
             <label id={this.labelId} class="label has-label " part="form-control-label label" onClick={() => this.editor?.focus()}>

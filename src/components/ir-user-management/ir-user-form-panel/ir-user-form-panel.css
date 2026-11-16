@@ -90,3 +90,9 @@
   font-size: 0.75rem;
   color: #9ca3af;
 }
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-pe-0 {
+  padding-inline-end: 0;
+}

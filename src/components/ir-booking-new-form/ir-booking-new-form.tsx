@@ -1,5 +1,6 @@
 import { IglBookPropertyPayloadPlusBooking } from '@/models/igl-book-property';
 import { Component, Host, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 
 @Component({
@@ -10,6 +11,10 @@ import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 export class IrBookingNewForm {
   @Prop() ticket: string;
   @Prop() propertyid: string;
+  /**
+   * Language for the form and the editor it opens, independent of the page's. Reflected as `lang`
+   * on the host, which makes this subtree its own locale scope (see `locale-scope.ts`).
+   */
   @Prop() language: string;
 
   @State() bookingItem: IglBookPropertyPayloadPlusBooking | null = null;
@@ -31,12 +36,12 @@ export class IrBookingNewForm {
       NAME: '',
       PHONE: '',
       REFERENCE_TYPE: '',
-      TITLE: 'New Booking',
+      TITLE: t('Lcz_NewBooking', { fallback: 'New Booking' }),
     };
   }
   render() {
     return (
-      <Host>
+      <Host lang={this.language || undefined}>
         <div
           onClick={() => {
             this.handleTriggerClicked();
@@ -55,7 +60,6 @@ export class IrBookingNewForm {
             this.bookingItem = null;
           }}
           mode={this.bookingItem?.event_type}
-          label={this.bookingItem?.TITLE}
           ticket={this.ticket}
           open={this.bookingItem !== null}
           language={this.language}

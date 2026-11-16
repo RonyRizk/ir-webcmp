@@ -1,7 +1,7 @@
 import { SharedPerson } from '@/models/booking.dto';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-room-guests',
   styleUrl: 'ir-room-guests.css',
@@ -30,7 +30,7 @@ export class IrRoomGuests {
 
   /**
    * An array of people sharing the room.
-   * Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+   * Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
    */
   @Prop() sharedPersons: SharedPerson[] = [];
 
@@ -42,7 +42,7 @@ export class IrRoomGuests {
 
   /**
    * A list of available countries.
-   * Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+   * Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
    */
   @Prop() countries: ICountry[];
 
@@ -79,7 +79,7 @@ export class IrRoomGuests {
           '--ir-drawer-padding-top': 'var(--spacing)',
           '--ir-drawer-padding-bottom': 'var(--spacing)',
         }}
-        label={this.roomName ? `Room ${this.roomName}` : this.roomType || 'Guest Details'}
+        label={this.roomName ? t('Lcz_RoomDrawerLabel', { fallback: 'Room %1', params: [this.roomName] }) : this.roomType || t('Lcz_GuestDetails', { fallback: 'Guest Details' })}
         open={this.open}
         onDrawerHide={e => {
           e.stopImmediatePropagation();
@@ -106,15 +106,15 @@ export class IrRoomGuests {
         )}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button size="m" data-drawer="close" appearance="filled" variant="neutral">
-            {locales?.entries?.Lcz_Cancel ?? 'Save'}
+            {t('Lcz_Cancel', { fallback: 'Save' })}
           </ir-custom-button>
 
           <ir-custom-button value="save" loading={this.isLoading === 'save'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
-            {locales?.entries?.Lcz_Save ?? 'Save'}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
           {this.checkIn && this.roomName && (
             <ir-custom-button value="save_checkin" loading={this.isLoading === 'save_checkin'} size="m" form={`room-guests__${this.identifier}`} type="submit" variant="brand">
-              {locales.entries?.Lcz_CheckIn ?? 'Check in'}
+              {t('Lcz_CheckIn', { fallback: 'Check in' })}
             </ir-custom-button>
           )}
         </div>

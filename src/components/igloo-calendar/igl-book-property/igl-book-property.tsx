@@ -1,15 +1,16 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h, Listen, Fragment } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { getReleaseHoursString, handleBodyOverflow } from '@/utils/utils';
 import { ISO_FORMAT } from '@/utils/calendar-dates';
-import { ICountry, IEntries, RoomBlockDetails } from '@/models/IBooking';
+import { ICountry, SetupEntries, RoomBlockDetails } from '@/models/IBooking';
 import { IPageTwoDataUpdateProps } from '@/models/models';
 import { IglBookPropertyService } from './igl-book-property.service';
 import { BookingSource, IglBookPropertyPayloadEditBooking, TAdultChildConstraints, TEventType, TPropertyButtonsTypes } from '@/models/igl-book-property';
-import locales from '@/stores/locales.store';
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { ICurrency } from '@/models/calendarData';
+import { t } from '@/services/locale/t';
 import booking_store, {
   calculateTotalRooms,
   modifyBookingStore,
@@ -21,6 +22,7 @@ import booking_store, {
 } from '@/stores/booking.store';
 import moment from 'moment';
 import { BookingGuestSchema, RoomGuestSchema } from './types';
+import { LocaleController } from '@/services/locale/locale.controller';
 export type IHistoryEntry = {
   /** `YYYY-MM-DD` */
   dates: { checkIn: string; checkOut: string };
@@ -62,10 +64,11 @@ export class IglBookProperty {
   private guestData: { [key: string]: any }[] = [];
   private bookedByInfoData: { [key: string]: any } = {};
   private blockDatesData: { [key: string]: any } = {};
-  private ratePricingMode: IEntries[] = [];
+  private ratePricingMode: SetupEntries[] = [];
   private selectedUnits: Map<string, Map<string, any>> = new Map();
-  private bedPreferenceType: IEntries[] = [];
+  private bedPreferenceType: SetupEntries[] = [];
   private bookingService: BookingService = new BookingService();
+  private setupService = new SetupService();
   private bookPropertyService = new IglBookPropertyService();
   private defaultDateRange: { from_date: string; to_date: string };
   private updatedBooking: boolean = false;
@@ -118,7 +121,7 @@ export class IglBookProperty {
     if (key === 'select' || (key === 'blur' && data !== '')) {
       const res = await this.bookingService.getExposedBooking({
         booking_nbr: (data as any).booking_nbr || (data as string),
-        language: this.language,
+        language: LocaleController.language,
       });
       this.defaultData = { ...this.defaultData, booking: res };
       this.bookPropertyService.setBookingInfoFromAutoComplete(this, res);
@@ -197,8 +200,8 @@ export class IglBookProperty {
         }
         this.toast.emit({
           type: 'error',
-          description: locales.entries.Lcz_SelectRatePlan,
-          title: locales.entries.Lcz_SelectRatePlan,
+          description: t('Lcz_SelectRatePlan', { fallback: 'Select a rate plan' }),
+          title: t('Lcz_SelectRatePlan', { fallback: 'Select a rate plan' }),
         });
         break;
       case 'check':
@@ -317,7 +320,7 @@ export class IglBookProperty {
   }
 
   async fetchSetupEntries() {
-    return await this.bookingService.fetchSetupEntries();
+    return await this.setupService.fetchSetupEntries();
   }
 
   private isGuestDataIncomplete() {
@@ -424,7 +427,7 @@ export class IglBookProperty {
           adult: occupancy.adults,
           child: occupancy.children,
         },
-        language: this.language,
+        language: LocaleController.language,
         room_type_ids,
         currency: this.currency,
         agent_id: is_in_agent_mode ? source?.tag : null,
@@ -479,7 +482,7 @@ export class IglBookProperty {
           adult: 2,
           child: 0,
         },
-        language: this.language,
+        language: LocaleController.language,
         room_type_ids: this.defaultData.roomsInfo.map(room => room.id),
         currency: this.currency,
       });
@@ -702,7 +705,13 @@ export class IglBookProperty {
                     </svg>
                   </ir-icon> */}
                   <ir-custom-button appearance="plain" variant="neutral" size="m" onClickHandler={() => this.closeWindow()}>
-                    <wa-icon name="xmark" library="system" variant="solid" label="Close" aria-label="Close"></wa-icon>
+                    <wa-icon
+                      name="xmark"
+                      library="system"
+                      variant="solid"
+                      label={t('Lcz_Close', { fallback: 'Close' })}
+                      aria-label={t('Lcz_Close', { fallback: 'Close' })}
+                    ></wa-icon>
                   </ir-custom-button>
                 </div>
               </div>
@@ -749,9 +758,9 @@ export class IglBookProperty {
               </div>
               {this.getCurrentPage('page_block_date') ? (
                 <div class="sheet-footer">
-                  <ir-button text={locales.entries.Lcz_Cancel} btn_color="secondary" class="flex-fill" onClick={() => this.closeWindow()}></ir-button>
+                  <ir-button text={t('Lcz_Cancel', { fallback: 'Cancel' })} btn_color="secondary" class="flex-fill" onClick={() => this.closeWindow()}></ir-button>
                   <ir-button
-                    text={locales.entries.Lcz_Blockdates}
+                    text={t('Lcz_Blockdates', { fallback: 'Block dates' })}
                     isLoading={isRequestPending('/Block_Exposed_Unit')}
                     class="flex-fill"
                     onClick={() => this.handleBlockDate()}

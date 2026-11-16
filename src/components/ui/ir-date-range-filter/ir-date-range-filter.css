@@ -36,8 +36,8 @@
   outline-color: var(--ir-color-border-error, var(--wa-color-danger-border-loud));
 
   border-top-width: var(--error-border-width) !important;
-  border-left-width: var(--error-border-width) !important;
-  border-right-width: var(--error-border-width) !important;
+  border-inline-start-width: var(--error-border-width) !important;
+  border-inline-end-width: var(--error-border-width) !important;
   border-bottom-width: var(--error-border-width) !important;
 }
 

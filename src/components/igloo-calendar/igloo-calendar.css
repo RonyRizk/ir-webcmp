@@ -47,14 +47,14 @@
   display: none;
   height: 100%;
   overflow-y: auto;
-  padding-left: 0.5em !important;
-  padding-right: 0.5em !important;
+  padding-inline-start: 0.5em !important;
+  padding-inline-end: 0.5em !important;
 }
 .tobeAssignedContainer,
 .legendContainer,
 .dayUseBookingsContainer {
-  padding-left: 0em !important;
-  padding-right: 0em !important;
+  padding-inline-start: 0em !important;
+  padding-inline-end: 0em !important;
 }
 .showToBeAssigned .tobeAssignedContainer {
   display: block;
@@ -71,5 +71,5 @@
 .tobeBooked {
   padding-top: 8px;
   padding-bottom: 8px;
-  text-align: left;
+  text-align: start;
 }

@@ -2,10 +2,13 @@ import { Component, Host, h, Element, Prop, State, Watch } from '@stencil/core';
 import axios from 'axios';
 import { GHSService } from '../../services/ghs/ghs.service';
 import { BookingService } from '../../services/booking-service/booking.service';
-import Token from '../../models/Token';
+import ApiClient from '../../models/ApiClient';
 import { GHS_Candidate_Property } from '../../services/ghs/types';
 import { ICountry } from '../../models/IBooking';
 import { showToast } from '@/utils/utils';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-ghs-onboarding',
@@ -16,6 +19,7 @@ export class IrGhsOnboarding {
   @Element() el: HTMLElement;
   @Prop() ticket: string;
   @Prop() baseurl: string;
+  @Prop() language: string = 'en';
 
   @State() properties: GHS_Candidate_Property[] = [];
   @State() countries: ICountry[] = [];
@@ -29,7 +33,7 @@ export class IrGhsOnboarding {
 
   private ghsService = new GHSService();
   private bookingService = new BookingService();
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
 
   private removeAllModal: HTMLIrDialogElement;
   private activateModal: HTMLIrDialogElement;
@@ -37,17 +41,17 @@ export class IrGhsOnboarding {
   @Watch('ticket')
   ticketChanged(newValue: string) {
     if (newValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.init();
     }
   }
 
   async componentWillLoad() {
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
     }
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       await this.init();
     }
   }
@@ -55,14 +59,22 @@ export class IrGhsOnboarding {
   private async init() {
     this.isPageLoading = true;
     try {
-      const [allCountries, allProperties] = await Promise.all([this.bookingService.getCountries('EN'), this.ghsService.Get_GHS_Candidate_Properties({ COUNTRY_ID: null })]);
+      const [allCountries, allProperties] = await Promise.all([
+        this.bookingService.getCountries('EN'),
+        this.ghsService.Get_GHS_Candidate_Properties({ COUNTRY_ID: null }),
+        LocaleController.load({ language: this.language, tables: SCREEN_TABLES.ghsOnboarding }),
+      ]);
 
       const validCountryIds = new Set(allProperties.map(p => p.COUNTRY_ID));
 
       this.countries = allCountries.filter(c => validCountryIds.has(c.id)).sort((a, b) => a.name.localeCompare(b.name));
       this.properties = allProperties;
     } catch (error) {
-      this.showToast('error', 'Initialization Error', error.message || 'Failed to load properties');
+      this.showToast(
+        'error',
+        t('Lcz_InitializationError', { fallback: 'Initialization Error' }),
+        error.message || t('Lcz_FailedToLoadProperties', { fallback: 'Failed to load properties' }),
+      );
     } finally {
       this.isPageLoading = false;
     }
@@ -77,7 +89,7 @@ export class IrGhsOnboarding {
       });
       this.properties = props;
     } catch (error) {
-      this.showToast('error', 'Error', error.message || 'Failed to fetch properties');
+      this.showToast('error', t('Lcz_Error', { fallback: 'Error' }), error.message || t('Lcz_FailedToFetchProperties', { fallback: 'Failed to fetch properties' }));
     } finally {
       this.isDataLoading = false;
     }
@@ -130,13 +142,21 @@ export class IrGhsOnboarding {
         AC_ID: this.propertyToActivate.AC_ID,
         IS_ENABLED: true,
       });
-      this.showToast('success', 'Success', `${this.propertyToActivate.NAME} GHS has been activated.`);
+      this.showToast(
+        'success',
+        t('Lcz_Success', { fallback: 'Success' }),
+        t('Lcz_GhsActivatedSuccessfully', { fallback: `${this.propertyToActivate.NAME} GHS has been activated.`, params: [this.propertyToActivate.NAME] }),
+      );
 
       const activatedId = this.propertyToActivate.AC_ID;
       this.properties = this.properties.filter(p => p.AC_ID !== activatedId);
       this.selectedProperties = this.selectedProperties.filter(p => p.AC_ID !== activatedId);
     } catch (error) {
-      this.showToast('error', 'Activation Error', error.message || 'Failed to activate property');
+      this.showToast(
+        'error',
+        t('Lcz_ActivationError', { fallback: 'Activation Error' }),
+        error.message || t('Lcz_FailedToActivateProperty', { fallback: 'Failed to activate property' }),
+      );
     } finally {
       this.isActivating = false;
       this.propertyToActivate = null;
@@ -146,7 +166,11 @@ export class IrGhsOnboarding {
 
   private async handleGenerateRequest() {
     if (this.selectedProperties.length === 0) {
-      this.showToast('error', 'Selection Required', 'Please select at least one property.');
+      this.showToast(
+        'error',
+        t('Lcz_SelectionRequired', { fallback: 'Selection Required' }),
+        t('Lcz_PleaseSelectAtLeastOneProperty', { fallback: 'Please select at least one property.' }),
+      );
       return;
     }
 
@@ -179,10 +203,14 @@ export class IrGhsOnboarding {
 
         this.selectedProperties = [];
         await this.fetchProperties();
-        this.showToast('success', 'Success', 'GHS onboarding request downloaded.');
+        this.showToast('success', t('Lcz_Success', { fallback: 'Success' }), t('Lcz_GhsOnboardingRequestDownloaded', { fallback: 'GHS onboarding request downloaded.' }));
       }
     } catch (error) {
-      this.showToast('error', 'Generation Error', error.message || 'An error occurred while generating the request.');
+      this.showToast(
+        'error',
+        t('Lcz_GenerationError', { fallback: 'Generation Error' }),
+        error.message || t('Lcz_ErrorOccurredGeneratingRequest', { fallback: 'An error occurred while generating the request.' }),
+      );
     } finally {
       this.isGenerating = false;
     }
@@ -207,7 +235,7 @@ export class IrGhsOnboarding {
         <ir-interceptor></ir-interceptor>
         <ir-dialog
           ref={el => (this.activateModal = el)}
-          label="Activation Confirmation"
+          label={t('Lcz_ActivationConfirmation', { fallback: 'Activation Confirmation' })}
           onIrDialogHide={() => {
             this.propertyToActivate = null;
             this.activateModal.closeModal();
@@ -215,9 +243,12 @@ export class IrGhsOnboarding {
         >
           <div class="ir-ghs-onboarding__dialog-body">
             <p class="m-0 text-center">
-              Are you sure you want to <strong>activate</strong> GHS for <span class="text-primary">{this.propertyToActivate?.NAME}</span>?
+              {t('Lcz_AreYouSureActivateGhs', {
+                fallback: `Are you sure you want to activate GHS for ${this.propertyToActivate?.NAME}?`,
+                params: [this.propertyToActivate?.NAME],
+              })}
             </p>
-            <p class="small text-muted mt-2 mb-0">This will enable real-time synchronization with Google.</p>
+            <p class="small text-muted mt-2 mb-0">{t('Lcz_EnableRealTimeSyncWithGoogle', { fallback: 'This will enable real-time synchronization with Google.' })}</p>
           </div>
           <div slot="footer" class="ir-ghs-onboarding__dialog-footer">
             <ir-custom-button
@@ -235,7 +266,7 @@ export class IrGhsOnboarding {
                 this.activateModal.closeModal();
               }}
             >
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               type="button"
@@ -252,13 +283,13 @@ export class IrGhsOnboarding {
                 this.handleConfirmActivate();
               }}
             >
-              Activate
+              {t('Lcz_Activate', { fallback: 'Activate' })}
             </ir-custom-button>
           </div>
         </ir-dialog>
-        <ir-dialog ref={el => (this.removeAllModal = el)} label="Confirmation" onIrDialogHide={() => this.removeAllModal.closeModal()}>
+        <ir-dialog ref={el => (this.removeAllModal = el)} label={t('Lcz_Confirmation', { fallback: 'Confirmation' })} onIrDialogHide={() => this.removeAllModal.closeModal()}>
           <div class="ir-ghs-onboarding__dialog-body">
-            <p class="m-0 text-center">Are you sure you want to remove all selected properties from the list?</p>
+            <p class="m-0 text-center">{t('Lcz_AreYouSureRemoveAllSelectedProperties', { fallback: 'Are you sure you want to remove all selected properties from the list?' })}</p>
           </div>
           <div slot="footer" class="ir-ghs-onboarding__dialog-footer">
             <ir-custom-button
@@ -275,7 +306,7 @@ export class IrGhsOnboarding {
                 this.removeAllModal.closeModal();
               }}
             >
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               type="button"
@@ -291,13 +322,13 @@ export class IrGhsOnboarding {
                 this.handleConfirmRemoveAll();
               }}
             >
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>
         <section class="ir-ghs-onboarding__container">
           <div class="ir-ghs-onboarding__header">
-            <h3 class="ir-ghs-onboarding__title">Google hotels request</h3>
+            <h3 class="ir-ghs-onboarding__title">{t('Lcz_GoogleHotelsRequest', { fallback: 'Google hotels request' })}</h3>
           </div>
 
           <div class="ir-ghs-onboarding__content">

@@ -12,7 +12,7 @@
 | `duration`  | `duration`   |                                                                                  | `number`                                                                                        | `5000`      |
 | `maxToasts` | `max-toasts` | Maximum number of toasts shown at once; when exceeded, the oldest are dismissed. | `number`                                                                                        | `5`         |
 | `position`  | `position`   |                                                                                  | `"bottom-center" \| "bottom-end" \| "bottom-start" \| "top-center" \| "top-end" \| "top-start"` | `'top-end'` |
-| `rtl`       | `rtl`        |                                                                                  | `boolean`                                                                                       | `false`     |
+| `rtl`       | `rtl`        | Pins the toast layer to RTL. Leave unset to inherit the document direction.      | `boolean`                                                                                       | `false`     |
 
 
 ## Events

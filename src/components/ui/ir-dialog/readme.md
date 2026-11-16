@@ -52,6 +52,7 @@ Type: `Promise<void>`
 
 ### Used by
 
+ - [igl-booking-event](../../igloo-calendar/igl-booking-event)
  - [igl-hk-issues-dialog](../../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
  - [igl-housekeeping-dialog](../../igloo-calendar/igl-cal-body/igl-housekeeping-dialog)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
@@ -86,8 +87,10 @@ Type: `Promise<void>`
  - [ir-room](../../ir-booking-details/ir-room)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
  - [ir-test-cmp](../../ir-test-cmp)
+ - [ir-translatable-textarea](../ir-translatable-textarea)
  - [ir-translations-language-dialog](../../ir-translations-manager/ir-translations-language-dialog)
  - [ir-translations-manager](../../ir-translations-manager)
+ - [ir-translations-move-dialog](../../ir-translations-manager/ir-translations-move-dialog)
  - [ir-translations-settings-dialog](../../ir-translations-manager/ir-translations-settings-dialog)
  - [ir-translations-sync-dialog](../../ir-translations-manager/ir-translations-sync-dialog)
  - [ir-translations-table-dialog](../../ir-translations-manager/ir-translations-table-dialog)
@@ -97,6 +100,7 @@ Type: `Promise<void>`
 ### Graph
 ```mermaid
 graph TD;
+  igl-booking-event --> ir-dialog
   igl-hk-issues-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-dialog
   igl-reallocation-dialog --> ir-dialog
@@ -131,8 +135,10 @@ graph TD;
   ir-room --> ir-dialog
   ir-tasks-table --> ir-dialog
   ir-test-cmp --> ir-dialog
+  ir-translatable-textarea --> ir-dialog
   ir-translations-language-dialog --> ir-dialog
   ir-translations-manager --> ir-dialog
+  ir-translations-move-dialog --> ir-dialog
   ir-translations-settings-dialog --> ir-dialog
   ir-translations-sync-dialog --> ir-dialog
   ir-translations-table-dialog --> ir-dialog

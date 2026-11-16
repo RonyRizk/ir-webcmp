@@ -1,19 +1,16 @@
 # igl-booking-event-hover
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property             | Attribute            | Description | Type                      | Default     |
-| -------------------- | -------------------- | ----------- | ------------------------- | ----------- |
-| `bookingEvent`       | --                   |             | `{ [key: string]: any; }` | `undefined` |
-| `bubbleInfoTop`      | `bubble-info-top`    |             | `boolean`                 | `false`     |
-| `countries`          | --                   |             | `ICountry[]`              | `undefined` |
-| `currency`           | `currency`           |             | `any`                     | `undefined` |
-| `is_vacation_rental` | `is_vacation_rental` |             | `boolean`                 | `false`     |
+| Property             | Attribute            | Description                                                                                             | Type                      | Default     |
+| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
+| `bookingEvent`       | --                   |                                                                                                         | `{ [key: string]: any; }` | `undefined` |
+| `countries`          | --                   |                                                                                                         | `ICountry[]`              | `undefined` |
+| `inDialog`           | `in-dialog`          | The panel sits in a dialog, which frames it and sets its width, rather than floating over the calendar. | `boolean`                 | `false`     |
+| `is_vacation_rental` | `is_vacation_rental` |                                                                                                         | `boolean`                 | `false`     |
 
 
 ## Events
@@ -36,9 +33,6 @@
 
 ### Depends on
 
-- [ir-dropdown](../../ui/ir-dropdown)
-- [ir-icons](../../ui/ir-icons)
-- [ir-dropdown-item](../../ui/ir-dropdown-item)
 - [ir-date-view](../../ir-date-view)
 - [ir-label](../../ui/ir-label)
 - [ir-custom-button](../../ui/ir-custom-button)
@@ -47,14 +41,10 @@
 ### Graph
 ```mermaid
 graph TD;
-  igl-booking-event-hover --> ir-dropdown
-  igl-booking-event-hover --> ir-icons
-  igl-booking-event-hover --> ir-dropdown-item
   igl-booking-event-hover --> ir-date-view
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-custom-button
   igl-booking-event-hover --> igl-block-dates-view
-  ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
   igl-booking-event --> igl-booking-event-hover
   style igl-booking-event-hover fill:#f9f,stroke:#333,stroke-width:4px

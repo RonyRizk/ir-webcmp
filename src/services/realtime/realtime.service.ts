@@ -8,6 +8,11 @@ const REALTIME_URL = 'https://realtime.igloorooms.com/';
 
 export type MessageHandler = (msg: RealtimeMessage) => void | Promise<void>;
 
+/** Read per message so a host page can set `window.environment` after this module loads. */
+function isAlphaEnvironment(): boolean {
+  return typeof window !== 'undefined' && (window as Window & { environment?: string }).environment === 'alpha';
+}
+
 class RealtimeService {
   private static _instance: RealtimeService;
   private socket: Socket | null = null;
@@ -60,7 +65,7 @@ class RealtimeService {
   private connect(): void {
     this.socket = io(REALTIME_URL);
     this.socket.on('MSG', (raw: string) => {
-      let envelope: { REASON: string; KEY: unknown; PAYLOAD: unknown };
+      let envelope: { REASON: string; KEY: unknown; PAYLOAD: unknown; environment?: unknown };
       try {
         envelope = JSON.parse(raw);
       } catch {
@@ -68,13 +73,19 @@ class RealtimeService {
       }
       if (!envelope) return;
 
-      const { REASON, KEY, PAYLOAD } = envelope;
+      const { REASON, KEY, PAYLOAD, environment } = envelope;
 
       // Messages for other properties are the common case on a busy socket — drop them before
       // paying for the payload parse.
       const propertyId = KEY?.toString() ?? '';
       const handlers = this.subscribers.get(propertyId);
       if (!handlers?.size) {
+        return;
+      }
+
+      // Alpha pages see only alpha-tagged frames; every other page drops them. The tag sits on the
+      // frame beside PAYLOAD, so this is checked before paying for the payload parse.
+      if ((environment === 'alpha') !== isAlphaEnvironment()) {
         return;
       }
 

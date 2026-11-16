@@ -53,7 +53,6 @@ Type: `Promise<void>`
 ### Used by
 
  - [igl-book-property](../../igloo-calendar/igl-book-property)
- - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-booking-guarantee](../../ir-booking-details/ir-payment-details/ir-booking-guarantee)
  - [ir-channel](../../ir-channel)
@@ -74,7 +73,6 @@ Type: `Promise<void>`
  - [ir-payment-action](../../ir-booking-details/ir-payment-details/ir-payment-actions/ir-payment-action)
  - [ir-payment-option](../../ir-payment-option)
  - [ir-room-nights](../../igloo-calendar/ir-room-nights)
- - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
  - [ir-user-form-panel](../../ir-user-management/ir-user-form-panel)
 
 ### Depends on
@@ -86,7 +84,6 @@ Type: `Promise<void>`
 graph TD;
   ir-button --> ir-icons
   igl-book-property --> ir-button
-  igl-split-booking --> ir-button
   ir-booking-email-logs --> ir-button
   ir-booking-guarantee --> ir-button
   ir-channel --> ir-button
@@ -107,7 +104,6 @@ graph TD;
   ir-payment-action --> ir-button
   ir-payment-option --> ir-button
   ir-room-nights --> ir-button
-  ir-tasks-table-pagination --> ir-button
   ir-user-form-panel --> ir-button
   style ir-button fill:#f9f,stroke:#333,stroke-width:4px
 ```

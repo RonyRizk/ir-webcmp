@@ -4,12 +4,15 @@ import { IRoomNightsDataEventPayload } from '@/models/property-types';
 import { BookingService } from '@/services/booking-service/booking.service';
 import booking_store from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
-import { formatDate, getDaysArray } from '@/utils/utils';
+import { getDaysArray } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { z } from 'zod';
+import { formatBookingNumber } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'igl-rate-extender-form',
   styleUrl: 'igl-rate-extender-form.css',
@@ -76,7 +79,7 @@ export class IglRateExtenderForm {
       this.inputRefs = [];
       const { from_date } = this.defaultDates;
       this.dates = { from_date: from_date < this.fromDate ? from_date : this.fromDate, to_date: this.toDate };
-      this.booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
+      this.booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: LocaleController.language });
       if (this.booking) {
         const filteredRooms = this.booking.rooms.filter(room => room.identifier === this.identifier);
         this.selectedRoom = filteredRooms[0];
@@ -129,7 +132,7 @@ export class IglRateExtenderForm {
     let days = [...this.rates];
     inputValue = inputValue.replace(/[^0-9.]/g, '');
     if (inputValue === '') {
-      days[index].amount = -1;
+      days[index].amount = null;
     } else {
       if (!isNaN(Number(inputValue))) {
         days[index].amount = Number(inputValue);
@@ -148,7 +151,7 @@ export class IglRateExtenderForm {
           adult: this.selectedRoom.rateplan.selected_variation.adult_nbr,
           child: this.selectedRoom.rateplan.selected_variation.child_nbr,
         },
-        language: this.language,
+        language: LocaleController.language,
         currency: this.booking.currency,
         room_type_ids: [this.selectedRoom.roomtype.id],
         rate_plan_ids: [rate_plan_id],
@@ -192,6 +195,10 @@ export class IglRateExtenderForm {
   }
 
   private async handleRoomConfirmation() {
+    // ir-validator only flags the empty field on submit; it does not stop the submit itself.
+    if (this.rates.some(day => day.amount === null)) {
+      return;
+    }
     try {
       this.isLoading = true;
       this.loadingChanged.emit(true);
@@ -257,13 +264,13 @@ export class IglRateExtenderForm {
       >
         <section class="rate-form__body">
           <p class="rate-form__booking-number">
-            {`${locales.entries.Lcz_Booking}#`} {this.bookingNumber}
+            {`${t('Lcz_Booking', { fallback: 'Booking' })}#`} {formatBookingNumber(this.bookingNumber)}
           </p>
 
           <p class="rate-form__rate-plan">
             {this.selectedRoom.roomtype.name} {`${this.selectedRoom?.rateplan?.short_name}`} {this.selectedRoom?.rateplan?.custom_text}{' '}
             <ir-unit-tag unit={(this.selectedRoom?.unit as IUnit).name}></ir-unit-tag>
-            {this.selectedRoom?.rateplan?.is_non_refundable && <span class={'irfontgreen'}>{locales.entries.Lcz_NonRefundable}</span>}
+            {this.selectedRoom?.rateplan?.is_non_refundable && <span class={'irfontgreen'}>{t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}</span>}
           </p>
 
           {this.inventory !== 0 && this.inventory !== null && booking_store.roomTypes?.length > 0 && (
@@ -273,35 +280,38 @@ export class IglRateExtenderForm {
           )}
         </section>
         <p class="rate-form__date-range">
-          {formatDate(this.dates.from_date, 'YYYY-MM-DD')} <wa-icon name="arrow-right"></wa-icon> {formatDate(this.dates.to_date, 'YYYY-MM-DD')}
+          {formatDate(this.dates.from_date, 'ddd, DD MMM YYYY')} <wa-icon class="ir-flip-rtl" name="arrow-right"></wa-icon> {formatDate(this.dates.to_date, 'ddd, DD MMM YYYY')}
         </p>
         {(this.inventory === 0 || this.inventory === null) && (
           <wa-callout size="s" variant="danger" class="rate-form__availability-callout">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-            {locales.entries.Lcz_NoAvailabilityForAdditionalNights}
+            {t('Lcz_NoAvailabilityForAdditionalNights')}
           </wa-callout>
         )}
-        {this.rates?.map((day, index) => {
-          return [
-            <ir-validator key={day.date} value={day.amount} schema={z.number().min(0)}>
-              <ir-input
-                ref={el => (this.inputRefs[index] = el)}
-                disabled={this.disabled(index)}
-                class="rate-extender-input"
-                aria-describedby="rate cost"
-                aria-label="rate"
-                onText-change={e => this.handleInput(e.detail, index)}
-                value={day.amount.toString()}
-                defaultValue={day.amount.toString()}
-                mask={'price'}
-                label={moment(day.date, 'YYYY-MM-DD').format('ddd, MMM D')}
-              >
-                <span slot="start">{currency_symbol}</span>
-              </ir-input>
-            </ir-validator>,
-            this.showArrow(index) && <wa-icon class="rate-extender-arrow" name={this.isEndDateBeforeFromDate ? 'arrow-up' : 'arrow-down'}></wa-icon>,
-          ];
-        })}
+        <div class="rate-extender-nights">
+          {this.rates?.map((day, index) => {
+            return [
+              <ir-validator key={day.date} class="rate-extender-night" value={day.amount} schema={z.number().min(0)}>
+                <ir-input
+                  ref={el => (this.inputRefs[index] = el)}
+                  disabled={this.disabled(index)}
+                  class="rate-extender-input"
+                  aria-describedby="rate cost"
+                  aria-label="rate"
+                  onText-change={e => this.handleInput(e.detail, index)}
+                  value={day.amount?.toString() ?? ''}
+                  defaultValue={day.amount?.toString() ?? ''}
+                  mask={'price'}
+                  min={0}
+                  label={formatDate(day.date, 'ddd, MMM D')}
+                >
+                  <span slot="start">{currency_symbol}</span>
+                </ir-input>
+              </ir-validator>,
+              this.showArrow(index) && <wa-icon class="rate-extender-arrow" name={this.isEndDateBeforeFromDate ? 'arrow-up' : 'arrow-down'}></wa-icon>,
+            ];
+          })}
+        </div>
         <div></div>
       </form>
     );

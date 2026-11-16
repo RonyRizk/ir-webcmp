@@ -3,8 +3,9 @@ import { CityLedgerService, type CLStatements, type FiscalDocument } from '@/ser
 import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import type { StatementFilters } from './ir-city-ledger-statements-filter/ir-city-ledger-statements-filter';
-import moment from 'moment';
 import { FdTypes } from '@/types/enums';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-statements',
@@ -120,14 +121,17 @@ export class IrCityLedgerStatements {
   }
 
   private getPrintLabel(): string {
-    if (!this.printFilters?.fromDate || !this.printFilters?.toDate) return 'Statement Preview';
-    return `Statement - ${moment(this.printFilters.fromDate).format('MMM DD, YYYY')} to ${moment(this.printFilters.toDate).format('MMM DD, YYYY')}`;
+    if (!this.printFilters?.fromDate || !this.printFilters?.toDate) return t('Lcz_StatementPreviewTitle', { fallback: 'Statement Preview' });
+    return t('Lcz_StatementDateRangeLabel', {
+      fallback: 'Statement - %1 to %2',
+      params: [formatDate(this.printFilters.fromDate, 'MMM DD, YYYY'), formatDate(this.printFilters.toDate, 'MMM DD, YYYY')],
+    });
   }
 
   render() {
     return (
       <Host>
-        <section class="cl-statements" aria-label="City ledger statements">
+        <section class="cl-statements" aria-label={t('Lcz_CityLedgerStatementsAriaLabel', { fallback: 'City ledger statements' })}>
           <ir-city-ledger-statements-filter
             initialFromDate={this.filters.fromDate}
             initialToDate={this.filters.toDate}
@@ -171,7 +175,7 @@ export class IrCityLedgerStatements {
           <div slot="header-actions">
             {this.pdfUrl && (
               <ir-custom-button size="m" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
-                <wa-icon name="download" label="Download PDF"></wa-icon>
+                <wa-icon name="download" label={t('Lcz_DownloadPdfTooltip', { fallback: 'Download PDF' })}></wa-icon>
               </ir-custom-button>
             )}
           </div>

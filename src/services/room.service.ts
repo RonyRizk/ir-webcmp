@@ -1,6 +1,8 @@
 import { BookingColor } from '@/models/booking.dto';
 import calendar_data from '@/stores/calendar-data';
 import { locales } from '@/stores/locales.store';
+import { LocaleController } from './locale/locale.controller';
+import type { LocaleTable } from './locale/types';
 import axios from 'axios';
 
 const DEFAULT_BOOKING_COLORS: BookingColor[] = [
@@ -144,22 +146,15 @@ export class RoomService {
       booking_colors: colors.map(color => ({ ...color })),
     };
   }
-  public async fetchLanguage(code: string, sections: string[] = ['_PMS_FRONT']) {
-    try {
-      const { data } = await axios.post(`https://gateway.igloorooms.com/IRBE/Get_Exposed_Language`, { code, sections });
-      if (data.ExceptionMsg !== '') {
-        throw new Error(data.ExceptionMsg);
-      }
-      let entries = this.transformArrayToObject(data.My_Result.entries);
-      locales.entries = { ...locales.entries, ...entries };
-      locales.direction = data.My_Result.direction;
-      //copy entries
-      // this.copyEntries(entries);
-      return { entries, direction: data.My_Result.direction };
-    } catch (error) {
-      console.log(error);
-      throw new Error(error);
-    }
+  /**
+   * @deprecated Use `LocaleController.load({ language, tables })` directly.
+   *
+   * Kept as a delegate so the existing call sites keep working while gaining the
+   * controller's caching, request de-duplication and guaranteed base tables.
+   */
+  public async fetchLanguage(code: string, sections: string[] = []) {
+    await LocaleController.load({ language: code, tables: sections as LocaleTable[] });
+    return { entries: locales.entries, direction: locales.direction };
   }
   // private copyEntries(data: Record<string, string>) {
   //   const typedObject: Record<string, string> = {};
@@ -172,12 +167,4 @@ export class RoomService {
   //   }, {} as Record<string, string>);
   //   navigator.clipboard.writeText(JSON.stringify(output, null, 2).replace(/"string"/g, 'string'));
   // }
-
-  private transformArrayToObject(data: any) {
-    let object: any = {};
-    for (const d of data) {
-      object[d.code] = d.description;
-    }
-    return object;
-  }
 }

@@ -1,7 +1,8 @@
 import WaInput from '@awesome.me/webawesome/dist/components/input/input';
 import { AttachInternals, Component, Element, Event, EventEmitter, Host, Method, Prop, State, Watch, h } from '@stencil/core';
-import { masks } from './masks';
+import { masks, withLatinDigits } from './masks';
 import IMask, { FactoryArg, InputMask } from 'imask';
+import { normalizeNumericInput } from '@/utils/number';
 
 export type MaskName = keyof typeof masks;
 export type MaskConfig<N extends MaskName = MaskName> = (typeof masks)[N];
@@ -19,7 +20,8 @@ export class IrInput {
 
   @Element() el: HTMLIrInputElement;
 
-  @Prop() name: string;
+  /** Reflected: a form-associated element is submitted under its `name` *attribute*. */
+  @Prop({ reflect: true }) name: string;
   /** The value of the input. */
   @Prop({ reflect: true, mutable: true }) value: string = '';
 
@@ -175,7 +177,8 @@ export class IrInput {
     if (this.disabled) {
       this.inputRef.disabled = this.disabled;
     }
-    // Find the closest form element (if any)
+    // Report the initial value too, so a prefilled field is posted without being typed into.
+    this.syncFormValue(this.value);
     // track slotted prefix to compute width
     this.initializeMask();
     this.setupSlotListeners();
@@ -212,6 +215,7 @@ export class IrInput {
   @Watch('value')
   handleValueChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
+      this.syncFormValue(newValue);
       if (this._mask && this.returnMaskedValue && this._mask.value !== newValue) {
         this._mask.value = newValue;
         this._mask.updateValue();
@@ -219,15 +223,33 @@ export class IrInput {
     }
   }
   private handleInput = (nextValue: string) => {
+    if (!this.mask && this.isNumericField()) {
+      const normalized = normalizeNumericInput(nextValue);
+      if (normalized !== nextValue && this.inputRef) {
+        // Rewrite the field directly: if the Latin value equals the current one, no re-render would fix the display.
+        this.inputRef.value = normalized;
+      }
+      nextValue = normalized;
+    }
     if (nextValue === this.value) {
       return;
     }
     if (!this.mask) {
       this.value = nextValue ?? '';
     }
-    this.internals.setFormValue(nextValue ?? '');
+    this.syncFormValue(nextValue);
     this.textChange.emit(nextValue ?? '');
   };
+
+  /** Keeps the value submitted with the owning `<form>` in step with what the field holds. */
+  private syncFormValue(value: string) {
+    this.internals?.setFormValue?.(value ?? '');
+  }
+
+  /** Unmasked phone/number fields get Latin digits too; free-text fields are left as typed. */
+  private isNumericField() {
+    return ['tel', 'number'].includes(this.type) || ['tel', 'numeric', 'decimal'].includes(this.inputmode);
+  }
 
   private async initializeMask() {
     if (!this.inputRef) return;
@@ -316,7 +338,7 @@ export class IrInput {
       maskOpts.max = this.max;
     }
 
-    return maskOpts;
+    return withLatinDigits(maskOpts);
   }
 
   private resolveMask() {

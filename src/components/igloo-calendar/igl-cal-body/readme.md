@@ -50,17 +50,15 @@ graph TD;
   igl-cal-body --> igl-housekeeping-dialog
   igl-cal-body --> igl-hk-issues-dialog
   igl-booking-event --> igl-booking-event-hover
-  igl-booking-event-hover --> ir-dropdown
-  igl-booking-event-hover --> ir-icons
-  igl-booking-event-hover --> ir-dropdown-item
+  igl-booking-event --> ir-dialog
   igl-booking-event-hover --> ir-date-view
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-custom-button
   igl-booking-event-hover --> igl-block-dates-view
-  ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
   igl-housekeeping-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-custom-button
+  igl-hk-issues-dialog --> ir-empty-state
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
   igloo-calendar --> igl-cal-body

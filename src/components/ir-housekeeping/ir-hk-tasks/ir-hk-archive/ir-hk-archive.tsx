@@ -1,15 +1,16 @@
-// import { HouseKeepingService } from '@/services/housekeeping.service';
+// import { HouseKeepingService } from '@/services/housekeeping';
 // import housekeeping_store from '@/stores/housekeeping.store';
 import { ArchivedTask } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import locales from '@/stores/locales.store';
 import { downloadFile } from '@/utils/utils';
 import { Component, Fragment, Host, Listen, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
 export type ArchivesFilters = {
   from_date: string;
   to_date: string;
@@ -109,14 +110,14 @@ export class IrHkArchive {
   render() {
     return (
       <Host>
-        <ir-title class="px-1" label="Cleaning Archives (90 days)" displayContext="sidebar"></ir-title>
+        <ir-title class="px-1" label={t('Lcz_CleaningArchives90Days', { fallback: 'Cleaning Archives (90 days)' })} displayContext="sidebar"></ir-title>
         <section class="px-1">
           <div class="d-flex">
             <ir-select
               class="w-100"
               showFirstOption={false}
               data={[
-                { text: 'All units', value: '000' },
+                { text: t('Lcz_AllUnits', { fallback: 'All units' }), value: '000' },
                 ,
                 ...this.units
                   ?.map(v => ({
@@ -137,11 +138,11 @@ export class IrHkArchive {
             ></ir-select>
             {housekeeping_store?.hk_criteria?.housekeepers.length > 1 && (
               <ir-select
-                class="ml-1 w-100"
+                class="ir-ms-1 w-100"
                 selectedValue={this.filters?.filtered_by_hkm?.length === housekeeping_store.hk_criteria.housekeepers.length ? '000' : this.filters?.filtered_by_hkm[0]?.toString()}
                 showFirstOption={false}
                 data={[
-                  { text: 'All housekeepers', value: '000' },
+                  { text: t('Lcz_Allhousekeepers', { fallback: 'All housekeepers' }), value: '000' },
                   ...housekeeping_store?.hk_criteria?.housekeepers
                     .map(v => ({
                       text: v.name,
@@ -161,8 +162,8 @@ export class IrHkArchive {
           </div>
           <div class="d-flex mt-1 align-items-center">
             {/* <igl-date-range
-              class="mr-1"
-              dateLabel={locales.entries.Lcz_Dates}
+              class="ir-me-1"
+              dateLabel={t('Lcz_Dates', { fallback: 'Dates' })}
               minDate={moment().add(-90, 'days').format('YYYY-MM-DD')}
               defaultData={{
                 fromDate: this.filters.from_date,
@@ -172,20 +173,20 @@ export class IrHkArchive {
             <ir-range-picker
               maxDate={moment().format('YYYY-MM-DD')}
               minDate={this.minSelectableDate}
-              class="mr-1"
+              class="ir-me-1"
               fromDate={this.filters.from_date ? moment(this.filters.from_date, 'YYYY-MM-DD') : null}
               toDate={this.filters.to_date ? moment(this.filters.to_date, 'YYYY-MM-DD') : null}
             ></ir-range-picker>
             <ir-button
-              title={locales.entries?.Lcz_Search}
+              title={t('Lcz_Search', { fallback: 'Search' })}
               variant="icon"
               icon_name="search"
-              class="mr-1"
+              class="ir-me-1"
               isLoading={this.isLoading === 'search'}
               onClickHandler={e => this.searchArchive(e)}
             ></ir-button>
             <ir-button
-              title={locales.entries?.Lcz_ExportToExcel}
+              title={t('Lcz_ExportToExcel', { fallback: 'Export to excel' })}
               variant="icon"
               icon_name="file"
               isLoading={this.isLoading === 'excel'}
@@ -195,19 +196,19 @@ export class IrHkArchive {
           {this.fetchedData && (
             <Fragment>
               {this.data?.length === 0 && !isRequestPending('/Get_Archived_HK_Tasks') ? (
-                <p class={'text-center mt-2'}>{locales.entries.Lcz_NoResultsFound}</p>
+                <p class={'text-center mt-2'}>{t('Lcz_NoResultsFound', { fallback: 'No results found' })}</p>
               ) : (
                 <table class="mt-2 table">
                   <thead>
-                    <th class="pl-0">{locales.entries.Lcz_Period}</th>
-                    <th>{locales.entries.Lcz_Housekeeper}</th>
-                    <th>{locales.entries.Lcz_Unit}</th>
-                    <th>{locales.entries.Lcz_BookingNumber}</th>
+                    <th class="ir-ps-0">{t('Lcz_Period', { fallback: 'Period' })}</th>
+                    <th>{t('Lcz_Housekeeper', { fallback: 'Housekeeper' })}</th>
+                    <th>{t('Lcz_Unit', { fallback: 'Unit' })}</th>
+                    <th>{t('Lcz_BookingNumber', { fallback: 'Booking number' })}</th>
                   </thead>
                   <tbody>
                     {this.data?.map(d => (
                       <tr key={d.id}>
-                        <td class="pl-0">{d.date}</td>
+                        <td class="ir-ps-0">{formatDate(d.date, 'MMM DD, YYYY')}</td>
                         <td>{d.house_keeper}</td>
                         <td>
                           <ir-tooltip message={d.unit} customSlot containerStyle={{ width: 'fit-content' }}>
@@ -235,7 +236,7 @@ export class IrHkArchive {
                               }}
                             ></ir-button>
                           ) : (
-                            locales.entries.Lcz_WasVacant
+                            t('Lcz_WasVacant', { fallback: 'Was vacant' })
                           )}
                         </td>
                       </tr>

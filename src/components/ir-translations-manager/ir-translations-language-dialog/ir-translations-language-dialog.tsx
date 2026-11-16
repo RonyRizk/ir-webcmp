@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import { TranslationEntry, TranslationLanguage } from '../types';
 import { completionFor } from '../utils';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-translations-language-dialog',
@@ -57,7 +58,7 @@ export class IrTranslationsLanguageDialog {
         <span class="language-dialog__code">{language.code.toUpperCase()}</span>
         <span class="language-dialog__name">
           {language.name}
-          {isSource && <span class="language-dialog__source-tag">Source</span>}
+          {isSource && <span class="language-dialog__source-tag">{t('Lcz_Source', { fallback: 'Source' })}</span>}
         </span>
         <span class="language-dialog__coverage">
           <wa-progress-bar class="language-dialog__bar" value={percent} label={`${language.name} coverage`}></wa-progress-bar>

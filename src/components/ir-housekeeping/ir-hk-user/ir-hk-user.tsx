@@ -1,13 +1,13 @@
 import { THKUser } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import { UserService } from '@/services/user.service';
 import calendar_data from '@/stores/calendar-data';
 import { getDefaultProperties } from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import { CONSTANTS } from '@/utils/constants';
 import { Component, Prop, State, h, Event, EventEmitter } from '@stencil/core';
 import { z, ZodError } from 'zod';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-hk-user',
   styleUrls: ['ir-hk-user.css', '../../../common/sheet.css'],
@@ -40,7 +40,7 @@ export class IrHkUser {
 
   private housekeepingService = new HouseKeepingService();
   private default_properties = {
-    token: '',
+    ApiClient: '',
     language: '',
   };
   private housekeeperSchema = z.object({
@@ -57,7 +57,7 @@ export class IrHkUser {
           }
           return CONSTANTS.PASSWORD.test(password);
         },
-        { message: 'Password must be at least 8 characters long.' },
+        { message: t('Lcz_PasswordMinLength', { fallback: 'Password must be at least 8 characters long.' }) },
       ),
     username: z
       .string()
@@ -72,13 +72,13 @@ export class IrHkUser {
           }
           return true;
         },
-        { message: 'Username already exists.' },
+        { message: t('Lcz_UsernameAlreadyExists', { fallback: 'Username already exists.' }) },
       ),
   });
 
   async componentWillLoad() {
-    const { token, language, property_id } = getDefaultProperties();
-    this.default_properties = { token, language };
+    const { ApiClient, language, property_id } = getDefaultProperties();
+    this.default_properties = { ApiClient, language };
     if (!this.user) {
       this.userInfo['property_id'] = property_id;
       // this.showPasswordValidation = true;
@@ -137,7 +137,9 @@ export class IrHkUser {
         <ir-title
           class="px-1 sheet-header"
           displayContext="sidebar"
-          label={this.isEdit ? locales.entries.Lcz_EditHousekeeperProfile : locales.entries.Lcz_CreateHousekeeperProfile}
+          label={
+            this.isEdit ? t('Lcz_EditHousekeeperProfile', { fallback: 'Edit Housekeeper Profile' }) : t('Lcz_CreateHousekeeperProfile', { fallback: 'Create housekeeper profile' })
+          }
         ></ir-title>
         <section class="px-1 sheet-body">
           <ir-input-text
@@ -146,8 +148,8 @@ export class IrHkUser {
             wrapKey="name"
             autoValidate={this.autoValidate}
             error={this.errors?.name}
-            label={locales.entries.Lcz_Name}
-            placeholder={locales.entries.Lcz_Name}
+            label={t('Lcz_Name', { fallback: 'Name' })}
+            placeholder={t('Lcz_Name', { fallback: 'Name' })}
             onTextChange={e => this.updateUserField('name', e.detail)}
             value={this.userInfo.name}
             onInputBlur={this.handleBlur.bind(this)}
@@ -155,13 +157,13 @@ export class IrHkUser {
           ></ir-input-text>
           <ir-phone-input
             testId="phone"
-            placeholder={locales.entries.Lcz_Mobile}
+            placeholder={t('Lcz_Mobile', { fallback: 'Mobile' })}
             error={this.errors?.mobile && !this.userInfo?.mobile}
             language={this.default_properties.language}
-            token={this.default_properties.token}
+            ApiClient={this.default_properties.ApiClient}
             default_country={calendar_data.country.id}
             phone_prefix={this.user?.phone_prefix}
-            label={locales.entries.Lcz_Mobile}
+            label={t('Lcz_Mobile', { fallback: 'Mobile' })}
             value={this.userInfo.mobile}
             onTextChange={e => {
               this.updateUserField('phone_prefix', e.detail.phone_prefix);
@@ -170,8 +172,8 @@ export class IrHkUser {
           ></ir-phone-input>
 
           {/* <ir-input-text
-            label={locales.entries.Lcz_Note}
-            placeholder={locales.entries.Lcz_Note}
+            label={t('Lcz_Note', { fallback: 'Note' })}
+            placeholder={t('Lcz_Note', { fallback: 'Note' })}
             value={this.userInfo.note}
             onTextChange={e => this.updateUserField('note', e.detail)}
             ></ir-input-text> */}
@@ -180,8 +182,8 @@ export class IrHkUser {
               testId="note"
               variant="prepend"
               maxLength={250}
-              label={locales.entries.Lcz_Note}
-              placeholder={locales.entries.Lcz_Note}
+              label={t('Lcz_Note', { fallback: 'Note' })}
+              placeholder={t('Lcz_Note', { fallback: 'Note' })}
               value={this.userInfo.note}
               onTextChange={e => this.updateUserField('note', e.detail)}
             ></ir-textarea>
@@ -193,16 +195,16 @@ export class IrHkUser {
             error={this.errors?.username}
             asyncParse
             autoValidate={this.user ? (this.userInfo?.username !== this.user.username ? true : false) : this.autoValidate}
-            errorMessage={this.errors?.username && this.userInfo?.username?.length >= 3 ? locales.entries.Lcz_UsernameAlreadyExists : undefined}
-            label={locales.entries.Lcz_Username}
-            placeholder={locales.entries.Lcz_Username}
+            errorMessage={this.errors?.username && this.userInfo?.username?.length >= 3 ? t('Lcz_UsernameAlreadyExists', { fallback: 'Username already exists.' }) : undefined}
+            label={t('Lcz_Username', { fallback: 'Username' })}
+            placeholder={t('Lcz_Username', { fallback: 'Username' })}
             value={this.userInfo.username}
             onTextChange={e => this.updateUserField('username', e.detail)}
           ></ir-input-text>
           <ir-input-text
             testId="password"
             autoValidate={this.user ? (!this.userInfo?.password ? false : true) : this.autoValidate}
-            label={locales.entries.Lcz_Password}
+            label={t('Lcz_Password', { fallback: 'Password' })}
             value={this.userInfo.password}
             type="password"
             maxLength={16}
@@ -224,7 +226,7 @@ export class IrHkUser {
             class="flex-fill"
             btn_styles="w-100  justify-content-center align-items-center"
             btn_color="secondary"
-            text={locales.entries.Lcz_Cancel}
+            text={t('Lcz_Cancel', { fallback: 'Cancel' })}
           ></ir-button>
           <ir-button
             data-testid="save"
@@ -232,7 +234,7 @@ export class IrHkUser {
             onClickHandler={this.addUser.bind(this)}
             class="flex-fill"
             btn_styles="w-100 justify-content-center align-items-center"
-            text={locales.entries.Lcz_Save}
+            text={t('Lcz_Save', { fallback: 'Save' })}
           ></ir-button>
         </div>
       </div>

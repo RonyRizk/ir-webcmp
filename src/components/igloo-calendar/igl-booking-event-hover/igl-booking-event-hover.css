@@ -1,181 +1,280 @@
 :host {
-  display: block;
-  position: relative;
-  z-index: 100;
+  /* Public theming API — every value resolves to a Web Awesome ApiClient */
+  --eh-gap: var(--wa-space-2xs, 0.25rem);
+  --eh-row-gap: var(--wa-space-3xs, 0.125rem);
+  --eh-pad: var(--wa-space-s, 0.5rem);
+  --eh-font: var(--wa-font-size-s, 0.8125rem);
+  --eh-label-color: var(--wa-color-text-quiet, #64748b);
+
   --ir-booking-event-arrow: 8px;
   --ir-booking-event-arrow-before: calc(var(--ir-booking-event-arrow) + 1px);
-  --ir-booking-popover-border-color: var(--wa-color-neutral-border-normal);
+  --ir-booking-popover-border-color: var(--wa-color-neutral-border-normal, #cbd5e1);
+
+  display: block;
 }
 
-.btn {
-  padding-left: 4px !important;
-  padding-right: 4px !important;
-}
-
-.balance_amount {
-  color: var(--wa-color-danger-fill-loud);
-  font-size: 0.75rem;
-}
-
-.event-hover__origin-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.event-hover__origin-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--wa-color-text-quiet, #6b7280);
-  letter-spacing: 0.04em;
-}
-
-.user-notes {
-  margin-left: 4px;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  line-clamp: 5;
-  overflow: hidden;
-  max-width: 100%;
-  height: auto;
-}
-
-.booking-event-hover__color-picker-trigger {
-  all: unset;
-  border: 1px solid #e0e0e0;
-  padding: 0.25rem 0.25rem;
-  border-radius: 0.21rem;
-  cursor: pointer;
-}
-
-.events_btns {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-.mx-01 {
-  --m: 5px;
-  margin-left: var(--m) !important;
-  margin-right: var(--m) !important;
-}
-
-.ota-notes {
-  width: 450px;
-}
-
+/* ─── Popover shell ─────────────────────────────────────── */
 .iglPopOver {
-  /* max-width: 350px; */
-  position: absolute;
-  background-color: var(--wa-color-surface-default);
-  padding: 10px;
-  border: 1px solid var(--ir-booking-popover-border-color);
-  left: var(--el-left, 50%);
-  transform: translateX(-50%) translateY(10px);
-  box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.2);
-  font-size: 13.5px;
-  line-height: var(--wa-line-height-normal);
-  /* ;
+  /* Positioned by the wa-popup it is rendered in (igl-booking-event); this is only the panel. */
+
+  box-sizing: border-box;
+  padding: var(--eh-pad);
   text-align: start;
   white-space: normal;
-  background-color: var(--wa-color-surface-default);
-  border-top: none;
-  border-left: none;
-  border-bottom: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
-  border-right: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
-  box-shadow: none; */
-  /* transform-origin: bottom; */
-  /* display: flex;
-  flex-direction: column; */
-  padding: var(--wa-space-m);
-  border-radius: var(--wa-panel-border-radius);
-  border-style: var(--wa-panel-border-style);
-  box-shadow:
-    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
-    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
-  box-shadow: var(--wa-shadow-l);
-  color: var(--wa-color-text-normal);
   user-select: none;
   -webkit-user-select: none;
+
+  font-size: var(--eh-font);
+  line-height: var(--wa-line-height-normal, 1.5);
+  color: var(--wa-color-text-normal, #1e293b);
+
+  background-color: var(--wa-color-surface-default, #fff);
+  border: var(--wa-panel-border-width, 1px) var(--wa-panel-border-style, solid) var(--ir-booking-popover-border-color);
+  border-radius: var(--wa-panel-border-radius, 0.5rem);
+  box-shadow: var(--wa-shadow-l, 0 10px 38px -10px rgba(15, 23, 42, 0.35));
+
+  animation: eh-in 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .iglPopOver.infoBubble {
   min-width: 350px;
+  /* max-width: 360px; */
 }
 
 .iglPopOver.blockedView {
-  max-width: 400px;
-  width: 400px;
+  width: 380px;
+  max-width: 380px;
 }
 
 .iglPopOver.newBookingOptions {
-  overflow-wrap: break-word !important;
-  min-width: 230px;
+  /* As narrow as its widest action; see the single-column grid below. */
   width: fit-content;
+  overflow-wrap: break-word;
 }
 
-.bubblePointer {
-  position: absolute;
-  width: 22px;
-  height: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
+@keyframes eh-in {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
 }
 
-.bubblePointer::before,
-.bubblePointer::after {
-  z-index: 100;
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: var(--ir-booking-event-arrow) solid transparent;
-  border-right: var(--ir-booking-event-arrow) solid transparent;
+@media (prefers-reduced-motion: reduce) {
+  .iglPopOver {
+    animation: eh-fade 120ms ease;
+  }
+  @keyframes eh-fade {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
-.bubblePointer::before {
-  border-left: var(--ir-booking-event-arrow-before) solid transparent;
-  border-right: var(--ir-booking-event-arrow-before) solid transparent;
-}
-.bubblePointTop {
-  bottom: -12px;
-}
-
-.bubblePointTop::before {
-  border-top: var(--ir-booking-event-arrow-before) solid var(--ir-booking-popover-border-color);
-  top: 0;
+/* ─── Header (channel + booking no + price + color) ─────── */
+.event-hover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--eh-gap);
+  margin-block-end: var(--eh-gap);
 }
 
-.bubblePointTop::after {
-  border-top: var(--ir-booking-event-arrow) solid var(--wa-color-surface-default);
-  top: -1px;
+.event-hover__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--eh-gap);
+  min-width: 0;
+  font-weight: var(--wa-font-weight-bold, 700);
 }
 
-.bubblePointBottom {
-  top: -12px;
+.event-hover__channel-icon {
+  block-size: auto;
+  inline-size: 22px;
+  flex-shrink: 0;
 }
 
-.bubblePointBottom::before {
-  border-bottom: var(--ir-booking-event-arrow-before) solid var(--ir-booking-popover-border-color);
-  bottom: 0;
+.event-hover__booking-no {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.bubblePointBottom::after {
-  border-bottom: var(--ir-booking-event-arrow) solid var(--wa-color-surface-default);
-  bottom: -1px;
+.event-hover__price {
+  display: flex;
+  align-items: center;
+  gap: var(--eh-gap);
+  flex-shrink: 0;
+  font-weight: var(--wa-font-weight-semibold, 600);
 }
 
-.bubbleInfoAbove {
-  bottom: 35px;
+/* ─── Color picker ─────────────────────────────────────── */
+.event-hover__color-dropdown::part(menu) {
+  min-width: max-content;
 }
 
-.updateBtnIcon {
-  margin-right: 4px;
+.event-hover__color-trigger {
+  all: unset;
+  display: inline-flex;
+  cursor: pointer;
+  padding: var(--wa-space-3xs, 2px);
+  border: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+  border-radius: var(--wa-border-radius-s, 0.1875rem);
+  transition: transform 120ms ease-out;
 }
-.icon-image {
-  height: auto;
-  width: 25px;
-  margin-right: 5px;
+
+.event-hover__color-trigger:active {
+  transform: scale(0.97);
+}
+
+.event-hover__color-trigger:focus-visible {
+  outline: var(--wa-focus-ring, 2px solid);
+  outline-offset: var(--wa-focus-ring-offset, 1px);
+}
+
+.event-hover__swatch {
+  display: block;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--wa-border-radius-s, 0.1875rem);
+}
+
+.event-hover__swatch.--none {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* ─── Origin / agent / balance ─────────────────────────── */
+.event-hover__origin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--eh-gap);
+}
+
+.event-hover__origin-label {
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  font-weight: var(--wa-font-weight-semibold, 600);
+  color: var(--eh-label-color);
+  letter-spacing: 0.04em;
+}
+
+.event-hover__agent {
+  display: inline-block;
+  max-inline-size: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.event-hover__balance {
+  flex-shrink: 0;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+}
+
+/* ─── Dates ────────────────────────────────────────────── */
+.event-hover__dates {
+  display: block;
+  margin-block: var(--eh-gap);
+  --ir-date-view-font-size: var(--eh-font);
+}
+
+/* ─── Detail rows ──────────────────────────────────────── */
+.event-hover__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-row-gap);
+}
+
+/* ─── Action buttons ──────────────────────────────────────
+   Info and blocked views keep every action on a single row — never wrapping —
+   buttons shrink together to fit. The new-booking view stacks them in a single
+   column instead (a wrapping flex row would size the panel to every button side
+   by side), so the panel fits its widest button and the others stretch to match. */
+.event-hover__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-gap);
+  margin-block-start: var(--wa-space-s, 0.5rem);
+}
+
+.newBookingOptions .event-hover__actions,
+.blockedView .event-hover__actions {
+  margin-block-start: 0;
+}
+
+.newBookingOptions .event-hover__actions {
+  display: grid;
+}
+
+.infoBubble .event-hover__actions,
+.blockedView .event-hover__actions {
+  flex-wrap: nowrap;
+}
+
+.infoBubble .event-hover__actions > ir-custom-button,
+.blockedView .event-hover__actions > ir-custom-button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.event-hover__actions ir-custom-button::part(label) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-hover__error {
+  margin: 0;
+  color: var(--wa-color-danger-fill-loud, #dc2626);
+  font-size: var(--wa-font-size-xs, 0.75rem);
+}
+
+/* ─── In a dialog ──────────────────────────────────────────
+   The dialog is the frame and sets the width. Actions are ranked rather than squeezed onto one row:
+   the first one is the main action, the rest share the width in pairs - a lone one, or one whose
+   label needs it, takes the whole row - and the destructive one stands apart at the end. */
+.iglPopOver.inDialog {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+.inDialog .event-hover__actions {
+  flex-wrap: wrap;
+  gap: var(--wa-space-xs, 0.5rem);
+  padding-block-end: var(--wa-space-m, 1rem);
+  background: var(--wa-color-surface-raised, #fff);
+}
+
+.inDialog .event-hover__actions > ir-custom-button {
+  flex: 1 1 calc(50% - var(--wa-space-xs, 0.5rem));
+  min-width: max-content;
+}
+
+.inDialog .event-hover__actions > ir-custom-button:first-child,
+.inDialog .event-hover__actions > .event-hover__destructive {
+  flex-basis: 100%;
+}
+
+.inDialog .event-hover__actions > .event-hover__destructive {
+  margin-block-start: var(--wa-space-xs, 0.5rem);
+}
+
+/* Upright there is height to spare, so the actions stay in reach while the details scroll under
+   them. On its side a phone has too little: pinned, they would cover what they act on. */
+@media (min-height: 501px) {
+  .inDialog .event-hover__actions {
+    position: sticky;
+    inset-block-end: 0;
+  }
 }

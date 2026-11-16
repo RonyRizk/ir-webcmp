@@ -2,6 +2,8 @@ import { Component, Event, EventEmitter, h } from '@stencil/core';
 import moment from 'moment';
 import { QuickDatePreset } from '@/components/ui/ir-date-range-filter/ir-date-range-filter';
 import uninvoiced_bookings, { updateUninvoicedBookingsFilters } from '@/stores/uninvoiced_bookings.store';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-unvoiced-bookings-filters',
@@ -11,12 +13,12 @@ import uninvoiced_bookings, { updateUninvoicedBookingsFilters } from '@/stores/u
 export class IrUnvoicedBookingsFilters {
   @Event() uninvoicedBookingsFiltersChange: EventEmitter<{ from: string; to: string; source: string }>;
 
-  private quickDates: QuickDatePreset[] = [
-    { label: '7 Days Ago', getDate: () => moment().subtract(7, 'days') },
-    { label: '14 Days Ago', getDate: () => moment().subtract(14, 'days') },
-    { label: '30 Days Ago', getDate: () => moment().subtract(30, 'days') },
-    { label: '90 Days Ago', getDate: () => moment().subtract(90, 'days') },
-  ];
+  private get quickDates(): QuickDatePreset[] {
+    return [7, 14, 30, 90].map(days => ({
+      label: t('Lcz_DaysAgo', { fallback: '%1 Days Ago', params: [formatCount(days)] }),
+      getDate: () => moment().subtract(days, 'days'),
+    }));
+  }
 
   private handleDatesChanged = (e: CustomEvent<{ from: string | null; to: string | null }>) => {
     e.stopImmediatePropagation();
@@ -57,7 +59,7 @@ export class IrUnvoicedBookingsFilters {
         ></ir-date-range-filter>
         <div class="uninvoiced-bookings-group">
           <wa-select onchange={this.handleSourceChanged} value={uninvoiced_bookings.filters.source} size="s">
-            <wa-option value="">All channels</wa-option>
+            <wa-option value="">{t('Lcz_AllChannels', { fallback: 'All channels' })}</wa-option>
             {uninvoiced_bookings.channels.map(channel => (
               <wa-option key={channel.value} value={channel.value}>
                 {channel.name}
@@ -75,7 +77,7 @@ export class IrUnvoicedBookingsFilters {
             <wa-icon name="magnifying-glass"></wa-icon>
           </ir-custom-button>
         </div>
-        <wa-tooltip for="uninvoiced-bookings-search-btn">Search</wa-tooltip>
+        <wa-tooltip for="uninvoiced-bookings-search-btn">{t('Lcz_Search', { fallback: 'Search' })}</wa-tooltip>
       </div>
     );
   }

@@ -9,6 +9,7 @@
 
 | Property     | Attribute    | Description | Type     | Default     |
 | ------------ | ------------ | ----------- | -------- | ----------- |
+| `language`   | `language`   |             | `string` | `'en'`      |
 | `propertyid` | `propertyid` |             | `string` | `undefined` |
 | `ticket`     | `ticket`     |             | `string` | `undefined` |
 
@@ -28,6 +29,7 @@
 - [ir-menu](../ir-menu)
 - [ir-menu-item](../ir-menu-item)
 - [ir-menu-group](../ir-menu-group)
+- [ir-translatable-textarea](../../ui/ir-translatable-textarea)
 - [ir-pms-payment-due-alert](../ir-pms-payment-due-alert)
 - [ir-input](../../ui/ir-input)
 - [ir-text-editor](../../ui/ir-text-editor)
@@ -46,6 +48,7 @@ graph TD;
   ir-pms-page --> ir-menu
   ir-pms-page --> ir-menu-item
   ir-pms-page --> ir-menu-group
+  ir-pms-page --> ir-translatable-textarea
   ir-pms-page --> ir-pms-payment-due-alert
   ir-pms-page --> ir-input
   ir-pms-page --> ir-text-editor
@@ -115,6 +118,8 @@ graph TD;
   ir-notifications --> ir-custom-button
   ir-notifications --> ir-empty-state
   ir-menu-drawer --> ir-drawer
+  ir-translatable-textarea --> ir-dialog
+  ir-translatable-textarea --> ir-translation-editor
   style ir-pms-page fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

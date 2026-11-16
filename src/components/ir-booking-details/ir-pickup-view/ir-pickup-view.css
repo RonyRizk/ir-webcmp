@@ -11,13 +11,13 @@
 }
 
 .pickup-body--guest {
-  border-left: 3px solid var(--wa-color-neutral-300, #d4d4d8);
-  padding-left: 0.625rem;
+  border-inline-start: 3px solid var(--wa-color-neutral-300, #d4d4d8);
+  padding-inline-start: 0.625rem;
 }
 
 .pickup-body--agent {
-  border-left: 3px solid var(--wa-color-brand-fill-loud, #60a5fa);
-  padding-left: 0.625rem;
+  border-inline-start: 3px solid var(--wa-color-brand-fill-loud, #60a5fa);
+  padding-inline-start: 0.625rem;
 }
 
 /* Bill-to label (original service-group__label pattern) */

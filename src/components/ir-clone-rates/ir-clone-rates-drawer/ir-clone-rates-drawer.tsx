@@ -1,3 +1,4 @@
+import { t } from '@/services/locale';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 
 @Component({
@@ -23,7 +24,7 @@ export class IrCloneRatesDrawer {
 
   render() {
     return (
-      <ir-drawer open={this.open} label="Copy rates to future dates" onDrawerHide={this.handleDrawerHide}>
+      <ir-drawer open={this.open} label={t('Lcz_CopyRatesToFutureDates')} onDrawerHide={this.handleDrawerHide}>
         {this.open && (
           <ir-clone-rates
             mode="drawer"
@@ -40,10 +41,10 @@ export class IrCloneRatesDrawer {
         )}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button size="m" appearance="filled" variant="neutral" data-drawer="close">
-            Cancel
+            {t('Lcz_Cancel')}
           </ir-custom-button>
           <ir-custom-button size="m" variant="brand" type="submit" form="clone-rates-form">
-            Review
+            {t('Lcz_Review')}
           </ir-custom-button>
         </div>
       </ir-drawer>

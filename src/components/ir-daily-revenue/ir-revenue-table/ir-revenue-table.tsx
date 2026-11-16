@@ -4,6 +4,8 @@ import { PaymentEntries } from '@/components/ir-booking-details/types';
 import { PAYMENT_TYPES_WITH_METHOD } from '@/components/ir-booking-details/ir-payment-details/global.variables';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 
 @Component({
   tag: 'ir-revenue-table',
@@ -19,11 +21,12 @@ export class IrRevenueTable {
   private payMethodObj: {};
   private groupType: 'method' | 'type' = 'method';
 
-  componentWillLoad() {
+  // Rebuilt on every render so labels follow the selected language.
+  private buildPaymentLookups() {
     const buildPaymentLookup = (key: keyof PaymentEntries) => {
       let pt = {};
       this.paymentEntries[key].forEach(p => {
-        pt = { ...pt, [p.CODE_NAME]: p.CODE_VALUE_EN };
+        pt = { ...pt, [p.CODE_NAME]: getSetupEntryLabel(p) };
       });
       return pt;
     };
@@ -90,6 +93,7 @@ export class IrRevenueTable {
   }
 
   render() {
+    this.buildPaymentLookups();
     const hasPayments = this.payments instanceof Map && this.payments.size > 0;
 
     return (
@@ -97,8 +101,8 @@ export class IrRevenueTable {
         {hasPayments ? (
           <Fragment>
             <div class="revenue-table__header">
-              <p>Method</p>
-              <p>Amount</p>
+              <p>{t('Lcz_Method', { fallback: 'Method' })}</p>
+              <p>{t('Lcz_Amount', { fallback: 'Amount' })}</p>
             </div>
             {this.groupType === 'type' &&
               Array.from((this.payments as Map<string, FolioPayment[]>).entries()).map(([key, list]) => {
@@ -106,7 +110,7 @@ export class IrRevenueTable {
                 const [paymentType, paymentMethod] = key.split('_');
                 const groupName = PAYMENT_TYPES_WITH_METHOD.includes(paymentType)
                   ? `${this.payTypesObj[paymentType] ?? paymentType}: ${this.payMethodObj[paymentMethod] ?? paymentMethod}`
-                  : this.payTypesObj[paymentType] ?? paymentType;
+                  : (this.payTypesObj[paymentType] ?? paymentType);
 
                 return <ir-revenue-row key={key} payments={list} groupName={groupName}></ir-revenue-row>;
               })}
@@ -116,12 +120,12 @@ export class IrRevenueTable {
                 return (
                   <div key={`method_${methodKey}`}>
                     <div class="revenue-table__method_header">
-                      <p>{this.payMethodObj[methodKey] ?? methodKey}</p>
+                      <p>{this.payMethodObj[methodKey] ?? (methodKey === 'UNKNOWN' ? t('Lcz_Unknown', { fallback: 'Unknown' }) : methodKey)}</p>
                       <p>{formatAmount(calendar_data.currency.symbol, total)}</p>
                     </div>
                     {Array.from(byType.entries()).map(([typeKey, list]) => {
                       list = this.sortByDateTime(list);
-                      const groupName = PAYMENT_TYPES_WITH_METHOD.includes(typeKey) ? `${this.payTypesObj[typeKey] ?? typeKey}` : this.payTypesObj[typeKey] ?? typeKey;
+                      const groupName = PAYMENT_TYPES_WITH_METHOD.includes(typeKey) ? `${this.payTypesObj[typeKey] ?? typeKey}` : (this.payTypesObj[typeKey] ?? typeKey);
 
                       return (
                         <div key={`type_${typeKey}`} class="revenue-table__type-group">
@@ -135,7 +139,7 @@ export class IrRevenueTable {
           </Fragment>
         ) : (
           <div class="revenue-table__empty-wrapper">
-            <ir-empty-state message="There are no payment transactions recorded for the selected date."></ir-empty-state>
+            <ir-empty-state message={t('Lcz_NoPaymentTransactionsForDate', { fallback: 'There are no payment transactions recorded for the selected date.' })}></ir-empty-state>
           </div>
         )}
       </wa-card>

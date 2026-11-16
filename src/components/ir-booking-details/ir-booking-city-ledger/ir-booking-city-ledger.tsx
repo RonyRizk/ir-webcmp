@@ -1,13 +1,16 @@
 import { Component, Host, Prop, State, h } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { CityLedgerService } from '@/services/city-ledger';
 import type { ServiceCategoryOption } from '@/components/ir-city-ledger/ir-city-ledger-folio/ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/ir-city-ledger-transaction-form.schema';
 import { FolioRow, mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
-import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
 import { actionableClTypes } from '@/services/city-ledger.service';
 import { formatAmount } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
+import { formatBookingNumber } from '@/utils/number';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 
 @Component({
   tag: 'ir-booking-city-ledger',
@@ -24,7 +27,7 @@ export class IrBookingCityLedger {
   @Prop() language: string = 'en';
 
   /** Service-category entries used to populate the transaction form. */
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
 
   /** Folio rows fetched by the parent. */
   @Prop() folioRows: FolioRow[] = [];
@@ -71,11 +74,12 @@ export class IrBookingCityLedger {
   }
 
   private get serviceCategoryOptions(): ServiceCategoryOption[] {
-    return this.svcCategories.map(s => ({ id: s.CODE_NAME, label: s.CODE_VALUE_EN }));
+    return this.svcCategories.map(s => ({ id: s.CODE_NAME, label: getSetupEntryLabel(s) }));
   }
 
   private get bookingOptions() {
-    return this.booking?.booking_nbr ? [{ id: this.booking.booking_nbr, label: `#${this.booking.booking_nbr}` }] : [];
+    // `id` stays the raw booking number — it is the option's identity; only `label` is displayed.
+    return this.booking?.booking_nbr ? [{ id: this.booking.booking_nbr, label: `#${formatBookingNumber(this.booking.booking_nbr)}` }] : [];
   }
 
   private formatAmount(value: number): string {
@@ -108,7 +112,7 @@ export class IrBookingCityLedger {
                   {row.status.id === 'billed' && <wa-icon name="lock"></wa-icon>}
                 </wa-tag> */}
                   {/* <ir-cl-status-tag transaction={{ _rowId: '', ...mapClTxToFolioRow(row._raw), balance: 0 }}></ir-cl-status-tag> */}
-                  <span class="folio-row__date">{moment(row.serviceDate).format('MMM DD, YYYY')}</span>
+                  <span class="folio-row__date">{formatDate(row.serviceDate, 'MMM DD, YYYY')}</span>
                 </div>
                 <div class="folio-row__right">
                   <span class="folio-row__amount">
@@ -139,11 +143,11 @@ export class IrBookingCityLedger {
 
                       <wa-dropdown-item value="edit">
                         <wa-icon slot="icon" name="edit"></wa-icon>
-                        Edit
+                        {t('Lcz_Edit', { fallback: 'Edit' })}
                       </wa-dropdown-item>
                       <wa-dropdown-item value="delete" variant="danger">
                         <wa-icon slot="icon" name="trash"></wa-icon>
-                        Delete
+                        {t('Lcz_Delete', { fallback: 'Delete' })}
                       </wa-dropdown-item>
                     </wa-dropdown>
                   )}
@@ -152,7 +156,7 @@ export class IrBookingCityLedger {
               <div class={'folio-row-desc_row'}>
                 {row.description && <p class="folio-row__desc">{row.description}</p>}
                 <ir-cl-status-tag
-                  style={{ marginRight: showDropdown ? '1.9rem' : '0' }}
+                  style={{ marginInlineEnd: showDropdown ? '1.9rem' : '0' }}
                   transaction={{ _rowId: '', ...mapClTxToFolioRow(row._raw), balance: 0 }}
                 ></ir-cl-status-tag>
               </div>
@@ -171,10 +175,10 @@ export class IrBookingCityLedger {
       <Host>
         <wa-card appearance="plain" class="booking-city-ledger__card">
           <div slot="header" class="booking-city-ledger__header-title">
-            <p class="font-size-large p-0 m-0"> Agent Folio</p>
+            <p class="font-size-large p-0 m-0">{t('Lcz_AgentFolio', { fallback: 'Agent Folio' })}</p>
           </div>
 
-          <wa-tooltip for="booking-city-ledger-add-btn">Add folio entry</wa-tooltip>
+          <wa-tooltip for="booking-city-ledger-add-btn">{t('Lcz_AddFolioEntry', { fallback: 'Add folio entry' })}</wa-tooltip>
           <ir-custom-button
             slot="header-actions"
             id="booking-city-ledger-add-btn"
@@ -202,7 +206,7 @@ export class IrBookingCityLedger {
 
         <ir-city-ledger-transaction-drawer
           open={this.drawerOpen}
-          drawerLabel={this.editingRow ? 'Edit Folio Entry' : 'New Folio Entry'}
+          drawerLabel={this.editingRow ? t('Lcz_EditFolioEntry', { fallback: 'Edit Folio Entry' }) : t('Lcz_NewFolioEntry', { fallback: 'New Folio Entry' })}
           agent={this.booking.agent}
           booking={this.booking}
           transaction={this.editingRow?._raw ?? null}
@@ -222,7 +226,7 @@ export class IrBookingCityLedger {
             (`ir-fiscal-document-preview`), which listens for these events globally. */}
 
         <ir-dialog
-          label="Delete Entry"
+          label={t('Lcz_DeleteEntry', { fallback: 'Delete Entry' })}
           open={!!this.deleteTarget}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
@@ -230,13 +234,13 @@ export class IrBookingCityLedger {
             if (!this.isDeleting) this.deleteTarget = null;
           }}
         >
-          <p>Are you sure you want to delete this entry? This action cannot be undone.</p>
+          <p>{t('Lcz_ConfirmDeleteFolioEntry', { fallback: 'Are you sure you want to delete this entry? This action cannot be undone.' })}</p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
-              Delete
+              {t('Lcz_Delete', { fallback: 'Delete' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

@@ -1,10 +1,10 @@
 import { Booking, ExtraService } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-extra-service-config',
   styleUrls: ['ir-extra-service-config.css'],
@@ -13,7 +13,7 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 export class IrExtraServiceConfig {
   @Prop() booking: Booking;
   @Prop() agent: Agent;
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
   @Prop() service: ExtraService;
   @Prop() language: string;
   @Prop({ reflect: true }) open: boolean;
@@ -42,7 +42,7 @@ export class IrExtraServiceConfig {
           e.stopPropagation();
           this.closeDialog();
         }}
-        label={locales.entries.Lcz_ExtraServices}
+        label={t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}
       >
         {this.open && (
           <ir-extra-service-config-form
@@ -61,10 +61,10 @@ export class IrExtraServiceConfig {
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button class={`flex-fill`} size="m" appearance="filled" variant="neutral" data-drawer="close">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button type="submit" loading={isRequestPending('/Do_Booking_Extra_Service')} form="extra-service-config-form" size="m" class={`flex-fill`} variant="brand">
-            {locales.entries.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

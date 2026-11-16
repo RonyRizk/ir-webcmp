@@ -1,5 +1,4 @@
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { Agent } from '@/services/agents/type';
 import { Component, Element, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { IAllowedOptions } from '@/models/calendarData';
@@ -8,6 +7,7 @@ import { Booking, IBookingPickupInfo } from '@/models/booking.dto';
 import { TPickupData } from '../types';
 import { IrServiceAssigneeSelectCustomEvent } from '@/components';
 import { isAgentMode } from '../../functions';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-pickup-form',
   styleUrl: 'ir-pickup-form.css',
@@ -246,8 +246,8 @@ export class IrPickupForm {
             defaultValue={this.pickupData.location === -1 ? '' : this.pickupData.location?.toString()}
             value={this.pickupData.location === -1 ? '' : this.pickupData.location?.toString()}
           >
-            <wa-option value="">{locales.entries.Lcz_Pickup_NoThankYou}</wa-option>
-            {this.pickupService.getAvailableLocations(locales.entries.Lcz_Pickup_YesFrom).map(option => (
+            <wa-option value="">{t('Lcz_Pickup_NoThankYou')}</wa-option>
+            {this.pickupService.getAvailableLocations(t('Lcz_Pickup_YesFrom')).map(option => (
               <wa-option key={`pickup-location-${option.value}`} value={option.value?.toString()}>
                 {option.text}
               </wa-option>
@@ -272,7 +272,7 @@ export class IrPickupForm {
                 onDateChanged={evt => {
                   this.updatePickupData('arrival_date', evt.detail.start?.format('YYYY-MM-DD') ?? null);
                 }}
-                label={locales.entries.Lcz_ArrivalDate}
+                label={t('Lcz_ArrivalDate')}
               ></ir-date-select>
             </ir-validator>
             <ir-validator
@@ -288,7 +288,7 @@ export class IrPickupForm {
                   this.updatePickupData('arrival_time', e.detail);
                 }}
                 mask={'time'}
-                label={locales.entries.Lcz_Time}
+                label={t('Lcz_Time')}
               ></ir-input>
             </ir-validator>
             <ir-validator
@@ -298,11 +298,7 @@ export class IrPickupForm {
               valueEvent="text-change input input-change"
               blurEvent="input-blur blur"
             >
-              <ir-input
-                onText-change={e => this.updatePickupData('flight_details', e.detail)}
-                value={this.pickupData.flight_details}
-                label={locales.entries.Lcz_FlightDetails}
-              ></ir-input>
+              <ir-input onText-change={e => this.updatePickupData('flight_details', e.detail)} value={this.pickupData.flight_details} label={t('Lcz_FlightDetails')}></ir-input>
             </ir-validator>
             <ir-validator
               schema={this.pickupSchema.shape.vehicle_type_code}
@@ -335,7 +331,7 @@ export class IrPickupForm {
                 size="s"
                 defaultValue={this.pickupData.number_of_vehicles?.toString()}
                 value={this.pickupData.number_of_vehicles?.toString()}
-                label={locales.entries.Lcz_NbrOfVehicles}
+                label={t('Lcz_NbrOfVehicles')}
                 onchange={e => {
                   this.handleVehicleQuantityChange(Number((e.target as HTMLSelectElement).value));
                 }}
@@ -349,7 +345,7 @@ export class IrPickupForm {
             </ir-validator>
             <ir-input
               mask={'price'}
-              label={`${locales.entries.Lcz_DueUponBooking}`}
+              label={`${t('Lcz_DueUponBooking')}`}
               onText-change={e => {
                 this.pickupData = {
                   ...this.pickupData,

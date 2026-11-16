@@ -23,10 +23,6 @@
 
 ## Dependencies
 
-### Used by
-
- - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
-
 ### Depends on
 
 - [ir-icons](../ir-icons)
@@ -35,7 +31,6 @@
 ```mermaid
 graph TD;
   ir-dropdown --> ir-icons
-  igl-booking-event-hover --> ir-dropdown
   style ir-dropdown fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

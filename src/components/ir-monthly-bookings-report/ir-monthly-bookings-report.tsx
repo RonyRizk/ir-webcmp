@@ -1,12 +1,17 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { Component, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { DailyReport, DailyReportFilter } from './types';
 import moment from 'moment';
-import locales from '@/stores/locales.store';
 import { RoomService } from '@/services/room.service';
 import { PropertyService } from '@/services/property.service';
 import type { DailyStat, MonthlyStatsResults } from '@/services/property/types';
+import { formatDate } from '@/utils/date';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
+import { formatCount, formatNumber, formatPercent } from '@/utils/number';
 @Component({
   tag: 'ir-monthly-bookings-report',
   styleUrl: 'ir-monthly-bookings-report.css',
@@ -28,14 +33,17 @@ export class IrMonthlyBookingsReport {
 
   private baseFilters: DailyReportFilter;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.monthlyBookingsReport, () => this.init());
 
   componentWillLoad() {
     this.baseFilters = {
       date: {
-        description: moment().format('MMMM YYYY'),
+        description: formatDate(moment(), 'MMMM YYYY'),
         firstOfMonth: moment().startOf('month').format('YYYY-MM-DD'),
         lastOfMonth: moment().endOf('month').format('YYYY-MM-DD'),
       },
@@ -43,14 +51,27 @@ export class IrMonthlyBookingsReport {
     };
     this.filters = this.baseFilters;
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -64,6 +85,9 @@ export class IrMonthlyBookingsReport {
 
   private async init() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.monthlyBookingsReport });
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
@@ -74,7 +98,7 @@ export class IrMonthlyBookingsReport {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
           include_units_hk_status: true,
         });
@@ -82,12 +106,12 @@ export class IrMonthlyBookingsReport {
         propertyId = propertyData.My_Result.id;
       }
       this.property_id = propertyId;
-      const requests = [this.roomService.fetchLanguage(this.language), this.getReports()];
+      const requests = [localeReady, this.getReports()];
       if (this.propertyid) {
         requests.push(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
             include_units_hk_status: true,
           }),
@@ -170,7 +194,7 @@ export class IrMonthlyBookingsReport {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <ir-page label="Daily Occupancy">
+      <ir-page label={t('Lcz_DailyOccupancy', { fallback: 'Daily Occupancy' })}>
         <ir-custom-button
           variant="neutral"
           onClickHandler={async e => {
@@ -183,7 +207,7 @@ export class IrMonthlyBookingsReport {
           loading={this.isLoading === 'export'}
         >
           <wa-icon name="download" slot="start"></wa-icon>
-          {locales.entries?.Lcz_Export}
+          {t('Lcz_Export', { fallback: 'Export' })}
         </ir-custom-button>
         <section class="report-layout">
           <section>
@@ -191,14 +215,14 @@ export class IrMonthlyBookingsReport {
               <ir-metric-card
                 class="report-metric"
                 icon={this.stats?.Occupancy_Difference_From_Previous_Month < 0 ? 'arrow-trend-down' : 'arrow-trend-up'}
-                label="Average Occupancy"
-                value={this.stats.AverageOccupancy ? this.stats?.AverageOccupancy.toFixed(2) : null}
+                label={t('Lcz_AverageOccupancy', { fallback: 'Average Occupancy' })}
+                value={this.stats.AverageOccupancy ? formatNumber(this.stats.AverageOccupancy, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null}
                 unit="%"
                 trend={this.stats?.Occupancy_Difference_From_Previous_Month}
-                trendLabel="from last month"
+                trendLabel={t('Lcz_FromLastMonth', { fallback: 'from last month' })}
                 caption={
                   this.stats?.Occupancy_Difference_From_Previous_Month != null && this.stats?.AverageOccupancy != null
-                    ? `Last month: ${(this.stats.AverageOccupancy - this.stats.Occupancy_Difference_From_Previous_Month).toFixed(2)}%`
+                    ? `${t('Lcz_LastMonth', { fallback: 'Last month:' })} ${formatPercent(this.stats.AverageOccupancy - this.stats.Occupancy_Difference_From_Previous_Month, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     : undefined
                 }
               ></ir-metric-card>
@@ -206,25 +230,25 @@ export class IrMonthlyBookingsReport {
               <ir-metric-card
                 class="report-metric"
                 icon="hotel"
-                label="Total Units"
-                value={this.stats?.TotalUnitsBooked ? this.stats?.TotalUnitsBooked.toString() : null}
-                caption="Booked"
+                label={t('Lcz_TotalUnits', { fallback: 'Total Units' })}
+                value={this.stats?.TotalUnitsBooked ? formatCount(this.stats.TotalUnitsBooked) : null}
+                caption={t('Lcz_Booked', { fallback: 'Booked' })}
               ></ir-metric-card>
 
               <ir-metric-card
                 class="report-metric"
                 icon="user-group"
-                label="Total Guests"
-                value={this.stats?.Total_Guests ? this.stats?.Total_Guests?.toString() : null}
-                caption="Stayed"
+                label={t('Lcz_TotalGuests', { fallback: 'Total Guests' })}
+                value={this.stats?.Total_Guests ? formatCount(this.stats.Total_Guests) : null}
+                caption={t('Lcz_Stayed', { fallback: 'Stayed' })}
               ></ir-metric-card>
 
               <ir-metric-card
                 class="report-metric"
                 icon="calendar"
-                label="Peak Days"
-                value={this.stats?.PeakDays.length === 0 ? null : this.stats?.PeakDays?.map(pd => moment(pd.Date, 'YYYY-MM-DD').format('D').concat('th')).join(' - ')}
-                caption={`${Math.max(...(this.stats.PeakDays?.map(pd => pd.OccupancyPercent) || []))}% occupancy`}
+                label={t('Lcz_PeakDays', { fallback: 'Peak Days' })}
+                value={this.stats?.PeakDays.length === 0 ? null : this.stats?.PeakDays?.map(pd => formatDate(pd.Date, 'Do')).join(' - ')}
+                caption={t('Lcz_PercentOccupancy', { fallback: '%1% occupancy', params: [formatNumber(Math.max(...(this.stats.PeakDays?.map(pd => pd.OccupancyPercent) || [])))] })}
               ></ir-metric-card>
             </div>
             <div class="report-content-row">

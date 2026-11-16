@@ -1,8 +1,8 @@
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import { TaskFilters } from '../types';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
 export type ModifiedTaskFilters = Omit<TaskFilters, 'housekeepers'> & { housekeepers: string };
 @Component({
   tag: 'ir-tasks-filters',
@@ -64,7 +64,7 @@ export class IrTasksFilters {
       <ir-filter-card>
         <fieldset>
           <wa-select
-            label={locales.entries.Lcz_Period}
+            label={t('Lcz_Period', { fallback: 'Period' })}
             size="s"
             data-testid="period"
             value={this.filters?.cleaning_periods?.code}
@@ -81,14 +81,14 @@ export class IrTasksFilters {
         {housekeeping_store?.hk_criteria?.housekeepers.length > 1 && (
           <fieldset>
             <wa-select
-              label={locales.entries.Lcz_Housekeepers}
+              label={t('Lcz_Housekeepers', { fallback: 'Housekeepers' })}
               size="s"
               data-testid="housekeepers"
               value={this.filters?.housekeepers}
               defaultValue={this.filters?.housekeepers}
               onchange={e => this.updateFilter({ housekeepers: (e.target as HTMLSelectElement).value })}
             >
-              <wa-option value="000">{locales.entries.Lcz_Allhousekeepers}</wa-option>
+              <wa-option value="000">{t('Lcz_Allhousekeepers', { fallback: 'All housekeepers' })}</wa-option>
               {housekeeping_store?.hk_criteria?.housekeepers
                 .slice()
                 .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
@@ -102,7 +102,7 @@ export class IrTasksFilters {
         )}
         <fieldset>
           <wa-select
-            label="Include dusty units"
+            label={t('Lcz_IncludeDustyUnits', { fallback: 'Include dusty units' })}
             size="s"
             data-testid="dusty_units"
             value={this.filters?.dusty_units?.code}
@@ -118,7 +118,7 @@ export class IrTasksFilters {
         </fieldset>
         <fieldset>
           <wa-select
-            label={locales.entries['Lcz_HighlightCheck-insFrom']}
+            label={t('Lcz_HighlightCheck-insFrom')}
             size="s"
             data-testid="highlight_check_ins"
             value={this.filters?.highlight_check_ins?.code}
@@ -134,10 +134,10 @@ export class IrTasksFilters {
         </fieldset>
         <div slot="footer">
           <ir-custom-button variant="neutral" appearance="filled" data-testid="reset" onClickHandler={e => this.resetFilters(e)}>
-            {locales.entries.Lcz_Reset}
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button variant="brand" data-testid="apply" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
-            {locales.entries.Lcz_Apply}
+            {t('Lcz_Apply', { fallback: 'Apply' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

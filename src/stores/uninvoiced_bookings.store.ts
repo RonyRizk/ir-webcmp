@@ -1,6 +1,6 @@
 import { createStore } from '@stencil/store';
 import moment from 'moment';
-import { ICriteriaChannel, ICriteriaStatuses, ICriteriaTypes } from '@/models/IrBookingListing';
+import { ICriteriaChannel, ICriteriaStatuses, ICriteriaTypes, IExposedBookingsCriteria } from '@/services/booking-listing/types';
 import { UninvoicedBookingRow } from '@/components/ir-uninvoiced-bookings/types';
 
 export interface UninvoicedBookingsFilters {
@@ -49,7 +49,7 @@ export function updateUninvoicedBookingsFilters(filters: Partial<UninvoicedBooki
   uninvoiced_bookings.filters = { ...uninvoiced_bookings.filters, ...filters };
 }
 
-export function setUninvoicedBookingsCriteria(criteria: { channels: ICriteriaChannel[]; statuses: ICriteriaStatuses[]; types: ICriteriaTypes[] }) {
+export function setUninvoicedBookingsCriteria(criteria: Pick<IExposedBookingsCriteria, 'channels' | 'statuses' | 'types'>) {
   uninvoiced_bookings.channels = criteria.channels ?? [];
   uninvoiced_bookings.statuses = criteria.statuses ?? [];
   uninvoiced_bookings.types = criteria.types ?? [];

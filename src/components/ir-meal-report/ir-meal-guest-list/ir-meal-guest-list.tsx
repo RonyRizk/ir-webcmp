@@ -2,6 +2,8 @@ import { Component, Host, Prop, State, h } from '@stencil/core';
 import { MealGuestEntry } from '@/services/meal-report/types';
 import { flexRender, useTable } from '@/utils/useTable';
 import { type TableState, type Updater, createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-meal-guest-list',
@@ -18,20 +20,20 @@ export class IrMealGuestList {
   private columns = [
     this.columnHelper.accessor(row => row.unit.name, {
       id: 'unit',
-      header: 'Unit',
+      header: t('Lcz_Unit', { fallback: 'Unit' }),
       enableSorting: false,
       cell: info => <span class="meal-guest-list__unit">{info.getValue()}</span>,
     }),
     this.columnHelper.accessor(row => `${row.guest.first_name} ${row.guest.last_name}`.trim(), {
       id: 'guest',
-      header: 'Guest name',
+      header: t('Lcz_GuestName', { fallback: 'Guest name' }),
       enableSorting: false,
       cell: info => (
         <div class="meal-guest-list__guest">
           <span>{info.getValue()}</span>
           {info.row.original.is_arriving_today && (
             <wa-badge variant="brand" appearance="filled" pill>
-              Arriving today
+              {t('Lcz_ArrivingToday', { fallback: 'Arriving today' })}
             </wa-badge>
           )}
         </div>
@@ -41,8 +43,8 @@ export class IrMealGuestList {
       id: 'occupancy',
       header: () => (
         <span>
-          <span class="meal-guest-list__cell--ad">Ad</span>
-          <span class="meal-guest-list__cell--ch">Ch</span>
+          <span class="meal-guest-list__cell--ad">{t('Lcz_Ad', { fallback: 'Ad' })}</span>
+          <span class="meal-guest-list__cell--ch">{t('Lcz_Ch', { fallback: 'Ch' })}</span>
         </span>
       ),
       enableSorting: false,
@@ -50,21 +52,21 @@ export class IrMealGuestList {
         const [ad, ch] = info.getValue().split(' - ');
         return (
           <span>
-            <span class="meal-guest-list__cell--ad">{ad}</span>
-            <span class="meal-guest-list__cell--ch">{ch}</span>
+            <span class="meal-guest-list__cell--ad">{formatCount(Number(ad))}</span>
+            <span class="meal-guest-list__cell--ch">{formatCount(Number(ch))}</span>
           </span>
         );
       },
     }),
     this.columnHelper.accessor(row => row.source?.Label ?? '', {
       id: 'source',
-      header: 'Source',
+      header: t('Lcz_Source', { fallback: 'Source' }),
       enableSorting: false,
       cell: info => <span class="meal-guest-list__muted">{info.getValue()}</span>,
     }),
     this.columnHelper.accessor(row => row.rate_plan?.short_name ?? '', {
       id: 'ratePlan',
-      header: 'Rate plan',
+      header: t('Lcz_RatePlan', { fallback: 'Rate plan' }),
       enableSorting: false,
       cell: info => <span class="meal-guest-list__muted">{info.getValue()}</span>,
     }),
@@ -83,7 +85,7 @@ export class IrMealGuestList {
       return (
         <Host>
           <div class="meal-guest-list__empty">
-            <ir-empty-state message="No guests found for the current filters."></ir-empty-state>
+            <ir-empty-state message={t('Lcz_NoGuestsFoundForCurrentFilters', { fallback: 'No guests found for the current filters.' })}></ir-empty-state>
           </div>
         </Host>
       );
@@ -142,11 +144,11 @@ export class IrMealGuestList {
             <tfoot>
               <tr class="meal-guest-list__total-row">
                 <td></td>
-                <td class="meal-guest-list__total-label">Total</td>
+                <td class="meal-guest-list__total-label">{t('Lcz_Total', { fallback: 'Total' })}</td>
                 <td class="meal-guest-list__total-value ">
                   <span>
-                    <span class="meal-guest-list__cell--ad --total">{totalAdults}</span>
-                    <span class="meal-guest-list__cell--ch --total">{totalChildren}</span>
+                    <span class="meal-guest-list__cell--ad --total">{formatCount(totalAdults)}</span>
+                    <span class="meal-guest-list__cell--ch --total">{formatCount(totalChildren)}</span>
                   </span>
                 </td>
                 <td colSpan={2} class="meal-guest-list__total-meta">

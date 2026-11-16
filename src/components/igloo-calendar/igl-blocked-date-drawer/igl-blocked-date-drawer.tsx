@@ -1,6 +1,7 @@
 import { BookingService } from '@/services/booking-service/booking.service';
 import { getReleaseHoursString } from '@/utils/utils';
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-blocked-date-drawer',
@@ -109,7 +110,7 @@ export class IglBlockedDateDrawer {
         )}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button data-drawer="close" size="m" appearance="filled" variant="neutral">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button
             loading={this.isLoading}
@@ -120,7 +121,7 @@ export class IglBlockedDateDrawer {
             appearance="accent"
             variant="brand"
           >
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

@@ -1,13 +1,16 @@
 import { RoomService } from '@/services/room.service';
 import channels_data, { resetStore, selectChannel, setChannelIdAndActiveState, testConnection, updateChannelSettings } from '@/stores/channel.store';
-import locales from '@/stores/locales.store';
 import { Component, Host, Prop, Watch, h, Element, State, Fragment, Listen } from '@stencil/core';
 import { actions } from './data';
 import { IModalCause } from './types';
 import { ChannelService } from '@/services/channel.service';
 import { IChannel } from '@/models/calendarData';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-channel',
   styleUrl: 'ir-channel.css',
@@ -28,17 +31,33 @@ export class IrChannel {
 
   private roomService = new RoomService();
   private channelService = new ChannelService();
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   private irModalRef: HTMLIrModalElement;
   propertyId: number;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.channel, () => this.initializeApp());
+
   componentWillLoad() {
     this.isLoading = true;
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   async handleConfirmClicked(e: CustomEvent) {
@@ -65,28 +84,27 @@ export class IrChannel {
       throw new Error('Property ID or username is required');
     }
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.channel });
       let propertyId = this.propertyid;
       if (!propertyId) {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
         propertyId = propertyData.My_Result.id;
       }
 
-      const requests = [
-        this.channelService.getExposedChannels(propertyId),
-        this.channelService.getExposedConnectedChannels(propertyId),
-        this.roomService.fetchLanguage(this.language, ['_CHANNEL_FRONT']),
-      ];
+      const requests = [this.channelService.getExposedChannels(propertyId), this.channelService.getExposedConnectedChannels(propertyId), localeReady];
 
       if (this.propertyid) {
         requests.unshift(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
           }),
         );
@@ -94,14 +112,9 @@ export class IrChannel {
 
       this.propertyId = propertyId;
 
-      const results = await Promise.all(requests);
-      const languageTexts = results[results.length - 1];
+      await Promise.all(requests);
 
       channels_data.property_id = this.propertyid;
-      if (!locales.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -114,7 +127,7 @@ export class IrChannel {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -136,7 +149,7 @@ export class IrChannel {
         },
         cause: 'channel',
         main_color: 'primary',
-        message: locales.entries?.Lcz_UnSavedChangesWillBeLost,
+        message: t('Lcz_UnSavedChangesWillBeLost'),
         title: '',
       };
       this.openModal();
@@ -185,8 +198,8 @@ export class IrChannel {
         <ir-toast></ir-toast>
         <section class="p-2 px-lg-5 py-0 h-100 d-flex flex-column">
           <div class="d-flex w-100 justify-content-between mb-2 align-items-center">
-            <h3 class="font-weight-bold m-0 p-0">{locales.entries?.Lcz_iSWITCH}</h3>
-            <ir-button iconPosition="left" icon_name="circle_plus" text={locales.entries?.Lcz_CreateChannel} size="sm" onClickHandler={() => (this.channel_status = 'create')}>
+            <h3 class="font-weight-bold m-0 p-0">{t('Lcz_iSWITCH')}</h3>
+            <ir-button iconPosition="left" icon_name="circle_plus" text={t('Lcz_CreateChannel')} size="sm" onClickHandler={() => (this.channel_status = 'create')}>
               {/* <svg slot="icon" stroke-width={3} width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M7.49991 0.876892C3.84222 0.876892 0.877075 3.84204 0.877075 7.49972C0.877075 11.1574 3.84222 14.1226 7.49991 14.1226C11.1576 14.1226 14.1227 11.1574 14.1227 7.49972C14.1227 3.84204 11.1576 0.876892 7.49991 0.876892ZM1.82707 7.49972C1.82707 4.36671 4.36689 1.82689 7.49991 1.82689C10.6329 1.82689 13.1727 4.36671 13.1727 7.49972C13.1727 10.6327 10.6329 13.1726 7.49991 13.1726C4.36689 13.1726 1.82707 10.6327 1.82707 7.49972ZM7.50003 4C7.77617 4 8.00003 4.22386 8.00003 4.5V7H10.5C10.7762 7 11 7.22386 11 7.5C11 7.77614 10.7762 8 10.5 8H8.00003V10.5C8.00003 10.7761 7.77617 11 7.50003 11C7.22389 11 7.00003 10.7761 7.00003 10.5V8H4.50003C4.22389 8 4.00003 7.77614 4.00003 7.5C4.00003 7.22386 4.22389 7 4.50003 7H7.00003V4.5C7.00003 4.22386 7.22389 4 7.50003 4Z"
@@ -201,19 +214,19 @@ export class IrChannel {
             <table class="table table-striped table-bordered no-footer dataTable">
               <thead>
                 <tr>
-                  <th scope="col" class="text-left">
-                    {locales.entries?.Lcz_Channel}
+                  <th scope="col" class="ir-text-start">
+                    {t('Lcz_Channel')}
                   </th>
-                  <th scope="col">{locales.entries?.Lcz_Status}</th>
+                  <th scope="col">{t('Lcz_Status', { fallback: 'Status' })}</th>
                   <th scope="col" class="actions-theader">
-                    {locales.entries?.Lcz_Actions}
+                    {t('Lcz_Actions', { fallback: 'Actions' })}
                   </th>
                 </tr>
               </thead>
               <tbody class="">
                 {channels_data.connected_channels?.map(channel => (
                   <tr key={channel.channel.id}>
-                    <td class="text-left">
+                    <td class="ir-text-start">
                       {channel.channel.name} {channel.title ? `(${channel.title})` : ''}
                     </td>
                     <td>
@@ -223,7 +236,7 @@ export class IrChannel {
                       <div class="d-flex justify-content-end">
                         <div class="btn-group">
                           <button type="button" class="btn  dropdown-toggle px-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-1"> {locales.entries?.Lcz_Actions}</span>
+                            <span class="ir-me-1"> {t('Lcz_Actions', { fallback: 'Actions' })}</span>
                             <svg class={'caret-icon'} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height={14} width={14}>
                               <path
                                 fill="var(--blue)"
@@ -232,7 +245,7 @@ export class IrChannel {
                             </svg>
                           </button>
                           <div class="dropdown-menu dropdown-menu-right">
-                            {actions(locales.entries).map((a, index) => (
+                            {actions().map((a, index) => (
                               <Fragment>
                                 <button
                                   onClick={() => {
@@ -256,7 +269,7 @@ export class IrChannel {
                                   {a.icon()}
                                   {a.name}
                                 </button>
-                                {index < actions(locales.entries).length - 1 && <div key={a.id + '_divider'} class="dropdown-divider my-0"></div>}
+                                {index < actions().length - 1 && <div key={a.id + '_divider'} class="dropdown-divider my-0"></div>}
                               </Fragment>
                             ))}
                           </div>
@@ -267,7 +280,7 @@ export class IrChannel {
                 ))}
               </tbody>
             </table>
-            {channels_data.connected_channels.length === 0 && <p class="text-center">{locales.entries?.Lcz_NoChannelsAreConnected}</p>}
+            {channels_data.connected_channels.length === 0 && <p class="text-center">{t('Lcz_NoChannelsAreConnected')}</p>}
           </div>
         </section>
 
@@ -294,8 +307,8 @@ export class IrChannel {
           modalTitle={this.modal_cause?.title}
           modalBody={this.modal_cause?.message}
           ref={el => (this.irModalRef = el)}
-          rightBtnText={locales.entries?.Lcz_Confirm}
-          leftBtnText={locales.entries?.Lcz_Cancel}
+          rightBtnText={t('Lcz_Confirm', { fallback: 'Confirm' })}
+          leftBtnText={t('Lcz_Cancel', { fallback: 'Cancel' })}
           onCancelModal={this.handleCancelModal.bind(this)}
           rightBtnColor={this.modal_cause?.main_color ?? 'primary'}
           onConfirmModal={this.handleConfirmClicked.bind(this)}

@@ -1,5 +1,6 @@
 import { Booking } from '@/models/booking.dto';
 import { Component, Host, Prop, h } from '@stencil/core';
+import { formatBookingNumber } from '@/utils/number';
 
 @Component({
   tag: 'ir-m-combobox-booking-item',
@@ -13,8 +14,8 @@ export class IrMComboboxBookingItem {
       <Host class="pe-1">
         <img src={this.booking.origin.Icon} alt={this.booking.origin.Label} class="origin-icon" />
         <div>
-          <p class="p-0 m-0">{this.booking.booking_nbr}</p>
-          {!this.booking.is_direct && <p class="small p-0 m-0">{this.booking.channel_booking_nbr}</p>}
+          <p class="p-0 m-0">{formatBookingNumber(this.booking.booking_nbr)}</p>
+          {!this.booking.is_direct && <p class="small p-0 m-0">{formatBookingNumber(this.booking.channel_booking_nbr)}</p>}
         </div>
         <p class="p-0 m-0">
           {this.booking.guest.first_name} {this.booking.guest.last_name}

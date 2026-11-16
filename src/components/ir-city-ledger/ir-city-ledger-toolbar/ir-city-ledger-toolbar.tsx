@@ -4,6 +4,8 @@ import { CityLedgerService, type CLAccountOverview } from '@/services/city-ledge
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-toolbar',
@@ -12,7 +14,6 @@ import { _formatTime } from '@/components/ir-booking-details/functions';
 })
 export class IrCityLedgerToolbar {
   @Prop() agentId: number | null = null;
-  @Prop() currencySymbol: string = '$';
 
   @State() accountOverview: CLAccountOverview | null = null;
 
@@ -51,7 +52,7 @@ export class IrCityLedgerToolbar {
           {this.accountOverview ? (
             <div class="toolbar__stats">
               <div id="netbalance" class="toolbar__stat">
-                <span class="toolbar__stat-label">Net Balance</span>
+                <span class="toolbar__stat-label">{t('Lcz_NetBalance', { fallback: 'Net Balance' })}</span>
                 <span
                   class={{
                     'toolbar__stat-value': true,
@@ -59,7 +60,7 @@ export class IrCityLedgerToolbar {
                   }}
                 >
                   {this.accountOverview.ACCOUNT_NET_BALANCE < 0 ? '-' : ''}
-                  {formatAmount(this.currencySymbol, Math.abs(this.accountOverview.ACCOUNT_NET_BALANCE))}
+                  {formatAmount(calendar_data.currency.symbol, Math.abs(this.accountOverview.ACCOUNT_NET_BALANCE))}
                 </span>
               </div>
 
@@ -67,25 +68,26 @@ export class IrCityLedgerToolbar {
 
               <div id="due-invoiced" class="toolbar__stat">
                 <span class="toolbar__stat-label">Due Invoiced</span>
-                <span class="toolbar__stat-value">{formatAmount(this.currencySymbol, this.accountOverview.TOTAL_DUE_INVOICED)}</span>
+                <span class="toolbar__stat-value">{formatAmount(calendar_data.currency.symbol, this.accountOverview.TOTAL_DUE_INVOICED)}</span>
               </div> */}
 
               <div class="toolbar__stats-sep" />
 
               <div id="uninvoiced" class="toolbar__stat">
-                <span class="toolbar__stat-label">Uninvoiced</span>
-                <span class="toolbar__stat-value">{formatAmount(this.currencySymbol, this.accountOverview.TOTAL_UNINVOICED)}</span>
+                <span class="toolbar__stat-label">{t('Lcz_Uninvoiced', { fallback: 'Uninvoiced' })}</span>
+                <span class="toolbar__stat-value">{formatAmount(calendar_data.currency.symbol, this.accountOverview.TOTAL_UNINVOICED)}</span>
               </div>
               <wa-tooltip for="netbalance">
-                Ending balance as of {moment().format('MMM DD, YYYY')} {_formatTime(new Date().getHours().toString(), new Date().getMinutes().toString())}
+                {t('Lcz_EndingBalanceAsOfTooltip', {
+                  fallback: 'Ending balance as of %1 %2',
+                  params: [formatDate(moment(), 'MMM DD, YYYY'), _formatTime(new Date().getHours().toString(), new Date().getMinutes().toString())],
+                })}
               </wa-tooltip>
               <wa-tooltip for="due-invoice"></wa-tooltip>
               <wa-tooltip for="uninvoiced">
-                Total <b>unbilled</b> entries from bookings, manual charges, adjustments and discounts.
+                {t('Lcz_UnbilledEntriesTooltip', { fallback: 'Total unbilled entries from bookings, manual charges, adjustments and discounts.' })}
               </wa-tooltip>
-              <wa-tooltip for="toolbar-held">
-                Total <b>held</b> entries to resolve with agent.
-              </wa-tooltip>
+              <wa-tooltip for="toolbar-held">{t('Lcz_HeldEntriesTooltip', { fallback: 'Total held entries to resolve with agent.' })}</wa-tooltip>
               {/* //Find total held */}
             </div>
           ) : (
@@ -94,7 +96,7 @@ export class IrCityLedgerToolbar {
 
           <div class="toolbar__actions">
             <ir-custom-button variant="brand" onClickHandler={() => this.createInvoice.emit()}>
-              Create Invoice
+              {t('Lcz_CreateInvoice', { fallback: 'Create Invoice' })}
             </ir-custom-button>
           </div>
         </div>

@@ -1,7 +1,6 @@
 import * as z from 'zod';
 import { Booking, ExtraService, IBookingPickupInfo, RoomInOut } from '@/models/booking.dto';
-import { IEntries } from '@/models/IBooking';
-import { PropertyIdSchema, TaxTypesSchema } from '../commonSchemas';
+import { DateSchema, LanguageSchema, PropertyIdSchema, TaxTypesSchema } from '../commonSchemas';
 
 const NumberOrStringSchema = z.union([z.number(), z.string().optional()]);
 
@@ -41,10 +40,9 @@ export const GetNextValuePropsSchema = z.object({
 });
 export type GetNextValueProps = z.infer<typeof GetNextValuePropsSchema>;
 
-export const GetExposedApplicablePoliciesPropsSchema = z.object({
+export const GetExposedApplicablePoliciesPropsSchema = LanguageSchema.extend({
   booking_nbr: z.string().optional(),
   currency_id: z.number(),
-  language: z.string().optional().optional(),
   rate_plan_id: z.number(),
   room_type_id: z.number(),
   property_id: z.number(),
@@ -60,10 +58,9 @@ export const HandleExposedRoomInOutPropsSchema = z.object({
 });
 export type HandleExposedRoomInOutProps = z.infer<typeof HandleExposedRoomInOutPropsSchema> & { status: RoomInOut['code'] };
 
-export const GetPenaltyStatementPropsSchema = z.object({
+export const GetPenaltyStatementPropsSchema = LanguageSchema.extend({
   booking_nbr: z.string().optional(),
   currency_id: z.number(),
-  language: z.string().optional(),
 });
 export type GetPenaltyStatementProps = z.infer<typeof GetPenaltyStatementPropsSchema>;
 
@@ -90,12 +87,11 @@ const AdultChildCountSchema = z.object({
   child: z.number(),
 });
 
-export const GetBookingAvailabilityPropsSchema = z.object({
+export const GetBookingAvailabilityPropsSchema = LanguageSchema.extend({
   from_date: z.string().optional(),
   to_date: z.string().optional(),
   propertyid: z.number(),
   adultChildCount: AdultChildCountSchema,
-  language: z.string().optional(),
   room_type_ids: z.array(z.number()),
   room_type_ids_to_update: z.array(z.number()).optional(),
   rate_plan_ids: z.array(z.number()).optional(),
@@ -153,25 +149,8 @@ export interface IBookingProps {
   extras: { key: string; value: string }[] | null;
 }
 
-export type TableEntries =
-  | '_CALENDAR_BLOCKED_TILL'
-  | '_DEPARTURE_TIME'
-  | '_ARRIVAL_TIME'
-  | '_RATE_PRICING_MODE'
-  | '_BED_PREFERENCE_TYPE'
-  | '_PAY_TYPE'
-  | '_PAY_TYPE_GROUP'
-  | '_PAY_METHOD'
-  | '_INVOICE_TARGET'
-  | '_GAP_RANGE'
-  | '_GAP_RULE'
-  | (string & {});
-
-export type GroupedTableEntries = {
-  [K in TableEntries as K extends `_${infer Rest}` ? Lowercase<Rest> : never]: IEntries[];
-};
 /*Arrivals */
-export const GetRoomsToCheckInPropsSchema = z.object({
+export const GetRoomsToCheckInPropsSchema = LanguageSchema.extend({
   property_id: z.string(),
   check_in_date: z.string(),
   page_index: z.number().default(1),
@@ -179,7 +158,7 @@ export const GetRoomsToCheckInPropsSchema = z.object({
 });
 export type GetRoomsToCheckInProps = z.infer<typeof GetRoomsToCheckInPropsSchema>;
 /*Departures */
-export const GetRoomsToCheckOutPropsSchema = z.object({
+export const GetRoomsToCheckOutPropsSchema = LanguageSchema.extend({
   property_id: z.string(),
   check_out_date: z.string(),
   page_index: z.number().default(1),
@@ -192,7 +171,7 @@ export interface RoomsToProcessResult {
 }
 /* INVOICE TYPES */
 
-export const GetBookingInvoiceInfoPropsSchema = z.object({
+export const GetBookingInvoiceInfoPropsSchema = LanguageSchema.extend({
   booking_nbr: z.string().optional(),
 });
 export type GetBookingInvoiceInfoProps = z.infer<typeof GetBookingInvoiceInfoPropsSchema>;
@@ -200,7 +179,7 @@ export type GetBookingInvoiceInfoProps = z.infer<typeof GetBookingInvoiceInfoPro
 export const VoidInvoicePropsSchema = z.object({
   invoice_nbr: z.string().optional(),
   reason: z.string().optional(),
-  property_id: z.number(),
+  property_id: PropertyIdSchema,
 });
 
 export const InvoiceSchema = z.object({
@@ -295,8 +274,7 @@ export const SimulateDirectBookingParamsSchema = z.object({
 });
 export type SimulateDirectBookingParams = z.infer<typeof SimulateDirectBookingParamsSchema>;
 
-export const DoDayUseParamsSchema = z.object({
-  language: z.string().min(1),
+export const DoDayUseParamsSchema = LanguageSchema.extend({
   is_to_block: z.boolean().optional().default(false),
 
   booking: z.object({
@@ -357,3 +335,10 @@ export const SetArrivalTimePropsSchema = z.object({
   code: z.string(),
 });
 export type SetArrivalTimeProps = z.infer<typeof SetArrivalTimePropsSchema>;
+
+export const GetCalendarDataParamsSchema = LanguageSchema.extend({
+  propertyid: PropertyIdSchema,
+  from_date: DateSchema,
+  to_date: DateSchema,
+});
+export type GetCalendarDataParams = z.infer<typeof GetCalendarDataParamsSchema>;

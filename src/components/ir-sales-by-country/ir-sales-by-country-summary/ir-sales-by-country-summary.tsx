@@ -2,6 +2,8 @@ import { Component, h, Prop } from '@stencil/core';
 import { CountrySalesFilter, SalesRecord } from '../types';
 import { calculateTrend, formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 export type NumericKeys<T> = {
   [K in keyof T]: T[K] extends number ? K : never;
@@ -38,29 +40,29 @@ export class IrSalesByCountrySummary {
         <ir-metric-card
           class="summary-metric"
           icon="moon"
-          label="Total Room Nights"
-          value={totalRoomNights?.toString()}
+          label={t('Lcz_TotalRoomNights', { fallback: 'Total Room Nights' })}
+          value={formatCount(totalRoomNights)}
           trend={hasLastYear ? calculateTrend(totalRoomNights, lastYearTotalRoomNights) : undefined}
-          trendLabel="vs last year"
-          caption={hasLastYear ? `Last year: ${lastYearTotalRoomNights}` : undefined}
+          trendLabel={t('Lcz_VsLastYear', { fallback: 'vs last year' })}
+          caption={hasLastYear ? `${t('Lcz_LastYear', { fallback: 'Last year:' })} ${formatCount(lastYearTotalRoomNights)}` : undefined}
         ></ir-metric-card>
         <ir-metric-card
           class="summary-metric"
           icon="user-group"
-          label="Total Guests"
-          value={totalGuests?.toString()}
+          label={t('Lcz_TotalGuests', { fallback: 'Total Guests' })}
+          value={formatCount(totalGuests)}
           trend={hasLastYear ? calculateTrend(totalGuests, lastYearTotalGuests) : undefined}
-          trendLabel="vs last year"
-          caption={hasLastYear ? `Last year: ${lastYearTotalGuests}` : undefined}
+          trendLabel={t('Lcz_VsLastYear', { fallback: 'vs last year' })}
+          caption={hasLastYear ? `${t('Lcz_LastYear', { fallback: 'Last year:' })} ${formatCount(lastYearTotalGuests)}` : undefined}
         ></ir-metric-card>
         <ir-metric-card
           class="summary-metric"
           icon="money-bill"
-          label="Total Revenue"
+          label={t('Lcz_TotalRevenue', { fallback: 'Total Revenue' })}
           value={formatAmount(calendar_data.currency.symbol, totalRevenue)}
           trend={hasLastYear ? calculateTrend(totalRevenue, lastYearTotalRevenue) : undefined}
-          trendLabel="vs last year"
-          caption={hasLastYear ? `Last year: ${formatAmount(calendar_data.currency.symbol, lastYearTotalRevenue)}` : undefined}
+          trendLabel={t('Lcz_VsLastYear', { fallback: 'vs last year' })}
+          caption={hasLastYear ? `${t('Lcz_LastYear', { fallback: 'Last year:' })} ${formatAmount(calendar_data.currency.symbol, lastYearTotalRevenue)}` : undefined}
         ></ir-metric-card>
       </div>
     );

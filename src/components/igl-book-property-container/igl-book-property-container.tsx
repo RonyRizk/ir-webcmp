@@ -1,10 +1,13 @@
 import { IglBookPropertyPayloadPlusBooking } from '@/models/igl-book-property';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
 import { Component, Host, State, h, Prop, Watch, Event, EventEmitter, Fragment } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 import { addDaysISO, todayISO } from '@/utils/calendar-dates';
 @Component({
   tag: 'igl-book-property-container',
@@ -29,7 +32,7 @@ export class IglBookPropertyContainer {
 
   private bookingService = new BookingService();
   private roomService = new RoomService();
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   setRoomsData(roomServiceResp) {
     let roomsData: { [key: string]: any }[] = new Array();
@@ -43,18 +46,17 @@ export class IglBookPropertyContainer {
   }
   async initializeApp() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.bookProperty });
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
       }
-      const [roomResponse, languageTexts, countriesList] = await Promise.all([
-        this.roomService.getExposedProperty({ id: this.propertyid, language: this.language, aname: this.p }),
-        this.roomService.fetchLanguage(this.language),
-        this.bookingService.getCountries(this.language),
+      const [roomResponse, , countriesList] = await Promise.all([
+        this.roomService.getExposedProperty({ id: this.propertyid, language: LocaleController.language, aname: this.p }),
+        localeReady,
+        this.bookingService.getCountries(LocaleController.language),
       ]);
-      if (!locales.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
       this.countries = countriesList;
 
       const { allowed_payment_methods: paymentMethods, currency, allowed_booking_sources, adult_child_constraints, calendar_legends } = roomResponse['My_Result'];
@@ -66,18 +68,34 @@ export class IglBookPropertyContainer {
       console.error('Error initializing app:', error);
     }
   }
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.bookProperty, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
   handleCloseBookingWindow() {
@@ -100,7 +118,7 @@ export class IglBookPropertyContainer {
       NAME: '',
       PHONE: '',
       REFERENCE_TYPE: '',
-      TITLE: locales.entries.Lcz_NewBooking,
+      TITLE: t('Lcz_NewBooking', { fallback: 'New Booking' }),
     };
   }
   render() {

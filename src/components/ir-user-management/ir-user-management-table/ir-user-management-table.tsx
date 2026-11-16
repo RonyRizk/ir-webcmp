@@ -1,4 +1,3 @@
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 
 import moment from 'moment';
@@ -9,7 +8,9 @@ import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { AllowedUser } from '../types';
 import { SystemService } from '@/services/system.service';
 import { showToast } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-user-management-table',
   styleUrls: ['ir-user-management-table.css', '../../../common/table.css'],
@@ -78,7 +79,7 @@ export class IrUserManagementTable {
     });
     showToast({
       position: 'top-right',
-      title: 'Saved Successfully',
+      title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
       description: '',
       type: 'success',
     });
@@ -160,16 +161,16 @@ export class IrUserManagementTable {
           <table class="table">
             <thead>
               <tr>
-                <th class="text-left">{locales.entries.Lcz_Username ?? 'Username'}</th>
-                <th class="text-left">{locales.entries.Lcz_Email}</th>
-                <th class="text-left">{locales.entries.Lcz_Mobile ?? 'Mobile'}</th>
-                <th class="text-left">{locales.entries.Lcz_Role}</th>
-                <th class="text-left small" style={{ fontWeight: 'bold' }}>
-                  <p class="m-0 p-0 ">{locales.entries.Lcz_CreatedAt}</p>
-                  <p class="m-0 p-0">{locales.entries.Lcz_LastSignedIn}</p>
+                <th class="ir-text-start">{t('Lcz_Username', { fallback: 'Username' })}</th>
+                <th class="ir-text-start">{t('Lcz_Email', { fallback: 'Email' })}</th>
+                <th class="ir-text-start">{t('Lcz_Mobile', { fallback: 'Mobile' })}</th>
+                <th class="ir-text-start">{t('Lcz_Role', { fallback: 'Role' })}</th>
+                <th class="ir-text-start small" style={{ fontWeight: 'bold' }}>
+                  <p class="m-0 p-0 ">{t('Lcz_CreatedAt', { fallback: 'Created at' })}</p>
+                  <p class="m-0 p-0">{t('Lcz_LastSignedIn', { fallback: 'Last signed in' })}</p>
                 </th>
-                {/* <th class="text-left">Created at</th> */}
-                {this.haveAdminPrivileges && <th>{locales.entries.Lcz_Active}</th>}
+                {/* <th class="ir-text-start">Created at</th> */}
+                {this.haveAdminPrivileges && <th>{t('Lcz_Active', { fallback: 'Active' })}</th>}
                 {/* {this.haveAdminPrivileges && <th>Email verified</th>} */}
 
                 <th class={'action-row'}>
@@ -189,7 +190,7 @@ export class IrUserManagementTable {
                       >
                         <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
                       </ir-custom-button>
-                      <wa-tooltip for="new-user-btn">{locales.entries.Lcz_CreateUser}</wa-tooltip>
+                      <wa-tooltip for="new-user-btn">{t('Lcz_CreateUser', { fallback: 'Create user' })}</wa-tooltip>
                     </Fragment>
                   )}
                 </th>
@@ -208,24 +209,26 @@ export class IrUserManagementTable {
                       {user.email}
 
                       {this.haveAdminPrivileges && (
-                        <span style={{ marginLeft: '0.5rem', color: `var(--wa-color-${user.is_email_verified ? 'success' : 'danger'}-fill-loud)` }} class={`small`}>
-                          {user.is_email_verified ? locales.entries.Lcz_Verified : locales.entries.Lcz_NotVerified}
+                        <span style={{ marginInlineStart: '0.5rem', color: `var(--wa-color-${user.is_email_verified ? 'success' : 'danger'}-fill-loud)` }} class={`small`}>
+                          {user.is_email_verified ? t('Lcz_Verified', { fallback: 'Verified' }) : t('Lcz_NotVerified', { fallback: 'Not verified' })}
                         </span>
                       )}
                     </td>
-                    <td>{user.mobile ?? 'N/A'}</td>
-                    <td>{user.type.toString() === this.superAdminId ? locales.entries.Lcz_SuperAdmin : this.userTypes.get(user.type.toString())}</td>
+                    <td>{user.mobile ?? t('Lcz_NotAvailable', { fallback: 'N/A' })}</td>
+                    <td>{user.type.toString() === this.superAdminId ? t('Lcz_SuperAdmin', { fallback: 'Super admin' }) : this.userTypes.get(user.type.toString())}</td>
                     <td class="small">
                       <p class="m-0 p-0">
-                        {new Date(user.created_on).getFullYear() === 1900 || !user.created_on ? 'N/A' : moment(user.created_on, 'YYYY-MM-DD').format('DD-MMM-YYYY')}
+                        {new Date(user.created_on).getFullYear() === 1900 || !user.created_on
+                          ? t('Lcz_NotAvailable', { fallback: 'N/A' })
+                          : formatDate(user.created_on, 'DD-MMM-YYYY')}
                       </p>
                       <p class={`m-0 p-0`} style={{ color: isLastSignInOld ? 'var(--wa-color-danger-fill-loud)' : '' }}>
                         {latestSignIn && new Date(latestSignIn.date).getFullYear() > 1900
-                          ? moment(latestSignIn.date, 'YYYY-MM-DD').format('DD-MMM-YYYY') + ' ' + _formatTime(latestSignIn.hour.toString(), latestSignIn.minute.toString())
-                          : 'N/A'}
+                          ? formatDate(latestSignIn.date, 'DD-MMM-YYYY') + ' ' + _formatTime(latestSignIn.hour.toString(), latestSignIn.minute.toString())
+                          : t('Lcz_NotAvailable', { fallback: 'N/A' })}
                       </p>
                     </td>
-                    {/* <td>{new Date(user.created_on).getFullYear() === 1900 || !user.created_on ? 'N/A' : moment(user.created_on, 'YYYY-MM-DD').format('DD-MMM-YYYY')}</td> */}
+                    {/* <td>{new Date(user.created_on).getFullYear() === 1900 || !user.created_on ? 'N/A' : formatDate(user.created_on, 'DD-MMM-YYYY')}</td> */}
                     {this.haveAdminPrivileges && (
                       <td>
                         {this.haveAdminPrivileges && !this.isSuperAdmin && user.type.toString() === '17'
@@ -255,7 +258,7 @@ export class IrUserManagementTable {
                           <ir-button
                             class="m-0 p-0"
                             onClickHandler={() => this.sendVerificationEmail(user)}
-                            btn_styles={'px-0 m-0 text-left'}
+                            btn_styles={'px-0 m-0 ir-text-start'}
                             labelStyle={{ padding: '0' }}
                             btnStyle={{ paddingHorizontal: '0', width: 'fit-content' }}
                             data-toggle="tooltip"
@@ -289,7 +292,7 @@ export class IrUserManagementTable {
                               >
                                 <wa-icon name="edit" style={{ fontSize: '1.2rem' }}></wa-icon>
                               </ir-custom-button>
-                              <wa-tooltip for={`edit-user-${user.id}`}>{locales.entries.Lcz_EditUser}</wa-tooltip>
+                              <wa-tooltip for={`edit-user-${user.id}`}>{t('Lcz_EditUser', { fallback: 'Edit user' })}</wa-tooltip>
                             </Fragment>
                           )}
                           {this.canDelete && !isUserSuperAdmin && (this.isSuperAdmin || user.type.toString() !== '17') && (
@@ -313,7 +316,7 @@ export class IrUserManagementTable {
                               >
                                 <wa-icon name="trash-can" style={{ fontSize: '1.2rem' }}></wa-icon>
                               </ir-custom-button>
-                              <wa-tooltip for={`delete-user-${user.id}`}>{locales.entries.Lcz_DeleteUser}</wa-tooltip>
+                              <wa-tooltip for={`delete-user-${user.id}`}>{t('Lcz_DeleteUser', { fallback: 'Delete user' })}</wa-tooltip>
                             </Fragment>
                           )}
                         </div>
@@ -339,7 +342,7 @@ export class IrUserManagementTable {
           isEdit={this.currentTrigger?.isEdit}
         ></ir-user-form-panel-drawer>
         <ir-dialog
-          label={'Alert'}
+          label={t('Lcz_Alert', { fallback: 'Alert' })}
           onIrDialogAfterHide={e => {
             e.stopImmediatePropagation();
             e.stopPropagation();
@@ -350,12 +353,12 @@ export class IrUserManagementTable {
         >
           <span>
             {this.modalType === 'delete'
-              ? `${locales.entries.Lcz_AreYouSureToDelete} ${this.user?.username}?`
-              : `${locales.entries.Lcz_AreYouSureToUnverify} ${this.maskEmail(this.user?.email)}`}
+              ? t('Lcz_AreYouSureDeleteUser', { params: [this.user?.username ?? ''], fallback: 'Are you sure you want to delete %1?' })
+              : t('Lcz_AreYouSureUnverifyEmail', { params: [this.maskEmail(this.user?.email)], fallback: 'Are you sure you want to unverify %1?' })}
           </span>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button data-dialog="close" size="m" appearance="filled">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               size="m"
@@ -364,7 +367,7 @@ export class IrUserManagementTable {
               variant={this.modalType === 'verify' ? 'brand' : 'danger'}
               onClickHandler={this.executeUserAction.bind(this)}
             >
-              {this.modalType === 'verify' ? locales.entries.Lcz_Confirm : locales.entries.Lcz_Delete}
+              {this.modalType === 'verify' ? t('Lcz_Confirm', { fallback: 'Confirm' }) : t('Lcz_Delete', { fallback: 'Delete' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

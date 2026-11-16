@@ -2,8 +2,8 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { CleanTaskEvent, Task } from '@/models/housekeeping';
 import { toggleTaskSelection } from '@/stores/hk-tasks.store';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
-
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'ir-tasks-card',
   styleUrls: ['ir-tasks-card.css'],
@@ -34,9 +34,9 @@ export class IrTasksCard {
 
   private taskTypeBadge(code: 'CLN' | 'T1' | 'T2') {
     const config = {
-      CLN: { variant: 'danger', label: 'CL' },
-      T1: { variant: 'success', label: 'T1' },
-      T2: { variant: 'brand', label: 'T2' },
+      CLN: { variant: 'danger', label: t('Lcz_CleaningAbbreviation', { fallback: 'CL' }) },
+      T1: { variant: 'success', label: t('Lcz_TaskAbbreviation', { fallback: 'T%1', params: [formatCount(1)] }) },
+      T2: { variant: 'brand', label: t('Lcz_TaskAbbreviation', { fallback: 'T%1', params: [formatCount(2)] }) },
     } as const;
     const { variant, label } = config[code] ?? { variant: 'neutral', label: code };
     return (
@@ -48,9 +48,9 @@ export class IrTasksCard {
 
   private get guests() {
     return [
-      { count: this.task.adult, icon: 'person', label: 'Ad' },
-      { count: this.task.child, icon: 'child', label: 'Ch' },
-      { count: this.task.infant, icon: 'baby', label: 'In' },
+      { count: this.task.adult, icon: 'person', label: t('Lcz_Ad', { fallback: 'Ad' }) },
+      { count: this.task.child, icon: 'child', label: t('Lcz_Ch', { fallback: 'Ch' }) },
+      { count: this.task.infant, icon: 'baby', label: t('Lcz_In', { fallback: 'In' }) },
     ].filter(g => g.count > 0);
   }
 
@@ -82,7 +82,7 @@ export class IrTasksCard {
               {this.guests.map(g => (
                 <div class="task-card__guest">
                   <wa-icon name={g.icon} class="task-card__guest-icon" style={{ fontSize: `${Math.min(0.75 + g.count * 0.15, 1.4)}rem` }}></wa-icon>
-                  <span class="task-card__guest-count">{g.count}</span>
+                  <span class="task-card__guest-count">{formatCount(g.count)}</span>
                 </div>
               ))}
             </div>
@@ -92,10 +92,10 @@ export class IrTasksCard {
           <div class="task-card__assign">
             {/* <wa-icon name="user-group" class="task-card__assign-icon"></wa-icon> */}
             <wa-select
-              label="Housekeeper"
+              label={t('Lcz_Housekeeper', { fallback: 'Housekeeper' })}
               class="task-card__hk-select"
               size="s"
-              placeholder="Unassigned"
+              placeholder={t('Lcz_Unassigned', { fallback: 'Unassigned' })}
               value={this.task.hkm_id ? String(this.task.hkm_id) : '0'}
               defaultValue={this.task.hkm_id ? String(this.task.hkm_id) : '0'}
               onchange={e => {
@@ -103,7 +103,7 @@ export class IrTasksCard {
                 this.assignHousekeeper.emit({ task: this.task, hkm_id });
               }}
             >
-              <wa-option value="0">{locales.entries.Lcz_Unassigned}</wa-option>
+              <wa-option value="0">{t('Lcz_Unassigned', { fallback: 'Unassigned' })}</wa-option>
               {housekeeping_store.hk_criteria?.housekeepers
                 .slice()
                 .sort((a, b) => a.name.localeCompare(b.name))
@@ -119,7 +119,7 @@ export class IrTasksCard {
           <div class="task-card__actions">
             {this.isSkippable && (
               <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={() => this.skipSelectedTask.emit(this.task)}>
-                Skip
+                {t('Lcz_Skip', { fallback: 'Skip' })}
               </ir-custom-button>
             )}
             {this.isCheckable && (
@@ -132,7 +132,7 @@ export class IrTasksCard {
                     this.cleanSelectedTask.emit({ task: this.task, status: '004' });
                   }}
                 >
-                  Clean & Inspect
+                  {t('Lcz_CleanAndInspect', { fallback: 'Clean & Inspect' })}
                 </ir-custom-button>
                 <ir-custom-button
                   variant="brand"
@@ -142,7 +142,7 @@ export class IrTasksCard {
                     this.cleanSelectedTask.emit({ task: this.task, status: '001' });
                   }}
                 >
-                  Clean
+                  {t('Lcz_Clean', { fallback: 'Clean' })}
                 </ir-custom-button>
               </div>
             )}

@@ -1,6 +1,7 @@
 import { Component, Host, Prop, h } from '@stencil/core';
 import { IPaymentAction } from '@/services/payment.service';
 import { Booking } from '@/models/booking.dto';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-payment-actions',
@@ -18,8 +19,8 @@ export class IrPaymentActions {
     return (
       <Host>
         <div class={'my-1 d-flex align-items-center'} style={{ gap: '0.5rem' }}>
-          <p class={'font-size-large p-0 m-0 '}>Payment Actions</p>
-          <span class="beta">Beta</span>
+          <p class={'font-size-large p-0 m-0 '}>{t('Lcz_PaymentActions', { fallback: 'Payment Actions' })}</p>
+          <span class="beta">{t('Lcz_BetaTag', { fallback: 'Beta' })}</span>
         </div>
         <div class="payment-actions-container">
           {this.paymentAction?.map((pa, index) => (

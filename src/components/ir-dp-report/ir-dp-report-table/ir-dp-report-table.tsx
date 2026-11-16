@@ -5,6 +5,8 @@ import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagina
 import dp_report, { setDpReportTablePage, setDpReportTablePageSize } from '@/stores/dp_report.store';
 import { formatAmount } from '@/utils/utils';
 import { DpReportRow } from '../types';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-dp-report-table',
@@ -18,7 +20,7 @@ export class IrDpReportTable {
   private columns = [
     this.columnHelper.display({
       id: 'booking_nbr',
-      header: 'Booking #',
+      header: t('Lcz_BookingNumberColumn', { fallback: 'Booking #' }),
       cell: info => {
         const row = info.row.original;
         return <ir-booking-number-cell class="dp-report__booking-nbr-cell" bookingNumber={row.booking_nbr} origin={row.raw.origin}></ir-booking-number-cell>;
@@ -26,12 +28,12 @@ export class IrDpReportTable {
     }),
     this.columnHelper.display({
       id: 'booked_on',
-      header: 'Booked on',
+      header: t('Lcz_BookedOn', { fallback: 'Booked on' }),
       cell: info => <ir-booked-on-cell showTime={false} bookedOn={info.row.original.raw.booked_on}></ir-booked-on-cell>,
     }),
     this.columnHelper.display({
       id: 'booked_by',
-      header: 'Booked by',
+      header: t('Lcz_BookedBy', { fallback: 'Booked by' }),
       cell: info => {
         const row = info.row.original;
         return <ir-booked-by-cell guest={row.raw.guest} identifier={row.booking_nbr} clickableGuest></ir-booked-by-cell>;
@@ -39,17 +41,17 @@ export class IrDpReportTable {
     }),
     this.columnHelper.display({
       id: 'dates',
-      header: 'Dates',
+      header: t('Lcz_Dates', { fallback: 'Dates' }),
       cell: info => <ir-dates-cell display="inline" showArrow checkIn={info.row.original.raw.from_date} checkOut={info.row.original.raw.to_date}></ir-dates-cell>,
     }),
     this.columnHelper.display({
       id: 'units',
-      header: 'Units booked',
-      cell: info => <span>{info.row.original.raw.rooms_length}</span>,
+      header: t('Lcz_UnitsBooked', { fallback: 'Units booked' }),
+      cell: info => <span>{formatCount(info.row.original.raw.rooms_length)}</span>,
     }),
     this.columnHelper.accessor('profit', {
       id: 'effect',
-      header: 'Effect',
+      header: t('Lcz_Effect', { fallback: 'Effect' }),
       cell: info => this.renderEffect(info.row.original),
     }),
   ];
@@ -121,7 +123,7 @@ export class IrDpReportTable {
               ) : table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={this.columns.length} class="empty-row">
-                    <ir-empty-state message="No dynamic pricing data for this date range."></ir-empty-state>
+                    <ir-empty-state message={t('Lcz_NoDynamicPricingData', { fallback: 'No dynamic pricing data for this date range.' })}></ir-empty-state>
                   </td>
                 </tr>
               ) : (
@@ -147,7 +149,7 @@ export class IrDpReportTable {
           allowPageSizeChange={true}
           pageSizes={this.pageSizes}
           showing={{ from: total ? startIndex + 1 : 0, to: Math.min(startIndex + pageSize, total) }}
-          recordLabel="bookings"
+          recordLabel={t('Lcz_Bookings', { fallback: 'bookings' })}
           onPageChange={this.handlePageChange}
           onPageSizeChange={this.handlePageSizeChange}
         ></ir-pagination>

@@ -1,9 +1,9 @@
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { ChannelService } from '@/services/channel.service';
 import channels_data, { onChannelChange } from '@/stores/channel.store';
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-channel-editor',
   styleUrl: 'ir-channel-editor.css',
@@ -19,11 +19,11 @@ export class IrChannelEditor {
   @State() headerTitles = [
     {
       id: 'general_settings',
-      name: locales.entries?.Lcz_GeneralSettings,
+      name: t('Lcz_GeneralSettings'),
       disabled: false,
     },
-    { id: 'mapping', name: locales.entries?.Lcz_Mapping, disabled: true },
-    { id: 'channel_booking', name: locales.entries?.Lcz_ChannelBooking, disabled: true },
+    { id: 'mapping', name: t('Lcz_Mapping'), disabled: true },
+    { id: 'channel_booking', name: t('Lcz_ChannelBooking'), disabled: true },
   ];
   @State() selectedRoomType = [];
 
@@ -60,7 +60,7 @@ export class IrChannelEditor {
       case 'mapping':
         return <ir-channel-mapping></ir-channel-mapping>;
       case 'channel_booking':
-        return <div>channel booking</div>;
+        return <div>{t('Lcz_ChannelBookingPlaceholder', { fallback: 'channel booking' })}</div>;
       default:
         return null;
     }
@@ -91,7 +91,7 @@ export class IrChannelEditor {
       <Host class=" d-flex flex-column h-100">
         <nav class="position-sticky sticky-top pb-1 top-0 bg-white ">
           <div class="d-flex align-items-center px-1 py-1  justify-content-between">
-            <h3 class="text-left font-medium-2  py-0 my-0">{this.channel_status === 'create' ? locales.entries?.Lcz_CreateChannel : locales.entries?.Lcz_EditChannel}</h3>
+            <h3 class="ir-text-start font-medium-2  py-0 my-0">{this.channel_status === 'create' ? t('Lcz_CreateChannel') : t('Lcz_EditChannel')}</h3>
             <ir-icon
               class={'m-0 p-0 close'}
               onIconClickHandler={() => {
@@ -113,8 +113,8 @@ export class IrChannelEditor {
             if (!channels_data.isConnectedToChannel) {
               this.toast.emit({
                 type: 'error',
-                description: locales.entries.Lcz_InvalidCredentials,
-                title: locales.entries.Lcz_InvalidCredentials,
+                description: t('Lcz_InvalidCredentials'),
+                title: t('Lcz_InvalidCredentials'),
               });
               return;
             }
@@ -122,7 +122,7 @@ export class IrChannelEditor {
           }}
           class="px-1 py-1 top-border"
           btn_styles="w-100  justify-content-center align-items-center"
-          text={locales.entries.Lcz_Save}
+          text={t('Lcz_Save', { fallback: 'Save' })}
         ></ir-button>
       </Host>
     );

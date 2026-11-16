@@ -1,4 +1,6 @@
 import { Component, Event, EventEmitter, h, Host, Prop, State, Watch } from '@stencil/core';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-otp',
@@ -287,7 +289,7 @@ export class IrOtp {
                 onKeyDown={e => this.handleKeyDown(e, index)}
                 onPaste={e => this.handlePaste(e, index)}
                 onFocus={this.handleFocus}
-                aria-label={`Digit ${index + 1} of ${this.length}`}
+                aria-label={t('Lcz_DigitOfLength', { fallback: 'Digit %1 of %2', params: [formatCount(index + 1), formatCount(this.length)] })}
               />
             ))}
         </div>

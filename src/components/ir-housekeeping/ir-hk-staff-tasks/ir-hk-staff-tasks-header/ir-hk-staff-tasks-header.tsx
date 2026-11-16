@@ -1,5 +1,6 @@
-import { ConnectedHK } from '@/services/housekeeping.service';
+import { ConnectedHK } from '@/services/housekeeping';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'EN' },
@@ -28,7 +29,7 @@ export class IrHkStaffTasksHeader {
       <header class="tasks-header">
         <div class="tasks-header__inner">
           <div class="tasks-header__brand">
-            <img class="tasks-header__logo" src="https://x.igloorooms.com/app-assets/images/logo/logo-dark.png" alt="IglooRooms logo" />
+            <img class="tasks-header__logo" src="https://x.igloorooms.com/app-assets/images/logo/logo-dark.png" alt={t('Lcz_IglooRoomsLogo', { fallback: 'IglooRooms logo' })} />
             <span class="tasks-header__name">{this.connectedHK.NAME}</span>
           </div>
           <div class="tasks-header__actions">

@@ -2,12 +2,15 @@ import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import { z, ZodError } from 'zod';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { PaymentService } from '@/services/payment.service';
 import { FolioEntryMode, Payment, PaymentEntries } from '../../../types';
 import { buildPaymentTypes } from '@/services/booking-service/utils';
 import { PAYMENT_TYPES_WITH_METHOD } from '../../global.variables';
 import { Booking } from '@/models/booking.dto';
+import { t } from '@/services/locale/t';
+
+import { getSetupEntryLabel } from '@/services/setup';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -41,7 +44,8 @@ const folioBaseSchema = z.object({
         const date = moment(dateStr, DATE_FORMAT, true);
         return date.isValid();
       },
-      { message: `Invalid date` },
+      // Lazy: this schema is built at module load, before any locale is fetched.
+      () => ({ message: t('Lcz_InvalidDate', { fallback: 'Invalid date' }) }),
     ),
   amount: z.coerce.number().min(0),
   reference: z.string().optional().nullable(),
@@ -56,7 +60,7 @@ const folioValidationSchema = folioBaseSchema.superRefine((data, ctx) => {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['payment_method'],
-      message: 'Payment method is required for this transaction type.',
+      message: t('Lcz_PaymentMethodRequired', { fallback: 'Payment method is required for this transaction type.' }),
     });
   }
 });
@@ -87,7 +91,7 @@ export class IrPaymentFolioForm {
   @State() errors: Record<string, boolean> = {};
   @State() autoValidate: boolean = false;
   @State() folioData: Payment;
-  @State() _paymentTypes: Record<string, IEntries[]> = {};
+  @State() _paymentTypes: Record<string, SetupEntries[]> = {};
 
   @Event() closeModal: EventEmitter<null>;
   @Event() resetBookingEvt: EventEmitter<null>;
@@ -262,11 +266,11 @@ export class IrPaymentFolioForm {
     return groups.map((p, idx) => (
       <Fragment>
         {p.map(pt => (
-          <wa-option key={pt.CODE_NAME} value={pt.CODE_NAME} label={pt.CODE_VALUE_EN}>
+          <wa-option key={pt.CODE_NAME} value={pt.CODE_NAME} label={getSetupEntryLabel(pt)}>
             <div class={'payment-folio__payment-type-option'}>
-              <span>{pt.CODE_VALUE_EN}</span>
+              <span>{getSetupEntryLabel(pt)}</span>
               <wa-badge variant={pt.NOTES === 'CR' ? 'success' : 'danger'} style={{ fontSize: 'var(--wa-font-size-s)' }}>
-                {pt.NOTES === 'CR' ? 'credit' : 'debit'}
+                {pt.NOTES === 'CR' ? t('Lcz_Credit') : t('Lcz_Debit')}
               </wa-badge>
             </div>
           </wa-option>
@@ -294,7 +298,7 @@ export class IrPaymentFolioForm {
       >
         <ir-date-select
           id={this.controlIds.date}
-          label="Date"
+          label={t('Lcz_DateLabel', { fallback: 'Date' })}
           aria-invalid={this.errors?.date && !this.folioData?.date ? 'true' : 'false'}
           data-testid="pickup_date"
           onDateChanged={evt => {
@@ -317,8 +321,8 @@ export class IrPaymentFolioForm {
             size="s"
             onwa-hide={event => this.stopEventPropagation(event)}
             onwa-show={event => this.stopEventPropagation(event)}
-            placeholder="Select..."
-            label="Transaction type"
+            placeholder={t('Lcz_SelectPlaceholder', { fallback: 'Select...' })}
+            label={t('Lcz_TransactionType', { fallback: 'Transaction Type' })}
             defaultValue={this.folioData?.payment_type?.code}
             value={this.folioData?.payment_type?.code}
             disabled={this.mode === 'payment-action'}
@@ -327,7 +331,7 @@ export class IrPaymentFolioForm {
               this.handleDropdownChange((event.target as HTMLSelectElement).value);
             }}
           >
-            <wa-option value="">Select...</wa-option>
+            <wa-option value="">{t('Lcz_SelectPlaceholder', { fallback: 'Select...' })}</wa-option>
             {this.renderDropdownItems()}
           </wa-select>
         </ir-validator>
@@ -343,7 +347,9 @@ export class IrPaymentFolioForm {
             <wa-select
               id={this.controlIds.paymentMethod}
               size="s"
-              label={`${this.folioData.payment_type?.code === '001' ? 'Payment' : 'Refund'} method`}
+              label={
+                this.folioData.payment_type?.code === '001' ? t('Lcz_PaymentMethod', { fallback: 'Payment Method' }) : t('Lcz_RefundMethodLabel', { fallback: 'Refund method' })
+              }
               onwa-show={event => this.stopEventPropagation(event)}
               onwa-hide={event => this.stopEventPropagation(event)}
               defaultValue={this.folioData?.payment_method?.code}
@@ -354,11 +360,11 @@ export class IrPaymentFolioForm {
               }}
               // aria-invalid={String(this.errors?.payment_method && !this.folioData?.payment_method?.code)}
             >
-              <wa-option value="">Select...</wa-option>
+              <wa-option value="">{t('Lcz_SelectPlaceholder', { fallback: 'Select...' })}</wa-option>
               {this.paymentEntries?.methods?.map(pt => {
                 return (
-                  <wa-option key={pt.CODE_NAME} label={pt.CODE_VALUE_EN} value={pt.CODE_NAME}>
-                    {pt.CODE_VALUE_EN}
+                  <wa-option key={pt.CODE_NAME} label={getSetupEntryLabel(pt)} value={pt.CODE_NAME}>
+                    {getSetupEntryLabel(pt)}
                   </wa-option>
                 );
               })}
@@ -376,7 +382,7 @@ export class IrPaymentFolioForm {
             id={this.controlIds.amount}
             aria-invalid={String(!!this.errors?.amount)}
             value={this.folioData?.amount?.toString() ?? ''}
-            label="Amount"
+            label={t('Lcz_Amount', { fallback: 'Amount' })}
             mask="price"
             min={0}
             onText-change={e => this.updateFolioData({ amount: !e.detail ? undefined : Number(e.detail) })}
@@ -394,7 +400,7 @@ export class IrPaymentFolioForm {
           <ir-input
             id={this.controlIds.reference}
             value={this.folioData?.reference ?? ''}
-            label="Reference"
+            label={t('Lcz_Reference', { fallback: 'Reference' })}
             maxlength={50}
             onText-change={e => this.updateFolioData({ reference: e.detail ?? '' })}
           ></ir-input>

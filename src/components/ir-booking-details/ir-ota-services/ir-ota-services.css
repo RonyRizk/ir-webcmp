@@ -4,3 +4,12 @@
 .bottom-border {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-me-2 {
+  margin-inline-end: 0.5rem;
+}
+.ir-ms-2 {
+  margin-inline-start: 0.5rem;
+}

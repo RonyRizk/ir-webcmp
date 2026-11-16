@@ -64,16 +64,12 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [igl-spilt-booking-form](../../igloo-calendar/igl-split-booking-drawer/igl-spilt-booking-form)
- - [igl-split-booking](../../igloo-calendar/igl-split-booking)
  - [ir-financial-filters](../../ir-financial-actions/ir-financial-filters)
  - [ir-range-picker](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive/ir-range-picker)
 
 ### Graph
 ```mermaid
 graph TD;
-  igl-spilt-booking-form --> ir-date-picker
-  igl-split-booking --> ir-date-picker
   ir-financial-filters --> ir-date-picker
   ir-range-picker --> ir-date-picker
   style ir-date-picker fill:#f9f,stroke:#333,stroke-width:4px

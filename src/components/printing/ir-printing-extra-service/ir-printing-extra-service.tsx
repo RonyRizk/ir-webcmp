@@ -1,7 +1,8 @@
 import { Booking } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
 import { Component, Fragment, Prop, h } from '@stencil/core';
-import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-printing-extra-service',
@@ -20,7 +21,7 @@ export class IrPrintingExtraService {
   render() {
     return (
       <section class="ir-print-extra-services">
-        <h3 class="ir-print-extra-services__title">Extra services</h3>
+        <h3 class="ir-print-extra-services__title">{t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}</h3>
 
         <div class="ir-print-extra-services__list">
           {this.extraServices?.map(service => {
@@ -36,14 +37,11 @@ export class IrPrintingExtraService {
                   {(service.start_date || service.end_date) && (
                     <div class="ir-print-extra-services__dates">
                       <span class="ir-print-extra-services__date-wrapper">
-                        (
-                        {service.start_date && (
-                          <ir-printing-label class="ir-print-extra-services__date" label="" content={moment(service.start_date).format('dddd, DD MMM YYYY')} />
-                        )}
+                        ({service.start_date && <ir-printing-label class="ir-print-extra-services__date" label="" content={formatDate(service.start_date, 'dddd, DD MMM YYYY')} />}
                         {service.end_date && (
                           <Fragment>
                             <span class="ir-print-extra-services__date-separator">–</span>
-                            <ir-printing-label class="ir-print-extra-services__date" label="" content={moment(service.end_date).format('dddd, DD MMM YYYY')} />
+                            <ir-printing-label class="ir-print-extra-services__date" label="" content={formatDate(service.end_date, 'dddd, DD MMM YYYY')} />
                           </Fragment>
                         )}
                         )

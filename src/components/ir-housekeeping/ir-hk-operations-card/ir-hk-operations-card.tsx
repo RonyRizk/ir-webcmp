@@ -1,21 +1,23 @@
 import { RoomService } from '@/services/room.service';
 import { PropertyService } from '@/services/property.service';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import locales from '@/stores/locales.store';
 import { Component, Host, Prop, State, h } from '@stencil/core';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { showToast } from '@/utils/utils';
 
+import { formatCount } from '@/utils/number';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 @Component({
   tag: 'ir-hk-operations-card',
   styleUrl: 'ir-hk-operations-card.css',
   scoped: true,
 })
 export class IrHkOperationsCard {
-  @Prop() frequencies: IEntries[] = [];
+  @Prop() frequencies: SetupEntries[] = [];
   @State() hkTasks: Array<{ name: string; frequency: string }> = [
     { name: '', frequency: '' },
     { name: '', frequency: '' },
@@ -46,7 +48,7 @@ export class IrHkOperationsCard {
         property_id: housekeeping_store.default_properties.property_id,
         flag,
       });
-      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }), description: '', type: 'success' });
     } catch (error) {
       console.log(error);
     }
@@ -59,7 +61,7 @@ export class IrHkOperationsCard {
         code: this.selectedCleaningFrequency,
       });
       calendar_data.cleaning_frequency = { code: this.selectedCleaningFrequency, description: '' };
-      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }), description: '', type: 'success' });
       this.dialog.closeModal();
     } catch (error) {
       console.log(error);
@@ -76,7 +78,7 @@ export class IrHkOperationsCard {
         t2_label: t2.name,
         t2_freq: t2.frequency,
       });
-      showToast({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }), description: '', type: 'success' });
     } catch (error) {
       console.log(error);
     }
@@ -87,7 +89,7 @@ export class IrHkOperationsCard {
       <Host>
         <wa-card appearance="plain" class="hk-operation__card">
           <div slot="header">
-            <span class="ops-header__title">Operations Settings</span>
+            <span class="ops-header__title">{t('Lcz_OperationsSettings', { fallback: 'Operations Settings' })}</span>
           </div>
 
           <div class="ops-settings">
@@ -96,8 +98,10 @@ export class IrHkOperationsCard {
                 <wa-icon name="calendar-check"></wa-icon>
               </span> */}
               <div class="ops-setting-item__info">
-                <span class="ops-setting-item__title">Automatic Check-in &amp; Check-out</span>
-                <span class="ops-setting-item__subtitle">Process guests automatically based on property rules</span>
+                <span class="ops-setting-item__title">{t('Lcz_AutomaticCheckInCheckout', { fallback: 'Automatic Check-in & Check-out' })}</span>
+                <span class="ops-setting-item__subtitle">
+                  {t('Lcz_ProcessGuestsAutomaticallyBasedOnPropertyRules', { fallback: 'Process guests automatically based on property rules' })}
+                </span>
               </div>
               <div class="ops-setting-item__controls">
                 <wa-select
@@ -107,24 +111,24 @@ export class IrHkOperationsCard {
                   defaultValue={calendar_data.is_automatic_check_in_out ? 'auto' : 'manual'}
                   onchange={(e: Event) => this.saveAutomaticCheckInCheckout(e)}
                 >
-                  <wa-option value="auto">{locales.entries.Lcz_YesAsPerPropertyPolicy}</wa-option>
-                  <wa-option value="manual">{locales.entries.Lcz_NoIWillDoItManually}</wa-option>
+                  <wa-option value="auto">{t('Lcz_YesAsPerPropertyPolicy', { fallback: 'Yes, as per the property policy.' })}</wa-option>
+                  <wa-option value="manual">{t('Lcz_NoIWillDoItManually', { fallback: 'No, I will do it manually.' })}</wa-option>
                 </wa-select>
               </div>
             </div>
           </div>
 
           <div class="ops-tasks__header">
-            <p class="ops-tasks__title">Recurring Tasks</p>
-            <p class="ops-tasks__subtitle">Define your housekeeping tasks and frequency</p>
+            <p class="ops-tasks__title">{t('Lcz_RecurringTasks', { fallback: 'Recurring Tasks' })}</p>
+            <p class="ops-tasks__subtitle">{t('Lcz_DefineYourHousekeepingTasksAndFrequency', { fallback: 'Define your housekeeping tasks and frequency' })}</p>
           </div>
           <div class="ops-tasks__list">
             {/* Cleaning — locked task, frequency is still configurable */}
             <div class="ops-task-row ops-task-row--locked">
               <wa-badge variant="danger" appearance="filled">
-                CL
+                {t('Lcz_CleaningAbbreviation', { fallback: 'CL' })}
               </wa-badge>
-              <span class="ops-task-locked-label">Cleaning</span>
+              <span class="ops-task-locked-label">{t('Lcz_Cleaning', { fallback: 'Cleaning' })}</span>
               <wa-select
                 class="ops-task-select"
                 size="s"
@@ -150,12 +154,14 @@ export class IrHkOperationsCard {
             {this.hkTasks.map((task, i) => (
               <div key={i} class="ops-task-row">
                 <wa-badge variant={i === 0 ? 'success' : 'brand'} appearance="filled">
-                  T{i + 1}
+                  {t('Lcz_TaskAbbreviation', { fallback: 'T%1', params: [formatCount(i + 1)] })}
                 </wa-badge>
                 <ir-input
                   class="ops-task-input"
                   size="s"
-                  placeholder={i === 0 ? 'Change sheets, ...' : 'Amenities refill, ...'}
+                  placeholder={
+                    i === 0 ? t('Lcz_ChangeSheetsPlaceholder', { fallback: 'Change sheets, ...' }) : t('Lcz_AmenitiesRefillPlaceholder', { fallback: 'Amenities refill, ...' })
+                  }
                   maxlength={30}
                   value={task.name}
                   onChange={(e: InputEvent) => {
@@ -170,7 +176,7 @@ export class IrHkOperationsCard {
                   size="s"
                   value={task.frequency}
                   defaultValue={task.frequency}
-                  placeholder="Frequency"
+                  placeholder={t('Lcz_Frequency', { fallback: 'Frequency' })}
                   onchange={(e: Event) => {
                     const updated = [...this.hkTasks];
                     updated[i] = { ...updated[i], frequency: (e.target as HTMLSelectElement).value };
@@ -180,14 +186,14 @@ export class IrHkOperationsCard {
                 >
                   {this.frequencies.map(f => (
                     <wa-option key={f.CODE_NAME} value={f.CODE_NAME}>
-                      {f.CODE_VALUE_EN}
+                      {getSetupEntryLabel(f)}
                     </wa-option>
                   ))}
                 </wa-select>
                 <wa-icon-button
                   class="ops-task-delete"
                   name="xmark"
-                  label="Remove task"
+                  label={t('Lcz_RemoveTask', { fallback: 'Remove task' })}
                   onClick={() => {
                     const updated = [...this.hkTasks];
                     updated[i] = { name: '', frequency: '' };
@@ -200,8 +206,8 @@ export class IrHkOperationsCard {
           </div>
         </wa-card>
 
-        <ir-dialog ref={el => (this.dialog = el)} label={locales.entries.Lcz_Confirmation} lightDismiss={false}>
-          <span>This action will reschedule all cleaning tasks. Do you want to continue?</span>
+        <ir-dialog ref={el => (this.dialog = el)} label={t('Lcz_Confirmation', { fallback: 'Confirmation' })} lightDismiss={false}>
+          <span>{t('Lcz_RescheduleCleaningTasksConfirmation', { fallback: 'This action will reschedule all cleaning tasks. Do you want to continue?' })}</span>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button
               size="m"
@@ -212,7 +218,7 @@ export class IrHkOperationsCard {
                 this.dialog.closeModal();
               }}
             >
-              {locales.entries.Lcz_Cancel}
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               size="m"
@@ -221,7 +227,7 @@ export class IrHkOperationsCard {
               loading={isRequestPending('/Set_Exposed_Cleaning_Frequency')}
               onClickHandler={() => this.saveCleaningFrequency()}
             >
-              {locales.entries.Lcz_Confirm}
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

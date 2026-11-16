@@ -34,11 +34,11 @@
   justify-content: flex-end;
   white-space: nowrap;
   margin-top: 0.25rem;
-  text-align: right;
+  text-align: end;
 }
 
 .booking-editor__total-label {
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 .booking-editor__total-amount {

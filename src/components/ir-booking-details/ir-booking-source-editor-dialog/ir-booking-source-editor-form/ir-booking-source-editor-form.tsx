@@ -5,6 +5,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import WaSelect from '@awesome.me/webawesome/dist/components/select/select';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { AssignableItem } from '../types';
+import { t } from '@/services/locale/t';
 
 type EditorStep = 'source' | 'assign';
 
@@ -56,7 +57,7 @@ export class IrBookingSourceEditorForm {
     this.booking.rooms?.forEach(room => {
       items.push({
         key: `room-${room.identifier}`,
-        label: room.roomtype?.name ?? 'Room',
+        label: room.roomtype?.name ?? t('Lcz_RoomFallback', { fallback: 'Room' }),
         type: 'room',
         ratePlanShortName: room.rateplan?.short_name,
         isNonRefundable: room.rateplan?.is_non_refundable,
@@ -70,7 +71,7 @@ export class IrBookingSourceEditorForm {
       const pickup = this.booking.pickup_info;
       items.push({
         key: 'pickup',
-        label: pickup.selected_option?.vehicle?.description ?? 'Airport Pickup',
+        label: pickup.selected_option?.vehicle?.description ?? t('Lcz_AirportPickupFallback', { fallback: 'Airport Pickup' }),
         type: 'pickup',
       });
     }
@@ -181,10 +182,16 @@ export class IrBookingSourceEditorForm {
         {this.booking.agent === null && this.booking?.financial?.payments?.filter(p => !p.is_city_ledger)?.length > 0 && (
           <wa-callout size="s" variant="warning" style={{ marginBottom: '1rem' }}>
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-            You have guest folio entries that may need to be removed and recreated in the agent folio.
+            {t('Lcz_GuestFolioEntriesWarning', { fallback: 'You have guest folio entries that may need to be removed and recreated in the agent folio.' })}
           </wa-callout>
         )}
-        <wa-select label="New source" onchange={this.handleSelectChange.bind(this)} size="s" value={this.selectedSource?.id} defaultValue={this.selectedSource?.id}>
+        <wa-select
+          label={t('Lcz_NewSource', { fallback: 'New source' })}
+          onchange={this.handleSelectChange.bind(this)}
+          size="s"
+          value={this.selectedSource?.id}
+          defaultValue={this.selectedSource?.id}
+        >
           {calendar_data?.property?.allowed_booking_sources?.map(option =>
             option.type === 'LABEL' ? (
               <small key={option.id}>{option.description}</small>

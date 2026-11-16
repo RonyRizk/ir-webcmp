@@ -59,19 +59,6 @@ Type: `Promise<void>`
 
 
 
-## Dependencies
-
-### Used by
-
- - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
-
-### Graph
-```mermaid
-graph TD;
-  igl-booking-event-hover --> ir-dropdown-item
-  style ir-dropdown-item fill:#f9f,stroke:#333,stroke-width:4px
-```
-
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

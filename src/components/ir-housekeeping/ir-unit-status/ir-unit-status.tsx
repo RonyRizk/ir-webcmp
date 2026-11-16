@@ -1,9 +1,9 @@
 import { IInspectionMode } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Host, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-unit-status',
   styleUrl: 'ir-unit-status.css',
@@ -39,14 +39,14 @@ export class IrUnitStatus {
   render() {
     return (
       <Host class="card p-1">
-        <ir-title label={locales.entries.Lcz_RoomOrUnitStatus}></ir-title>
+        <ir-title label={t('Lcz_RoomOrUnitStatus', { fallback: 'Room or Unit Status' })}></ir-title>
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>{locales.entries.Lcz_Status}</th>
-                <th class={'text-center'}>{locales.entries.Lcz_Code}</th>
-                <th>{locales.entries.Lcz_Action}</th>
+                <th>{t('Lcz_Status', { fallback: 'Status' })}</th>
+                <th class={'text-center'}>{t('Lcz_Code', { fallback: 'Code' })}</th>
+                <th>{t('Lcz_Action', { fallback: 'Action' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -66,15 +66,15 @@ export class IrUnitStatus {
                         <div>
                           <ir-select
                             selectedValue={status.inspection_mode.is_active ? status.inspection_mode?.window.toString() : ''}
-                            firstOption={locales.entries.Lcz_No}
+                            firstOption={t('Lcz_No', { fallback: 'No' })}
                             onSelectChange={this.handleSelectChange.bind(this)}
                             data={Array.from(Array(7 + 1), (_, i) => i).map(i => {
                               const text =
                                 i === 0
-                                  ? locales.entries.Lcz_YesOnTheSameDay
+                                  ? t('Lcz_YesOnTheSameDay', { fallback: 'Yes on the same day' })
                                   : i === 1
-                                  ? locales.entries.Lcz_DayPrior.replace('%1', i.toString())
-                                  : locales.entries.Lcz_DaysPrior.replace('%1', i.toString());
+                                    ? t('Lcz_DayPrior', { params: [i.toString()] })
+                                    : t('Lcz_DaysPrior', { params: [i.toString()] });
                               return {
                                 text,
                                 value: i.toString(),

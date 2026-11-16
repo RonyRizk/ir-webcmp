@@ -2,6 +2,7 @@ import { Booking } from '@/models/booking.dto';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-reallocation-drawer',
@@ -19,7 +20,7 @@ export class IrReallocationDrawer {
   render() {
     return (
       <ir-drawer
-        label="Reassign Unit"
+        label={t('Lcz_ReassignUnit', { fallback: 'Reassign Unit' })}
         open={this.open}
         onDrawerHide={e => {
           e.stopImmediatePropagation();
@@ -30,10 +31,10 @@ export class IrReallocationDrawer {
         {this.open && <ir-reallocation-form pool={this.pool} formId={this._id} booking={this.booking} identifier={this.roomIdentifier}></ir-reallocation-form>}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button size="m" data-drawer="close" variant="neutral" appearance="filled">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button form={this._id} size="m" loading={isRequestPending('/ReAllocate_Exposed_Room')} type="submit" variant="brand">
-            Confirm
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

@@ -4,7 +4,7 @@ import { createStore } from '@stencil/store';
 export interface IHouseKeepingStore {
   hk_criteria: IExposedHouseKeepingSetup;
   default_properties: {
-    token: string;
+    ApiClient: string;
     property_id: number;
     language: string;
   };

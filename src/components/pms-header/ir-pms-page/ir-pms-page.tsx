@@ -1,5 +1,9 @@
-import { Component, Prop, State, h } from '@stencil/core';
+import { Component, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-pms-page',
@@ -9,6 +13,27 @@ import moment from 'moment';
 export class IrPmsPage {
   @Prop() propertyid: string;
   @Prop() ticket: string;
+  @Prop() language: string = 'en';
+
+  /** The shell has no server-localized data of its own; strings re-render through the store. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.pmsPage, () => LocaleController.load({ tables: SCREEN_TABLES.pmsPage }));
+
+  componentWillLoad() {
+    LocaleController.load({ language: this.language, tables: SCREEN_TABLES.pmsPage });
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
+  }
 
   input: HTMLIrInputElement;
   menuDrawerRef: HTMLIrMenuDrawerElement;
@@ -16,8 +41,8 @@ export class IrPmsPage {
     {
       id: '1',
       type: 'info',
-      title: 'Welcome!',
-      message: 'Your account has been created successfully.',
+      title: t('Lcz_Welcome', { fallback: 'Welcome!' }),
+      message: t('Lcz_AccountCreatedSuccessfully', { fallback: 'Your account has been created successfully.' }),
       date: moment().format('YYYY-MM-DD'),
       hour: 10,
       minute: 10,
@@ -27,20 +52,20 @@ export class IrPmsPage {
     {
       id: '2',
       type: 'warning',
-      title: 'Storage Almost Full',
-      message: 'You have used 90% of your storage. Please upgrade.',
+      title: t('Lcz_StorageAlmostFull', { fallback: 'Storage Almost Full' }),
+      message: t('Lcz_StorageUsageWarning', { fallback: 'You have used 90% of your storage. Please upgrade.' }),
       date: moment().add(-1, 'days').format('YYYY-MM-DD'),
       hour: 1,
       minute: 10,
       read: false,
       dismissible: true,
-      link: { href: '#', text: 'Upgrade now' },
+      link: { href: '#', text: t('Lcz_UpgradeNow', { fallback: 'Upgrade now' }) },
     },
     {
       id: '3',
       type: 'success',
-      title: 'Payment Received',
-      message: 'Your invoice has been paid. Thank you!',
+      title: t('Lcz_PaymentReceived', { fallback: 'Payment Received' }),
+      message: t('Lcz_InvoicePaidThankYou', { fallback: 'Your invoice has been paid. Thank you!' }),
       date: moment().add(-2, 'month').format('YYYY-MM-DD'),
       hour: 10,
       minute: 10,
@@ -53,12 +78,12 @@ export class IrPmsPage {
       <div>
         <ir-interceptor></ir-interceptor>
         <ir-toast></ir-toast>
-        <header class="app-header">
+        <header class="app-header" dir="rtl">
           <div class="app-header__left">
             <ir-custom-button onClickHandler={() => this.menuDrawerRef.openDrawer()} size="s" appearance="plain" variant="neutral" class="header-action">
               <wa-icon name="bars" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
-            {/* <div class="d-flex" style={{ marginLeft: '1rem' }}>
+            {/* <div class="d-flex" style={{ marginInlineStart: '1rem' }}>
               <a href="/">
                 <img class="logo" src="https://gateway.igloorooms.com/irimages/aclogo/AcLogo_229.png?t=1597509988143" />
               </a>
@@ -81,45 +106,46 @@ export class IrPmsPage {
               }}
               ticket={this.ticket}
               propertyid={this.propertyid}
+              language={this.language}
               class="header-search"
             ></ir-pms-search>
           </div>
 
           <div class="app-header__right">
-            <ir-booking-new-form ticket={this.ticket} prop:propertyid={this.propertyid} language="en">
+            <ir-booking-new-form dir="rtl" language="ar" ticket={this.ticket} prop:propertyid={this.propertyid}>
               <ir-custom-button slot="trigger" id="add-booking-btn" size="s" appearance="plain" variant="brand">
                 <wa-icon name="circle-plus" style={{ fontSize: '1.2rem' }}></wa-icon>
               </ir-custom-button>
             </ir-booking-new-form>
-            <wa-tooltip for="add-booking-btn">New booking</wa-tooltip>
+            <wa-tooltip for="add-booking-btn">{t('Lcz_NewBooking', { fallback: 'New booking' })}</wa-tooltip>
 
             <ir-custom-button id="calendar-btn" href="/frontdesk.aspx" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="calendar" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
-            <wa-tooltip for="calendar-btn">Calendar</wa-tooltip>
+            <wa-tooltip for="calendar-btn">{t('Lcz_Calendar', { fallback: 'Calendar' })}</wa-tooltip>
 
             <ir-custom-button href="/acbookinglist.aspx" id="rooms-btn" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="bed" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
-            <wa-tooltip for="rooms-btn">Bookings</wa-tooltip>
+            <wa-tooltip for="rooms-btn">{t('Lcz_Bookings', { fallback: 'Bookings' })}</wa-tooltip>
 
             <ir-custom-button id="departures-btn" href="AcDepartures.aspx" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="plane-departure" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
-            <wa-tooltip for="departures-btn">Check-outs</wa-tooltip>
+            <wa-tooltip for="departures-btn">{t('Lcz_CheckOuts', { fallback: 'Check-outs' })}</wa-tooltip>
 
             <ir-custom-button href="/AcArrivals.aspx" id="arrivals-btn" size="s" appearance="plain" class="header-desktop-only">
               <wa-icon name="plane-arrival" style={{ fontSize: '1.2rem' }}></wa-icon>
             </ir-custom-button>
-            <wa-tooltip for="arrivals-btn">Check-ins</wa-tooltip>
+            <wa-tooltip for="arrivals-btn">{t('Lcz_CheckIns', { fallback: 'Check-ins' })}</wa-tooltip>
 
             <ir-notifications propertyid={this.propertyid as any} ticket={this.ticket}></ir-notifications>
 
             <wa-dropdown>
-              <wa-avatar slot="trigger" style={{ '--size': '2rem', 'marginLeft': '0.5rem' }}></wa-avatar>
+              <wa-avatar slot="trigger" style={{ '--size': '2rem', 'marginInlineStart': '0.5rem' }}></wa-avatar>
               <wa-dropdown-item>
                 <wa-icon slot="icon" name="globe"></wa-icon>
-                View Your Website
+                {t('Lcz_ViewYourWebsite', { fallback: 'View Your Website' })}
               </wa-dropdown-item>
               <wa-dropdown-item>
                 <wa-icon slot="icon" name="arrow-up-right-from-square"></wa-icon>
@@ -132,31 +158,31 @@ export class IrPmsPage {
               <wa-divider></wa-divider>
               <wa-dropdown-item>
                 <wa-icon slot="icon" name="users"></wa-icon>
-                Extranet Users
+                {t('Lcz_ExtranetUsers', { fallback: 'Extranet Users' })}
               </wa-dropdown-item>
               <wa-dropdown-item>
                 <wa-icon slot="icon" name="lock"></wa-icon>
-                Change Password
+                {t('Lcz_ChangePassword', { fallback: 'Change Password' })}
               </wa-dropdown-item>
 
               <wa-divider></wa-divider>
               <wa-dropdown-item>
                 <wa-icon slot="icon" name="wallet"></wa-icon>
-                Billing
+                {t('Lcz_Billing', { fallback: 'Billing' })}
               </wa-dropdown-item>
               <wa-divider></wa-divider>
               <wa-dropdown-item variant="danger">
                 <wa-icon slot="icon" name="power-off"></wa-icon>
-                Logout
+                {t('Lcz_Logout', { fallback: 'Logout' })}
               </wa-dropdown-item>
             </wa-dropdown>
           </div>
         </header>
-        <ir-menu-drawer ref={el => (this.menuDrawerRef = el)}>
+        <ir-menu-drawer dir="rtl" ref={el => (this.menuDrawerRef = el)}>
           <div slot="label">
             <img style={{ height: '24px' }} src="	https://x.igloorooms.com/app-assets/images/logo/logo-dark.png" alt="" />
           </div>
-          <ir-menu>
+          <ir-menu dir="rtl">
             <ir-property-switcher ticket={this.ticket}></ir-property-switcher>
 
             {/* <div>
@@ -168,59 +194,59 @@ export class IrPmsPage {
             </div>
             <wa-divider></wa-divider> */}
 
-            <ir-menu-item slot="summary">Property</ir-menu-item>
-            <ir-menu-item href="acdashboard.aspx">Dashboard</ir-menu-item>
-            <ir-menu-item href="frontdesk.aspx">Frontdesk</ir-menu-item>
-            <ir-menu-item href="acratesallotment.aspx">Inventory</ir-menu-item>
-            <ir-menu-item href="frontdesk.aspx">Frontdesk</ir-menu-item>
+            <ir-menu-item slot="summary">{t('Lcz_Property', { fallback: 'Property' })}</ir-menu-item>
+            <ir-menu-item href="acdashboard.aspx">{t('Lcz_Dashboard', { fallback: 'Dashboard' })}</ir-menu-item>
+            <ir-menu-item href="frontdesk.aspx">{t('Lcz_Frontdesk', { fallback: 'Frontdesk' })}</ir-menu-item>
+            <ir-menu-item href="acratesallotment.aspx">{t('Lcz_Inventory', { fallback: 'Inventory' })}</ir-menu-item>
+            <ir-menu-item href="frontdesk.aspx">{t('Lcz_Frontdesk', { fallback: 'Frontdesk' })}</ir-menu-item>
             <wa-divider></wa-divider>
-            <p style={{ margin: '0', marginBottom: '0.5rem' }}>Property</p>
+            <p style={{ margin: '0', marginBottom: '0.5rem' }}>{t('Lcz_Property', { fallback: 'Property' })}</p>
             {/* <ir-menu-group open groupName="main"> */}
-            <ir-menu-item slot="summary">Property</ir-menu-item>
-            <ir-menu-item href="acdashboard.aspx">Dashboard</ir-menu-item>
-            <ir-menu-item href="frontdesk.aspx">Frontdesk</ir-menu-item>
-            <ir-menu-item href="acratesallotment.aspx">Inventory</ir-menu-item>
+            <ir-menu-item slot="summary">{t('Lcz_Property', { fallback: 'Property' })}</ir-menu-item>
+            <ir-menu-item href="acdashboard.aspx">{t('Lcz_Dashboard', { fallback: 'Dashboard' })}</ir-menu-item>
+            <ir-menu-item href="frontdesk.aspx">{t('Lcz_Frontdesk', { fallback: 'Frontdesk' })}</ir-menu-item>
+            <ir-menu-item href="acratesallotment.aspx">{t('Lcz_Inventory', { fallback: 'Inventory' })}</ir-menu-item>
             <ir-menu-group groupName="sub-property">
-              <ir-menu-item slot="summary">Marketing</ir-menu-item>
-              <ir-menu-item href="acpromodiscounts.aspx">Discounts</ir-menu-item>
-              <ir-menu-item href="acautomatedemails.aspx">Automated Emails</ir-menu-item>
+              <ir-menu-item slot="summary">{t('Lcz_Marketing', { fallback: 'Marketing' })}</ir-menu-item>
+              <ir-menu-item href="acpromodiscounts.aspx">{t('Lcz_Discounts', { fallback: 'Discounts' })}</ir-menu-item>
+              <ir-menu-item href="acautomatedemails.aspx">{t('Lcz_AutomatedEmails', { fallback: 'Automated Emails' })}</ir-menu-item>
             </ir-menu-group>
             <ir-menu-group groupName="sub-property">
-              <ir-menu-item slot="summary">Bookings</ir-menu-item>
-              <ir-menu-item href="/acbookinglist.aspx">Bookings List</ir-menu-item>
-              <ir-menu-item href="/AcArrivals.aspx">Check-ins</ir-menu-item>
-              <ir-menu-item href="/AcDepartures.aspx">Check-outs</ir-menu-item>
+              <ir-menu-item slot="summary">{t('Lcz_Bookings', { fallback: 'Bookings' })}</ir-menu-item>
+              <ir-menu-item href="/acbookinglist.aspx">{t('Lcz_BookingsList', { fallback: 'Bookings List' })}</ir-menu-item>
+              <ir-menu-item href="/AcArrivals.aspx">{t('Lcz_CheckIns', { fallback: 'Check-ins' })}</ir-menu-item>
+              <ir-menu-item href="/AcDepartures.aspx">{t('Lcz_CheckOuts', { fallback: 'Check-outs' })}</ir-menu-item>
             </ir-menu-group>
 
             <ir-menu-group groupName="sub-property">
-              <ir-menu-item slot="summary">Settings</ir-menu-item>
-              <ir-menu-item href="acgeneral.aspx">General Info</ir-menu-item>
+              <ir-menu-item slot="summary">{t('Lcz_Settings', { fallback: 'Settings' })}</ir-menu-item>
+              <ir-menu-item href="acgeneral.aspx">{t('Lcz_GeneralInfo', { fallback: 'General Info' })}</ir-menu-item>
               <ir-menu-item href="acamenities.aspx" badge="    جديد">
                 المرافق والخدمات
               </ir-menu-item>
-              <ir-menu-item href="acdescriptions.aspx">Descriptions</ir-menu-item>
-              <ir-menu-item href="acconcan.aspx">Policies</ir-menu-item>
-              <ir-menu-item href="accommtax.aspx">Money Matters</ir-menu-item>
-              <ir-menu-item href="acroomcategories.aspx">Rooms &amp; Rate Plans</ir-menu-item>
-              <ir-menu-item href="ACHousekeeping.aspx">Housekeeping &amp; Check-in Setup</ir-menu-item>
-              <ir-menu-item href="actravelagents.aspx">Agents and Groups</ir-menu-item>
-              <ir-menu-item href="acimagegallery.aspx">Image Gallery</ir-menu-item>
-              <ir-menu-item href="acpickups.aspx">Pickup Services</ir-menu-item>
-              <ir-menu-item href="acintegrations.aspx">Integrations</ir-menu-item>
-              <ir-menu-item href="acthemingwebsite.aspx">iSPACE</ir-menu-item>
-              <ir-menu-item href="acigloochannel.aspx">iCHANNEL</ir-menu-item>
-              <ir-menu-item href="iSwitch.aspx">iSWITCH</ir-menu-item>
+              <ir-menu-item href="acdescriptions.aspx">{t('Lcz_Descriptions', { fallback: 'Descriptions' })}</ir-menu-item>
+              <ir-menu-item href="acconcan.aspx">{t('Lcz_Policies', { fallback: 'Policies' })}</ir-menu-item>
+              <ir-menu-item href="accommtax.aspx">{t('Lcz_MoneyMatters', { fallback: 'Money Matters' })}</ir-menu-item>
+              <ir-menu-item href="acroomcategories.aspx">{t('Lcz_RoomsAndRatePlans', { fallback: 'Rooms & Rate Plans' })}</ir-menu-item>
+              <ir-menu-item href="ACHousekeeping.aspx">{t('Lcz_HouseKeepingAndCheckInSetup', { fallback: 'Housekeeping & Check-In Setup' })}</ir-menu-item>
+              <ir-menu-item href="actravelagents.aspx">{t('Lcz_AgentsAndGroups', { fallback: 'Agents and Groups' })}</ir-menu-item>
+              <ir-menu-item href="acimagegallery.aspx">{t('Lcz_ImageGallery', { fallback: 'Image Gallery' })}</ir-menu-item>
+              <ir-menu-item href="acpickups.aspx">{t('Lcz_PickupServices', { fallback: 'Pickup Services' })}</ir-menu-item>
+              <ir-menu-item href="acintegrations.aspx">{t('Lcz_Integrations', { fallback: 'Integrations' })}</ir-menu-item>
+              <ir-menu-item href="acthemingwebsite.aspx">{t('Lcz_ISpace', { fallback: 'iSPACE' })}</ir-menu-item>
+              <ir-menu-item href="acigloochannel.aspx">{t('Lcz_IChannel', { fallback: 'iCHANNEL' })}</ir-menu-item>
+              <ir-menu-item href="iSwitch.aspx">{t('Lcz_ISwitch', { fallback: 'iSWITCH' })}</ir-menu-item>
             </ir-menu-group>
 
             <ir-menu-group groupName="sub-property">
-              <ir-menu-item slot="summary">Reports</ir-menu-item>
-              <ir-menu-item href="ACHousekeepingTasks.aspx">Housekeeping Tasks</ir-menu-item>
-              <ir-menu-item href="acmemberlist.aspx">Guests</ir-menu-item>
-              <ir-menu-item href="acsalesstatistics.aspx">Sales Statistics</ir-menu-item>
-              <ir-menu-item href="acsalesbychannel.aspx">Sales by Channel</ir-menu-item>
-              <ir-menu-item href="acsalesbycountry.aspx">Sales by Country</ir-menu-item>
-              <ir-menu-item href="ACDailyOccupancy.aspx">Daily Occupancy</ir-menu-item>
-              <ir-menu-item href="acaccountingreport.aspx">Accounting Report</ir-menu-item>
+              <ir-menu-item slot="summary">{t('Lcz_Reports', { fallback: 'Reports' })}</ir-menu-item>
+              <ir-menu-item href="ACHousekeepingTasks.aspx">{t('Lcz_HousekeepingTasks', { fallback: 'Housekeeping Tasks' })}</ir-menu-item>
+              <ir-menu-item href="acmemberlist.aspx">{t('Lcz_Guests', { fallback: 'Guests' })}</ir-menu-item>
+              <ir-menu-item href="acsalesstatistics.aspx">{t('Lcz_SalesStatistics', { fallback: 'Sales Statistics' })}</ir-menu-item>
+              <ir-menu-item href="acsalesbychannel.aspx">{t('Lcz_SalesByChannel', { fallback: 'Sales by Channel' })}</ir-menu-item>
+              <ir-menu-item href="acsalesbycountry.aspx">{t('Lcz_SalesByCountry', { fallback: 'Sales by Country' })}</ir-menu-item>
+              <ir-menu-item href="ACDailyOccupancy.aspx">{t('Lcz_DailyOccupancy', { fallback: 'Daily Occupancy' })}</ir-menu-item>
+              <ir-menu-item href="acaccountingreport.aspx">{t('Lcz_AccountingReport', { fallback: 'Accounting Report' })}</ir-menu-item>
               <ir-menu-item href="/" selected id="hello">
                 Hello
               </ir-menu-item>
@@ -234,6 +260,7 @@ export class IrPmsPage {
           {/* <ir-dialog open={this.open}>{this.open && <ir-input ref={el => (this.input = el)}></ir-input>}</ir-dialog> */}
         </ir-menu-drawer>
         <div>
+          <ir-translatable-textarea></ir-translatable-textarea>
           <ir-pms-payment-due-alert propertyid={this.propertyid ? Number(this.propertyid) : null} ticket={this.ticket}></ir-pms-payment-due-alert>
           <div style={{ height: '200vh', padding: '1rem', background: 'white' }}>
             <div class={'d-flex'}>
@@ -257,6 +284,7 @@ export class IrPmsPage {
             ></ir-text-editor>
             <ir-text-editor size="xl" appearance={'filled-outlined'} label="Hello world"></ir-text-editor>
           </div>
+          <ir-input mask="price"></ir-input>
         </div>
       </div>
     );

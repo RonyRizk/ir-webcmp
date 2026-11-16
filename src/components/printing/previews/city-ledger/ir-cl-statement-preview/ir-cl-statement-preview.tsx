@@ -3,9 +3,12 @@ import type { IProperty } from '@/models/property';
 import { CityLedgerService, type CLStatements, type FiscalDocument } from '@/services/city-ledger';
 import { PropertyService } from '@/services/property.service';
 import { formatAmount } from '@/utils/utils';
-import Token from '@/models/Token';
-import moment from 'moment';
+import ApiClient from '@/models/ApiClient';
 import { FdTypes } from '@/types/enums';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber } from '@/utils/number';
+import { formatDate } from '@/utils/date';
 
 const DATE_DISPLAY = 'MMM DD, YYYY';
 
@@ -32,18 +35,18 @@ export class IrClStatementPreview {
 
   @Event({ bubbles: true, composed: true }) clPreviewReady: EventEmitter<void>;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private propertyService = new PropertyService();
   private cityLedgerService = new CityLedgerService();
   private hasEmitted: boolean = false;
 
   componentWillLoad() {
     if (!this.ticket) {
-      this.error = 'Authentication ticket is required.';
+      this.error = t('Lcz_AuthTicketRequired', { fallback: 'Authentication ticket is required.' });
       return;
     }
-    if (this.baseurl) this.tokenService.setBaseUrl(this.baseurl);
-    this.tokenService.setToken(this.ticket);
+    if (this.baseurl) this.apiClientService.setBaseUrl(this.baseurl);
+    this.apiClientService.setApiClient(this.ticket);
     return this.fetchData();
   }
   componentDidRender() {
@@ -59,7 +62,7 @@ export class IrClStatementPreview {
     this.error = null;
     try {
       const [propertyData, statement, fiscalDocuments] = await Promise.all([
-        this.propertyService.getExposedProperty({ id: this.propertyId, language: 'en' }),
+        this.propertyService.getExposedProperty({ id: this.propertyId, language: LocaleController.language }),
         this.cityLedgerService.getCLStatement({
           AGENCY_ID: this.agentId,
           CURRENCY_ID: this.currencyId,
@@ -77,7 +80,7 @@ export class IrClStatementPreview {
       this.statement = statement;
       this.fiscalDocuments = fiscalDocuments ?? [];
     } catch (e: any) {
-      this.error = e?.message ?? 'Failed to load statement data.';
+      this.error = e?.message ?? t('Lcz_FailedToLoadStatementData', { fallback: 'Failed to load statement data.' });
     } finally {
       this.isLoading = false;
     }
@@ -87,7 +90,7 @@ export class IrClStatementPreview {
     if (!this.ticket) {
       return (
         <Host>
-          <div class="document-state document-state--error">Authentication ticket is required.</div>
+          <div class="document-state document-state--error">{t('Lcz_AuthTicketRequired', { fallback: 'Authentication ticket is required.' })}</div>
         </Host>
       );
     }
@@ -110,7 +113,7 @@ export class IrClStatementPreview {
     if (!this.statement) {
       return (
         <Host>
-          <div class="document-state document-state--error">No statement data found.</div>
+          <div class="document-state document-state--error">{t('Lcz_NoStatementDataFound', { fallback: 'No statement data found.' })}</div>
         </Host>
       );
     }
@@ -127,19 +130,19 @@ export class IrClStatementPreview {
           <table class="cl-table">
             <thead>
               <tr>
-                <th class="cl-th">Date</th>
-                <th class="cl-th">Document #</th>
-                <th class="cl-th">Type</th>
-                <th class="cl-th cl-th--num">Debit</th>
-                <th class="cl-th cl-th--num">Credit</th>
-                <th class="cl-th cl-th--num">Balance</th>
+                <th class="cl-th">{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+                <th class="cl-th">{t('Lcz_DocumentNumberLabel', { fallback: 'Document #' })}</th>
+                <th class="cl-th">{t('Lcz_Type', { fallback: 'Type' })}</th>
+                <th class="cl-th cl-th--num">{t('Lcz_Debit', { fallback: 'Debit' })}</th>
+                <th class="cl-th cl-th--num">{t('Lcz_Credit', { fallback: 'Credit' })}</th>
+                <th class="cl-th cl-th--num">{t('Lcz_Balance', { fallback: 'Balance' })}</th>
               </tr>
             </thead>
             <tbody>
               {/* Opening balance */}
               <tr class="cl-balance-row">
                 <td class="cl-td" colSpan={3}>
-                  Opening Balance — {moment(this.fromDate).format(DATE_DISPLAY)}
+                  {t('Lcz_OpeningBalanceRow', { fallback: 'Opening Balance — %1', params: [formatDate(this.fromDate, DATE_DISPLAY)] })}
                 </td>
                 <td class="cl-td"></td>
                 <td class="cl-td"></td>
@@ -153,8 +156,8 @@ export class IrClStatementPreview {
                   running += (doc.DEBIT ?? 0) - (doc.CREDIT ?? 0);
                   return (
                     <tr>
-                      <td class="cl-td cl-td--nowrap">{doc.ISSUE_DATE_DISPLAY || (doc.ISSUE_DATE ? moment(doc.ISSUE_DATE).format(DATE_DISPLAY) : '—')}</td>
-                      <td class="cl-td">{doc.DOC_NUMBER || '—'}</td>
+                      <td class="cl-td cl-td--nowrap">{doc.ISSUE_DATE_DISPLAY || (doc.ISSUE_DATE ? formatDate(doc.ISSUE_DATE, DATE_DISPLAY) : '—')}</td>
+                      <td class="cl-td">{doc.DOC_NUMBER ? formatBookingNumber(doc.DOC_NUMBER) : '—'}</td>
                       <td class="cl-td">{doc.FD_TYPE_NAME || '—'}</td>
                       <td class="cl-td cl-td--num cl-td--muted">{doc.DEBIT ? fmt(doc.DEBIT) : '—'}</td>
                       <td class="cl-td cl-td--num cl-td--muted">{doc.CREDIT ? fmt(doc.CREDIT) : '—'}</td>
@@ -167,7 +170,7 @@ export class IrClStatementPreview {
               {this.fiscalDocuments.length === 0 && (
                 <tr>
                   <td class="cl-td cl-td--empty" colSpan={6}>
-                    No fiscal documents found for this period.
+                    {t('Lcz_NoFiscalDocumentsForPeriod', { fallback: 'No fiscal documents found for this period.' })}
                   </td>
                 </tr>
               )}
@@ -175,7 +178,7 @@ export class IrClStatementPreview {
               {/* Closing balance */}
               <tr class="cl-balance-row">
                 <td class="cl-td" colSpan={3}>
-                  Closing Balance — {moment(this.toDate).format(DATE_DISPLAY)}
+                  {t('Lcz_ClosingBalanceRow', { fallback: 'Closing Balance — %1', params: [formatDate(this.toDate, DATE_DISPLAY)] })}
                 </td>
                 <td class="cl-td"></td>
                 <td class="cl-td"></td>

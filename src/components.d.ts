@@ -8,7 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ACPages } from "./components/ac-pages-menu/ac-pages-menu";
 import { IRatePlanSelection, RatePlanGuest } from "./stores/booking.store";
 import { ICurrency } from "./models/calendarData";
-import { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
+import { ICountry, RoomBlockDetails, SetupEntries } from "./models/IBooking";
 import { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
 import { IToast, TPositions as TPositions1 } from "./components/ui/ir-toast/toast";
 import { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes } from "./models/igl-book-property";
@@ -20,7 +20,7 @@ import { AllowedProperties, DayUseBookings, FetchedProperty, FetchUnBookableRoom
 import { DayUseBookings as DayUseBookings1, FolioPayment as FolioPayment1, GuestChangedEvent, ICountry as ICountry2, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast1 } from "./components.d";
 import { DayInfo, MonthInfo, RoomListItem } from "./components/igloo-calendar/igl-cal-header/types";
 import { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components/igloo-calendar/ir-booking-editor/types";
-import { Currency, ICurrency as ICurrency1, IEntries as IEntries1, IProperty, PhysicalRoom, RatePlan, RoomType } from "./models/property";
+import { Currency, ICurrency as ICurrency1, IProperty, PhysicalRoom, RatePlan, RoomType, SetupEntries as SetupEntries1 } from "./models/property";
 import { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 import { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 import { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
@@ -32,6 +32,8 @@ import { Moment } from "moment";
 import { IPaymentAction } from "./services/payment.service";
 import { PaginationChangeEvent, PaginationRange } from "./components/ir-pagination/ir-pagination";
 import { Payment, PaymentEntries, RoomGuestsPayload } from "./components/ir-booking-details/types";
+import { AuthLanguage } from "./components/ir-auth/ir-auth";
+import { LegacyUserInfo } from "./services/auth/legacy-auth.service";
 import { MaskProp, NativeWaInput } from "./components/ui/ir-input/ir-input";
 import { BookedByCellGuest } from "./components/table-cells/booking/ir-booked-by-cell/ir-booked-by-cell";
 import { AssignableItem } from "./components/ir-booking-details/ir-booking-source-editor-dialog/types";
@@ -58,7 +60,6 @@ import { Row } from "@tanstack/table-core";
 import { ColumnAutocompleteSelectionChange } from "./components/ir-table/ir-column-autocomplete/ir-column-autocomplete";
 import { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
 import { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
-import { Moment as Moment1 } from "moment/min/moment-with-locales";
 import { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
 import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption } from "./components/ir-daily-revenue/types";
 import { DashboardBookingsTableVariant } from "./components/ir-dashboard/ir-dashboard-bookings-table/ir-dashboard-bookings-table";
@@ -68,6 +69,7 @@ import { DashboardPerformance, DashboardUnits } from "./services/dashboard/index
 import { DateRangeChangeEvent } from "./components/ui/ir-date-range/ir-date-range";
 import { QuickDatePreset } from "./components/ui/ir-date-range-filter/ir-date-range-filter";
 import { DateChangeEvent } from "./components/ui/date-picker/ir-date-select/ir-date-select";
+import { DateStyle } from "./utils/date/index";
 import { CheckoutRoomEvent } from "./components/ir-departures/ir-departures-table/ir-departures-table";
 import { Element } from "@stencil/core";
 import { NativeDrawer } from "./components/ir-drawer/ir-drawer";
@@ -85,11 +87,13 @@ import { GHS_Candidate_Property } from "./services/ghs/types";
 import { ICountry as ICountry1 } from "./models/IBooking";
 import { GuestDocumentPreviewRequest as GuestDocumentPreviewRequest1 } from "./components/ir-fiscal-documents/ir-guest-document-preview/types";
 import { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
-import { ConnectedHK } from "./services/housekeeping.service";
+import { ConnectedHK } from "./services/housekeeping/index";
 import { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
 import { FactoryArg } from "imask";
 import { BookingInvoiceInfo, ViewMode } from "./components/ir-invoice/types";
 import { IssueInvoiceProps } from "./services/booking-service/types";
+import { LoginAsideView } from "./components/ir-login-aside/ir-login-aside";
+import { TLocaleEntries } from "./stores/locales.store";
 import { ComboboxOption, DataMode } from "./components/ir-m-combobox/types";
 import { MealCountDaySummary, MealGuestEntry } from "./services/meal-report/types";
 import { MetricSize } from "./components/ir-metric-card/ir-metric-card";
@@ -113,7 +117,10 @@ import { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 import { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 import { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 import { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
+import { TranslatableLanguage, TranslatableTextareaLabels, TranslatableValueChangeDetail, TranslationMap } from "./components/ui/ir-translatable-textarea/types";
+import { TranslationInputDetail } from "./components/ui/ir-translatable-textarea/ir-translation-editor/ir-translation-editor";
 import { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+import { TranslationEntryMoved } from "./components/ir-translations-manager/ir-translations-move-dialog/ir-translations-move-dialog";
 import { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 import { SyncAnswer } from "./components/ir-translations-manager/sync-policy";
 import { User } from "./models/Users";
@@ -122,7 +129,7 @@ import { VoidDocumentRequest } from "./components/ir-booking-details/ir-void-doc
 export { ACPages } from "./components/ac-pages-menu/ac-pages-menu";
 export { IRatePlanSelection, RatePlanGuest } from "./stores/booking.store";
 export { ICurrency } from "./models/calendarData";
-export { ICountry, IEntries, RoomBlockDetails } from "./models/IBooking";
+export { ICountry, RoomBlockDetails, SetupEntries } from "./models/IBooking";
 export { TAdultChildConstraints, TIglBookPropertyPayload } from "./models/igl-book-property.d";
 export { IToast, TPositions as TPositions1 } from "./components/ui/ir-toast/toast";
 export { IglBookPropertyPayloadEditBooking, TAdultChildConstraints as TAdultChildConstraints1, TPropertyButtonsTypes } from "./models/igl-book-property";
@@ -134,7 +141,7 @@ export { AllowedProperties, DayUseBookings, FetchedProperty, FetchUnBookableRoom
 export { DayUseBookings as DayUseBookings1, FolioPayment as FolioPayment1, GuestChangedEvent, ICountry as ICountry2, IrComboboxSelectEventDetail as IrComboboxSelectEventDetail1, IToast as IToast1 } from "./components.d";
 export { DayInfo, MonthInfo, RoomListItem } from "./components/igloo-calendar/igl-cal-header/types";
 export { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components/igloo-calendar/ir-booking-editor/types";
-export { Currency, ICurrency as ICurrency1, IEntries as IEntries1, IProperty, PhysicalRoom, RatePlan, RoomType } from "./models/property";
+export { Currency, ICurrency as ICurrency1, IProperty, PhysicalRoom, RatePlan, RoomType, SetupEntries as SetupEntries1 } from "./models/property";
 export { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 export { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 export { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
@@ -146,6 +153,8 @@ export { Moment } from "moment";
 export { IPaymentAction } from "./services/payment.service";
 export { PaginationChangeEvent, PaginationRange } from "./components/ir-pagination/ir-pagination";
 export { Payment, PaymentEntries, RoomGuestsPayload } from "./components/ir-booking-details/types";
+export { AuthLanguage } from "./components/ir-auth/ir-auth";
+export { LegacyUserInfo } from "./services/auth/legacy-auth.service";
 export { MaskProp, NativeWaInput } from "./components/ui/ir-input/ir-input";
 export { BookedByCellGuest } from "./components/table-cells/booking/ir-booked-by-cell/ir-booked-by-cell";
 export { AssignableItem } from "./components/ir-booking-details/ir-booking-source-editor-dialog/types";
@@ -172,7 +181,6 @@ export { Row } from "@tanstack/table-core";
 export { ColumnAutocompleteSelectionChange } from "./components/ir-table/ir-column-autocomplete/ir-column-autocomplete";
 export { ComboboxItem } from "./components/ui/ir-combobox/ir-combobox";
 export { NativeButton } from "./components/ui/ir-custom-button/ir-custom-button";
-export { Moment as Moment1 } from "moment/min/moment-with-locales";
 export { IDateModifiers } from "./components/ui/ir-custom-date-range/ir-custom-date-range.types";
 export { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption } from "./components/ir-daily-revenue/types";
 export { DashboardBookingsTableVariant } from "./components/ir-dashboard/ir-dashboard-bookings-table/ir-dashboard-bookings-table";
@@ -182,6 +190,7 @@ export { DashboardPerformance, DashboardUnits } from "./services/dashboard/index
 export { DateRangeChangeEvent } from "./components/ui/ir-date-range/ir-date-range";
 export { QuickDatePreset } from "./components/ui/ir-date-range-filter/ir-date-range-filter";
 export { DateChangeEvent } from "./components/ui/date-picker/ir-date-select/ir-date-select";
+export { DateStyle } from "./utils/date/index";
 export { CheckoutRoomEvent } from "./components/ir-departures/ir-departures-table/ir-departures-table";
 export { Element } from "@stencil/core";
 export { NativeDrawer } from "./components/ir-drawer/ir-drawer";
@@ -199,11 +208,13 @@ export { GHS_Candidate_Property } from "./services/ghs/types";
 export { ICountry as ICountry1 } from "./models/IBooking";
 export { GuestDocumentPreviewRequest as GuestDocumentPreviewRequest1 } from "./components/ir-fiscal-documents/ir-guest-document-preview/types";
 export { GuestChangedEvent as GuestChangedEvent1 } from "./components/ir-guest-info/ir-guest-info-form/ir-guest-info-form";
-export { ConnectedHK } from "./services/housekeeping.service";
+export { ConnectedHK } from "./services/housekeeping/index";
 export { MaskProp as MaskProp1, NativeWaInput as NativeWaInput1 } from "./components/ui/ir-input/ir-input";
 export { FactoryArg } from "imask";
 export { BookingInvoiceInfo, ViewMode } from "./components/ir-invoice/types";
 export { IssueInvoiceProps } from "./services/booking-service/types";
+export { LoginAsideView } from "./components/ir-login-aside/ir-login-aside";
+export { TLocaleEntries } from "./stores/locales.store";
 export { ComboboxOption, DataMode } from "./components/ir-m-combobox/types";
 export { MealCountDaySummary, MealGuestEntry } from "./services/meal-report/types";
 export { MetricSize } from "./components/ir-metric-card/ir-metric-card";
@@ -227,7 +238,10 @@ export { ToastVariant } from "./components/ir-toast-alert/ir-toast-alert";
 export { ToastVariants } from "./components/ui/ir-toast-item/ir-toast-item";
 export { Toast } from "./components/ir-toast-provider/ir-toast-provider";
 export { ToastOptions } from "./components/ui/ir-toasts-provider/ir-toasts-provider";
+export { TranslatableLanguage, TranslatableTextareaLabels, TranslatableValueChangeDetail, TranslationMap } from "./components/ui/ir-translatable-textarea/types";
+export { TranslationInputDetail } from "./components/ui/ir-translatable-textarea/ir-translation-editor/ir-translation-editor";
 export { DuplicateInfo, DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from "./components/ir-translations-manager/types";
+export { TranslationEntryMoved } from "./components/ir-translations-manager/ir-translations-move-dialog/ir-translations-move-dialog";
 export { TranslationsSettingsSaved } from "./components/ir-translations-manager/ir-translations-settings-dialog/ir-translations-settings-dialog";
 export { SyncAnswer } from "./components/ir-translations-manager/sync-policy";
 export { User } from "./models/Users";
@@ -361,27 +375,28 @@ export namespace Components {
         "wasBlockedUnit": boolean;
     }
     interface IglBookingEvent {
-        /**
-          * @default []
-         */
-        "allBookingEvents": { [key: string]: any };
         "bookingEvent": { [key: string]: any };
         "countries": ICountry[];
         "currency": any;
+        /**
+          * Every booking on the calendar, read only when a drop has to be checked for overlaps. A getter rather than the array itself, so that updating one booking does not hand every bar a new prop value and re-render them all.
+         */
+        "getAllBookingEvents": () => { [key: string]: any }[];
         /**
           * @default false
          */
         "is_vacation_rental": boolean;
         "language": string;
+        "roomTop": number;
     }
     interface IglBookingEventHover {
         "bookingEvent": { [key: string]: any };
+        "countries": ICountry[];
         /**
+          * The panel sits in a dialog, which frames it and sets its width, rather than floating over the calendar.
           * @default false
          */
-        "bubbleInfoTop": boolean;
-        "countries": ICountry[];
-        "currency": any;
+        "inDialog": boolean;
         /**
           * @default false
          */
@@ -674,7 +689,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "ratePricingMode": Array<{ CODE_NAME: string; CODE_VALUE_EN: string }>;
+        "ratePricingMode": SetupEntries[];
         "roomTypeId": number;
         "shouldBeDisabled": boolean;
         /**
@@ -707,18 +722,15 @@ export namespace Components {
          */
         "unavailableRatePlanIds": Set<number>;
     }
-    interface IglSpiltBookingForm {
-        "booking": Booking;
-        "identifier": Room['identifier'];
-    }
-    interface IglSplitBooking {
-        "booking": Booking;
-        "identifier": Room['identifier'];
-    }
     interface IglSplitBookingDrawer {
         "booking": Booking;
         "identifier": Room['identifier'];
         "open": boolean;
+    }
+    interface IglSplitBookingForm {
+        "booking": Booking;
+        "formId": string;
+        "identifier": Room['identifier'];
     }
     interface IglTbaBookingView {
         "calendarData": { [key: string]: any };
@@ -828,7 +840,7 @@ export namespace Components {
          */
         "propertyid": number;
         /**
-          * Authentication token issued by the PMS backend. Required for initializing the component and making API calls.
+          * Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.
          */
         "ticket": string;
     }
@@ -996,7 +1008,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "arrivalTime": IEntries[];
+        "arrivalTime": SetupEntries[];
         /**
           * Needed to look up whether this room already has an early-check-in extra service charge.
          */
@@ -1041,7 +1053,7 @@ export namespace Components {
          */
         "propertyid": number;
         /**
-          * Authentication token issued by the PMS backend. Required for initializing the component and making API calls.
+          * Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.
          */
         "ticket": string;
     }
@@ -1062,18 +1074,16 @@ export namespace Components {
     interface IrAssignmentToggleDialog {
         /**
           * Cancel button label
-          * @default 'Cancel'
          */
         "cancelLabel": string;
         "closeModal": () => Promise<void>;
         /**
           * Confirm button label
-          * @default 'Confirm'
          */
         "confirmLabel": string;
         /**
           * Dialog header title
-          * @default 'Are you sure?'
+          * @default t('Lcz_AreYouSure', { fallback: 'Are you sure?' })
          */
         "label": string;
         /**
@@ -1086,6 +1096,55 @@ export namespace Components {
          */
         "message": string;
         "openModal": () => Promise<void>;
+    }
+    /**
+     * The extranet sign-in panel: login, forgot password and forgot username.
+     * Owns validation and the whole legacy login chain (`IsAuthenticated_JSON` →
+     * `Get_Startup_Data_Signature` → `Get_Startup_Data`), then redirects the way
+     * `Default.aspx` always has: to the OTP page, or by clicking the server's
+     * `btn_RedirectFromLogin`, whose handler reads `Request.Form["txt_username"]`.
+     * Renders no `<form>` of its own, and no encapsulation: mount it inside the page's
+     * `<form runat="server">`, exactly where the legacy fields sat, so `#txt_username`
+     * posts with the redirect like the original input did. Every other submit of that
+     * form is intercepted and handled here.
+     */
+    interface IrAuth {
+        /**
+          * Base URL of the app's WCF service the login endpoints live on — `_apiUri` in `js/CommonLibrary.js`. The default resolves next to the page (`…/Default.aspx` → `…/AppWCF.svc/`).
+          * @default 'AppWCF.svc/'
+         */
+        "apiUrl": string;
+        "autoPassword": string;
+        /**
+          * When set together with {@link autoPassword}, signs in on load.
+         */
+        "autoUsername": string;
+        /**
+          * Hides the app links and the sign-up button when the page runs inside MPO.
+          * @default false
+         */
+        "insideMpo": boolean;
+        /**
+          * The page's current language, e.g. `<%= CurrentLanguage %>`.
+          * @default 'en'
+         */
+        "language": string;
+        /**
+          * Languages offered by the switcher, as an array or a JSON string of `{ code, label }`.
+          * @default []
+         */
+        "languages": string | AuthLanguage[];
+        "logoUrl": string;
+        /**
+          * Where users who must confirm a one-time password are sent instead.
+          * @default './OTPVerifier.aspx'
+         */
+        "otpUrl": string;
+        /**
+          * Id of the server button whose postback signs the user in (`FormsAuthentication.RedirectFromLoginPage`).
+          * @default 'btn_RedirectFromLogin'
+         */
+        "redirectButton": string;
     }
     interface IrAutocomplete {
         /**
@@ -1437,7 +1496,7 @@ export namespace Components {
           * Service-category entries used to populate the transaction form.
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrBookingCompanyDialog {
         "booking": Booking;
@@ -1522,7 +1581,7 @@ export namespace Components {
          */
         "propertyid": number;
         /**
-          * Authentication token used to initialize the component. Triggers re-initialization when changed.
+          * Authentication ApiClient used to initialize the component. Triggers re-initialization when changed.
           * @default ''
          */
         "ticket": string;
@@ -1651,7 +1710,7 @@ export namespace Components {
          */
         "roomTypeIds": (string | number)[];
         /**
-          * Auth token used for API requests.
+          * Auth ApiClient used for API requests.
          */
         "ticket": string;
         /**
@@ -1752,6 +1811,9 @@ export namespace Components {
     interface IrBookingListingTable {
     }
     interface IrBookingNewForm {
+        /**
+          * Language for the form and the editor it opens, independent of the page's. Reflected as `lang` on the host, which makes this subtree its own locale scope (see `locale-scope.ts`).
+         */
         "language": string;
         "propertyid": string;
         "ticket": string;
@@ -1816,6 +1878,10 @@ export namespace Components {
         /**
           * @default ''
          */
+        "ApiClient": string;
+        /**
+          * @default ''
+         */
         "bookingNumber": string;
         "countries": any;
         /**
@@ -1827,10 +1893,6 @@ export namespace Components {
          */
         "mode": 'invoice' | 'default';
         "propertyid": number;
-        /**
-          * @default ''
-         */
-        "token": string;
     }
     interface IrBookingRooms {
         "agent": Agent;
@@ -1838,12 +1900,12 @@ export namespace Components {
           * Available arrival time options for the booking. Passed down to each room when applicable.
           * @default []
          */
-        "arrivalTime": IEntries[];
+        "arrivalTime": SetupEntries[];
         /**
           * Available bed preference options for the booking rooms. Used to populate bed selection inside each room component.
           * @default []
          */
-        "bedPreference": IEntries[];
+        "bedPreference": SetupEntries[];
         /**
           * The booking object containing reservation details, including rooms, status, currency, and edit permissions.
          */
@@ -1860,7 +1922,7 @@ export namespace Components {
           * Available departure time options for the booking. Passed down to each room when applicable.
           * @default []
          */
-        "departureTime": IEntries[];
+        "departureTime": SetupEntries[];
         /**
           * Enables the ability to add a new room/unit to the booking.
           * @default false
@@ -1900,7 +1962,7 @@ export namespace Components {
           * `_SVC_CATEGORY` setup entries, threaded down to each room's extra-services section for category labels.
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrBookingSourceEditorDialog {
         "booking": Booking;
@@ -2331,10 +2393,6 @@ export namespace Components {
           * @default null
          */
         "agentId": number | null;
-        /**
-          * @default '$'
-         */
-        "currencySymbol": string;
         "refresh": () => Promise<void>;
     }
     interface IrCityLedgerTransactionDrawer {
@@ -2351,7 +2409,7 @@ export namespace Components {
          */
         "bookingOptions": LinkedOption[];
         /**
-          * @default 'New Entry'
+          * @default t('Lcz_NewEntryTitle', { fallback: 'New Entry' })
          */
         "drawerLabel": string;
         /**
@@ -2576,9 +2634,6 @@ export namespace Components {
           * @default ''
          */
         "hint": string;
-        /**
-          * @default 'Invoice'
-         */
         "label": string;
         /**
           * @default ''
@@ -2623,7 +2678,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "paymentMethods": IEntries[];
+        "paymentMethods": SetupEntries[];
         /**
           * @default []
          */
@@ -2701,21 +2756,12 @@ export namespace Components {
         "row": Row<any>;
     }
     interface IrColumnAutocomplete {
-        /**
-          * @default 'No results found'
-         */
         "emptyLabel": string;
         /**
           * @default []
          */
         "options": string[];
-        /**
-          * @default 'Search...'
-         */
         "placeholder": string;
-        /**
-          * @default 'Select all'
-         */
         "selectAllLabel": string;
         /**
           * @default []
@@ -2926,18 +2972,17 @@ export namespace Components {
           * The currently selected check-in date.
           * @default null
          */
-        "fromDate": Moment1 | null;
+        "fromDate": Moment | null;
         /**
-          * BCP-47 locale tag used to localise day names and month formatting.
-          * @reflect 
-          * @default 'en'
+          * BCP-47 locale tag used to localise day names and month formatting. Leave unset to follow the nearest `lang` ancestor (see `locale-scope.ts`), then the app's language.
+          * @reflect
          */
-        "locale": string;
+        "locale"?: string;
         /**
           * The latest selectable date. Defaults to 24 years in the future.
           * @default moment().add(24, 'years')
          */
-        "maxDate": Moment1;
+        "maxDate": Moment;
         /**
           * Maximum number of nights that can be selected in one span.
           * @default 90
@@ -2947,7 +2992,7 @@ export namespace Components {
           * The earliest selectable date. Defaults to 24 years in the past.
           * @default moment().add(-24, 'years')
          */
-        "minDate": Moment1;
+        "minDate": Moment;
         /**
           * When `true`, displays a price line inside each day button (requires `dateModifiers`).
           * @default false
@@ -2957,7 +3002,7 @@ export namespace Components {
           * The currently selected check-out date.
           * @default null
          */
-        "toDate": Moment1 | null;
+        "toDate": Moment | null;
     }
     interface IrDailyRevenue {
         /**
@@ -2994,6 +3039,7 @@ export namespace Components {
      * booking whose stay covers the selected day reloads the stats plus cancellations.
      */
     interface IrDashboard {
+        "baseUrl": string;
         /**
           * API base URL override.
          */
@@ -3054,8 +3100,8 @@ export namespace Components {
         "variant": DashboardBookingsTableVariant;
     }
     /**
-     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
-     * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days from
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface IrDashboardDateNavigator {
         /**
@@ -3317,9 +3363,8 @@ export namespace Components {
         "minDate"?: string;
         /**
           * Configurable quick-date preset buttons shown alongside each calendar.
-          * @default [     { label: 'Today', getDate: () => moment() },     { label: '30 Days Ago', getDate: () => moment().subtract(30, 'days') },     { label: '60 Days Ago', getDate: () => moment().subtract(60, 'days') },     { label: '90 Days Ago', getDate: () => moment().subtract(90, 'days') },     { label: '1 Year Ago', getDate: () => moment().subtract(1, 'year') },   ]
          */
-        "quickDates": QuickDatePreset[];
+        "quickDates"?: QuickDatePreset[];
         /**
           * How a quick-date preset behaves when picked from the *to* side: - `'absolute'` (default): sets only the to-date to `preset.getDate()`, same as the from side. - `'range'`: treats `preset.getDate()` as a "N units ago" anchor — sets from-date to   `preset.getDate()` and to-date to today, so e.g. "7 Days Ago" becomes a "last 7 days" range.   The from side is unaffected by this prop; it always sets only the from-date.
           * @default 'absolute'
@@ -3448,15 +3493,10 @@ export namespace Components {
     }
     interface IrDateView {
         /**
-          * Input format used when `from_date` / `to_date` are plain strings
-          * @default 'YYYY-MM-DD'
+          * Display style for both dates
+          * @default 'medium'
          */
-        "dateOption": string;
-        /**
-          * Display format for both dates
-          * @default 'MMM DD, YYYY'
-         */
-        "format": string;
+        "format": DateStyle;
         /**
           * Raw from-date — accepts ISO string, JS Date, or Moment
          */
@@ -3515,7 +3555,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "departureTime": IEntries[];
+        "departureTime": SetupEntries[];
         /**
           * @default 'en'
          */
@@ -3657,9 +3697,6 @@ export namespace Components {
         "value": string;
     }
     interface IrEmptyState {
-        /**
-          * @default 'No records found'
-         */
         "message": string;
         /**
           * @default true
@@ -3684,7 +3721,7 @@ export namespace Components {
          */
         "language": string;
         "service": ExtraService;
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrExtraServiceConfig {
         "agent": Agent;
@@ -3699,7 +3736,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrExtraServiceConfigForm {
         "agent": Agent;
@@ -3714,7 +3751,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrExtraServiceEditorDrawer {
         /**
@@ -3744,7 +3781,7 @@ export namespace Components {
          */
         "clTransactions": ClTx[];
         "language": string;
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrExtraServicesSettings {
         /**
@@ -3770,7 +3807,7 @@ export namespace Components {
         "action": FdConfirmAction | null;
         "amount": number;
         /**
-          * @default 'this document'
+          * @default t('Lcz_ThisDocumentFallback', { fallback: 'this document' })
          */
         "docNumber": string;
         "fdType": string;
@@ -3886,7 +3923,7 @@ export namespace Components {
         "actionsAlign": 'start' | 'center' | 'end' | 'space-between' | 'space-around';
         /**
           * Apply button copy
-          * @default locales.entries.Lcz_Apply
+          * @default t('Lcz_Apply', { fallback: 'Apply' })
          */
         "applyLabel": string;
         /**
@@ -3938,7 +3975,7 @@ export namespace Components {
         "disableReset": boolean;
         /**
           * Panel headline text
-          * @default locales.entries.Lcz_Filters
+          * @default t('Lcz_Filters', { fallback: 'Filters' })
          */
         "filterTitle": string;
         /**
@@ -3966,7 +4003,7 @@ export namespace Components {
         "persistentOnDesktop": boolean;
         /**
           * Reset button copy
-          * @default locales.entries.Lcz_Reset
+          * @default t('Lcz_Reset', { fallback: 'Reset' })
          */
         "resetLabel": string;
         /**
@@ -4050,7 +4087,7 @@ export namespace Components {
           * `_FD_TYPE` setup entries used to display the document type.
           * @default []
          */
-        "fdTypes": IEntries[];
+        "fdTypes": SetupEntries[];
         /**
           * Folio scope driving which identity columns are shown.
           * @default 'all'
@@ -4160,6 +4197,10 @@ export namespace Components {
     }
     interface IrGhsOnboarding {
         "baseurl": string;
+        /**
+          * @default 'en'
+         */
+        "language": string;
         "ticket": string;
     }
     interface IrGhsSelectionBucket {
@@ -4265,7 +4306,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "frequencies": IEntries[];
+        "frequencies": SetupEntries[];
     }
     interface IrHkStaffTask {
         /**
@@ -4491,6 +4532,9 @@ export namespace Components {
           * The minimum length of input that will be considered valid.
          */
         "minlength": NativeWaInput1['minlength'];
+        /**
+          * Reflected: a form-associated element is submitted under its `name` *attribute*.
+         */
         "name": string;
         /**
           * Adds a button to toggle the password's visibility. Only applies to password types.
@@ -4924,9 +4968,6 @@ export namespace Components {
     interface IrListingModal {
         "closeModal": () => Promise<void>;
         "editBooking": { booking: Booking; cause: 'edit' | 'payment' | 'delete' | 'guest' };
-        /**
-          * @default 'Modal Title'
-         */
         "modalTitle": string;
         "openModal": () => Promise<void>;
         "paymentEntries": PaymentEntries;
@@ -4937,7 +4978,86 @@ export namespace Components {
          */
         "message": string;
     }
+    /**
+     * A floating dev/QA panel for switching language, calendar system,
+     * numbering system and text direction at runtime.
+     * All user-selected settings are persisted in localStorage and restored
+     * automatically the next time the page is opened.
+     */
+    interface IrLocaleSwitcher {
+        /**
+          * Start collapsed to a single button when no saved state exists.
+          * @default true
+         */
+        "collapsed": boolean;
+        /**
+          * Corner to pin the panel to.
+          * @default 'bottom-end'
+         */
+        "placement": 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
+        /**
+          * Sample date for the preview, YYYY-MM-DD. Defaults to today.
+         */
+        "sampleDate": string;
+    }
     interface IrLogin {
+        /**
+          * @default 'en'
+         */
+        "language": string;
+    }
+    interface IrLoginAside {
+        /**
+          * Alternative text for the image. Empty means decorative.
+          * @default ''
+         */
+        "imageAlt": string;
+        /**
+          * Image URL, used when `view` is `image`.
+         */
+        "imageSrc": string;
+        /**
+          * Server-provided `Lcz_*` translations, passed through to every view that shows copy.
+          * @default null
+         */
+        "localeEntries": TLocaleEntries | null;
+        /**
+          * Which aside content to render.
+          * @default 'calendar'
+         */
+        "view": LoginAsideView;
+    }
+    interface IrLoginAsideCalendar {
+        /**
+          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * @default null
+         */
+        "localeEntries": TLocaleEntries | null;
+    }
+    interface IrLoginAsideDynamicPricing {
+        /**
+          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * @default null
+         */
+        "localeEntries": TLocaleEntries | null;
+    }
+    interface IrLoginAsideImage {
+        /**
+          * Alternative text. Leave empty when the image is purely decorative.
+          * @default ''
+         */
+        "imageAlt": string;
+        /**
+          * Image URL rendered as the aside background.
+         */
+        "imageSrc": string;
+    }
+    interface IrLoginAsideShowcase {
+        /**
+          * Server-provided `Lcz_*` translations, passed through to the slides.
+          * @default null
+         */
+        "localeEntries": TLocaleEntries | null;
     }
     interface IrMCombobox {
         /**
@@ -5030,10 +5150,6 @@ export namespace Components {
          */
         "isLoading": boolean;
         /**
-          * @default {}
-         */
-        "lcz": any;
-        /**
           * @default null
          */
         "mealType": string | null;
@@ -5041,7 +5157,7 @@ export namespace Components {
           * @default 'GUEST_LIST'
          */
         "reportType": 'GUEST_LIST' | 'MEAL_COUNT';
-        "setupEntries": { meal_type: IEntries[]; hb_preference: IEntries[] };
+        "setupEntries": { meal_type: SetupEntries[]; hb_preference: SetupEntries[] };
         "toDate": string;
     }
     interface IrMenu {
@@ -5145,7 +5261,6 @@ export namespace Components {
         "error"?: string;
         /**
           * Visible label for the phone input
-          * @default 'Phone number'
          */
         "label": string;
         /**
@@ -5155,7 +5270,6 @@ export namespace Components {
         "name": string;
         /**
           * Placeholder shown when the input is empty
-          * @default 'Enter phone number'
          */
         "placeholder": string;
         /**
@@ -5227,7 +5341,6 @@ export namespace Components {
         "leftBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the left (cancel/close) button.
-          * @default 'Close'
          */
         "leftBtnText": string;
         /**
@@ -5242,17 +5355,14 @@ export namespace Components {
         "middleBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the middle (tertiary) button.
-          * @default 'More'
          */
         "middleBtnText": string;
         /**
           * The main content text shown in the modal body.
-          * @default 'Modal Body'
          */
         "modalBody": string;
         /**
           * The title text displayed in the modal header.
-          * @default 'Modal Title'
          */
         "modalTitle": string;
         /**
@@ -5271,7 +5381,6 @@ export namespace Components {
         "rightBtnColor": 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the right (confirm) button.
-          * @default 'Confirm'
          */
         "rightBtnText": string;
         /**
@@ -5511,7 +5620,7 @@ export namespace Components {
         "paymentActions": IPaymentAction[];
         "paymentEntries": PaymentEntries1;
         "propertyId": number;
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrPaymentFolio {
         /**
@@ -5612,6 +5721,10 @@ export namespace Components {
     }
     interface IrPhoneInput {
         /**
+          * Auth ApiClient used by the booking service (if needed).
+         */
+        "ApiClient": string;
+        /**
           * Country list, used to populate prefix and dropdown. If not provided, fetched from the booking service.
           * @default []
          */
@@ -5660,10 +5773,6 @@ export namespace Components {
           * Identifier for test automation.
          */
         "testId": string;
-        /**
-          * Auth token used by the booking service (if needed).
-         */
-        "token": string;
         /**
           * Initial phone number value.
           * @default ''
@@ -5790,6 +5899,10 @@ export namespace Components {
         "bookingNumber": string;
     }
     interface IrPmsPage {
+        /**
+          * @default 'en'
+         */
+        "language": string;
         "propertyid": string;
         "ticket": string;
     }
@@ -5799,6 +5912,10 @@ export namespace Components {
         "ticket": string;
     }
     interface IrPmsSearch {
+        /**
+          * @default 'en'
+         */
+        "language": string;
         "propertyid": string;
         "ticket": string;
     }
@@ -5857,7 +5974,6 @@ export namespace Components {
         "hideDefaultAction": boolean;
         /**
           * The dialog's label as displayed in the header. Required for accessibility and announced by assistive technologies.
-          * @default 'Preview'
          */
         "label": string;
         /**
@@ -6081,7 +6197,7 @@ export namespace Components {
     interface IrQueueChart {
         /**
           * Chart title
-          * @default 'Queue Status'
+          * @default t('Lcz_QueueStatus', { fallback: 'Queue Status' })
          */
         "label": string;
         /**
@@ -6096,6 +6212,10 @@ export namespace Components {
         "values": number[];
     }
     interface IrQueueManager {
+        /**
+          * @default 'en'
+         */
+        "language": string;
         /**
           * @default ''
          */
@@ -6229,13 +6349,13 @@ export namespace Components {
     }
     interface IrRoom {
         "agent": Agent;
-        "arrivalTime": IEntries[];
+        "arrivalTime": SetupEntries[];
         /**
           * When true, this room opens its check-out dialog automatically once mounted. Set by the booking-details screen when an early check-out was initiated from another screen (departures list, calendar) and redirected here.
           * @default false
          */
         "autoOpenCheckout": boolean;
-        "bedPreferences": IEntries[];
+        "bedPreferences": SetupEntries[];
         "booking": Booking;
         "bookingIndex": number;
         /**
@@ -6246,7 +6366,7 @@ export namespace Components {
           * @default 'USD'
          */
         "currency": string;
-        "departureTime": IEntries[];
+        "departureTime": SetupEntries[];
         /**
           * @default false
          */
@@ -6283,7 +6403,7 @@ export namespace Components {
           * `_SVC_CATEGORY` setup entries, used to label extra services in the room's extra-services section.
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrRoomBreakdown {
         "booking": Booking;
@@ -6298,7 +6418,7 @@ export namespace Components {
         "room": Room;
     }
     interface IrRoomDetails {
-        "bedPreferences": IEntries[];
+        "bedPreferences": SetupEntries[];
         "booking": Booking;
         /**
           * @default false
@@ -6336,7 +6456,7 @@ export namespace Components {
         /**
           * @default []
          */
-        "svcCategories": IEntries[];
+        "svcCategories": SetupEntries[];
     }
     interface IrRoomGuests {
         /**
@@ -6348,7 +6468,7 @@ export namespace Components {
          */
         "checkIn": boolean;
         /**
-          * A list of available countries. Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+          * A list of available countries. Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
          */
         "countries": ICountry[];
         /**
@@ -6370,7 +6490,7 @@ export namespace Components {
          */
         "roomType": string;
         /**
-          * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+          * An array of people sharing the room. Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
           * @default []
          */
         "sharedPersons": SharedPerson[];
@@ -6390,7 +6510,7 @@ export namespace Components {
          */
         "checkIn": boolean;
         /**
-          * A list of available countries. Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+          * A list of available countries. Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
          */
         "countries": ICountry[];
         /**
@@ -6407,7 +6527,7 @@ export namespace Components {
          */
         "roomName": string;
         /**
-          * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+          * An array of people sharing the room. Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
           * @default []
          */
         "sharedPersons": SharedPerson[];
@@ -6506,6 +6626,7 @@ export namespace Components {
     }
     interface IrSecureTasks {
         "bookingNumber": string;
+        "language": string;
         "p": string;
         "propertyid": number;
         "ticket": string;
@@ -6517,9 +6638,6 @@ export namespace Components {
           * @default false
          */
         "error": boolean;
-        /**
-          * @default 'Select'
-         */
         "firstOption": string;
         /**
           * Floating label text that appears inside the input and “floats” above when the field is focused or has a value.  - If provided, a floating label will be rendered inside the input container. - If you omit this prop but set `label`, the old left-side static label is used. - If you provide both `label` and `floatingLabel`, only the floating label is shown.   Examples: ```tsx <ir-select floating-label label="Phone" /> ```
@@ -6585,7 +6703,6 @@ export namespace Components {
         "assigneeType": 'agent' | 'guest';
         /**
           * Label displayed above the assignment selector.
-          * @default 'Assign to folio'
          */
         "label": string;
     }
@@ -6774,7 +6891,7 @@ export namespace Components {
           * List of setup entries used to populate the tax mode select.  Each entry represents a tax application option (e.g. Not Applicable, Inclusive, Exclusive).
           * @default []
          */
-        "setupEntries": IEntries[];
+        "setupEntries": SetupEntries[];
     }
     interface IrTaxServiceCategories {
         /**
@@ -7025,6 +7142,7 @@ export namespace Components {
         "position": 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
         "removeToast": (id: string) => Promise<void>;
         /**
+          * Pins the toast layer to RTL. Leave unset to inherit the document direction.
           * @default false
          */
         "rtl": boolean;
@@ -7063,6 +7181,159 @@ export namespace Components {
           * @default true
          */
         "withHtml": boolean;
+    }
+    /**
+     * A multilingual textarea modelled on Shopify's translation flow: the field itself is edited in the default
+     * language (English unless overridden), which is required. Translations are made in a separate side-by-side
+     * editor (`ir-translation-editor`, inside a dialog) and are only committed when the user saves.
+     * Value is a map keyed by BCP-47 code. Form-associated: submits `JSON.stringify(value)` under `name`, and
+     * blocks submission while the default language is blank.
+     */
+    interface IrTranslatableTextarea {
+        /**
+          * @default 'outlined'
+         */
+        "appearance": WaTextarea['appearance'];
+        "checkValidity": () => Promise<boolean>;
+        /**
+          * The source language: edited inline and required.
+          * @default 'en'
+         */
+        "defaultLanguage": string;
+        /**
+          * @default false
+         */
+        "disabled": boolean;
+        /**
+          * Locale used to display language names. Defaults to the nearest `lang` attribute, then the browser locale.
+         */
+        "displayLocale": string;
+        /**
+          * Help text under the inline textarea.
+         */
+        "hint": string;
+        /**
+          * Field label. Also used in the translation editor's title.
+         */
+        "label": string;
+        /**
+          * Overrides for the built-in English UI strings.
+          * @default {}
+         */
+        "labels": Partial<TranslatableTextareaLabels>;
+        /**
+          * Languages the field can be translated into. The default language may be listed; it is skipped as a target.
+          * @default []
+         */
+        "languages": TranslatableLanguage[];
+        /**
+          * Maximum characters per language.
+         */
+        "maxlength": number;
+        /**
+          * Form field name. The submitted value is the JSON-encoded translation map.
+         */
+        "name": string;
+        /**
+          * Opens the translation editor, optionally on a specific language.
+         */
+        "openTranslations": (code?: string) => Promise<void>;
+        /**
+          * Placeholder for the inline textarea.
+         */
+        "placeholder": string;
+        /**
+          * @default false
+         */
+        "readonly": boolean;
+        /**
+          * Like `checkValidity()`, but also shows the error and focuses the field.
+         */
+        "reportValidity": () => Promise<boolean>;
+        /**
+          * @default 'auto'
+         */
+        "resize": WaTextarea['resize'];
+        /**
+          * @default 4
+         */
+        "rows": number;
+        /**
+          * @default 's'
+         */
+        "size": WaTextarea['size'];
+        /**
+          * Text per language, e.g. `{ en: '…', fr: '…' }`. Blank translations are never stored.
+          * @default {}
+         */
+        "value": TranslationMap;
+        /**
+          * Shows a character count (remaining characters when `maxlength` is set).
+          * @default false
+         */
+        "withCount": boolean;
+    }
+    /**
+     * Side-by-side translation editor: a language selector, the default-language text as a read-only reference,
+     * and a textarea for the selected language. Stateless about edits — it shows `value` and reports keystrokes
+     * through `translationInput`; the owner decides when to save.
+     */
+    interface IrTranslationEditor {
+        /**
+          * @default 'outlined'
+         */
+        "appearance": WaTextarea['appearance'];
+        /**
+          * @default 'en'
+         */
+        "defaultLanguage": string;
+        /**
+          * Locale used to display language names.
+         */
+        "displayLocale": string;
+        /**
+          * Focuses the translation textarea.
+         */
+        "focusInput": () => Promise<void>;
+        /**
+          * Field label, used in the textarea's accessible name.
+         */
+        "label": string;
+        /**
+          * @default {}
+         */
+        "labels": Partial<TranslatableTextareaLabels>;
+        /**
+          * The language being edited. Updated when the user picks another one.
+         */
+        "language": string;
+        /**
+          * All languages; the default language is shown as the reference and excluded from the selector.
+          * @default []
+         */
+        "languages": TranslatableLanguage[];
+        "maxlength": number;
+        /**
+          * @default false
+         */
+        "readonly": boolean;
+        /**
+          * @default 6
+         */
+        "rows": number;
+        /**
+          * @default 's'
+         */
+        "size": WaTextarea['size'];
+        /**
+          * Text per language to display (saved text merged with any unsaved edits).
+          * @default {}
+         */
+        "value": TranslationMap;
+        /**
+          * @default false
+         */
+        "withCount": boolean;
     }
     /**
      * Owns the entries table plus its client-side search/status filtering — the
@@ -7286,6 +7557,34 @@ export namespace Components {
         "userId": number;
     }
     /**
+     * Moves one setup entry to another table through Move_Setup_Entry — the
+     * backend re-homes the row, so nothing is re-created or soft-deleted here.
+     * The destination list is whatever the parent passes as `tables`: the manager
+     * hands over the same set its header picker offers, so the "only used tables"
+     * setting narrows both the same way. The search box is a local filter over
+     * that list, and the source table is never offered as a destination.
+     */
+    interface IrTranslationsMoveDialog {
+        /**
+          * The row being moved. Its `tableName` is the source table.
+          * @default null
+         */
+        "entry": TranslationEntry | null;
+        /**
+          * @default false
+         */
+        "open": boolean;
+        /**
+          * Language whose value is shown next to the key, so the user can tell rows with similar keys apart.
+         */
+        "sourceCode"?: string;
+        /**
+          * Candidate destinations — the tables the header picker shows.
+          * @default []
+         */
+        "tables": TranslationTable[];
+    }
+    /**
      * Settings for the entries grid — which tables the pickers offer, which
      * non-source languages show up as columns, and whether the notes column is
      * shown. Every control here edits a local draft only; nothing reaches the
@@ -7389,6 +7688,10 @@ export namespace Components {
           * @default 14
          */
         "consecutive_period": number;
+        /**
+          * @default ''
+         */
+        "language": string;
         /**
           * @default 'default'
          */
@@ -7778,17 +8081,13 @@ export interface IglReallocationDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglReallocationDialogElement;
 }
-export interface IglSpiltBookingFormCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLIglSpiltBookingFormElement;
-}
-export interface IglSplitBookingCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLIglSplitBookingElement;
-}
 export interface IglSplitBookingDrawerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIglSplitBookingDrawerElement;
+}
+export interface IglSplitBookingFormCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIglSplitBookingFormElement;
 }
 export interface IglTbaBookingViewCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -7853,6 +8152,10 @@ export interface IrArrivalsTableCustomEvent<T> extends CustomEvent<T> {
 export interface IrAssignmentToggleDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrAssignmentToggleDialogElement;
+}
+export interface IrAuthCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrAuthElement;
 }
 export interface IrAutocompleteCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -8618,6 +8921,14 @@ export interface IrToastProviderCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrToastProviderElement;
 }
+export interface IrTranslatableTextareaCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrTranslatableTextareaElement;
+}
+export interface IrTranslationEditorCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrTranslationEditorElement;
+}
 export interface IrTranslationsEntriesPanelCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrTranslationsEntriesPanelElement;
@@ -8637,6 +8948,10 @@ export interface IrTranslationsEntryFormCustomEvent<T> extends CustomEvent<T> {
 export interface IrTranslationsLanguageDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrTranslationsLanguageDialogElement;
+}
+export interface IrTranslationsMoveDialogCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrTranslationsMoveDialogElement;
 }
 export interface IrTranslationsSettingsDialogCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -8837,12 +9152,9 @@ declare global {
         new (): HTMLIglBookPropertyHeaderElement;
     };
     interface HTMLIglBookingEventElementEventMap {
-        "hideBubbleInfo": any;
-        "updateEventData": any;
         "dragOverEventData": any;
         "showRoomNightsDialog": IRoomNightsData;
         "showDialog": CalendarModalEvent;
-        "resetStretchedBooking": string;
         "updateBookingEvent": { [key: string]: any };
     }
     interface HTMLIglBookingEventElement extends Components.IglBookingEvent, HTMLStencilElement {
@@ -9279,40 +9591,6 @@ declare global {
         prototype: HTMLIglRoomTypeElement;
         new (): HTMLIglRoomTypeElement;
     };
-    interface HTMLIglSpiltBookingFormElementEventMap {
-        "closeModal": null;
-    }
-    interface HTMLIglSpiltBookingFormElement extends Components.IglSpiltBookingForm, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglSpiltBookingFormElementEventMap>(type: K, listener: (this: HTMLIglSpiltBookingFormElement, ev: IglSpiltBookingFormCustomEvent<HTMLIglSpiltBookingFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglSpiltBookingFormElementEventMap>(type: K, listener: (this: HTMLIglSpiltBookingFormElement, ev: IglSpiltBookingFormCustomEvent<HTMLIglSpiltBookingFormElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLIglSpiltBookingFormElement: {
-        prototype: HTMLIglSpiltBookingFormElement;
-        new (): HTMLIglSpiltBookingFormElement;
-    };
-    interface HTMLIglSplitBookingElementEventMap {
-        "closeModal": null;
-    }
-    interface HTMLIglSplitBookingElement extends Components.IglSplitBooking, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLIglSplitBookingElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingElement, ev: IglSplitBookingCustomEvent<HTMLIglSplitBookingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLIglSplitBookingElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingElement, ev: IglSplitBookingCustomEvent<HTMLIglSplitBookingElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLIglSplitBookingElement: {
-        prototype: HTMLIglSplitBookingElement;
-        new (): HTMLIglSplitBookingElement;
-    };
     interface HTMLIglSplitBookingDrawerElementEventMap {
         "closeModal": null;
     }
@@ -9329,6 +9607,23 @@ declare global {
     var HTMLIglSplitBookingDrawerElement: {
         prototype: HTMLIglSplitBookingDrawerElement;
         new (): HTMLIglSplitBookingDrawerElement;
+    };
+    interface HTMLIglSplitBookingFormElementEventMap {
+        "closeModal": null;
+    }
+    interface HTMLIglSplitBookingFormElement extends Components.IglSplitBookingForm, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIglSplitBookingFormElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingFormElement, ev: IglSplitBookingFormCustomEvent<HTMLIglSplitBookingFormElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIglSplitBookingFormElementEventMap>(type: K, listener: (this: HTMLIglSplitBookingFormElement, ev: IglSplitBookingFormCustomEvent<HTMLIglSplitBookingFormElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIglSplitBookingFormElement: {
+        prototype: HTMLIglSplitBookingFormElement;
+        new (): HTMLIglSplitBookingFormElement;
     };
     interface HTMLIglTbaBookingViewElementEventMap {
         "highlightToBeAssignedBookingEvent": { key: 'highlightBookingId'; data: { bookingId: string; fromDate?: string } };
@@ -9694,6 +9989,35 @@ declare global {
     var HTMLIrAssignmentToggleDialogElement: {
         prototype: HTMLIrAssignmentToggleDialogElement;
         new (): HTMLIrAssignmentToggleDialogElement;
+    };
+    interface HTMLIrAuthElementEventMap {
+        "authLanguageChange": { code: string };
+        "authFinish": { userInfo: LegacyUserInfo; requiresOtp: boolean };
+    }
+    /**
+     * The extranet sign-in panel: login, forgot password and forgot username.
+     * Owns validation and the whole legacy login chain (`IsAuthenticated_JSON` →
+     * `Get_Startup_Data_Signature` → `Get_Startup_Data`), then redirects the way
+     * `Default.aspx` always has: to the OTP page, or by clicking the server's
+     * `btn_RedirectFromLogin`, whose handler reads `Request.Form["txt_username"]`.
+     * Renders no `<form>` of its own, and no encapsulation: mount it inside the page's
+     * `<form runat="server">`, exactly where the legacy fields sat, so `#txt_username`
+     * posts with the redirect like the original input did. Every other submit of that
+     * form is intercepted and handled here.
+     */
+    interface HTMLIrAuthElement extends Components.IrAuth, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrAuthElementEventMap>(type: K, listener: (this: HTMLIrAuthElement, ev: IrAuthCustomEvent<HTMLIrAuthElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrAuthElementEventMap>(type: K, listener: (this: HTMLIrAuthElement, ev: IrAuthCustomEvent<HTMLIrAuthElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrAuthElement: {
+        prototype: HTMLIrAuthElement;
+        new (): HTMLIrAuthElement;
     };
     interface HTMLIrAutocompleteElementEventMap {
         "text-change": string;
@@ -11128,8 +11452,8 @@ declare global {
         "dateChange": ISODate;
     }
     /**
-     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
-     * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days from
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface HTMLIrDashboardDateNavigatorElement extends Components.IrDashboardDateNavigator, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrDashboardDateNavigatorElementEventMap>(type: K, listener: (this: HTMLIrDashboardDateNavigatorElement, ev: IrDashboardDateNavigatorCustomEvent<HTMLIrDashboardDateNavigatorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -12472,9 +12796,21 @@ declare global {
         prototype: HTMLIrLoadingScreenElement;
         new (): HTMLIrLoadingScreenElement;
     };
+    /**
+     * A floating dev/QA panel for switching language, calendar system,
+     * numbering system and text direction at runtime.
+     * All user-selected settings are persisted in localStorage and restored
+     * automatically the next time the page is opened.
+     */
+    interface HTMLIrLocaleSwitcherElement extends Components.IrLocaleSwitcher, HTMLStencilElement {
+    }
+    var HTMLIrLocaleSwitcherElement: {
+        prototype: HTMLIrLocaleSwitcherElement;
+        new (): HTMLIrLocaleSwitcherElement;
+    };
     interface HTMLIrLoginElementEventMap {
         "authFinish": {
-    token: string;
+    ApiClient: string;
     code: 'succsess' | 'error';
   };
     }
@@ -12491,6 +12827,36 @@ declare global {
     var HTMLIrLoginElement: {
         prototype: HTMLIrLoginElement;
         new (): HTMLIrLoginElement;
+    };
+    interface HTMLIrLoginAsideElement extends Components.IrLoginAside, HTMLStencilElement {
+    }
+    var HTMLIrLoginAsideElement: {
+        prototype: HTMLIrLoginAsideElement;
+        new (): HTMLIrLoginAsideElement;
+    };
+    interface HTMLIrLoginAsideCalendarElement extends Components.IrLoginAsideCalendar, HTMLStencilElement {
+    }
+    var HTMLIrLoginAsideCalendarElement: {
+        prototype: HTMLIrLoginAsideCalendarElement;
+        new (): HTMLIrLoginAsideCalendarElement;
+    };
+    interface HTMLIrLoginAsideDynamicPricingElement extends Components.IrLoginAsideDynamicPricing, HTMLStencilElement {
+    }
+    var HTMLIrLoginAsideDynamicPricingElement: {
+        prototype: HTMLIrLoginAsideDynamicPricingElement;
+        new (): HTMLIrLoginAsideDynamicPricingElement;
+    };
+    interface HTMLIrLoginAsideImageElement extends Components.IrLoginAsideImage, HTMLStencilElement {
+    }
+    var HTMLIrLoginAsideImageElement: {
+        prototype: HTMLIrLoginAsideImageElement;
+        new (): HTMLIrLoginAsideImageElement;
+    };
+    interface HTMLIrLoginAsideShowcaseElement extends Components.IrLoginAsideShowcase, HTMLStencilElement {
+    }
+    var HTMLIrLoginAsideShowcaseElement: {
+        prototype: HTMLIrLoginAsideShowcaseElement;
+        new (): HTMLIrLoginAsideShowcaseElement;
     };
     interface HTMLIrMComboboxElementEventMap {
         "optionChange": ComboboxOption;
@@ -13427,6 +13793,7 @@ declare global {
         "resetBookingEvt": Booking | null;
         "openSidebar": OpenSidebarEvent<RoomGuestsPayload1>;
         "addExtraServiceToUnit": { identifier: string };
+        "openPrintScreen": PrintScreenOptions;
     }
     interface HTMLIrRoomElement extends Components.IrRoom, HTMLStencilElement {
         addEventListener<K extends keyof HTMLIrRoomElementEventMap>(type: K, listener: (this: HTMLIrRoomElement, ev: IrRoomCustomEvent<HTMLIrRoomElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -13998,10 +14365,58 @@ declare global {
         prototype: HTMLIrTooltipElement;
         new (): HTMLIrTooltipElement;
     };
+    interface HTMLIrTranslatableTextareaElementEventMap {
+        "valueChange": TranslatableValueChangeDetail;
+    }
+    /**
+     * A multilingual textarea modelled on Shopify's translation flow: the field itself is edited in the default
+     * language (English unless overridden), which is required. Translations are made in a separate side-by-side
+     * editor (`ir-translation-editor`, inside a dialog) and are only committed when the user saves.
+     * Value is a map keyed by BCP-47 code. Form-associated: submits `JSON.stringify(value)` under `name`, and
+     * blocks submission while the default language is blank.
+     */
+    interface HTMLIrTranslatableTextareaElement extends Components.IrTranslatableTextarea, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrTranslatableTextareaElementEventMap>(type: K, listener: (this: HTMLIrTranslatableTextareaElement, ev: IrTranslatableTextareaCustomEvent<HTMLIrTranslatableTextareaElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrTranslatableTextareaElementEventMap>(type: K, listener: (this: HTMLIrTranslatableTextareaElement, ev: IrTranslatableTextareaCustomEvent<HTMLIrTranslatableTextareaElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrTranslatableTextareaElement: {
+        prototype: HTMLIrTranslatableTextareaElement;
+        new (): HTMLIrTranslatableTextareaElement;
+    };
+    interface HTMLIrTranslationEditorElementEventMap {
+        "translationInput": TranslationInputDetail;
+        "translationLanguageChange": string;
+    }
+    /**
+     * Side-by-side translation editor: a language selector, the default-language text as a read-only reference,
+     * and a textarea for the selected language. Stateless about edits — it shows `value` and reports keystrokes
+     * through `translationInput`; the owner decides when to save.
+     */
+    interface HTMLIrTranslationEditorElement extends Components.IrTranslationEditor, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrTranslationEditorElementEventMap>(type: K, listener: (this: HTMLIrTranslationEditorElement, ev: IrTranslationEditorCustomEvent<HTMLIrTranslationEditorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrTranslationEditorElementEventMap>(type: K, listener: (this: HTMLIrTranslationEditorElement, ev: IrTranslationEditorCustomEvent<HTMLIrTranslationEditorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrTranslationEditorElement: {
+        prototype: HTMLIrTranslationEditorElement;
+        new (): HTMLIrTranslationEditorElement;
+    };
     interface HTMLIrTranslationsEntriesPanelElementEventMap {
         "createEntry": void;
         "editEntry": TranslationEntry;
         "duplicateEntry": TranslationEntry;
+        "moveEntry": TranslationEntry;
         "deleteEntry": TranslationEntry;
         "entryChange": TranslationEntry;
         "reorderEntries": TranslationEntry[];
@@ -14032,6 +14447,7 @@ declare global {
         "entryChange": TranslationEntry;
         "editEntry": TranslationEntry;
         "duplicateEntry": TranslationEntry;
+        "moveEntry": TranslationEntry;
         "deleteEntry": TranslationEntry;
         "clearFilters": void;
         "reorderEntries": TranslationEntry[];
@@ -14121,6 +14537,32 @@ declare global {
     var HTMLIrTranslationsManagerElement: {
         prototype: HTMLIrTranslationsManagerElement;
         new (): HTMLIrTranslationsManagerElement;
+    };
+    interface HTMLIrTranslationsMoveDialogElementEventMap {
+        "closeDialog": void;
+        "entryMoved": TranslationEntryMoved;
+    }
+    /**
+     * Moves one setup entry to another table through Move_Setup_Entry — the
+     * backend re-homes the row, so nothing is re-created or soft-deleted here.
+     * The destination list is whatever the parent passes as `tables`: the manager
+     * hands over the same set its header picker offers, so the "only used tables"
+     * setting narrows both the same way. The search box is a local filter over
+     * that list, and the source table is never offered as a destination.
+     */
+    interface HTMLIrTranslationsMoveDialogElement extends Components.IrTranslationsMoveDialog, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrTranslationsMoveDialogElementEventMap>(type: K, listener: (this: HTMLIrTranslationsMoveDialogElement, ev: IrTranslationsMoveDialogCustomEvent<HTMLIrTranslationsMoveDialogElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrTranslationsMoveDialogElementEventMap>(type: K, listener: (this: HTMLIrTranslationsMoveDialogElement, ev: IrTranslationsMoveDialogCustomEvent<HTMLIrTranslationsMoveDialogElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrTranslationsMoveDialogElement: {
+        prototype: HTMLIrTranslationsMoveDialogElement;
+        new (): HTMLIrTranslationsMoveDialogElement;
     };
     interface HTMLIrTranslationsSettingsDialogElementEventMap {
         "saveSettings": TranslationsSettingsSaved;
@@ -14471,9 +14913,8 @@ declare global {
         "igl-rate-plan": HTMLIglRatePlanElement;
         "igl-reallocation-dialog": HTMLIglReallocationDialogElement;
         "igl-room-type": HTMLIglRoomTypeElement;
-        "igl-spilt-booking-form": HTMLIglSpiltBookingFormElement;
-        "igl-split-booking": HTMLIglSplitBookingElement;
         "igl-split-booking-drawer": HTMLIglSplitBookingDrawerElement;
+        "igl-split-booking-form": HTMLIglSplitBookingFormElement;
         "igl-tba-booking-view": HTMLIglTbaBookingViewElement;
         "igl-tba-category-view": HTMLIglTbaCategoryViewElement;
         "igl-to-be-assigned": HTMLIglToBeAssignedElement;
@@ -14497,6 +14938,7 @@ declare global {
         "ir-arrivals-filters": HTMLIrArrivalsFiltersElement;
         "ir-arrivals-table": HTMLIrArrivalsTableElement;
         "ir-assignment-toggle-dialog": HTMLIrAssignmentToggleDialogElement;
+        "ir-auth": HTMLIrAuthElement;
         "ir-autocomplete": HTMLIrAutocompleteElement;
         "ir-autocomplete-option": HTMLIrAutocompleteOptionElement;
         "ir-balance-cell": HTMLIrBalanceCellElement;
@@ -14684,7 +15126,13 @@ declare global {
         "ir-listing-header": HTMLIrListingHeaderElement;
         "ir-listing-modal": HTMLIrListingModalElement;
         "ir-loading-screen": HTMLIrLoadingScreenElement;
+        "ir-locale-switcher": HTMLIrLocaleSwitcherElement;
         "ir-login": HTMLIrLoginElement;
+        "ir-login-aside": HTMLIrLoginAsideElement;
+        "ir-login-aside-calendar": HTMLIrLoginAsideCalendarElement;
+        "ir-login-aside-dynamic-pricing": HTMLIrLoginAsideDynamicPricingElement;
+        "ir-login-aside-image": HTMLIrLoginAsideImageElement;
+        "ir-login-aside-showcase": HTMLIrLoginAsideShowcaseElement;
         "ir-m-combobox": HTMLIrMComboboxElement;
         "ir-m-combobox-booking-item": HTMLIrMComboboxBookingItemElement;
         "ir-m-combobox-item": HTMLIrMComboboxItemElement;
@@ -14803,12 +15251,15 @@ declare global {
         "ir-toast-provider": HTMLIrToastProviderElement;
         "ir-toasts-provider": HTMLIrToastsProviderElement;
         "ir-tooltip": HTMLIrTooltipElement;
+        "ir-translatable-textarea": HTMLIrTranslatableTextareaElement;
+        "ir-translation-editor": HTMLIrTranslationEditorElement;
         "ir-translations-entries-panel": HTMLIrTranslationsEntriesPanelElement;
         "ir-translations-entries-table": HTMLIrTranslationsEntriesTableElement;
         "ir-translations-entry-drawer": HTMLIrTranslationsEntryDrawerElement;
         "ir-translations-entry-form": HTMLIrTranslationsEntryFormElement;
         "ir-translations-language-dialog": HTMLIrTranslationsLanguageDialogElement;
         "ir-translations-manager": HTMLIrTranslationsManagerElement;
+        "ir-translations-move-dialog": HTMLIrTranslationsMoveDialogElement;
         "ir-translations-settings-dialog": HTMLIrTranslationsSettingsDialogElement;
         "ir-translations-sync-dialog": HTMLIrTranslationsSyncDialogElement;
         "ir-translations-table-dialog": HTMLIrTranslationsTableDialogElement;
@@ -14981,34 +15432,32 @@ declare namespace LocalJSX {
         "wasBlockedUnit"?: boolean;
     }
     interface IglBookingEvent {
-        /**
-          * @default []
-         */
-        "allBookingEvents"?: { [key: string]: any };
         "bookingEvent"?: { [key: string]: any };
         "countries"?: ICountry[];
         "currency"?: any;
+        /**
+          * Every booking on the calendar, read only when a drop has to be checked for overlaps. A getter rather than the array itself, so that updating one booking does not hand every bar a new prop value and re-render them all.
+         */
+        "getAllBookingEvents"?: () => { [key: string]: any }[];
         /**
           * @default false
          */
         "is_vacation_rental"?: boolean;
         "language"?: string;
         "onDragOverEventData"?: (event: IglBookingEventCustomEvent<any>) => void;
-        "onHideBubbleInfo"?: (event: IglBookingEventCustomEvent<any>) => void;
-        "onResetStretchedBooking"?: (event: IglBookingEventCustomEvent<string>) => void;
         "onShowDialog"?: (event: IglBookingEventCustomEvent<CalendarModalEvent>) => void;
         "onShowRoomNightsDialog"?: (event: IglBookingEventCustomEvent<IRoomNightsData>) => void;
         "onUpdateBookingEvent"?: (event: IglBookingEventCustomEvent<{ [key: string]: any }>) => void;
-        "onUpdateEventData"?: (event: IglBookingEventCustomEvent<any>) => void;
+        "roomTop"?: number;
     }
     interface IglBookingEventHover {
         "bookingEvent"?: { [key: string]: any };
+        "countries"?: ICountry[];
         /**
+          * The panel sits in a dialog, which frames it and sets its width, rather than floating over the calendar.
           * @default false
          */
-        "bubbleInfoTop"?: boolean;
-        "countries"?: ICountry[];
-        "currency"?: any;
+        "inDialog"?: boolean;
         /**
           * @default false
          */
@@ -15360,7 +15809,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "ratePricingMode"?: Array<{ CODE_NAME: string; CODE_VALUE_EN: string }>;
+        "ratePricingMode"?: SetupEntries[];
         "roomTypeId"?: number;
         "shouldBeDisabled": boolean;
         /**
@@ -15396,21 +15845,17 @@ declare namespace LocalJSX {
          */
         "unavailableRatePlanIds"?: Set<number>;
     }
-    interface IglSpiltBookingForm {
-        "booking"?: Booking;
-        "identifier"?: Room['identifier'];
-        "onCloseModal"?: (event: IglSpiltBookingFormCustomEvent<null>) => void;
-    }
-    interface IglSplitBooking {
-        "booking"?: Booking;
-        "identifier"?: Room['identifier'];
-        "onCloseModal"?: (event: IglSplitBookingCustomEvent<null>) => void;
-    }
     interface IglSplitBookingDrawer {
         "booking"?: Booking;
         "identifier"?: Room['identifier'];
         "onCloseModal"?: (event: IglSplitBookingDrawerCustomEvent<null>) => void;
         "open"?: boolean;
+    }
+    interface IglSplitBookingForm {
+        "booking"?: Booking;
+        "formId"?: string;
+        "identifier"?: Room['identifier'];
+        "onCloseModal"?: (event: IglSplitBookingFormCustomEvent<null>) => void;
     }
     interface IglTbaBookingView {
         "calendarData"?: { [key: string]: any };
@@ -15548,7 +15993,7 @@ declare namespace LocalJSX {
          */
         "propertyid"?: number;
         /**
-          * Authentication token issued by the PMS backend. Required for initializing the component and making API calls.
+          * Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.
          */
         "ticket"?: string;
     }
@@ -15728,7 +16173,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "arrivalTime"?: IEntries[];
+        "arrivalTime"?: SetupEntries[];
         /**
           * Needed to look up whether this room already has an early-check-in extra service charge.
          */
@@ -15777,7 +16222,7 @@ declare namespace LocalJSX {
          */
         "propertyid"?: number;
         /**
-          * Authentication token issued by the PMS backend. Required for initializing the component and making API calls.
+          * Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.
          */
         "ticket"?: string;
     }
@@ -15801,17 +16246,15 @@ declare namespace LocalJSX {
     interface IrAssignmentToggleDialog {
         /**
           * Cancel button label
-          * @default 'Cancel'
          */
         "cancelLabel"?: string;
         /**
           * Confirm button label
-          * @default 'Confirm'
          */
         "confirmLabel"?: string;
         /**
           * Dialog header title
-          * @default 'Are you sure?'
+          * @default t('Lcz_AreYouSure', { fallback: 'Are you sure?' })
          */
         "label"?: string;
         /**
@@ -15827,6 +16270,60 @@ declare namespace LocalJSX {
           * Emitted when the user clicks confirm
          */
         "onConfirmToggle"?: (event: IrAssignmentToggleDialogCustomEvent<void>) => void;
+    }
+    /**
+     * The extranet sign-in panel: login, forgot password and forgot username.
+     * Owns validation and the whole legacy login chain (`IsAuthenticated_JSON` →
+     * `Get_Startup_Data_Signature` → `Get_Startup_Data`), then redirects the way
+     * `Default.aspx` always has: to the OTP page, or by clicking the server's
+     * `btn_RedirectFromLogin`, whose handler reads `Request.Form["txt_username"]`.
+     * Renders no `<form>` of its own, and no encapsulation: mount it inside the page's
+     * `<form runat="server">`, exactly where the legacy fields sat, so `#txt_username`
+     * posts with the redirect like the original input did. Every other submit of that
+     * form is intercepted and handled here.
+     */
+    interface IrAuth {
+        /**
+          * Base URL of the app's WCF service the login endpoints live on — `_apiUri` in `js/CommonLibrary.js`. The default resolves next to the page (`…/Default.aspx` → `…/AppWCF.svc/`).
+          * @default 'AppWCF.svc/'
+         */
+        "apiUrl"?: string;
+        "autoPassword"?: string;
+        /**
+          * When set together with {@link autoPassword}, signs in on load.
+         */
+        "autoUsername"?: string;
+        /**
+          * Hides the app links and the sign-up button when the page runs inside MPO.
+          * @default false
+         */
+        "insideMpo"?: boolean;
+        /**
+          * The page's current language, e.g. `<%= CurrentLanguage %>`.
+          * @default 'en'
+         */
+        "language"?: string;
+        /**
+          * Languages offered by the switcher, as an array or a JSON string of `{ code, label }`.
+          * @default []
+         */
+        "languages"?: string | AuthLanguage[];
+        "logoUrl"?: string;
+        /**
+          * Fires after a successful login, before redirecting. Call `preventDefault()` to handle navigation yourself.
+         */
+        "onAuthFinish"?: (event: IrAuthCustomEvent<{ userInfo: LegacyUserInfo; requiresOtp: boolean }>) => void;
+        "onAuthLanguageChange"?: (event: IrAuthCustomEvent<{ code: string }>) => void;
+        /**
+          * Where users who must confirm a one-time password are sent instead.
+          * @default './OTPVerifier.aspx'
+         */
+        "otpUrl"?: string;
+        /**
+          * Id of the server button whose postback signs the user in (`FormsAuthentication.RedirectFromLoginPage`).
+          * @default 'btn_RedirectFromLogin'
+         */
+        "redirectButton"?: string;
     }
     interface IrAutocomplete {
         /**
@@ -16190,7 +16687,7 @@ declare namespace LocalJSX {
           * Service-category entries used to populate the transaction form.
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrBookingCompanyDialog {
         "booking"?: Booking;
@@ -16284,7 +16781,7 @@ declare namespace LocalJSX {
          */
         "propertyid"?: number;
         /**
-          * Authentication token used to initialize the component. Triggers re-initialization when changed.
+          * Authentication ApiClient used to initialize the component. Triggers re-initialization when changed.
           * @default ''
          */
         "ticket"?: string;
@@ -16426,7 +16923,7 @@ declare namespace LocalJSX {
          */
         "roomTypeIds"?: (string | number)[];
         /**
-          * Auth token used for API requests.
+          * Auth ApiClient used for API requests.
          */
         "ticket"?: string;
         /**
@@ -16537,6 +17034,9 @@ declare namespace LocalJSX {
         "onRequestPageSizeChange"?: (event: IrBookingListingTableCustomEvent<PaginationChangeEvent>) => void;
     }
     interface IrBookingNewForm {
+        /**
+          * Language for the form and the editor it opens, independent of the page's. Reflected as `lang` on the host, which makes this subtree its own locale scope (see `locale-scope.ts`).
+         */
         "language"?: string;
         "propertyid"?: string;
         "ticket"?: string;
@@ -16607,6 +17107,10 @@ declare namespace LocalJSX {
         /**
           * @default ''
          */
+        "ApiClient"?: string;
+        /**
+          * @default ''
+         */
         "bookingNumber"?: string;
         "countries"?: any;
         /**
@@ -16618,10 +17122,6 @@ declare namespace LocalJSX {
          */
         "mode"?: 'invoice' | 'default';
         "propertyid"?: number;
-        /**
-          * @default ''
-         */
-        "token"?: string;
     }
     interface IrBookingRooms {
         "agent"?: Agent;
@@ -16629,12 +17129,12 @@ declare namespace LocalJSX {
           * Available arrival time options for the booking. Passed down to each room when applicable.
           * @default []
          */
-        "arrivalTime"?: IEntries[];
+        "arrivalTime"?: SetupEntries[];
         /**
           * Available bed preference options for the booking rooms. Used to populate bed selection inside each room component.
           * @default []
          */
-        "bedPreference"?: IEntries[];
+        "bedPreference"?: SetupEntries[];
         /**
           * The booking object containing reservation details, including rooms, status, currency, and edit permissions.
          */
@@ -16651,7 +17151,7 @@ declare namespace LocalJSX {
           * Available departure time options for the booking. Passed down to each room when applicable.
           * @default []
          */
-        "departureTime"?: IEntries[];
+        "departureTime"?: SetupEntries[];
         /**
           * Enables the ability to add a new room/unit to the booking.
           * @default false
@@ -16692,7 +17192,7 @@ declare namespace LocalJSX {
           * `_SVC_CATEGORY` setup entries, threaded down to each room's extra-services section for category labels.
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrBookingSourceEditorDialog {
         "booking"?: Booking;
@@ -17155,10 +17655,6 @@ declare namespace LocalJSX {
           * @default null
          */
         "agentId"?: number | null;
-        /**
-          * @default '$'
-         */
-        "currencySymbol"?: string;
         "onCreateInvoice"?: (event: IrCityLedgerToolbarCustomEvent<void>) => void;
     }
     interface IrCityLedgerTransactionDrawer {
@@ -17175,7 +17671,7 @@ declare namespace LocalJSX {
          */
         "bookingOptions"?: LinkedOption[];
         /**
-          * @default 'New Entry'
+          * @default t('Lcz_NewEntryTitle', { fallback: 'New Entry' })
          */
         "drawerLabel"?: string;
         /**
@@ -17412,9 +17908,6 @@ declare namespace LocalJSX {
           * @default ''
          */
         "hint"?: string;
-        /**
-          * @default 'Invoice'
-         */
         "label"?: string;
         "onInvoiceChange"?: (event: IrClInvoiceSelectCustomEvent<string>) => void;
         /**
@@ -17462,7 +17955,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "paymentMethods"?: IEntries[];
+        "paymentMethods"?: SetupEntries[];
         /**
           * @default []
          */
@@ -17555,9 +18048,6 @@ declare namespace LocalJSX {
         "row"?: Row<any>;
     }
     interface IrColumnAutocomplete {
-        /**
-          * @default 'No results found'
-         */
         "emptyLabel"?: string;
         "onAutocompleteSelectionChange"?: (event: IrColumnAutocompleteCustomEvent<ColumnAutocompleteSelectionChange>) => void;
         "onQueryChange"?: (event: IrColumnAutocompleteCustomEvent<string>) => void;
@@ -17565,13 +18055,7 @@ declare namespace LocalJSX {
           * @default []
          */
         "options"?: string[];
-        /**
-          * @default 'Search...'
-         */
         "placeholder"?: string;
-        /**
-          * @default 'Select all'
-         */
         "selectAllLabel"?: string;
         /**
           * @default []
@@ -17799,18 +18283,17 @@ declare namespace LocalJSX {
           * The currently selected check-in date.
           * @default null
          */
-        "fromDate"?: Moment1 | null;
+        "fromDate"?: Moment | null;
         /**
-          * BCP-47 locale tag used to localise day names and month formatting.
-          * @reflect 
-          * @default 'en'
+          * BCP-47 locale tag used to localise day names and month formatting. Leave unset to follow the nearest `lang` ancestor (see `locale-scope.ts`), then the app's language.
+          * @reflect
          */
         "locale"?: string;
         /**
           * The latest selectable date. Defaults to 24 years in the future.
           * @default moment().add(24, 'years')
          */
-        "maxDate"?: Moment1;
+        "maxDate"?: Moment;
         /**
           * Maximum number of nights that can be selected in one span.
           * @default 90
@@ -17820,7 +18303,7 @@ declare namespace LocalJSX {
           * The earliest selectable date. Defaults to 24 years in the past.
           * @default moment().add(-24, 'years')
          */
-        "minDate"?: Moment1;
+        "minDate"?: Moment;
         /**
           * Emits the selected start and end dates as native `Date` objects. `end` is `null` when the user has only picked the first date.
          */
@@ -17834,7 +18317,7 @@ declare namespace LocalJSX {
           * The currently selected check-out date.
           * @default null
          */
-        "toDate"?: Moment1 | null;
+        "toDate"?: Moment | null;
     }
     interface IrDailyRevenue {
         /**
@@ -17873,6 +18356,7 @@ declare namespace LocalJSX {
      * booking whose stay covers the selected day reloads the stats plus cancellations.
      */
     interface IrDashboard {
+        "baseUrl"?: string;
         /**
           * API base URL override.
          */
@@ -17933,8 +18417,8 @@ declare namespace LocalJSX {
         "variant"?: DashboardBookingsTableVariant;
     }
     /**
-     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
-     * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+     * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days from
+     * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
      */
     interface IrDashboardDateNavigator {
         /**
@@ -18229,7 +18713,6 @@ declare namespace LocalJSX {
         "onDatesChanged"?: (event: IrDateRangeFilterCustomEvent<{ from: string | null; to: string | null }>) => void;
         /**
           * Configurable quick-date preset buttons shown alongside each calendar.
-          * @default [     { label: 'Today', getDate: () => moment() },     { label: '30 Days Ago', getDate: () => moment().subtract(30, 'days') },     { label: '60 Days Ago', getDate: () => moment().subtract(60, 'days') },     { label: '90 Days Ago', getDate: () => moment().subtract(90, 'days') },     { label: '1 Year Ago', getDate: () => moment().subtract(1, 'year') },   ]
          */
         "quickDates"?: QuickDatePreset[];
         /**
@@ -18360,15 +18843,10 @@ declare namespace LocalJSX {
     }
     interface IrDateView {
         /**
-          * Input format used when `from_date` / `to_date` are plain strings
-          * @default 'YYYY-MM-DD'
+          * Display style for both dates
+          * @default 'medium'
          */
-        "dateOption"?: string;
-        /**
-          * Display format for both dates
-          * @default 'MMM DD, YYYY'
-         */
-        "format"?: string;
+        "format"?: DateStyle;
         /**
           * Raw from-date — accepts ISO string, JS Date, or Moment
          */
@@ -18427,7 +18905,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "departureTime"?: IEntries[];
+        "departureTime"?: SetupEntries[];
         /**
           * @default 'en'
          */
@@ -18616,9 +19094,6 @@ declare namespace LocalJSX {
         "value": string;
     }
     interface IrEmptyState {
-        /**
-          * @default 'No records found'
-         */
         "message"?: string;
         /**
           * @default true
@@ -18645,7 +19120,7 @@ declare namespace LocalJSX {
         "onEditExtraService"?: (event: IrExtraServiceCustomEvent<ExtraService>) => void;
         "onResetBookingEvt"?: (event: IrExtraServiceCustomEvent<null>) => void;
         "service"?: ExtraService;
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrExtraServiceConfig {
         "agent"?: Agent;
@@ -18661,7 +19136,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrExtraServiceConfigForm {
         "agent"?: Agent;
@@ -18678,7 +19153,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrExtraServiceEditorDrawer {
         "onExtraServiceEditorClose"?: (event: IrExtraServiceEditorDrawerCustomEvent<void>) => void;
@@ -18713,7 +19188,7 @@ declare namespace LocalJSX {
          */
         "clTransactions"?: ClTx[];
         "language"?: string;
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrExtraServicesSettings {
         /**
@@ -18741,7 +19216,7 @@ declare namespace LocalJSX {
         "action"?: FdConfirmAction | null;
         "amount"?: number;
         /**
-          * @default 'this document'
+          * @default t('Lcz_ThisDocumentFallback', { fallback: 'this document' })
          */
         "docNumber"?: string;
         "fdType"?: string;
@@ -18854,7 +19329,7 @@ declare namespace LocalJSX {
         "actionsAlign"?: 'start' | 'center' | 'end' | 'space-between' | 'space-around';
         /**
           * Apply button copy
-          * @default locales.entries.Lcz_Apply
+          * @default t('Lcz_Apply', { fallback: 'Apply' })
          */
         "applyLabel"?: string;
         /**
@@ -18906,7 +19381,7 @@ declare namespace LocalJSX {
         "disableReset"?: boolean;
         /**
           * Panel headline text
-          * @default locales.entries.Lcz_Filters
+          * @default t('Lcz_Filters', { fallback: 'Filters' })
          */
         "filterTitle"?: string;
         /**
@@ -18937,7 +19412,7 @@ declare namespace LocalJSX {
         "persistentOnDesktop"?: boolean;
         /**
           * Reset button copy
-          * @default locales.entries.Lcz_Reset
+          * @default t('Lcz_Reset', { fallback: 'Reset' })
          */
         "resetLabel"?: string;
         /**
@@ -19029,7 +19504,7 @@ declare namespace LocalJSX {
           * `_FD_TYPE` setup entries used to display the document type.
           * @default []
          */
-        "fdTypes"?: IEntries[];
+        "fdTypes"?: SetupEntries[];
         /**
           * Folio scope driving which identity columns are shown.
           * @default 'all'
@@ -19158,6 +19633,10 @@ declare namespace LocalJSX {
     }
     interface IrGhsOnboarding {
         "baseurl"?: string;
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
         "ticket"?: string;
     }
     interface IrGhsSelectionBucket {
@@ -19286,7 +19765,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "frequencies"?: IEntries[];
+        "frequencies"?: SetupEntries[];
     }
     interface IrHkStaffTask {
         /**
@@ -19520,6 +19999,9 @@ declare namespace LocalJSX {
           * The minimum length of input that will be considered valid.
          */
         "minlength"?: NativeWaInput1['minlength'];
+        /**
+          * Reflected: a form-associated element is submitted under its `name` *attribute*.
+         */
         "name"?: string;
         "onInput-blur"?: (event: IrInputCustomEvent<void>) => void;
         "onInputCleared"?: (event: IrInputCustomEvent<void>) => void;
@@ -19978,9 +20460,6 @@ declare namespace LocalJSX {
     }
     interface IrListingModal {
         "editBooking"?: { booking: Booking; cause: 'edit' | 'payment' | 'delete' | 'guest' };
-        /**
-          * @default 'Modal Title'
-         */
         "modalTitle"?: string;
         "onModalClosed"?: (event: IrListingModalCustomEvent<null>) => void;
         "onResetData"?: (event: IrListingModalCustomEvent<string>) => void;
@@ -19992,11 +20471,90 @@ declare namespace LocalJSX {
          */
         "message"?: string;
     }
+    /**
+     * A floating dev/QA panel for switching language, calendar system,
+     * numbering system and text direction at runtime.
+     * All user-selected settings are persisted in localStorage and restored
+     * automatically the next time the page is opened.
+     */
+    interface IrLocaleSwitcher {
+        /**
+          * Start collapsed to a single button when no saved state exists.
+          * @default true
+         */
+        "collapsed"?: boolean;
+        /**
+          * Corner to pin the panel to.
+          * @default 'bottom-end'
+         */
+        "placement"?: 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
+        /**
+          * Sample date for the preview, YYYY-MM-DD. Defaults to today.
+         */
+        "sampleDate"?: string;
+    }
     interface IrLogin {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
         "onAuthFinish"?: (event: IrLoginCustomEvent<{
-    token: string;
+    ApiClient: string;
     code: 'succsess' | 'error';
   }>) => void;
+    }
+    interface IrLoginAside {
+        /**
+          * Alternative text for the image. Empty means decorative.
+          * @default ''
+         */
+        "imageAlt"?: string;
+        /**
+          * Image URL, used when `view` is `image`.
+         */
+        "imageSrc"?: string;
+        /**
+          * Server-provided `Lcz_*` translations, passed through to every view that shows copy.
+          * @default null
+         */
+        "localeEntries"?: TLocaleEntries | null;
+        /**
+          * Which aside content to render.
+          * @default 'calendar'
+         */
+        "view"?: LoginAsideView;
+    }
+    interface IrLoginAsideCalendar {
+        /**
+          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * @default null
+         */
+        "localeEntries"?: TLocaleEntries | null;
+    }
+    interface IrLoginAsideDynamicPricing {
+        /**
+          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * @default null
+         */
+        "localeEntries"?: TLocaleEntries | null;
+    }
+    interface IrLoginAsideImage {
+        /**
+          * Alternative text. Leave empty when the image is purely decorative.
+          * @default ''
+         */
+        "imageAlt"?: string;
+        /**
+          * Image URL rendered as the aside background.
+         */
+        "imageSrc"?: string;
+    }
+    interface IrLoginAsideShowcase {
+        /**
+          * Server-provided `Lcz_*` translations, passed through to the slides.
+          * @default null
+         */
+        "localeEntries"?: TLocaleEntries | null;
     }
     interface IrMCombobox {
         /**
@@ -20103,10 +20661,6 @@ declare namespace LocalJSX {
          */
         "isLoading"?: boolean;
         /**
-          * @default {}
-         */
-        "lcz"?: any;
-        /**
           * @default null
          */
         "mealType"?: string | null;
@@ -20120,7 +20674,7 @@ declare namespace LocalJSX {
           * @default 'GUEST_LIST'
          */
         "reportType"?: 'GUEST_LIST' | 'MEAL_COUNT';
-        "setupEntries"?: { meal_type: IEntries[]; hb_preference: IEntries[] };
+        "setupEntries"?: { meal_type: SetupEntries[]; hb_preference: SetupEntries[] };
         "toDate"?: string;
     }
     interface IrMenu {
@@ -20228,7 +20782,6 @@ declare namespace LocalJSX {
         "error"?: string;
         /**
           * Visible label for the phone input
-          * @default 'Phone number'
          */
         "label"?: string;
         /**
@@ -20240,7 +20793,6 @@ declare namespace LocalJSX {
         "onMobile-input-country-change"?: (event: IrMobileInputCustomEvent<ICountry>) => void;
         /**
           * Placeholder shown when the input is empty
-          * @default 'Enter phone number'
          */
         "placeholder"?: string;
         /**
@@ -20308,7 +20860,6 @@ declare namespace LocalJSX {
         "leftBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the left (cancel/close) button.
-          * @default 'Close'
          */
         "leftBtnText"?: string;
         /**
@@ -20323,17 +20874,14 @@ declare namespace LocalJSX {
         "middleBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the middle (tertiary) button.
-          * @default 'More'
          */
         "middleBtnText"?: string;
         /**
           * The main content text shown in the modal body.
-          * @default 'Modal Body'
          */
         "modalBody"?: string;
         /**
           * The title text displayed in the modal header.
-          * @default 'Modal Title'
          */
         "modalTitle"?: string;
         /**
@@ -20360,7 +20908,6 @@ declare namespace LocalJSX {
         "rightBtnColor"?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
         /**
           * Text displayed on the right (confirm) button.
-          * @default 'Confirm'
          */
         "rightBtnText"?: string;
         /**
@@ -20645,7 +21192,7 @@ declare namespace LocalJSX {
         "paymentActions"?: IPaymentAction[];
         "paymentEntries"?: PaymentEntries1;
         "propertyId"?: number;
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrPaymentFolio {
         /**
@@ -20755,6 +21302,10 @@ declare namespace LocalJSX {
     }
     interface IrPhoneInput {
         /**
+          * Auth ApiClient used by the booking service (if needed).
+         */
+        "ApiClient"?: string;
+        /**
           * Country list, used to populate prefix and dropdown. If not provided, fetched from the booking service.
           * @default []
          */
@@ -20807,10 +21358,6 @@ declare namespace LocalJSX {
           * Identifier for test automation.
          */
         "testId"?: string;
-        /**
-          * Auth token used by the booking service (if needed).
-         */
-        "token"?: string;
         /**
           * Initial phone number value.
           * @default ''
@@ -20957,6 +21504,10 @@ declare namespace LocalJSX {
         "bookingNumber"?: string;
     }
     interface IrPmsPage {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
         "propertyid"?: string;
         "ticket"?: string;
     }
@@ -20966,6 +21517,10 @@ declare namespace LocalJSX {
         "ticket"?: string;
     }
     interface IrPmsSearch {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
         "onCombobox-select"?: (event: IrPmsSearchCustomEvent<IrComboboxSelectEventDetail>) => void;
         "propertyid"?: string;
         "ticket"?: string;
@@ -21021,7 +21576,6 @@ declare namespace LocalJSX {
         "hideDefaultAction"?: boolean;
         /**
           * The dialog's label as displayed in the header. Required for accessibility and announced by assistive technologies.
-          * @default 'Preview'
          */
         "label"?: string;
         "onOpenChanged"?: (event: IrPreviewScreenDialogCustomEvent<boolean>) => void;
@@ -21263,7 +21817,7 @@ declare namespace LocalJSX {
     interface IrQueueChart {
         /**
           * Chart title
-          * @default 'Queue Status'
+          * @default t('Lcz_QueueStatus', { fallback: 'Queue Status' })
          */
         "label"?: string;
         /**
@@ -21278,6 +21832,10 @@ declare namespace LocalJSX {
         "values"?: number[];
     }
     interface IrQueueManager {
+        /**
+          * @default 'en'
+         */
+        "language"?: string;
         /**
           * @default ''
          */
@@ -21424,13 +21982,13 @@ declare namespace LocalJSX {
     }
     interface IrRoom {
         "agent"?: Agent;
-        "arrivalTime"?: IEntries[];
+        "arrivalTime"?: SetupEntries[];
         /**
           * When true, this room opens its check-out dialog automatically once mounted. Set by the booking-details screen when an early check-out was initiated from another screen (departures list, calendar) and redirected here.
           * @default false
          */
         "autoOpenCheckout"?: boolean;
-        "bedPreferences"?: IEntries[];
+        "bedPreferences"?: SetupEntries[];
         "booking"?: Booking;
         "bookingIndex"?: number;
         /**
@@ -21441,7 +21999,7 @@ declare namespace LocalJSX {
           * @default 'USD'
          */
         "currency"?: string;
-        "departureTime"?: IEntries[];
+        "departureTime"?: SetupEntries[];
         /**
           * @default false
          */
@@ -21474,6 +22032,7 @@ declare namespace LocalJSX {
         "onAddExtraServiceToUnit"?: (event: IrRoomCustomEvent<{ identifier: string }>) => void;
         "onDeleteFinished"?: (event: IrRoomCustomEvent<string>) => void;
         "onEditInitiated"?: (event: IrRoomCustomEvent<TIglBookPropertyPayload>) => void;
+        "onOpenPrintScreen"?: (event: IrRoomCustomEvent<PrintScreenOptions>) => void;
         "onOpenSidebar"?: (event: IrRoomCustomEvent<OpenSidebarEvent<RoomGuestsPayload1>>) => void;
         "onPressCheckIn"?: (event: IrRoomCustomEvent<any>) => void;
         "onPressCheckOut"?: (event: IrRoomCustomEvent<any>) => void;
@@ -21486,7 +22045,7 @@ declare namespace LocalJSX {
           * `_SVC_CATEGORY` setup entries, used to label extra services in the room's extra-services section.
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrRoomBreakdown {
         "booking"?: Booking;
@@ -21501,7 +22060,7 @@ declare namespace LocalJSX {
         "room"?: Room;
     }
     interface IrRoomDetails {
-        "bedPreferences"?: IEntries[];
+        "bedPreferences"?: SetupEntries[];
         "booking"?: Booking;
         /**
           * @default false
@@ -21545,7 +22104,7 @@ declare namespace LocalJSX {
         /**
           * @default []
          */
-        "svcCategories"?: IEntries[];
+        "svcCategories"?: SetupEntries[];
     }
     interface IrRoomGuests {
         /**
@@ -21557,7 +22116,7 @@ declare namespace LocalJSX {
          */
         "checkIn"?: boolean;
         /**
-          * A list of available countries. Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+          * A list of available countries. Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
          */
         "countries"?: ICountry[];
         /**
@@ -21580,7 +22139,7 @@ declare namespace LocalJSX {
          */
         "roomType"?: string;
         /**
-          * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+          * An array of people sharing the room. Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
           * @default []
          */
         "sharedPersons"?: SharedPerson[];
@@ -21600,7 +22159,7 @@ declare namespace LocalJSX {
          */
         "checkIn"?: boolean;
         /**
-          * A list of available countries. Used to populate dropdowns for selecting the {locales.entries.Lcz_Nationality} of guests.
+          * A list of available countries. Used to populate dropdowns for selecting the {t('Lcz_Nationality', { fallback: 'Nationality' })} of guests.
          */
         "countries"?: ICountry[];
         /**
@@ -21621,7 +22180,7 @@ declare namespace LocalJSX {
          */
         "roomName"?: string;
         /**
-          * An array of people sharing the room. Contains information about the {locales.entries.Lcz_MainGuest} and additional guests, such as their name, date of birth, {locales.entries.Lcz_Nationality}, and ID details.
+          * An array of people sharing the room. Contains information about the {t('Lcz_MainGuest', { fallback: 'Main guest' })} and additional guests, such as their name, date of birth, {t('Lcz_Nationality', { fallback: 'Nationality' })}, and ID details.
           * @default []
          */
         "sharedPersons"?: SharedPerson[];
@@ -21725,6 +22284,7 @@ declare namespace LocalJSX {
     }
     interface IrSecureTasks {
         "bookingNumber"?: string;
+        "language"?: string;
         "p"?: string;
         "propertyid"?: number;
         "ticket"?: string;
@@ -21736,9 +22296,6 @@ declare namespace LocalJSX {
           * @default false
          */
         "error"?: boolean;
-        /**
-          * @default 'Select'
-         */
         "firstOption"?: string;
         /**
           * Floating label text that appears inside the input and “floats” above when the field is focused or has a value.  - If provided, a floating label will be rendered inside the input container. - If you omit this prop but set `label`, the old left-side static label is used. - If you provide both `label` and `floatingLabel`, only the floating label is shown.   Examples: ```tsx <ir-select floating-label label="Phone" /> ```
@@ -21805,7 +22362,6 @@ declare namespace LocalJSX {
         "assigneeType"?: 'agent' | 'guest';
         /**
           * Label displayed above the assignment selector.
-          * @default 'Assign to folio'
          */
         "label"?: string;
         /**
@@ -22030,7 +22586,7 @@ declare namespace LocalJSX {
           * List of setup entries used to populate the tax mode select.  Each entry represents a tax application option (e.g. Not Applicable, Inclusive, Exclusive).
           * @default []
          */
-        "setupEntries"?: IEntries[];
+        "setupEntries"?: SetupEntries[];
     }
     interface IrTaxServiceCategories {
         /**
@@ -22290,6 +22846,7 @@ declare namespace LocalJSX {
          */
         "position"?: 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
         /**
+          * Pins the toast layer to RTL. Leave unset to inherit the document direction.
           * @default false
          */
         "rtl"?: boolean;
@@ -22324,6 +22881,162 @@ declare namespace LocalJSX {
           * @default true
          */
         "withHtml"?: boolean;
+    }
+    /**
+     * A multilingual textarea modelled on Shopify's translation flow: the field itself is edited in the default
+     * language (English unless overridden), which is required. Translations are made in a separate side-by-side
+     * editor (`ir-translation-editor`, inside a dialog) and are only committed when the user saves.
+     * Value is a map keyed by BCP-47 code. Form-associated: submits `JSON.stringify(value)` under `name`, and
+     * blocks submission while the default language is blank.
+     */
+    interface IrTranslatableTextarea {
+        /**
+          * @default 'outlined'
+         */
+        "appearance"?: WaTextarea['appearance'];
+        /**
+          * The source language: edited inline and required.
+          * @default 'en'
+         */
+        "defaultLanguage"?: string;
+        /**
+          * @default false
+         */
+        "disabled"?: boolean;
+        /**
+          * Locale used to display language names. Defaults to the nearest `lang` attribute, then the browser locale.
+         */
+        "displayLocale"?: string;
+        /**
+          * The `id` of a `<form>` element to associate this element with.
+         */
+        "form"?: string;
+        /**
+          * Help text under the inline textarea.
+         */
+        "hint"?: string;
+        /**
+          * Field label. Also used in the translation editor's title.
+         */
+        "label"?: string;
+        /**
+          * Overrides for the built-in English UI strings.
+          * @default {}
+         */
+        "labels"?: Partial<TranslatableTextareaLabels>;
+        /**
+          * Languages the field can be translated into. The default language may be listed; it is skipped as a target.
+          * @default []
+         */
+        "languages"?: TranslatableLanguage[];
+        /**
+          * Maximum characters per language.
+         */
+        "maxlength"?: number;
+        /**
+          * Form field name. The submitted value is the JSON-encoded translation map.
+         */
+        "name"?: string;
+        /**
+          * Emitted when the default-language text is edited, and when the translation editor is saved.
+         */
+        "onValueChange"?: (event: IrTranslatableTextareaCustomEvent<TranslatableValueChangeDetail>) => void;
+        /**
+          * Placeholder for the inline textarea.
+         */
+        "placeholder"?: string;
+        /**
+          * @default false
+         */
+        "readonly"?: boolean;
+        /**
+          * @default 'auto'
+         */
+        "resize"?: WaTextarea['resize'];
+        /**
+          * @default 4
+         */
+        "rows"?: number;
+        /**
+          * @default 's'
+         */
+        "size"?: WaTextarea['size'];
+        /**
+          * Text per language, e.g. `{ en: '…', fr: '…' }`. Blank translations are never stored.
+          * @default {}
+         */
+        "value"?: TranslationMap;
+        /**
+          * Shows a character count (remaining characters when `maxlength` is set).
+          * @default false
+         */
+        "withCount"?: boolean;
+    }
+    /**
+     * Side-by-side translation editor: a language selector, the default-language text as a read-only reference,
+     * and a textarea for the selected language. Stateless about edits — it shows `value` and reports keystrokes
+     * through `translationInput`; the owner decides when to save.
+     */
+    interface IrTranslationEditor {
+        /**
+          * @default 'outlined'
+         */
+        "appearance"?: WaTextarea['appearance'];
+        /**
+          * @default 'en'
+         */
+        "defaultLanguage"?: string;
+        /**
+          * Locale used to display language names.
+         */
+        "displayLocale"?: string;
+        /**
+          * Field label, used in the textarea's accessible name.
+         */
+        "label"?: string;
+        /**
+          * @default {}
+         */
+        "labels"?: Partial<TranslatableTextareaLabels>;
+        /**
+          * The language being edited. Updated when the user picks another one.
+         */
+        "language"?: string;
+        /**
+          * All languages; the default language is shown as the reference and excluded from the selector.
+          * @default []
+         */
+        "languages"?: TranslatableLanguage[];
+        "maxlength"?: number;
+        /**
+          * Emitted on every keystroke in the translation textarea.
+         */
+        "onTranslationInput"?: (event: IrTranslationEditorCustomEvent<TranslationInputDetail>) => void;
+        /**
+          * Emitted when the user selects another language.
+         */
+        "onTranslationLanguageChange"?: (event: IrTranslationEditorCustomEvent<string>) => void;
+        /**
+          * @default false
+         */
+        "readonly"?: boolean;
+        /**
+          * @default 6
+         */
+        "rows"?: number;
+        /**
+          * @default 's'
+         */
+        "size"?: WaTextarea['size'];
+        /**
+          * Text per language to display (saved text merged with any unsaved edits).
+          * @default {}
+         */
+        "value"?: TranslationMap;
+        /**
+          * @default false
+         */
+        "withCount"?: boolean;
     }
     /**
      * Owns the entries table plus its client-side search/status filtering — the
@@ -22381,6 +23094,7 @@ declare namespace LocalJSX {
         "onDuplicateEntry"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
         "onEditEntry"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
         "onEntryChange"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
+        "onMoveEntry"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
         "onReorderEntries"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry[]>) => void;
         "onSaveOrder"?: (event: IrTranslationsEntriesPanelCustomEvent<void>) => void;
         "onToggleVisibility"?: (event: IrTranslationsEntriesPanelCustomEvent<TranslationEntry>) => void;
@@ -22436,6 +23150,10 @@ declare namespace LocalJSX {
         "onDuplicateEntry"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry>) => void;
         "onEditEntry"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry>) => void;
         "onEntryChange"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry>) => void;
+        /**
+          * "Move to table…" — the parent opens the move dialog for this row.
+         */
+        "onMoveEntry"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry>) => void;
         "onReorderEntries"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry[]>) => void;
         "onToggleVisibility"?: (event: IrTranslationsEntriesTableCustomEvent<TranslationEntry>) => void;
         /**
@@ -22578,6 +23296,39 @@ declare namespace LocalJSX {
         "userId"?: number;
     }
     /**
+     * Moves one setup entry to another table through Move_Setup_Entry — the
+     * backend re-homes the row, so nothing is re-created or soft-deleted here.
+     * The destination list is whatever the parent passes as `tables`: the manager
+     * hands over the same set its header picker offers, so the "only used tables"
+     * setting narrows both the same way. The search box is a local filter over
+     * that list, and the source table is never offered as a destination.
+     */
+    interface IrTranslationsMoveDialog {
+        /**
+          * The row being moved. Its `tableName` is the source table.
+          * @default null
+         */
+        "entry"?: TranslationEntry | null;
+        "onCloseDialog"?: (event: IrTranslationsMoveDialogCustomEvent<void>) => void;
+        /**
+          * Emitted once the API confirmed the move. The parent owns closing the dialog and updating its rows.
+         */
+        "onEntryMoved"?: (event: IrTranslationsMoveDialogCustomEvent<TranslationEntryMoved>) => void;
+        /**
+          * @default false
+         */
+        "open"?: boolean;
+        /**
+          * Language whose value is shown next to the key, so the user can tell rows with similar keys apart.
+         */
+        "sourceCode"?: string;
+        /**
+          * Candidate destinations — the tables the header picker shows.
+          * @default []
+         */
+        "tables"?: TranslationTable[];
+    }
+    /**
      * Settings for the entries grid — which tables the pickers offer, which
      * non-source languages show up as columns, and whether the notes column is
      * shown. Every control here edits a local draft only; nothing reaches the
@@ -22689,6 +23440,10 @@ declare namespace LocalJSX {
           * @default 14
          */
         "consecutive_period"?: number;
+        /**
+          * @default ''
+         */
+        "language"?: string;
         /**
           * @default 'default'
          */
@@ -23039,11 +23794,11 @@ declare namespace LocalJSX {
         "currency": string;
         "is_vacation_rental": boolean;
         "language": string;
+        "roomTop": number;
     }
     interface IglBookingEventHoverAttributes {
-        "bubbleInfoTop": boolean;
-        "currency": string;
         "is_vacation_rental": boolean;
+        "inDialog": boolean;
     }
     interface IglBookingFormAttributes {
         "showPaymentDetails": boolean;
@@ -23173,15 +23928,13 @@ declare namespace LocalJSX {
         "currency": string;
         "isBookDisabled": boolean;
     }
-    interface IglSpiltBookingFormAttributes {
-        "identifier": Room['identifier'];
-    }
-    interface IglSplitBookingAttributes {
-        "identifier": Room['identifier'];
-    }
     interface IglSplitBookingDrawerAttributes {
         "identifier": Room['identifier'];
         "open": boolean;
+    }
+    interface IglSplitBookingFormAttributes {
+        "identifier": Room['identifier'];
+        "formId": string;
     }
     interface IglTbaBookingViewAttributes {
         "roomTypeId": number;
@@ -23283,6 +24036,17 @@ declare namespace LocalJSX {
         "confirmLabel": string;
         "cancelLabel": string;
         "loading": boolean;
+    }
+    interface IrAuthAttributes {
+        "language": string;
+        "languages": string | AuthLanguage[];
+        "logoUrl": string;
+        "insideMpo": boolean;
+        "autoUsername": string;
+        "autoPassword": string;
+        "apiUrl": string;
+        "redirectButton": string;
+        "otpUrl": string;
     }
     interface IrAutocompleteAttributes {
         "emitOnSameValue": boolean;
@@ -23489,7 +24253,7 @@ declare namespace LocalJSX {
         "currencySymbol": string;
     }
     interface IrBookingPrintingAttributes {
-        "token": string;
+        "ApiClient": string;
         "bookingNumber": string;
         "language": string;
         "propertyid": number;
@@ -23627,7 +24391,6 @@ declare namespace LocalJSX {
     }
     interface IrCityLedgerToolbarAttributes {
         "agentId": number | null;
-        "currencySymbol": string;
     }
     interface IrCityLedgerTransactionDrawerAttributes {
         "open": boolean;
@@ -23856,6 +24619,7 @@ declare namespace LocalJSX {
         "language": string;
         "p": string;
         "baseurl": string;
+        "baseUrl": string;
     }
     interface IrDashboardArrivalsAttributes {
         "language": string;
@@ -23950,8 +24714,7 @@ declare namespace LocalJSX {
         "from_date": string | Date | moment.Moment;
         "to_date": string | Date | moment.Moment;
         "showDateDifference": boolean;
-        "dateOption": string;
-        "format": string;
+        "format": DateStyle;
     }
     interface IrDatesCellAttributes {
         "display": 'block' | 'inline';
@@ -24164,6 +24927,7 @@ declare namespace LocalJSX {
     interface IrGhsOnboardingAttributes {
         "ticket": string;
         "baseurl": string;
+        "language": string;
     }
     interface IrGhsSelectionBucketAttributes {
         "isGenerating": boolean;
@@ -24397,6 +25161,23 @@ declare namespace LocalJSX {
     interface IrLoadingScreenAttributes {
         "message": string;
     }
+    interface IrLocaleSwitcherAttributes {
+        "placement": 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
+        "collapsed": boolean;
+        "sampleDate": string;
+    }
+    interface IrLoginAttributes {
+        "language": string;
+    }
+    interface IrLoginAsideAttributes {
+        "view": LoginAsideView;
+        "imageSrc": string;
+        "imageAlt": string;
+    }
+    interface IrLoginAsideImageAttributes {
+        "imageSrc": string;
+        "imageAlt": string;
+    }
     interface IrMComboboxAttributes {
         "placeholder": string;
         "defaultOption": ComboboxOption['value'];
@@ -24423,7 +25204,6 @@ declare namespace LocalJSX {
         "toDate": string;
         "mealType": string | null;
         "isLoading": boolean;
-        "lcz": string;
     }
     interface IrMenuAttributes {
         "selectedHref": string;
@@ -24584,7 +25364,7 @@ declare namespace LocalJSX {
         "value": string;
         "disabled": boolean;
         "error": boolean;
-        "token": string;
+        "ApiClient": string;
         "language": string;
         "default_country": number;
         "phone_prefix": string | null;
@@ -24628,6 +25408,7 @@ declare namespace LocalJSX {
     interface IrPmsPageAttributes {
         "propertyid": string;
         "ticket": string;
+        "language": string;
     }
     interface IrPmsPaymentDueAlertAttributes {
         "propertyid": number;
@@ -24637,6 +25418,7 @@ declare namespace LocalJSX {
     interface IrPmsSearchAttributes {
         "propertyid": string;
         "ticket": string;
+        "language": string;
     }
     interface IrPopoverAttributes {
         "content": string;
@@ -24707,6 +25489,7 @@ declare namespace LocalJSX {
     }
     interface IrQueueManagerAttributes {
         "ticket": string;
+        "language": string;
     }
     interface IrRadioAttributes {
         "checked": boolean;
@@ -24841,6 +25624,7 @@ declare namespace LocalJSX {
     }
     interface IrSecureTasksAttributes {
         "propertyid": number;
+        "language": string;
         "p": string;
         "bookingNumber": string;
         "ticket": string;
@@ -25015,6 +25799,34 @@ declare namespace LocalJSX {
         "containerClass": string;
         "alignment": 'start' | 'end' | 'center';
     }
+    interface IrTranslatableTextareaAttributes {
+        "defaultLanguage": string;
+        "label": string;
+        "hint": string;
+        "placeholder": string;
+        "name": string;
+        "rows": number;
+        "maxlength": number;
+        "withCount": boolean;
+        "resize": WaTextarea['resize'];
+        "size": WaTextarea['size'];
+        "appearance": WaTextarea['appearance'];
+        "disabled": boolean;
+        "readonly": boolean;
+        "displayLocale": string;
+    }
+    interface IrTranslationEditorAttributes {
+        "defaultLanguage": string;
+        "language": string;
+        "label": string;
+        "rows": number;
+        "maxlength": number;
+        "withCount": boolean;
+        "size": WaTextarea['size'];
+        "appearance": WaTextarea['appearance'];
+        "readonly": boolean;
+        "displayLocale": string;
+    }
     interface IrTranslationsEntriesPanelAttributes {
         "sourceCode": string;
         "isLoading": boolean;
@@ -25055,6 +25867,10 @@ declare namespace LocalJSX {
         "propertyid": number;
         "userId": number;
     }
+    interface IrTranslationsMoveDialogAttributes {
+        "open": boolean;
+        "sourceCode": string;
+    }
     interface IrTranslationsSettingsDialogAttributes {
         "open": boolean;
         "usedTablesOnly": boolean;
@@ -25075,6 +25891,7 @@ declare namespace LocalJSX {
         "entryUserId": number;
     }
     interface IrUnbookableRoomsAttributes {
+        "language": string;
         "ticket": string;
         "propertyid": number;
         "mode": UnbookableRoomsMode;
@@ -25197,9 +26014,8 @@ declare namespace LocalJSX {
         "igl-rate-plan": Omit<IglRatePlan, keyof IglRatePlanAttributes> & { [K in keyof IglRatePlan & keyof IglRatePlanAttributes]?: IglRatePlan[K] } & { [K in keyof IglRatePlan & keyof IglRatePlanAttributes as `attr:${K}`]?: IglRatePlanAttributes[K] } & { [K in keyof IglRatePlan & keyof IglRatePlanAttributes as `prop:${K}`]?: IglRatePlan[K] } & OneOf<"shouldBeDisabled", IglRatePlan["shouldBeDisabled"], IglRatePlanAttributes["shouldBeDisabled"]>;
         "igl-reallocation-dialog": IglReallocationDialog;
         "igl-room-type": Omit<IglRoomType, keyof IglRoomTypeAttributes> & { [K in keyof IglRoomType & keyof IglRoomTypeAttributes]?: IglRoomType[K] } & { [K in keyof IglRoomType & keyof IglRoomTypeAttributes as `attr:${K}`]?: IglRoomTypeAttributes[K] } & { [K in keyof IglRoomType & keyof IglRoomTypeAttributes as `prop:${K}`]?: IglRoomType[K] };
-        "igl-spilt-booking-form": Omit<IglSpiltBookingForm, keyof IglSpiltBookingFormAttributes> & { [K in keyof IglSpiltBookingForm & keyof IglSpiltBookingFormAttributes]?: IglSpiltBookingForm[K] } & { [K in keyof IglSpiltBookingForm & keyof IglSpiltBookingFormAttributes as `attr:${K}`]?: IglSpiltBookingFormAttributes[K] } & { [K in keyof IglSpiltBookingForm & keyof IglSpiltBookingFormAttributes as `prop:${K}`]?: IglSpiltBookingForm[K] };
-        "igl-split-booking": Omit<IglSplitBooking, keyof IglSplitBookingAttributes> & { [K in keyof IglSplitBooking & keyof IglSplitBookingAttributes]?: IglSplitBooking[K] } & { [K in keyof IglSplitBooking & keyof IglSplitBookingAttributes as `attr:${K}`]?: IglSplitBookingAttributes[K] } & { [K in keyof IglSplitBooking & keyof IglSplitBookingAttributes as `prop:${K}`]?: IglSplitBooking[K] };
         "igl-split-booking-drawer": Omit<IglSplitBookingDrawer, keyof IglSplitBookingDrawerAttributes> & { [K in keyof IglSplitBookingDrawer & keyof IglSplitBookingDrawerAttributes]?: IglSplitBookingDrawer[K] } & { [K in keyof IglSplitBookingDrawer & keyof IglSplitBookingDrawerAttributes as `attr:${K}`]?: IglSplitBookingDrawerAttributes[K] } & { [K in keyof IglSplitBookingDrawer & keyof IglSplitBookingDrawerAttributes as `prop:${K}`]?: IglSplitBookingDrawer[K] };
+        "igl-split-booking-form": Omit<IglSplitBookingForm, keyof IglSplitBookingFormAttributes> & { [K in keyof IglSplitBookingForm & keyof IglSplitBookingFormAttributes]?: IglSplitBookingForm[K] } & { [K in keyof IglSplitBookingForm & keyof IglSplitBookingFormAttributes as `attr:${K}`]?: IglSplitBookingFormAttributes[K] } & { [K in keyof IglSplitBookingForm & keyof IglSplitBookingFormAttributes as `prop:${K}`]?: IglSplitBookingForm[K] };
         "igl-tba-booking-view": Omit<IglTbaBookingView, keyof IglTbaBookingViewAttributes> & { [K in keyof IglTbaBookingView & keyof IglTbaBookingViewAttributes]?: IglTbaBookingView[K] } & { [K in keyof IglTbaBookingView & keyof IglTbaBookingViewAttributes as `attr:${K}`]?: IglTbaBookingViewAttributes[K] } & { [K in keyof IglTbaBookingView & keyof IglTbaBookingViewAttributes as `prop:${K}`]?: IglTbaBookingView[K] };
         "igl-tba-category-view": Omit<IglTbaCategoryView, keyof IglTbaCategoryViewAttributes> & { [K in keyof IglTbaCategoryView & keyof IglTbaCategoryViewAttributes]?: IglTbaCategoryView[K] } & { [K in keyof IglTbaCategoryView & keyof IglTbaCategoryViewAttributes as `attr:${K}`]?: IglTbaCategoryViewAttributes[K] } & { [K in keyof IglTbaCategoryView & keyof IglTbaCategoryViewAttributes as `prop:${K}`]?: IglTbaCategoryView[K] };
         "igl-to-be-assigned": Omit<IglToBeAssigned, keyof IglToBeAssignedAttributes> & { [K in keyof IglToBeAssigned & keyof IglToBeAssignedAttributes]?: IglToBeAssigned[K] } & { [K in keyof IglToBeAssigned & keyof IglToBeAssignedAttributes as `attr:${K}`]?: IglToBeAssignedAttributes[K] } & { [K in keyof IglToBeAssigned & keyof IglToBeAssignedAttributes as `prop:${K}`]?: IglToBeAssigned[K] };
@@ -25223,6 +26039,7 @@ declare namespace LocalJSX {
         "ir-arrivals-filters": IrArrivalsFilters;
         "ir-arrivals-table": Omit<IrArrivalsTable, keyof IrArrivalsTableAttributes> & { [K in keyof IrArrivalsTable & keyof IrArrivalsTableAttributes]?: IrArrivalsTable[K] } & { [K in keyof IrArrivalsTable & keyof IrArrivalsTableAttributes as `attr:${K}`]?: IrArrivalsTableAttributes[K] } & { [K in keyof IrArrivalsTable & keyof IrArrivalsTableAttributes as `prop:${K}`]?: IrArrivalsTable[K] };
         "ir-assignment-toggle-dialog": Omit<IrAssignmentToggleDialog, keyof IrAssignmentToggleDialogAttributes> & { [K in keyof IrAssignmentToggleDialog & keyof IrAssignmentToggleDialogAttributes]?: IrAssignmentToggleDialog[K] } & { [K in keyof IrAssignmentToggleDialog & keyof IrAssignmentToggleDialogAttributes as `attr:${K}`]?: IrAssignmentToggleDialogAttributes[K] } & { [K in keyof IrAssignmentToggleDialog & keyof IrAssignmentToggleDialogAttributes as `prop:${K}`]?: IrAssignmentToggleDialog[K] };
+        "ir-auth": Omit<IrAuth, keyof IrAuthAttributes> & { [K in keyof IrAuth & keyof IrAuthAttributes]?: IrAuth[K] } & { [K in keyof IrAuth & keyof IrAuthAttributes as `attr:${K}`]?: IrAuthAttributes[K] } & { [K in keyof IrAuth & keyof IrAuthAttributes as `prop:${K}`]?: IrAuth[K] };
         "ir-autocomplete": Omit<IrAutocomplete, keyof IrAutocompleteAttributes> & { [K in keyof IrAutocomplete & keyof IrAutocompleteAttributes]?: IrAutocomplete[K] } & { [K in keyof IrAutocomplete & keyof IrAutocompleteAttributes as `attr:${K}`]?: IrAutocompleteAttributes[K] } & { [K in keyof IrAutocomplete & keyof IrAutocompleteAttributes as `prop:${K}`]?: IrAutocomplete[K] };
         "ir-autocomplete-option": Omit<IrAutocompleteOption, keyof IrAutocompleteOptionAttributes> & { [K in keyof IrAutocompleteOption & keyof IrAutocompleteOptionAttributes]?: IrAutocompleteOption[K] } & { [K in keyof IrAutocompleteOption & keyof IrAutocompleteOptionAttributes as `attr:${K}`]?: IrAutocompleteOptionAttributes[K] } & { [K in keyof IrAutocompleteOption & keyof IrAutocompleteOptionAttributes as `prop:${K}`]?: IrAutocompleteOption[K] };
         "ir-balance-cell": Omit<IrBalanceCell, keyof IrBalanceCellAttributes> & { [K in keyof IrBalanceCell & keyof IrBalanceCellAttributes]?: IrBalanceCell[K] } & { [K in keyof IrBalanceCell & keyof IrBalanceCellAttributes as `attr:${K}`]?: IrBalanceCellAttributes[K] } & { [K in keyof IrBalanceCell & keyof IrBalanceCellAttributes as `prop:${K}`]?: IrBalanceCell[K] } & OneOf<"statusCode", IrBalanceCell["statusCode"], IrBalanceCellAttributes["statusCode"]> & OneOf<"isDirect", IrBalanceCell["isDirect"], IrBalanceCellAttributes["isDirect"]> & OneOf<"bookingNumber", IrBalanceCell["bookingNumber"], IrBalanceCellAttributes["bookingNumber"]> & OneOf<"currencySymbol", IrBalanceCell["currencySymbol"], IrBalanceCellAttributes["currencySymbol"]>;
@@ -25410,7 +26227,13 @@ declare namespace LocalJSX {
         "ir-listing-header": Omit<IrListingHeader, keyof IrListingHeaderAttributes> & { [K in keyof IrListingHeader & keyof IrListingHeaderAttributes]?: IrListingHeader[K] } & { [K in keyof IrListingHeader & keyof IrListingHeaderAttributes as `attr:${K}`]?: IrListingHeaderAttributes[K] } & { [K in keyof IrListingHeader & keyof IrListingHeaderAttributes as `prop:${K}`]?: IrListingHeader[K] };
         "ir-listing-modal": Omit<IrListingModal, keyof IrListingModalAttributes> & { [K in keyof IrListingModal & keyof IrListingModalAttributes]?: IrListingModal[K] } & { [K in keyof IrListingModal & keyof IrListingModalAttributes as `attr:${K}`]?: IrListingModalAttributes[K] } & { [K in keyof IrListingModal & keyof IrListingModalAttributes as `prop:${K}`]?: IrListingModal[K] };
         "ir-loading-screen": Omit<IrLoadingScreen, keyof IrLoadingScreenAttributes> & { [K in keyof IrLoadingScreen & keyof IrLoadingScreenAttributes]?: IrLoadingScreen[K] } & { [K in keyof IrLoadingScreen & keyof IrLoadingScreenAttributes as `attr:${K}`]?: IrLoadingScreenAttributes[K] } & { [K in keyof IrLoadingScreen & keyof IrLoadingScreenAttributes as `prop:${K}`]?: IrLoadingScreen[K] };
-        "ir-login": IrLogin;
+        "ir-locale-switcher": Omit<IrLocaleSwitcher, keyof IrLocaleSwitcherAttributes> & { [K in keyof IrLocaleSwitcher & keyof IrLocaleSwitcherAttributes]?: IrLocaleSwitcher[K] } & { [K in keyof IrLocaleSwitcher & keyof IrLocaleSwitcherAttributes as `attr:${K}`]?: IrLocaleSwitcherAttributes[K] } & { [K in keyof IrLocaleSwitcher & keyof IrLocaleSwitcherAttributes as `prop:${K}`]?: IrLocaleSwitcher[K] };
+        "ir-login": Omit<IrLogin, keyof IrLoginAttributes> & { [K in keyof IrLogin & keyof IrLoginAttributes]?: IrLogin[K] } & { [K in keyof IrLogin & keyof IrLoginAttributes as `attr:${K}`]?: IrLoginAttributes[K] } & { [K in keyof IrLogin & keyof IrLoginAttributes as `prop:${K}`]?: IrLogin[K] };
+        "ir-login-aside": Omit<IrLoginAside, keyof IrLoginAsideAttributes> & { [K in keyof IrLoginAside & keyof IrLoginAsideAttributes]?: IrLoginAside[K] } & { [K in keyof IrLoginAside & keyof IrLoginAsideAttributes as `attr:${K}`]?: IrLoginAsideAttributes[K] } & { [K in keyof IrLoginAside & keyof IrLoginAsideAttributes as `prop:${K}`]?: IrLoginAside[K] };
+        "ir-login-aside-calendar": IrLoginAsideCalendar;
+        "ir-login-aside-dynamic-pricing": IrLoginAsideDynamicPricing;
+        "ir-login-aside-image": Omit<IrLoginAsideImage, keyof IrLoginAsideImageAttributes> & { [K in keyof IrLoginAsideImage & keyof IrLoginAsideImageAttributes]?: IrLoginAsideImage[K] } & { [K in keyof IrLoginAsideImage & keyof IrLoginAsideImageAttributes as `attr:${K}`]?: IrLoginAsideImageAttributes[K] } & { [K in keyof IrLoginAsideImage & keyof IrLoginAsideImageAttributes as `prop:${K}`]?: IrLoginAsideImage[K] };
+        "ir-login-aside-showcase": IrLoginAsideShowcase;
         "ir-m-combobox": Omit<IrMCombobox, keyof IrMComboboxAttributes> & { [K in keyof IrMCombobox & keyof IrMComboboxAttributes]?: IrMCombobox[K] } & { [K in keyof IrMCombobox & keyof IrMComboboxAttributes as `attr:${K}`]?: IrMComboboxAttributes[K] } & { [K in keyof IrMCombobox & keyof IrMComboboxAttributes as `prop:${K}`]?: IrMCombobox[K] };
         "ir-m-combobox-booking-item": IrMComboboxBookingItem;
         "ir-m-combobox-item": Omit<IrMComboboxItem, keyof IrMComboboxItemAttributes> & { [K in keyof IrMComboboxItem & keyof IrMComboboxItemAttributes]?: IrMComboboxItem[K] } & { [K in keyof IrMComboboxItem & keyof IrMComboboxItemAttributes as `attr:${K}`]?: IrMComboboxItemAttributes[K] } & { [K in keyof IrMComboboxItem & keyof IrMComboboxItemAttributes as `prop:${K}`]?: IrMComboboxItem[K] } & OneOf<"value", IrMComboboxItem["value"], IrMComboboxItemAttributes["value"]>;
@@ -25529,12 +26352,15 @@ declare namespace LocalJSX {
         "ir-toast-provider": Omit<IrToastProvider, keyof IrToastProviderAttributes> & { [K in keyof IrToastProvider & keyof IrToastProviderAttributes]?: IrToastProvider[K] } & { [K in keyof IrToastProvider & keyof IrToastProviderAttributes as `attr:${K}`]?: IrToastProviderAttributes[K] } & { [K in keyof IrToastProvider & keyof IrToastProviderAttributes as `prop:${K}`]?: IrToastProvider[K] };
         "ir-toasts-provider": IrToastsProvider;
         "ir-tooltip": Omit<IrTooltip, keyof IrTooltipAttributes> & { [K in keyof IrTooltip & keyof IrTooltipAttributes]?: IrTooltip[K] } & { [K in keyof IrTooltip & keyof IrTooltipAttributes as `attr:${K}`]?: IrTooltipAttributes[K] } & { [K in keyof IrTooltip & keyof IrTooltipAttributes as `prop:${K}`]?: IrTooltip[K] };
+        "ir-translatable-textarea": Omit<IrTranslatableTextarea, keyof IrTranslatableTextareaAttributes> & { [K in keyof IrTranslatableTextarea & keyof IrTranslatableTextareaAttributes]?: IrTranslatableTextarea[K] } & { [K in keyof IrTranslatableTextarea & keyof IrTranslatableTextareaAttributes as `attr:${K}`]?: IrTranslatableTextareaAttributes[K] } & { [K in keyof IrTranslatableTextarea & keyof IrTranslatableTextareaAttributes as `prop:${K}`]?: IrTranslatableTextarea[K] };
+        "ir-translation-editor": Omit<IrTranslationEditor, keyof IrTranslationEditorAttributes> & { [K in keyof IrTranslationEditor & keyof IrTranslationEditorAttributes]?: IrTranslationEditor[K] } & { [K in keyof IrTranslationEditor & keyof IrTranslationEditorAttributes as `attr:${K}`]?: IrTranslationEditorAttributes[K] } & { [K in keyof IrTranslationEditor & keyof IrTranslationEditorAttributes as `prop:${K}`]?: IrTranslationEditor[K] };
         "ir-translations-entries-panel": Omit<IrTranslationsEntriesPanel, keyof IrTranslationsEntriesPanelAttributes> & { [K in keyof IrTranslationsEntriesPanel & keyof IrTranslationsEntriesPanelAttributes]?: IrTranslationsEntriesPanel[K] } & { [K in keyof IrTranslationsEntriesPanel & keyof IrTranslationsEntriesPanelAttributes as `attr:${K}`]?: IrTranslationsEntriesPanelAttributes[K] } & { [K in keyof IrTranslationsEntriesPanel & keyof IrTranslationsEntriesPanelAttributes as `prop:${K}`]?: IrTranslationsEntriesPanel[K] };
         "ir-translations-entries-table": Omit<IrTranslationsEntriesTable, keyof IrTranslationsEntriesTableAttributes> & { [K in keyof IrTranslationsEntriesTable & keyof IrTranslationsEntriesTableAttributes]?: IrTranslationsEntriesTable[K] } & { [K in keyof IrTranslationsEntriesTable & keyof IrTranslationsEntriesTableAttributes as `attr:${K}`]?: IrTranslationsEntriesTableAttributes[K] } & { [K in keyof IrTranslationsEntriesTable & keyof IrTranslationsEntriesTableAttributes as `prop:${K}`]?: IrTranslationsEntriesTable[K] };
         "ir-translations-entry-drawer": Omit<IrTranslationsEntryDrawer, keyof IrTranslationsEntryDrawerAttributes> & { [K in keyof IrTranslationsEntryDrawer & keyof IrTranslationsEntryDrawerAttributes]?: IrTranslationsEntryDrawer[K] } & { [K in keyof IrTranslationsEntryDrawer & keyof IrTranslationsEntryDrawerAttributes as `attr:${K}`]?: IrTranslationsEntryDrawerAttributes[K] } & { [K in keyof IrTranslationsEntryDrawer & keyof IrTranslationsEntryDrawerAttributes as `prop:${K}`]?: IrTranslationsEntryDrawer[K] };
         "ir-translations-entry-form": Omit<IrTranslationsEntryForm, keyof IrTranslationsEntryFormAttributes> & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes]?: IrTranslationsEntryForm[K] } & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes as `attr:${K}`]?: IrTranslationsEntryFormAttributes[K] } & { [K in keyof IrTranslationsEntryForm & keyof IrTranslationsEntryFormAttributes as `prop:${K}`]?: IrTranslationsEntryForm[K] };
         "ir-translations-language-dialog": Omit<IrTranslationsLanguageDialog, keyof IrTranslationsLanguageDialogAttributes> & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes]?: IrTranslationsLanguageDialog[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `attr:${K}`]?: IrTranslationsLanguageDialogAttributes[K] } & { [K in keyof IrTranslationsLanguageDialog & keyof IrTranslationsLanguageDialogAttributes as `prop:${K}`]?: IrTranslationsLanguageDialog[K] };
         "ir-translations-manager": Omit<IrTranslationsManager, keyof IrTranslationsManagerAttributes> & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes]?: IrTranslationsManager[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `attr:${K}`]?: IrTranslationsManagerAttributes[K] } & { [K in keyof IrTranslationsManager & keyof IrTranslationsManagerAttributes as `prop:${K}`]?: IrTranslationsManager[K] };
+        "ir-translations-move-dialog": Omit<IrTranslationsMoveDialog, keyof IrTranslationsMoveDialogAttributes> & { [K in keyof IrTranslationsMoveDialog & keyof IrTranslationsMoveDialogAttributes]?: IrTranslationsMoveDialog[K] } & { [K in keyof IrTranslationsMoveDialog & keyof IrTranslationsMoveDialogAttributes as `attr:${K}`]?: IrTranslationsMoveDialogAttributes[K] } & { [K in keyof IrTranslationsMoveDialog & keyof IrTranslationsMoveDialogAttributes as `prop:${K}`]?: IrTranslationsMoveDialog[K] };
         "ir-translations-settings-dialog": Omit<IrTranslationsSettingsDialog, keyof IrTranslationsSettingsDialogAttributes> & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes]?: IrTranslationsSettingsDialog[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `attr:${K}`]?: IrTranslationsSettingsDialogAttributes[K] } & { [K in keyof IrTranslationsSettingsDialog & keyof IrTranslationsSettingsDialogAttributes as `prop:${K}`]?: IrTranslationsSettingsDialog[K] };
         "ir-translations-sync-dialog": IrTranslationsSyncDialog;
         "ir-translations-table-dialog": Omit<IrTranslationsTableDialog, keyof IrTranslationsTableDialogAttributes> & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes]?: IrTranslationsTableDialog[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `attr:${K}`]?: IrTranslationsTableDialogAttributes[K] } & { [K in keyof IrTranslationsTableDialog & keyof IrTranslationsTableDialogAttributes as `prop:${K}`]?: IrTranslationsTableDialog[K] };
@@ -25608,9 +26434,8 @@ declare module "@stencil/core" {
             "igl-rate-plan": LocalJSX.IntrinsicElements["igl-rate-plan"] & JSXBase.HTMLAttributes<HTMLIglRatePlanElement>;
             "igl-reallocation-dialog": LocalJSX.IntrinsicElements["igl-reallocation-dialog"] & JSXBase.HTMLAttributes<HTMLIglReallocationDialogElement>;
             "igl-room-type": LocalJSX.IntrinsicElements["igl-room-type"] & JSXBase.HTMLAttributes<HTMLIglRoomTypeElement>;
-            "igl-spilt-booking-form": LocalJSX.IntrinsicElements["igl-spilt-booking-form"] & JSXBase.HTMLAttributes<HTMLIglSpiltBookingFormElement>;
-            "igl-split-booking": LocalJSX.IntrinsicElements["igl-split-booking"] & JSXBase.HTMLAttributes<HTMLIglSplitBookingElement>;
             "igl-split-booking-drawer": LocalJSX.IntrinsicElements["igl-split-booking-drawer"] & JSXBase.HTMLAttributes<HTMLIglSplitBookingDrawerElement>;
+            "igl-split-booking-form": LocalJSX.IntrinsicElements["igl-split-booking-form"] & JSXBase.HTMLAttributes<HTMLIglSplitBookingFormElement>;
             "igl-tba-booking-view": LocalJSX.IntrinsicElements["igl-tba-booking-view"] & JSXBase.HTMLAttributes<HTMLIglTbaBookingViewElement>;
             "igl-tba-category-view": LocalJSX.IntrinsicElements["igl-tba-category-view"] & JSXBase.HTMLAttributes<HTMLIglTbaCategoryViewElement>;
             "igl-to-be-assigned": LocalJSX.IntrinsicElements["igl-to-be-assigned"] & JSXBase.HTMLAttributes<HTMLIglToBeAssignedElement>;
@@ -25661,6 +26486,18 @@ declare module "@stencil/core" {
             "ir-arrivals-filters": LocalJSX.IntrinsicElements["ir-arrivals-filters"] & JSXBase.HTMLAttributes<HTMLIrArrivalsFiltersElement>;
             "ir-arrivals-table": LocalJSX.IntrinsicElements["ir-arrivals-table"] & JSXBase.HTMLAttributes<HTMLIrArrivalsTableElement>;
             "ir-assignment-toggle-dialog": LocalJSX.IntrinsicElements["ir-assignment-toggle-dialog"] & JSXBase.HTMLAttributes<HTMLIrAssignmentToggleDialogElement>;
+            /**
+             * The extranet sign-in panel: login, forgot password and forgot username.
+             * Owns validation and the whole legacy login chain (`IsAuthenticated_JSON` →
+             * `Get_Startup_Data_Signature` → `Get_Startup_Data`), then redirects the way
+             * `Default.aspx` always has: to the OTP page, or by clicking the server's
+             * `btn_RedirectFromLogin`, whose handler reads `Request.Form["txt_username"]`.
+             * Renders no `<form>` of its own, and no encapsulation: mount it inside the page's
+             * `<form runat="server">`, exactly where the legacy fields sat, so `#txt_username`
+             * posts with the redirect like the original input did. Every other submit of that
+             * form is intercepted and handled here.
+             */
+            "ir-auth": LocalJSX.IntrinsicElements["ir-auth"] & JSXBase.HTMLAttributes<HTMLIrAuthElement>;
             "ir-autocomplete": LocalJSX.IntrinsicElements["ir-autocomplete"] & JSXBase.HTMLAttributes<HTMLIrAutocompleteElement>;
             "ir-autocomplete-option": LocalJSX.IntrinsicElements["ir-autocomplete-option"] & JSXBase.HTMLAttributes<HTMLIrAutocompleteOptionElement>;
             "ir-balance-cell": LocalJSX.IntrinsicElements["ir-balance-cell"] & JSXBase.HTMLAttributes<HTMLIrBalanceCellElement>;
@@ -25814,8 +26651,8 @@ declare module "@stencil/core" {
              */
             "ir-dashboard-bookings-table": LocalJSX.IntrinsicElements["ir-dashboard-bookings-table"] & JSXBase.HTMLAttributes<HTMLIrDashboardBookingsTableElement>;
             /**
-             * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
-             * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+             * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days from
+             * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
              */
             "ir-dashboard-date-navigator": LocalJSX.IntrinsicElements["ir-dashboard-date-navigator"] & JSXBase.HTMLAttributes<HTMLIrDashboardDateNavigatorElement>;
             /**
@@ -26019,7 +26856,19 @@ declare module "@stencil/core" {
             "ir-listing-header": LocalJSX.IntrinsicElements["ir-listing-header"] & JSXBase.HTMLAttributes<HTMLIrListingHeaderElement>;
             "ir-listing-modal": LocalJSX.IntrinsicElements["ir-listing-modal"] & JSXBase.HTMLAttributes<HTMLIrListingModalElement>;
             "ir-loading-screen": LocalJSX.IntrinsicElements["ir-loading-screen"] & JSXBase.HTMLAttributes<HTMLIrLoadingScreenElement>;
+            /**
+             * A floating dev/QA panel for switching language, calendar system,
+             * numbering system and text direction at runtime.
+             * All user-selected settings are persisted in localStorage and restored
+             * automatically the next time the page is opened.
+             */
+            "ir-locale-switcher": LocalJSX.IntrinsicElements["ir-locale-switcher"] & JSXBase.HTMLAttributes<HTMLIrLocaleSwitcherElement>;
             "ir-login": LocalJSX.IntrinsicElements["ir-login"] & JSXBase.HTMLAttributes<HTMLIrLoginElement>;
+            "ir-login-aside": LocalJSX.IntrinsicElements["ir-login-aside"] & JSXBase.HTMLAttributes<HTMLIrLoginAsideElement>;
+            "ir-login-aside-calendar": LocalJSX.IntrinsicElements["ir-login-aside-calendar"] & JSXBase.HTMLAttributes<HTMLIrLoginAsideCalendarElement>;
+            "ir-login-aside-dynamic-pricing": LocalJSX.IntrinsicElements["ir-login-aside-dynamic-pricing"] & JSXBase.HTMLAttributes<HTMLIrLoginAsideDynamicPricingElement>;
+            "ir-login-aside-image": LocalJSX.IntrinsicElements["ir-login-aside-image"] & JSXBase.HTMLAttributes<HTMLIrLoginAsideImageElement>;
+            "ir-login-aside-showcase": LocalJSX.IntrinsicElements["ir-login-aside-showcase"] & JSXBase.HTMLAttributes<HTMLIrLoginAsideShowcaseElement>;
             "ir-m-combobox": LocalJSX.IntrinsicElements["ir-m-combobox"] & JSXBase.HTMLAttributes<HTMLIrMComboboxElement>;
             "ir-m-combobox-booking-item": LocalJSX.IntrinsicElements["ir-m-combobox-booking-item"] & JSXBase.HTMLAttributes<HTMLIrMComboboxBookingItemElement>;
             "ir-m-combobox-item": LocalJSX.IntrinsicElements["ir-m-combobox-item"] & JSXBase.HTMLAttributes<HTMLIrMComboboxItemElement>;
@@ -26148,6 +26997,20 @@ declare module "@stencil/core" {
             "ir-toasts-provider": LocalJSX.IntrinsicElements["ir-toasts-provider"] & JSXBase.HTMLAttributes<HTMLIrToastsProviderElement>;
             "ir-tooltip": LocalJSX.IntrinsicElements["ir-tooltip"] & JSXBase.HTMLAttributes<HTMLIrTooltipElement>;
             /**
+             * A multilingual textarea modelled on Shopify's translation flow: the field itself is edited in the default
+             * language (English unless overridden), which is required. Translations are made in a separate side-by-side
+             * editor (`ir-translation-editor`, inside a dialog) and are only committed when the user saves.
+             * Value is a map keyed by BCP-47 code. Form-associated: submits `JSON.stringify(value)` under `name`, and
+             * blocks submission while the default language is blank.
+             */
+            "ir-translatable-textarea": LocalJSX.IntrinsicElements["ir-translatable-textarea"] & JSXBase.HTMLAttributes<HTMLIrTranslatableTextareaElement>;
+            /**
+             * Side-by-side translation editor: a language selector, the default-language text as a read-only reference,
+             * and a textarea for the selected language. Stateless about edits — it shows `value` and reports keystrokes
+             * through `translationInput`; the owner decides when to save.
+             */
+            "ir-translation-editor": LocalJSX.IntrinsicElements["ir-translation-editor"] & JSXBase.HTMLAttributes<HTMLIrTranslationEditorElement>;
+            /**
              * Owns the entries table plus its client-side search/status filtering — the
              * parent manager just hands it one table's raw entries and listens for the
              * CRUD intents it emits.
@@ -26166,6 +27029,15 @@ declare module "@stencil/core" {
             "ir-translations-entry-form": LocalJSX.IntrinsicElements["ir-translations-entry-form"] & JSXBase.HTMLAttributes<HTMLIrTranslationsEntryFormElement>;
             "ir-translations-language-dialog": LocalJSX.IntrinsicElements["ir-translations-language-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsLanguageDialogElement>;
             "ir-translations-manager": LocalJSX.IntrinsicElements["ir-translations-manager"] & JSXBase.HTMLAttributes<HTMLIrTranslationsManagerElement>;
+            /**
+             * Moves one setup entry to another table through Move_Setup_Entry — the
+             * backend re-homes the row, so nothing is re-created or soft-deleted here.
+             * The destination list is whatever the parent passes as `tables`: the manager
+             * hands over the same set its header picker offers, so the "only used tables"
+             * setting narrows both the same way. The search box is a local filter over
+             * that list, and the source table is never offered as a destination.
+             */
+            "ir-translations-move-dialog": LocalJSX.IntrinsicElements["ir-translations-move-dialog"] & JSXBase.HTMLAttributes<HTMLIrTranslationsMoveDialogElement>;
             /**
              * Settings for the entries grid — which tables the pickers offer, which
              * non-source languages show up as columns, and whether the notes column is

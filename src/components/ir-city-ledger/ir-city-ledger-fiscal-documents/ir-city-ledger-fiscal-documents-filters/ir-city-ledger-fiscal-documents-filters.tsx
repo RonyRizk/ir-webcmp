@@ -5,6 +5,7 @@ import moment from 'moment';
 import { FdTypes } from '@/types/enums';
 import { Debounce } from '@/decorators/debounce';
 import { z } from 'zod';
+import { t } from '@/services/locale/t';
 
 const today = moment();
 type FdType = (typeof FdTypes)[keyof typeof FdTypes];
@@ -34,12 +35,12 @@ export class IrCityLedgerFiscalDocumentsFilters {
   }
 
   private typeOptions: Array<{ label: string; value: FdType | 'all' }> = [
-    { label: 'All document types', value: 'all' },
-    { label: 'Invoices', value: FdTypes.Invoice },
-    { label: 'Receipts', value: FdTypes.Receipt },
-    { label: 'Credit Notes', value: FdTypes.CreditNote },
+    { label: t('Lcz_AllDocumentTypes', { fallback: 'All document types' }), value: 'all' },
+    { label: t('Lcz_Invoices', { fallback: 'Invoices' }), value: FdTypes.Invoice },
+    { label: t('Lcz_Receipts', { fallback: 'Receipts' }), value: FdTypes.Receipt },
+    { label: t('Lcz_CreditNotes', { fallback: 'Credit Notes' }), value: FdTypes.CreditNote },
     // { label: 'Debit Notes', value: FdTypes.DebitNote },
-    { label: 'Credit Receipt', value: FdTypes.CreditReceipt },
+    { label: t('Lcz_CreditReceipt', { fallback: 'Credit Receipt' }), value: FdTypes.CreditReceipt },
   ];
 
   private updateFilters(patch: Partial<ClFiscalDocumentFilters>) {
@@ -81,7 +82,7 @@ export class IrCityLedgerFiscalDocumentsFilters {
                 defaultValue={this.filters.type}
                 onchange={e => this.updateFilters({ type: (e.target as WaOption).value as any })}
                 size="s"
-                placeholder="Document Type"
+                placeholder={t('Lcz_DocumentTypePlaceholder', { fallback: 'Document Type' })}
               >
                 {this.typeOptions.map(option => (
                   <wa-option value={option.value} key={option.value}>
@@ -95,7 +96,7 @@ export class IrCityLedgerFiscalDocumentsFilters {
                 checked={this.filters.taxableOnly}
                 onchange={e => this.updateFilters({ taxableOnly: (e.target as HTMLInputElement).checked })}
               >
-                Taxes
+                {t('Lcz_Taxes', { fallback: 'Taxes' })}
               </wa-switch>
 
               <wa-switch
@@ -107,13 +108,13 @@ export class IrCityLedgerFiscalDocumentsFilters {
                   this.applyFilters.emit(updated);
                 }}
               >
-                Proforma
+                {t('Lcz_Proforma', { fallback: 'Proforma' })}
               </wa-switch>
             </div>
 
             <ir-input
               class="filters-bar__search-input"
-              placeholder="Search by doc number"
+              placeholder={t('Lcz_SearchByDocNumber', { fallback: 'Search by doc number' })}
               value={this.docNumber}
               onText-change={e => {
                 this.docNumber = e.detail;

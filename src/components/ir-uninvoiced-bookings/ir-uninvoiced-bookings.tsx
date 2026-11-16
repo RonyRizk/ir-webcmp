@@ -1,11 +1,14 @@
 import { Component, Element, Listen, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { RoomService } from '@/services/room.service';
 import { PropertyService } from '@/services/property.service';
-import locales from '@/stores/locales.store';
 import uninvoiced_bookings, { setUninvoicedBookingsCriteria } from '@/stores/uninvoiced_bookings.store';
 import { mapBookingToUninvoicedRow } from './types';
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-uninvoiced-bookings',
@@ -25,21 +28,37 @@ export class IrUninvoicedBookings {
   @State() activeBookingNbr: string | null = null;
   @State() activeGuestBookingNbr: string | null = null;
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
   private bookingListingService = new BookingListingService();
 
   private propertyId: number;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.uninvoicedBookings, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -47,7 +66,7 @@ export class IrUninvoicedBookings {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -83,6 +102,9 @@ export class IrUninvoicedBookings {
   private async initializeApp() {
     this.isPageLoading = true;
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.uninvoicedBookings });
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
       }
@@ -92,7 +114,7 @@ export class IrUninvoicedBookings {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
         propertyId = propertyData.My_Result.id;
@@ -100,15 +122,11 @@ export class IrUninvoicedBookings {
       this.propertyId = propertyId;
 
       // Bookings don't depend on language/criteria, so fetch all three concurrently.
-      const [languageTexts, criteria] = await Promise.all([
-        this.roomService.fetchLanguage(this.language),
-        this.bookingListingService.getExposedBookingsCriteria(propertyId),
+      const [, criteria] = await Promise.all([
+        localeReady,
+        this.bookingListingService.getExposedBookingsCriteria({ property_id: propertyId, language: LocaleController.language }),
         this.fetchUninvoicedBookings(),
       ]);
-      if (!locales.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
       setUninvoicedBookingsCriteria(criteria);
     } catch (error) {
       console.error('Error initializing uninvoiced bookings:', error);
@@ -156,7 +174,11 @@ export class IrUninvoicedBookings {
     }
 
     return (
-      <ir-page description="List of ended bookings with some services that have not been invoiced yet." label="Uninvoiced Past Bookings" class="uninvoiced-bookings__page">
+      <ir-page
+        description={t('Lcz_UninvoicedBookingsDescription', { fallback: 'List of ended bookings with some services that have not been invoiced yet.' })}
+        label={t('Lcz_UninvoicedPastBookings', { fallback: 'Uninvoiced Past Bookings' })}
+        class="uninvoiced-bookings__page"
+      >
         <ir-unvoiced-bookings-filters></ir-unvoiced-bookings-filters>
         <ir-unvoiced-bookings-table></ir-unvoiced-bookings-table>
         <ir-booking-details-drawer

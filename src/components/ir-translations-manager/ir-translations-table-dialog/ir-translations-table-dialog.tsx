@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { TranslationTable } from '../types';
+import { t } from '@/services/locale/t';
 
 /**
  * Dumb open/close shell — the nested ir-translations-table-form owns the
@@ -68,7 +69,7 @@ export class IrTranslationsTableDialog {
         )}
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" appearance="outlined" variant="neutral" disabled={this.isSubmitting} onClickHandler={() => this.closeDialog.emit()}>
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button
             size="m"
@@ -79,7 +80,7 @@ export class IrTranslationsTableDialog {
             disabled={this.saveDisabled || this.isSubmitting}
             loading={this.isSubmitting}
           >
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

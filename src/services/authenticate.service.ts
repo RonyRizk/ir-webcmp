@@ -5,7 +5,7 @@ export class AuthService {
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
-    //  sessionStorage.setItem('token', JSON.stringify(data.My_Result));
+    //  sessionStorage.setItem('ApiClient', JSON.stringify(data.My_Result));
     return data['My_Result'];
   }
   public async changeUserPwd(params: { username: string; new_pwd: string; old_pwd?: string }) {

@@ -4,6 +4,7 @@ import calendar_data from '@/stores/calendar-data';
 import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
+import { t } from '@/services/locale/t';
 
 type RectifierFormState = {
   property_id: number | null;
@@ -102,7 +103,7 @@ export class IrRectifier {
       await this.propertyService.exposedRectifier(result.data);
       showToast({
         type: 'success',
-        title: 'The update is being processed.',
+        title: t('Lcz_UpdateBeingProcessed', { fallback: 'The update is being processed.' }),
         description: '',
       });
       this.closeDrawer.emit();
@@ -130,7 +131,9 @@ export class IrRectifier {
         >
           <wa-callout size="s" appearance="filled" variant="warning">
             <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-            This will update the total availability of the selected room types by calculating: No. of physical rooms - Booked - Blocked - Pending
+            {t('Lcz_RectifierCalloutExplanation', {
+              fallback: 'This will update the total availability of the selected room types by calculating: No. of physical rooms - Booked - Blocked - Pending',
+            })}
           </wa-callout>
           <div class="ir-rectifier__roomtypes">
             {validRoomTypeIds.length > 0 && (
@@ -143,7 +146,7 @@ export class IrRectifier {
                   this.toggleSelectAllRoomTypes(checked);
                 }}
               >
-                Select all
+                {t('Lcz_SelectAll', { fallback: 'Select all' })}
               </wa-checkbox>
             )}
             {roomTypes.map(roomtype => {
@@ -166,12 +169,12 @@ export class IrRectifier {
               );
             })}
           </div>
-          {this.showRoomTypeError && <p class="text-danger m-0">Please select at least one room type.</p>}
+          {this.showRoomTypeError && <p class="text-danger m-0">{t('Lcz_PleaseSelectAtLeastOneRoomType', { fallback: 'Please select at least one room type.' })}</p>}
           <div class="ir-rectifier__date-range">
             <ir-validator value={this.form.from ?? null} schema={ExposedRectifierParamsSchema.shape.from} autovalidate={this.autoValidate}>
               <ir-date-select
                 class="ir-rectifier__date-picker ir-rectifier__date-picker--from"
-                label="Date from"
+                label={t('Lcz_DateFrom', { fallback: 'Date from' })}
                 emitEmptyDate
                 date={this.form.from}
                 onDateChanged={e => {
@@ -184,7 +187,7 @@ export class IrRectifier {
             <ir-validator value={this.form.to ?? null} schema={ExposedRectifierParamsSchema.shape.to} autovalidate={this.autoValidate}>
               <ir-date-select
                 class="ir-rectifier__date-picker ir-rectifier__date-picker--to"
-                label="To (inclusive)"
+                label={t('Lcz_ToInclusive', { fallback: 'To (inclusive)' })}
                 emitEmptyDate
                 disabled={!this.form.from}
                 ref={el => (this.toDateRef = el)}

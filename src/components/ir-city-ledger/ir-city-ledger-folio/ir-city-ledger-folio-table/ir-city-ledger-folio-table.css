@@ -86,21 +86,21 @@
 /* Column borders */
 .data-table thead th,
 .data-table tbody td {
-  border-right: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb) !important;
+  border-inline-end: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb) !important;
 }
 .data-table tbody td:last-child,
 .data-table thead th:last-child {
-  border-right: 0 !important;
+  border-inline-end: 0 !important;
 }
 .data-table thead th.sticky-column,
 .data-table tbody td.sticky-column {
-  border-right: 0 !important;
+  border-inline-end: 0 !important;
 }
 .sticky-column::after {
   content: '';
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
   width: 1px;
   height: 100%;
   background-color: var(--wa-color-neutral-border-quiet, #e5e7eb);
@@ -214,7 +214,7 @@
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   display: block;
-  text-align: right;
+  text-align: end;
   padding: var(--ir-cell-padding, 0.5rem 1rem);
 }
 

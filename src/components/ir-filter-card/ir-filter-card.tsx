@@ -1,4 +1,5 @@
 import { Component, h, State } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-filter-card',
@@ -36,7 +37,7 @@ export class IrFilterCard {
         <div part="header" class="filters__header" slot="header">
           <div class="filters__title-group">
             <wa-icon name="filter" style={{ fontSize: '1rem' }}></wa-icon>
-            <h4 class="filters__title">Filter</h4>
+            <h4 class="filters__title">{t('Lcz_Filter', { fallback: 'Filter' })}</h4>
           </div>
           {!this.isDesktop && (
             <ir-custom-button

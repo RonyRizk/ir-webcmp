@@ -1,11 +1,13 @@
 import { Booking, ExtraService, ExtraServiceSchema, IUnit, Room } from '@/models/booking.dto';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
-import locales from '@/stores/locales.store';
 import calendar_data, { getExtraServiceDefaultPrice } from '@/stores/calendar-data';
 import { createDateWithOffsetAndHour } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
+import { formatBookingNumber } from '@/utils/number';
 /** Service category code for a late-checkout extra service charge. */
 const LATE_CHECKOUT_CATEGORY_CODE = 'LCO';
 
@@ -36,7 +38,7 @@ export class IrDepartureTimeDialog {
   /** Controls dialog visibility. */
   @Prop() open: boolean;
   @Prop() property_id: number;
-  @Prop() departureTime: IEntries[] = [];
+  @Prop() departureTime: SetupEntries[] = [];
   @Prop() language: string = 'en';
   /** Needed to create a late-checkout extra service charge alongside the departure time. */
   @Prop() booking_nbr: string;
@@ -73,7 +75,7 @@ export class IrDepartureTimeDialog {
   }
 
   /** Whether a departure-time option (e.g. "14:00") falls after the property's standard checkout time, in hotel-local time. */
-  private isLateCheckout(entry: IEntries): boolean {
+  private isLateCheckout(entry: SetupEntries): boolean {
     const match = entry.CODE_VALUE_EN?.match(/^(\d{1,2}):(\d{2})$/);
     const checkoutHours = calendar_data.checkin_checkout_hours;
     if (!match || !checkoutHours) return false;
@@ -140,7 +142,7 @@ export class IrDepartureTimeDialog {
     return (
       <ir-dialog
         open={this.open}
-        label="Expected Departure Time"
+        label={t('Lcz_ExpectedDepartureTimeDialogTitle', { fallback: 'Expected Departure Time' })}
         ref={el => (this.dialogRef = el)}
         onIrDialogHide={e => {
           e.preventDefault();
@@ -162,7 +164,7 @@ export class IrDepartureTimeDialog {
           </div>
           <wa-select
             size="s"
-            placeholder="Not provided"
+            placeholder={t('Lcz_NotProvided', { fallback: 'Not provided' })}
             onwa-after-hide={e => {
               e.stopImmediatePropagation();
               e.stopPropagation();
@@ -173,8 +175,8 @@ export class IrDepartureTimeDialog {
           >
             {this.departureTime?.map(dt => (
               <wa-option key={dt.CODE_NAME} value={dt.CODE_NAME}>
-                {dt[`CODE_VALUE_${this.language?.toUpperCase()}`] ?? dt[`CODE_VALUE_EN`]}
-                {this.isLateCheckout(dt) ? ' (Late check-out)' : ''}
+                {formatBookingNumber(getSetupEntryLabel(dt, this.language))}
+                {this.isLateCheckout(dt) ? t('Lcz_LateCheckoutSuffix', { fallback: ' (Late check-out)' }) : ''}
               </wa-option>
             ))}
           </wa-select>
@@ -183,10 +185,10 @@ export class IrDepartureTimeDialog {
               <div class="ir-time-dialog__insight-row">
                 <wa-icon class="ir-time-dialog__insight-icon" name="clock"></wa-icon>
                 <div class="ir-time-dialog__insight-copy">
-                  <p class="ir-time-dialog__insight-title">
-                    Would you like to charge it as an <b>Late Check-out</b>?
+                  <p class="ir-time-dialog__insight-title">{t('Lcz_ChargeAsLateCheckoutQuestion', { fallback: 'Would you like to charge it as an Late Check-out?' })}</p>
+                  <p class="ir-time-dialog__insight-subtitle">
+                    {t('Lcz_AddedAsAccommodationExtraServiceHint', { fallback: 'This will be added as an accommodation extra service' })}
                   </p>
-                  <p class="ir-time-dialog__insight-subtitle">This will be added as an accommodation extra service</p>
                 </div>
                 {/* <wa-switch
                 checked={this.createExtraService}
@@ -205,7 +207,7 @@ export class IrDepartureTimeDialog {
                       mask={'price'}
                       type="text"
                       withClear
-                      // label="Price"
+                      // label={t('Lcz_Price', { fallback: 'Price' })}
                     >
                       <span slot="start">{this.currencySymbol}</span>
                     </ir-input>
@@ -217,10 +219,10 @@ export class IrDepartureTimeDialog {
         </div>
         <div slot="footer" class={'ir-dialog__footer'}>
           <ir-custom-button size="m" variant="neutral" appearance="filled" data-dialog="close">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button size="m" variant="brand" loading={this.isLoading} disabled={!this.selectedValue} onClickHandler={e => this.handleConfirm(e)} appearance="accent">
-            {locales.entries.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

@@ -1,8 +1,8 @@
 import { Component, Event, EventEmitter, Watch, h, Prop, State } from '@stencil/core';
 
-import locales from '@/stores/locales.store';
 import { TIcons } from '../ir-icons/icons';
 
+import { t } from '@/services/locale/t';
 let panelId = 0;
 
 @Component({
@@ -12,7 +12,7 @@ let panelId = 0;
 })
 export class IrFiltersPanel {
   /** Panel headline text */
-  @Prop() filterTitle: string = locales.entries.Lcz_Filters;
+  @Prop() filterTitle: string = t('Lcz_Filters', { fallback: 'Filters' });
 
   /** Optional custom collapse target id (useful for legacy CSS hooks) */
   @Prop() collapseId?: string;
@@ -57,10 +57,10 @@ export class IrFiltersPanel {
   @Prop() collapseIconClosed: TIcons = 'closed_eye';
 
   /** Apply button copy */
-  @Prop() applyLabel: string = locales.entries.Lcz_Apply;
+  @Prop() applyLabel: string = t('Lcz_Apply', { fallback: 'Apply' });
 
   /** Reset button copy */
-  @Prop() resetLabel: string = locales.entries.Lcz_Reset;
+  @Prop() resetLabel: string = t('Lcz_Reset', { fallback: 'Reset' });
 
   /** Disable apply action */
   @Prop() disableApply: boolean = false;

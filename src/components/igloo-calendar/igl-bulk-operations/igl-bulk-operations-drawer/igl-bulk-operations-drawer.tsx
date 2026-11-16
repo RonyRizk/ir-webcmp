@@ -1,5 +1,6 @@
 import { IrToast } from '@/components/ui/ir-toast/ir-toast';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-bulk-operations-drawer',
@@ -19,17 +20,6 @@ export class IglBulkOperationsDrawer {
 
   private formId = `bulk-operations-form`;
 
-  private tabs = [
-    {
-      id: 'stop-sale',
-      label: 'Stop/Open Sale',
-    },
-    {
-      id: 'block',
-      label: 'Block Unit',
-    },
-  ];
-
   @Listen('loadingChanged')
   handleLoadingChange(e: CustomEvent<boolean>) {
     e.stopImmediatePropagation();
@@ -46,12 +36,16 @@ export class IglBulkOperationsDrawer {
     const formId = `${this.formId}-${this.selectedTab}`;
     return (
       <Host>
-        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label="Bulk Availability Operations" open={this.open} class="bulk-operations__drawer">
+        <ir-drawer
+          onDrawerHide={this.handleDrawerClose.bind(this)}
+          label={t('Lcz_BulkAvailabilityOperations', { fallback: 'Bulk Availability Operations' })}
+          open={this.open}
+          class="bulk-operations__drawer"
+        >
           {this.open && (
             <wa-tab-group class="bulk-operations__tab-group" active={this.selectedTab} activation="manual" onwa-tab-show={e => (this.selectedTab = e.detail.name?.toString())}>
-              {this.tabs.map(tab => (
-                <wa-tab panel={tab.id}>{tab.label}</wa-tab>
-              ))}
+              <wa-tab panel="stop-sale">{t('Lcz_StopOpenSale', { fallback: 'Stop/Open Sale' })}</wa-tab>
+              <wa-tab panel="block">{t('Lcz_BlockUnit', { fallback: 'Block Unit' })}</wa-tab>
               <wa-tab-panel name="stop-sale">
                 {this.selectedTab === 'stop-sale' && (
                   <igl-bulk-stop-sale
@@ -76,10 +70,10 @@ export class IglBulkOperationsDrawer {
           )}
           <div slot="footer" class="ir__drawer-footer">
             <ir-custom-button size="m" variant="neutral" appearance="filled" data-drawer="close">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button loading={this.isLoading} type="submit" form={formId} size="m" variant="brand">
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-drawer>

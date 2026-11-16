@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, h } from '@stencil/core';
 import { SidebarOpenEvent } from '../types';
 import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-financial-table',
@@ -16,10 +17,10 @@ export class IrFinancialTable {
         <table class="table" data-testid="hk_tasks_table">
           <thead class="table-header">
             <tr>
-              <th class="text-center">Date</th>
-              <th class="text-center">Booking</th>
-              <th class="text-center">By direct</th>
-              <th class="text-right">Amount</th>
+              <th class="text-center">{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+              <th class="text-center">{t('Lcz_Booking', { fallback: 'Booking' })}</th>
+              <th class="text-center">{t('Lcz_ByDirect', { fallback: 'By direct' })}</th>
+              <th class="ir-text-end">{t('Lcz_Amount', { fallback: 'Amount' })}</th>
               <th class="text-center"></th>
             </tr>
           </thead>
@@ -43,11 +44,11 @@ export class IrFinancialTable {
                 ></ir-button>
               </td>
               <td class="text-center">1</td>
-              <td class="text-right">1</td>
+              <td class="ir-text-end">1</td>
               <td>
                 <ir-button
                   size="sm"
-                  text="Pay"
+                  text={t('Lcz_Pay', { fallback: 'Pay' })}
                   onClickHandler={() => {
                     this.financialActionsOpenSidebar.emit({
                       type: 'payment',

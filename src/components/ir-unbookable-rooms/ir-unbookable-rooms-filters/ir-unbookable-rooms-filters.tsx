@@ -1,5 +1,7 @@
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import type { FetchUnBookableRoomsResult } from '@/services/property/types';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 type UnbookableRoomsMode = 'default' | 'mpo';
 type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: number; country: string };
@@ -54,7 +56,7 @@ export class IrUnbookableRoomsFilters {
     return (
       <ir-filter-card>
         <wa-select
-          label="Look ahead"
+          label={t('Lcz_LookAhead', { fallback: 'Look ahead' })}
           size="s"
           value={this.filters.period_to_check?.toString()}
           defaultValue={this.filters.period_to_check?.toString()}
@@ -63,16 +65,14 @@ export class IrUnbookableRoomsFilters {
           }}
         >
           {Array.from({ length: 5 }, (_, i) => i + 2).map(value => (
-            <wa-option value={value.toString()}>
-              {value} month{value > 1 ? 's' : ''}
-            </wa-option>
+            <wa-option value={value.toString()}>{t('Lcz_MonthsCount', { fallback: '%1 months', params: [formatCount(value)] })}</wa-option>
           ))}
         </wa-select>
         <ir-input
           type="number"
-          label="Minimum consecutive nights"
+          label={t('Lcz_MinimumConsecutiveNights', { fallback: 'Minimum consecutive nights' })}
           min="7"
-          hint="Period where room types are closed for booking."
+          hint={t('Lcz_PeriodRoomTypesClosedForBooking', { fallback: 'Period where room types are closed for booking.' })}
           max="60"
           value={this.filters.consecutive_period?.toString()}
           onText-change={e => {
@@ -81,7 +81,7 @@ export class IrUnbookableRoomsFilters {
         ></ir-input>
         {this.mode === 'mpo' && sortedCountries.length > 1 && (
           <wa-select
-            label="Country"
+            label={t('Lcz_Country', { fallback: 'Country' })}
             size="s"
             value={this.filters.country?.toString()}
             defaultValue="all"
@@ -89,7 +89,7 @@ export class IrUnbookableRoomsFilters {
               this.handleCountryChange((e.target as HTMLSelectElement).value);
             }}
           >
-            <wa-option value="all">Show all</wa-option>
+            <wa-option value="all">{t('Lcz_ShowAll', { fallback: 'Show all' })}</wa-option>
             {sortedCountries.map(([id, name]) => (
               <wa-option value={id.toString()}>{name}</wa-option>
             ))}
@@ -97,10 +97,10 @@ export class IrUnbookableRoomsFilters {
         )}
         <div slot="footer">
           <ir-custom-button onClickHandler={() => this.filtersReset.emit()} variant="neutral" appearance="filled">
-            Reset
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button loading={this.isLoading} onClickHandler={() => this.filtersSave.emit()} variant="brand">
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

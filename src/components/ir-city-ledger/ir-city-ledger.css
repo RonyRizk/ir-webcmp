@@ -227,7 +227,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  text-align: right;
+  text-align: end;
 }
 
 .statement-doc__meta-row {
@@ -365,7 +365,7 @@
   font-weight: 600;
   font-size: 0.8125rem;
   color: var(--wa-color-text-quiet, #6b7280);
-  text-align: left;
+  text-align: start;
   border-bottom: 1px solid var(--wa-color-neutral-border-quiet, #e5e7eb);
   white-space: nowrap;
 }
@@ -384,7 +384,7 @@
 }
 
 .statement-doc__col--right {
-  text-align: right;
+  text-align: end;
 }
 
 .statement-doc__opening-row td {

@@ -1,14 +1,15 @@
 import { ArchivedTask } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
-import locales from '@/stores/locales.store';
 import { downloadFile } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { v4 } from 'uuid';
 
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
 export type ArchivesFilters = {
   from_date: string;
   to_date: string;
@@ -107,20 +108,25 @@ export class IrHkArchiveDrawer {
   render() {
     return (
       <Host>
-        <ir-drawer open={this.open} label="Cleaning Archives (90 days)" class="hk_archive__drawer" onDrawerHide={() => this.drawerClosed.emit()}>
+        <ir-drawer
+          open={this.open}
+          label={t('Lcz_CleaningArchives90Days', { fallback: 'Cleaning Archives (90 days)' })}
+          class="hk_archive__drawer"
+          onDrawerHide={() => this.drawerClosed.emit()}
+        >
           <div class="archive-content">
             <div class="filters">
               <div class="filters-row">
                 <wa-select
                   size="s"
-                  placeholder="All units"
+                  placeholder={t('Lcz_AllUnits', { fallback: 'All units' })}
                   onchange={(e: Event) => {
                     const val = (e.target as HTMLSelectElement).value;
                     this.updateFilters({ filtered_by_unit: val === '000' ? [] : [Number(val)] });
                   }}
                   defaultValue={'000'}
                 >
-                  <wa-option value="000">All units</wa-option>
+                  <wa-option value="000">{t('Lcz_AllUnits', { fallback: 'All units' })}</wa-option>
                   {this.units
                     .slice()
                     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
@@ -132,13 +138,13 @@ export class IrHkArchiveDrawer {
                   <wa-select
                     size="s"
                     defaultValue={'000'}
-                    placeholder="All housekeepers"
+                    placeholder={t('Lcz_Allhousekeepers', { fallback: 'All housekeepers' })}
                     onchange={(e: Event) => {
                       const val = (e.target as HTMLSelectElement).value;
                       this.updateFilters({ filtered_by_hkm: val === '000' ? [] : [Number(val)] });
                     }}
                   >
-                    <wa-option value="000">All housekeepers</wa-option>
+                    <wa-option value="000">{t('Lcz_Allhousekeepers', { fallback: 'All housekeepers' })}</wa-option>
                     {housekeeping_store.hk_criteria.housekeepers
                       .slice()
                       .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
@@ -160,11 +166,11 @@ export class IrHkArchiveDrawer {
                 />
                 <div class="filter-actions">
                   <ir-custom-button variant="neutral" appearance="outlined" loading={this.isLoading === 'search'} onClickHandler={() => this.searchArchive()}>
-                    {locales.entries?.Lcz_Search ?? 'Search'}
+                    {t('Lcz_Search', { fallback: 'Search' })}
                   </ir-custom-button>
                   <ir-custom-button variant="neutral" appearance="outlined" loading={this.isLoading === 'excel'} onClickHandler={() => this.exportArchive()}>
                     <wa-icon name="download" slot="start"></wa-icon>
-                    {locales.entries?.Lcz_ExportToExcel ?? 'Export'}
+                    {t('Lcz_ExportToExcel', { fallback: 'Export' })}
                   </ir-custom-button>
                 </div>
               </div>
@@ -172,22 +178,22 @@ export class IrHkArchiveDrawer {
             {this.fetchedData && (
               <div class="results">
                 {this.data?.length === 0 && !isRequestPending('/Get_Archived_HK_Tasks') ? (
-                  <ir-empty-state message={locales.entries?.Lcz_NoResultsFound ?? 'No results found'} />
+                  <ir-empty-state message={t('Lcz_NoResultsFound', { fallback: 'No results found' })} />
                 ) : (
                   <div class="table-wrapper">
                     <table class="table data-table">
                       <thead>
                         <tr>
-                          <th>{locales.entries?.Lcz_Period ?? 'Period'}</th>
-                          <th>{locales.entries?.Lcz_Housekeeper ?? 'Housekeeper'}</th>
-                          <th>{locales.entries?.Lcz_Unit ?? 'Unit'}</th>
-                          <th>{locales.entries?.Lcz_BookingNumber ?? 'Booking #'}</th>
+                          <th>{t('Lcz_Period', { fallback: 'Period' })}</th>
+                          <th>{t('Lcz_Housekeeper', { fallback: 'Housekeeper' })}</th>
+                          <th>{t('Lcz_Unit', { fallback: 'Unit' })}</th>
+                          <th>{t('Lcz_BookingNumber', { fallback: 'Booking #' })}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {this.data?.map(d => (
                           <tr key={d.id} class="ir-table-row">
-                            <td>{d.date}</td>
+                            <td>{formatDate(d.date, 'MMM DD, YYYY')}</td>
                             <td>{d.house_keeper}</td>
                             <td>
                               <ir-tooltip message={d.unit} customSlot containerStyle={{ width: 'fit-content' }}>
@@ -202,7 +208,7 @@ export class IrHkArchiveDrawer {
                                   {d.booking_nbr.toString()}
                                 </ir-custom-button>
                               ) : (
-                                locales.entries?.Lcz_WasVacant
+                                t('Lcz_WasVacant', { fallback: 'Was vacant' })
                               )}
                             </td>
                           </tr>

@@ -212,7 +212,7 @@ export interface OtaGuarantee {
   expiration_date: string;
   is_virtual: boolean;
   meta: Meta;
-  token: string;
+  ApiClient: string;
 }
 
 interface Meta {
@@ -1062,6 +1062,7 @@ export interface RoomType {
   rate: number;
   rateplans: null;
   is_active: boolean;
+  is_virtual: boolean;
 }
 export type RoomHkStatus = '001' | '002' | '003' | '004';
 export interface PhysicalRoom {

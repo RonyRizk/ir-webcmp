@@ -112,9 +112,9 @@ describe('clone-rates utils', () => {
       const rows = buildReviewRows(baseState({ weekdays: [1, 2], adjustment: 'dec-fixed', amount: '20', copyMinStay: true }), roomTypes, 'US$');
       expect(valueOf(rows, 'Copy rates from')).toBe('Jan 1, 2025 – Dec 31, 2025');
       expect(valueOf(rows, 'Copy rates to')).toBe('Jan 1, 2026 – Dec 31, 2026');
-      expect(valueOf(rows, 'Days of the week')).toBe('Mon, Tue');
+      expect(valueOf(rows, 'Days of the week')).toBe('M, T');
       expect(valueOf(rows, 'Rate plans')).toBe('Suite (BB); Double (RO)');
-      expect(valueOf(rows, 'Rate changes')).toBe('− US$20');
+      expect(valueOf(rows, 'Rate changes')).toBe('− US$ 20.00');
       expect(valueOf(rows, 'Copy minimum stay restrictions')).toBe('Yes');
     });
 

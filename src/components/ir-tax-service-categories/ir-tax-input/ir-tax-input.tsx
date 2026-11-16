@@ -1,11 +1,14 @@
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import WaSelect from '@awesome.me/webawesome/dist/components/select/select';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { z } from 'zod';
 import { ChargeRule } from '../types';
-import { getEntryValue } from '@/utils/utils';
+import { getEntryValue } from '@/services/setup';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
 
-const taxSetupSchema = z.string().min(1, 'Select a setup entry');
+// Lazy message: built at module load, before any locale is fetched.
+const taxSetupSchema = z.string({ errorMap: () => ({ message: t('Lcz_SelectASetupEntry', { fallback: 'Select a setup entry' }) }) }).min(1);
 
 @Component({
   tag: 'ir-tax-input',
@@ -19,7 +22,7 @@ export class IrTaxInput {
    * Each entry represents a tax application option
    * (e.g. Not Applicable, Inclusive, Exclusive).
    */
-  @Prop() setupEntries: IEntries[] = [];
+  @Prop() setupEntries: SetupEntries[] = [];
 
   /**
    * Label displayed above the percentage input.
@@ -143,11 +146,11 @@ export class IrTaxInput {
               this.updateTaxField({ mode });
               this.taxChange.emit({ value: this.tax?.value ?? this.chargeRule?.value ?? null, mode });
             }}
-            placeholder="Select..."
+            placeholder={t('Lcz_SelectPlaceholder', { fallback: 'Select...' })}
           >
             {this.setupEntries.map(entry => (
               <wa-option key={entry.CODE_NAME} value={entry.CODE_NAME}>
-                {getEntryValue({ entry, language: this.language })}
+                {getEntryValue({ entry, language: LocaleController.language })}
               </wa-option>
             ))}
           </wa-select>

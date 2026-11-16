@@ -7,9 +7,10 @@
 
 ## Properties
 
-| Property | Attribute | Description | Type     | Default |
-| -------- | --------- | ----------- | -------- | ------- |
-| `ticket` | `ticket`  |             | `string` | `''`    |
+| Property   | Attribute  | Description | Type     | Default |
+| ---------- | ---------- | ----------- | -------- | ------- |
+| `language` | `language` |             | `string` | `'en'`  |
+| `ticket`   | `ticket`   |             | `string` | `''`    |
 
 
 ## Dependencies

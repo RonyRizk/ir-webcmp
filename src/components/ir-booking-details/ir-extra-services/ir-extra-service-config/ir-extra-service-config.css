@@ -19,9 +19,14 @@
   padding: 0 0 0 0.25rem;
   border-top: 1px solid var(--ir-input-border-color);
   border-bottom: 1px solid var(--ir-input-border-color);
-  border-left: 1px solid transparent;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  border-inline-start: 1px solid transparent;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out,
+    -webkit-box-shadow 0.15s ease-in-out;
 }
 
 .service-description-input {
@@ -31,8 +36,8 @@
 .service-description .input-group-prepend {
   background-color: #f4f5fa;
   border: 1px solid var(--ir-input-border-color);
-  border-top-left-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem;
+  border-start-start-radius: 0.25rem;
+  border-end-start-radius: 0.25rem;
 }
 .service-date-container {
   padding: 0;
@@ -45,7 +50,7 @@
 }
 .service-date-container .btn-container {
   position: absolute;
-  right: 5px;
+  inset-inline-end: 5px;
   margin: 0;
   display: flex;
   align-items: center;
@@ -62,13 +67,13 @@
 .cost-input-group:focus-within .currency-ph {
   border-top: 1px solid #1e9ff2;
   border-bottom: 1px solid #1e9ff2;
-  border-left: 1px solid #1e9ff2;
+  border-inline-start: 1px solid #1e9ff2;
 }
 .currency-ph[data-state='error'] {
   border-color: var(--red, #ff4961);
 }
 .price-input:focus {
-  border-right-width: 1px !important;
+  border-inline-end-width: 1px !important;
 }
 
 .is-invalid {
@@ -76,7 +81,7 @@
 }
 .price-input,
 .cost-input {
-  border-left: 0;
+  border-inline-start: 0;
 }
 
 .row-group {
@@ -97,20 +102,20 @@
     gap: 0;
   }
   .cost-label {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-left: 0;
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-inline-start: 0;
   }
   .until-prepend,
   .cost-input-placeholder {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+    border-start-start-radius: 0 !important;
+    border-end-start-radius: 0 !important;
   }
   .date-from,
   .price-input {
-    border-right-width: 0 !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+    border-inline-end-width: 0 !important;
+    border-start-end-radius: 0 !important;
+    border-end-end-radius: 0 !important;
   }
 }
 

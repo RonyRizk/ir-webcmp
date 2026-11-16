@@ -2,7 +2,6 @@ import { Component, Host, h, Prop, State, Listen, Watch, Event, EventEmitter } f
 import { TPropertyButtonsTypes } from '@/components';
 import { ICurrency } from '@/models/calendarData';
 import booking_store, { IRatePlanSelection, modifyBookingStore, RatePlanGuest, updateBookedByGuest, updateRoomGuest } from '@/stores/booking.store';
-import locales from '@/stores/locales.store';
 import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import VariationService from '@/services/variation.service';
@@ -11,6 +10,9 @@ import { z } from 'zod';
 import { v4 } from 'uuid';
 import { BookingService } from '../../../../../services/booking-service/booking.service';
 
+import { t } from '@/services/locale/t';
+
+import { getSetupEntryLabel } from '@/services/setup';
 @Component({
   tag: 'igl-application-info',
   styleUrl: 'igl-application-info.css',
@@ -128,10 +130,10 @@ export class IglApplicationInfo {
 
     let tooltip = '';
     if (cancellationPolicy) {
-      tooltip += `<b><u>Cancellation:</u></b> ${cancellationPolicy}<br/>`;
+      tooltip += `<b><u>${t('Lcz_CancellationLabel', { fallback: 'Cancellation:' })}</u></b> ${cancellationPolicy}<br/>`;
     }
     if (guaranteePolicy) {
-      tooltip += `<b><u>Guarantee:</u></b> ${guaranteePolicy}`;
+      tooltip += `<b><u>${t('Lcz_GuaranteeLabel', { fallback: 'Guarantee:' })}</u></b> ${guaranteePolicy}`;
     }
     return tooltip || undefined;
   }
@@ -209,7 +211,9 @@ export class IglApplicationInfo {
             <div class="fd-application-info__rateplan">
               <p class="fd-application-info__rateplan-name">
                 {this.rateplanSelection.ratePlan.short_name}
-                {this.rateplanSelection.ratePlan.is_non_refundable && <span class="fd-application-info__non-refundable">Non Refundable</span>}
+                {this.rateplanSelection.ratePlan.is_non_refundable && (
+                  <span class="fd-application-info__non-refundable">{t('Lcz_NonRefundable', { fallback: 'Non Refundable' })}</span>
+                )}
               </p>
               <wa-tooltip for={this.tooltipId}>
                 <span innerHTML={this.getTooltipMessages()}></span>
@@ -223,9 +227,9 @@ export class IglApplicationInfo {
 
           <p class="fd-application-info__price">
             <span class="ir-price">
-              {formatAmount(this.currency?.symbol, this.amount)}/{locales.entries.Lcz_Stay}
+              {formatAmount(this.currency?.symbol, this.amount)}/{t('Lcz_Stay', { fallback: 'Stay' })}
             </span>
-            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>Including taxes and fees</p>
+            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>{t('Lcz_IncludingTaxesAndFees', { fallback: 'Including taxes and fees' })}</p>
           </p>
         </div>
 
@@ -249,7 +253,7 @@ export class IglApplicationInfo {
               value={this.guestInfo?.first_name}
               defaultValue={this.guestInfo?.first_name}
               data-testid="guest_first_name"
-              placeholder={locales.entries['Lcz_GuestFirstname'] ?? 'Guest first name'}
+              placeholder={t('Lcz_GuestFirstName', { fallback: 'Guest first name' })}
               onText-change={event => {
                 const name = event.detail.trim();
                 this.updateGuest({ first_name: name });
@@ -270,7 +274,7 @@ export class IglApplicationInfo {
               value={this.guestInfo?.last_name}
               defaultValue={this.guestInfo?.last_name}
               data-testid="guest_last_name"
-              placeholder={locales.entries['Lcz_GuestLastname'] ?? 'Guest last name'}
+              placeholder={t('Lcz_GuestLastName', { fallback: 'Guest last name' })}
               onText-change={event => {
                 const name = event.detail.trim();
                 this.updateGuest({ last_name: name });
@@ -291,7 +295,7 @@ export class IglApplicationInfo {
                 with-clear
                 size="s"
                 class="fd-application-info__select"
-                placeholder={locales.entries.Lcz_Assignunits}
+                placeholder={t('Lcz_AssignUnit', { fallback: 'Assign unit' })}
                 data-testid="unit"
                 value={this.guestInfo?.unit}
                 defaultValue={this.guestInfo?.unit}
@@ -315,7 +319,7 @@ export class IglApplicationInfo {
                 with-clear
                 size="s"
                 class="fd-application-info__select"
-                placeholder={locales.entries.Lcz_BedConfiguration}
+                placeholder={t('Lcz_BedConfiguration', { fallback: 'Bed configuration...' })}
                 data-testid="bed_configuration"
                 value={this.guestInfo?.bed_preference}
                 defaultValue={this.guestInfo?.bed_preference}
@@ -328,7 +332,7 @@ export class IglApplicationInfo {
               >
                 {this.bedPreferenceType.map(data => (
                   <wa-option value={data.CODE_NAME} selected={this.guestInfo?.bed_preference === data.CODE_NAME}>
-                    {data.CODE_VALUE_EN}
+                    {getSetupEntryLabel(data)}
                   </wa-option>
                 ))}
               </wa-select>
@@ -337,19 +341,19 @@ export class IglApplicationInfo {
 
           <p class="fd-application-info__price-inline">
             <span class="ir-price">
-              {formatAmount(this.currency?.symbol, this.amount)}/{locales.entries.Lcz_Stay}
+              {formatAmount(this.currency?.symbol, this.amount)}/{t('Lcz_Stay', { fallback: 'Stay' })}
             </span>
-            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>Including taxes and fees</p>
+            <p style={{ margin: '0', padding: '0', fontSize: '0.75rem' }}>{t('Lcz_IncludingTaxesAndFees', { fallback: 'Including taxes and fees' })}</p>
           </p>
         </div>
 
         {this.rateplanSelection.selected_variation?.child_nbr > 0 && (
           <div class="fd-application-info__infant">
-            <p class="fd-application-info__infant-label">Any of the children below 3 years?</p>
+            <p class="fd-application-info__infant-label">{t('Lcz_AnyChildrenBelow3Years', { fallback: 'Any of the children below 3 years?' })}</p>
             <wa-select
               size="s"
               class="fd-application-info__select fd-application-info__select--inline"
-              placeholder={locales.entries['No'] || 'No'}
+              placeholder={t('Lcz_NO', { fallback: 'No' })}
               value={this.guestInfo?.infant_nbr?.toString()}
               defaultValue={this.guestInfo?.infant_nbr?.toString()}
               onchange={event => {

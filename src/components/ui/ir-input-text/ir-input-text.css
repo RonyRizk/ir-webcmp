@@ -108,11 +108,13 @@
   font-size: var(--ir-floating-input-font-size);
   height: var(--ir-floating-input-height);
   background: var(--ir-bg);
-  padding-right: 0 !important;
-  border-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  padding-inline-end: 0 !important;
+  border-inline-end: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  transition:
+    border-color 0.15s ease-in-out,
+    -webkit-box-shadow 0.15s ease-in-out;
 }
 
 input:focus {
@@ -139,11 +141,11 @@ input:focus {
 }
 
 .input-container input {
-  padding-left: 5px !important;
-  padding-right: 5px !important;
-  border-left: 0;
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
+  padding-inline-start: 5px !important;
+  padding-inline-end: 5px !important;
+  border-inline-start: 0;
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
 }
 
 .icon-container[data-state='focus'] {
@@ -166,7 +168,9 @@ input:focus {
   border: 1px solid var(--ir-floating-input-border);
   border-radius: var(--ir-floating-input-border-radius);
   background: var(--ir-bg);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
   padding: 0;
 }
 
@@ -218,17 +222,19 @@ input:focus {
   padding: 0 0.4rem;
   color: var(--ir-floating-label-fg);
   background: transparent;
-  transition: transform 120ms ease, color 120ms ease, top 120ms ease, background-color 120ms ease, opacity 120ms ease;
+  transition:
+    transform 120ms ease,
+    color 120ms ease,
+    top 120ms ease,
+    background-color 120ms ease,
+    opacity 120ms ease;
   opacity: 0.95;
   line-height: 1;
 }
 
 /* logical inline offsets */
-.ir-floating-label:dir(rtl) {
-  right: var(--ir-floating-label-resting-offset-inline);
-}
-.ir-floating-label:dir(ltr) {
-  left: var(--ir-floating-label-resting-offset-inline);
+.ir-floating-label {
+  inset-inline-start: var(--ir-floating-label-resting-offset-inline);
 }
 
 /* Float up when focused OR has value */
@@ -272,17 +278,11 @@ input:focus {
   color: var(--ir-floating-input-affix-color);
   pointer-events: none;
 }
-.prefix-container:dir(ltr) {
-  left: 0.5rem;
+.prefix-container {
+  inset-inline-start: 0.5rem;
 }
-.suffix-container:dir(ltr) {
-  right: 0.5rem;
-}
-.prefix-container:dir(rtl) {
-  right: 0.5rem;
-}
-.suffix-container:dir(rtl) {
-  left: 0.5rem;
+.suffix-container {
+  inset-inline-end: 0.5rem;
 }
 
 /* Default sizing for slotted icons/elements */
@@ -298,14 +298,16 @@ input:focus {
   padding: var(--ir-floating-input-padding-y) var(--ir-floating-input-padding-x-with-affix);
 }
 
-.ir-floating-group[data-have-prefix='true'] .ir-floating-label:dir(ltr) {
-  left: var(--ir-floating-label-resting-offset-inline-with-prefix);
-}
-
-.ir-floating-group[data-have-prefix='true'] .ir-floating-label:dir(rtl) {
-  right: var(--ir-floating-label-resting-offset-inline-with-prefix);
+.ir-floating-group[data-have-prefix='true'] .ir-floating-label {
+  inset-inline-start: var(--ir-floating-label-resting-offset-inline-with-prefix);
 }
 
 .no-slot {
   display: none;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-ps-0 {
+  padding-inline-start: 0;
 }

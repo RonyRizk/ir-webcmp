@@ -28,6 +28,7 @@
  - [igloo-calendar](../igloo-calendar)
  - [ir-agents](../ir-agents)
  - [ir-arrivals](../ir-arrivals)
+ - [ir-auth](../ir-auth)
  - [ir-booking-details](../ir-booking-details)
  - [ir-booking-editor](../igloo-calendar/ir-booking-editor)
  - [ir-booking-email-logs](../ir-booking-email-logs)
@@ -59,6 +60,7 @@ graph TD;
   igloo-calendar --> ir-interceptor
   ir-agents --> ir-interceptor
   ir-arrivals --> ir-interceptor
+  ir-auth --> ir-interceptor
   ir-booking-details --> ir-interceptor
   ir-booking-editor --> ir-interceptor
   ir-booking-email-logs --> ir-interceptor

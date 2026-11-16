@@ -1,8 +1,8 @@
 import { IToast } from '@/components';
-import locales from '@/stores/locales.store';
 import { Component, Prop, State, h, Element, Event, EventEmitter, Listen, Watch, Fragment } from '@stencil/core';
 import { v4 } from 'uuid';
 
+import { t } from '@/services/locale/t';
 export type ComboboxItem = { id: string; name: string; image?: string; occupancy?: number };
 @Component({
   tag: 'ir-combobox',
@@ -315,7 +315,7 @@ export class IrCombobox {
           </li>
         ))}
 
-        {this.filteredData.length === 0 && !this.isLoading && <span class={'text-center'}>{locales.entries.Lcz_NoResultsFound}</span>}
+        {this.filteredData.length === 0 && !this.isLoading && <span class={'text-center'}>{t('Lcz_NoResultsFound', { fallback: 'No results found' })}</span>}
       </ul>
     );
   }

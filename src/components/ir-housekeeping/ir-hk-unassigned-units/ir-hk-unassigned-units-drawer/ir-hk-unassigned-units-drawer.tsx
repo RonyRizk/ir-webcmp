@@ -1,6 +1,7 @@
 import { IHouseKeepers } from '@/models/housekeeping';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-hk-unassigned-units-drawer',
@@ -17,7 +18,11 @@ export class IrHkUnassignedUnitsDrawer {
   render() {
     return (
       <ir-drawer
-        label={!this.user ? 'Assingn Units' : `Assignment for ${this.user.name}`}
+        label={
+          !this.user
+            ? t('Lcz_AssingnUnitsTypo', { fallback: 'Assingn Units' })
+            : `${t('Lcz_AssignmentForUser', { fallback: 'Assignment for' })} ${this.user.name}`
+        }
         onDrawerHide={e => {
           e.stopImmediatePropagation();
           e.stopPropagation();
@@ -29,10 +34,10 @@ export class IrHkUnassignedUnitsDrawer {
         {this.open && <ir-hk-unassigned-units-drawer-form formId={this.formId} user={this.user}></ir-hk-unassigned-units-drawer-form>}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button data-drawer="close" variant="neutral" size="m" appearance="filled">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button loading={isRequestPending('/Manage_Exposed_Assigned_Unit_To_HKM')} variant="brand" type="submit" form={this.formId} appearance="accent" size="m">
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

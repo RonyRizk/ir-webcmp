@@ -3,9 +3,9 @@ import { UnassignedUnitsService } from '@/services/unassigned-units';
 import { UnassignedCategory, UnassignedRoomTypeGroup } from '@/services/unassigned-units/types';
 import { groupIntoCategories } from '@/services/unassigned-units/utils';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
 import { getUnassignedUnitsDateKeys, getUnassignedUnitsForDate, removeUnassignedRoom, replaceUnassignedUnitsRange } from '@/stores/unassigned-units.store';
-import { formatDate } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 
 interface CategoriesCache {
   source: UnassignedRoomTypeGroup[];
@@ -156,10 +156,10 @@ export class IglToBeAssigned {
       );
     }
     if (!hasDates) {
-      return this.renderEmptyState(locales.entries.Lcz_AllBookingsAreAssigned);
+      return this.renderEmptyState(t('Lcz_AllBookingsAreAssigned'));
     }
     if (categories.length === 0) {
-      return this.renderEmptyState(locales.entries.Lcz_AllAssignForThisDay, formatDate(this.selectedDate, 'YYYY-MM-DD'));
+      return this.renderEmptyState(t('Lcz_AllAssignForThisDay'), formatDate(this.selectedDate, 'ddd, DD MMM YYYY'));
     }
     return categories.map((category, index) => (
       <igl-tba-category-view
@@ -186,25 +186,19 @@ export class IglToBeAssigned {
           <div class="tba-panel__head">
             <header class="tba-panel__header">
               <h2 class="tba-panel__title" id="to-be-assigned-title">
-                {locales.entries.Lcz_Assignments}
+                {t('Lcz_Assignments')}
               </h2>
               <ir-custom-button size="m" appearance="plain" variant="neutral" onClickHandler={this.handleClose}>
-                <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
+                <wa-icon name="xmark" variant="solid" label={t('Lcz_Close', { fallback: 'Close' })} aria-label={t('Lcz_Close', { fallback: 'Close' })} role="img"></wa-icon>
               </ir-custom-button>
             </header>
 
             {options.length > 0 && (
               <div class="tba-panel__toolbar">
-                <wa-select
-                  size="s"
-                  aria-label={locales.entries.Lcz_Assignments}
-                  value={this.selectedDate ?? ''}
-                  defaultValue={this.selectedDate ?? ''}
-                  onchange={this.handleDateChange}
-                >
+                <wa-select size="s" aria-label={t('Lcz_Assignments')} value={this.selectedDate ?? ''} defaultValue={this.selectedDate ?? ''} onchange={this.handleDateChange}>
                   {options.map(date => (
                     <wa-option key={date} value={date}>
-                      {formatDate(date, 'YYYY-MM-DD')}
+                      {formatDate(date, 'ddd, DD MMM YYYY')}
                     </wa-option>
                   ))}
                 </wa-select>

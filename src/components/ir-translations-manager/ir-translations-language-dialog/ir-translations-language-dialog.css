@@ -81,7 +81,7 @@
   min-width: 2.5rem;
   font-size: var(--wa-font-size-xs, 0.75rem);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
   color: var(--wa-color-text-quiet);
 }
 

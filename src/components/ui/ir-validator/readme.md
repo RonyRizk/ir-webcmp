@@ -41,10 +41,11 @@
  - [igl-book-property-header](../../igloo-calendar/igl-book-property/igl-book-property-header)
  - [igl-property-booked-by](../../igloo-calendar/igl-book-property/igl-booking-form/igl-property-booked-by)
  - [igl-rate-extender-form](../../igloo-calendar/igl-rate-extender-drawer/igl-rate-extender-form)
- - [igl-spilt-booking-form](../../igloo-calendar/igl-split-booking-drawer/igl-spilt-booking-form)
+ - [igl-split-booking-form](../../igloo-calendar/igl-split-booking-drawer/igl-split-booking-form)
  - [ir-agent-contract](../../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
  - [ir-agent-profile](../../ir-agents/ir-agent-editor-drawer/ir-agent-profile)
  - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
+ - [ir-auth](../../ir-auth)
  - [ir-booking-editor-day-use](../../igloo-calendar/ir-booking-editor/ir-booking-editor-day-use)
  - [ir-booking-editor-guest-form](../../igloo-calendar/ir-booking-editor/ir-booking-editor-guest-form)
  - [ir-booking-editor-header](../../igloo-calendar/ir-booking-editor/ir-booking-editor-header)
@@ -80,10 +81,11 @@ graph TD;
   igl-book-property-header --> ir-validator
   igl-property-booked-by --> ir-validator
   igl-rate-extender-form --> ir-validator
-  igl-spilt-booking-form --> ir-validator
+  igl-split-booking-form --> ir-validator
   ir-agent-contract --> ir-validator
   ir-agent-profile --> ir-validator
   ir-arrival-time-dialog --> ir-validator
+  ir-auth --> ir-validator
   ir-booking-editor-day-use --> ir-validator
   ir-booking-editor-guest-form --> ir-validator
   ir-booking-editor-header --> ir-validator

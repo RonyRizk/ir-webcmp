@@ -3,6 +3,8 @@ import { Component, Host, h, Prop, Event, EventEmitter } from '@stencil/core';
 import { AgentBaseSchema, type Agent } from '@/services/agents/type';
 import { ICountry } from '@/models/IBooking';
 import { AgentSetupEntries, AgentsTypes } from '../../types';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 
 @Component({
   tag: 'ir-agent-profile',
@@ -40,14 +42,14 @@ export class IrAgentProfile {
         {/* Business information */}
         <wa-card appearance="plain" class="agent-card --business-info" data-testid="agent-profile-business-card">
           <p slot="header" data-testid="agent-profile-business-title">
-            Business Information
+            {t('Lcz_BusinessInformation', { fallback: 'Business Information' })}
           </p>
 
           <div class="agent-form-group">
             <ir-validator schema={AgentBaseSchema?.shape?.agent_type_code} value={agent?.agent_type_code} valueEvent="change" data-testid="agent-profile-agent-type-validator">
               <wa-select
                 size="s"
-                placeholder="Select agent type ..."
+                placeholder={t('Lcz_SelectAgentTypePlaceholder', { fallback: 'Select agent type ...' })}
                 value={agent?.agent_type_code?.code}
                 defaultValue={agent?.agent_type_code?.code}
                 data-testid="agent-profile-agent-type-select"
@@ -74,10 +76,10 @@ export class IrAgentProfile {
               >
                 {this.setupEntries.agent_type
                   ?.filter(t => t.CODE_NAME !== '004')
-                  ?.sort((a, b) => a.CODE_VALUE_EN.toLowerCase().localeCompare(b.CODE_VALUE_EN.toLowerCase()))
+                  ?.sort((a, b) => getSetupEntryLabel(a).toLowerCase().localeCompare(getSetupEntryLabel(b).toLowerCase()))
                   ?.map(agent => (
                     <wa-option key={agent.CODE_NAME} value={agent.CODE_NAME} data-testid={`agent-profile-agent-type-option-${agent.CODE_NAME}`}>
-                      {agent.CODE_VALUE_EN}
+                      {getSetupEntryLabel(agent)}
                     </wa-option>
                   ))}
               </wa-select>
@@ -86,7 +88,7 @@ export class IrAgentProfile {
             <ir-validator schema={AgentBaseSchema.shape.name} value={agent?.name} valueEvent="text-change input input-change" data-testid="agent-profile-business-name-validator">
               <ir-input
                 autocomplete="none"
-                placeholder="Business name"
+                placeholder={t('Lcz_BusinessNamePlaceholder', { fallback: 'Business name' })}
                 value={agent?.name}
                 data-testid="agent-profile-business-name-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ name: e.detail })}
@@ -100,7 +102,7 @@ export class IrAgentProfile {
               data-testid="agent-profile-tax-number-validator"
             >
               <ir-input
-                placeholder="Tax number"
+                placeholder={t('Lcz_TaxNumberPlaceholder', { fallback: 'Tax number' })}
                 value={agent?.tax_nbr}
                 data-testid="agent-profile-tax-number-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ tax_nbr: e.detail })}
@@ -117,7 +119,7 @@ export class IrAgentProfile {
                   mask: /^[A-Za-z0-9 ]*$/,
                 }}
                 maxlength={20}
-                placeholder="Codename"
+                placeholder={t('Lcz_CodenamePlaceholder', { fallback: 'Codename' })}
                 value={agent?.reference}
                 data-testid="agent-profile-reference-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ reference: e.detail || null })}
@@ -129,7 +131,7 @@ export class IrAgentProfile {
         {/* Billing address */}
         <wa-card appearance="plain" class="agent-card" data-testid="agent-profile-billing-card">
           <p slot="header" data-testid="agent-profile-billing-title">
-            Billing Address
+            {t('Lcz_BillingAddress', { fallback: 'Billing Address' })}
           </p>
 
           <div class="agent-form-group">
@@ -140,7 +142,7 @@ export class IrAgentProfile {
               data-testid="agent-profile-country-validator"
             >
               <ir-country-picker
-                placeholder="Country"
+                placeholder={t('Lcz_Country', { fallback: 'Country' })}
                 country={this.countries.find(c => agent?.country_id?.toString() === c.id?.toString())}
                 countries={this.countries}
                 variant="modern"
@@ -151,7 +153,7 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.city} value={agent?.city} valueEvent="text-change input input-change" data-testid="agent-profile-city-validator">
               <ir-input
-                placeholder="City"
+                placeholder={t('Lcz_CityPlaceholder', { fallback: 'City' })}
                 value={agent?.city}
                 data-testid="agent-profile-city-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ city: e.detail })}
@@ -160,7 +162,7 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.address} value={agent?.address} valueEvent="text-change input input-change" data-testid="agent-profile-address-validator">
               <ir-input
-                placeholder="Address"
+                placeholder={t('Lcz_Address', { fallback: 'Address' })}
                 value={agent?.address}
                 data-testid="agent-profile-address-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ address: e.detail })}
@@ -172,13 +174,13 @@ export class IrAgentProfile {
         {/* Contact information */}
         <wa-card appearance="plain" class="agent-card" data-testid="agent-profile-contact-card">
           <p slot="header" data-testid="agent-profile-contact-title">
-            Contact Information
+            {t('Lcz_ContactInformation', { fallback: 'Contact Information' })}
           </p>
 
           <div class="agent-form-group">
             <ir-validator schema={AgentBaseSchema.shape.contact_name} value={agent?.contact_name} data-testid="agent-profile-contact-name-validator">
               <ir-input
-                placeholder="Name"
+                placeholder={t('Lcz_Name', { fallback: 'Name' })}
                 value={agent?.contact_name}
                 data-testid="agent-profile-contact-name-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ contact_name: e.detail })}
@@ -187,7 +189,7 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.phone} value={agent?.phone} data-testid="agent-profile-phone-validator">
               <ir-input
-                placeholder="Phone"
+                placeholder={t('Lcz_Phone', { fallback: 'Phone' })}
                 value={agent?.phone}
                 data-testid="agent-profile-phone-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ phone: e.detail })}
@@ -202,7 +204,7 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.email} value={agent?.email} data-testid="agent-profile-email-validator">
               <ir-input
-                placeholder="Email"
+                placeholder={t('Lcz_Email', { fallback: 'Email' })}
                 value={agent?.email}
                 data-testid="agent-profile-email-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ email: e.detail ?? null })}
@@ -211,8 +213,8 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.email_copied_upon_booking} value={agent?.email_copied_upon_booking} data-testid="agent-profile-email-bcc-validator">
               <ir-input
-                placeholder="Email BCCed on booking notifications"
-                // hint="Additional email address to receive booking notifications"
+                placeholder={t('Lcz_EmailBccOnBookingNotifications', { fallback: 'Email BCCed on booking notifications' })}
+                // hint={t('Lcz_AdditionalEmailHint', { fallback: 'Additional email address to receive booking notifications' })}
                 value={agent?.email_copied_upon_booking}
                 data-testid="agent-profile-email-bcc-input"
                 onText-change={(e: CustomEvent<string>) => this.updateField({ email_copied_upon_booking: e.detail || null })}
@@ -221,7 +223,7 @@ export class IrAgentProfile {
 
             <ir-validator schema={AgentBaseSchema.shape.notes} value={agent?.notes} valueEvent="input change" data-testid="agent-profile-notes-validator">
               <wa-textarea
-                placeholder="Note"
+                placeholder={t('Lcz_Note', { fallback: 'Note' })}
                 size="s"
                 value={agent?.notes}
                 defaultValue={agent?.notes}

@@ -17,7 +17,6 @@
 ### Used by
 
  - [ac-pages-menu](../../ac-pages-menu)
- - [igl-booking-event-hover](../../igloo-calendar/igl-booking-event-hover)
  - [ir-accordion](../ir-accordion)
  - [ir-applicable-policies](../../ir-booking-details/ir-payment-details/ir-applicable-policies)
  - [ir-button](../ir-button)
@@ -32,7 +31,6 @@
 ```mermaid
 graph TD;
   ac-pages-menu --> ir-icons
-  igl-booking-event-hover --> ir-icons
   ir-accordion --> ir-icons
   ir-applicable-policies --> ir-icons
   ir-button --> ir-icons

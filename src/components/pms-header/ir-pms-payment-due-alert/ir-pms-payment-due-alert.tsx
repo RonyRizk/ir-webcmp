@@ -1,6 +1,6 @@
 import { PropertyService } from '@/services/property.service';
 import type { FetchNotificationsResult as Notifications } from '@/services/property/types';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
@@ -15,15 +15,15 @@ export class IrPmsPaymentDueAlert {
 
   @State() notifications: Notifications = [];
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private propertyService = new PropertyService();
 
   componentWillLoad() {
     if (this.baseUrl) {
-      this.tokenService.setBaseUrl(this.baseUrl);
+      this.apiClientService.setBaseUrl(this.baseUrl);
     }
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.fetchNotifications();
     }
   }
@@ -33,7 +33,7 @@ export class IrPmsPaymentDueAlert {
     if (newValue === oldValue || !newValue) {
       return;
     }
-    this.tokenService.setToken(newValue);
+    this.apiClientService.setApiClient(newValue);
     this.fetchNotifications();
   }
 

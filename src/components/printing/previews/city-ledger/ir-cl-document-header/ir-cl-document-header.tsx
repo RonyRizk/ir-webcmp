@@ -1,6 +1,8 @@
 import { Component, Host, Prop, h } from '@stencil/core';
 import type { IProperty } from '@/models/property';
 import moment from 'moment';
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
 
 const DATE_DISPLAY = 'MMM DD, YYYY';
 
@@ -27,15 +29,15 @@ export class IrClDocumentHeader {
   private get documentTitle(): string {
     switch (this.documentType) {
       case 'invoice':
-        return 'invoice';
+        return t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' });
       case 'receipt':
-        return 'receipt';
+        return t('Lcz_DocumentTypeReceipt', { fallback: 'Receipt' });
       case 'creditnote':
-        return 'credit note';
+        return t('Lcz_DocumentTypeCreditNote', { fallback: 'Credit Note' });
       case 'debitnote':
-        return 'debit note';
+        return t('Lcz_DocumentTypeDebitNote', { fallback: 'Debit Note' });
       case 'statement':
-        return 'account statement';
+        return t('Lcz_DocumentTypeStatement', { fallback: 'account statement' });
       default:
         return '';
     }
@@ -55,18 +57,18 @@ export class IrClDocumentHeader {
               <div class="invoice__details">
                 {this.documentNumber && (
                   <div class="invoice__meta-row">
-                    <span class="invoice__meta-label">Document #</span>
+                    <span class="invoice__meta-label">{t('Lcz_DocumentNumberLabel', { fallback: 'Document #' })}</span>
                     <span class="invoice__meta-value">{this.documentNumber}</span>
                   </div>
                 )}
                 <div class="invoice__meta-row">
-                  <span class="invoice__meta-label">Date</span>
-                  <span class="invoice__meta-value">{moment().format(DATE_DISPLAY)}</span>
+                  <span class="invoice__meta-label">{t('Lcz_DateLabel', { fallback: 'Date' })}</span>
+                  <span class="invoice__meta-value">{formatDate(moment(), DATE_DISPLAY)}</span>
                 </div>
               </div>
               {this.agentName && (
-                <section class="bill-to-section" aria-label="Bill to">
-                  <h4 class="section-heading">Bill To</h4>
+                <section class="bill-to-section" aria-label={t('Lcz_BillTo', { fallback: 'Bill to' })}>
+                  <h4 class="section-heading">{t('Lcz_BillTo', { fallback: 'Bill To' })}</h4>
                   <div class="bill-to">
                     <p class="bill-to__name">{this.agentName}</p>
                   </div>
@@ -74,7 +76,7 @@ export class IrClDocumentHeader {
               )}
             </div>
             <div class="invoice__column invoice__column--property">
-              <div class="property-overview" aria-label="Property overview">
+              <div class="property-overview" aria-label={t('Lcz_PropertyOverviewAria', { fallback: 'Property overview' })}>
                 {logo && <img src={logo} alt={p?.name} class="property-logo" />}
                 <div class="property-overview__text">
                   <p class="property-overview__name">{p?.name}</p>
@@ -82,7 +84,11 @@ export class IrClDocumentHeader {
                   {p?.address && <p class="property-overview__location">{p.address}</p>}
                   {p?.phone && <p class="property-overview__location">{p.phone}</p>}
                   {this.primaryContact?.email && <p class="property-overview__location">{this.primaryContact.email}</p>}
-                  {p?.tax_nbr && <p class="property-overview__location">Tax Reg: {p.tax_nbr}</p>}
+                  {p?.tax_nbr && (
+                    <p class="property-overview__location">
+                      {t('Lcz_TaxRegPrefix', { fallback: 'Tax Reg:' })} {p.tax_nbr}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

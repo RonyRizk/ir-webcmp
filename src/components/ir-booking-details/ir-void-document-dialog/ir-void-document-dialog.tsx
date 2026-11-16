@@ -3,6 +3,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import calendar_data from '@/stores/calendar-data';
 import { FdTypes } from '@/types/enums';
 import type { IToast } from '@/components/ui/ir-toast/toast';
+import { t } from '@/services/locale/t';
 
 export type VoidableDocumentType = typeof FdTypes.Invoice | typeof FdTypes.Receipt;
 
@@ -79,8 +80,8 @@ export class IrVoidDocumentDialog {
       console.error(error);
       this.toast.emit({
         type: 'error',
-        title: 'Error',
-        description: 'Failed to void document. Please try again.',
+        title: t('Lcz_Error', { fallback: 'Error' }),
+        description: t('Lcz_FailedToVoidDocument', { fallback: 'Failed to void document. Please try again.' }),
         position: 'top-right',
       });
     } finally {
@@ -89,12 +90,12 @@ export class IrVoidDocumentDialog {
   }
 
   render() {
-    const documentLabel = this.isInvoice ? 'invoice' : 'receipt';
-    const creditDocumentLabel = this.isInvoice ? 'credit note' : 'credit receipt';
+    const documentLabel = this.isInvoice ? t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' }) : t('Lcz_DocumentTypeReceipt', { fallback: 'Receipt' });
+    const creditDocumentLabel = this.isInvoice ? t('Lcz_DocumentTypeCreditNote', { fallback: 'Credit Note' }) : t('Lcz_CreditReceipt', { fallback: 'Credit Receipt' });
     return (
       <Host>
         <ir-dialog
-          label="Alert"
+          label={t('Lcz_Alert', { fallback: 'Alert' })}
           open={this.isOpen}
           lightDismiss={false}
           onIrDialogHide={e => {
@@ -109,14 +110,14 @@ export class IrVoidDocumentDialog {
           }}
         >
           <p class="void-document-dialog__message">
-            Void {documentLabel} {this.request?.documentNumber} by generating a {creditDocumentLabel}?
+            {t('Lcz_VoidDocumentConfirm', { fallback: 'Void %1 %2 by generating a %3?', params: [documentLabel, this.request?.documentNumber ?? '', creditDocumentLabel] })}
           </p>
           <div slot="footer" class="void-document-dialog__footer">
             <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral" disabled={this.isLoading}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button loading={this.isLoading} onClickHandler={() => this.handleConfirm()} size="m" variant="danger">
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

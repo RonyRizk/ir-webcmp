@@ -2,6 +2,7 @@ import { Component, Host, Prop, h } from '@stencil/core';
 import type { FolioRow } from '../ir-city-ledger-folio/types';
 import type { FiscalDocument } from '@/services/city-ledger';
 import type WaTag from '@awesome.me/webawesome/dist/components/tag/tag';
+import { t } from '@/services/locale';
 
 type ResolvedStatus = { label: string; variant: WaTag['variant']; showLock: boolean };
 
@@ -18,10 +19,16 @@ function isFolioRow(tx: FolioRow | FiscalDocument): tx is FolioRow {
   return 'status' in tx && tx.status != null && typeof (tx as any).status === 'object';
 }
 
+const LOCALIZED_STATUS_MAP = {
+  billed: t('Lcz_Billed', { fallback: 'Billed' }),
+  unbilled: t('Lcz_Unbilled', { fallback: 'Unbilled' }),
+  held: t('Lcz_Held', { fallback: 'Held' }),
+};
+
 function resolveStatus(tx: FolioRow | FiscalDocument): ResolvedStatus {
   if (isFolioRow(tx)) {
     return {
-      label: tx.status.label,
+      label: LOCALIZED_STATUS_MAP[tx.status.id],
       variant: tx.status.variant as WaTag['variant'],
       showLock: tx.status.id === 'billed',
     };

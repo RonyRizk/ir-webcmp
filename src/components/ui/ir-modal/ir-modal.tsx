@@ -1,4 +1,5 @@
 import { Component, h, State, Method, Event, EventEmitter, Prop, Listen } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-modal',
@@ -9,12 +10,12 @@ export class IrModal {
   /**
    * The title text displayed in the modal header.
    */
-  @Prop() modalTitle: string = 'Modal Title';
+  @Prop() modalTitle: string;
 
   /**
    * The main content text shown in the modal body.
    */
-  @Prop() modalBody: string = 'Modal Body';
+  @Prop() modalBody: string;
 
   /**
    * Controls whether the modal title is rendered.
@@ -37,15 +38,15 @@ export class IrModal {
   /**
    * Text displayed on the right (confirm) button.
    */
-  @Prop() rightBtnText: string = 'Confirm';
+  @Prop() rightBtnText: string;
 
   /**
    * Text displayed on the left (cancel/close) button.
    */
-  @Prop() leftBtnText: string = 'Close';
+  @Prop() leftBtnText: string;
 
   /**Text displayed on the middle (tertiary) button. */
-  @Prop() middleBtnText: string = 'More';
+  @Prop() middleBtnText: string;
 
   /**
    * Whether the modal is in a loading state, disabling interaction.
@@ -137,20 +138,36 @@ export class IrModal {
   /** Fired when the middle (tertiary) button is clicked. Emits the current `item` value. */
   @Event({ bubbles: true, composed: true }) middleModal: EventEmitter<any>;
 
+  private get resolvedModalTitle() {
+    return this.modalTitle || t('Lcz_ModalTitle', { fallback: 'Modal Title' });
+  }
+  private get resolvedModalBody() {
+    return this.modalBody || t('Lcz_ModalBody', { fallback: 'Modal Body' });
+  }
+  private get resolvedRightBtnText() {
+    return this.rightBtnText || t('Lcz_Confirm', { fallback: 'Confirm' });
+  }
+  private get resolvedLeftBtnText() {
+    return this.leftBtnText || t('Lcz_Close', { fallback: 'Close' });
+  }
+  private get resolvedMiddleBtnText() {
+    return this.middleBtnText || t('Lcz_More', { fallback: 'More' });
+  }
+
   @Listen('clickHandler')
   btnClickHandler(event: CustomEvent) {
     let target = event.target as HTMLInputElement;
     let name = target.name;
 
-    if (name === this.leftBtnText) {
+    if (name === this.resolvedLeftBtnText) {
       this.cancelModal.emit();
       this.item = {};
       this.closeModal();
-    } else if (name === this.middleBtnText) {
+    } else if (name === this.resolvedMiddleBtnText) {
       this.middleModal.emit(this.item);
       this.item = {};
       if (this.autoClose) this.closeModal();
-    } else if (name === this.rightBtnText) {
+    } else if (name === this.resolvedRightBtnText) {
       this.confirmModal.emit(this.item);
       this.item = {};
       if (this.autoClose) {
@@ -176,7 +193,7 @@ export class IrModal {
             <div class={`ir-alert-header`}>
               {/*
             <p class="font-weight-bold p-0 my-0 mb-1">
-              {this.iconAvailable && <ir-icon class="mr-1" icon={this.icon}></ir-icon>} 
+              {this.iconAvailable && <ir-icon class="ir-me-1" icon={this.icon}></ir-icon>} 
                {this.modalBody} 
               {this.modalTitle}
             </p>
@@ -191,23 +208,25 @@ export class IrModal {
                 }}
               ></ir-icon>
             </div> */}
-              <p>{this.modalTitle}</p>
+              <p>{this.resolvedModalTitle}</p>
             </div>
           )}
-          <div class="modal-body text-left p-0 mb-2">
-            <div>{this.modalBody}</div>
+          <div class="modal-body ir-text-start p-0 mb-2">
+            <div>{this.resolvedModalBody}</div>
           </div>
 
           <div class={`ir-alert-footer border-0  d-flex justify-content-${this.btnPosition === 'center' ? 'center' : this.btnPosition === 'left' ? 'start' : 'end'}`}>
-            {this.leftBtnActive && <ir-button btn_disabled={this.isLoading} btn_color={this.leftBtnColor} btn_block text={this.leftBtnText} name={this.leftBtnText}></ir-button>}
+            {this.leftBtnActive && (
+              <ir-button btn_disabled={this.isLoading} btn_color={this.leftBtnColor} btn_block text={this.resolvedLeftBtnText} name={this.resolvedLeftBtnText}></ir-button>
+            )}
             {this.middleBtnActive && (
               <ir-button
                 btn_disabled={this.isMiddleButtonLoading}
                 btn_color={this.middleBtnColor}
                 btn_block
-                text={this.middleBtnText}
+                text={this.resolvedMiddleBtnText}
                 isLoading={this.isMiddleButtonLoading}
-                name={this.middleBtnText}
+                name={this.resolvedMiddleBtnText}
               ></ir-button>
             )}
             {this.rightBtnActive && (
@@ -216,8 +235,8 @@ export class IrModal {
                 btn_disabled={this.isLoading}
                 isLoading={this.isLoading}
                 btn_block
-                text={this.rightBtnText}
-                name={this.rightBtnText}
+                text={this.resolvedRightBtnText}
+                name={this.resolvedRightBtnText}
               ></ir-button>
             )}
           </div>

@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@s
 import type { ClFiscalDocumentPreviewRequest } from './types';
 import { FdTypes } from '@/types/enums';
 import { CityLedgerService } from '@/services/city-ledger';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-fiscal-document-preview',
@@ -52,7 +53,7 @@ export class IrClFiscalDocumentPreview {
   }
 
   private getDialogLabel(): string {
-    if (!this.request) return 'Preview';
+    if (!this.request) return t('Lcz_Preview', { fallback: 'Preview' });
     const typeLabel = this.getTypeLabel(this.request.fdTypeCode);
     return this.request.documentNumber ? `${typeLabel} #${this.request.documentNumber}` : typeLabel;
   }
@@ -60,19 +61,19 @@ export class IrClFiscalDocumentPreview {
   private getTypeLabel(fdTypeCode: string): string {
     switch (fdTypeCode) {
       case FdTypes.Invoice:
-        return 'Invoice';
+        return t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' });
       case FdTypes.Draft:
-        return 'Draft Invoice';
+        return t('Lcz_DraftInvoice', { fallback: 'Draft Invoice' });
       case FdTypes.CreditNote:
-        return 'Credit Note';
+        return t('Lcz_DocumentTypeCreditNote', { fallback: 'Credit Note' });
       case FdTypes.DebitNote:
-        return 'Debit Note';
+        return t('Lcz_DocumentTypeDebitNote', { fallback: 'Debit Note' });
       case FdTypes.Receipt:
-        return 'Receipt';
+        return t('Lcz_DocumentTypeReceipt', { fallback: 'Receipt' });
       case FdTypes.Proforma:
-        return 'Proforma Invoice';
+        return t('Lcz_ProformaInvoice', { fallback: 'Proforma Invoice' });
       default:
-        return 'Document';
+        return t('Lcz_Document', { fallback: 'Document' });
     }
   }
 
@@ -164,12 +165,12 @@ export class IrClFiscalDocumentPreview {
           <div slot="header-actions" class="header-actions">
             {this.request?.fdTypeCode === FdTypes.Draft && (
               <ir-custom-button onClickHandler={() => (this.showConvertDialog = true)} variant="brand" appearance="accent">
-                Convert to invoice
+                {t('Lcz_ConvertToInvoice', { fallback: 'Convert to Invoice' })}
               </ir-custom-button>
             )}
             {this.request?.url && (
               <ir-custom-button size="m" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
-                <wa-icon name="download" style={{ fontSize: '1.2rem' }} label="Download PDF"></wa-icon>
+                <wa-icon name="download" style={{ fontSize: '1.2rem' }} label={t('Lcz_DownloadPdfTooltip', { fallback: 'Download PDF' })}></wa-icon>
               </ir-custom-button>
             )}
           </div>
@@ -178,7 +179,7 @@ export class IrClFiscalDocumentPreview {
         <ir-fd-confirm-dialog
           open={this.showConvertDialog}
           action="convert-to-invoice"
-          docNumber={this.request?.documentNumber ?? 'this document'}
+          docNumber={this.request?.documentNumber ?? t('Lcz_ThisDocumentFallback', { fallback: 'this document' })}
           isConfirming={this.isConverting}
           onConfirmed={() => this.handleConvertConfirm()}
           onCancelled={() => (this.showConvertDialog = false)}

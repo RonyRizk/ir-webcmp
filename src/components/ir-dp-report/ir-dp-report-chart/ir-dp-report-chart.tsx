@@ -4,6 +4,8 @@ import moment from 'moment';
 import dp_report, { onDpReportChange } from '@/stores/dp_report.store';
 import { DpReportRow } from '../types';
 import { formatAmount } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 Chart.register(...registerables);
 
@@ -62,7 +64,7 @@ export class IrDpReportChart {
 
   private formatDateLabel(date: string): string {
     const m = moment(date, 'YYYY-MM-DD', true);
-    return m.isValid() ? m.format('MMM DD') : date;
+    return m.isValid() ? formatDate(m, 'MMM DD') : date;
   }
 
   /** Negative values (price reductions) are never plotted — the chart only shows gains. */
@@ -105,7 +107,7 @@ export class IrDpReportChart {
     const successColor = this.getCssVar('--wa-color-success-fill-loud');
 
     return {
-      label: 'Gain / Reduction',
+      label: t('Lcz_GainReduction', { fallback: 'Gain / Reduction' }),
       data: rows.map(r => this.clampProfit(r.profit)),
       backgroundColor: successColor,
       hoverBackgroundColor: successColor,
@@ -173,14 +175,14 @@ export class IrDpReportChart {
     }
 
     const date = document.createElement('span');
-    date.textContent = moment(row.date).format('MMM DD, YYYY');
+    date.textContent = formatDate(row.date, 'MMM DD, YYYY');
     header.appendChild(date);
 
     const profit = this.clampProfit(row.profit);
 
     const effectRow = document.createElement('div');
     effectRow.className = 'dp-chart-tooltip__row';
-    effectRow.append(`Dynamic pricing effect: `);
+    effectRow.append(`${t('Lcz_DynamicPricingEffect', { fallback: 'Dynamic Pricing Effect' })}: `);
     const effectValue = document.createElement('span');
     effectValue.className = 'dp-chart-tooltip__value dp-chart-tooltip__value--gain';
     effectValue.textContent = `+${formatAmount(row.currencySymbol, profit)}`;
@@ -188,7 +190,7 @@ export class IrDpReportChart {
 
     const valueRow = document.createElement('div');
     valueRow.className = 'dp-chart-tooltip__row';
-    valueRow.textContent = `Total stay value: ${formatAmount(row.currencySymbol, row.accommodationGross)}`;
+    valueRow.textContent = `${t('Lcz_TotalStayValue', { fallback: 'Total stay value:' })} ${formatAmount(row.currencySymbol, row.accommodationGross)}`;
 
     container.append(header, effectRow, valueRow);
   }
@@ -311,7 +313,7 @@ export class IrDpReportChart {
       return (
         <Host>
           <div class="dp-chart-container dp-chart-container--empty">
-            <ir-empty-state message="No dynamic pricing data for this date range."></ir-empty-state>
+            <ir-empty-state message={t('Lcz_NoDynamicPricingData', { fallback: 'No dynamic pricing data for this date range.' })}></ir-empty-state>
           </div>
         </Host>
       );

@@ -1,13 +1,13 @@
 import { Component, h, Prop, Event, EventEmitter } from '@stencil/core';
 import { isAgentMode } from '../../functions';
-import { IUnit, Room } from '@/models/booking.dto';
+import { IUnit, Room, ROOM_IN_OUT } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
-import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import { HbPreference } from '@/types/enums';
 
-export type IrRoomHeaderAction = 'edit' | 'edit-rates' | 'delete' | 'toggle' | 'add-extra-service';
+import { t } from '@/services/locale/t';
+export type IrRoomHeaderAction = 'edit' | 'edit-rates' | 'delete' | 'toggle' | 'add-extra-service' | 'print-registration-card';
 
 @Component({
   tag: 'ir-room-header',
@@ -35,12 +35,19 @@ export class IrRoomHeader {
     return (this.room.unit as IUnit)?.id ?? null;
   }
 
+  /** Registration card exists once the guest checked in — and stays printable after check-out. */
+  private get canPrintRegistrationCard() {
+    const code = this.room?.in_out?.code;
+    return code === ROOM_IN_OUT.CHECKIN || code === ROOM_IN_OUT.CHECKOUT;
+  }
+
   render() {
+    const canEdit = this.isEditable && (this.hasRoomEdit || this.hasRoomDelete || !!this.unitId);
     return (
       <div class="booking-room__summary-row">
         <p class="booking-room__summary-text">
           <span class="booking-room__summary-highlight">{this.myRoomTypeFoodCat || ''} </span> {this.mealCodeName}{' '}
-          {this.room.rateplan.is_non_refundable && ` - ${locales.entries.Lcz_NonRefundable}`}{' '}
+          {this.room.rateplan.is_non_refundable && ` - ${t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}`}{' '}
           {this.isHalfBoard && (
             <wa-button
               size="xs"
@@ -49,7 +56,11 @@ export class IrRoomHeader {
               variant={this.room?.hb_preference ? 'brand' : 'warning'}
               onClick={() => this.openHbDialog.emit()}
             >
-              {this.room?.hb_preference === HbPreference.Lunch ? 'With lunch' : this.room?.hb_preference === HbPreference.Dinner ? 'With dinner' : 'Choose lunch or dinner'}
+              {this.room?.hb_preference === HbPreference.Lunch
+                ? t('Lcz_WithLunch', { fallback: 'With lunch' })
+                : this.room?.hb_preference === HbPreference.Dinner
+                  ? t('Lcz_WithDinner', { fallback: 'With dinner' })
+                  : t('Lcz_ChooseLunchOrDinner', { fallback: 'Choose lunch or dinner' })}
             </wa-button>
           )}
         </p>
@@ -57,7 +68,7 @@ export class IrRoomHeader {
         <div class="booking-room__price-row">
           <span class="booking-room__price">{formatAmount(this.currency, this.room['gross_total'])}</span>
 
-          {this.isEditable && (this.hasRoomEdit || this.hasRoomDelete || !!this.unitId) && (
+          {(canEdit || this.canPrintRegistrationCard) && (
             <div class="booking-room__actions">
               <wa-dropdown
                 onwa-show={e => {
@@ -82,15 +93,28 @@ export class IrRoomHeader {
                   variant="neutral"
                   style={{ marginBottom: '4px' }}
                 >
-                  <wa-icon style={{ fontSize: '1rem' }} label="Actions" name="ellipsis-vertical"></wa-icon>
+                  <wa-icon style={{ fontSize: '1rem' }} label={t('Lcz_Actions', { fallback: 'Actions' })} name="ellipsis-vertical"></wa-icon>
                 </ir-custom-button>
-                {this.hasRoomEdit && <wa-dropdown-item value="edit">Edit unit</wa-dropdown-item>}
-                {this.hasRoomEdit && <wa-dropdown-item value="edit-rates">Edit nightly rates</wa-dropdown-item>}
-                {isAgentMode(this.agent) && this.hasRoomEdit && <wa-dropdown-item value="toggle">Re-assign {this.room.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
-                {!!this.unitId && <wa-dropdown-item value="add-extra-service">Add extra service to this unit</wa-dropdown-item>}
-                {this.hasRoomDelete && (
+                {this.isEditable && this.hasRoomEdit && <wa-dropdown-item value="edit">{t('Lcz_EditUnit', { fallback: 'Edit unit' })}</wa-dropdown-item>}
+                {this.isEditable && this.hasRoomEdit && <wa-dropdown-item value="edit-rates">{t('Lcz_EditNightlyRates', { fallback: 'Edit Nightly Rates' })}</wa-dropdown-item>}
+                {this.isEditable && isAgentMode(this.agent) && this.hasRoomEdit && (
+                  <wa-dropdown-item value="toggle">
+                    {t('Lcz_ReassignFolioDropdown', {
+                      fallback: 'Re-assign %1 folio',
+                      params: [this.room.agent ? t('Lcz_GuestLowercase', { fallback: 'guest' }) : t('Lcz_AgentLowercase', { fallback: 'agent' })],
+                    })}
+                    {/* Re-assign {this.room.agent ? 'guest' : 'agent'} folio */}
+                  </wa-dropdown-item>
+                )}
+                {this.isEditable && !!this.unitId && (
+                  <wa-dropdown-item value="add-extra-service">{t('Lcz_AddExtraServiceToUnit', { fallback: 'Add extra service to this unit' })}</wa-dropdown-item>
+                )}
+                {this.canPrintRegistrationCard && (
+                  <wa-dropdown-item value="print-registration-card">{t('Lcz_PrintRegistrationCard', { fallback: 'Print registration card' })}</wa-dropdown-item>
+                )}
+                {this.isEditable && this.hasRoomDelete && (
                   <wa-dropdown-item value="delete" variant="danger">
-                    Delete
+                    {t('Lcz_Delete', { fallback: 'Delete' })}
                   </wa-dropdown-item>
                 )}
               </wa-dropdown>

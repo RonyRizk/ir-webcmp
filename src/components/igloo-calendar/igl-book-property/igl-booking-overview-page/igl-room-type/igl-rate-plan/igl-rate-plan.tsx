@@ -1,9 +1,12 @@
 import { Component, Host, Prop, h, Event, EventEmitter, Fragment } from '@stencil/core';
+import { SetupEntries } from '@/models/IBooking';
 import { v4 as uuidv4 } from 'uuid';
-import locales from '@/stores/locales.store';
 import { RatePlan, Variation } from '@/models/property';
 import booking_store, { IRatePlanSelection, reserveRooms, resetReserved, updateRoomParams } from '@/stores/booking.store';
 
+import { t, tRaw } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'igl-rate-plan',
   styleUrl: 'igl-rate-plan.css',
@@ -13,7 +16,7 @@ export class IglRatePlan {
   // Used Props with type annotations
   @Prop() ratePlan: RatePlan;
   @Prop() roomTypeId: number;
-  @Prop() ratePricingMode: Array<{ CODE_NAME: string; CODE_VALUE_EN: string }> = [];
+  @Prop() ratePricingMode: SetupEntries[] = [];
   @Prop() currency!: { symbol: string };
   @Prop() shouldBeDisabled!: boolean;
   @Prop() bookingType: string = 'PLUS_BOOKING';
@@ -107,10 +110,10 @@ export class IglRatePlan {
   // Format variation for display
   private formatVariation(variation: Variation): string {
     if (!variation) return '';
-    const adults = `${variation.adult_nbr} ${variation.adult_nbr === 1 ? locales.entries['Lcz_Adult']?.toLowerCase() : locales.entries['Lcz_Adults']?.toLowerCase()}`;
+    const adults = `${formatCount(variation.adult_nbr)} ${variation.adult_nbr === 1 ? t('Lcz_Adult', { fallback: 'adult' })?.toLowerCase() : t('Lcz_Adults', { fallback: 'adults' })?.toLowerCase()}`;
     const children =
       variation.child_nbr > 0
-        ? `${variation.child_nbr} ${variation.child_nbr > 1 ? locales.entries['Lcz_Children']?.toLowerCase() : locales.entries['Lcz_Child']?.toLowerCase()}`
+        ? `${formatCount(variation.child_nbr)} ${variation.child_nbr > 1 ? t('Lcz_Children', { fallback: 'Children' })?.toLowerCase() : t('Lcz_Child', { fallback: 'Child' })?.toLowerCase()}`
         : '';
     return children ? `${adults} ${children}` : adults;
   }
@@ -130,10 +133,10 @@ export class IglRatePlan {
 
     let tooltip = '';
     if (cancellationPolicy) {
-      tooltip += `<b><u>Cancellation:</u></b> ${cancellationPolicy}<br/>`;
+      tooltip += `<b><u>${t('Lcz_CancellationLabel', { fallback: 'Cancellation:' })}</u></b> ${cancellationPolicy}<br/>`;
     }
     if (guaranteePolicy) {
-      tooltip += `<b><u>Guarantee:</u></b> ${guaranteePolicy}`;
+      tooltip += `<b><u>${t('Lcz_GuaranteeLabel', { fallback: 'Guarantee:' })}</u></b> ${guaranteePolicy}`;
     }
     return tooltip || undefined;
   }
@@ -176,12 +179,12 @@ export class IglRatePlan {
                   {/* <span class="font-weight-bold">{ratePlan.name.split('/')[0]}</span> */}
                   {/* <span class={'rateplan-name'}>{ratePlan.name.split('/')[1]} </span> */}
                   <span class={'rateplan-name'}>{ratePlan.short_name} </span>
-                  {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
+                  {ratePlan.is_non_refundable && <span class="non-ref-span">{t('Lcz_NonRefundable', { fallback: 'Non Refundable' })}</span>}
                 </Fragment>
               ) : (
                 <Fragment>
                   <span class={'rateplan-name'}>{ratePlan.short_name} </span>
-                  {ratePlan.is_non_refundable && <span class="non-ref-span">Non Refundable</span>}
+                  {ratePlan.is_non_refundable && <span class="non-ref-span">{t('Lcz_NonRefundable', { fallback: 'Non Refundable' })}</span>}
                 </Fragment>
               )}
               {ratePlan.custom_text && <span class="custom-text-span">{ratePlan.custom_text}</span>}
@@ -196,7 +199,9 @@ export class IglRatePlan {
             )}
             {this.unavailableRatePlanIds.has(this.ratePlan.id) && (
               <Fragment>
-                <wa-tooltip for={`rateplan-warning-${this.ratePlan.id}`}>You are forcing a stop-sale restriction.</wa-tooltip>
+                <wa-tooltip for={`rateplan-warning-${this.ratePlan.id}`}>
+                  {t('Lcz_ForcingStopSaleRestriction', { fallback: 'You are forcing a stop-sale restriction.' })}
+                </wa-tooltip>
                 <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-warning-fill-loud)' }} id={`rateplan-warning-${this.ratePlan.id}`}></wa-icon>
               </Fragment>
             )}
@@ -239,7 +244,7 @@ export class IglRatePlan {
                     class="ir-br-input-none price-amount rateplan-price-input"
                     currency={currency.symbol}
                     value={this.renderRate()}
-                    placeholder={locales.entries.Lcz_Rate || 'Rate'}
+                    placeholder={t('Lcz_Rate', { fallback: 'Rate' })}
                   ></ir-price-input> */}
                   <ir-input
                     disabled={disableForm}
@@ -251,11 +256,11 @@ export class IglRatePlan {
                       })
                     }
                     id={`rate-input-${this.ratePlan.id}`}
-                    aria-label={`${this.visibleInventory?.roomtype?.name} ${this.ratePlan.short_name}'s rate`}
+                    aria-label={t('Lcz_RatePlanRateAria', { fallback: '%1 %2 rate', params: [this.visibleInventory?.roomtype?.name, this.ratePlan.short_name] })}
                     aria-describedby={`${this.ratePlan.short_name}'s rate`}
                     value={this.rate}
                     defaultValue={this.rate}
-                    placeholder={locales.entries.Lcz_Rate || 'Rate'}
+                    placeholder={t('Lcz_Rate', { fallback: 'Rate' })}
                     mask="price"
                   >
                     <span slot="start">{currency.symbol}</span>
@@ -280,7 +285,7 @@ export class IglRatePlan {
                   >
                     {ratePricingMode.map(data => (
                       <wa-option value={data.CODE_NAME} selected={visibleInventory?.view_mode === data.CODE_NAME}>
-                        {data.CODE_VALUE_EN}
+                        {getSetupEntryLabel(data)}
                       </wa-option>
                     ))}
                   </wa-select>
@@ -339,8 +344,8 @@ export class IglRatePlan {
                       this.bookProperty();
                     }}
                   >
-                    {/* {visibleInventory.reserved === 1 ? locales.entries.Lcz_Current : locales.entries.Lcz_Select} */}
-                    {locales.entries.Lcz_Select}
+                    {/* {visibleInventory.reserved === 1 ? t('Lcz_Current') : t('Lcz_Select', { fallback: 'Select' })} */}
+                    {t('Lcz_Select', { fallback: 'Select' })}
                   </ir-custom-button>
                 </Fragment>
               )}
@@ -354,12 +359,12 @@ export class IglRatePlan {
                   variant="brand"
                   onClickHandler={() => this.bookProperty()}
                 >
-                  {locales.entries.Lcz_Book}
+                  {t('Lcz_Book', { fallback: 'Book' })}
                 </ir-custom-button>
               )}
             </div>
           ) : (
-            <p class="rate-plan-unavailable-text">{locales.entries['Lcz_NotAvailable'] || 'Not available'}</p>
+            <p class="rate-plan-unavailable-text">{tRaw('Lcz_NotAvailable', { fallback: 'Not available' })}</p>
           )}
         </div>
       </Host>

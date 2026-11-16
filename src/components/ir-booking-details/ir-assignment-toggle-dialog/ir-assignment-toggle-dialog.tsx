@@ -1,4 +1,5 @@
 import { Component, Event, EventEmitter, Host, Method, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-assignment-toggle-dialog',
@@ -7,16 +8,16 @@ import { Component, Event, EventEmitter, Host, Method, Prop, h } from '@stencil/
 })
 export class IrAssignmentToggleDialog {
   /** Dialog header title */
-  @Prop() label: string = 'Are you sure?';
+  @Prop() label: string = t('Lcz_AreYouSure', { fallback: 'Are you sure?' });
 
   /** Message shown inside the dialog */
   @Prop() message: string;
 
   /** Confirm button label */
-  @Prop() confirmLabel: string = 'Confirm';
+  @Prop() confirmLabel: string;
 
   /** Cancel button label */
-  @Prop() cancelLabel: string = 'Cancel';
+  @Prop() cancelLabel: string;
 
   /** Controls the loading spinner on the confirm button — set by the parent while the async operation runs */
   @Prop() loading: boolean = false;
@@ -53,10 +54,10 @@ export class IrAssignmentToggleDialog {
           </p>
           <div slot="footer" class="assignment-toggle-dialog__footer">
             <ir-custom-button appearance="filled" variant="neutral" size="m" data-dialog="close" disabled={this.loading}>
-              {this.cancelLabel}
+              {this.cancelLabel || t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button variant="brand" size="m" loading={this.loading} onClickHandler={() => this.confirmToggle.emit()}>
-              {this.confirmLabel}
+              {this.confirmLabel || t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

@@ -1,4 +1,6 @@
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { formatNumber, formatPercent } from '@/utils/number';
+import { t } from '@/services/locale/t';
 
 export type MetricIntent = 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
 export type MetricSize = 's' | 'm';
@@ -106,8 +108,10 @@ export class IrMetricCard {
     const tone = direction === 'flat' ? 'flat' : this.trendIsPositive ? 'positive' : 'negative';
     const iconName = direction === 'up' ? 'arrow-trend-up' : direction === 'down' ? 'arrow-trend-down' : 'minus';
     const magnitude = Math.abs(this.trend);
-    const displayValue = this.trendValue ?? `${magnitude}%`;
-    const ariaLabel = `${direction === 'flat' ? 'no change' : direction} ${this.trendValue ?? `${magnitude} percent`}`;
+    const displayValue = this.trendValue ?? formatPercent(magnitude);
+    const directionLabel =
+      direction === 'up' ? t('Lcz_TrendUp', { fallback: 'up' }) : direction === 'down' ? t('Lcz_TrendDown', { fallback: 'down' }) : t('Lcz_NoChange', { fallback: 'no change' });
+    const ariaLabel = `${directionLabel} ${this.trendValue ?? `${formatNumber(magnitude)} ${t('Lcz_Percent', { fallback: 'percent' })}`}`;
     return (
       <span part="trend" class={`metric__trend metric__trend--${tone}`} aria-label={ariaLabel}>
         <wa-icon name={iconName} aria-hidden="true"></wa-icon>
@@ -158,7 +162,9 @@ export class IrMetricCard {
             <div class="metric__main">
               <div part="value" class="metric__value">
                 <slot name="value">
-                  {this.value !== undefined && this.value !== null && <span class="metric__value-number">{this.value}</span>}
+                  {this.value !== undefined && this.value !== null && (
+                    <span class="metric__value-number">{typeof this.value === 'number' ? formatNumber(this.value) : this.value}</span>
+                  )}
                   {this.unit && (
                     <span part="unit" class="metric__unit">
                       {this.unit}

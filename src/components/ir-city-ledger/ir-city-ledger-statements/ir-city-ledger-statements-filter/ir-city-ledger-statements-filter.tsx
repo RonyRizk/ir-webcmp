@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 import { z } from 'zod';
+import { t } from '@/services/locale/t';
 
 export interface StatementFilters {
   fromDate: string | null;
@@ -66,7 +67,7 @@ export class IrCityLedgerStatementsFilter {
 
           <div class="stmt-filters__right">
             <ir-custom-button variant="brand" type="submit">
-              Create Statement
+              {t('Lcz_CreateStatement', { fallback: 'Create Statement' })}
             </ir-custom-button>
             <ir-custom-button
               variant="brand"
@@ -78,7 +79,7 @@ export class IrCityLedgerStatementsFilter {
                 }
               }}
             >
-              Print
+              {t('Lcz_Print', { fallback: 'Print' })}
             </ir-custom-button>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import { DailyPaymentFilter, GroupedFolioPayment, RevenueSourceOption } from '../types';
-import locales from '@/stores/locales.store';
+import { formatDate } from '@/utils/date';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-daily-revenue-filters',
   styleUrl: 'ir-daily-revenue-filters.css',
@@ -65,7 +66,7 @@ export class IrDailyRevenueFilters {
   private getLast30Days(): { text: string; value: string }[] {
     return Array.from({ length: 30 }, (_, i) => {
       const date = moment().subtract(i, 'days');
-      const label = i === 0 ? 'Today' : date.format('MMM DD, YYYY');
+      const label = i === 0 ? t('Lcz_Today', { fallback: 'Today' }) : formatDate(date, 'MMM DD, YYYY');
       return { text: label, value: date.format('YYYY-MM-DD') };
     });
   }
@@ -74,7 +75,7 @@ export class IrDailyRevenueFilters {
     return (
       <ir-filter-card>
         <wa-select
-          label={locales.entries?.Lcz_Source ?? 'Source'}
+          label={t('Lcz_Source', { fallback: 'Source' })}
           size="s"
           value={this.filters?.source ?? ''}
           defaultValue={this.filters?.source ?? ''}
@@ -83,7 +84,7 @@ export class IrDailyRevenueFilters {
             this.updateFilter({ source: value || null });
           }}
         >
-          <wa-option value="">All sources</wa-option>
+          <wa-option value="">{t('Lcz_AllSources', { fallback: 'All sources' })}</wa-option>
           {this.sources.map(({ label, value }) => (
             <wa-option key={value} value={value}>
               {label}
@@ -91,7 +92,7 @@ export class IrDailyRevenueFilters {
           ))}
         </wa-select>
         <wa-select
-          label="Selected period"
+          label={t('Lcz_SelectedPeriod', { fallback: 'Selected period' })}
           size="s"
           value={this.filters?.date?.toString()}
           defaultValue={this.filters?.date?.toString()}
@@ -108,12 +109,12 @@ export class IrDailyRevenueFilters {
         </wa-select>
         <div class="or-divider">
           <span class="or-divider__line"></span>
-          <span class="or-divider__text">Or</span>
+          <span class="or-divider__text">{t('Lcz_Or', { fallback: 'Or' })}</span>
           <span class="or-divider__line"></span>
         </div>
         <ir-date-range-filter
           showQuickActions={false}
-          label="Date range"
+          label={t('Lcz_DateRange', { fallback: 'Date range' })}
           fromDate={this.filters?.from_date}
           toDate={this.filters?.to_date}
           selectionMode="auto"
@@ -128,10 +129,10 @@ export class IrDailyRevenueFilters {
         ></ir-date-range-filter>
         <div slot="footer">
           <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
-            {locales.entries?.Lcz_Reset ?? 'Reset'}
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
-            {locales.entries?.Lcz_Apply ?? 'Apply'}
+            {t('Lcz_Apply', { fallback: 'Apply' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

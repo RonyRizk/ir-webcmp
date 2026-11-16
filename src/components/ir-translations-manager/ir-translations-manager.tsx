@@ -1,15 +1,16 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { SetupService, type SetupEntry } from '@/services/setup';
 import { showToast } from '@/utils/utils';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, from, map, merge, of, switchMap, tap } from 'rxjs';
 import { type DuplicateSyncPlan, planDuplicateSync } from './duplicate-sync';
-import { TRANSLATABLE_SETUP_TABLE_SET } from './displayed-setup-tables';
 import { getSyncPrompt, narrowSyncPlan } from './sync-policy';
 import { buildEditSetupParams, exposedLanguagesToTranslationLanguages, setupEntryToTranslationEntry } from './setup-mapping';
 import { DuplicateInfo, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
-import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
+import type { TranslationEntryMoved } from './ir-translations-move-dialog/ir-translations-move-dialog';
+import { PINNED_LANG_LOCAL_STORAGE_NAME, SESSION_CURRENT_TABLE, SHOW_NOTES_LOCAL_STORAGE_NAME, USED_SETUP_TABLE_SET, USED_TABLES_LOCAL_STORAGE_NAME } from './used-setup-tables';
 import { buildDuplicateMap, diffValues, getSourceLanguage, orderLanguages, sortByDisplayOrder } from './utils';
+import { t } from '@/services/locale/t';
 
 type DeleteTarget = { type: 'entry' | 'table'; id: string; label: string; detail?: string };
 
@@ -42,6 +43,9 @@ export class IrTranslationsManager {
   @State() tableDialogOpen: boolean = false;
   @State() tableDialogMode: 'create' | 'edit' = 'create';
   @State() tableDialogTable: TranslationTable | null = null;
+
+  @State() moveDialogOpen: boolean = false;
+  @State() moveDialogEntry: TranslationEntry | null = null;
 
   @State() settingsDialogOpen: boolean = false;
   /** Non-source language codes pinned as columns. `null` means "not customized yet" — everything is pinned. */
@@ -83,7 +87,7 @@ export class IrTranslationsManager {
   private unsavedOrderDialogRef: HTMLIrDialogElement;
   private syncDialogRef: HTMLIrTranslationsSyncDialogElement;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private setupService = new SetupService();
 
   /** Every keystroke in the header search. Debounced downstream — typing shouldn't be a query per character. */
@@ -114,7 +118,7 @@ export class IrTranslationsManager {
       });
 
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.loadLanguages();
       this.loadTables();
       this.loadDuplicatedSetupEntriesAcrossTables();
@@ -132,7 +136,7 @@ export class IrTranslationsManager {
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue && newValue !== oldValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.loadLanguages();
       this.loadTables();
       this.loadDuplicatedSetupEntriesAcrossTables();
@@ -176,10 +180,7 @@ export class IrTranslationsManager {
     try {
       const tableNames = await this.setupService.getDistinctSetupTables();
       this.tables = tableNames.map(name => ({ id: name, name, entries: [] }));
-      // The remembered table may since have been hidden by the "used in the app" filter.
-      const remembered = sessionStorage.getItem(SESSION_CURRENT_TABLE);
-      const restorable = this.visibleTables.some(table => table.id === remembered) ? remembered : null;
-      this.setActiveTable(restorable ?? this.visibleTables[0]?.id ?? null);
+      this.setActiveTable(sessionStorage.getItem(SESSION_CURRENT_TABLE) ?? this.visibleTables[0]?.id ?? null);
       // this.setActiveTable(this.tables.find(t => t.name === 'BLAbLA')?.id ?? null);
     } finally {
       this.isLoading = false;
@@ -198,7 +199,7 @@ export class IrTranslationsManager {
     }
     this.isLoadingEntries = true;
     try {
-      const rows = await this.setupService.getSetupEntriesByTblName({ TBL_NAME: tableId });
+      const rows = await this.setupService.getSetupEntriesByTableName(tableId);
       const entries = sortByDisplayOrder(rows.map(setupEntryToTranslationEntry));
       this.tables = this.tables.map(table => (table.id === tableId ? { ...table, entries } : table));
       // A fresh fetch is always the authoritative order — any pending local reorder is moot now.
@@ -271,9 +272,9 @@ export class IrTranslationsManager {
     return this.languages.filter(language => language.code !== sourceCode);
   }
 
-  /** True when a table survives the "used in the app" filter — only tables whose text is actually shown in the UI. */
+  /** True when a table survives the "used in this codebase" filter. */
   private isTableAllowed(name: string | undefined): boolean {
-    return !this.usedTablesOnly || !name || TRANSLATABLE_SETUP_TABLE_SET.has(name);
+    return !this.usedTablesOnly || !name || USED_SETUP_TABLE_SET.has(name);
   }
 
   /** The tables the picker offers — every one Setup reports, or only those the app reads. */
@@ -568,7 +569,10 @@ export class IrTranslationsManager {
       if (syncFailed) {
         showToast({ type: 'error', title: 'Saved, but its duplicate rows could not be updated' });
       } else {
-        showToast({ type: 'success', title: synced > 0 ? `Saved — also updated ${synced} duplicate ${synced === 1 ? 'row' : 'rows'}` : 'Saved Successfully' });
+        showToast({
+          type: 'success',
+          title: synced > 0 ? `Saved — also updated ${synced} duplicate ${synced === 1 ? 'row' : 'rows'}` : t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
+        });
       }
     } catch (error) {
       this.patchEntries(() => previousEntries, tableId);
@@ -688,6 +692,29 @@ export class IrTranslationsManager {
   private requestDeleteEntry(entry: TranslationEntry) {
     this.deleteTarget = { type: 'entry', id: entry.id, label: entry.key || 'this key' };
     this.deleteDialogRef?.openModal();
+  }
+
+  private openMoveEntry(entry: TranslationEntry) {
+    // Same guard as the header search — a move refetches rows, which would silently drop an unsaved reorder.
+    if (this.orderDirty) {
+      showToast({ type: 'error', title: 'Save or discard the pending order first' });
+      return;
+    }
+    this.moveDialogEntry = { ...entry, tableName: this.tableNameFor(entry) };
+    this.moveDialogOpen = true;
+  }
+
+  /** Move_Setup_Entry already re-homed the row — drop it from whatever is on screen and let the destination refetch when it's next selected. */
+  private handleEntryMoved({ entry }: TranslationEntryMoved) {
+    this.moveDialogOpen = false;
+    this.moveDialogEntry = null;
+    this.patchEntries(entries => entries.filter(item => item.id !== entry.id));
+    if (this.isCrossTableMode) {
+      // The row still matches the query — refetch so it reappears under its new table's header.
+      this.refresh$.next();
+    }
+    // Duplicate badges are keyed by `TBL_NAME::CODE_NAME`, so the moved row's id just changed.
+    this.loadDuplicatedSetupEntriesAcrossTables();
   }
 
   // #endregion
@@ -911,9 +938,7 @@ export class IrTranslationsManager {
               Duplicate
             </wa-dropdown-item>
             <wa-dropdown-item value="delete" variant="danger">
-              <wa-icon slot="icon" name="trash-can"></wa-icon>
-              Delete
-            </wa-dropdown-item>
+              <wa-icon slot="icon" name="trash-can"></wa-icon>{t('Lcz_Delete', { fallback: 'Delete' })}</wa-dropdown-item>
           </wa-dropdown> */}
 
           {/* <ir-custom-button class="tm__icon-btn" appearance="outlined" variant="neutral" disabled={this.isMutating} onClickHandler={() => this.openCreateTable()}>
@@ -1013,6 +1038,7 @@ export class IrTranslationsManager {
               onCreateEntry={() => this.openCreateEntry()}
               onEditEntry={(e: CustomEvent<TranslationEntry>) => this.openEditEntry(e.detail)}
               // onDuplicateEntry={(e: CustomEvent<TranslationEntry>) => this.handleDuplicateEntry(e.detail)}
+              onMoveEntry={(e: CustomEvent<TranslationEntry>) => this.openMoveEntry(e.detail)}
               onDeleteEntry={(e: CustomEvent<TranslationEntry>) => this.requestDeleteEntry(e.detail)}
               onEntryChange={(e: CustomEvent<TranslationEntry>) => this.handleEntryChange(e.detail)}
               onToggleVisibility={(e: CustomEvent<TranslationEntry>) => this.handleToggleVisibility(e.detail)}
@@ -1038,6 +1064,18 @@ export class IrTranslationsManager {
             this.entryDrawerEntry = null;
           }}
         ></ir-translations-entry-drawer>
+
+        <ir-translations-move-dialog
+          open={this.moveDialogOpen}
+          entry={this.moveDialogEntry}
+          tables={this.visibleTables}
+          sourceCode={sourceCode}
+          onEntryMoved={(e: CustomEvent<TranslationEntryMoved>) => this.handleEntryMoved(e.detail)}
+          onCloseDialog={() => {
+            this.moveDialogOpen = false;
+            this.moveDialogEntry = null;
+          }}
+        ></ir-translations-move-dialog>
 
         <ir-translations-settings-dialog
           open={this.settingsDialogOpen}
@@ -1068,14 +1106,15 @@ export class IrTranslationsManager {
           onIrDialogAfterHide={() => (this.deleteTarget = null)}
         >
           <p class="tm__confirm-text">
-            Delete <strong>{this.deleteTarget?.label}</strong>? {this.deleteTarget?.detail} This cannot be undone.
+            {t('Lcz_Delete', { fallback: 'Delete' })}
+            <strong>{this.deleteTarget?.label}</strong>? {this.deleteTarget?.detail} This cannot be undone.
           </p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="outlined" variant="neutral" onClickHandler={() => this.deleteDialogRef?.closeModal()}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" appearance="accent" variant="danger" loading={this.isMutating} onClickHandler={() => this.confirmDelete()}>
-              Delete
+              {t('Lcz_Delete', { fallback: 'Delete' })}
             </ir-custom-button>
           </div>
         </ir-dialog>
@@ -1101,13 +1140,13 @@ export class IrTranslationsManager {
           <p class="tm__confirm-text">You reordered keys in this table but haven't saved it yet. Save the new order, or discard it and switch tables?</p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="outlined" variant="neutral" onClickHandler={() => this.unsavedOrderDialogRef?.closeModal()}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" appearance="outlined" variant="danger" disabled={this.isMutating} onClickHandler={() => this.discardOrderAndSwitchTable()}>
               Discard
             </ir-custom-button>
             <ir-custom-button size="m" appearance="accent" variant="brand" loading={this.isMutating} onClickHandler={() => this.saveOrderAndSwitchTable()}>
-              Save
+              {t('Lcz_Save', { fallback: 'Save' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

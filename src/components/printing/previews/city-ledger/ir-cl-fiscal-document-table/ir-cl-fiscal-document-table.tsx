@@ -2,9 +2,11 @@ import { formatAmount } from '@/utils/utils';
 import { Component, Fragment, Host, Prop, h } from '@stencil/core';
 import type { PhysicalRoom, RatePlan, RoomType } from '@/models/property';
 import type { ClTx } from '@/services/city-ledger';
-import moment from 'moment';
 import { groupData, type BookingGroup, type GroupedItem, type UnitGroup } from './utils';
 import calendar_data from '@/stores/calendar-data';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-cl-fiscal-document-table',
@@ -116,9 +118,9 @@ export class IrClFiscalDocumentTable {
         <tr key={`unit-hdr-${group.PR_ID}`} class="invoice-items__unit-row">
           <td colSpan={this.showCityTax ? 8 : 6}>
             <span>
-              {`${roomName} - ${group.GUEST_FIRST_NAME} ${group.GUEST_LAST_NAME} (${group.occupancy} pax)`}
+              {`${roomName} - ${group.GUEST_FIRST_NAME} ${group.GUEST_LAST_NAME} (${t('Lcz_PaxCount', { fallback: '%1 pax', params: [formatCount(group.occupancy)] })})`}
               <span innerHTML="&nbsp&nbsp&nbsp&nbsp"></span>
-              {moment(group.FROM_DATE, 'YYYY-MM-DD').format('MMM, DD YYYY')} - {moment(group.TO_DATE, 'YYYY-MM-DD').format('MMM, DD YYYY')}
+              {formatDate(group.FROM_DATE, 'MMM, DD YYYY')} - {formatDate(group.TO_DATE, 'MMM, DD YYYY')}
             </span>
           </td>
         </tr>
@@ -157,24 +159,27 @@ export class IrClFiscalDocumentTable {
   }
 
   private renderTotals() {
-    const t = this.totals;
+    const totals = this.totals;
     return (
       <tr class="cl-balance-row">
         <td class="cl-td"></td>
         <td class="cl-td cl-td--num"></td>
         <td class="cl-td cl-td--num">
-          <span style={{ fontSize: '1rem' }}>{this.renderMoney(t.net)}</span> <br></br>Net Price
+          <span style={{ fontSize: '1rem' }}>{this.renderMoney(totals.net)}</span> <br></br>
+          {t('Lcz_NetPriceLabel', { fallback: 'Net Price' })}
         </td>
         <td class="cl-td cl-td--num"></td>
         <td class="cl-td cl-td--num">
-          <span style={{ fontSize: '1rem' }}>{this.renderMoney(t.tax)}</span>
-          <br></br>Taxes
+          <span style={{ fontSize: '1rem' }}>{this.renderMoney(totals.tax)}</span>
+          <br></br>
+          {t('Lcz_Taxes', { fallback: 'Taxes' })}
         </td>
         {this.showCityTax && <td class="cl-td cl-td--num"></td>}
         {this.showCityTax && <td class="cl-td cl-td--num"></td>}
         <td class="cl-td cl-td--num">
-          <span style={{ fontSize: '1rem' }}>{this.renderMoney(t.total)}</span>
-          <br></br>Total
+          <span style={{ fontSize: '1rem' }}>{this.renderMoney(totals.total)}</span>
+          <br></br>
+          {t('Lcz_Total', { fallback: 'Total' })}
         </td>
       </tr>
     );
@@ -187,33 +192,29 @@ export class IrClFiscalDocumentTable {
           <table class="cl-table">
             <thead>
               <tr>
-                <th class="cl-th">Date</th>
+                <th class="cl-th">{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
                 <th class="cl-th" style={{ width: '100%' }}>
-                  Description
+                  {t('Lcz_Description', { fallback: 'Description' })}
                 </th>
-                <th class="cl-th cl-th--num">Net Price</th>
-                <th class="cl-th">VAT</th>
-                <th class="cl-th cl-th--num">VAT Amount</th>
-                {this.showCityTax && (
-                  <th class="cl-th">
-                    City <br />
-                    Tax
-                  </th>
-                )}
+                <th class="cl-th cl-th--num">{t('Lcz_NetPriceLabel', { fallback: 'Net Price' })}</th>
+                <th class="cl-th">{t('Lcz_Vat', { fallback: 'VAT' })}</th>
+                <th class="cl-th cl-th--num">{t('Lcz_VatAmountColumn', { fallback: 'VAT Amount' })}</th>
+                {this.showCityTax && <th class="cl-th">{t('Lcz_CityTaxColumn', { fallback: 'City Tax' })}</th>}
                 {this.showCityTax && (
                   <th class="cl-th cl-th--num">
-                    City Tax
-                    <br /> Amount
+                    {t('Lcz_CityTaxColumn', { fallback: 'City Tax' })}
+                    <br />
+                    {t('Lcz_Amount', { fallback: 'Amount' })}
                   </th>
                 )}
-                <th class="cl-th cl-th--num">Total</th>
+                <th class="cl-th cl-th--num">{t('Lcz_Total', { fallback: 'Total' })}</th>
               </tr>
             </thead>
             <tbody>
               {this.transactions.length === 0 ? (
                 <tr>
                   <td class="cl-td cl-td--empty" colSpan={this.showCityTax ? 8 : 6}>
-                    No transactions found for this document.
+                    {t('Lcz_NoTransactionsForDocument', { fallback: 'No transactions found for this document.' })}
                   </td>
                 </tr>
               ) : (

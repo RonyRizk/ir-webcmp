@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-company-form',
   styleUrl: 'ir-booking-company-form.css',
@@ -68,8 +69,19 @@ export class IrBookingCompanyForm {
         }}
         class="booking-company__form"
       >
-        <ir-input value={this.formData.company_name} onText-change={e => this.updateGuest({ company_name: e.detail })} label="Name" autofocus placeholder="XYZ LTD"></ir-input>
-        <ir-input value={this.formData.company_tax_nbr} onText-change={e => this.updateGuest({ company_tax_nbr: e.detail })} label="Tax ID" placeholder="VAT 123456"></ir-input>
+        <ir-input
+          value={this.formData.company_name}
+          onText-change={e => this.updateGuest({ company_name: e.detail })}
+          label={t('Lcz_Name', { fallback: 'Name' })}
+          autofocus
+          placeholder={t('Lcz_CompanyNamePlaceholder', { fallback: 'XYZ LTD' })}
+        ></ir-input>
+        <ir-input
+          value={this.formData.company_tax_nbr}
+          onText-change={e => this.updateGuest({ company_tax_nbr: e.detail })}
+          label={t('Lcz_TaxId', { fallback: 'Tax ID' })}
+          placeholder={t('Lcz_TaxIdPlaceholder', { fallback: 'VAT 123456' })}
+        ></ir-input>
       </form>
     );
   }

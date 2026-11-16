@@ -1,4 +1,4 @@
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { z } from 'zod';
 
 export enum TaxationStrategy {
@@ -26,4 +26,4 @@ export const TaxAndChargeSetupSchema = z.object({
 });
 export type TaxAndChargeSetup = z.infer<typeof TaxAndChargeSetupSchema>;
 
-export type TaxesSetupEntries = { vat_included: IEntries[]; svc_category: IEntries[]; city_tax_included: IEntries[]; service_charge_included: IEntries[] };
+export type TaxesSetupEntries = { vat_included: SetupEntries[]; svc_category: SetupEntries[]; city_tax_included: SetupEntries[]; service_charge_included: SetupEntries[] };

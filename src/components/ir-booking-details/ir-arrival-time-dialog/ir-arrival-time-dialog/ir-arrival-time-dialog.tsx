@@ -1,11 +1,12 @@
 import { Booking, ExtraService, ExtraServiceSchema, IUnit, Room } from '@/models/booking.dto';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
-import locales from '@/stores/locales.store';
 import calendar_data, { getExtraServiceDefaultPrice } from '@/stores/calendar-data';
 import { createDateWithOffsetAndHour } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 /** Service category code for an early-check-in extra service charge. */
 const EARLY_CHECK_IN_CATEGORY_CODE = 'ECI';
 
@@ -64,7 +65,7 @@ export class IrArrivalTimeDialog {
   /** Controls dialog visibility. */
   @Prop() open: boolean;
   @Prop() property_id: number;
-  @Prop() arrivalTime: IEntries[] = [];
+  @Prop() arrivalTime: SetupEntries[] = [];
   @Prop() language: string = 'en';
   /** Needed to create an early-check-in extra service charge alongside the arrival time. */
   @Prop() booking_nbr: string;
@@ -101,7 +102,7 @@ export class IrArrivalTimeDialog {
   }
 
   /** Whether an arrival-time option (e.g. "10 AM") falls before the property's standard check-in start time, in hotel-local time. */
-  private isEarlyCheckIn(entry: IEntries): boolean {
+  private isEarlyCheckIn(entry: SetupEntries): boolean {
     if (NEVER_EARLY_CHECK_IN_CODES.has(entry.CODE_NAME)) return false;
     const hour = ARRIVAL_TIME_HOURS[entry.CODE_NAME];
     const checkInFrom = calendar_data.property?.time_constraints?.check_in_from;
@@ -171,7 +172,7 @@ export class IrArrivalTimeDialog {
     return (
       <ir-dialog
         open={this.open}
-        label="Expected Arrival Time"
+        label={t('Lcz_ExpectedArrivalTime', { fallback: 'Expected Arrival Time' })}
         ref={el => (this.dialogRef = el)}
         onIrDialogHide={e => {
           e.preventDefault();
@@ -193,7 +194,7 @@ export class IrArrivalTimeDialog {
           </div>
           <wa-select
             size="s"
-            placeholder="Not provided"
+            placeholder={t('Lcz_NotProvided', { fallback: 'Not provided' })}
             value={this.selectedValue ?? ''}
             onwa-after-hide={e => {
               e.stopImmediatePropagation();
@@ -204,8 +205,8 @@ export class IrArrivalTimeDialog {
           >
             {this.arrivalTime?.map(time => (
               <wa-option key={time.CODE_NAME} value={time.CODE_NAME}>
-                {time[`CODE_VALUE_${this.language?.toUpperCase()}`] ?? time[`CODE_VALUE_EN`]}
-                {this.isEarlyCheckIn(time) ? ' (Early check-in)' : ''}
+                {getSetupEntryLabel(time, this.language)}
+                {this.isEarlyCheckIn(time) ? t('Lcz_EarlyCheckInSuffix', { fallback: ' (Early check-in)' }) : ''}
               </wa-option>
             ))}
           </wa-select>
@@ -214,10 +215,10 @@ export class IrArrivalTimeDialog {
               <div class="ir-time-dialog__insight-row">
                 <wa-icon class="ir-time-dialog__insight-icon" name="clock"></wa-icon>
                 <div class="ir-time-dialog__insight-copy">
-                  <p class="ir-time-dialog__insight-title">
-                    Would you like to charge it as an <b>Early Check-in</b>?
+                  <p class="ir-time-dialog__insight-title">{t('Lcz_ChargeAsEarlyCheckInQuestion', { fallback: 'Would you like to charge it as an Early Check-in?' })}</p>
+                  <p class="ir-time-dialog__insight-subtitle">
+                    {t('Lcz_AddedAsAccommodationExtraServiceHint', { fallback: 'This will be added as an accommodation extra service' })}
                   </p>
-                  <p class="ir-time-dialog__insight-subtitle">This will be added as an accommodation extra service</p>
                 </div>
                 {/* <wa-switch
                 checked={this.createExtraService}
@@ -236,7 +237,7 @@ export class IrArrivalTimeDialog {
                       mask={'price'}
                       withClear
                       type="text"
-                      // label="Price"
+                      // label={t('Lcz_Price', { fallback: 'Price' })}
                     >
                       <span slot="start">{this.currencySymbol}</span>
                     </ir-input>
@@ -248,10 +249,10 @@ export class IrArrivalTimeDialog {
         </div>
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" variant="neutral" appearance="filled" data-dialog="close">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button size="m" variant="brand" loading={this.isLoading} disabled={!this.selectedValue} onClickHandler={e => this.handleConfirm(e)} appearance="accent">
-            {locales.entries.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

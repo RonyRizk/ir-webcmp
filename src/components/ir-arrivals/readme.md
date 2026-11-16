@@ -11,7 +11,7 @@
 | `p`          | `p`          | Property alias or short identifier used by backend endpoints (aname). Passed to `getExposedProperty` when initializing the component. | `string` | `undefined` |
 | `pageSize`   | `page-size`  | Number of arrivals to load per page in the arrivals table. Used to configure pagination via Arrivals Store. Defaults to `20`.         | `number` | `20`        |
 | `propertyid` | `propertyid` | ID of the property (hotel) for which arrivals should be displayed. Used in API calls related to rooms, bookings, and check-ins.       | `number` | `undefined` |
-| `ticket`     | `ticket`     | Authentication token issued by the PMS backend. Required for initializing the component and making API calls.                         | `string` | `undefined` |
+| `ticket`     | `ticket`     | Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.                     | `string` | `undefined` |
 
 
 ## Dependencies

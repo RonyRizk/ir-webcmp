@@ -26,11 +26,11 @@
   justify-content: flex-end;
   white-space: nowrap;
   margin-top: 0.25rem;
-  text-align: right;
+  text-align: end;
 }
 
 .booking-editor__total-label {
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 .booking-editor__total-amount {
@@ -88,4 +88,10 @@
   .booking-editor__total {
     margin-top: 0;
   }
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

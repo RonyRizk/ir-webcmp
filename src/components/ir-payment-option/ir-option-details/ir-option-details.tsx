@@ -3,8 +3,8 @@ import { PaymentOptionService } from '@/services/payment_option.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import payment_option_store from '@/stores/payment-option.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
-import locales from '@/stores/locales.store';
 import { showToast } from '@/utils/utils';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-option-details',
   styleUrls: ['ir-option-details.css', '../../../common/sheet.css'],
@@ -81,7 +81,7 @@ export class IrOptionDetails {
     showToast({
       type: 'success',
       description: '',
-      title: locales.entries.Lcz_Saved,
+      title: t('Lcz_Saved', { fallback: 'Saved' }),
       position: 'top-right',
     });
     this.closeModal.emit(selectedOption);
@@ -149,7 +149,7 @@ export class IrOptionDetails {
           <ir-title
             class="px-1 sheet-header"
             onCloseSideBar={() => this.closeModal.emit(null)}
-            label={locales?.entries.Lcz_Information?.replace('%1', payment_option_store.selectedOption?.description)}
+            label={t('Lcz_Information', { params: [payment_option_store.selectedOption?.description] })}
             displayContext="sidebar"
           ></ir-title>
 
@@ -167,7 +167,7 @@ export class IrOptionDetails {
                   ></ir-select>
                 </div>
                 <div>
-                  {this.invalid && <p class="text-danger p-0 m-0">{locales.entries.Lcz_YouMustFillEnglishField}</p>}
+                  {this.invalid && <p class="text-danger p-0 m-0">{t('Lcz_YouMustFillEnglishField')}</p>}
                   {/* <ir-textarea
                   placeholder=""
                   aria-invalid={this.invalid ? 'true' : 'false'}
@@ -216,7 +216,7 @@ export class IrOptionDetails {
               onClick={() => this.closeModal.emit(null)}
               btn_styles="justify-content-center"
               class={`flex-fill`}
-              text={locales.entries.Lcz_Cancel}
+              text={t('Lcz_Cancel', { fallback: 'Cancel' })}
               btn_color="secondary"
               btn_type="button"
             ></ir-button>
@@ -226,7 +226,7 @@ export class IrOptionDetails {
               btn_styles="justify-content-center align-items-center"
               class={'flex-fill'}
               isLoading={isRequestPending('/Handle_Payment_Method')}
-              text={locales.entries.Lcz_Save}
+              text={t('Lcz_Save', { fallback: 'Save' })}
               btn_color="primary"
             ></ir-button>
           </div>

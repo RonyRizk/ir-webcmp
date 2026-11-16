@@ -1,4 +1,5 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 import { ICountry } from '@/models/IBooking';
 import { NativeWaInput } from '../ir-input/ir-input';
 
@@ -26,11 +27,11 @@ export class IrMobileInput {
   /** The input's size. */
   @Prop({ reflect: true }) size: NativeWaInput['size'] = 's';
   /** Visible label for the phone input */
-  @Prop() label: string = 'Phone number';
+  @Prop() label: string;
   /** Name attribute passed to the native input */
   @Prop() name: string = 'phone';
   /** Placeholder shown when the input is empty */
-  @Prop() placeholder: string = 'Enter phone number';
+  @Prop() placeholder: string;
   /** Help text rendered under the label */
   @Prop() description?: string;
   /** Error message announced to screen readers */
@@ -147,7 +148,7 @@ export class IrMobileInput {
     return (
       <Host size={'s'} role="group" aria-labelledby={this.labelId} aria-describedby={describedByIds}>
         <label class="mobile-input__label" id={this.labelId} htmlFor={this.inputId}>
-          {this.label}
+          {this.label || t('Lcz_PhoneNumber', { fallback: 'Phone number' })}
           {this.required ? (
             <span class="mobile-input__required" aria-hidden="true">
               *
@@ -179,16 +180,25 @@ export class IrMobileInput {
               class="mobile-input__trigger"
               disabled={this.disabled}
               aria-haspopup="listbox"
-              aria-label="Change country calling code"
+              aria-label={t('Lcz_ChangeCountryCallingCode', { fallback: 'Change country calling code' })}
             >
-              <div class="mobile-input__phone-country" style={{ marginRight: '1rem' }}>
-                {this.selectedCountry ? <img src={this.selectedCountry?.flag} alt={this.selectedCountry?.name} class="mobile-input__logo" /> : <span>Select</span>}
+              <div class="mobile-input__phone-country" style={{ marginInlineEnd: '1rem' }}>
+                {this.selectedCountry ? (
+                  <img src={this.selectedCountry?.flag} alt={this.selectedCountry?.name} class="mobile-input__logo" />
+                ) : (
+                  <span>{t('Lcz_Select', { fallback: 'Select' })}</span>
+                )}
                 {/* <span aria-hidden="true">{this.selectedCountry?.phone_prefix}</span> */}
               </div>
               <wa-icon class="mobile-input__phone-country-caret" name="chevron-down" aria-hidden="true"></wa-icon>
             </button>
             <span class="sr-only" id={this.countryStatusId} aria-live="polite">
-              {this.selectedCountry ? `Selected country ${this.selectedCountry.name} ${this.selectedCountry.phone_prefix}` : 'Select a country'}
+              {this.selectedCountry
+                ? t('Lcz_SelectedCountryAnnouncement', {
+                    fallback: `Selected country ${this.selectedCountry.name} ${this.selectedCountry.phone_prefix}`,
+                    params: [this.selectedCountry.name, this.selectedCountry.phone_prefix],
+                  })
+                : t('Lcz_SelectACountry', { fallback: 'Select a country' })}
             </span>
             {this.countries.map(country => (
               <wa-dropdown-item value={country.id.toString()}>
@@ -206,7 +216,7 @@ export class IrMobileInput {
             inputMode="tel"
             autocomplete="off"
             disabled={this.disabled}
-            placeholder={this.placeholder}
+            placeholder={this.placeholder || t('Lcz_EnterPhoneNumber', { fallback: 'Enter phone number' })}
             defaultValue={this.value}
             value={this.value}
             class="phone__input"

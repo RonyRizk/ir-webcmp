@@ -22,7 +22,7 @@
 | `language`               | `language`                 | Active language code used for translations and API requests. Defaults to 'en'.                                                                                                                                                     | `string`  | `'en'`      |
 | `p`                      | `p`                        | Property alias or account name used when fetching exposed property data.                                                                                                                                                           | `string`  | `undefined` |
 | `propertyid`             | `propertyid`               | Property ID used to retrieve property-specific configuration.                                                                                                                                                                      | `number`  | `undefined` |
-| `ticket`                 | `ticket`                   | Authentication token used to initialize the component. Triggers re-initialization when changed.                                                                                                                                    | `string`  | `''`        |
+| `ticket`                 | `ticket`                   | Authentication ApiClient used to initialize the component. Triggers re-initialization when changed.                                                                                                                                | `string`  | `''`        |
 
 
 ## Events

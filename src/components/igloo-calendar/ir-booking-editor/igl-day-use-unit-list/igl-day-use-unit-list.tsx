@@ -6,6 +6,7 @@ import { DAY_USE_STATUS_ICON, DayUseUnitDayStatus, formatDayUseStatusText, getDa
 import { ExtraService } from '@/models/booking.dto';
 import { BookingEditorMode } from '../types';
 import { SvcCategory } from '@/types/enums';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-day-use-unit-list',
@@ -107,7 +108,7 @@ export class IglDayUseUnitList {
     if (this.hasSearched && !hasBookableUnit) {
       return (
         <div class="day-use-unit-list__empty-container">
-          <ir-empty-state message="No units available for the selected date."></ir-empty-state>
+          <ir-empty-state message={t('Lcz_NoUnitsAvailableForSelectedDate', { fallback: 'No units available for the selected date.' })}></ir-empty-state>
         </div>
       );
     }
@@ -117,7 +118,11 @@ export class IglDayUseUnitList {
         {availableRoomTypes.length > 0 && (
           <div class="day-use-unit-list__infos">
             {this.mode !== 'BAR_BOOKING' && (
-              <p class={'m-0 p-0'}>{this.currentExtraService ? 'Edit the existing unit or switch the booking to another one.' : 'Pick a unit for day-use.'}</p>
+              <p class={'m-0 p-0'}>
+                {this.currentExtraService
+                  ? t('Lcz_EditExistingUnitOrSwitchBooking', { fallback: 'Edit the existing unit or switch the booking to another one.' })
+                  : t('Lcz_PickUnitForDayUse', { fallback: 'Pick a unit for day-use.' })}
+              </p>
             )}
             {calendar_data.property.tax_statement && (
               <wa-callout size="s" variant="neutral" appearance="filled" class="booking-editor-header__tax_statement">
@@ -175,7 +180,7 @@ export class IglDayUseUnitList {
                           disabled={this.resolvingUnitId !== null && this.resolvingUnitId !== unit.id}
                           onClickHandler={() => this.unitSelected.emit({ unit, roomType, price: this.getPrice(unit.id), isCustomPrice: this.isCustomPrice(unit.id) })}
                         >
-                          Book
+                          {t('Lcz_Book', { fallback: 'Book' })}
                         </ir-custom-button>
                         {dayStatus && <span class="day-use-unit-list__day-status-text">{formatDayUseStatusText(dayStatus, checkoutTime, checkinTime)}</span>}
                       </div>

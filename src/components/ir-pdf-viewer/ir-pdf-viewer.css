@@ -50,6 +50,9 @@ canvas.hidden {
   font-size: 2rem;
 }
 
+/* Physical: symmetric self-centring (left:50% + translateX(-50%)). `inset-inline-start`
+   would resolve to `right` under RTL while translateX stays physical, knocking the box a
+   full width off its anchor. */
 .pagination {
   position: absolute;
   bottom: 0.75rem;
@@ -94,4 +97,10 @@ canvas.hidden {
   color: var(--wa-color-text-normal, #111827);
   min-width: 4rem;
   text-align: center;
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

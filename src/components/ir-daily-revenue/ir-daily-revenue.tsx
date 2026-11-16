@@ -1,16 +1,18 @@
-import Token from '@/models/Token';
-import { BookingService } from '@/services/booking-service/booking.service';
-import { BookingListingService } from '@/services/booking_listing.service';
+import ApiClient from '@/models/ApiClient';
+import { SetupService } from '@/services/setup';
+import { BookingListingService, ICriteriaChannel } from '@/services/booking-listing';
 import { PropertyService } from '@/services/property.service';
 import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment, RevenueSourceOption, SidebarOpenEvent } from './types';
-import { ICriteriaChannel } from '@/models/IrBookingListing';
 import { v4 } from 'uuid';
 import moment from 'moment';
 import { PaymentEntries } from '../ir-booking-details/types';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-daily-revenue',
   styleUrl: 'ir-daily-revenue.css',
@@ -37,20 +39,36 @@ export class IrDailyRevenue {
   @State() sideBarEvent: SidebarOpenEvent | null;
   @State() sources: RevenueSourceOption[] = [];
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
-  private bookingService = new BookingService();
+  private setupService = new SetupService();
   private bookingListingService = new BookingListingService();
   private paymentEntries: PaymentEntries;
 
   @Event() preventPageLoad: EventEmitter<null>;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.dailyRevenue, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -58,7 +76,7 @@ export class IrDailyRevenue {
     if (newValue === oldValue) {
       return;
     }
-    this.tokenService.setToken(this.ticket);
+    this.apiClientService.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -92,6 +110,9 @@ export class IrDailyRevenue {
     this.isPageLoading = true;
 
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.dailyRevenue });
       let propertyId = this.propertyid;
       if (!propertyId && !this.p) {
         throw new Error('Property ID or username is required');
@@ -100,7 +121,7 @@ export class IrDailyRevenue {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
           include_units_hk_status: true,
         });
@@ -110,31 +131,26 @@ export class IrDailyRevenue {
       this.property_id = propertyId;
 
       const requests: Promise<any>[] = [
-        this.bookingService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
+        this.setupService.getPaymentEntries(),
         this.getPaymentReports(),
-        this.roomService.fetchLanguage(this.language),
+        localeReady,
         // The source filter is optional; don't let a criteria failure block the report
-        this.bookingListingService.fetchExposedBookingsCriteria(propertyId).catch(() => null),
+        this.bookingListingService.fetchExposedBookingsCriteria({ property_id: propertyId, language: LocaleController.language }).catch(() => null),
       ];
       if (propertyId) {
         requests.push(
           this.roomService.getExposedProperty({
             id: propertyId,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
             include_units_hk_status: true,
           }),
         );
       }
 
-      const [setupEntries, , , criteria] = await Promise.all(requests);
+      const [paymentEntries, , , criteria] = await Promise.all(requests);
+      this.paymentEntries = paymentEntries;
       this.sources = this.buildSourceOptions(criteria?.channels ?? []);
-      const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
-      this.paymentEntries = {
-        groups: pay_type_group,
-        methods: pay_method,
-        types: pay_type,
-      };
     } catch (error) {
       console.log(error);
     } finally {
@@ -150,7 +166,7 @@ export class IrDailyRevenue {
     const directValues = channels.filter(c => c.is_direct).map(c => c.value);
     const options: RevenueSourceOption[] = [];
     if (directValues.length) {
-      options.push({ label: 'Direct', value: directValues.join(',') });
+      options.push({ label: t('Lcz_Direct', { fallback: 'Direct' }), value: directValues.join(',') });
     }
     for (const channel of channels) {
       if (!channel.is_direct) {
@@ -242,7 +258,7 @@ export class IrDailyRevenue {
     }
     return (
       <Host>
-        <ir-page label="Daily Revenue">
+        <ir-page label={t('Lcz_DailyRevenue', { fallback: 'Daily Revenue' })}>
           <ir-custom-button
             slot="page-header"
             variant="neutral"
@@ -255,7 +271,7 @@ export class IrDailyRevenue {
             }}
           >
             <wa-icon name="download" slot="start"></wa-icon>
-            {locales.entries?.Lcz_Export}
+            {t('Lcz_Export', { fallback: 'Export' })}
           </ir-custom-button>
           <ir-revenue-summary
             filters={this.filters}

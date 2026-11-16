@@ -72,7 +72,7 @@ export function OverflowRelease(_tag: string = 'data-ir-overflow') {
 // Style element id prefix for per-tag CSS
 const STYLE_ID_PREFIX = 'overflow-style-';
 
-/** Ensure a <style> for this tag exists (once) and targets the body attr token. */
+/** Ensure a <style> for this tag exists (once) and targets the body attr ApiClient. */
 function ensureStyleForTag(tag: string) {
   if (!isDomAvailable()) return;
 
@@ -99,8 +99,11 @@ function ensureStyleForTag(tag: string) {
   }
   .wa-scroll-lock body{
     overflow:hidden !important;
-    margin-inline-end:${scrollbarWidth}px;
+    margin-inline-end:var(--wa-scroll-lock-size);
   }
+ 
+  
+  
   `.trim();
 
   const style = document.createElement('style');
@@ -109,7 +112,7 @@ function ensureStyleForTag(tag: string) {
   document.head.appendChild(style);
 }
 
-/** Add the tag token to body’s data-overflow-locks (space-separated tokens). */
+/** Add the tag ApiClient to body’s data-overflow-locks (space-separated tokens). */
 // function addBodyTag(tag: string) {
 //   if (!isDomAvailable()) return;
 //
@@ -124,7 +127,7 @@ function ensureStyleForTag(tag: string) {
 //   }
 // }
 
-/** Remove the tag token from body’s data-overflow-locks. */
+/** Remove the tag ApiClient from body’s data-overflow-locks. */
 // function removeBodyTag(tag: string) {
 //   if (!isDomAvailable()) return;
 //

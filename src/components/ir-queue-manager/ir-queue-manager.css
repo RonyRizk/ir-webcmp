@@ -61,7 +61,7 @@
 
 /* Pending count */
 .queue-item__count {
-  text-align: right;
+  text-align: end;
   font-size: 0.85rem;
 }
 

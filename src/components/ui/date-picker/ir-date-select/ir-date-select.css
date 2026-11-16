@@ -41,9 +41,9 @@
 .ir-date-select__popup::part(arrow) {
   background-color: var(--wa-color-surface-default);
   border-top: none;
-  border-left: none;
+  border-inline-start: none;
   border-bottom: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
-  border-right: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
+  border-inline-end: solid var(--wa-panel-border-width) var(--wa-color-surface-border);
   box-shadow: none;
 }
 .ir-date-select__control[aria-disabled='true'] {

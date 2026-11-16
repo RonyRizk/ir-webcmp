@@ -17,7 +17,7 @@
   margin: 0;
   padding: 0;
   font-size: 14px;
-  margin-left: 5px;
+  margin-inline-start: 5px;
   width: fit-content;
 }
 .list-item.green {

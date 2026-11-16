@@ -1,18 +1,18 @@
 import { Task } from '@/models/housekeeping';
-import Token from '@/models/Token';
-import { ConnectedHK, HouseKeepingService } from '@/services/housekeeping.service';
-import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
-import moment from 'moment/min/moment-with-locales';
+import ApiClient from '@/models/ApiClient';
+import { ConnectedHK, HouseKeepingService } from '@/services/housekeeping';
+import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
+import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { isRtlLanguage } from '@/utils/direction';
 import { realtimeService } from '@/services/realtime/realtime.service';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
 const LANGUAGE_KEY = 'ir_language';
-
-const localeMap: Record<string, string> = {
-  en: 'en',
-  ar: 'ar',
-  el: 'el',
-};
 
 type Translations = {
   noTasks: string;
@@ -22,7 +22,12 @@ type Translations = {
   cancel: string;
 };
 
-const translations: Record<string, Translations> = {
+/**
+ * Fallbacks for `t()`. This page is opened by housekeeping staff on their own devices, in
+ * their own language, so it cannot wait for Setup's `_HOUSEKEEPING` table to be translated —
+ * the strings a translated table would carry are inlined here until it is.
+ */
+const INLINE_LABELS: Record<string, Translations> = {
   en: {
     noTasks: 'No tasks for this day.',
     markAsCleaned: 'Mark as Cleaned',
@@ -46,12 +51,8 @@ const translations: Record<string, Translations> = {
   },
 };
 
-function toMomentLocale(lang: string): string {
-  return localeMap[lang?.toLowerCase()] ?? 'en';
-}
-
-function t(lang: string): Translations {
-  return translations[lang?.toLowerCase()] ?? translations.en;
+function inlineLabels(lang: string): Translations {
+  return INLINE_LABELS[lang?.toLowerCase()] ?? INLINE_LABELS.en;
 }
 
 type TaskDateGroup = { date: string; formattedDate: string; isFuture: boolean; tasks: Task[] };
@@ -62,13 +63,11 @@ type TaskDateGroup = { date: string; formattedDate: string; isFuture: boolean; t
   scoped: true,
 })
 export class IrHkStaffTasks {
-  @Element() el: HTMLElement;
-
   @Prop() ticket: string;
   @Prop() baseurl: string;
   @Prop() language: string = 'en';
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private houseKeepingService = new HouseKeepingService();
   // Always use English locale for date keys to avoid Arabic-Indic numerals
   private fromDate = moment().locale('en').format('YYYY-MM-DD');
@@ -89,15 +88,15 @@ export class IrHkStaffTasks {
   componentWillLoad() {
     // Language resolution: stored preference wins, then prop, then default 'en'
     this.activeLanguage = localStorage.getItem(LANGUAGE_KEY) || this.language;
-    moment.locale(toMomentLocale(this.activeLanguage));
-    this.el.setAttribute('dir', this.activeLanguage === 'ar' ? 'rtl' : 'ltr');
+    this.publishLanguage(this.activeLanguage);
 
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
     }
 
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
+      this.loadLocale(this.activeLanguage);
       this.loadTasks();
     }
   }
@@ -113,13 +112,38 @@ export class IrHkStaffTasks {
     }
     this.activeLanguage = lang;
     localStorage.setItem(LANGUAGE_KEY, lang);
-    moment.locale(toMomentLocale(lang));
-    this.el.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    this.publishLanguage(lang);
+    if (this.ticket) {
+      this.loadLocale(lang, true);
+    }
     this.tasksByDate = this.tasksByDate.map(group => ({
       ...group,
-      // Use locale('en') clone so display format uses active locale correctly
-      formattedDate: moment(group.date).format('ddd, DD MMM'),
+      formattedDate: formatDate(group.date, 'ddd, DD MMM'),
     }));
+  }
+
+  /**
+   * Standalone page, so it fetches its own strings — after `setApiClient`, since the request
+   * needs the ticket. Nothing awaits this: `t()` renders the inline fallback until the store
+   * fills, then the component re-renders through the store.
+   */
+  private loadLocale(language: string, force = false) {
+    LocaleController.load({ language, tables: SCREEN_TABLES.hkStaffTasks, force }).catch(() => {});
+  }
+
+  /**
+   * This component is mounted standalone (staff open it directly), so nothing else has run
+   * `fetchLanguage` to publish the active language. Setting `<html lang>` is what routes it to
+   * the date layer — see `resolveLocale` in `src/utils/date/ir-date.ts`. Deliberately no
+   * `moment.locale()` call: that is a global mutation that would change date output for every
+   * other component on the page.
+   */
+  private publishLanguage(lang: string) {
+    const normalized = (lang ?? 'en').toLowerCase();
+    document.documentElement.lang = normalized;
+    // Direction is a document-level concern - dialogs, drawers and toasts render outside
+    // this element's subtree and would keep the page default if `dir` only went on the host.
+    document.documentElement.setAttribute('dir', isRtlLanguage(normalized) ? 'rtl' : 'ltr');
   }
 
   @Watch('ticket')
@@ -128,7 +152,8 @@ export class IrHkStaffTasks {
       return;
     }
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
+      this.loadLocale(this.activeLanguage);
       this.loadTasks();
     }
   }
@@ -178,7 +203,7 @@ export class IrHkStaffTasks {
       const dateStr = cursor.clone().locale('en').format('YYYY-MM-DD');
       dateMap.set(dateStr, {
         date: dateStr,
-        formattedDate: cursor.format('ddd, DD MMM'), // uses active global locale for display
+        formattedDate: formatDate(dateStr, 'ddd, DD MMM'),
         isFuture: dateStr > today,
         tasks: [],
       });
@@ -208,6 +233,7 @@ export class IrHkStaffTasks {
         cleaning_frequency: '001',
         dusty_window: '000',
         highlight_window: '000',
+        language: LocaleController.language,
       });
 
       if (tasks) {
@@ -269,7 +295,7 @@ export class IrHkStaffTasks {
       const allTasks = [this.selectedTask, ...(this.selectedTask.extra_task ?? [])];
       await this.houseKeepingService.executeHKAction({
         actions: allTasks.map((task: Task, i) => ({
-          description: comment || 'Cleaned',
+          description: comment || t('Lcz_Cleaned', { fallback: 'Cleaned' }),
           hkm_id: task.hkm_id === 0 ? null : task.hkm_id,
           unit_id: task.unit.id,
           booking_nbr: task.booking_nbr,
@@ -295,6 +321,7 @@ export class IrHkStaffTasks {
       housekeepers: [{ id: this.connectedHk.HKM_ID }],
       cleaning_frequency: '001',
       dusty_window: '000',
+      language: LocaleController.language,
       highlight_window: '000',
     });
     if (tasks) {
@@ -307,13 +334,17 @@ export class IrHkStaffTasks {
     if (this.isLoading) {
       return <ir-loading-screen></ir-loading-screen>;
     }
-    const i18n = t(this.activeLanguage);
+    const i18n = inlineLabels(this.activeLanguage);
     return (
       <Host>
         <ir-hk-staff-tasks-header connectedHK={this.connectedHk} language={this.activeLanguage} onLanguageChanged={e => this.applyLanguage(e.detail)}></ir-hk-staff-tasks-header>
         <div class="tasks__container">
           {this.tasksByDate.map(group => (
-            <section key={group.date} class={`tasks__section${group.isFuture ? ' tasks__section--future' : ''}`} aria-label={`Tasks for ${group.formattedDate}`}>
+            <section
+              key={group.date}
+              class={`tasks__section${group.isFuture ? ' tasks__section--future' : ''}`}
+              aria-label={`${t('Lcz_TasksFor', { fallback: 'Tasks for' })} ${group.formattedDate}`}
+            >
               <header class="tasks__header">
                 <h3 class="tasks__date">{group.formattedDate}</h3>
                 <wa-badge
@@ -322,7 +353,7 @@ export class IrHkStaffTasks {
                   variant={group.isFuture ? 'neutral' : 'brand'}
                   appearance={group.isFuture ? 'filled' : 'accent'}
                 >
-                  {group.tasks.length}
+                  {formatCount(group.tasks.length)}
                 </wa-badge>
               </header>
               {group.tasks.length > 0 ? (
@@ -342,7 +373,7 @@ export class IrHkStaffTasks {
                   ))}
                 </div>
               ) : (
-                <p class="tasks__empty">{i18n.noTasks}</p>
+                <p class="tasks__empty">{t('Lcz_NoTasksForThisDay', { fallback: i18n.noTasks })}</p>
               )}
             </section>
           ))}
@@ -350,7 +381,7 @@ export class IrHkStaffTasks {
         <ir-dialog
           class="hk-staff-tasks__dialog"
           ref={el => (this.confirmDialog = el)}
-          label={this.selectedTask ? `${this.selectedTask.unit.name} — ${i18n.markAsCleaned}` : i18n.confirm}
+          label={this.selectedTask ? `${this.selectedTask.unit.name} — ${t('Lcz_MarkAsCleaned', { fallback: i18n.markAsCleaned })}` : t('Lcz_Confirm', { fallback: i18n.confirm })}
           onIrDialogAfterHide={() => {
             this.selectedTask = null;
             if (this.anythingToReportString) {
@@ -362,15 +393,15 @@ export class IrHkStaffTasks {
             value={this.anythingToReportString}
             onchange={e => (this.anythingToReportString = (e.target as HTMLTextAreaElement).value)}
             defaultValue={this.anythingToReportString}
-            placeholder={i18n.anythingToReport}
+            placeholder={t('Lcz_AnythingToReport', { fallback: i18n.anythingToReport })}
             maxlength={500}
           ></wa-textarea>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button variant="neutral" appearance="filled" onClickHandler={() => this.confirmDialog.closeModal()}>
-              {i18n.cancel}
+              {t('Lcz_Cancel', { fallback: i18n.cancel })}
             </ir-custom-button>
             <ir-custom-button variant="brand" appearance="accent" loading={this.isConfirmLoading} onClickHandler={this.handleConfirm.bind(this)}>
-              {i18n.confirm}
+              {t('Lcz_Confirm', { fallback: i18n.confirm })}
             </ir-custom-button>
           </div>
         </ir-dialog>

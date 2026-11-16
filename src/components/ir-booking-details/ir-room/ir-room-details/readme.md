@@ -1,22 +1,20 @@
 # ir-room-details
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property               | Attribute                | Description | Type           | Default     |
-| ---------------------- | ------------------------ | ----------- | -------------- | ----------- |
-| `bedPreferences`       | --                       |             | `IEntries[]`   | `undefined` |
-| `booking`              | --                       |             | `Booking`      | `undefined` |
-| `hasCheckIn`           | `has-check-in`           |             | `boolean`      | `false`     |
-| `hasCheckOut`          | `has-check-out`          |             | `boolean`      | `false`     |
-| `includeDepartureTime` | `include-departure-time` |             | `boolean`      | `undefined` |
-| `language`             | `language`               |             | `string`       | `'en'`      |
-| `mainGuest`            | --                       |             | `SharedPerson` | `undefined` |
-| `room`                 | --                       |             | `Room`         | `undefined` |
+| Property               | Attribute                | Description | Type             | Default     |
+| ---------------------- | ------------------------ | ----------- | ---------------- | ----------- |
+| `bedPreferences`       | --                       |             | `SetupEntries[]` | `undefined` |
+| `booking`              | --                       |             | `Booking`        | `undefined` |
+| `hasCheckIn`           | `has-check-in`           |             | `boolean`        | `false`     |
+| `hasCheckOut`          | `has-check-out`          |             | `boolean`        | `false`     |
+| `includeDepartureTime` | `include-departure-time` |             | `boolean`        | `undefined` |
+| `language`             | `language`               |             | `string`         | `'en'`      |
+| `mainGuest`            | --                       |             | `SharedPerson`   | `undefined` |
+| `room`                 | --                       |             | `Room`           | `undefined` |
 
 
 ## Events

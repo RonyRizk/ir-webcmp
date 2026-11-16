@@ -2,8 +2,10 @@ import { Component, Host, h, Prop, Element, Watch, Event, EventEmitter, State } 
 import { Notification } from './types';
 import { PropertyService } from '@/services/property.service';
 import type { FetchNotificationsResult as Notifications } from '@/services/property/types';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import WaAnimation from '@awesome.me/webawesome/dist/components/animation/animation';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'ir-notifications',
   styleUrl: 'ir-notifications.css',
@@ -20,7 +22,7 @@ export class IrNotifications {
 
   @Event() notificationCleared: EventEmitter<Notification>;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private propertyService = new PropertyService();
   private buttonRef: HTMLIrCustomButtonElement;
   private animationRef: WaAnimation;
@@ -36,7 +38,7 @@ export class IrNotifications {
 
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.fetchNotifications();
     }
   }
@@ -61,7 +63,7 @@ export class IrNotifications {
     if (newValue === oldValue || !newValue) {
       return;
     }
-    this.tokenService.setToken(newValue);
+    this.apiClientService.setApiClient(newValue);
     this.fetchNotifications();
   }
 
@@ -130,10 +132,10 @@ export class IrNotifications {
     return (
       <Host>
         <div style={{ position: 'relative' }}>
-          <wa-tooltip for="notifications-button">Notifications</wa-tooltip>
+          <wa-tooltip for="notifications-button">{t('Lcz_Notifications', { fallback: 'Notifications' })}</wa-tooltip>
           {this.notifications?.length > 0 && (
             <wa-badge pill class="header-notification-badge">
-              {this.notifications.length}
+              {formatCount(this.notifications.length)}
             </wa-badge>
           )}
           <wa-animation duration={1200} iterations={1} keyframes={this.bellKeyframes} ref={el => (this.animationRef = el as WaAnimation)}>
@@ -143,7 +145,7 @@ export class IrNotifications {
           </wa-animation>
         </div>
         <wa-popover distance={15} class="notification__popover" for="notifications-button">
-          <p class="notification__popover-title">Notifications</p>
+          <p class="notification__popover-title">{t('Lcz_Notifications', { fallback: 'Notifications' })}</p>
           {/*this.notifications?.map(notification => (
             <div class="notification-item">
               <div class="notification-item__content">
@@ -159,8 +161,11 @@ export class IrNotifications {
               return (
                 <a href="AcAvailabilityAlert.aspx" class="notification-item">
                   <div class="notification-item__content">
-                    <p class="notification-item__title">{notification.message} rooms types are not bookable for 14 consecutive nights within the next 2 months. More...</p>
-                    <wa-icon name="angle-right"></wa-icon>
+                    <p class="notification-item__title">
+                      {notification.message}{' '}
+                      {t('Lcz_RoomsNotBookableConsecutiveNights', { fallback: 'rooms types are not bookable for 14 consecutive nights within the next 2 months. More...' })}
+                    </p>
+                    <wa-icon class="ir-flip-rtl" name="angle-right"></wa-icon>
                     {/* <p class="notification-item__time">{this.getRelativeTimeFromParts(notification.date, notification.hour, notification.minute)}</p> */}
                   </div>
                 </a>
@@ -168,7 +173,7 @@ export class IrNotifications {
             }
           })}
           {this.notifications?.length === 0 && (
-            <ir-empty-state message="All caught up!" style={{ width: '250px', height: '150px' }}>
+            <ir-empty-state message={t('Lcz_AllCaughtUp', { fallback: 'All caught up!' })} style={{ width: '250px', height: '150px' }}>
               <wa-icon slot="icon" name="inbox"></wa-icon>
             </ir-empty-state>
           )}

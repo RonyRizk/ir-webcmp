@@ -2,18 +2,20 @@ import { IrServiceAssigneeSelectCustomEvent } from '@/components';
 import { isAgentMode } from '@/components/ir-booking-details/functions';
 import { Booking, ExtraService, ExtraServiceSchema, IUnit } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { taxationModes } from '@/services/property/types';
 import { findAccTax, toAccChargeRule } from '@/services/property/acc-tax.helpers';
 import calendar_data, { getExtraServiceDefaultPrice, getBabyCotPricingModel } from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { getTopLevelSvcCategories, groupSvcCategoriesByParent } from '@/utils/svc-category.utils';
 import { calculateDaysBetweenDates, formatName } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { z, ZodError } from 'zod';
 import { SvcCategory } from '@/types/enums';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
+import { formatCount } from '@/utils/number';
 /** Group code for accommodation-linked extra services (Breakfast, Minibar, ...) — see `KNOWN_GROUP_LABELS` in svc-category.utils. */
 const ACCOMMODATION_GROUP_CODE = SvcCategory.Accommodation;
 
@@ -32,7 +34,7 @@ export class IrExtraServiceConfigForm {
   @Prop() booking: Booking;
   @Prop() agent: Agent;
   @Prop() service: ExtraService;
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
   @Prop() language: string;
   /** Pre-selected room identifier to link a new service to, e.g. when added from ir-room's quick-add action. */
   @Prop() defaultIdentifier: string | null = null;
@@ -109,7 +111,7 @@ export class IrExtraServiceConfigForm {
     return { notApplicableCodes, taxPctByCode, realCodes, accVat };
   }
 
-  private toCategoryOption(cat: IEntries): IEntries & { pct: number; isNotApplicable: boolean } {
+  private toCategoryOption(cat: SetupEntries): SetupEntries & { pct: number; isNotApplicable: boolean } {
     const { notApplicableCodes, taxPctByCode, realCodes, accVat } = this.taxCategoryLookup;
     // Synthesized parent-group placeholders (e.g. Accommodation) have no `tax_categories` row of their
     // own — their rate mirrors the property's accommodation VAT, same as it does on the Extra Services page.
@@ -119,12 +121,11 @@ export class IrExtraServiceConfigForm {
     return { ...cat, pct: taxPctByCode[cat.CODE_NAME] ?? 0, isNotApplicable: notApplicableCodes.has(cat.CODE_NAME) };
   }
 
-  private sortByLabel<T extends IEntries>(entries: T[]): T[] {
-    const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
-    return entries.sort((a, b) => (a[langKey] ?? a.CODE_VALUE_EN ?? '').localeCompare(b[langKey] ?? b.CODE_VALUE_EN ?? ''));
+  private sortByLabel<T extends SetupEntries>(entries: T[]): T[] {
+    return entries.sort((a, b) => getSetupEntryLabel(a, this.language).localeCompare(getSetupEntryLabel(b, this.language)));
   }
 
-  private get categories(): (IEntries & { pct: number; isNotApplicable: boolean })[] {
+  private get categories(): (SetupEntries & { pct: number; isNotApplicable: boolean })[] {
     return this.sortByLabel(getTopLevelSvcCategories(this.svcCategories).map(cat => this.toCategoryOption(cat)));
   }
 
@@ -133,7 +134,7 @@ export class IrExtraServiceConfigForm {
   }
 
   /** Sub-categories of the currently selected top-level group (e.g. Breakfast/Minibar under Accommodation), when there are any. */
-  private get subCategories(): (IEntries & { pct: number; isNotApplicable: boolean })[] {
+  private get subCategories(): (SetupEntries & { pct: number; isNotApplicable: boolean })[] {
     if (!this.selectedGroupCode) return [];
     const group = this.svcGroups.get(this.selectedGroupCode);
     if (!group) return [];
@@ -177,7 +178,11 @@ export class IrExtraServiceConfigForm {
         return;
       }
       const schema = this.isUnitRequired
-        ? ExtraServiceSchema.extend({ room_identifier: z.string({ required_error: 'Unit is required' }).nonempty('Unit is required') })
+        ? ExtraServiceSchema.extend({
+            room_identifier: z
+              .string({ required_error: t('Lcz_UnitIsRequired', { fallback: 'Unit is required' }) })
+              .nonempty(t('Lcz_UnitIsRequired', { fallback: 'Unit is required' })),
+          })
         : ExtraServiceSchema;
       schema.parse(service);
       await this.bookingService.doBookingExtraService({
@@ -278,7 +283,7 @@ export class IrExtraServiceConfigForm {
           <ir-validator value={this.s_service?.category} schema={ExtraServiceSchema.shape.category}>
             <wa-select
               size="s"
-              label="Service category"
+              label={t('Lcz_ServiceCategory', { fallback: 'Service category' })}
               value={this.selectedGroupCode ?? this.s_service?.category?.code ?? ''}
               defaultValue={this.selectedGroupCode ?? this.s_service?.category?.code ?? ''}
               onchange={(e: any) => {
@@ -302,9 +307,10 @@ export class IrExtraServiceConfigForm {
               }}
             >
               {this.categories?.map(category => {
-                const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
-                const vatSuffix = category.isNotApplicable ? 'VAT - Not applicable' : `VAT ${category.pct}%`;
-                const label = (category[langKey] ?? category.CODE_VALUE_EN ?? '') + ` (${vatSuffix})`;
+                const vatSuffix = category.isNotApplicable
+                  ? t('Lcz_VatNotApplicable', { fallback: 'VAT - Not applicable' })
+                  : t('Lcz_VatPercent', { fallback: 'VAT %1%', params: [formatCount(category.pct)] });
+                const label = getSetupEntryLabel(category, this.language) + ` (${vatSuffix})`;
                 if (this.booking.is_room_less && category.CODE_NAME === SvcCategory.Accommodation) {
                   return null;
                 }
@@ -318,10 +324,15 @@ export class IrExtraServiceConfigForm {
           </ir-validator>
         )}
         {this.selectedGroupCode && this.subCategories.length > 0 && (
-          <ir-validator value={this.s_service?.category?.code ?? null} schema={z.string({ required_error: 'Subcategory is required' }).nonempty('Subcategory is required')}>
+          <ir-validator
+            value={this.s_service?.category?.code ?? null}
+            schema={z
+              .string({ required_error: t('Lcz_SubcategoryIsRequired', { fallback: 'Subcategory is required' }) })
+              .nonempty(t('Lcz_SubcategoryIsRequired', { fallback: 'Subcategory is required' }))}
+          >
             <wa-select
               size="s"
-              label="Subcategory"
+              label={t('Lcz_Subcategory', { fallback: 'Subcategory' })}
               required
               value={this.s_service?.category?.code ?? ''}
               defaultValue={this.s_service?.category?.code ?? ''}
@@ -338,14 +349,13 @@ export class IrExtraServiceConfigForm {
               }}
             >
               {this.subCategories.map(category => {
-                const langKey = `CODE_VALUE_${(this.language ?? 'en').toUpperCase()}`;
-                const label = category[langKey] ?? category.CODE_VALUE_EN ?? '';
+                const label = getSetupEntryLabel(category, this.language);
 
                 return (
                   <wa-option value={category.CODE_NAME} label={label}>
                     {label}
                     {category.CODE_NAME === BABY_COT_CATEGORY_CODE && getBabyCotPricingModel() && <span> (/{getBabyCotPricingModel().toLowerCase()})</span>}
-                    {category.CODE_NAME === 'EXB' && <span> (/night)</span>}
+                    {category.CODE_NAME === 'EXB' && <span>{t('Lcz_ExtraBedPerNightSuffix', { fallback: ' (/night)' })}</span>}
                   </wa-option>
                 );
               })}
@@ -359,19 +369,23 @@ export class IrExtraServiceConfigForm {
             value={this.s_service?.description}
             onchange={e => this.updateService({ description: (e.target as any).value })}
             id="amenity-description"
-            aria-label="Amenity description"
+            aria-label={t('Lcz_AmenityDescriptionAriaLabel', { fallback: 'Amenity description' })}
             maxlength={250}
-            label={locales.entries.Lcz_Description}
+            label={t('Lcz_Description', { fallback: 'Description' })}
           ></wa-textarea>
         </ir-validator>
         {this.showUnitLink && (
           <ir-validator
             value={this.s_service?.room_identifier ?? null}
-            schema={this.isUnitRequired ? z.string({ required_error: 'Unit is required' }).nonempty('Unit is required') : ExtraServiceSchema.shape.room_identifier}
+            schema={
+              this.isUnitRequired
+                ? z.string({ required_error: t('Lcz_UnitIsRequired', { fallback: 'Unit is required' }) }).nonempty(t('Lcz_UnitIsRequired', { fallback: 'Unit is required' }))
+                : ExtraServiceSchema.shape.room_identifier
+            }
           >
             <wa-select
               size="s"
-              label={this.isUnitRequired ? 'Link to unit' : 'Link to unit (optional)'}
+              label={this.isUnitRequired ? t('Lcz_LinkToUnit', { fallback: 'Link to unit' }) : t('Lcz_LinkToUnitOptional', { fallback: 'Link to unit (optional)' })}
               required={this.isUnitRequired}
               value={this.s_service?.room_identifier ?? ''}
               defaultValue={this.s_service?.room_identifier ?? ''}
@@ -388,7 +402,7 @@ export class IrExtraServiceConfigForm {
                 e.stopPropagation();
               }}
             >
-              {!this.isUnitRequired && <wa-option value="">Not linked to a specific unit</wa-option>}
+              {!this.isUnitRequired && <wa-option value="">{t('Lcz_NotLinkedToSpecificUnit', { fallback: 'Not linked to a specific unit' })}</wa-option>}
               {this.unitOptions.map(option => (
                 <wa-option value={option.identifier} label={option.label}>
                   {option.label}
@@ -399,9 +413,9 @@ export class IrExtraServiceConfigForm {
         )}
         <ir-validator value={this.s_service?.start_date ?? null} schema={ExtraServiceSchema.shape.start_date}>
           <ir-date-select
-            placeholder="Select date"
+            placeholder={t('Lcz_SelectDate', { fallback: 'Select date' })}
             withClear
-            label="Dates on"
+            label={t('Lcz_DatesOn', { fallback: 'Dates on' })}
             emitEmptyDate
             date={this.s_service?.start_date}
             minDate={this.booking.from_date}
@@ -415,7 +429,7 @@ export class IrExtraServiceConfigForm {
         <ir-date-select
           withClear
           emitEmptyDate
-          placeholder="Select date"
+          placeholder={t('Lcz_SelectDate', { fallback: 'Select date' })}
           date={this.s_service?.end_date}
           minDate={this.s_service?.start_date ?? this.booking.from_date}
           maxDate={this.booking.to_date}
@@ -425,7 +439,7 @@ export class IrExtraServiceConfigForm {
             this.updateService({ end_date: e.detail.start?.format('YYYY-MM-DD') });
             this.syncBabyCotPriceWithDateRange();
           }}
-          label="Till and including"
+          label={t('Lcz_TillAndIncluding', { fallback: 'Till and including' })}
         ></ir-date-select>
         {/* Prices and cost */}
         <ir-validator value={this.s_service?.price ?? null} schema={ExtraServiceSchema.shape.price}>
@@ -440,7 +454,7 @@ export class IrExtraServiceConfigForm {
             onChange={() => {
               this.priceManuallyEdited = true;
             }}
-            label={`${locales.entries.Lcz_Price} (including tax)`}
+            label={`${t('Lcz_Price')} ${t('Lcz_IncludingTaxSuffix', { fallback: '(including tax)' })}`}
           >
             <span slot="start">{this.booking.currency.symbol}</span>
           </ir-input>
@@ -452,7 +466,7 @@ export class IrExtraServiceConfigForm {
             onText-change={e => this.updateService({ cost: Number(e.detail) })}
             value={this.s_service?.cost?.toString()}
             mask={'price'}
-            label={`${locales.entries.Lcz_Cost} (optional)`}
+            label={`${t('Lcz_Cost')} (optional)`}
           >
             <span slot="start">{this.booking.currency.symbol}</span>
           </ir-input>

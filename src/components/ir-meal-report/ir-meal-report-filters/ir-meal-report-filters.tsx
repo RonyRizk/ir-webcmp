@@ -1,5 +1,7 @@
 import { Component, h, Prop, Event, EventEmitter } from '@stencil/core';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 import moment from 'moment';
 
 @Component({
@@ -12,9 +14,8 @@ export class IrMealReportFilters {
   @Prop() fromDate: string;
   @Prop() toDate: string;
   @Prop() mealType: string | null = null;
-  @Prop() setupEntries: { meal_type: IEntries[]; hb_preference: IEntries[] };
+  @Prop() setupEntries: { meal_type: SetupEntries[]; hb_preference: SetupEntries[] };
   @Prop() isLoading: boolean = false;
-  @Prop() lcz: any = {};
 
   @Event() reportTypeChange: EventEmitter<'GUEST_LIST' | 'MEAL_COUNT'>;
   @Event() dateChange: EventEmitter<{ from: string; to: string }>;
@@ -33,7 +34,7 @@ export class IrMealReportFilters {
     return (
       <ir-filter-card>
         <wa-radio-group
-          label="Report type"
+          label={t('Lcz_ReportType', { fallback: 'Report type' })}
           size="s"
           orientation="horizontal"
           value={this.reportType}
@@ -42,15 +43,15 @@ export class IrMealReportFilters {
           }}
         >
           <wa-radio style={{ flex: '1' }} appearance="button" value="GUEST_LIST">
-            Guest list
+            {t('Lcz_GuestList', { fallback: 'Guest list' })}
           </wa-radio>
           <wa-radio style={{ flex: '1' }} appearance="button" value="MEAL_COUNT">
-            Meal count
+            {t('Lcz_MealCount', { fallback: 'Meal count' })}
           </wa-radio>
         </wa-radio-group>
         {this.reportType === 'GUEST_LIST' ? (
           <wa-radio-group
-            label="Stay date"
+            label={t('Lcz_StayDate', { fallback: 'Stay date' })}
             size="s"
             orientation="horizontal"
             value={selectedPreset}
@@ -59,16 +60,16 @@ export class IrMealReportFilters {
             }}
           >
             <wa-radio style={{ flex: '1' }} appearance="button" value="today">
-              Today
+              {t('Lcz_Today', { fallback: 'Today' })}
             </wa-radio>
             <wa-radio style={{ flex: '1' }} appearance="button" value="tomorrow">
-              Tomorrow
+              {t('Lcz_Tomorrow', { fallback: 'Tomorrow' })}
             </wa-radio>
           </wa-radio-group>
         ) : (
           <div>
             <ir-date-range-filter
-              label="Stay date"
+              label={t('Lcz_StayDate', { fallback: 'Stay date' })}
               fromDate={this.fromDate}
               showQuickActions={false}
               toDate={this.toDate}
@@ -91,7 +92,7 @@ export class IrMealReportFilters {
           (mealTypes.length > 0 ? (
             <wa-radio-group
               defaultValue={this.mealType}
-              label="Meal type"
+              label={t('Lcz_MealType', { fallback: 'Meal type' })}
               size="s"
               orientation="horizontal"
               value={this.mealType}
@@ -102,12 +103,12 @@ export class IrMealReportFilters {
             >
               {mealTypes.map(type => (
                 <wa-radio style={{ flex: '1' }} appearance="button" value={type.CODE_NAME}>
-                  {type.CODE_VALUE_EN}
+                  {getSetupEntryLabel(type)}
                 </wa-radio>
               ))}
             </wa-radio-group>
           ) : (
-            <div class="ir-meal-report-filters__warning">No meal types found.</div>
+            <div class="ir-meal-report-filters__warning">{t('Lcz_NoMealTypesFound', { fallback: 'No meal types found.' })}</div>
           ))}
         <div slot="footer">
           <ir-custom-button
@@ -124,7 +125,7 @@ export class IrMealReportFilters {
               this.filterReset.emit();
             }}
           >
-            {this.lcz.Lcz_Reset || 'Reset'}
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button
             type="button"
@@ -140,7 +141,7 @@ export class IrMealReportFilters {
               this.filterApply.emit();
             }}
           >
-            {this.lcz.Lcz_Apply || 'Apply'}
+            {t('Lcz_Apply', { fallback: 'Apply' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

@@ -30,3 +30,9 @@
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
+}

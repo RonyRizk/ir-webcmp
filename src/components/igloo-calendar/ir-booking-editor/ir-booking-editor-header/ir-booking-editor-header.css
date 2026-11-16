@@ -8,6 +8,10 @@
   flex-direction: column;
   gap: var(--wa-space-m, 1rem);
 }
+/* `Lcz_Adults` is lower case; the placeholder shows it as "Adults". */
+.booking-editor-header__adults-select::part(display-input) {
+  text-transform: capitalize;
+}
 .booking-editor-header__booking-picker {
   max-width: 350px;
 }

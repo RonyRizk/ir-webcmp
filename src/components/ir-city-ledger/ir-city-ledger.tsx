@@ -1,8 +1,9 @@
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import { SetupEntries } from '@/models/IBooking';
+import ApiClient from '@/models/ApiClient';
 import { AgentsService } from '@/services/agents/agents.service';
 import type { Agent } from '@/services/agents/type';
-import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, groupEntryTablesResult, getSetupEntryLabel } from '@/services/setup';
 import { PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
 import { Moment } from 'moment';
@@ -15,6 +16,10 @@ import { SystemService } from '@/services/system.service';
 import { ICurrency } from '@/models/property';
 import type { ClFiscalDocumentFilters } from './ir-city-ledger-fiscal-documents/types';
 import type { StatementFilters } from './ir-city-ledger-statements/ir-city-ledger-statements-filter/ir-city-ledger-statements-filter';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 export type ClPanels = 'folio' | 'fiscal-documents' | 'create-statement';
 
@@ -35,12 +40,11 @@ export class IrCityLedger {
 
   @State() resolvedPropertyId: number | null = null;
   @State() currentTab: ClPanels = 'folio';
-  @State() isLoading: boolean = false;
+  @State() isLoading: boolean = true;
   @State() agents: Agent[] = [];
   @State() selectedAgent: Agent | null = null;
   @State() taxOptions: TaxOption[] = [];
-  @State() serviceCategoryOptions: ServiceCategoryOption[] = [];
-  @State() currencySymbol: string = '$';
+  @State() svcCategories: SetupEntries[] = [];
 
   // Statement tab state
   @State() statementFrom: Moment | null = null;
@@ -51,16 +55,10 @@ export class IrCityLedger {
   @State() fiscalFilters: ClFiscalDocumentFilters = { fromDate: undefined, toDate: undefined, docNumber: '', taxableOnly: false, type: 'all', proformaOnly: false };
   @State() stmtFilters: StatementFilters = { fromDate: null, toDate: null };
 
-  private panels: { id: ClPanels; label: string }[] = [
-    { id: 'folio', label: 'Folio' },
-    { id: 'fiscal-documents', label: 'Fiscal Documents' },
-    { id: 'create-statement', label: 'Create Statement' },
-  ];
-
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private agentsService = new AgentsService();
   private propertyService = new PropertyService();
-  private bookingService = new BookingService();
+  private setupService = new SetupService();
   private systemService = new SystemService();
   private toolbarRef: HTMLIrCityLedgerToolbarElement;
   private createInvoiceDialogRef: HTMLIrClInvoiceDialogElement;
@@ -73,6 +71,9 @@ export class IrCityLedger {
     return this.agents.filter(a => a.name.toLowerCase().includes(q));
   }
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.cityLedger, () => this.init());
+
   componentWillLoad() {
     const agentId = this.getAgentIdFromSearchParams();
     if (agentId && !this.agentId) {
@@ -80,18 +81,31 @@ export class IrCityLedger {
     }
     if (this.ticket) {
       if (this.baseurl) {
-        this.tokenService.setBaseUrl(this.baseurl);
+        this.apiClientService.setBaseUrl(this.baseurl);
       }
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue === oldValue) return;
-    if (this.baseurl) this.tokenService.setBaseUrl(this.baseurl);
-    this.tokenService.setToken(this.ticket);
+    if (this.baseurl) this.apiClientService.setBaseUrl(this.baseurl);
+    this.apiClientService.setApiClient(this.ticket);
     this.init();
   }
 
@@ -129,38 +143,40 @@ export class IrCityLedger {
   private async init() {
     try {
       this.isLoading = true;
-
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.cityLedger });
       // If a property name was supplied but no numeric id, resolve the id first.
       let propertyId = this.propertyid;
       if (!propertyId && this.p) {
-        await this.propertyService.getExposedProperty({ id: null, language: this.language, aname: this.p });
+        await this.propertyService.getExposedProperty({ id: null, language: LocaleController.language, aname: this.p });
         propertyId = calendar_data.id;
       }
 
       this.resolvedPropertyId = propertyId;
       const resolvedByName = !this.propertyid && !!this.p;
       const [, setupEntries, agents, currencies] = await Promise.all([
-        resolvedByName ? Promise.resolve() : this.propertyService.getExposedProperty({ id: propertyId, language: this.language }),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_SVC_CATEGORY']),
+        resolvedByName ? Promise.resolve() : this.propertyService.getExposedProperty({ id: propertyId, language: LocaleController.language }),
+        this.setupService.getSetupEntriesByTableNameMulti(['_SVC_CATEGORY']),
         this.agentsService.getExposedAgents({ property_id: propertyId }),
         this.systemService.getExposedCurrencies(),
+        localeReady,
       ]);
       this.currencies = currencies;
       this.agents = agents ?? [];
       this.applyAgentIdProp();
 
-      const { svc_category } = this.bookingService.groupEntryTablesResult(setupEntries);
-      this.serviceCategoryOptions = (svc_category ?? []).map(entry => ({
-        id: entry.CODE_NAME,
-        label: entry.CODE_VALUE_EN,
-      }));
-
-      this.currencySymbol = calendar_data.currency?.symbol ?? '$';
+      const { svc_category } = groupEntryTablesResult(setupEntries);
+      this.svcCategories = svc_category ?? [];
     } catch (error) {
       console.error('Failed to initialize city ledger', error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private get serviceCategoryOptions(): ServiceCategoryOption[] {
+    return this.svcCategories.map(entry => ({ id: entry.CODE_NAME, label: getSetupEntryLabel(entry) }));
   }
 
   render() {
@@ -170,15 +186,15 @@ export class IrCityLedger {
 
     return (
       <Host>
-        <ir-page label={'City Ledger'} description={this.selectedAgent?.name}>
+        <ir-page label={t('Lcz_CityLedgerPageLabel', { fallback: 'City Ledger' })} description={this.selectedAgent?.name}>
           {/* Agent selector in page header */}
-          <i slot="page-description" style={{ marginLeft: '0.5rem' }}>
+          <i slot="page-description" style={{ marginInlineStart: '0.5rem' }}>
             {this.selectedAgent?.code}
           </i>
           <ir-autocomplete
             slot="page-header"
             // size="m"
-            placeholder="Select agent"
+            placeholder={t('Lcz_SelectAgentPlaceholder', { fallback: 'Select agent' })}
             class="city-ledger__agents-autocomplete"
             onText-change={(e: CustomEvent<string>) => {
               this.agentSearch = e.detail ?? '';
@@ -216,11 +232,13 @@ export class IrCityLedger {
 
           {/* No-agent prompt */}
           {!this.selectedAgent ? (
-            <ir-empty-state message="Select an agent to get started" class="city-ledger__no-agent">
+            <ir-empty-state message={t('Lcz_SelectAgentToGetStarted', { fallback: 'Select an agent to get started' })} class="city-ledger__no-agent">
               <div slot="icon" class={'city-ledger__no-agent-icon-container'}>
                 <wa-icon name="building" class="city-ledger__no-agent-icon"></wa-icon>
               </div>
-              <p class="city-ledger__no-agent-sub">Choose an agent from the selector above to view their city ledger folio, fiscal documents, and statements.</p>
+              <p class="city-ledger__no-agent-sub">
+                {t('Lcz_SelectAgentSubtext', { fallback: 'Choose an agent from the selector above to view their city ledger folio, fiscal documents, and statements.' })}
+              </p>
             </ir-empty-state>
           ) : (
             <div class="city-ledger__content">
@@ -228,7 +246,6 @@ export class IrCityLedger {
               <ir-city-ledger-toolbar
                 ref={el => (this.toolbarRef = el)}
                 agentId={this.selectedAgent?.id}
-                currencySymbol={this.currencySymbol}
                 onCreateInvoice={() => this.createInvoiceDialogRef.openModal()}
               ></ir-city-ledger-toolbar>
 
@@ -239,11 +256,9 @@ export class IrCityLedger {
                 }}
                 active={this.currentTab}
               >
-                {this.panels.map(panel => (
-                  <wa-tab key={panel.id} panel={panel.id}>
-                    {panel.label}
-                  </wa-tab>
-                ))}
+                <wa-tab panel={'folio'}>{t('Lcz_Folio', { fallback: 'Folio' })}</wa-tab>
+                <wa-tab panel={'fiscal-documents'}>{t('Lcz_FiscalDocuments', { fallback: 'Fiscal Documents' })}</wa-tab>
+                <wa-tab panel={'create-statement'}>{t('Lcz_CreateStatement', { fallback: 'Create Statement' })}</wa-tab>
 
                 <wa-tab-panel name="folio">
                   {/* {this.currentTab === 'folio' && ( */}

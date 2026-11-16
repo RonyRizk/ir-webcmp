@@ -1,8 +1,9 @@
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
-import locales from '@/stores/locales.store';
 import moment from 'moment';
 import { CountrySalesFilter } from '../types';
 
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'ir-sales-filters',
   styleUrl: 'ir-sales-filters.css',
@@ -44,7 +45,7 @@ export class IrSalesFilters {
     return (
       <ir-filter-card>
         <wa-radio-group
-          label="Rooms"
+          label={t('Lcz_Rooms', { fallback: 'Rooms' })}
           orientation="horizontal"
           size="s"
           style={{ width: '100%' }}
@@ -54,15 +55,15 @@ export class IrSalesFilters {
           }}
         >
           <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="001">
-            Booked
+            {t('Lcz_Booked', { fallback: 'Booked' })}
           </wa-radio>
           <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="002">
-            Stayed
+            {t('Lcz_Stayed', { fallback: 'Stayed' })}
           </wa-radio>
         </wa-radio-group>
 
         <wa-select
-          label="Selected period"
+          label={t('Lcz_SelectedPeriod', { fallback: 'Selected period' })}
           size="s"
           value={this.window}
           defaultValue={this.window}
@@ -77,22 +78,22 @@ export class IrSalesFilters {
             this.window = val;
           }}
         >
-          <wa-option value="7">For the past 7 days</wa-option>
-          <wa-option value="14">For the past 14 days</wa-option>
-          <wa-option value="30">For the past 30 days</wa-option>
-          <wa-option value="60">For the past 60 days</wa-option>
-          <wa-option value="90">For the past 90 days</wa-option>
-          <wa-option value="365">For the past 365 days</wa-option>
+          <wa-option value="7">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(7)] })}</wa-option>
+          <wa-option value="14">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(14)] })}</wa-option>
+          <wa-option value="30">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(30)] })}</wa-option>
+          <wa-option value="60">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(60)] })}</wa-option>
+          <wa-option value="90">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(90)] })}</wa-option>
+          <wa-option value="365">{t('Lcz_ForThePastNDays', { fallback: 'For the past %1 days', params: [formatCount(365)] })}</wa-option>
         </wa-select>
 
         <div class="or-divider">
           <span class="or-divider__line"></span>
-          <span class="or-divider__text">Or</span>
+          <span class="or-divider__text">{t('Lcz_Or', { fallback: 'Or' })}</span>
           <span class="or-divider__line"></span>
         </div>
 
         <ir-date-range-filter
-          label="Date range"
+          label={t('Lcz_DateRange', { fallback: 'Date range' })}
           fromDate={this.filters?.FROM_DATE}
           toDate={this.filters?.TO_DATE}
           maxDate={moment().format('YYYY-MM-DD')}
@@ -116,15 +117,15 @@ export class IrSalesFilters {
             this.updateFilter({ include_previous_year: (e.target as HTMLInputElement).checked });
           }}
         >
-          Compare with previous year
+          {t('Lcz_CompareWithPreviousYear', { fallback: 'Compare with previous year' })}
         </wa-checkbox>
 
         <div slot="footer">
           <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
-            {locales.entries?.Lcz_Reset ?? 'Reset'}
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
-            {locales.entries?.Lcz_Apply ?? 'Apply'}
+            {t('Lcz_Apply', { fallback: 'Apply' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

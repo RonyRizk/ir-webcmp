@@ -1,0 +1,43 @@
+/*
+ * RTL corrections for globally-loaded third-party CSS.
+ *
+ * The vendored stylesheets under src/assets are left byte-identical so they stay
+ * upgradable; everything they get wrong under an RTL document is corrected here.
+ * Only globally-scoped vendors belong in this file — a vendor sheet that is @imported
+ * into a component (air-datepicker, Quill) is corrected next to that component instead.
+ */
+
+/* ── toastr ──────────────────────────────────────────────────────────────────
+ * toastr appends #toast-container to document.body and only mirrors when its own
+ * `rtl: true` option adds an `.rtl` class, which nothing here sets. Drive the same
+ * corrections off the document direction instead.
+ */
+:dir(rtl) .toast-close-button {
+  right: auto;
+  left: -0.3em;
+  float: left;
+}
+
+:dir(rtl) #toast-container > div {
+  direction: rtl;
+  padding: 15px 50px 15px 15px;
+  background-position: right 15px center;
+}
+
+/* The four corner positions name the inline side, so they swap with the direction. */
+:dir(rtl) #toast-container.toast-top-left,
+:dir(rtl) #toast-container.toast-bottom-left {
+  left: auto;
+  right: 12px;
+}
+
+:dir(rtl) #toast-container.toast-top-right,
+:dir(rtl) #toast-container.toast-bottom-right {
+  right: auto;
+  left: 12px;
+}
+
+:dir(rtl) .toast-progress {
+  left: auto;
+  right: 0;
+}

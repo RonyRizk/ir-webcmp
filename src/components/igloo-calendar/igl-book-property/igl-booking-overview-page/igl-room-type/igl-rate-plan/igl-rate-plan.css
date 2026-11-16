@@ -88,8 +88,8 @@
 }
 
 .rp-select--nights {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
 .inventory-select {
@@ -144,33 +144,26 @@
   text-wrap: balance;
 }
 .nightBorder {
-  border-left-width: 0;
-  border-top-right-radius: 3px !important;
-  border-bottom-right-radius: 3px !important;
+  border-inline-start-width: 0;
+  border-start-end-radius: 3px !important;
+  border-end-end-radius: 3px !important;
 }
 
-:dir(rtl) .fd-rateplan__price-input::part(base),
-:dir(ltr) .fd-rateplan__nights-select::part(combobox) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+/* The price field squares its inline-end corners and the nights select its inline-start
+   ones, dropping that border so the two read as a single control in either direction. */
+.fd-rateplan__price-input::part(base) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 .fd-rateplan__price-input {
   flex: 1 1 0%;
   z-index: 1;
 }
 
-:dir(rtl) .fd-rateplan__nights-select::part(combobox),
-:dir(ltr) .fd-rateplan__price-input::part(base) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-:dir(rtl) .fd-rateplan__nights-select::part(combobox) {
-  border-right-width: 0;
-}
-
-:dir(ltr) .fd-rateplan__nights-select::part(combobox) {
-  border-left-width: 0;
+.fd-rateplan__nights-select::part(combobox) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-inline-start-width: 0;
 }
 
 .fd-rateplan__nights-select {
@@ -198,7 +191,7 @@
   }
   .edit-booking-radio {
     display: block;
-    margin-left: 0.75rem;
+    margin-inline-start: 0.75rem;
   }
   .rateplan-container {
     flex-direction: row;

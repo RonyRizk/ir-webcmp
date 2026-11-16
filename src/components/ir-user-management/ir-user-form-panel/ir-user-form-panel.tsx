@@ -1,17 +1,17 @@
 import { Component, Event, EventEmitter, Fragment, Prop, State, h } from '@stencil/core';
 
-import locales from '@/stores/locales.store';
 import { z } from 'zod';
 import { CONSTANTS } from '@/utils/constants';
 import { UserService } from '@/services/user.service';
 import calendar_data from '@/stores/calendar-data';
 import { User } from '@/models/Users';
 import { _formatTime } from '@/components/ir-booking-details/functions';
-import moment from 'moment';
 import { UAParser } from 'ua-parser-js';
 import { AllowedUser } from '../types';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
+import { formatDate } from '@/utils/date';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-user-form-panel',
   styleUrls: ['ir-user-form-panel.css', '../../../common/sheet.css'],
@@ -58,12 +58,13 @@ export class IrUserFormPanel {
   private userService = new UserService();
   private disableFields = false;
   private isPropertyAdmin = false;
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private mobileMask = {};
+  // Messages are functions so they resolve when validation runs, in the current language — not once at construction.
   private userSchema = z.object({
     mobile: z.string().optional(),
     email: z
-      .string()
+      .string({ errorMap: () => ({ message: t('Lcz_InvalidEmail', { fallback: 'Invalid email' }) }) })
       .email()
       .refine(
         async email => {
@@ -76,7 +77,7 @@ export class IrUserFormPanel {
           });
           return !exists;
         },
-        { message: 'Email already exists.' },
+        () => ({ message: t('Lcz_EmailAlreadyExists', { fallback: 'Email already exists.' }) }),
       ),
     password: z
       .string()
@@ -89,7 +90,7 @@ export class IrUserFormPanel {
           }
           return CONSTANTS.PASSWORD.test(password);
         },
-        { message: 'Password must be at least 8 characters long.' },
+        () => ({ message: t('Lcz_PasswordMinLength', { fallback: 'Password must be at least 8 characters long.' }) }),
       ),
     type: z.union([z.literal(1), z.literal(Number(this.superAdminId?.toString() ?? '5')), z.coerce.string().nonempty().min(2)]),
     username: z
@@ -108,7 +109,7 @@ export class IrUserFormPanel {
           }
           return true;
         },
-        { message: 'Username already exists.' },
+        () => ({ message: t('Lcz_UsernameAlreadyExists', { fallback: 'Username already exists.' }) }),
       ),
   });
 
@@ -183,7 +184,7 @@ export class IrUserFormPanel {
               maxlength={40}
               onText-change={e => this.updateUserField('email', e.detail)}
               value={this.userInfo.email}
-              label={locales.entries.Lcz_Email}
+              label={t('Lcz_Email', { fallback: 'Email' })}
               data-testid="email"
               id="user-email"
             ></ir-input>
@@ -192,7 +193,7 @@ export class IrUserFormPanel {
             <ir-input
               onText-change={e => this.updateUserField('mobile', e.detail)}
               value={this.userInfo.mobile}
-              label={locales.entries.Lcz_Mobile}
+              label={t('Lcz_Mobile', { fallback: 'Mobile' })}
               data-testid="mobile"
               mask={this.mobileMask}
             ></ir-input>
@@ -203,11 +204,11 @@ export class IrUserFormPanel {
                 data-testId="user_type"
                 // error={this.errors?.type && !this.userInfo.type}
                 disabled={this.disableFields}
-                label="Role"
+                label={t('Lcz_Role', { fallback: 'Role' })}
                 value={this.userInfo.type?.toString()}
                 size="s"
                 defaultValue={this.userInfo.type?.toString()}
-                placeholder={locales.entries.Lcz_Select}
+                placeholder={t('Lcz_Select', { fallback: 'Select' })}
                 onchange={e => this.updateUserField('type', (e.target as HTMLSelectElement).value)}
               >
                 {this.allowedUsersTypes.map(t => (
@@ -226,7 +227,7 @@ export class IrUserFormPanel {
                   maxlength={40}
                   value={this.userInfo.username}
                   disabled={this.disableFields}
-                  label={locales.entries.Lcz_Username}
+                  label={t('Lcz_Username', { fallback: 'Username' })}
                 ></ir-input>
               </ir-validator>
             </Fragment>
@@ -237,7 +238,7 @@ export class IrUserFormPanel {
               <ir-validator value={this.userInfo.password} schema={this.userSchema.shape.password}>
                 <ir-input
                   data-testId="password"
-                  label={locales.entries.Lcz_Password}
+                  label={t('Lcz_Password', { fallback: 'Password' })}
                   value={this.userInfo.password}
                   autocomplete="off"
                   passwordToggle
@@ -258,8 +259,14 @@ export class IrUserFormPanel {
             // this.user.type.toString() !== this.superAdminId &&
             // (this.user?.type.toString() === '17' && this.userTypeCode?.toString() === '17' ? null : (
             <div class="d-flex mt-2 align-items-center justify-content-between">
-              <h4 class="m-0 p-0 logins-history-title">{locales.entries.Lcz_Password}</h4>
-              <ir-button size="sm" btn_styles={'pr-0'} onClickHandler={() => (this.isOpen = true)} text={locales.entries.Lcz_ChangePassword} btn_color="link"></ir-button>
+              <h4 class="m-0 p-0 logins-history-title">{t('Lcz_Password', { fallback: 'Password' })}</h4>
+              <ir-button
+                size="sm"
+                btn_styles={'ir-pe-0'}
+                onClickHandler={() => (this.isOpen = true)}
+                text={t('Lcz_ChangePassword', { fallback: 'Change Password' })}
+                btn_color="link"
+              ></ir-button>
             </div>
             // ))
           )}
@@ -267,11 +274,11 @@ export class IrUserFormPanel {
         {this.user?.sign_ins?.length > 0 && (
           <section class="logins-history-section mt-2">
             <div class="d-flex align-items-center logins-history-title-container justify-content-between">
-              <h4 class="logins-history-title m-0 p-0">Recent sign-ins</h4>
+              <h4 class="logins-history-title m-0 p-0">{t('Lcz_RecentSignins', { fallback: 'Recent sign-ins' })}</h4>
               {this.user.sign_ins.length > 5 && (
                 <ir-button
-                  btn_styles={'pr-0'}
-                  text={!this.showFullHistory ? locales.entries.Lcz_ViewAll : locales.entries.Lcz_ViewLess}
+                  btn_styles={'ir-pe-0'}
+                  text={!this.showFullHistory ? t('Lcz_ViewAll', { fallback: 'View all' }) : t('Lcz_ViewLess', { fallback: 'View less' })}
                   btn_color="link"
                   size="sm"
                   onClickHandler={() => (this.showFullHistory = !this.showFullHistory)}
@@ -285,19 +292,19 @@ export class IrUserFormPanel {
                   <li class="login-entry" key={s.date + '_' + i}>
                     <div class="login-meta">
                       <p class="login-datetime">
-                        {moment(s.date, 'YYYY-MM-DD').format('DD-MMM-YYYY')} {_formatTime(s.hour?.toString(), s.minute?.toString())} |
+                        {formatDate(s.date, 'DD-MMM-YYYY')} {_formatTime(s.hour?.toString(), s.minute?.toString())} |
                       </p>
                       <p class="login-location">
                         <span class="login-ip">
-                          {locales.entries.Lcz_IP}: {s.ip}
+                          {t('Lcz_IP', { fallback: 'IP' })}: {s.ip}
                         </span>{' '}
                         &nbsp;|&nbsp;
                         <span class="login-country">
-                          {locales.entries.Lcz_Location}: {s.country}
+                          {t('Lcz_Location', { fallback: 'Location' })}: {s.country}
                         </span>{' '}
                         &nbsp;|&nbsp;
                         <span class="login-os">
-                          OS: {ua.os.name ?? 'N/A'} {ua.os.version}
+                          {t('Lcz_OS', { fallback: 'OS' })}: {ua.os.name ?? t('Lcz_NotAvailable', { fallback: 'N/A' })} {ua.os.version}
                         </span>
                       </p>
                     </div>
@@ -328,7 +335,7 @@ export class IrUserFormPanel {
         >
           {this.isOpen && (
             <ir-reset-password
-              ticket={this.token.getToken()}
+              ticket={this.ApiClient.getToken()}
               skip2Fa={true}
               username={this.user.username}
               onCloseSideBar={e => {
@@ -343,10 +350,10 @@ export class IrUserFormPanel {
         {/* </section> */}
         {/* <div class="sheet-footer">
           <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button data-testid="save" size="m" loading={this.isLoading} class="flex-fill" type="submit" variant="brand">
-            {locales.entries.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div> */}
       </form>

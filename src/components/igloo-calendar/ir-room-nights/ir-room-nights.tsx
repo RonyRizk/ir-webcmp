@@ -1,14 +1,17 @@
 import { Component, Prop, State, h, Event, EventEmitter, Fragment } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { convertDatePrice, formatDate, getDaysArray } from '@/utils/utils';
+import { convertDatePrice, getDaysArray } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 import { Booking, Day, IUnit, Room } from '@/models/booking.dto';
 import { IRoomNightsDataEventPayload } from '@/models/property-types';
 import moment from 'moment';
-import locales from '@/stores/locales.store';
 import { Night, Variation } from '@/models/property';
 import booking_store from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
+import { formatAmount, formatBookingNumber } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-room-nights',
   styleUrls: ['ir-room-nights.css', '../../../common/sheet.css'],
@@ -53,7 +56,7 @@ export class IrRoomNights {
     try {
       const { from_date } = this.defaultDates;
       this.dates = { from_date: from_date < this.fromDate ? from_date : this.fromDate, to_date: this.toDate };
-      this.bookingEvent = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: this.language });
+      this.bookingEvent = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: LocaleController.language });
       if (this.bookingEvent) {
         const filteredRooms = this.bookingEvent.rooms.filter(room => room.identifier === this.identifier);
         this.selectedRoom = filteredRooms[0];
@@ -116,7 +119,7 @@ export class IrRoomNights {
           adult: this.selectedRoom.rateplan.selected_variation.adult_nbr,
           child: this.selectedRoom.rateplan.selected_variation.child_nbr,
         },
-        language: this.language,
+        language: LocaleController.language,
         currency: this.bookingEvent.currency,
         room_type_ids: [this.selectedRoom.roomtype.id],
         rate_plan_ids: [rate_plan_id],
@@ -145,7 +148,7 @@ export class IrRoomNights {
 
   private renderInputField(index: number, currency_symbol: string, day: Day) {
     return (
-      <div class="col-3 ml-1 position-relative  m-0 p-0 rate-input-container">
+      <div class="col-3 ir-ms-1 position-relative  m-0 p-0 rate-input-container">
         <ir-price-input
           value={day.amount > 0 ? day.amount.toString() : ''}
           disabled={this.inventory === 0 || this.inventory === null}
@@ -159,7 +162,7 @@ export class IrRoomNights {
   }
 
   private renderReadOnlyField(currency_symbol: string, day: Day) {
-    return <p class="col-9 ml-1 m-0 p-0">{`${currency_symbol}${Number(day.amount).toFixed(2)}`}</p>;
+    return <p class="col-9 ir-ms-1 m-0 p-0">{formatAmount(currency_symbol, Number(day.amount))}</p>;
   }
   private renderRateFields(index: number, currency_symbol: string, day: Day) {
     if (this.isEndDateBeforeFromDate) {
@@ -242,22 +245,23 @@ export class IrRoomNights {
         <ir-title
           class="p-1 sheet-header"
           onCloseSideBar={() => this.closeRoomNightsDialog.emit({ type: 'cancel', pool: this.pool })}
-          label={`${locales.entries.Lcz_AddingRoomNightsTo} ${this.selectedRoom?.roomtype?.name} ${(this.selectedRoom?.unit as IUnit).name}`}
+          label={`${t('Lcz_AddingRoomNightsTo')} ${this.selectedRoom?.roomtype?.name} ${(this.selectedRoom?.unit as IUnit).name}`}
           displayContext="sidebar"
         ></ir-title>
-        <section class={'text-left px-1 pt-0 sheet-body'}>
+        <section class={'ir-text-start px-1 pt-0 sheet-body'}>
           <p class={'font-medium-1'}>
-            {`${locales.entries.Lcz_Booking}#`} {this.bookingNumber}
+            {`${t('Lcz_Booking', { fallback: 'Booking' })}#`} {formatBookingNumber(this.bookingNumber)}
           </p>
           {this.initialLoading ? (
-            <p class={'mt-2 text-secondary'}>{locales.entries['Lcz_CheckingRoomAvailability ']}</p>
+            <p class={'mt-2 text-secondary'}>{t('Lcz_CheckingRoomAvailability ')}</p>
           ) : (
             <Fragment>
-              <p class={'font-weight-bold font-medium-1'}>{`${formatDate(this.dates.from_date, 'YYYY-MM-DD')} - ${formatDate(this.dates.to_date, 'YYYY-MM-DD')}`}</p>
+              <p class={'font-weight-bold font-medium-1'}>{`${formatDate(this.dates.from_date, 'ddd, DD MMM YYYY')} - ${formatDate(this.dates.to_date, 'ddd, DD MMM YYYY')}`}</p>
               <p class={'font-medium-1 mb-0'}>
-                {`${this.selectedRoom.rateplan.name}`} {this.selectedRoom.rateplan.is_non_refundable && <span class={'irfontgreen'}>{locales.entries.Lcz_NonRefundable}</span>}
+                {`${this.selectedRoom.rateplan.name}`}{' '}
+                {this.selectedRoom.rateplan.is_non_refundable && <span class={'irfontgreen'}>{t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}</span>}
               </p>
-              {(this.inventory === 0 || this.inventory === null) && <p class="font-medium-1 text danger">{locales.entries.Lcz_NoAvailabilityForAdditionalNights}</p>}
+              {(this.inventory === 0 || this.inventory === null) && <p class="font-medium-1 text danger">{t('Lcz_NoAvailabilityForAdditionalNights')}</p>}
 
               {this.selectedRoom.rateplan.custom_text && <p class={'text-secondary mt-0'}>{this.selectedRoom.rateplan.custom_text}</p>}
               {booking_store.roomTypes?.length > 0 && calendar_data.tax_statement && (
@@ -274,7 +278,7 @@ export class IrRoomNights {
           <ir-button
             btn_color="secondary"
             btn_disabled={this.isLoading}
-            text={locales?.entries.Lcz_Cancel}
+            text={t('Lcz_Cancel', { fallback: 'Cancel' })}
             class="full-width"
             btn_styles="justify-content-center"
             onClickHandler={() => this.closeRoomNightsDialog.emit({ type: 'cancel', pool: this.pool })}
@@ -283,7 +287,7 @@ export class IrRoomNights {
           {this.inventory > 0 && this.inventory !== null && (
             <ir-button
               isLoading={this.isLoading}
-              text={locales?.entries.Lcz_Confirm}
+              text={t('Lcz_Confirm', { fallback: 'Confirm' })}
               btn_disabled={this.isButtonDisabled()}
               class="full-width"
               btn_styles="justify-content-center"

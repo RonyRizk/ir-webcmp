@@ -30,6 +30,14 @@ export type PaymentMode = z.infer<typeof PaymentModeSchema>;
 export const ClPostTimingSchema = CodeDescriptionSchema;
 export type ClPostTiming = z.infer<typeof ClPostTimingSchema>;
 
+/** Agent-specific name mapped to a property room type (tour operators only). */
+export const AgentRtNamingSchema = z.object({
+  id: z.number().default(-1),
+  room_type_id: z.number(),
+  name: z.string(),
+});
+export type AgentRtNaming = z.infer<typeof AgentRtNamingSchema>;
+
 export const AgentBaseSchema = z.object({
   address: z.string(),
   agent_rate_type_code: AgentRateTypeCodeSchema,
@@ -59,6 +67,7 @@ export const AgentBaseSchema = z.object({
   verification_mode: z.string().nullable().default(null),
   has_opening_balance: z.boolean().optional().default(false),
   cl_post_timing: ClPostTimingSchema.optional(),
+  rt_namings: z.array(AgentRtNamingSchema).nullable().optional(),
 });
 
 export const AgentSchema = AgentBaseSchema.superRefine((value, ctx) => {

@@ -1,14 +1,17 @@
 import { Component, Element, Listen, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { RoomService } from '@/services/room.service';
 import { DpReportService } from '@/services/dp-report.service';
-import locales from '@/stores/locales.store';
 import dp_report, { updateDpReportFilters } from '@/stores/dp_report.store';
 import { mapBookingToDpRow } from './types';
 import { isOptimReadOnly } from '@/stores/calendar-data';
 import { PropertyService } from '@/services/property';
 import { AllowedProperties } from '@/services/property/types';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 export type DPReportPageTabs = 'chart' | 'bookings';
 
@@ -35,19 +38,35 @@ export class IrDpReport {
   @State() allowedProperties: AllowedProperties = null;
   @State() minAllowedDate: string | undefined;
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
   private dpReportService = new DpReportService();
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.dpReport, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -55,7 +74,7 @@ export class IrDpReport {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -83,6 +102,9 @@ export class IrDpReport {
   private async initializeApp() {
     this.isPageLoading = true;
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.dpReport });
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
       }
@@ -91,30 +113,26 @@ export class IrDpReport {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
         propertyId = propertyData.My_Result.id;
       }
 
       this.propertyId = propertyId;
-      const [languageTexts, allowedProperties] = await Promise.all([
-        this.roomService.fetchLanguage(this.language),
+      const [, allowedProperties] = await Promise.all([
+        localeReady,
         this.propertyService.getActiveOptimExposedProperties(),
         !this.propertyid
           ? Promise.resolve(null)
           : this.roomService.getExposedProperty({
               id: this.propertyId,
               aname: this.p,
-              language: this.language,
+              language: LocaleController.language,
               is_backend: true,
             }),
         await this.fetchInitialDpReport(),
       ]);
-      if (!locales.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
 
       this.allowedProperties = allowedProperties && allowedProperties.length > 1 ? allowedProperties : null;
     } catch (error) {
@@ -205,16 +223,17 @@ export class IrDpReport {
     }
     return (
       <ir-page
-        description="The dynamic pricing effect is calculated at the time the booking is
-created and remains fixed thereafter, serving as an indicator of the additional profit generated or of
-the incentive price reduction."
-        label="Dynamic Pricing Effect"
+        description={t('Lcz_DynamicPricingEffectTooltip', {
+          fallback:
+            'The dynamic pricing effect is calculated at the time the booking is created and remains fixed thereafter, serving as an indicator of the additional profit generated or of the incentive price reduction.',
+        })}
+        label={t('Lcz_DynamicPricingEffect', { fallback: 'Dynamic Pricing Effect' })}
         class="dp-report__page"
       >
         {this.allowedProperties && (
           <ir-autocomplete
             slot="page-header"
-            placeholder="Change property"
+            placeholder={t('Lcz_ChangeProperty', { fallback: 'Change property' })}
             withExpandIcon
             class={'dp-report__property-select'}
             value={this.allowedProperties.find(property => property.id === this.propertyId)?.name ?? ''}
@@ -232,21 +251,23 @@ the incentive price reduction."
           <wa-callout size="s" variant="danger" class="dp-report__callout">
             <wa-icon slot="icon" name="face-frown"></wa-icon>
             <div class="dp-report__callout-header">
-              <b>Missed Profit</b>
+              <b>{t('Lcz_MissedProfit', { fallback: 'Missed Profit' })}</b>
               <wa-badge pill variant="danger">
-                SIMULATION
+                {t('Lcz_Simulation', { fallback: 'SIMULATION' })}
               </wa-badge>
             </div>
             <p class="dp-report__callout-text">
-              The figures below estimate the additional profit your hotel could have generated if Dynamic Pricing had been enabled during the selected period. Contact your account
-              manager to subscribe.
+              {t('Lcz_MissedProfitCalloutText', {
+                fallback:
+                  'The figures below estimate the additional profit your hotel could have generated if Dynamic Pricing had been enabled during the selected period. Contact your account manager to subscribe.',
+              })}
             </p>
           </wa-callout>
         )}
         <ir-dp-report-summary></ir-dp-report-summary>
         <wa-tab-group active={this.activeTab} activation="manual" onwa-tab-show={this.handleTabShow}>
-          <wa-tab panel="chart">Chart</wa-tab>
-          <wa-tab panel="bookings">Bookings</wa-tab>
+          <wa-tab panel="chart">{t('Lcz_Chart', { fallback: 'Chart' })}</wa-tab>
+          <wa-tab panel="bookings">{t('Lcz_Bookings', { fallback: 'Bookings' })}</wa-tab>
           <wa-tab-panel name="chart">
             <ir-dp-report-filters minDate={this.minAllowedDate}></ir-dp-report-filters>
             <ir-dp-report-chart></ir-dp-report-chart>

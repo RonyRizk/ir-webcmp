@@ -60,3 +60,9 @@
     min-width: 250px;
   }
 }
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
+}

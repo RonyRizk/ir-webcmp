@@ -1,15 +1,20 @@
 # ir-login
 
-
-
 <!-- Auto Generated Below -->
+
+
+## Properties
+
+| Property   | Attribute  | Description | Type     | Default |
+| ---------- | ---------- | ----------- | -------- | ------- |
+| `language` | `language` |             | `string` | `'en'`  |
 
 
 ## Events
 
-| Event        | Description | Type                                                           |
-| ------------ | ----------- | -------------------------------------------------------------- |
-| `authFinish` |             | `CustomEvent<{ token: string; code: "error" \| "succsess"; }>` |
+| Event        | Description | Type                                                               |
+| ------------ | ----------- | ------------------------------------------------------------------ |
+| `authFinish` |             | `CustomEvent<{ ApiClient: string; code: "error" \| "succsess"; }>` |
 
 
 ## Dependencies

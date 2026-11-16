@@ -1,7 +1,9 @@
 import { Component, Element, Event, EventEmitter, Fragment, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { formatLegendColors, isBlockUnit } from '@/utils/utils';
+import { t } from '@/services/locale/t';
 import { addDaysISO, addMonthsISO, ISO_FORMAT, nightsBetween, todayISO } from '@/utils/calendar-dates';
 import {
   realtimeService,
@@ -13,7 +15,7 @@ import {
   type DayUseRemovedPayload,
 } from '@/services/realtime/realtime.service';
 import { EventsService } from '@/services/events.service';
-import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
+import { ICountry, SetupEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
 import { UnassignedUnitsService } from '@/services/unassigned-units';
 import {
@@ -32,10 +34,11 @@ import calendar_dates, { addCleaningTasks, addRoomForCleaning, cleanRoom } from 
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { beginUnassignedUnitsFetch, onUnassignedUnitsChange, replaceUnassignedUnitsRange } from '@/stores/unassigned-units.store';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { RoomType } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
-import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
+import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping';
+import { isRtlDirection, ROOM_HEADER_WIDTH } from '@/utils/calendar-grid';
 import housekeeping_store from '@/stores/housekeeping.store';
 import type { DayUseBookings, ExposedRectifierParams, SetRoomCalendarExtraParams } from '@/services/property/types';
 import { PropertyService } from '@/services/property.service';
@@ -43,6 +46,9 @@ import { CheckoutDialogCloseEvent } from '../ir-checkout-dialog/ir-checkout-dial
 import { CheckoutRoomEvent } from '../ir-departures/ir-departures-table/ir-departures-table';
 import { DoDayUseParams, SetDepartureTimeProps } from '@/services/booking-service/types';
 import { HKIssue } from '@/models/housekeeping';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 // import Auth from '@/models/Auth';
 export type CalendarSidebarState = {
   type: 'room-guests' | 'booking-details' | 'add-days' | 'bulk-blocks' | 'split' | 'reallocate-drawer' | 'rectifier';
@@ -171,6 +177,7 @@ export class IglooCalendar {
   @Event() showRoomNightsDialog: EventEmitter<IRoomNightsData>;
 
   private bookingService: BookingService = new BookingService();
+  private setupService = new SetupService();
   private roomService: RoomService = new RoomService();
   private propertyService = new PropertyService();
   private eventsService = new EventsService();
@@ -179,13 +186,18 @@ export class IglooCalendar {
   // private auth = new Auth();
   private countries: ICountry[] = [];
   private visibleCalendarCells: { x: any[]; y: any[] } = { x: [], y: [] };
+  /**
+   * Set whenever `addDatesToCalendar()` appends day cells, so an in-flight drag knows its cached
+   * drop-target bounds are short a few days and re-measures on the next `DRAG_OVER`.
+   */
+  private dragOverBoundsStale = false;
   private scrollContainer: HTMLElement;
   /** `YYYY-MM-DD` */
   private today: string = '';
   private reachedEndOfCalendar = false;
 
   private unsubscribeRealtime: (() => void) | null = null;
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private calendarModalEl: HTMLIrModalElement;
 
   private salesQueue = new BatchingQueue<SalesBatchPayload[]>(this.processSalesBatch.bind(this), {
@@ -211,23 +223,33 @@ export class IglooCalendar {
   private roomTypeIdsCache: Map<number, { id: number; index: number } | 'skip'> = new Map();
   private tasksEndDate: string;
   dialogEl: HTMLIrDialogElement;
-  private departureTimes: IEntries[];
+  private departureTimes: SetupEntries[];
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.calendar, () => this.initializeApp());
 
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     this.init();
   }
   componentDidLoad() {
     this.scrollToElement(this.today);
+    this.languageSync.connect();
   }
 
   disconnectedCallback() {
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
+    this.languageSync.disconnect();
     this.clearUnassignedDatesTimers();
     this.pendingUnassignedRanges = [];
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Listen('deleteButton')
@@ -339,37 +361,65 @@ export class IglooCalendar {
 
   @Listen('dragOverEventData')
   dragOverEventDataHandler(event: CustomEvent) {
-    if (event.detail.id === 'CALCULATE_DRAG_OVER_BOUNDS') {
-      let topLeftCell = document.querySelector('igl-cal-header .topLeftCell') as HTMLElement;
-      let containerDays = document.querySelectorAll('.headersContainer .headerCell');
-      let containerRooms = document.querySelectorAll('.bodyContainer .roomRow .roomTitle');
-      this.visibleCalendarCells = { x: [], y: [] };
-
-      containerDays.forEach(element => {
-        const htmlElement = element as HTMLElement;
-        this.visibleCalendarCells.x.push({
-          left: htmlElement.offsetLeft + topLeftCell.offsetWidth,
-          width: htmlElement.offsetWidth,
-          id: htmlElement.getAttribute('data-date'),
-        });
-      });
-
-      containerRooms.forEach(element => {
-        const htmlElement = element as HTMLElement;
-        this.visibleCalendarCells.y.push({
-          top: htmlElement.offsetTop,
-          height: htmlElement.offsetHeight,
-          id: htmlElement.getAttribute('data-room'),
-        });
-      });
-      this.highlightDragOver(true, event.detail.data);
-    } else if (event.detail.id === 'DRAG_OVER') {
-      this.highlightDragOver(true, event.detail.data);
-    } else if (event.detail.id === 'DRAG_OVER_END') {
-      this.highlightDragOver(false, event.detail.data);
-    } else if (event.detail.id === 'STRETCH_OVER_END') {
-      this.highlightDragOver(false, event.detail.data);
+    const { id, data } = event.detail;
+    // Auto-scrolling to the end of the loaded range makes `calendarScrolling()` lazy-load two more
+    // months mid-drag. Those day cells aren't in the bounds measured when the drag started, so a
+    // drop onto one would resolve to no day at all and revert. Re-measure before the next
+    // hit-test, whichever one that is - a stretch reports nothing at all until it ends, so waiting
+    // for a DRAG_OVER would miss it.
+    if (id === 'CALCULATE_DRAG_OVER_BOUNDS' || this.dragOverBoundsStale) {
+      this.measureDragOverBounds();
     }
+    if (id === 'CALCULATE_DRAG_OVER_BOUNDS' || id === 'DRAG_OVER') {
+      this.highlightDragOver(true, data);
+    } else if (id === 'DRAG_OVER_END' || id === 'STRETCH_OVER_END') {
+      this.highlightDragOver(false, data);
+    } else if (id === 'DRAG_CANCEL') {
+      // The bar has already put itself back; there is no drop to resolve, only a highlight to clear.
+      this.dragOverHighlightElement.emit({ dragOverElement: '' });
+    }
+  }
+
+  /**
+   * Caches every day column's and room row's extent, in `.bodyContainer` grid space - the same
+   * space `igl-booking-event` writes its `style.top`/`style.left` in, so a dragged bar's position
+   * can be hit-tested against it directly. Measured once per drag; the values are scroll-invariant
+   * (the day header is sticky vertically only, `offsetTop` ignores `scrollTop`), so only a change
+   * to the set of rendered cells invalidates them.
+   */
+  private measureDragOverBounds() {
+    const bodyContainer = document.querySelector('.bodyContainer') as HTMLElement;
+    const bodyContainerRect = bodyContainer.getBoundingClientRect();
+    let containerDays = document.querySelectorAll('.headersContainer .headerCell');
+    let containerRooms = document.querySelectorAll('.bodyContainer .roomRow .roomTitle');
+    this.visibleCalendarCells = { x: [], y: [] };
+
+    // Measure the header day cells' true rendered position relative to .bodyContainer
+    // (getBoundingClientRect), rather than reconstructing it from offsetLeft. igl-cal-header's
+    // .topLeftCell and .headersContainer are separate sibling boxes that bidi-mirror
+    // independently of each other in RTL, while igl-booking-event's own coordinate system
+    // (element.style.left, which this array is hit-tested against) treats the room-header
+    // column and day cells as one combined mirrored box - the two reconstructions only happen
+    // to agree in LTR. Reading the actual rendered rect sidesteps that mismatch entirely.
+    containerDays.forEach(element => {
+      const htmlElement = element as HTMLElement;
+      const rect = htmlElement.getBoundingClientRect();
+      this.visibleCalendarCells.x.push({
+        left: rect.left - bodyContainerRect.left,
+        width: rect.width,
+        id: htmlElement.getAttribute('data-date'),
+      });
+    });
+
+    containerRooms.forEach(element => {
+      const htmlElement = element as HTMLElement;
+      this.visibleCalendarCells.y.push({
+        top: htmlElement.offsetTop,
+        height: htmlElement.offsetHeight,
+        id: htmlElement.getAttribute('data-room'),
+      });
+    });
+    this.dragOverBoundsStale = false;
   }
 
   @Watch('ticket')
@@ -377,7 +427,7 @@ export class IglooCalendar {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -387,7 +437,7 @@ export class IglooCalendar {
       to: this.to_date,
     };
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
     this.calDates = {
@@ -405,19 +455,19 @@ export class IglooCalendar {
       case 'checkin': {
         const unitName = this.dialogData.roomName;
         if (unitName) {
-          return `Are you sure you want to check in unit ${unitName}?`;
+          return `${t('Lcz_ConfirmCheckInUnit', { fallback: 'Are you sure you want to check in unit' })} ${unitName}?`;
         }
-        return `Are you sure you want to check in this unit?`;
+        return t('Lcz_ConfirmCheckIn', { fallback: 'Are you sure you want to Check In this unit?' });
       }
       case 'checkout': {
-        return 'Are you sure you want to Check Out this unit?';
+        return t('Lcz_ConfirmCheckOut', { fallback: 'Are you sure you want to Check Out this unit?' });
       }
       case 'reallocate':
         return this.dialogData?.description || '';
       case 'stretch':
-        return 'Warning ';
+        return t('Lcz_Warning', { fallback: 'Warning ' });
       default:
-        return 'Unknown modal content';
+        return t('Lcz_UnknownModalContent', { fallback: 'Unknown modal content' });
     }
   }
   private setUpCalendarData(roomResp, bookingResp) {
@@ -439,6 +489,9 @@ export class IglooCalendar {
 
   private async initializeApp() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.calendar });
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
@@ -449,7 +502,7 @@ export class IglooCalendar {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
           include_units_hk_status: true,
           include_sales_rate_plans: true,
@@ -459,11 +512,11 @@ export class IglooCalendar {
       }
       this.property_id = propertyId;
       const requests = [
-        this.bookingService.getCalendarData(propertyId, this.from_date, this.to_date),
-        this.bookingService.getCountries(this.language),
-        this.roomService.fetchLanguage(this.language),
+        this.bookingService.getCalendarData({ propertyid: propertyId, from_date: this.from_date, to_date: this.to_date, language: LocaleController.language }),
+        this.bookingService.getCountries(LocaleController.language),
+        localeReady,
         this.getHkIssues(propertyId),
-        this.housekeepingService.getExposedHKSetup(this.property_id),
+        this.housekeepingService.getExposedHKSetup({ property_id: this.property_id }),
         //this.housekeepingService.getHkIssues({ property_id: propertyId }),
       ];
 
@@ -472,7 +525,7 @@ export class IglooCalendar {
         requests.push(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
             include_units_hk_status: true,
             include_sales_rate_plans: true,
@@ -595,7 +648,7 @@ export class IglooCalendar {
     calendar_data.unitIssues = new Map(_issues);
   }
   private async fetchSetupEntries() {
-    const d = await this.bookingService.getSetupEntriesByTableName('_DEPARTURE_TIME');
+    const d = await this.setupService.getSetupEntriesByTableName('_DEPARTURE_TIME');
     this.departureTimes = d;
   }
   private async getHousekeepingTasks({ from_date, to_date }: { from_date: string; to_date: string }) {
@@ -604,6 +657,7 @@ export class IglooCalendar {
       from_date,
       to_date,
       housekeepers: [],
+      language: LocaleController.language,
       cleaning_frequency: (calendar_data.cleaning_frequency ?? housekeeping_store?.hk_criteria?.cleaning_frequencies[0])?.code,
       dusty_window: housekeeping_store?.hk_criteria?.dusty_periods[0]?.code,
       highlight_window: housekeeping_store?.hk_criteria?.highlight_checkin_options[0]?.code,
@@ -925,7 +979,7 @@ export class IglooCalendar {
       return;
     }
     try {
-      const results = await this.bookingService.getCalendarData(this.property_id, fromDate, toDate);
+      const results = await this.bookingService.getCalendarData({ propertyid: this.property_id, from_date: fromDate, to_date: toDate });
       this.applyRefreshedDays(results.days ?? []);
     } catch (error) {
       console.error('Error refetching calendar availabilities after UPDATE_CALENDAR_AVAILABILITIES', error);
@@ -1189,12 +1243,20 @@ export class IglooCalendar {
     const topLeftCell = this.element.querySelector('.topLeftCell');
     const gotoDay = this.element.querySelector(`.headerCell[data-date="${goToDate}"]`);
     if (gotoDay) {
+      const isRtl = isRtlDirection(locales.direction);
+      // scrollLeft:0 lands on the start edge regardless of direction (per the CSSOM View spec,
+      // modern browsers report scrollLeft as 0-or-negative in RTL containers). From there we
+      // measure the target day's offset from the same edge the sticky room-header column is
+      // pinned to, which flips from the container's left to its right edge in RTL.
       this.scrollContainer.scrollTo({ left: 0 });
       const gotoRect = gotoDay.getBoundingClientRect();
       const containerRect = this.scrollContainer.getBoundingClientRect();
       const topLeftCellRect = topLeftCell.getBoundingClientRect();
+      const offset = isRtl
+        ? containerRect.right - gotoRect.right - topLeftCellRect.width - gotoRect.width
+        : gotoRect.left - containerRect.left - topLeftCellRect.width - gotoRect.width;
       this.scrollContainer.scrollTo({
-        left: gotoRect.left - containerRect.left - topLeftCellRect.width - gotoRect.width,
+        left: isRtl ? -offset : offset,
       });
     }
   }
@@ -1318,7 +1380,14 @@ export class IglooCalendar {
   }
 
   private async addDatesToCalendar(fromDate: string, toDate: string) {
-    const [results] = await Promise.all([this.bookingService.getCalendarData(this.property_id, fromDate, toDate)]);
+    const [results] = await Promise.all([
+      this.bookingService.getCalendarData({
+        propertyid: this.property_id,
+        from_date: fromDate,
+        to_date: toDate,
+        language: LocaleController.language,
+      }),
+    ]);
     this.fetchDayUseBookings(this.property_id, fromDate, toDate);
 
     const newBookings = results.myBookings || [];
@@ -1388,6 +1457,7 @@ export class IglooCalendar {
       };
       await this.fetchUnassignedUnitsRange(fromDate, toDate);
     }
+    this.dragOverBoundsStale = true;
   }
   async handleDateSearch(dates: { start: Moment; end: Moment }) {
     const startDate = dates.start.format(ISO_FORMAT);
@@ -1465,11 +1535,14 @@ export class IglooCalendar {
           }
         }
       }
+      const isRtl = isRtlDirection(locales.direction);
       const containerRect = this.scrollContainer.getBoundingClientRect();
-      let leftSideMenuSize = 170;
+      let leftSideMenuSize = ROOM_HEADER_WIDTH;
       let maxWidth = containerRect.width - leftSideMenuSize;
-      let leftX = containerRect.x + leftSideMenuSize;
-      let rightX = containerRect.x + containerRect.width;
+      // The sticky room-header column is pinned to the physical left in LTR but to the physical
+      // right in RTL (inset-inline-start: 0), so the usable/scrollable grid bounds mirror too.
+      let leftX = isRtl ? containerRect.x : containerRect.x + leftSideMenuSize;
+      let rightX = isRtl ? containerRect.x + containerRect.width - leftSideMenuSize : containerRect.x + containerRect.width;
 
       let cells = Array.from(this.element.querySelectorAll('.monthCell')) as HTMLElement[];
 
@@ -1477,7 +1550,10 @@ export class IglooCalendar {
         cells.map(async (monthContainer: HTMLElement) => {
           let monthRect = monthContainer.getBoundingClientRect();
           if (cells.indexOf(monthContainer) === cells.length - 1) {
-            if (monthRect.x + monthRect.width <= rightX && !this.reachedEndOfCalendar) {
+            // The chronologically-last month is the rightmost cell in LTR but the leftmost cell
+            // in RTL (mirrored grid), so "has it scrolled fully into view" checks the opposite edge.
+            const reachedEnd = isRtl ? monthRect.x >= leftX : monthRect.x + monthRect.width <= rightX;
+            if (reachedEnd && !this.reachedEndOfCalendar) {
               this.reachedEndOfCalendar = true;
               //await this.addNextTwoMonthsToCalendar();
               const loadedTo = this.calendarData.to_date;
@@ -1489,6 +1565,21 @@ export class IglooCalendar {
             // item end is scrolled outside view, in -x
           } else if (monthRect.x > rightX) {
             // item is outside scrollview, in +x
+          } else if (isRtl) {
+            // Mirror of the LTR branch below: the sticky room-header column sits at the physical
+            // end edge (right) in RTL instead of the start edge (left), so the month currently
+            // scrolling underneath it is pinned/clipped from the right instead of the left.
+            let titleElement = monthContainer.querySelector('.monthTitle') as HTMLElement;
+            let marginStart = 0;
+            let monthWidth = monthRect.width;
+            if (monthRect.x + monthRect.width > rightX) {
+              marginStart = monthRect.x + monthRect.width - rightX;
+              monthWidth = monthRect.x < leftX ? maxWidth : rightX - monthRect.x;
+            } else {
+              monthWidth = maxWidth - monthWidth > monthWidth ? monthWidth : monthRect.x + monthRect.width - leftX;
+            }
+            titleElement.style.marginInlineStart = marginStart + 'px';
+            titleElement.style.width = monthWidth + 'px';
           } else {
             let titleElement = monthContainer.querySelector('.monthTitle') as HTMLElement;
             let marginLeft = 0;
@@ -1500,7 +1591,7 @@ export class IglooCalendar {
             } else {
               monthWidth = maxWidth - monthWidth > monthWidth ? monthWidth : maxWidth - monthRect.x + leftX;
             }
-            titleElement.style.marginLeft = marginLeft + 'px';
+            titleElement.style.marginInlineStart = marginLeft + 'px';
             titleElement.style.width = monthWidth + 'px';
           }
         });
@@ -1522,7 +1613,12 @@ export class IglooCalendar {
   private async highlightDragOver(hightLightElement, currentPosition) {
     let xElement, yElement;
     if (currentPosition) {
-      xElement = this.visibleCalendarCells.x.find(pos => pos.left < currentPosition.x && currentPosition.x <= pos.left + pos.width);
+      // The booking bar's physical-left edge is the later (checkout) date and its physical-right
+      // edge is the earlier (check-in) date in RTL - the mirror of LTR, since the whole bar is
+      // reflected (see toPhysicalLeft in calendar-grid.ts) - so which edge identifies the
+      // check-in day flips too. Falls back to the left edge when width wasn't provided.
+      const checkInX = isRtlDirection(locales.direction) && typeof currentPosition.width === 'number' ? currentPosition.x + currentPosition.width : currentPosition.x;
+      xElement = this.visibleCalendarCells.x.find(pos => pos.left < checkInX && checkInX <= pos.left + pos.width);
       yElement = this.visibleCalendarCells.y.find(pos => pos.top < currentPosition.y && currentPosition.y <= pos.top + pos.height);
     }
     // console.log(hightLightElement+":::"+yElement.id+"_"+xElement.id);
@@ -1607,35 +1703,8 @@ export class IglooCalendar {
     }
     this.roomNightsData = null;
   }
-  private handleSideBarToggle(e: CustomEvent<boolean>) {
-    if (e.detail) {
-      this.calendarSidebarState = null;
-      if (this.editBookingItem) {
-        this.editBookingItem = null;
-      }
-      if (this.dialogData?.reason === 'reallocate') {
-        this.revertBooking.emit(this.dialogData.pool);
-        this.dialogData = null;
-      }
-    }
-  }
   private handleCloseBookingWindow() {
     this.bookingItem = null;
-  }
-  private get isSidebarOpen(): boolean {
-    // 1) Always open when editing a booking
-    if (this.editBookingItem && this.editBookingItem.event_type === 'EDIT_BOOKING') {
-      return false;
-    }
-
-    // 2) Open for sidebar-based flows (but not room-guests, which uses <ir-room-guests>)
-    if (this.calendarSidebarState) {
-      const type = this.calendarSidebarState.type;
-      return type === 'split';
-    }
-
-    // 3) Default: closed
-    return false;
   }
   private handleInvoiceClose(event: CustomEvent<void>): void {
     event.stopImmediatePropagation();
@@ -1689,7 +1758,12 @@ export class IglooCalendar {
                   onOptionEvent={evt => this.onOptionSelect(evt)}
                 ></igl-day-use-bookings>
               )}
-              <div class="calendarScrollContainer" onMouseDown={event => this.dragScrollContent(event)} onScroll={() => this.calendarScrolling()}>
+              <div
+                class="calendarScrollContainer"
+                dir={isRtlDirection(locales.direction) ? 'rtl' : 'ltr'}
+                onMouseDown={event => this.dragScrollContent(event)}
+                onScroll={() => this.calendarScrolling()}
+              >
                 <div id="calendarContainer">
                   <igl-cal-header
                     to_date={this.to_date}
@@ -1722,7 +1796,7 @@ export class IglooCalendar {
               </div>
             </Fragment>
           ) : (
-            <ir-loading-screen message="Preparing Calendar Data"></ir-loading-screen>
+            <ir-loading-screen message={t('Lcz_PreparingCalendarData', { fallback: 'Preparing Calendar Data' })}></ir-loading-screen>
           )}
         </div>
         {/* {this.bookingItem && (
@@ -1738,28 +1812,12 @@ export class IglooCalendar {
             onCloseBookingWindow={() => this.handleCloseBookingWindow()}
           ></igl-book-property>
         )} */}
-        <ir-sidebar
-          onIrSidebarToggle={this.handleSideBarToggle.bind(this)}
-          open={this.isSidebarOpen}
-          showCloseButton={false}
-          sidebarStyles={{
-            width: this.calendarSidebarState?.type === 'room-guests' ? '60rem' : this.editBookingItem ? '80rem' : 'var(--sidebar-width,40rem)',
-            background: this.editBookingItem ? 'var(--ir-color-muted-background,#f2f3f8)' : 'white',
-          }}
-        >
-          {this.calendarSidebarState?.type === 'split' && (
-            <igl-split-booking
-              slot="sidebar-body"
-              booking={this.calendarSidebarState?.payload?.booking}
-              identifier={this.calendarSidebarState?.payload?.identifier}
-              onCloseModal={() => (this.calendarSidebarState = null)}
-            ></igl-split-booking>
-          )}
-          {/* {this.calendarSidebarState?.type === 'bulk-blocks' && (
-            <igl-bulk-operations slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-operations>
-            // <igl-bulk-stop-sale slot="sidebar-body" property_id={this.property_id} onCloseModal={() => (this.calendarSidebarState = null)}></igl-bulk-stop-sale>
-          )} */}
-        </ir-sidebar>
+        <igl-split-booking-drawer
+          open={this.calendarSidebarState?.type === 'split'}
+          booking={this.calendarSidebarState?.payload?.booking}
+          identifier={this.calendarSidebarState?.payload?.identifier}
+          onCloseModal={() => (this.calendarSidebarState = null)}
+        ></igl-split-booking-drawer>
         <igl-rate-extender-drawer
           open={!!this.roomNightsData}
           bookingNumber={this.roomNightsData?.bookingNumber}
@@ -1813,10 +1871,10 @@ export class IglooCalendar {
         ></igl-reallocation-dialog>
         <ir-modal
           ref={el => (this.calendarModalEl = el)}
-          modalTitle={'lol'}
+          modalTitle={t('Lcz_ModalTitlePlaceholder', { fallback: 'lol' })}
           rightBtnActive={this.dialogData?.reason === 'reallocate' ? !this.dialogData.hideConfirmButton : true}
-          leftBtnText={locales?.entries?.Lcz_Cancel}
-          rightBtnText={locales?.entries?.Lcz_Confirm}
+          leftBtnText={t('Lcz_Cancel', { fallback: 'Cancel' })}
+          rightBtnText={t('Lcz_Confirm', { fallback: 'Confirm' })}
           modalBody={this.renderModalBody()}
           onConfirmModal={this.handleModalConfirm.bind(this)}
           onCancelModal={this.handleModalCancel.bind(this)}

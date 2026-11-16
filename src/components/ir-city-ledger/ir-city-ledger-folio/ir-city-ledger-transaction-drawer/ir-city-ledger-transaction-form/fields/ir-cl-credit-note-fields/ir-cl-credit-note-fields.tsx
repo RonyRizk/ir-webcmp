@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Fragment, Prop, h } from '@stencil/core';
 import type { FiscalDocuments } from '@/services/city-ledger/types';
 import { type CityLedgerTransactionFormDraft, type CreditNoteMode } from '../../ir-city-ledger-transaction-form.schema';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-credit-note-fields',
@@ -23,7 +24,7 @@ export class IrClCreditNoteFields {
         {/* ── Credit Note Mode ───────────────────────── */}
         {/* <div class="field field--full-width">
           <wa-radio-group
-            label="Credit Note Type"
+            label={t('Lcz_CreditNoteType', { fallback: 'Credit Note Type' })}
             orientation="horizontal"
             size="s"
             value={this.creditNoteMode}
@@ -50,11 +51,11 @@ export class IrClCreditNoteFields {
             <ir-cl-invoice-select
               value={this.invoiceId ?? ''}
               fiscalDocuments={this.fiscalDocuments}
-              label="Invoice"
+              label={t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' })}
               onInvoiceChange={event => {
                 this.fieldChange.emit({ invoiceId: event.detail || undefined });
               }}
-              hint="Issuing this credit note will void the selected invoice and unlock all associated line items."
+              hint={t('Lcz_IssueCreditNoteVoidHint', { fallback: 'Issuing this credit note will void the selected invoice and unlock all associated line items.' })}
             />
           </div>
         )}

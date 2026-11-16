@@ -2,7 +2,10 @@ import { Component, Prop, h } from '@stencil/core';
 import { DailyReport } from '../types';
 import moment from 'moment';
 import { formatAmount } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
+import { formatCount, formatPercent } from '@/utils/number';
 
 @Component({
   tag: 'ir-monthly-bookings-report-table',
@@ -18,60 +21,62 @@ export class IrMonthlyBookingsReportTable {
           <table class="table data-table">
             <thead class="table-header">
               <tr>
-                <th class="text-center">Date</th>
-                <th class="text-center">Units booked</th>
-                <th class="text-center">Adults</th>
-                <th class="text-center">Children</th>
-                <th class="text-right">
-                  <ir-tooltip customSlot message="Average Daily Rate" alignment="end">
-                    <span slot="tooltip-trigger">ADR</span>
+                <th class="text-center">{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+                <th class="text-center">{t('Lcz_UnitsBooked', { fallback: 'Units booked' })}</th>
+                <th class="text-center text-capitalize">{t('Lcz_Adults', { fallback: 'adults' })}</th>
+                <th class="text-center">{t('Lcz_Children', { fallback: 'Children' })}</th>
+                <th class="ir-text-end">
+                  <ir-tooltip customSlot message={t('Lcz_AverageDailyRate', { fallback: 'Average Daily Rate' })} alignment="end">
+                    <span slot="tooltip-trigger">{t('Lcz_Adr', { fallback: 'ADR' })}</span>
                   </ir-tooltip>
                 </th>
-                <th class="text-right">Rooms revenue</th>
-                <th>Occupancy</th>
+                <th class="ir-text-end">{t('Lcz_RoomsRevenue', { fallback: 'Rooms revenue' })}</th>
+                <th>{t('Lcz_Occupancy', { fallback: 'Occupancy' })}</th>
               </tr>
             </thead>
             <tbody>
               {this.reports.length === 0 && (
                 <tr>
                   <td colSpan={7} class="empty-row">
-                    <ir-empty-state message="No data found"></ir-empty-state>
+                    <ir-empty-state message={t('Lcz_NoDataFound', { fallback: 'No data found' })}></ir-empty-state>
                   </td>
                 </tr>
               )}
               {this.reports.map(report => {
-                const mainPercentage = `${parseFloat(report.occupancy_percent.toString()).toFixed(2)}%`;
-                const secondaryPercentage = report.last_year ? `${parseFloat(report.last_year.occupancy_percent.toString()).toFixed(2)}%` : null;
+                const mainPercentage = formatPercent(parseFloat(report.occupancy_percent.toString()), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const secondaryPercentage = report.last_year
+                  ? formatPercent(parseFloat(report.last_year.occupancy_percent.toString()), { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : null;
                 const reportDate = moment(report.day, 'YYYY-MM-DD');
                 const isFutureDate = moment().isBefore(reportDate, 'dates');
                 return (
                   <tr key={report.day} class={`ir-table-row ${isFutureDate ? 'future-report' : ''}`}>
-                    <td class="text-center">{reportDate.format('D')}</td>
+                    <td class="text-center">{formatDate(report.day, { style: 'day-only' })}</td>
                     <td class="text-center">
                       <div class="cell-stack">
-                        <p class={report.last_year?.units_booked ? 'value--primary' : ''}>{report.units_booked}</p>
-                        {report.last_year?.units_booked > 0 && <p class="value--previous">{report.last_year?.units_booked}</p>}
+                        <p class={report.last_year?.units_booked ? 'value--primary' : ''}>{formatCount(report.units_booked)}</p>
+                        {report.last_year?.units_booked > 0 && <p class="value--previous">{formatCount(report.last_year?.units_booked)}</p>}
                       </div>
                     </td>
                     <td class="text-center">
                       <div class="cell-stack">
-                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{report.adults}</p>
-                        {report.last_year?.total_guests > 0 && <p class="value--previous">{report.last_year?.adults}</p>}
+                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{formatCount(report.adults)}</p>
+                        {report.last_year?.total_guests > 0 && <p class="value--previous">{formatCount(report.last_year?.adults)}</p>}
                       </div>
                     </td>
                     <td class="text-center">
                       <div class="cell-stack">
-                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{report.children}</p>
-                        {report.last_year?.total_guests > 0 && <p class="value--previous">{report.last_year?.children}</p>}
+                        <p class={report.last_year?.total_guests ? 'value--primary' : ''}>{formatCount(report.children)}</p>
+                        {report.last_year?.total_guests > 0 && <p class="value--previous">{formatCount(report.last_year?.children)}</p>}
                       </div>
                     </td>
-                    <td class="text-right">
+                    <td class="ir-text-end">
                       <div class="cell-stack">
                         <p class={report.last_year?.adr ? 'value--primary' : ''}>{formatAmount(calendar_data.currency.symbol, report.adr)}</p>
                         {report.last_year?.adr > 0 && <p class="value--previous">{formatAmount(calendar_data.currency.symbol, report.last_year.adr)}</p>}
                       </div>
                     </td>
-                    <td class="text-right">
+                    <td class="ir-text-end">
                       <div class="cell-stack">
                         <p class={report.last_year?.rooms_revenue ? 'value--primary' : ''}>{formatAmount(calendar_data.currency.symbol, report.rooms_revenue)}</p>
                         {report.last_year?.rooms_revenue > 0 && <p class="value--previous">{formatAmount(calendar_data.currency.symbol, report.last_year.rooms_revenue)}</p>}
@@ -102,11 +107,11 @@ export class IrMonthlyBookingsReportTable {
                   <div class="legend-row">
                     <div class="legend-item">
                       <div class="legend-dot legend-dot--current"></div>
-                      <p>Selected period</p>
+                      <p>{t('Lcz_SelectedPeriod', { fallback: 'Selected period' })}</p>
                     </div>
                     <div class="legend-item">
                       <div class="legend-dot legend-dot--previous"></div>
-                      <p>Previous year</p>
+                      <p>{t('Lcz_PreviousYear', { fallback: 'Previous year' })}</p>
                     </div>
                   </div>
                 </td>

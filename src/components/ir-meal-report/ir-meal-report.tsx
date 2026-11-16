@@ -1,11 +1,13 @@
 import { Component, h, Prop, State, Watch } from '@stencil/core';
 import { MealReportService } from '../../services/meal-report/meal-report.service';
-import Token from '../../models/Token';
+import { SetupService, groupEntryTablesResult } from '@/services/setup';
+import ApiClient from '../../models/ApiClient';
 import moment from 'moment';
-import locales from '@/stores/locales.store';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 import axios from 'axios';
-import { groupEntryTablesResult } from '../../utils/utils';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { MealCountDaySummary, MealGuestEntry } from '@/services/meal-report/types';
 
 @Component({
@@ -30,28 +32,29 @@ export class IrMealReport {
 
   @State() guestList: MealGuestEntry[] = [];
   @State() mealCountSummary: MealCountDaySummary[] = [];
-  @State() setupEntries: { meal_type: IEntries[]; hb_preference: IEntries[] } = {
+  @State() setupEntries: { meal_type: SetupEntries[]; hb_preference: SetupEntries[] } = {
     meal_type: [],
     hb_preference: [],
   };
 
   private mealReportService = new MealReportService();
-  private tokenService = new Token();
+  private setupService = new SetupService();
+  private apiClientService = new ApiClient();
 
   @Watch('ticket')
   ticketChanged(newValue: string) {
     if (newValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.init();
     }
   }
 
   componentWillLoad() {
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
     }
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -66,7 +69,10 @@ export class IrMealReport {
       this.isPageLoading = true;
       this.isDataLoading = true;
 
-      const setupEntries = await this.mealReportService.getSetupEntriesByTableNameMulti(['_MEAL_TYPE', '_HB_PREFERENCE'] as any);
+      const [setupEntries] = await Promise.all([
+        this.setupService.getSetupEntriesByTableNameMulti(['_MEAL_TYPE', '_HB_PREFERENCE']),
+        LocaleController.load({ language: this.language, tables: SCREEN_TABLES.mealReport }),
+      ]);
 
       const grouped = groupEntryTablesResult(setupEntries);
 
@@ -181,8 +187,6 @@ export class IrMealReport {
       return <ir-loading-screen></ir-loading-screen>;
     }
 
-    const lcz = (locales.entries as any) || {};
-
     // const summary = this.mealCountSummary || [];
     // const sum = (key: keyof MealCountDaySummary) => summary.reduce((acc, day) => acc + (Number(day[key]) || 0), 0);
     // const mealMetrics = [
@@ -192,7 +196,7 @@ export class IrMealReport {
     // ];
 
     return (
-      <ir-page label="Meal Report" description={this.localReportType === 'GUEST_LIST' ? 'Guest List' : 'Meal Count'} class={'page'}>
+      <ir-page label={t('Lcz_MealReport', { fallback: 'Meal Report' })} description={this.localReportType === 'GUEST_LIST' ? t('Lcz_GuestList', { fallback: 'Guest list' }) : t('Lcz_MealCount', { fallback: 'Meal count' })} class={'page'}>
         <ir-custom-button
           slot="page-header"
           type="button"
@@ -210,7 +214,7 @@ export class IrMealReport {
           class="ir-meal-report__export-btn"
         >
           <wa-icon name="download" slot="start" style={{ fontSize: '14px' }}></wa-icon>
-          {lcz.Lcz_Export || 'Export'}
+          {t('Lcz_Export', { fallback: 'Export' })}
         </ir-custom-button>
         {/* {this.localReportType === 'MEAL_COUNT' && (
           <div class="ir-meal-report__metrics">
@@ -235,7 +239,6 @@ export class IrMealReport {
             mealType={this.localMealType}
             setupEntries={this.setupEntries}
             isLoading={this.isDataLoading}
-            lcz={lcz}
             onReportTypeChange={e => {
               this.localReportType = e.detail;
               this.applyFilters();

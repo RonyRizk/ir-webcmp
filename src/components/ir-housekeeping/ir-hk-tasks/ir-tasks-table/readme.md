@@ -48,9 +48,8 @@ graph TD;
   ir-tasks-header --> ir-input
   ir-tasks-header --> ir-custom-button
   ir-tasks-card --> ir-custom-button
-  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-custom-button
   ir-tasks-table-pagination --> ir-pagination
-  ir-button --> ir-icons
   ir-pagination --> ir-custom-button
   ir-hk-tasks --> ir-tasks-table
   style ir-tasks-table fill:#f9f,stroke:#333,stroke-width:4px

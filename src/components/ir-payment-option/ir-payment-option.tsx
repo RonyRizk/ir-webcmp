@@ -1,12 +1,15 @@
 import { ILocalizable, OptionField, PaymentOption } from '@/models/payment-options';
 import { PaymentOptionService } from '@/services/payment_option.service';
 import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
 import payment_option_store from '@/stores/payment-option.store';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { showToast } from '@/utils/utils';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t, tRaw } from '@/services/locale/t';
 @Component({
   tag: 'ir-payment-option',
   styleUrl: 'ir-payment-option.css',
@@ -26,23 +29,39 @@ export class IrPaymentOption {
 
   private paymentOptionService = new PaymentOptionService();
   private roomService = new RoomService();
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   private propertyOptionsById: Map<string | number, PaymentOption>;
   private propertyOptionsByCode: Map<string | number, PaymentOption>;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.paymentOption, () => this.init());
+
   componentWillLoad() {
     if (!!this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.init();
   }
 
@@ -74,6 +93,9 @@ export class IrPaymentOption {
   }
   private async fetchData() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.paymentOption });
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
       }
@@ -84,17 +106,15 @@ export class IrPaymentOption {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
         });
         propertyId = propertyData.My_Result.id;
       }
-      const [paymentOptions, propertyOptions, languageTexts] = await Promise.all([
+      const [paymentOptions, propertyOptions] = await Promise.all([
         this.paymentOptionService.GetExposedPaymentMethods(),
         this.paymentOptionService.GetPropertyPaymentMethods(propertyId),
-        this.roomService.fetchLanguage(this.language, ['_PAYMENT_BACK']),
+        localeReady,
       ]);
-      locales.entries = languageTexts.entries;
-      locales.direction = languageTexts.direction;
       this.propertyOptionsById = new Map(propertyOptions?.map(o => [o.id, o]));
       this.propertyOptionsByCode = new Map(propertyOptions?.map(o => [o.code, o]));
       this.paymentOptions = paymentOptions?.map(option => {
@@ -111,7 +131,7 @@ export class IrPaymentOption {
   }
 
   private initServices() {
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
   }
   private modifyPaymentList(paymentOption: PaymentOption) {
     let prevPaymentOptions = [...this.paymentOptions];
@@ -136,7 +156,7 @@ export class IrPaymentOption {
         showToast({
           type: 'success',
           description: '',
-          title: locales.entries['Lcz_YouNeedToSelect'],
+          title: tRaw('Lcz_YouNeedToSelect'),
           position: 'top-right',
         });
       }
@@ -170,7 +190,7 @@ export class IrPaymentOption {
       await this.paymentOptionService.HandlePaymentMethod(newOption);
       showToast({
         position: 'top-right',
-        title: 'Saved Successfully',
+        title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
         description: '',
         type: 'success',
       });
@@ -202,21 +222,21 @@ export class IrPaymentOption {
         <ir-interceptor></ir-interceptor>
         <div class={`${this.defaultStyles ? 'card ' : ''} p-1 flex-fill m-0`}>
           <div class="d-flex align-items-center mb-2">
-            <div class="p-0 m-0 mr-1">
+            <div class="p-0 m-0 ir-me-1">
               <ir-icons name="credit_card"></ir-icons>
             </div>
-            <h3 class={'m-0 p-0'}>{locales?.entries?.Lcz_PaymentOptions}</h3>
+            <h3 class={'m-0 p-0'}>{t('Lcz_PaymentOptions', { fallback: 'Payment Options' })}</h3>
           </div>
           <div class="payment-table-container">
             <table class="table table-striped table-bordered no-footer dataTable">
               <thead>
                 <tr>
-                  <th scope="col" class="text-left">
-                    {locales?.entries?.Lcz_PaymentMethod}
+                  <th scope="col" class="ir-text-start">
+                    {t('Lcz_PaymentMethod', { fallback: 'Payment Method' })}
                   </th>
-                  <th scope="col">{locales?.entries?.Lcz_Status}</th>
+                  <th scope="col">{t('Lcz_Status', { fallback: 'Status' })}</th>
                   <th scope="col" class="actions-header">
-                    {locales?.entries?.Lcz_Action}
+                    {t('Lcz_Action', { fallback: 'Action' })}
                   </th>
                 </tr>
               </thead>
@@ -227,7 +247,7 @@ export class IrPaymentOption {
                   }
                   return (
                     <tr key={po.id}>
-                      <td class={'text-left po-description'}>
+                      <td class={'ir-text-start po-description'}>
                         <div class="po-view">
                           <span class={'p-0 m-0'}>{po?.description}</span>
                           {/* <img src="https://www.jccsmart.com/assets/images/app-logo.svg" alt="" class="payment-img" /> */}
@@ -240,7 +260,7 @@ export class IrPaymentOption {
                       <td class="payment-action">
                         {this.showEditButton(po) && (
                           <ir-button
-                            title={locales?.entries?.Lcz_Edit}
+                            title={t('Lcz_Edit', { fallback: 'Edit' })}
                             variant="icon"
                             icon_name="edit"
                             onClickHandler={() => {
@@ -263,7 +283,7 @@ export class IrPaymentOption {
           }}
           side={'right'}
           showCloseButton={false}
-          // label={locales?.entries.Lcz_Information?.replace('%1', payment_option_store.selectedOption?.description)}
+          // label={t('Lcz_Information', { params: [payment_option_store.selectedOption?.description] })}
           open={payment_option_store?.selectedOption !== null}
         >
           {payment_option_store?.selectedOption && <ir-option-details propertyId={this.propertyid} slot="sidebar-body"></ir-option-details>}

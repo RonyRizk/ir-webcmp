@@ -8,6 +8,10 @@
   min-width: 130px;
 }
 
+/* `Lcz_To` is capitalised; here it is a connector mid-sentence ("Assign 101 to Anna?"). */
+.hk-dialog__connector {
+  text-transform: lowercase;
+}
 .hk-dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -105,4 +109,10 @@
     overflow-y: visible;
     width: 100%;
   }
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
 }

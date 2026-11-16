@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import type { FiscalDocuments } from '@/services/city-ledger/types';
 import { type CityLedgerTransactionFormDraft } from '../../ir-city-ledger-transaction-form.schema';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-debit-note-fields',
@@ -18,7 +19,10 @@ export class IrClDebitNoteFields {
       return (
         <wa-callout size="s" variant="warning">
           <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-          No paid invoices are available. A debit note requires at least one paid invoice to reference. Please issue an invoice first, then return to create the debit note.
+          {t('Lcz_NoPaidInvoicesWarning', {
+            fallback:
+              'No paid invoices are available. A debit note requires at least one paid invoice to reference. Please issue an invoice first, then return to create the debit note.',
+          })}
         </wa-callout>
       );
     }
@@ -28,7 +32,7 @@ export class IrClDebitNoteFields {
         <ir-cl-invoice-select
           value={this.invoiceId ?? ''}
           fiscalDocuments={this.fiscalDocuments}
-          label="Invoice"
+          label={t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' })}
           onInvoiceChange={event => {
             this.fieldChange.emit({ invoiceId: event.detail || undefined });
           }}

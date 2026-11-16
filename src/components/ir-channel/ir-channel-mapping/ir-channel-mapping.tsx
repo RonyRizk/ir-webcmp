@@ -2,8 +2,7 @@ import { Component, Fragment, Host, State, h } from '@stencil/core';
 import { IrMappingService } from './ir-mapping.service';
 import channels_data, { addMapping, setMappedChannel } from '@/stores/channel.store';
 import { RoomDetail, RatePlanDetail } from '@/models/IBooking';
-import locales from '@/stores/locales.store';
-
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-channel-mapping',
   styleUrl: 'ir-channel-mapping.css',
@@ -46,10 +45,11 @@ export class IrChannelMapping {
     if (mappedField.result) {
       return (
         <Fragment>
-          <div class="pl-2 flex-fill d-sm-none mapped_item text-blue d-flex align-items-center">
+          <div class="ir-ps-2 flex-fill d-sm-none mapped_item text-blue d-flex align-items-center">
             <span class="m-0 p-0 d-flex align-items-center selected-map">
               <span class="selected-map-title">
-                {isRoomType ? mappedField.result.name : mappedField.result['short_name']} {mappedField.result['is_non_refundable'] ? 'Non-refundable' : ''}
+                {isRoomType ? mappedField.result.name : mappedField.result['short_name']}{' '}
+                {mappedField.result['is_non_refundable'] ? t('Lcz_NonRefundable', { fallback: 'Non-refundable' }) : ''}
               </span>
               <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
                 <path
@@ -59,7 +59,7 @@ export class IrChannelMapping {
               </svg>
               {mappedField.occupancy}
             </span>
-            <ir-icon class="ml-1 p-0" onIconClickHandler={() => this.mappingService.removedMapping(mappedField.result.id.toString(), isRoomType)}>
+            <ir-icon class="ir-ms-1 p-0" onIconClickHandler={() => this.mappingService.removedMapping(mappedField.result.id.toString(), isRoomType)}>
               <svg slot="icon" xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
                 <path
                   fill={'var(--blue)'}
@@ -68,9 +68,10 @@ export class IrChannelMapping {
               </svg>
             </ir-icon>
           </div>
-          <div class="pl-2 flex-fill d-none mapped_item text-blue d-sm-flex align-items-center">
+          <div class="ir-ps-2 flex-fill d-none mapped_item text-blue d-sm-flex align-items-center">
             <span class="mapped_name">
-              {isRoomType ? mappedField.result.name : mappedField.result['short_name']} {mappedField.result['is_non_refundable'] ? 'Non-refundable' : ''}
+              {isRoomType ? mappedField.result.name : mappedField.result['short_name']}{' '}
+              {mappedField.result['is_non_refundable'] ? t('Lcz_NonRefundable', { fallback: 'Non-refundable' }) : ''}
             </span>
             <div class="d-flex align-items-center gap-3 flex-fill">
               <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
@@ -92,11 +93,11 @@ export class IrChannelMapping {
       );
     }
     return (
-      <div class="pl-2  flex-fill mapped_item">
+      <div class="ir-ps-2  flex-fill mapped_item">
         {this.activeMapField === id ? (
           <ir-combobox
             autoFocus
-            placeholder={locales.entries?.Lcz_NotMapped}
+            placeholder={t('Lcz_NotMapped')}
             data={this.availableRooms}
             onComboboxValueChange={e => {
               addMapping(e.detail.data as string, this.activeMapField, isRoomType);
@@ -105,7 +106,7 @@ export class IrChannelMapping {
           ></ir-combobox>
         ) : (
           <span class="cursor-pointer  not_mapped_btn" onClick={() => this.setActiveField(id, isRoomType, roomTypeId)}>
-            {locales.entries.Lcz_NotMapped}
+            {t('Lcz_NotMapped')}
           </span>
         )}
       </div>
@@ -122,7 +123,7 @@ export class IrChannelMapping {
             }}
             class="btn refresh-btn"
           >
-            {locales.entries?.Lcz_Refresh}
+            {t('Lcz_Refresh')}
           </button>
         </div>
         <section class="w-100">
@@ -131,7 +132,7 @@ export class IrChannelMapping {
             <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
               <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" />
             </svg>
-            <p class="pl-2 mapped_item channel_name">igloorooms</p>
+            <p class="ir-ps-2 mapped_item channel_name">igloorooms</p>
           </div>
           <div>
             {channels_data.selectedChannel?.property?.room_types?.map(room_type => {
@@ -153,7 +154,7 @@ export class IrChannelMapping {
                     // console.log(mappedRatePlan);
                     return (
                       <div key={rate_plan.id} class=" mapped_row rate_plan">
-                        <p class="pl-1 submap-text mapped_item">{rate_plan.name}</p>
+                        <p class="ir-ps-1 submap-text mapped_item">{rate_plan.name}</p>
 
                         {!mappedRatePlan.hide && (
                           <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">

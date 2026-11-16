@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-billing-recipient',
   styleUrls: ['ir-booking-billing-recipient.css'],
@@ -80,7 +81,7 @@ export class IrBookingBillingRecipient {
         <wa-radio-group
           defaultValue={this.initialValue}
           onchange={e => this.handleRecipientChange((e.target as any).value)}
-          label="Bill to"
+          label={t('Lcz_BillTo', { fallback: 'Bill to' })}
           orientation="vertical"
           name={`${this.booking?.booking_nbr}-bill-to`}
           value={this.selectedRecipient}
@@ -109,7 +110,7 @@ export class IrBookingBillingRecipient {
           ))}
           {!this.booking.agent && (
             <wa-radio appearance="button" value="company">
-              {this.booking.company_name ? this.booking.company_name : 'Use company name'}
+              {this.booking.company_name ? this.booking.company_name : t('Lcz_UseCompanyName', { fallback: 'Use company name' })}
             </wa-radio>
           )}
         </wa-radio-group>

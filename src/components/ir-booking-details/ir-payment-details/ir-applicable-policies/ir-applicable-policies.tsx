@@ -5,11 +5,13 @@ import moment, { Moment } from 'moment';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 import { IPaymentAction } from '@/services/payment.service';
-import locales from '@/stores/locales.store';
 import { HelpDocButton } from '@/components/HelpButton';
 import { ApplicablePoliciesService } from '@/services/applicable-policies.service';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { formatDate } from '@/utils/date';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-applicable-policies',
   styleUrl: 'ir-applicable-policies.css',
@@ -42,7 +44,7 @@ export class IrApplicablePolicies {
     try {
       this.applicablePoliciesService.booking = this.booking;
       const { cancellationStatements, guaranteeAmount } = await this.applicablePoliciesService.fetchGroupedApplicablePolicies({
-        language: this.language,
+        language: LocaleController.language,
       });
 
       this.guaranteeAmount = guaranteeAmount;
@@ -55,10 +57,10 @@ export class IrApplicablePolicies {
   }
   private formatPreviousBracketDueOn(d1: Moment, d2: Moment) {
     if (d1.isSame(d2, 'year')) {
-      return d1.format('MMM DD');
+      return formatDate(d1, 'MMM DD');
     }
 
-    return d1.format('MMM DD, YYYY');
+    return formatDate(d1, 'MMM DD, YYYY');
   }
 
   private getBracketLabelsAndArrowState({ bracket, index, brackets, checkInDate }: { index: number; bracket: Bracket; brackets: Bracket[]; checkInDate: string }): {
@@ -102,15 +104,15 @@ export class IrApplicablePolicies {
     const momentCheckInDate = moment(checkInDate, 'YYYY-MM-DD');
     if (bracketDueDate.isSame(momentCheckInDate, 'days')) {
       return {
-        leftLabel: `${momentCheckInDate.format('MMM DD')} onwards`,
+        leftLabel: `${formatDate(momentCheckInDate, 'MMM DD')} ${t('Lcz_Onwards', { fallback: 'onwards' })}`,
         showArrow: false,
         rightLabel: '',
       };
     }
     return {
-      leftLabel: bracketDueDate.format('MMM DD'),
+      leftLabel: formatDate(bracketDueDate, 'MMM DD'),
       showArrow: true,
-      rightLabel: moment(checkInDate, 'YYYY-MM-DD').format('MMM DD, YYYY'),
+      rightLabel: formatDate(checkInDate, 'MMM DD, YYYY'),
     };
   }
 
@@ -143,17 +145,17 @@ export class IrApplicablePolicies {
       }
 
       return {
-        leftLabel: 'Until',
+        leftLabel: t('Lcz_UntilLabel', { fallback: 'Until' }),
         showArrow: false,
         rightLabel: nextBracketDueDate.isSame(momentCheckInDate, 'dates')
-          ? nextBracketDueDate.clone().add(-1, 'days').format('MMM DD, YYYY')
-          : nextBracketDueDate.format('MMM DD, YYYY'),
+          ? formatDate(nextBracketDueDate.clone().add(-1, 'days'), 'MMM DD, YYYY')
+          : formatDate(nextBracketDueDate, 'MMM DD, YYYY'),
       };
     }
 
     if (moment(bracket.due_on, 'YYYY-MM-DD').isSameOrAfter(momentCheckInDate, 'days')) {
       return {
-        leftLabel: `${momentCheckInDate.format('MMM DD')} onwards`,
+        leftLabel: `${formatDate(momentCheckInDate, 'MMM DD')} ${t('Lcz_Onwards', { fallback: 'onwards' })}`,
         showArrow: false,
         rightLabel: '',
       };
@@ -162,9 +164,9 @@ export class IrApplicablePolicies {
     // Last bracket
     if (index === brackets.length - 1) {
       return {
-        leftLabel: bracketDueDate.clone().format('MMM DD'),
+        leftLabel: formatDate(bracketDueDate.clone(), 'MMM DD'),
         showArrow: true,
-        rightLabel: moment(checkInDate).format('MMM DD, YYYY'),
+        rightLabel: formatDate(checkInDate, 'MMM DD, YYYY'),
       };
     }
 
@@ -185,19 +187,19 @@ export class IrApplicablePolicies {
     return {
       leftLabel: this.formatPreviousBracketDueOn(bracketDueDate, periodEndDate),
       showArrow: !haveSameDays,
-      rightLabel: haveSameDays ? '' : periodEndDate.add(-1, 'days').format('MMM DD, YYYY'),
+      rightLabel: haveSameDays ? '' : formatDate(periodEndDate.add(-1, 'days'), 'MMM DD, YYYY'),
     };
   }
   private generateCancellationStatement() {
-    const label = 'if cancelled today';
+    const label = t('Lcz_IfCancelledToday', { fallback: 'if cancelled today' });
     const { cancelation_penality_as_if_today } = this.booking.financial;
     if (cancelation_penality_as_if_today === 0) {
       if (this.booking.financial.collected > 0) {
-        return `No refund ${label}`;
+        return t('Lcz_NoRefund', { fallback: 'No refund %1', params: [label] });
       }
-      return `No payment required ${label}`;
+      return t('Lcz_NoPaymentRequired', { fallback: 'No payment required %1', params: [label] });
     }
-    return `${cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} ${formatAmount(calendar_data.currency.symbol, Math.abs(cancelation_penality_as_if_today))} ${label}`;
+    return `${cancelation_penality_as_if_today < 0 ? t('Lcz_Refund', { fallback: 'Refund' }) : t('Lcz_Charge', { fallback: 'Charge' })} ${formatAmount(calendar_data.currency.symbol, Math.abs(cancelation_penality_as_if_today))} ${label}`;
   }
 
   private _getCurrentBracket(brackets: Bracket[]): moment.Moment | null {
@@ -242,11 +244,13 @@ export class IrApplicablePolicies {
           <section>
             <wa-callout variant="danger" class="applicable-policies__guarantee">
               <div class="applicable-policies__guarantee-info">
-                <p class="applicable-policies__guarantee-date">{moment(this.booking.booked_on.date, 'YYYY-MM-DD').format('MMM DD, YYYY')}</p>
+                <p class="applicable-policies__guarantee-date">{formatDate(this.booking.booked_on.date, 'MMM DD, YYYY')}</p>
                 <p class="applicable-policies__guarantee-amount">
                   <span class="px-1">{formatAmount(calendar_data.currency.symbol, remainingGuaranteeAmount < 0 ? Math.abs(remainingGuaranteeAmount) : this.guaranteeAmount)}</span>
                 </p>
-                <p class="applicable-policies__guarantee-label">Guarantee {remainingGuaranteeAmount < 0 ? 'balance' : ''}</p>
+                <p class="applicable-policies__guarantee-label">
+                  {remainingGuaranteeAmount < 0 ? t('Lcz_GuaranteeBalance', { fallback: 'Guarantee balance' }) : t('Lcz_Guarantee', { fallback: 'Guarantee' })}
+                </p>
               </div>
               {remainingGuaranteeAmount < 0 && (
                 <div class="applicable-policies__guarantee-action">
@@ -264,7 +268,7 @@ export class IrApplicablePolicies {
                     }}
                     size="s"
                   >
-                    Pay
+                    {t('Lcz_Pay', { fallback: 'Pay' })}
                   </ir-custom-button>
                 </div>
               )}
@@ -274,8 +278,8 @@ export class IrApplicablePolicies {
         <section>
           <div class="applicable-policies__container">
             <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
-              <p class="applicable-policies__title font-size-large p-0 m-0">Cancellation Schedule</p>
-              <HelpDocButton message="Help" href="https://help.igloorooms.com/extranet/booking-details/guarantee-and-cancellation" />
+              <p class="applicable-policies__title font-size-large p-0 m-0">{t('Lcz_CancellationSchedule', { fallback: 'Cancellation Schedule' })}</p>
+              <HelpDocButton message={t('Lcz_HelpTooltip', { fallback: 'Help' })} href="https://help.igloorooms.com/extranet/booking-details/guarantee-and-cancellation" />
             </div>
             <p class="applicable-policies__no-penalty">{this.generateCancellationStatement()}</p>
           </div>
@@ -289,7 +293,8 @@ export class IrApplicablePolicies {
                   <div class="applicable-policies__statement">
                     {this.cancellationStatements.length > 1 && (
                       <p class="applicable-policies__room">
-                        <b>{statement.roomType.name}</b> {statement.ratePlan['short_name']} {statement.ratePlan.is_non_refundable ? ` - ${locales.entries.Lcz_NonRefundable}` : ''}
+                        <b>{statement.roomType.name}</b> {statement.ratePlan['short_name']}{' '}
+                        {statement.ratePlan.is_non_refundable ? ` - ${t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}` : ''}
                       </p>
                     )}
                     <div class="applicable-policies__brackets">
@@ -305,12 +310,13 @@ export class IrApplicablePolicies {
                         return (
                           <div class={{ 'applicable-policies__bracket': true, 'applicable-policies__highlighted-bracket': isInCurrentBracket }}>
                             <p class="applicable-policies__bracket-dates">
-                              {leftLabel} {showArrow && <ir-icons name="arrow_right" class="applicable-policies__icon" style={{ '--icon-size': '0.875rem' }}></ir-icons>}{' '}
+                              {leftLabel}{' '}
+                              {showArrow && <ir-icons name="arrow_right" class="applicable-policies__icon ir-flip-rtl" style={{ '--icon-size': '0.875rem' }}></ir-icons>}{' '}
                               {rightLabel}
                             </p>
                             <p class="applicable-policies__amount">{formatAmount(calendar_data.currency.symbol, bracket.gross_amount)}</p>
 
-                            <p class="applicable-policies__statement-text">{bracket.amount === 0 ? 'No penalty' : bracket.statement}</p>
+                            <p class="applicable-policies__statement-text">{bracket.amount === 0 ? t('Lcz_NoPenalty', { fallback: 'No penalty' }) : bracket.statement}</p>
                           </div>
                         );
                       })}
@@ -331,19 +337,20 @@ export class IrApplicablePolicies {
                             return (
                               <tr class={{ 'applicable-policies__highlighted-bracket': isInCurrentBracket }}>
                                 <td class="applicable-policies__bracket-dates">
-                                  {leftLabel} {showArrow && <ir-icons name="arrow_right" class="applicable-policies__icon" style={{ '--icon-size': '0.875rem' }}></ir-icons>}{' '}
+                                  {leftLabel}{' '}
+                                  {showArrow && <ir-icons name="arrow_right" class="applicable-policies__icon ir-flip-rtl" style={{ '--icon-size': '0.875rem' }}></ir-icons>}{' '}
                                   {rightLabel}
                                 </td>
 
                                 <td class="applicable-policies__amount px-1">{formatAmount(calendar_data.currency.symbol, bracket.gross_amount)}</td>
 
-                                <td class="applicable-policies__statement-text">{bracket.amount === 0 ? 'No penalty' : bracket.statement}</td>
+                                <td class="applicable-policies__statement-text">{bracket.amount === 0 ? t('Lcz_NoPenalty', { fallback: 'No penalty' }) : bracket.statement}</td>
                               </tr>
                             );
                           })}
                           {/*isTodaySameOrAfterCheckInDate && (
                             <tr class={{ 'applicable-policies__highlighted-bracket': true }}>
-                              <td class="applicable-policies__bracket-dates">{moment(statement.checkInDate, 'YYYY-MM-DD').add(1, 'days').format('MMM DD')} onwards</td>
+                              <td class="applicable-policies__bracket-dates">{formatDate(moment(statement.checkInDate, 'YYYY-MM-DD').add(1, 'days'), 'MMM DD')} onwards</td>
 
                               <td class="applicable-policies__amount px-1">{formatAmount(calendar_data.currency.symbol, statement.grossTotal)}</td>
 

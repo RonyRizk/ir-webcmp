@@ -46,18 +46,18 @@
 }
 .mx-01 {
   --m: 5px;
-  margin-right: var(--m) !important;
-  margin-left: var(--m) !important;
+  margin-inline-end: var(--m) !important;
+  margin-inline-start: var(--m) !important;
 }
 
 .date-margin {
-  margin-right: 5px;
+  margin-inline-end: 5px;
 }
 .pickup-margin {
   margin-bottom: 7px !important;
 }
 .header-date {
-  padding-left: 5px !important;
+  padding-inline-start: 5px !important;
 }
 
 .pointer {
@@ -77,10 +77,10 @@
   padding: 0;
 }
 .sm-padding-right {
-  padding-right: 0.2rem;
+  padding-inline-end: 0.2rem;
 }
 .sm-padding-left {
-  padding-left: 0.2rem;
+  padding-inline-start: 0.2rem;
 }
 .sm-padding-top {
   padding-top: 0.2rem;
@@ -91,7 +91,7 @@
 
 .info-notes {
   list-style: none;
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 .light-blue-bg {
   background-color: #acecff;

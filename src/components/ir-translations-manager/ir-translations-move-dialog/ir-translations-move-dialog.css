@@ -1,0 +1,66 @@
+:host {
+  --ir-dialog-width: 32rem;
+}
+
+.move-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* #region Summary */
+
+.move-dialog__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.move-dialog__key {
+  align-self: flex-start;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--wa-border-radius-s, 4px);
+  background: var(--wa-color-neutral-fill-quiet, #f1f5f9);
+  font-family: var(--wa-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-normal);
+}
+
+.move-dialog__value {
+  margin: 0;
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-normal);
+}
+
+.move-dialog__hint,
+.move-dialog__empty {
+  margin: 0;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet);
+}
+
+.move-dialog__locked {
+  margin: 0.25rem 0 0;
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-danger-on-quiet, #b91c1c);
+}
+
+/* #endregion */
+
+/* #region Table list */
+
+.move-dialog__tables {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+
+.move-dialog__list {
+  max-height: 18rem;
+  overflow-y: auto;
+  padding-inline: 0.25rem;
+}
+
+/* #endregion */

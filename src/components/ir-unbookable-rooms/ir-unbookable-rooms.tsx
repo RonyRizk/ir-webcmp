@@ -1,7 +1,11 @@
 import { Component, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { PropertyService } from '@/services/property.service';
 import type { AllowedProperties, FetchUnBookableRoomsResult } from '@/services/property/types';
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
 type UnbookableRoomsMode = 'default' | 'mpo';
 type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: number; country: string };
@@ -12,6 +16,7 @@ type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: num
   scoped: true,
 })
 export class IrUnbookableRooms {
+  @Prop() language: string = '';
   @Prop() ticket: string = '';
   @Prop() propertyid: number;
   @Prop({ reflect: true }) mode: UnbookableRoomsMode = 'default';
@@ -26,11 +31,13 @@ export class IrUnbookableRooms {
   @State() allowedProperties: AllowedProperties = null;
   @State() filters: UnbookableRoomsFilters = { period_to_check: 2, consecutive_period: 14, country: 'all' };
   @State() progressFilters = { period_to_check: 2, consecutive_period: 14 };
-  @State() lastUpdatedLabel = '';
   @State() isPageLoading = true;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private propertyService = new PropertyService();
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.unbookableRooms, () => this.initializeApp());
 
   componentWillLoad() {
     this.filters = {
@@ -40,9 +47,22 @@ export class IrUnbookableRooms {
     };
 
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -50,7 +70,7 @@ export class IrUnbookableRooms {
     if (newValue === oldValue) {
       return;
     }
-    this.tokenService.setToken(this.ticket);
+    this.apiClientService.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -62,7 +82,7 @@ export class IrUnbookableRooms {
     this.initializeApp();
   }
 
-  @Watch('property_id')
+  @Watch('propertyid')
   propertyIdChanged(newValue: number, oldValue: number) {
     if (newValue === oldValue) {
       return;
@@ -102,6 +122,7 @@ export class IrUnbookableRooms {
       this.errorMessage = '';
       this.isLoading = true;
       this.unbookableRooms = [];
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.unbookableRooms });
 
       if (this.resolveMode() === 'mpo') {
         this.allowedProperties = await this.propertyService.getExposedAllowedProperties();
@@ -109,10 +130,10 @@ export class IrUnbookableRooms {
         this.allowedProperties = null;
       }
 
-      await this.fetchUnbookableRooms();
+      await Promise.all([localeReady, this.fetchUnbookableRooms()]);
     } catch (error) {
       console.error('Failed to load unbookable rooms', error);
-      this.errorMessage = 'Unable to load unbookable rooms right now. Please try again.';
+      this.errorMessage = t('Lcz_UnableToLoadUnbookableRooms', { fallback: 'Unable to load unbookable rooms right now. Please try again.' });
     } finally {
       this.isLoading = false;
       if (this.isPageLoading) {
@@ -125,7 +146,10 @@ export class IrUnbookableRooms {
     const propertyIds = this.getPropertyIds();
     if (!propertyIds.length) {
       this.unbookableRooms = [];
-      this.errorMessage = this.resolveMode() === 'mpo' ? 'No properties available to check.' : 'Property ID is required to load unbookable rooms.';
+      this.errorMessage =
+        this.resolveMode() === 'mpo'
+          ? t('Lcz_NoPropertiesAvailableToCheck', { fallback: 'No properties available to check.' })
+          : t('Lcz_PropertyIdRequiredToLoadUnbookableRooms', { fallback: 'Property ID is required to load unbookable rooms.' });
       return;
     }
 
@@ -136,7 +160,6 @@ export class IrUnbookableRooms {
     });
 
     this.unbookableRooms = results ?? [];
-    this.lastUpdatedLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   private getPropertyIds(): number[] {
@@ -165,7 +188,7 @@ export class IrUnbookableRooms {
       };
     } catch (error) {
       console.error('Failed to refresh unbookable rooms', error);
-      this.errorMessage = 'Unable to refresh unbookable rooms right now.';
+      this.errorMessage = t('Lcz_UnableToRefreshUnbookableRooms', { fallback: 'Unable to refresh unbookable rooms right now.' });
     } finally {
       this.isLoading = false;
     }
@@ -186,15 +209,13 @@ export class IrUnbookableRooms {
     const totalIssues = this.unbookableRooms?.length ?? 0;
     const propertiesWithIssues = new Set(this.unbookableRooms?.map(entry => entry.property_id)).size;
     return (
-      <ir-page label="Availability Alert">
+      <ir-page label={t('Lcz_AvailabilityAlert', { fallback: 'Availability Alert' })}>
         {this.mode === 'mpo' && (
           <section class="summary" aria-live="polite">
-            <ir-metric-card icon={'bed'} value={totalIssues} label="Affected room types"></ir-metric-card>
-            <ir-metric-card icon={'hotel'} value={propertiesWithIssues} label="Properties impacted"></ir-metric-card>
+            <ir-metric-card icon={'bed'} value={totalIssues} label={t('Lcz_AffectedRoomTypes', { fallback: 'Affected room types' })}></ir-metric-card>
+            <ir-metric-card icon={'hotel'} value={propertiesWithIssues} label={t('Lcz_PropertiesImpacted', { fallback: 'Properties impacted' })}></ir-metric-card>
           </section>
         )}
-        {/* {this.errorMessage && <p class="error">{this.errorMessage}</p>} */}
-
         <section class="unbookable-rooms__content">
           <ir-unbookable-rooms-filters
             mode={this.mode}

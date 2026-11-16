@@ -1,8 +1,7 @@
 import { Component, Host, h, Prop, Event, EventEmitter, State, Fragment, Listen } from '@stencil/core';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { IEntries, ICountry } from '@/models/IBooking';
+import { SetupEntries, ICountry } from '@/models/IBooking';
 import { v4 } from 'uuid';
-import locales from '@/stores/locales.store';
 import { TPropertyButtonsTypes } from '@/components';
 import { z } from 'zod';
 import { validateEmail } from '@/utils/utils';
@@ -14,6 +13,8 @@ import { ExposedGuests } from '@/services/booking-service/types';
 import IMask from 'imask';
 import { BookingGuestSchema } from '../../types';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 @Component({
   tag: 'igl-property-booked-by',
   styleUrl: 'igl-property-booked-by.css',
@@ -49,7 +50,7 @@ export class IglPropertyBookedBy {
   @Event() dataUpdateEvent: EventEmitter<{ [key: string]: any }>;
 
   private bookingService: BookingService = new BookingService();
-  private arrivalTimeList: IEntries[] = [];
+  private arrivalTimeList: SetupEntries[] = [];
   private currentMonth: string = '01';
   private country;
   private paymentMethods: AllowedPaymentMethod[] = [];
@@ -211,11 +212,11 @@ export class IglPropertyBookedBy {
   render() {
     return (
       <Host>
-        <div class="text-left mt-3">
+        <div class="ir-text-start mt-3">
           <div class="d-flex" style={{ alignItems: 'flex-end', gap: '0.5rem' }}>
             <ir-picker
               class="bookedByEmailContainer m-0 p-0"
-              label={locales.entries.Lcz_BookedBy}
+              label={t('Lcz_BookedBy', { fallback: 'Booked by' })}
               value={this.bookedByData.email}
               ref={el => (this.pickerRef = el)}
               aria-invalid={String(Boolean(this.isButtonPressed && this.bookedByData.email !== '' && validateEmail(this.bookedByData.email)))}
@@ -247,7 +248,7 @@ export class IglPropertyBookedBy {
                 this.clearEvent();
               }}
               loading={isRequestPending('/Fetch_Exposed_Guests')}
-              placeholder={locales.entries.Lcz_FindEmailAddress}
+              placeholder={t('Lcz_FindEmailAddress', { fallback: 'Find email address or add new' })}
               mode="select-async"
               onCombobox-select={this.handleComboboxSelect.bind(this)}
             >
@@ -261,12 +262,12 @@ export class IglPropertyBookedBy {
               })}
             </ir-picker>
             <div style={{ paddingBottom: '0.5rem' }}>
-              <wa-tooltip for={`main_guest-search-tooltip`}>Leave empty if email is unavailable</wa-tooltip>
+              <wa-tooltip for={`main_guest-search-tooltip`}>{t('Lcz_LeaveEmptyIfEmailUnavailable', { fallback: 'Leave empty if email is unavailable' })}</wa-tooltip>
               <wa-icon name="circle-info" id={`main_guest-search-tooltip`}></wa-icon>
             </div>
           </div>
         </div>
-        <div class="bookedDetailsForm text-left mt-2 font-small-3 ">
+        <div class="bookedDetailsForm ir-text-start mt-2 font-small-3 ">
           <div class="d-flex flex-column flex-md-row  justify-content-md-between " style={{ gap: '1rem' }}>
             <div class="fd-property-booked-by__guest-form ">
               <ir-validator value={this.bookedByData.firstName} schema={BookingGuestSchema.shape.first_name}>
@@ -278,8 +279,8 @@ export class IglPropertyBookedBy {
                   }}
                   defaultValue={this.bookedByData.firstName}
                   value={this.bookedByData.firstName}
-                  label={locales.entries.Lcz_FirstName}
-                  placeholder={locales.entries.Lcz_FirstName}
+                  label={t('Lcz_FirstName', { fallback: 'First name' })}
+                  placeholder={t('Lcz_FirstName', { fallback: 'First name' })}
                   required
                   name="last_name_custom"
                   autocomplete="family-name"
@@ -296,13 +297,13 @@ export class IglPropertyBookedBy {
                   autocomplete="given-name"
                   defaultValue={this.bookedByData.lastName}
                   value={this.bookedByData.lastName}
-                  label={locales.entries.Lcz_LastName}
-                  placeholder={locales.entries.Lcz_LastName}
+                  label={t('Lcz_LastName', { fallback: 'Last name' })}
+                  placeholder={t('Lcz_LastName', { fallback: 'Last name' })}
                   required
                 ></ir-input>
               </ir-validator>
               <ir-country-picker
-                label={locales.entries.Lcz_Country}
+                label={t('Lcz_Country', { fallback: 'Country' })}
                 variant="modern"
                 testId="main_guest_country"
                 class="flex-grow-1 m-0"
@@ -323,7 +324,7 @@ export class IglPropertyBookedBy {
               ></ir-mobile-input>
               <wa-select
                 size="s"
-                label={locales.entries.Lcz_YourArrivalTime}
+                label={t('Lcz_YourArrivalTime', { fallback: 'Your arrival time' })}
                 data-testid="arrival_time"
                 aria-disabled={String(Boolean(this.isButtonPressed && this.bookedByData.selectedArrivalTime.code === ''))}
                 id={v4()}
@@ -333,7 +334,7 @@ export class IglPropertyBookedBy {
               >
                 {this.arrivalTimeList.map(time => (
                   <wa-option value={time.CODE_NAME} selected={this.bookedByData.selectedArrivalTime.code === time.CODE_NAME}>
-                    {time.CODE_VALUE_EN}
+                    {getSetupEntryLabel(time)}
                   </wa-option>
                 ))}
               </wa-select>
@@ -344,12 +345,12 @@ export class IglPropertyBookedBy {
                 size="s"
                 value={this.bookedByData.message}
                 defaultValue={this.bookedByData.message}
-                label={locales.entries.Lcz_AnyMessageForUs}
+                label={t('Lcz_AnyMessageForUs', { fallback: 'Any message for us' })}
                 rows={4}
               ></wa-textarea>
               {this.paymentMethods.length > 1 && (
                 <wa-select
-                  label={'Payment Method'}
+                  label={t('Lcz_PaymentMethod', { fallback: 'Payment Method' })}
                   size="s"
                   value={booking_store?.selectedPaymentMethod?.code}
                   onchange={e =>
@@ -369,13 +370,13 @@ export class IglPropertyBookedBy {
                     value={this.bookedByData.cardNumber}
                     defaultValue={this.bookedByData.cardNumber}
                     onText-change={e => this.handleCreditCardDataChange('cardNumber', e.detail.trim())}
-                    label={locales.entries.Lcz_CardNumber}
+                    label={t('Lcz_CardNumber', { fallback: 'Card number' })}
                   ></ir-input>
                   <ir-input
                     value={this.bookedByData.cardHolderName}
                     defaultValue={this.bookedByData.cardHolderName}
                     onText-change={e => this.handleCreditCardDataChange('cardHolderName', e.detail.trim())}
-                    label={locales.entries.Lcz_CardHolderName}
+                    label={t('Lcz_CardHolderName', { fallback: 'Card holder name' })}
                   ></ir-input>
                   <ir-input
                     onText-change={e => {
@@ -402,7 +403,7 @@ export class IglPropertyBookedBy {
                         },
                       },
                     }}
-                    label={locales.entries.Lcz_ExpiryDate}
+                    label={t('Lcz_ExpiryDate', { fallback: 'Expiry date' })}
                   ></ir-input>
                 </Fragment>
               )}
@@ -418,7 +419,7 @@ export class IglPropertyBookedBy {
                 </div>
               )}
               <wa-checkbox checked={this.bookedByData.emailGuest} onchange={event => this.handleDataChange('emailGuest', event)}>
-                {locales.entries.Lcz_EmailTheGuest}
+                {t('Lcz_EmailTheGuest', { fallback: 'Email the guest' })}
               </wa-checkbox>
             </div>
           </div>

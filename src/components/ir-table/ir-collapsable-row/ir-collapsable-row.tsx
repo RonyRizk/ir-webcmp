@@ -37,7 +37,7 @@ export class IrCollapsableRow {
           <td
             key={cell.id}
             class={{
-              'text-right': ['debit', 'credit', 'balance'].includes(cell.column.id),
+              'ir-text-end': ['debit', 'credit', 'balance'].includes(cell.column.id),
               'text-center': cell.column.id === 'actions',
               'sticky-column': cell.column.id === 'status',
               'input-column': ['debit', 'credit'].includes(cell.column.id),
@@ -62,7 +62,7 @@ export class IrCollapsableRow {
                 <td
                   key={cell.id}
                   class={{
-                    'text-right': ['debit', 'credit', 'balance'].includes(cell.column.id),
+                    'ir-text-end': ['debit', 'credit', 'balance'].includes(cell.column.id),
                     'text-center': cell.column.id === 'actions',
                     'sticky-column': cell.column.id === 'status',
                     'input-column': ['debit', 'credit'].includes(cell.column.id),
@@ -78,7 +78,7 @@ export class IrCollapsableRow {
                 <td
                   key={cell.id}
                   class={{
-                    'text-right': ['debit', 'credit', 'balance'].includes(cell.column.id),
+                    'ir-text-end': ['debit', 'credit', 'balance'].includes(cell.column.id),
                     'text-center': cell.column.id === 'actions',
                     'sticky-column': cell.column.id === 'status',
                     'input-column': ['debit', 'credit'].includes(cell.column.id),

@@ -6,7 +6,7 @@ import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import { RoomGuestsPayload } from '@/components/ir-booking-details/types';
 
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-arrivals-table',
   styleUrls: ['ir-arrivals-table.css', '../../../common/table.css'],
@@ -128,7 +128,7 @@ export class IrArrivalsTable {
       <td>
         <div class="arrivals-table__actions-cell">
           {!room.unit ? (
-            <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>Not assigned</span>
+            <span style={{ color: 'var(--wa-color-danger-fill-loud)' }}>{t('Lcz_NotAssigned', { fallback: 'Not assigned' })}</span>
           ) : showAction && !isAutomaticCheckIn ? (
             <ir-actions-cell
               buttons={isOverdueCheckIn ? ['overdue_check_in'] : ['check_in']}
@@ -138,7 +138,7 @@ export class IrArrivalsTable {
               }}
             ></ir-actions-cell>
           ) : room.in_out.code === '001' ? (
-            'In-house'
+            t('Lcz_InHouse', { fallback: 'In-house' })
           ) : (
             ''
           )}
@@ -194,19 +194,19 @@ export class IrArrivalsTable {
             <thead>
               <tr>
                 <th>
-                  <span class={'arrivals-table__departure__cell'}>Booking#</span>
+                  <span class={'arrivals-table__departure__cell'}>{t('Lcz_BookingHash', { fallback: 'Booking#' })}</span>
                 </th>
                 <th>
                   <div>
-                    <p>Booked by /</p>
-                    <p>Guest name</p>
+                    <p>{t('Lcz_BookedBySlash', { fallback: 'Booked by /' })}</p>
+                    <p>{t('Lcz_GuestName', { fallback: 'Guest name' })}</p>
                   </div>
                 </th>
                 {/* <th></th> */}
-                <th>Unit</th>
-                <th>Dates</th>
+                <th>{t('Lcz_Unit', { fallback: 'Unit' })}</th>
+                <th>{t('Lcz_Dates', { fallback: 'Dates' })}</th>
                 <th class="text-center">
-                  Balance
+                  {t('Lcz_Balance', { fallback: 'Balance' })}
                   <div style={{ width: 'fit-content', marginInline: 'auto' }}>
                     <ir-custom-button
                       id="balance-info"
@@ -215,7 +215,7 @@ export class IrArrivalsTable {
                       variant="danger"
                       appearance="outlined"
                     >
-                      Click to collect
+                      {t('Lcz_ClickToCollect', { fallback: 'Click to collect' })}
                     </ir-custom-button>
                   </div>
                 </th>
@@ -235,7 +235,7 @@ export class IrArrivalsTable {
             currentPage={pagination.currentPage}
             allowPageSizeChange={false}
             pageSizes={[pagination.pageSize]}
-            recordLabel={locales.entries?.Lcz_Bookings ?? 'Bookings'}
+            recordLabel={t('Lcz_Bookings', { fallback: 'Bookings' })}
             onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
             onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
           ></ir-pagination>

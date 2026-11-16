@@ -52,7 +52,6 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [igloo-calendar](../../igloo-calendar)
  - [ir-channel](../../ir-channel)
  - [ir-financial-actions](../../ir-financial-actions)
  - [ir-hk-archive](../../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
@@ -67,7 +66,6 @@ Type: `Promise<void>`
 ```mermaid
 graph TD;
   ir-sidebar --> ir-icon
-  igloo-calendar --> ir-sidebar
   ir-channel --> ir-sidebar
   ir-financial-actions --> ir-sidebar
   ir-hk-archive --> ir-sidebar

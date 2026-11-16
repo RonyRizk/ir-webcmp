@@ -101,14 +101,14 @@
   color: var(--wa-color-brand-fill-loud, var(--wa-color-brand-600));
 }
 .booking-room__extra-services-group {
-  padding-left: 0.625rem;
-  border-left: 3px solid transparent;
+  padding-inline-start: 0.625rem;
+  border-inline-start: 3px solid transparent;
 }
 .booking-room__extra-services-group--guest {
-  border-left-color: var(--wa-color-neutral-300, #d4d4d8);
+  border-inline-start-color: var(--wa-color-neutral-300, #d4d4d8);
 }
 .booking-room__extra-services-group--agent {
-  border-left-color: var(--wa-color-brand-fill-loud, #3b82f6);
+  border-inline-start-color: var(--wa-color-brand-fill-loud, #3b82f6);
 }
 .booking-room__extra-services-group-label {
   display: flex;

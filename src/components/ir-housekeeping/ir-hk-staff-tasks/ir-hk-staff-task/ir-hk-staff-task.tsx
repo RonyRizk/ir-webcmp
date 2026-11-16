@@ -1,5 +1,6 @@
 import { Task } from '@/models/housekeeping';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-hk-staff-task',
@@ -59,10 +60,10 @@ export class IrHkStaffTask {
               </div>
 
               {!this.future && this.guests.length > 0 && (
-                <div class="task-guests" style={{ paddingLeft: '1px' }}>
+                <div class="task-guests" style={{ paddingInlineStart: '1px' }}>
                   {this.guests.map(g => (
                     <div key={g.label} class="task-guest">
-                      <span class="task-guest__count">{g.count}</span>
+                      <span class="task-guest__count">{formatCount(g.count)}</span>
                       {g.label === 'adults' ? (
                         <wa-icon name="person" class="task-guest__label"></wa-icon>
                       ) : g.label === 'children' ? (

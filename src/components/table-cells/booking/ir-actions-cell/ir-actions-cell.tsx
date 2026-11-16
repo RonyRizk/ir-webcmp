@@ -1,4 +1,5 @@
 import { Component, Host, Prop, Event, EventEmitter, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 export type IrActionButton = 'check_in' | 'check_out' | 'overdue_check_in' | 'overdue_check_out' | 'edit' | 'delete';
 
@@ -15,13 +16,13 @@ export class IrActionsCell {
   private getLabel(type: IrActionButton): string {
     switch (type) {
       case 'check_in':
-        return 'Check in';
+        return t('Lcz_CheckIn', { fallback: 'Check in' });
       case 'check_out':
-        return 'Check out';
+        return t('Lcz_CheckOut', { fallback: 'Check out' });
       case 'overdue_check_in':
-        return 'Overdue check-in';
+        return t('Lcz_OverdueCheckIn', { fallback: 'Overdue check-in' });
       case 'overdue_check_out':
-        return 'Overdue check-out';
+        return t('Lcz_OverdueCheckOut', { fallback: 'Overdue check-out' });
       case 'edit':
         return 'icon';
       case 'delete':

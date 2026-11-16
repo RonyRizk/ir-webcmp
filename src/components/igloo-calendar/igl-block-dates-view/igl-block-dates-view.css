@@ -2,18 +2,44 @@
   display: block;
 }
 
-:host .controlContainer {
-  width: 24px;
+.block-dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s, 0.5rem);
+  text-align: start;
+  font-size: var(--wa-font-size-s, 0.8125rem);
+  color: var(--wa-color-text-normal, #1e293b);
 }
 
-:host .checkBoxContainer input {
-  height: 1.2rem !important;
-  width: 30px;
+.block-dates__dates {
+  --ir-date-view-font-size: var(--wa-font-size-m, 0.8125rem);
 }
 
-.releaseTime {
-  padding-left: 5px;
+/* Mode chooser — how the block resolves (auto-release vs out-of-service). */
+.block-dates__mode::part(radios) {
+  gap: var(--wa-space-xs, 0.375rem);
 }
-.out-of-service-label {
-  margin-left: 5px !important;
+
+/* Auto-release fields, nested beneath the "automatic release" radio and
+   indented to line up with its label (past the radio control). */
+.block-dates__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-xs, 0.375rem);
+  margin-block: var(--wa-space-3xs, 0.125rem) var(--wa-space-2xs, 0.25rem);
+  margin-inline-start: 1.6rem;
+  padding-inline-start: var(--wa-space-s, 0.5rem);
+  border-inline-start: 2px solid var(--wa-color-neutral-border-quiet, #e2e8f0);
+}
+
+.block-dates__select,
+.block-dates__reason {
+  width: 100%;
+}
+
+/* Computed release moment, shown inside the select next to the chosen period. */
+.block-dates__release-on {
+  font-size: var(--wa-font-size-xs, 0.75rem);
+  color: var(--wa-color-text-quiet, #64748b);
+  white-space: nowrap;
 }

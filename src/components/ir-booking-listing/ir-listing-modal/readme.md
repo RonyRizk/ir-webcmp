@@ -1,17 +1,15 @@
 # ir-listing-modal
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property         | Attribute     | Description | Type                                                                       | Default         |
-| ---------------- | ------------- | ----------- | -------------------------------------------------------------------------- | --------------- |
-| `editBooking`    | --            |             | `{ booking: Booking; cause: "edit" \| "guest" \| "delete" \| "payment"; }` | `undefined`     |
-| `modalTitle`     | `modal-title` |             | `string`                                                                   | `'Modal Title'` |
-| `paymentEntries` | --            |             | `{ types: IEntries[]; groups: IEntries[]; methods: IEntries[]; }`          | `undefined`     |
+| Property         | Attribute     | Description | Type                                                                          | Default     |
+| ---------------- | ------------- | ----------- | ----------------------------------------------------------------------------- | ----------- |
+| `editBooking`    | --            |             | `{ booking: Booking; cause: "edit" \| "delete" \| "guest" \| "payment"; }`    | `undefined` |
+| `modalTitle`     | `modal-title` |             | `string`                                                                      | `undefined` |
+| `paymentEntries` | --            |             | `{ types: SetupEntries[]; groups: SetupEntries[]; methods: SetupEntries[]; }` | `undefined` |
 
 
 ## Events

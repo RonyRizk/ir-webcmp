@@ -12,6 +12,9 @@ import { BookingColor, IOtaNotes, Room } from '@/models/booking.dto';
 import { PropertyService } from '@/services/property.service';
 import { CalendarSidebarState } from '../igloo-calendar';
 import { HbPreference } from '@/types/enums';
+import { isRtlDirection } from '@/utils/calendar-grid';
+import { formatBookingNumber } from '@/utils/number';
+import { t } from '@/services/locale/t';
 //import { transformNewBLockedRooms } from '../../../utils/booking';
 
 @Component({
@@ -23,10 +26,10 @@ export class IglBookingEventHover {
   @Element() element: HTMLIglBookingEventHoverElement;
 
   @Prop({ mutable: true }) bookingEvent: { [key: string]: any };
-  @Prop() bubbleInfoTop: boolean = false;
-  @Prop() currency;
   @Prop() countries: ICountry[];
   @Prop() is_vacation_rental: boolean = false;
+  /** The panel sits in a dialog, which frames it and sets its width, rather than floating over the calendar. */
+  @Prop() inDialog: boolean = false;
 
   @State() isLoading: string;
   @State() shouldHideUnassignUnit = false;
@@ -100,10 +103,10 @@ export class IglBookingEventHover {
   private getTotalOccupants() {
     const { CHILDREN_COUNT, ADULTS_COUNT } = this.bookingEvent;
     if (CHILDREN_COUNT === 0) {
-      return `${ADULTS_COUNT} ${ADULTS_COUNT > 1 ? locales.entries.Lcz_AdultsCaption.toLowerCase() : locales.entries.Lcz_Single_Adult?.toLowerCase()}`;
+      return `${ADULTS_COUNT} ${ADULTS_COUNT > 1 ? t('Lcz_Adults', { fallback: 'adults' }) : t('Lcz_Single_Adult')?.toLowerCase()}`;
     }
-    return `${ADULTS_COUNT} ${ADULTS_COUNT > 1 ? locales.entries.Lcz_AdultsCaption.toLowerCase() : locales.entries.Lcz_Single_Adult?.toLowerCase()}, ${CHILDREN_COUNT} ${
-      CHILDREN_COUNT > 1 ? locales.entries.Lcz_ChildCaption.toLowerCase() : locales.entries.Lcz_Single_Child?.toLowerCase()
+    return `${ADULTS_COUNT} ${ADULTS_COUNT > 1 ? t('Lcz_Adults', { fallback: 'adults' }) : t('Lcz_Single_Adult')?.toLowerCase()}, ${CHILDREN_COUNT} ${
+      CHILDREN_COUNT > 1 ? t('Lcz_ChildCaption', { fallback: 'Child.' }).toLowerCase() : t('Lcz_Child', { fallback: 'Child' })?.toLowerCase()
     }`;
   }
 
@@ -153,7 +156,7 @@ export class IglBookingEventHover {
     let str = '';
     str += currentRoom.rateplan['short_name'];
     if (currentRoom.rateplan['is_non_refundable']) {
-      str += ` - ${locales.entries.Lcz_NonRefundable}`;
+      str += ` - ${t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}`;
     }
     return str;
   }
@@ -212,7 +215,7 @@ export class IglBookingEventHover {
   }
 
   private handleEditBooking() {
-    this.bookingEvent.TITLE = locales.entries.Lcz_EditBookingFor;
+    this.bookingEvent.TITLE = t('Lcz_EditBookingFor');
     this.handleBookingOption('EDIT_BOOKING');
   }
 
@@ -227,7 +230,7 @@ export class IglBookingEventHover {
       roomsInfo: this.bookingEvent.roomsInfo,
       ARRIVAL: this.bookingEvent.ARRIVAL,
       ADD_ROOM_TO_BOOKING: this.bookingEvent.ID,
-      TITLE: 'Add Room to #' + this.bookingEvent.BOOKING_NUMBER,
+      TITLE: t('Lcz_AddRoomToBookingHash', { fallback: 'Add Room to #' }) + this.bookingEvent.BOOKING_NUMBER,
       event_type: 'ADD_ROOM',
       ROOMS: this.bookingEvent.ROOMS,
       GUEST: this.bookingEvent.GUEST,
@@ -239,7 +242,7 @@ export class IglBookingEventHover {
         toDate: TO_DATE,
         dateDifference: 0,
         editabled: true,
-        message: 'Including 5.00% City Tax - Excluding 11.00% VAT',
+        message: t('Lcz_IncludingCityTaxExcludingVatMock', { fallback: 'Including 5.00% City Tax - Excluding 11.00% VAT' }),
       },
     };
 
@@ -281,7 +284,6 @@ export class IglBookingEventHover {
   private handleDeleteEvent() {
     this.hideBubble();
     this.deleteButton.emit(this.bookingEvent.POOL);
-    console.log('Delete Event');
   }
 
   private async handleUpdateBlockedDates() {
@@ -322,13 +324,13 @@ export class IglBookingEventHover {
   private renderTitle(eventType, roomInfo) {
     switch (eventType) {
       case 'EDIT_BOOKING':
-        return `${locales.entries.Lcz_EditBookingFor} ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
+        return `${t('Lcz_EditBookingFor')} ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
       case 'ADD_ROOM':
-        return `${locales.entries.Lcz_AddingUnitToBooking}# ${this.bookingEvent.BOOKING_NUMBER}`;
+        return `${t('Lcz_AddingUnitToBooking')}# ${formatBookingNumber(this.bookingEvent.BOOKING_NUMBER)}`;
       case 'SPLIT_BOOKING':
-        return locales.entries.Lcz_Adding + ` ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
+        return t('Lcz_Adding') + ` ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
       default:
-        return `${locales.entries.Lcz_NewBookingFor} ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
+        return `${t('Lcz_NewBookingFor')} ${roomInfo.CATEGORY} ${roomInfo.ROOM_NAME}`;
     }
   }
 
@@ -377,7 +379,7 @@ export class IglBookingEventHover {
     const channel_notes: IOtaNotes[] = [...this.bookingEvent.ota_notes];
     const separator = '<br>- ';
     if (channel_notes.length > maxVisible) {
-      channel_notes[maxVisible - 1] = { statement: `${channel_notes[maxVisible - 1].statement} <span>more...</span>` };
+      channel_notes[maxVisible - 1] = { statement: `${channel_notes[maxVisible - 1].statement} <span>${t('Lcz_More', { fallback: 'more...' })}</span>` };
     }
     return channel_notes
       .slice(0, maxVisible)
@@ -421,192 +423,172 @@ export class IglBookingEventHover {
 
     return true;
   }
+  /** In a dialog the actions are tapped with a finger, not clicked in a small floating panel. */
+  private get actionSize(): 'm' | 'xs' {
+    return this.inDialog ? 'm' : 'xs';
+  }
   private get isHalfBoard() {
     return this.room?.rateplan?.meal_plan?.code === '003' && calendar_data.property.is_frontdesk_enabled;
   }
-  private getInfoElement() {
-    console.log(this.bookingEvent);
+  private renderColorPicker() {
+    if (this.bookingEvent?.STATUS === 'PENDING-CONFIRMATION') {
+      return null;
+    }
     return (
-      <div class={`iglPopOver infoBubble ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
-        {this.renderPointer()}
-        <div class={`d-flex p-0 m-0  ${this.bookingEvent.BALANCE > 1 ? 'pb-0' : 'pb-1'}`}>
-          <div class="px-0  font-weight-bold font-medium-1 d-flex align-items-center" style={{ flex: '1 1 0%' }}>
-            <img src={this.bookingEvent?.origin?.Icon} alt={this.bookingEvent?.origin?.Label} class={'icon-image'} />
-            <p class={'p-0 m-0'}>{!this.bookingEvent.is_direct ? this.bookingEvent.channel_booking_nbr : this.bookingEvent.BOOKING_NUMBER}</p>
+      <wa-dropdown
+        class="event-hover__color-dropdown"
+        onwa-show={e => {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+        }}
+        onwa-hide={e => {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+        }}
+        onwa-select={async e => {
+          const value = (e.detail as any).item.value as string;
+          const newBookingColor = value === 'none' ? null : calendar_data.property.calendar_extra?.booking_colors.find(c => c.color === value);
+          await this.propertyService.setRoomCalendarExtra({
+            property_id: calendar_data.property.id,
+            room_identifier: this.bookingEvent.IDENTIFIER,
+            value: JSON.stringify({
+              booking_color: newBookingColor,
+            }),
+          });
+          this.bookingColor = newBookingColor;
+        }}
+      >
+        <button type="button" class="event-hover__color-trigger" slot="trigger" aria-label={t('Lcz_BookingColor', { fallback: 'Booking color' })}>
+          {this.bookingColor ? (
+            <span class="event-hover__swatch" style={{ background: this.bookingColor?.color }}></span>
+          ) : (
+            <wa-icon class="event-hover__swatch --none" style={{ fontSize: '0.75rem', background: this.baseColor }} name="ban"></wa-icon>
+          )}
+        </button>
+        <wa-dropdown-item value="none">
+          <wa-icon style={{ fontSize: '0.875rem' }} name="ban"></wa-icon>
+        </wa-dropdown-item>
+        {calendar_data.property.calendar_extra?.booking_colors.map(s => (
+          <wa-dropdown-item value={s.color}>
+            <span class="event-hover__swatch" style={{ background: s.color }}></span>
+          </wa-dropdown-item>
+        ))}
+      </wa-dropdown>
+    );
+  }
+
+  private getInfoElement() {
+    return (
+      <div class={{ iglPopOver: true, infoBubble: true, inDialog: this.inDialog }}>
+        <div class="event-hover__header">
+          <div class="event-hover__identity">
+            <img src={this.bookingEvent?.origin?.Icon} alt={this.bookingEvent?.origin?.Label} class="event-hover__channel-icon" />
+            <span class="event-hover__booking-no">
+              {!this.bookingEvent.is_direct ? this.bookingEvent.channel_booking_nbr : formatBookingNumber(this.bookingEvent.BOOKING_NUMBER)}
+            </span>
           </div>
-          <div class="pr-0  text-right d-flex align-items-center" style={{ gap: '0.5rem' }}>
-            {this.bookingEvent?.STATUS !== 'PENDING-CONFIRMATION' && (
-              <ir-dropdown
-                caret={false}
-                onOptionChange={async e => {
-                  const newBookingColor = e.detail === 'none' ? null : calendar_data.property.calendar_extra?.booking_colors.find(c => c.color === e.detail);
-                  await this.propertyService.setRoomCalendarExtra({
-                    property_id: calendar_data.property.id,
-                    room_identifier: this.bookingEvent.IDENTIFIER,
-                    value: JSON.stringify({
-                      booking_color: newBookingColor,
-                    }),
-                  });
-                  this.bookingColor = newBookingColor;
-                }}
-                style={{ '--ir-dropdown-menu-min-width': 'fit-content', 'width': '1.5rem' }}
-              >
-                <button class="booking-event-hover__color-picker-trigger" slot="trigger">
-                  {this.bookingColor ? (
-                    <div style={{ height: '1rem', width: '1rem', background: this.bookingColor?.color, borderRadius: '0.21rem' }}></div>
-                  ) : (
-                    <ir-icons
-                      class="p-0 m-0 d-flex align-items-center"
-                      style={{
-                        '--icon-size': '1rem',
-                        'height': '1rem',
-                        'width': '1rem',
-                        'background': this.baseColor,
-                        'color': 'white',
-                        'borderRadius': '0.21rem',
-                        'padding': '0.25rem',
-                      }}
-                      name="ban"
-                    ></ir-icons>
-                  )}
-                </button>
-                <ir-dropdown-item value="none">
-                  <ir-icons class="p-0 m-0 d-flex align-items-center" style={{ '--icon-size': '1rem', 'height': '1rem', 'width': '1rem' }} name="ban"></ir-icons>
-                </ir-dropdown-item>
-                {calendar_data.property.calendar_extra?.booking_colors.map(s => (
-                  <ir-dropdown-item value={s.color}>
-                    <div style={{ height: '1rem', width: '1rem', borderRadius: '0.21rem', background: s.color }}></div>
-                  </ir-dropdown-item>
-                ))}
-              </ir-dropdown>
-            )}
-            {formatAmount(this.currency.symbol, this.getTotalPrice())}
+          <div class="event-hover__price">
+            {this.renderColorPicker()}
+            <span>{formatAmount(calendar_data.currency.symbol, this.getTotalPrice())}</span>
           </div>
         </div>
         <div class="event-hover__origin-row">
           <span class="event-hover__origin-label">
             {this.bookingEvent.booking?.agent ? (
               <span>
-                Agent:{' '}
-                <p class={'truncate p-0 m-0'} style={{ maxWidth: '150px', display: 'inline-flex' }}>
+                {t('Lcz_Agent', { fallback: 'Agent' })}
+                {': '}
+                <span class="event-hover__agent">
                   {this.bookingEvent?.booking?.agent?.name} {this.bookingEvent?.booking?.agent?.reference}
-                </p>
+                </span>
               </span>
             ) : (
               this.bookingEvent.origin.Label
             )}
           </span>
           {this.bookingEvent.BALANCE > 1 && (
-            <p class="pr-0 m-0 p-0 text-right balance_amount">
-              {locales.entries.Lcz_Balance}: {formatAmount(this.currency.symbol, this.bookingEvent.BALANCE)}
-            </p>
+            <span class="event-hover__balance">
+              {t('Lcz_Balance')}: {formatAmount(calendar_data.currency.symbol, this.bookingEvent.BALANCE)}
+            </span>
           )}
         </div>
-        <div class="row p-0 m-0">
-          <div class="px-0 pr-0 col-12">
-            <ir-date-view
-              format={'ddd, MMM DD, YYYY'}
-              from_date={this.bookingEvent.defaultDates.from_date}
-              to_date={this.bookingEvent.defaultDates.to_date}
-              showDateDifference={false}
-            ></ir-date-view>
-          </div>
+        <ir-date-view
+          class="event-hover__dates"
+          format={'weekday-medium'}
+          from_date={this.bookingEvent.defaultDates.from_date}
+          to_date={this.bookingEvent.defaultDates.to_date}
+          showDateDifference={false}
+        ></ir-date-view>
+        <div class="event-hover__details">
+          {this.bookingEvent.NAME && (
+            <ir-label class="label--capitalize" labelText={`${t('Lcz_GuestName', { fallback: 'Guest name' })}:`} content={this.bookingEvent.NAME}></ir-label>
+          )}
+          {this.getArrivalTime() && <ir-label labelText={`${t('Lcz_ArrivalTime', { fallback: 'Arrival time' })}:`} content={this.getArrivalTime()}></ir-label>}
+          {this.getTotalOccupants() && <ir-label labelText={`${t('Lcz_Occupancy')}:`} content={this.getTotalOccupants()}></ir-label>}
+          {this.getPhoneNumber() && <ir-label labelText={`${t('Lcz_Phone', { fallback: 'Phone' })}:`} content={this.renderPhone()}></ir-label>}
+          {this.getRatePlan() && (
+            <ir-label labelText={`${t('Lcz_RatePlan', { fallback: 'Rate plan' })}:`} content={this.getRatePlan()}>
+              {this.isHalfBoard && (
+                <wa-badge appearance="filled" variant={this.room?.hb_preference ? 'brand' : 'warning'}>
+                  {this.room?.hb_preference === HbPreference.Lunch
+                    ? t('Lcz_WithLunch', { fallback: 'With lunch' })
+                    : this.room?.hb_preference === HbPreference.Dinner
+                      ? t('Lcz_WithDinner', { fallback: 'With dinner' })
+                      : t('Lcz_ChooseLunchOrDinner', { fallback: 'Choose lunch or dinner' })}
+                </wa-badge>
+              )}
+            </ir-label>
+          )}
+          {this.bookingEvent.DEPARTURE_TIME?.code !== '000' && (
+            <ir-label labelText={`${t('Lcz_DepartureTime', { fallback: 'Departure time:' })}`} content={this.bookingEvent.DEPARTURE_TIME?.description}></ir-label>
+          )}
+          {this.bookingEvent.PRIVATE_NOTE && <ir-label labelText={`${t('Lcz_BookingPrivateNote')}:`} display="inline" content={this.bookingEvent.PRIVATE_NOTE}></ir-label>}
+          {this.bookingEvent.is_direct && <ir-label labelText={`${t('Lcz_GuestRemark')}:`} display="inline" content={this.bookingEvent.NOTES}></ir-label>}
+          <ir-label labelText={`${t('Lcz_ChannelNotes')}:`} display="inline" content={this.getOTANotes()} renderContentAsHtml></ir-label>
+          {this.getInternalNote() && <ir-label labelText={`${t('Lcz_InternalRemark')}:`} content={this.getInternalNote()}></ir-label>}
         </div>
-        {this.bookingEvent.NAME && <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`Guest name:`} content={this.bookingEvent.NAME}></ir-label>}
-        {this.getArrivalTime() && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_ArrivalTime}:`} content={this.getArrivalTime()}></ir-label>
-        )}
-        {this.getTotalOccupants() && (
-          <ir-label class="m-0 p-0" containerStyle={{ padding: '0', margin: '0' }} labelText={`${locales.entries.Lcz_Occupancy}:`} content={this.getTotalOccupants()}></ir-label>
-        )}
-        {this.getPhoneNumber() && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhone()}></ir-label>
-        )}
-        {this.getRatePlan() && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`${locales.entries.Lcz_RatePlan}:`} content={this.getRatePlan()}>
-            {this.isHalfBoard && (
-              <wa-badge appearance="filled" variant={this.room?.hb_preference ? 'brand' : 'warning'}>
-                {this.room?.hb_preference === HbPreference.Lunch ? 'With lunch' : this.room?.hb_preference === HbPreference.Dinner ? 'With dinner' : 'Choose lunch or dinner'}
-              </wa-badge>
-            )}
-          </ir-label>
-        )}
-        {this.bookingEvent.DEPARTURE_TIME?.code !== '000' && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} class="m-0 p-0" labelText={`Departure time:`} content={this.bookingEvent.DEPARTURE_TIME?.description}></ir-label>
-        )}
-        {this.bookingEvent.PRIVATE_NOTE && (
-          <ir-label
-            containerStyle={{ padding: '0', margin: '0' }}
-            class="m-0 p-0"
-            labelText={`${locales.entries.Lcz_BookingPrivateNote}:`}
-            display="inline"
-            content={this.bookingEvent.PRIVATE_NOTE}
-          ></ir-label>
-        )}
-        {this.bookingEvent.is_direct && (
-          <ir-label containerStyle={{ padding: '0', margin: '0' }} labelText={`${locales.entries.Lcz_GuestRemark}:`} display="inline" content={this.bookingEvent.NOTES}></ir-label>
-        )}
-        <ir-label
-          containerStyle={{ padding: '0', margin: '0' }}
-          labelText={`${locales.entries.Lcz_ChannelNotes}:`}
-          display="inline"
-          content={this.getOTANotes()}
-          renderContentAsHtml
-        ></ir-label>
-        {this.getInternalNote() && <ir-label labelText={`${locales.entries.Lcz_InternalRemark}:`} content={this.getInternalNote()}></ir-label>}
-        <div class="row p-0 m-0 mt-2">
-          <div class="full-width d-flex align-items-center" style={{ gap: '0.25rem' }} role="group">
-            {/* <ir-button
-              style={{ '--icon-size': '0.875rem' }}
-              onClickHandler={() => this.handleEditBooking()}
-              class={'w-100'}
-              btn_block
-              text={locales.entries.Lcz_Edit}
-              // icon_name="edit"
-              btn_styles="h-100"
-              size="sm"
-            ></ir-button> */}
-            <ir-custom-button style={{ width: '100%' }} variant="brand" onClickHandler={() => this.handleEditBooking()}>
-              Edit
+        <div class="event-hover__actions" style={{ paddingTop: '1.5rem' }} role="group">
+          <ir-custom-button size={this.actionSize} variant="brand" onClickHandler={() => this.handleEditBooking()}>
+            {t('Lcz_Edit', { fallback: 'Edit' })}
+          </ir-custom-button>
+          <ir-custom-button size={this.actionSize} variant="brand" appearance="outlined" onClickHandler={() => this.handleReallocationBooking()}>
+            {t('Lcz_Reassign', { fallback: 'Reassign' })}
+          </ir-custom-button>
+          {this.bookingEvent.is_direct && this.bookingEvent.IS_EDITABLE && !this.hideButtons && (
+            <ir-custom-button size={this.actionSize} variant="brand" appearance="outlined" onClickHandler={() => this.handleAddRoom()}>
+              {t('Lcz_AddUnit', { fallback: 'Add unit' })}
             </ir-custom-button>
-            <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleReallocationBooking()}>
-              Reassign
+          )}
+          {this.canSplitBooking() && (
+            <ir-custom-button size={this.actionSize} variant="brand" appearance="outlined" onClickHandler={() => this.handleSplitBooking()}>
+              {t('Lcz_Split', { fallback: 'Split' })}
             </ir-custom-button>
-            {this.bookingEvent.is_direct && this.bookingEvent.IS_EDITABLE && !this.hideButtons && (
-              <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleAddRoom()}>
-                {locales.entries.Lcz_AddRoom}
-              </ir-custom-button>
-            )}
-            {this.canSplitBooking() && (
-              <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleSplitBooking()}>
-                Split
-              </ir-custom-button>
-            )}
-            {this.canCheckIn() && (
-              <ir-custom-button style={{ width: '100%' }} onClickHandler={() => this.handleCustomerCheckIn()} variant="brand" appearance="outlined">
-                {locales.entries.Lcz_CheckIn}
-              </ir-custom-button>
-            )}
-            {this.canCheckOut() && (
-              <ir-custom-button style={{ width: '100%' }} variant="brand" appearance="outlined" onClickHandler={() => this.handleCustomerCheckOut()}>
-                {locales.entries.Lcz_CheckOut}
-              </ir-custom-button>
-            )}
-            {this.hideButtons
-              ? null
-              : !this.shouldHideUnassignUnit && (
-                  <ir-custom-button
-                    variant="danger"
-                    style={{ width: '100%' }}
-                    appearance="outlined"
-                    onClickHandler={_ => {
-                      this.handleDeleteEvent();
-                    }}
-                  >
-                    {locales.entries.Lcz_Unassign}
-                  </ir-custom-button>
-                )}
-          </div>
+          )}
+          {this.canCheckIn() && (
+            <ir-custom-button size={this.actionSize} onClickHandler={() => this.handleCustomerCheckIn()} variant="brand" appearance="outlined">
+              {t('Lcz_CheckIn', { fallback: 'Check in' })}
+            </ir-custom-button>
+          )}
+          {this.canCheckOut() && (
+            <ir-custom-button size={this.actionSize} variant="brand" appearance="outlined" onClickHandler={() => this.handleCustomerCheckOut()}>
+              {t('Lcz_CheckOut', { fallback: 'Check out' })}
+            </ir-custom-button>
+          )}
+          {this.hideButtons
+            ? null
+            : !this.shouldHideUnassignUnit && (
+                <ir-custom-button
+                  class="event-hover__destructive"
+                  size={this.actionSize}
+                  variant="danger"
+                  appearance="outlined"
+                  onClickHandler={_ => {
+                    this.handleDeleteEvent();
+                  }}
+                >
+                  {t('Lcz_Unassign')}
+                </ir-custom-button>
+              )}
         </div>
       </div>
     );
@@ -625,63 +607,60 @@ export class IglBookingEventHover {
   private getNewBookingOptions() {
     const shouldDisplayButtons = this.bookingEvent.roomsInfo[0].rateplans.some(rate => rate.is_active);
     return (
-      <div class={`iglPopOver d-flex flex-column newBookingOptions ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`} style={{ gap: '0.5rem' }}>
-        {this.renderPointer()}
-        {shouldDisplayButtons ? (
-          <Fragment>
-            {/* <div class={'mb-1'}> */}
-            <ir-custom-button
-              variant="brand"
-              appearance="accent"
-              data-testid="bar_booking_btn"
-              onClickHandler={_ => {
-                this.handleBookingOption('BAR_BOOKING');
-              }}
-            >
-              {locales.entries.Lcz_CreateNewBooking}
-            </ir-custom-button>
-            {/* </div> */}
-            {/* <div> */}
-            {this.hasSplitBooking() && (
-              // <div class="mb-1">
+      <div class="iglPopOver newBookingOptions">
+        <div class="event-hover__actions" role="group">
+          {shouldDisplayButtons ? (
+            <Fragment>
               <ir-custom-button
-                variant="neutral"
+                size="xs"
+                variant="brand"
                 appearance="accent"
+                data-testid="bar_booking_btn"
                 onClickHandler={_ => {
-                  this.handleBookingOption('SPLIT_BOOKING');
+                  this.handleBookingOption('BAR_BOOKING');
                 }}
               >
-                {locales.entries.Lcz_AssignUnitToExistingBooking}
+                <wa-icon slot="start" name="calendar-plus"></wa-icon>
+                {t('Lcz_CreateNewBooking')}
               </ir-custom-button>
-              // </div>
-            )}
-            {/* </div> */}
-          </Fragment>
-        ) : (
-          <p class={'text-danger'}>{locales.entries.Lcz_NoRatePlanDefined}</p>
-        )}
-        {/* <div> */}
-        <ir-custom-button
-          appearance="accent"
-          variant="danger"
-          onClickHandler={_ => {
-            this.handleBookingOption('BLOCK_DATES');
-          }}
-        >
-          {locales.entries.Lcz_Blockdates}
-        </ir-custom-button>
-        {/* </div> */}
+              {this.hasSplitBooking() && (
+                <ir-custom-button
+                  size="xs"
+                  variant="neutral"
+                  appearance="accent"
+                  onClickHandler={_ => {
+                    this.handleBookingOption('SPLIT_BOOKING');
+                  }}
+                >
+                  <wa-icon slot="start" name="link"></wa-icon>
+                  {t('Lcz_AssignUnitToExistingBooking')}
+                </ir-custom-button>
+              )}
+            </Fragment>
+          ) : (
+            <p class="event-hover__error">{t('Lcz_NoRatePlanDefined')}</p>
+          )}
+          <ir-custom-button
+            size="xs"
+            appearance="accent"
+            variant="danger"
+            onClickHandler={_ => {
+              this.handleBookingOption('BLOCK_DATES');
+            }}
+          >
+            <wa-icon slot="start" name="ban"></wa-icon>
+            {t('Lcz_Blockdates', { fallback: 'Block dates' })}
+          </ir-custom-button>
+        </div>
       </div>
     );
   }
 
   private getBlockedView() {
-    console.log('booking event', this.bookingEvent);
-    // let defaultData = {RELEASE_AFTER_HOURS: 0, OPTIONAL_REASON: "", OUT_OF_SERVICE: false};
     return (
-      <div class={`iglPopOver blockedView ${this.bubbleInfoTop ? 'bubbleInfoAbove' : ''} text-left`}>
-        {this.renderPointer()}
+      <div class={{ iglPopOver: true, blockedView: true, inDialog: this.inDialog }}>
         <igl-block-dates-view
+          style={{ marginBottom: '1.5rem' }}
           isEventHover={true}
           entryHour={this.bookingEvent.ENTRY_HOUR}
           entryMinute={this.bookingEvent.ENTRY_MINUTE}
@@ -691,53 +670,47 @@ export class IglBookingEventHover {
           entryDate={this.getEntryDate()}
           onDataUpdateEvent={event => this.handleBlockDateUpdate(event)}
         ></igl-block-dates-view>
-        <div class="row p-0 m-0 mt-2">
-          <div class="full-width d-flex align-items-center" style={{ gap: '0.25rem' }} role="group">
-            <ir-custom-button
-              disabled={this.isLoading === 'update'}
-              onClickHandler={_ => {
-                this.handleUpdateBlockedDates();
-              }}
-              variant="brand"
-              loading={this.isLoading === 'update'}
-              style={{ width: '100%' }}
-            >
-              {locales.entries.Lcz_Update}
-            </ir-custom-button>
-            <ir-custom-button
-              variant="brand"
-              appearance="outlined"
-              style={{ width: '100%' }}
-              onClickHandler={() => {
-                this.handleConvertBlockedDateToBooking();
-              }}
-            >
-              {locales.entries.Lcz_ConvertSplitBooking}
-            </ir-custom-button>
-
-            <ir-custom-button
-              variant="danger"
-              style={{ width: '100%' }}
-              appearance="outlined"
-              onClickHandler={_ => {
-                this.handleDeleteEvent();
-              }}
-            >
-              {locales.entries.Lcz_Delete}
-            </ir-custom-button>
-          </div>
+        <div class="event-hover__actions" role="group">
+          <ir-custom-button
+            size={this.actionSize}
+            disabled={this.isLoading === 'update'}
+            onClickHandler={_ => {
+              this.handleUpdateBlockedDates();
+            }}
+            variant="brand"
+            loading={this.isLoading === 'update'}
+          >
+            {t('Lcz_Update')}
+          </ir-custom-button>
+          <ir-custom-button
+            size={this.actionSize}
+            variant="brand"
+            appearance="outlined"
+            onClickHandler={() => {
+              this.handleConvertBlockedDateToBooking();
+            }}
+          >
+            {t('Lcz_ConvertSplitBooking')}
+          </ir-custom-button>
+          <ir-custom-button
+            class="event-hover__destructive"
+            variant="danger"
+            size={this.actionSize}
+            appearance="outlined"
+            onClickHandler={_ => {
+              this.handleDeleteEvent();
+            }}
+          >
+            {t('Lcz_Delete', { fallback: 'Delete' })}
+          </ir-custom-button>
         </div>
       </div>
     );
   }
 
-  private renderPointer() {
-    return <div class={`bubblePointer ${this.bubbleInfoTop ? 'bubblePointTop' : 'bubblePointBottom'}`}></div>;
-  }
-
   render() {
     return (
-      <Host>
+      <Host dir={isRtlDirection(locales.direction) ? 'rtl' : 'ltr'}>
         {this.isBlockedDateEvent() ? this.getBlockedView() : null}
         {this.isNewBooking() ? this.getNewBookingOptions() : null}
         {!this.isBlockedDateEvent() && !this.isNewBooking() ? this.getInfoElement() : null}

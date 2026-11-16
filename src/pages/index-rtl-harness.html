@@ -1,0 +1,50 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>RTL harness</title>
+    <link rel="stylesheet" href="/build/ir-webcmp.css" />
+    <script type="module" src="/build/ir-webcmp.esm.js"></script>
+    <script nomodule src="/build/ir-webcmp.js"></script>
+    <!-- Reads ?dir= / ?lang= and stamps them on <html> before components upgrade. -->
+    <script src="/scripts/index.js"></script>
+  </head>
+
+  <body>
+    <!--
+      Direction harness. Deliberately mounts only primitives that render without a ticket or a
+      gateway call, so tests/rtl.spec.ts can assert geometry offline. Open it at
+      /pages/index-rtl-harness.html?dir=rtl&lang=ar and compare against ?dir=ltr.
+    -->
+    <main style="max-width: 720px; margin: 2rem auto; display: flex; flex-direction: column; gap: 2rem">
+      <section data-case="pagination">
+        <ir-pagination total="120" pages="12" current-page="3" page-size="10"></ir-pagination>
+      </section>
+
+      <!-- Toast layer: only the direction-dependent slide sign is read, no toast is raised. -->
+      <section data-case="toast">
+        <ir-toast id="harness-toast-end" position="top-right"></ir-toast>
+        <ir-toast id="harness-toast-start" position="top-left"></ir-toast>
+      </section>
+
+      <section data-case="input-affixes">
+        <ir-input-text variant="floating-label" label="Amount" value="120">
+          <span slot="prefix">$</span>
+          <span slot="suffix">.00</span>
+        </ir-input-text>
+      </section>
+
+      <section data-case="sidebar" style="position: relative; height: 220px; overflow: hidden">
+        <ir-sidebar id="harness-sidebar" side="right" open label="Inline-end sidebar">
+          <p style="padding: 1rem">Sidebar body</p>
+        </ir-sidebar>
+      </section>
+
+      <!-- A PDF is a fixed physical layout: the rendered page must be pixel-identical in either direction. -->
+      <section data-case="pdf-viewer">
+        <ir-pdf-viewer id="harness-pdf" src="/pages/fixtures/rtl-harness.pdf" style="width: 600px"></ir-pdf-viewer>
+      </section>
+    </main>
+  </body>
+</html>

@@ -4,6 +4,7 @@ import type { RoomType } from '@/models/property';
 import type { DashboardOccupancy, DashboardUnits, OccupancyFigure } from '@/services/dashboard/types';
 import type { RealtimeEventMap } from '@/services/realtime/types';
 import type { ISODate } from '@/utils/calendar-dates';
+import { formatCount } from '@/utils/number';
 import { isBlockUnit } from '@/utils/utils';
 
 /** How many days either side of today the dashboard's day picker reaches. */
@@ -216,24 +217,15 @@ export function computeRevPar(adr: number, occupancyPercent: number): number {
   return (adr * occupancyPercent) / 100;
 }
 
-/** Whole-number count for the cards and tabs; empty for a missing value. */
-export function formatCount(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '';
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
-}
-
 /** Largest count a summary card shows in full; above it the card shows the compact form, so it never needs more than six characters. */
 const CARD_COUNT_FULL_MAX = 99_999;
 
-/** Count for a summary card: in full up to 99,999 ("98,765"), compact beyond ("123.5K", "1.2M"); empty for a missing value. */
+/**
+ * Count for a summary card, in the active language and digit script: in full up to 99,999 ("98,765"), compact beyond
+ * ("123.5K", "1.2M"); empty for a missing value.
+ */
 export function formatCardCount(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '';
   if (Math.abs(value) <= CARD_COUNT_FULL_MAX) return formatCount(value);
-  return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
-}
-
-/** `value` is a percentage (0–100), not a ratio; empty for a missing value. */
-export function formatPercent(value: number | null | undefined, options?: Intl.NumberFormatOptions): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '';
-  return new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 0, ...options }).format(value / 100);
+  return formatCount(value, { notation: 'compact', maximumFractionDigits: 1 });
 }

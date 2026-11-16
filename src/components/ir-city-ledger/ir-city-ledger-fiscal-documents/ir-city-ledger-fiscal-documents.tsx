@@ -4,6 +4,7 @@ import type { ClFiscalDocumentFilters } from './types';
 import type { ICurrency } from '@/models/property';
 import { FdTypes } from '@/types/enums';
 import moment from 'moment';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-fiscal-documents',
@@ -89,7 +90,7 @@ export class IrCityLedgerFiscalDocuments {
   render() {
     return (
       <Host>
-        <section class="fiscal-documents" aria-label="City ledger fiscal documents">
+        <section class="fiscal-documents" aria-label={t('Lcz_CityLedgerFiscalDocumentsAriaLabel', { fallback: 'City ledger fiscal documents' })}>
           <ir-city-ledger-fiscal-documents-filters
             filters={this.filters}
             onFiltersChange={event => {

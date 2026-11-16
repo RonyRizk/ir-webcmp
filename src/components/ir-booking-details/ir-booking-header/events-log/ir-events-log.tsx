@@ -1,6 +1,9 @@
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, Fragment, Prop, State, h } from '@stencil/core';
 import { Booking, ExposedBookingEvent } from '@/models/booking.dto';
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
+import { formatNumber } from '@/utils/number';
 
 @Component({
   tag: 'ir-events-log',
@@ -37,22 +40,23 @@ export class IrEventsLog {
             <table class=" dialog-container-height">
               <thead class="sr-only">
                 <tr>
-                  <th>date</th>
-                  <th>user</th>
-                  <th>status</th>
+                  <th>{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+                  <th>{t('Lcz_User', { fallback: 'user' })}</th>
+                  <th>{t('Lcz_Status', { fallback: 'Status' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {this.bookingEvents?.map(e => (
                   <tr key={e.id} class="pb-1">
                     <td class="event-row dates-row">
-                      <span>{e.date}</span>
+                      <span>{formatDate(e.date, 'MMM DD, YYYY')}</span>
                       <span>
-                        {String(e.hour).padStart(2, '0')}:{String(e.minute).padStart(2, '0')}:{String(e.second).padStart(2, '0')}
+                        {formatNumber(e.hour, { minimumIntegerDigits: 2, useGrouping: false })}:{formatNumber(e.minute, { minimumIntegerDigits: 2, useGrouping: false })}:
+                        {formatNumber(e.second, { minimumIntegerDigits: 2, useGrouping: false })}
                       </span>
                     </td>
-                    <td class="pl-3 event-row ">{e.type}</td>
-                    <td class="pl-1 event-row ">{e.user}</td>
+                    <td class="ir-ps-3 event-row ">{e.type}</td>
+                    <td class="ir-ps-1 event-row ">{e.user}</td>
                   </tr>
                 ))}
               </tbody>

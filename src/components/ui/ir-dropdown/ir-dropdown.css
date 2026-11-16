@@ -16,7 +16,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-55%);
-  right: 0.25rem;
+  inset-inline-end: 0.25rem;
   z-index: 99999;
 }
 .dropdown-trigger {

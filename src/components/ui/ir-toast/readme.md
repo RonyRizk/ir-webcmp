@@ -20,6 +20,7 @@
  - [igloo-calendar](../../igloo-calendar)
  - [ir-agents](../../ir-agents)
  - [ir-arrivals](../../ir-arrivals)
+ - [ir-auth](../../ir-auth)
  - [ir-booking-details](../../ir-booking-details)
  - [ir-booking-email-logs](../../ir-booking-email-logs)
  - [ir-channel](../../ir-channel)
@@ -48,6 +49,7 @@ graph TD;
   igloo-calendar --> ir-toast
   ir-agents --> ir-toast
   ir-arrivals --> ir-toast
+  ir-auth --> ir-toast
   ir-booking-details --> ir-toast
   ir-booking-email-logs --> ir-toast
   ir-channel --> ir-toast

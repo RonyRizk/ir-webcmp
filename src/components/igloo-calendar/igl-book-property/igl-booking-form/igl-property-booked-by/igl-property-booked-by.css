@@ -46,7 +46,7 @@
 }
 @media (min-width: 768px) {
   .bookedByEmailContainer {
-    margin-left: 37px;
+    margin-inline-start: 37px;
   }
 }
 .fd-property-booked-by__guest-form {
@@ -56,4 +56,10 @@
   gap: 0.5rem;
   width: 100%;
   flex: 1 1 0%;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
 }

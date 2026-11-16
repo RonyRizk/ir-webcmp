@@ -1,9 +1,9 @@
 import { Component, Element, Event, EventEmitter, h, Prop } from '@stencil/core';
-import locales from '@/stores/locales.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { GuestChangedEvent } from '@/components';
 import { v4 } from 'uuid';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-guest-info-drawer',
   styleUrl: 'ir-guest-info-drawer.css',
@@ -35,7 +35,7 @@ export class IrGuestInfoDrawer {
   private _formId = `guest-details-form_${v4()}`;
 
   render() {
-    const drawerLabel = locales?.entries?.Lcz_GuestDetails || 'Guest info';
+    const drawerLabel = t('Lcz_GuestDetails', { fallback: 'Guest info' });
 
     return (
       <ir-drawer
@@ -57,10 +57,10 @@ export class IrGuestInfoDrawer {
 
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button size="m" appearance="filled" variant="neutral" type="button" onClickHandler={this.handleCancel}>
-            {locales.entries?.Lcz_Cancel || 'Cancel'}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button type="submit" form={this._formId} size="m" variant="brand" loading={isRequestPending('/Edit_Exposed_Guest')}>
-            {locales.entries?.Lcz_Save || 'Save'}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

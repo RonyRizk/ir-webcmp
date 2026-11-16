@@ -4,6 +4,8 @@ import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
 import { AgentSetupEntries } from '../types';
 import { ICountry } from '@/models/IBooking';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 
 @Component({
   tag: 'ir-agents-table',
@@ -26,7 +28,7 @@ export class IrAgentsTable {
       console.warn(`couldn't find agent type ${agent?.agent_type_code?.code}`, agent);
       return;
     }
-    return agentType[`CODE_VALUE_${this.language?.toUpperCase()}`] || agentType.CODE_VALUE_EN;
+    return getSetupEntryLabel(agentType, this.language);
   }
 
   private getAgentPhoneNumber({ phone, country_id }: Agent) {
@@ -86,16 +88,16 @@ export class IrAgentsTable {
           <table class="table">
             <thead>
               <tr>
-                <th class="agents-table__header">Name</th>
-                <th class="agents-table__header">Type</th>
-                <th class="agents-table__header">Email</th>
-                <th class="agents-table__header">Phone</th>
-                <th class="agents-table__header">Active</th>
+                <th class="agents-table__header">{t('Lcz_Name', { fallback: 'Name' })}</th>
+                <th class="agents-table__header">{t('Lcz_Type', { fallback: 'Type' })}</th>
+                <th class="agents-table__header">{t('Lcz_Email', { fallback: 'Email' })}</th>
+                <th class="agents-table__header">{t('Lcz_Phone', { fallback: 'Phone' })}</th>
+                <th class="agents-table__header">{t('Lcz_Active', { fallback: 'Active' })}</th>
                 <th class="agents-table__header ">
                   <div class="agents-table__action">
-                    <wa-tooltip for="create-agent-button">New Agent</wa-tooltip>
+                    <wa-tooltip for="create-agent-button">{t('Lcz_NewAgent', { fallback: 'New Agent' })}</wa-tooltip>
                     <ir-custom-button onClickHandler={this.createAgent} variant="neutral" appearance="plain" id="create-agent-button" data-testid="create-agent-button">
-                      <wa-icon name="plus" style={{ fontSize: '1.2rem' }} label="New Agent"></wa-icon>
+                      <wa-icon name="plus" style={{ fontSize: '1.2rem' }} label={t('Lcz_NewAgent', { fallback: 'New Agent' })}></wa-icon>
                     </ir-custom-button>
                   </div>
                 </th>
@@ -122,8 +124,8 @@ export class IrAgentsTable {
                         <p class="agents-table__muted">{agent.code}</p>
                       </div>
                     </td>
-                    <td>{agent.email || 'N/A'}</td>
-                    <td>{this.getAgentPhoneNumber(agent) || 'N/A'}</td>
+                    <td>{agent.email || t('Lcz_NotAvailable', { fallback: 'N/A' })}</td>
+                    <td>{this.getAgentPhoneNumber(agent) || t('Lcz_NotAvailable', { fallback: 'N/A' })}</td>
                     <td>
                       {/* <wa-badge pill variant={this.statusVariant[status] ?? 'neutral'}>
                         {status}

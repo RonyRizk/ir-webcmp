@@ -24,5 +24,17 @@
 }
 .table th:first-child,
 .table td:first-child {
-  padding-left: 0 !important;
+  padding-inline-start: 0 !important;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-me-1 {
+  margin-inline-end: 0.25rem;
+}
+.ir-ms-1 {
+  margin-inline-start: 0.25rem;
+}
+.ir-ps-0 {
+  padding-inline-start: 0;
 }

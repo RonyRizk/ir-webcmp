@@ -21,7 +21,7 @@ export class SystemService {
     return data;
   }
   public async getExposedCurrencies(): Promise<ICurrency[]> {
-    const { data } = await axios.post('https://gateway.igloorooms.com/IRBE/Get_Exposed_Currencies', {});
+    const { data } = await axios.post('/Get_Exposed_Currencies', {});
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }

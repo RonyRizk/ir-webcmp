@@ -1,8 +1,8 @@
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { getTopLevelSvcCategories, groupSvcCategoriesByParent } from './svc-category.utils';
 import { SvcCategory } from '@/types/enums';
 
-function makeEntry(overrides: Partial<IEntries> & { CODE_NAME: string }): IEntries {
+function makeEntry(overrides: Partial<SetupEntries> & { CODE_NAME: string }): SetupEntries {
   return {
     CODE_VALUE_AR: '',
     CODE_VALUE_DE: '',

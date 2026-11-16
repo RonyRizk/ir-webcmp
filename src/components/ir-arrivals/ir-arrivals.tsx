@@ -1,13 +1,18 @@
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Booking } from '@/models/booking.dto';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { RoomService } from '@/services/room.service';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { Payment, PaymentEntries, RoomGuestsPayload } from '../ir-booking-details/types';
 import { arrivalsStore, initializeArrivalsStore, onArrivalsStoreChange, setArrivalsPage, setArrivalsPageSize, setArrivalsTotal } from '@/stores/arrivals.store';
 import { ICountry } from '@/models/IBooking';
 import calendar_data from '@/stores/calendar-data';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-arrivals',
@@ -16,7 +21,7 @@ import calendar_data from '@/stores/calendar-data';
 })
 export class IrArrivals {
   /**
-   * Authentication token issued by the PMS backend.
+   * Authentication ApiClient issued by the PMS backend.
    * Required for initializing the component and making API calls.
    */
   @Prop() ticket: string;
@@ -54,21 +59,38 @@ export class IrArrivals {
   @State() roomGuestState: RoomGuestsPayload = null;
   @State() countries: ICountry[];
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private bookingService = new BookingService();
+  private setupService = new SetupService();
 
   private paymentFolioRef: HTMLIrPaymentFolioElement;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.arrivals, () => this.init());
+
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
     setArrivalsPageSize(this.pageSize);
     onArrivalsStoreChange('today', _ => {
       this.getBookings();
     });
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('pageSize')
@@ -79,7 +101,7 @@ export class IrArrivals {
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue && newValue) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -115,6 +137,9 @@ export class IrArrivals {
   private async init() {
     try {
       this.isPageLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.arrivals });
 
       if (!this.propertyid && !this.p) {
         throw new Error('Missing credentials');
@@ -125,22 +150,21 @@ export class IrArrivals {
         await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
       }
 
-      const [_, __, countries, setupEntries] = await Promise.all([
-        calendar_data?.property ? Promise.resolve(null) : this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
-        this.roomService.fetchLanguage(this.language),
-        this.bookingService.getCountries(this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
+      const [_, __, countries, paymentEntries] = await Promise.all([
+        calendar_data?.property ? Promise.resolve(null) : this.roomService.getExposedProperty({ id: this.propertyid || 0, language: LocaleController.language, aname: this.p }),
+        localeReady,
+        this.bookingService.getCountries(LocaleController.language),
+        this.setupService.getPaymentEntries(),
+        this.getBookings(),
       ]);
       this.countries = countries;
-      const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
-
-      this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
-
+      this.paymentEntries = paymentEntries;
+      this.countries = countries;
       // Fetch bookings only after the property/calendar data is loaded — the arrivals
       // pipeline (canCheckIn) reads `calendar_data.property`, which is null until the
       // getExposedProperty calls above resolve.
@@ -157,6 +181,7 @@ export class IrArrivals {
       check_in_date: arrivalsStore.today,
       page_index: arrivalsStore.pagination.currentPage,
       page_size: arrivalsStore.pagination.pageSize,
+      language: LocaleController.language,
     });
     setArrivalsTotal(total_count ?? 0);
     initializeArrivalsStore(bookings);
@@ -214,7 +239,7 @@ export class IrArrivals {
         <ir-toast></ir-toast>
         <ir-interceptor handledEndpoints={['/Get_Rooms_To_Check_in']}></ir-interceptor>
         <div class="ir-page__container">
-          <h3 class="page-title">Check-ins</h3>
+          <h3 class="page-title">{t('Lcz_CheckIns', { fallback: 'Check-ins' })}</h3>
           {/* <ir-arrivals-filters></ir-arrivals-filters> */}
           <ir-arrivals-table
             onCheckInRoom={event => this.handleCheckingRoom(event as CustomEvent<RoomGuestsPayload>)}

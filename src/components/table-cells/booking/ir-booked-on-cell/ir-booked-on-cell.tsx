@@ -1,7 +1,7 @@
 import { _formatTime } from '@/components/ir-booking-details/functions';
 import { Booking } from '@/models/booking.dto';
 import { Component, Host, Prop, h } from '@stencil/core';
-import moment from 'moment';
+import { formatDate } from '@/utils/date';
 
 @Component({
   tag: 'ir-booked-on-cell',
@@ -18,7 +18,7 @@ export class IrBookedOnCell {
     return (
       <Host>
         {this.label && <p class="cell-label">{this.label}:</p>}
-        <p class="booked-on-cell__date">{moment(date, 'YYYY-MM-DD').format('DD MMM YYYY')}</p>
+        <p class="booked-on-cell__date">{formatDate(date, 'DD MMM YYYY')}</p>
         {this.showTime && <p class="booked-on-cell__time">{_formatTime(hour.toString(), minute.toString())}</p>}
       </Host>
     );

@@ -64,34 +64,3 @@ export const DISPLAYED_SETUP_TABLES = [
 
 /** Membership test for the list above. */
 export const DISPLAYED_SETUP_TABLE_SET: ReadonlySet<string> = new Set(DISPLAYED_SETUP_TABLES);
-
-/**
- * The label tables screens load through `Get_Exposed_Language` on `feat/internalization`:
- * `BASE_TABLES` plus every table in `SCREEN_TABLES` (`src/services/locale/screen-tables.ts`
- * on that branch). `_PMS_FRONT`, `_BOOKING_LIST_FRONT` and `_HK_FRONT` are no longer
- * requested by any screen there, so they are left out. **Update it when screens change.**
- */
-export const LABEL_SETUP_TABLES = [
-  '_COMMON',
-  '_AGENTS',
-  '_AUTH',
-  '_BOOKING',
-  '_CALENDAR',
-  '_CHANNEL_FRONT',
-  '_FINANCIALS',
-  '_FRONTDESK',
-  '_GUESTS',
-  '_HOUSEKEEPING',
-  '_PAYMENT_BACK',
-  '_PMS',
-  '_REPORTS',
-  '_SETTINGS',
-  '_USER_MGT',
-] as const;
-
-/**
- * Every table whose text reaches the screen — the ones worth translating. This is what
- * the manager's "Only show tables used in the app" filter keeps; tables the app reads only
- * for logic stay in `USED_SETUP_TABLES` for duplicate detection but are hidden from the picker.
- */
-export const TRANSLATABLE_SETUP_TABLE_SET: ReadonlySet<string> = new Set<string>([...LABEL_SETUP_TABLES, ...DISPLAYED_SETUP_TABLES]);

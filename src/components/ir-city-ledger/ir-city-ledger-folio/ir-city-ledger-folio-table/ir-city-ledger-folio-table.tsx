@@ -3,15 +3,16 @@ import { flexRender, useTable } from '@/utils/useTable';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { type Cell, type TableState, type Updater, createColumnHelper, getCoreRowModel, getExpandedRowModel, getGroupedRowModel, getSortedRowModel } from '@tanstack/table-core';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
-import moment from 'moment';
 import { type FolioRow } from '../types';
 import type { ICurrency } from '@/models/property';
 import { actionableClTypes } from '@/services/city-ledger.service';
 import { ClTxTypeCode } from '@/types/enums';
 import type { ServiceCategoryOption } from '../ir-city-ledger-transaction-drawer/ir-city-ledger-transaction-form/ir-city-ledger-transaction-form.schema';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber, formatCount } from '@/utils/number';
+import { formatDate } from '@/utils/date';
 
 const DATE_DISPLAY_FORMAT = 'MMM DD, YYYY';
-const DATE_INPUT_FORMAT = 'YYYY-MM-DD';
 /** `REL_ENTITY` of CL rows that came from a booking extra service. */
 const BOOKING_SERVICE_ENTITY = 'TBL_BSE';
 
@@ -79,14 +80,15 @@ export class IrCityLedgerFolioTable {
 
   private formatDate(date: string): string {
     if (!date) return '';
-    const m = moment(date, [DATE_INPUT_FORMAT, moment.ISO_8601], true);
-    return m.isValid() ? m.format(DATE_DISPLAY_FORMAT) : date;
+    return formatDate(date, DATE_DISPLAY_FORMAT);
+    // const m = moment(date, [DATE_INPUT_FORMAT, moment.ISO_8601], true);
+    // return m.isValid() ? m.format(DATE_DISPLAY_FORMAT) : date;
   }
 
   // ─── Selection ────────────────────────────────────────────────────────────
 
   private get selectedUnbilledRows(): FolioRow[] {
-    return this.data.filter(row => this.selectedRowIds.has(row._rowId) && row.status?.label === 'Unbilled');
+    return this.data.filter(row => this.selectedRowIds.has(row._rowId) && row.status?.id === 'unbilled');
   }
 
   private handleHoldToggled(rowId: string, newIsHold: boolean) {
@@ -94,7 +96,9 @@ export class IrCityLedgerFolioTable {
     const updatedData = this.data.map(row => {
       if (row._rowId !== rowId) return row;
       const updatedRaw: typeof row._raw = { ...row._raw, IS_HOLD: newIsHold };
-      const status = newIsHold ? { id: 'held', label: 'Held', variant: 'warning', description: '' } : { id: 'unbilled', label: 'Unbilled', variant: 'neutral', description: '' };
+      const status = newIsHold
+        ? { id: 'held', label: t('Lcz_Held', { fallback: 'Held' }), variant: 'warning', description: '' }
+        : { id: 'unbilled', label: t('Lcz_Unbilled', { fallback: 'Unbilled' }), variant: 'neutral', description: '' };
       return { ...row, _raw: updatedRaw, status };
     });
     // Trigger re-render by reassigning (Stencil tracks Prop changes via reference)
@@ -127,7 +131,7 @@ export class IrCityLedgerFolioTable {
   private columns = [
     this.columnHelper.accessor(row => row.status.label, {
       id: 'status',
-      header: 'Status',
+      header: t('Lcz_Status', { fallback: 'Status' }),
       size: 200,
       cell: info => {
         if (info?.row?.original?._raw?.CL_TX_TYPE_CODE === ClTxTypeCode.OpeningBalance) {
@@ -144,7 +148,7 @@ export class IrCityLedgerFolioTable {
     }),
     this.columnHelper.accessor('serviceDate', {
       enableSorting: false,
-      header: 'Service Date',
+      header: t('Lcz_ServiceDate', { fallback: 'Service Date' }),
       cell: info => this.formatDate(info.getValue()),
       aggregatedCell: info => this.formatDate(info.getValue()),
       enableGrouping: false,
@@ -160,7 +164,7 @@ export class IrCityLedgerFolioTable {
       },
     }),
     this.columnHelper.accessor('bookingNumber', {
-      header: 'Booking #',
+      header: t('Lcz_BookingNumberColumn', { fallback: 'Booking #' }),
       cell: info => {
         const val = info.getValue();
         if (!val) return null;
@@ -172,7 +176,7 @@ export class IrCityLedgerFolioTable {
               this.bookingDrawerOpen = true;
             }}
           >
-            {val}
+            {formatBookingNumber(val)}
           </ir-custom-button>
         );
       },
@@ -180,19 +184,19 @@ export class IrCityLedgerFolioTable {
       enableSorting: false,
     }),
     this.columnHelper.accessor('description', {
-      header: 'Description',
+      header: t('Lcz_Description', { fallback: 'Description' }),
       cell: info => <span class="folio-table__description">{this.resolveRowDescription(info.row.original)}</span>,
       enableSorting: false,
       enableGrouping: true,
     }),
     this.columnHelper.accessor('docNumber', {
-      header: 'Fiscal Doc',
+      header: t('Lcz_FiscalDoc', { fallback: 'Fiscal Doc' }),
       cell: info => <span>{info.getValue()}</span>,
       enableSorting: false,
       enableGrouping: true,
     }),
     this.columnHelper.accessor('debit', {
-      header: 'Debit',
+      header: t('Lcz_Debit', { fallback: 'Debit' }),
       cell: info => {
         const symbol = this.getSymbol(info.row.original._raw.CURRENCY_ID);
         return (
@@ -208,7 +212,7 @@ export class IrCityLedgerFolioTable {
       enableSorting: false,
     }),
     this.columnHelper.accessor('credit', {
-      header: 'Credit',
+      header: t('Lcz_Credit', { fallback: 'Credit' }),
       cell: info => {
         const symbol = this.getSymbol(info.row.original._raw.CURRENCY_ID);
         return (
@@ -224,7 +228,7 @@ export class IrCityLedgerFolioTable {
       enableGrouping: false,
     }),
     this.columnHelper.accessor('balance', {
-      header: 'Balance',
+      header: t('Lcz_Balance', { fallback: 'Balance' }),
       cell: info => {
         const symbol = this.getSymbol(info.row.original._raw.CURRENCY_ID);
         return (
@@ -239,7 +243,7 @@ export class IrCityLedgerFolioTable {
     }),
     this.columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('Lcz_Actions', { fallback: 'Actions' }),
       size: 48,
       cell: info => {
         const row = info.row.original;
@@ -258,11 +262,13 @@ export class IrCityLedgerFolioTable {
             <wa-button slot="trigger" size="s" variant="neutral" appearance="plain" class="fiscal-table__action-trigger">
               <wa-icon name="ellipsis-vertical" style={{ fontSize: '1rem' }}></wa-icon>
             </wa-button>
-            <wa-dropdown-item value="hold-transaction">{row._raw.IS_HOLD ? 'Revert to Unbilled' : 'Hold entry'}</wa-dropdown-item>
-            {canEditOrDelete && <wa-dropdown-item value="edit-transaction">Edit</wa-dropdown-item>}
+            <wa-dropdown-item value="hold-transaction">
+              {row._raw.IS_HOLD ? t('Lcz_RevertToUnbilled', { fallback: 'Revert to Unbilled' }) : t('Lcz_HoldEntry', { fallback: 'Hold entry' })}
+            </wa-dropdown-item>
+            {canEditOrDelete && <wa-dropdown-item value="edit-transaction">{t('Lcz_Edit', { fallback: 'Edit' })}</wa-dropdown-item>}
             {canEditOrDelete && (
               <wa-dropdown-item value="delete-transaction" variant="danger">
-                Delete
+                {t('Lcz_Delete', { fallback: 'Delete' })}
               </wa-dropdown-item>
             )}
           </wa-dropdown>
@@ -325,7 +331,7 @@ export class IrCityLedgerFolioTable {
       return (
         <wa-button appearance="plain" size="s" class="group-expander" onClick={() => cell.row.toggleExpanded()}>
           <wa-icon style={{ fontSize: '0.875rem' }} slot="start" name={cell.row.getIsExpanded() ? 'chevron-down' : 'chevron-up'}></wa-icon>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())} <span slot="end">({cell.row.subRows.length})</span>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())} <span slot="end">({formatCount(cell.row.subRows.length)})</span>
         </wa-button>
       );
     }
@@ -455,8 +461,8 @@ export class IrCityLedgerFolioTable {
         <td>{this.formatDate(this.fromDate)}</td>
         <td></td>
         <td>
-          <wa-icon name="scale-balanced" style={{ marginRight: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
-          Starting Balance
+          <wa-icon name="scale-balanced" style={{ marginInlineEnd: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
+          {t('Lcz_StartingBalance', { fallback: 'Starting Balance' })}
         </td>
         <td></td>
         <td class="cell--align-end">{this.startingBalance >= 0 ? formatAmount(this.currencySymbol, this.startingBalance) : ''}</td>
@@ -474,8 +480,8 @@ export class IrCityLedgerFolioTable {
         <td>{this.formatDate(this.toDate)}</td>
         <td></td>
         <td>
-          <wa-icon name="scale-balanced" style={{ marginRight: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
-          Ending Balance
+          <wa-icon name="scale-balanced" style={{ marginInlineEnd: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
+          {t('Lcz_EndingBalance', { fallback: 'Ending Balance' })}
         </td>
         <td></td>
         <td class="cell--align-end">{this.closingBalance >= 0 ? formatAmount(this.currencySymbol, Math.abs(this.closingBalance)) : ''}</td>
@@ -533,7 +539,7 @@ export class IrCityLedgerFolioTable {
         <Host>
           <div class="folio-table__empty-state">
             <wa-icon name="building-columns" style={{ fontSize: '2.5rem', opacity: '0.3' }}></wa-icon>
-            <p>Select an agent to view the folio ledger.</p>
+            <p>{t('Lcz_SelectAgentToViewFolio', { fallback: 'Select an agent to view the folio ledger.' })}</p>
           </div>
         </Host>
       );
@@ -547,12 +553,12 @@ export class IrCityLedgerFolioTable {
             <div class="folio-table__date-prompt-icon">
               <wa-icon name="calendar-days"></wa-icon>
             </div>
-            <p class="folio-table__date-prompt-title">Select a date range to get started</p>
+            <p class="folio-table__date-prompt-title">{t('Lcz_SelectDateRangeToGetStarted', { fallback: 'Select a date range to get started' })}</p>
             {hasDate && (
               <wa-animation play iterations={1} id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
                 <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
-                  Load Transactions
+                  {t('Lcz_LoadTransactions', { fallback: 'Load Transactions' })}
                 </ir-custom-button>
               </wa-animation>
             )}
@@ -596,15 +602,15 @@ export class IrCityLedgerFolioTable {
         {hasUnbilledSelected && (
           <div class="folio-table__invoice-bar">
             <span class="folio-table__invoice-bar-text">
-              <wa-icon name="file-invoice" style={{ marginRight: '0.375rem' }}></wa-icon>
-              {this.selectedUnbilledRows.length} unbilled item{this.selectedUnbilledRows.length !== 1 ? 's' : ''} selected
+              <wa-icon name="file-invoice" style={{ marginInlineEnd: '0.375rem' }}></wa-icon>
+              {t('Lcz_UnbilledItemsSelected', { fallback: '%1 unbilled item(s) selected', params: [formatCount(this.selectedUnbilledRows.length)] })}
             </span>
             <ir-custom-button size="s" variant="brand" onClickHandler={() => this.generateInvoice.emit(this.selectedUnbilledRows)}>
               <wa-icon slot="start" name="file-invoice-dollar"></wa-icon>
-              Generate Invoice
+              {t('Lcz_GenerateInvoice', { fallback: 'Generate Invoice' })}
             </ir-custom-button>
             <ir-custom-button size="s" variant="neutral" appearance="outlined" onClickHandler={() => (this.selectedRowIds = new Set())}>
-              Clear Selection
+              {t('Lcz_ClearSelection', { fallback: 'Clear Selection' })}
             </ir-custom-button>
           </div>
         )}

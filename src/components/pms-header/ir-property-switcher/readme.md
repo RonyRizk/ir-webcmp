@@ -8,8 +8,6 @@ Button-triggered dialog that loads allowed properties from `/Get_Exposed_Allowed
 | ---------------- | -------------------------------------------- |
 | `propertyChange` | Fires when the user selects a property entry |
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -29,10 +27,10 @@ It owns the data fetching, filtering and keyboard navigation logic so the parent
 
 ## Events
 
-| Event                  | Description                                             | Type                                                                 |
-| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
-| `linkedPropertyChange` |                                                         | `CustomEvent<{ name: string; property_id: number; token: string; }>` |
-| `propertySelected`     | Emits whenever the user picks a property from the list. | `CustomEvent<number>`                                                |
+| Event                  | Description                                             | Type                                                                     |
+| ---------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `linkedPropertyChange` |                                                         | `CustomEvent<{ name: string; property_id: number; ApiClient: string; }>` |
+| `propertySelected`     | Emits whenever the user picks a property from the list. | `CustomEvent<number>`                                                    |
 
 
 ## Dependencies

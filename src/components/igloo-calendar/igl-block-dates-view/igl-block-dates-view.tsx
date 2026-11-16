@@ -1,8 +1,8 @@
 import { Component, Host, h, Prop, State, Event, EventEmitter } from '@stencil/core';
-import { BookingService } from '@/services/booking-service/booking.service';
-import { IEntries } from '@/models/IBooking';
-import locales from '@/stores/locales.store';
-
+import { SetupService, getSetupEntryLabel } from '@/services/setup';
+import { SetupEntries } from '@/models/IBooking';
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
 @Component({
   tag: 'igl-block-dates-view',
   styleUrl: 'igl-block-dates-view.css',
@@ -25,12 +25,12 @@ export class IglBlockDatesView {
     OPTIONAL_REASON: '',
     OUT_OF_SERVICE: false,
   }; // Change of property name might require updates in booking-event-hover
-  private releaseList: IEntries[] = [];
-  private bookingService: BookingService = new BookingService();
+  private releaseList: SetupEntries[] = [];
+  private setupService: SetupService = new SetupService();
 
   async componentWillLoad() {
     try {
-      this.releaseList = await this.bookingService.getBlockedInfo();
+      this.releaseList = await this.setupService.getBlockedInfo();
       if (this.defaultData) {
         this.blockDatesData = { ...this.defaultData };
       } else {
@@ -42,43 +42,31 @@ export class IglBlockDatesView {
     }
   }
 
-  handleOptionalReason(event) {
-    this.blockDatesData.OPTIONAL_REASON = event.target.value;
+  private handleOptionalReason(event: Event) {
+    this.blockDatesData.OPTIONAL_REASON = (event.target as HTMLInputElement).value;
     this.emitData();
   }
 
-  handleReleaseAfterChange(evt) {
+  private handleReleaseAfterChange(evt: Event) {
     if (this.entryDate) this.entryDate = undefined;
-    this.blockDatesData.RELEASE_AFTER_HOURS = parseInt(evt.target.value);
+    this.blockDatesData.RELEASE_AFTER_HOURS = parseInt((evt.target as HTMLInputElement).value);
     this.renderPage();
     this.emitData();
   }
 
-  emitData() {
-    this.dataUpdateEvent.emit({
-      key: 'blockDatesData',
-      data: { ...this.blockDatesData },
-    });
-  }
-
-  getReleaseHoursString() {
-    // console.log("entry date", this.entryDate);
-    // console.log("blocked date data", this.blockDatesData);
-    let dt = this.entryDate ? new Date(this.entryDate) : new Date();
-    if (this.entryDate && this.entryHour && this.entryMinute) {
-      dt.setHours(this.entryHour, this.entryMinute, 0, 0);
-    } else {
-      dt.setHours(dt.getHours() + this.blockDatesData.RELEASE_AFTER_HOURS, dt.getMinutes(), 0, 0);
+  /**
+   * Switches between the two ways a block resolves: auto-release after a period, or out-of-service (manual release).
+   * The `wa-select` / `wa-input` for the auto-release branch live inside the radio group, so their bubbled `change`
+   * events reach this handler too — ignore anything that isn't the radio group or a radio.
+   */
+  private handleModeChange(evt: Event) {
+    const target = evt.target as HTMLElement;
+    if (!target || (target.tagName !== 'WA-RADIO-GROUP' && target.tagName !== 'WA-RADIO')) {
+      return;
     }
-
-    return dt.toLocaleString('default', { month: 'short' }) + ' ' + dt.getDate() + ', ' + this.formatNumber(dt.getHours()) + ':' + this.formatNumber(dt.getMinutes());
-  }
-  formatNumber(value: number) {
-    return value < 10 ? `0${value}` : value;
-  }
-  handleOutOfService(evt) {
-    this.blockDatesData.OUT_OF_SERVICE = evt.target.checked;
-    if (this.blockDatesData.OUT_OF_SERVICE) {
+    const outOfService = (target as unknown as { value: string }).value === 'oos';
+    this.blockDatesData.OUT_OF_SERVICE = outOfService;
+    if (outOfService) {
       this.blockDatesData.OPTIONAL_REASON = '';
       this.blockDatesData.RELEASE_AFTER_HOURS = 0;
     }
@@ -86,62 +74,76 @@ export class IglBlockDatesView {
     this.emitData();
   }
 
-  renderPage() {
+  private emitData() {
+    this.dataUpdateEvent.emit({
+      key: 'blockDatesData',
+      data: { ...this.blockDatesData },
+    });
+  }
+
+  private getReleaseHoursString() {
+    let dt = this.entryDate ? new Date(this.entryDate) : new Date();
+    if (this.entryDate && this.entryHour && this.entryMinute) {
+      dt.setHours(this.entryHour, this.entryMinute, 0, 0);
+    } else {
+      dt.setHours(dt.getHours() + this.blockDatesData.RELEASE_AFTER_HOURS, dt.getMinutes(), 0, 0);
+    }
+
+    return formatDate(dt, 'MMM D, HH:mm');
+  }
+
+  private renderPage() {
     this.renderAgain = !this.renderAgain;
   }
 
   render() {
+    const { OUT_OF_SERVICE, OPTIONAL_REASON, RELEASE_AFTER_HOURS } = this.blockDatesData;
+    const releaseValue = String(Number(RELEASE_AFTER_HOURS) || 0);
+    const releaseHours = Number(RELEASE_AFTER_HOURS) || 0;
+
     return (
       <Host>
-        <div class={`m-0 p-0 mb-1`}>
-          <div class="text-left p-0">
-            <ir-date-view format={'ddd, MMM DD, YYYY'} from_date={this.fromDate} dateOption="YYYY-MM-DD" showDateDifference={false} to_date={this.toDate}></ir-date-view>
-          </div>
-        </div>
-        <div class={` mb-1 text-left ${this.isEventHover && 'p-0'}`}>
-          <div class="mb-1 ">
-            <label class="p-0 text-bold-700 font-medium-1 m-0 align-middle">{locales.entries.Lcz_Reason}:</label>
-            <div class="p-0 m-0 pr-1  controlContainer checkBoxContainer d-inline-block align-middle">
-              <input class="form-control" type="checkbox" checked={this.blockDatesData.OUT_OF_SERVICE} id="userinput6" onChange={event => this.handleOutOfService(event)} />
-            </div>
-            <span class="align-middle out-of-service-label">{locales.entries.Lcz_OutOfservice}</span>
-          </div>
-          {!this.blockDatesData.OUT_OF_SERVICE ? (
-            <div>
-              <div class="mb-1 d-flex  align-items-center">
-                <span class="align-middle">{locales.entries.Lcz_Or} </span>
-                <div class="d-inline-flex col pr-0 align-middle">
-                  <input
-                    class="form-control"
-                    type="text"
-                    placeholder={locales.entries.Lcz_OptionalReason}
-                    id="optReason"
-                    value={this.blockDatesData.OPTIONAL_REASON}
-                    onInput={event => this.handleOptionalReason(event)}
-                  />
-                </div>
+        <div class="block-dates">
+          <ir-date-view format={'weekday-medium'} from_date={this.fromDate} to_date={this.toDate} showDateDifference={false}></ir-date-view>
+
+          <wa-radio-group class="block-dates__mode" size="m" orientation="vertical" value={OUT_OF_SERVICE ? 'oos' : 'auto'} onchange={evt => this.handleModeChange(evt)}>
+            <wa-radio value="auto">{t('Lcz_Reason', { fallback: 'Reason' })}</wa-radio>
+
+            {!OUT_OF_SERVICE && (
+              <div class="block-dates__fields">
+                <wa-select class="block-dates__select" size="s" value={releaseValue} defaultValue={releaseValue} onchange={evt => this.handleReleaseAfterChange(evt)}>
+                  <wa-icon slot="start" name="clock"></wa-icon>
+                  {releaseHours > 0 && (
+                    <span slot="end" class="block-dates__release-on">
+                      {t('Lcz_On', { fallback: 'On' })} {this.getReleaseHoursString()}
+                    </span>
+                  )}
+                  {this.releaseList.map(releaseItem => {
+                    const value = Number(releaseItem.CODE_NAME) || 0;
+                    return (
+                      <wa-option value={String(value)}>
+                        {value === 0
+                          ? t('Lcz_NotAutomaticRelease', { fallback: 'Not automatic release' })
+                          : t('Lcz_AutomaticReleaseIn', { fallback: 'Automatic release in %1', params: [getSetupEntryLabel(releaseItem)] })}
+                      </wa-option>
+                    );
+                  })}
+                </wa-select>
+
+                <wa-input
+                  class="block-dates__reason"
+                  size="s"
+                  placeholder={t('Lcz_OptionalReason', { fallback: 'Optional reason' })}
+                  value={OPTIONAL_REASON}
+                  oninput={event => this.handleOptionalReason(event)}
+                >
+                  <wa-icon slot="start" name="comment" label={t('Lcz_OptionalReason', { fallback: 'Optional reason' })}></wa-icon>
+                </wa-input>
               </div>
-              <div class="mb-1 w-100 pr-0 ">
-                <span class="text-bold-700 font-medium-1">{locales.entries.Lcz_AutomaticReleaseIn}: </span>
-                <div class="d-inline-block">
-                  <select class="form-control input-sm" id="zSmallSelect" onChange={evt => this.handleReleaseAfterChange(evt)}>
-                    {this.releaseList.map(releaseItem => (
-                      <option value={+releaseItem.CODE_NAME} selected={Number(this.blockDatesData.RELEASE_AFTER_HOURS) == Number(releaseItem.CODE_NAME)}>
-                        {releaseItem.CODE_VALUE_EN}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {this.blockDatesData.RELEASE_AFTER_HOURS ? (
-                  <div class="d-inline-block releaseTime">
-                    <em>
-                      {locales.entries.Lcz_On} {this.getReleaseHoursString()}
-                    </em>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
+            )}
+
+            <wa-radio value="oos">{t('Lcz_OutOfservice', { fallback: 'Out of service' })}</wa-radio>
+          </wa-radio-group>
         </div>
       </Host>
     );

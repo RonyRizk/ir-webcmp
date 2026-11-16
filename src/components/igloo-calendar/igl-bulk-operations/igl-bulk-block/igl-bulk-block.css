@@ -34,7 +34,7 @@
   padding: 0;
   color: var(--wa-color-danger-60, #d64545);
   font-size: 0.85rem;
-  text-align: left;
+  text-align: start;
 }
 
 .igl-bulk-block__roomtype-row,
@@ -53,11 +53,11 @@
 }
 
 .igl-bulk-block__roomtype-name {
-  text-align: left;
+  text-align: start;
 }
 
 .igl-bulk-block__unit-row {
-  margin-left: 1rem;
+  margin-inline-start: 1rem;
   /* padding-top: 0.5rem; */
 }
 
@@ -78,7 +78,7 @@
   padding-bottom: 0.5rem;
 }
 .igl-bulk-block__dates-header {
-  text-align: left;
+  text-align: start;
   font-size: 0.857rem;
   color: var(--wa-form-control-label-color);
   font-weight: var(--wa-form-control-label-font-weight);

@@ -10,6 +10,7 @@
 | Property             | Attribute            | Description | Type                 | Default     |
 | -------------------- | -------------------- | ----------- | -------------------- | ----------- |
 | `consecutive_period` | `consecutive_period` |             | `number`             | `14`        |
+| `language`           | `language`           |             | `string`             | `''`        |
 | `mode`               | `mode`               |             | `"default" \| "mpo"` | `'default'` |
 | `period_to_check`    | `period_to_check`    |             | `number`             | `2`         |
 | `propertyid`         | `propertyid`         |             | `number`             | `undefined` |

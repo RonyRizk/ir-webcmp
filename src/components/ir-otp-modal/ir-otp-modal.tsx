@@ -1,10 +1,12 @@
-import Token from '@/models/Token';
-import { RoomService } from '@/services/room.service';
+import ApiClient from '@/models/ApiClient';
 import { SystemService } from '@/services/system.service';
 import locales from '@/stores/locales.store';
 import { Component, Element, Event, EventEmitter, Fragment, Host, Method, Prop, State, Watch, h } from '@stencil/core';
 import { z } from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-otp-modal',
   styleUrl: 'ir-otp-modal.css',
@@ -43,8 +45,7 @@ export class IrOtpModal {
   private dialogRef: HTMLIrDialogElement;
   private timerInterval: number;
   private systemService = new SystemService();
-  private roomService = new RoomService();
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
 
   private otpVerificationSchema = z.object({ email: z.string().nonempty(), requestUrl: z.string().nonempty(), otp: z.string().length(this.otpLength) });
 
@@ -57,7 +58,7 @@ export class IrOtpModal {
 
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
     }
     this.fetchLocale();
   }
@@ -65,7 +66,7 @@ export class IrOtpModal {
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.fetchLocale();
     }
   }
@@ -101,11 +102,11 @@ export class IrOtpModal {
     }
   }
   private async fetchLocale() {
-    if (!this.tokenService.getToken()) {
+    if (!this.apiClientService.getToken()) {
       return;
     }
     this.isInitializing = true;
-    await this.roomService.fetchLanguage(this.language, ['_USER_MGT']);
+    await LocaleController.load({ language: this.language, tables: SCREEN_TABLES.otpModal });
     this.isInitializing = false;
   }
 
@@ -159,7 +160,7 @@ export class IrOtpModal {
       this.otpFinished.emit({ otp: this.otp, type: 'success' });
       this.closeModal();
     } catch (err) {
-      this.error = 'Verification failed. Please try again.';
+      this.error = t('Lcz_VerificationFailedTryAgain', { fallback: 'Verification failed. Please try again.' });
     } finally {
       this.isLoading = false;
     }
@@ -208,12 +209,12 @@ export class IrOtpModal {
           ) : (
             <Fragment>
               <header class="otp-modal-header">
-                <h5 class="otp-modal-title">{locales.entries.Lcz_VerifyYourIdentity}</h5>
+                <h5 class="otp-modal-title">{t('Lcz_VerifyYourIdentity')}</h5>
               </header>
 
               <section class="otp-modal-body">
                 <p class="verification-message">
-                  {locales.entries.Lcz_WeSentYuoVerificationCode} {this.email}
+                  {t('Lcz_WeSentYuoVerificationCode')} {this.email}
                 </p>
                 <ir-otp autoFocus length={this.otpLength} defaultValue={this.otp} onOtpComplete={this.handleOtpComplete}></ir-otp>
 
@@ -223,7 +224,7 @@ export class IrOtpModal {
                   <Fragment>
                     {this.timer > 0 ? (
                       <p class="otp-resend-timer">
-                        {locales.entries.Lcz_ResendCode} 00:{String(this.timer).padStart(2, '0')}
+                        {t('Lcz_ResendCode')} 00:{String(this.timer).padStart(2, '0')}
                       </p>
                     ) : (
                       <ir-custom-button
@@ -236,7 +237,7 @@ export class IrOtpModal {
                           this.resendOtp();
                         }}
                       >
-                        Didn’t receive code? Resend
+                        {t('Lcz_ResendCodeAction', { fallback: 'Didn’t receive code? Resend' })}
                       </ir-custom-button>
                     )}
                   </Fragment>
@@ -245,7 +246,7 @@ export class IrOtpModal {
 
               <div slot="footer" class="ir-dialog__footer">
                 <ir-custom-button variant="neutral" appearance="filled" size="m" onClickHandler={() => this.handleCancelClicked()}>
-                  {locales.entries.Lcz_Cancel}
+                  {t('Lcz_Cancel', { fallback: 'Cancel' })}
                 </ir-custom-button>
                 <ir-custom-button
                   variant="brand"
@@ -254,7 +255,7 @@ export class IrOtpModal {
                   disabled={this.otp?.length < this.otpLength || this.isLoading}
                   onClickHandler={() => this.verifyOtp()}
                 >
-                  {locales.entries.Lcz_VerifyNow}
+                  {t('Lcz_VerifyNow')}
                 </ir-custom-button>
               </div>
             </Fragment>

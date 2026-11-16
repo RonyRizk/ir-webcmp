@@ -1,8 +1,9 @@
 import { ExposedApplicablePolicy, ExposedBookingEvent, HandleExposedRoomGuestsRequest } from '../../models/booking.dto';
 import { DayData } from '../../models/DayType';
 import axios from 'axios';
-import { BookingDetails, DayType, IBlockUnit, ICountry, IEntries, ISetupEntries, MonthType, ZIEntrySchema } from '../../models/IBooking';
+import { BookingDetails, DayType, IBlockUnit, ICountry, SetupEntries, MonthType, SetupEntrySchema } from '../../models/IBooking';
 import { extras } from '../../utils/utils';
+import { addDaysISO } from '../../utils/calendar-dates';
 import { getMyBookings } from '../../utils/booking';
 import { Booking, Day, ExtraService, Guest, IBookingPickupInfo, IPmsLog, RoomInOut } from '../../models/booking.dto';
 import booking_store from '@/stores/booking.store';
@@ -26,6 +27,7 @@ import {
   PrintInvoicePropsSchema,
   VoidInvoicePropsSchema,
   SetArrivalTimePropsSchema,
+  GetCalendarDataParamsSchema,
   type CalculateOptimBaseGrossAmountParams,
   type DoDayUseParams,
   type SetHbPreferenceProps,
@@ -42,6 +44,7 @@ import {
   type PrintInvoiceProps,
   type VoidInvoiceProps,
   type SetArrivalTimeProps,
+  type GetCalendarDataParams,
 } from './types';
 import { BookingInvoiceInfo, BookingInvoiceInfoSchema } from '@/components/ir-invoice/types';
 
@@ -67,36 +70,6 @@ export interface IBookingParams {
   extras: { key: string; value: string }[] | null;
 }
 
-export type TableEntries =
-  | '_CALENDAR_BLOCKED_TILL'
-  | '_DEPARTURE_TIME'
-  | '_ARRIVAL_TIME'
-  | '_RATE_PRICING_MODE'
-  | '_BED_PREFERENCE_TYPE'
-  | '_PAY_TYPE'
-  | '_PAY_TYPE_GROUP'
-  | '_PAY_METHOD'
-  | '_AGENT_RATE_TYPE'
-  | '_AGENT_TYPE'
-  | '_TA_PAYMENT_METHOD'
-  | '_VAT_INCLUDED'
-  | '_CITY_TAX_INCLUDED'
-  | '_SERVICE_CHARGE_INCLUDED'
-  | '_TAXATION_STRATEGY'
-  | '_SVC_CATEGORY'
-  | '_VAT_INCLUDED'
-  | '_CL_TX_TYPE'
-  | '_FD_TYPE'
-  | '_FD_STATUS'
-  | '_CL_POST_TIMING'
-  | '_GAP_RANGE'
-  | '_GAP_RULE'
-  | (string & {});
-
-export type GroupedTableEntries = {
-  [K in TableEntries as K extends `_${infer Rest}` ? Lowercase<Rest> : never]: IEntries[];
-};
-
 /**
  * Builds a grouped payment types record from raw entries and groups.
  *
@@ -112,35 +85,35 @@ export type GroupedTableEntries = {
  * //   ...
  * // }
  */
-export function buildPaymentTypes(paymentEntries: PaymentEntries): Record<string, IEntries[]> {
+export function buildPaymentTypes(paymentEntries: PaymentEntries): Record<string, SetupEntries[]> {
   try {
     const { groups, types } = z
       .object({
-        types: ZIEntrySchema.array().min(1),
-        groups: ZIEntrySchema.array().min(1),
-        methods: ZIEntrySchema.array().min(1),
+        types: SetupEntrySchema.array().min(1),
+        groups: SetupEntrySchema.array().min(1),
+        methods: SetupEntrySchema.array().min(1),
       })
       .parse(paymentEntries);
     const items = [...types];
 
-    const byCodes = (codes: string[]) => codes.map(code => items.find(i => i.CODE_NAME === code)).filter((x): x is IEntries => Boolean(x));
+    const byCodes = (codes: string[]) => codes.map(code => items.find(i => i.CODE_NAME === code)).filter((x): x is SetupEntries => Boolean(x));
 
     const extractGroupCodes = (code: string) => {
       const paymentGroup = groups.find(pt => pt.CODE_NAME === code);
       return paymentGroup ? paymentGroup.CODE_VALUE_EN.split(',') : [];
     };
-    let rec: Record<string, IEntries[]> = {};
+    let rec: Record<string, SetupEntries[]> = {};
     groups.forEach(group => {
       // if (group.CODE_NAME === 'PAYMENTS') {
       //   rec[group.CODE_NAME] = methods.map(entry => ({
       //     ...entry,
       //     CODE_VALUE_EN: `Payment: ${entry.CODE_VALUE_EN}`,
-      //   })) as IEntries[];
+      //   })) as SetupEntries[];
       // } else if (group.CODE_NAME === 'REFUND') {
       //   rec[group.CODE_NAME] = methods.map(entry => ({
       //     ...entry,
       //     CODE_VALUE_EN: `Refund: ${entry.CODE_VALUE_EN}`,
-      //   })) as IEntries[];
+      //   })) as SetupEntries[];
       rec[group.CODE_NAME] = byCodes(extractGroupCodes(group.CODE_NAME));
     });
     return rec;
@@ -204,7 +177,7 @@ export class BookingService {
     return data.My_Result;
   }
   public async setExposedRestrictionPerRoomType(params: { is_closed: boolean; restrictions: { room_type_id: number | string; night: string }[]; operation_type?: string }) {
-    const { data } = await axios.post(`https://gateway.igloorooms.com/IRBE/Set_Exposed_Restriction_Per_Room_Type`, {
+    const { data } = await axios.post(`/Set_Exposed_Restriction_Per_Room_Type`, {
       operation_type: params.operation_type ?? 'close_open',
       ...params,
     });
@@ -238,12 +211,11 @@ export class BookingService {
     return { route: isV4 ? 'Get_Exposed_Calendar_V4' : 'Get_Exposed_Calendar', isV4 };
   }
 
-  private async postExposedCalendar(propertyid: number, from_date: string, to_date: string) {
-    const { route, isV4 } = this.getExposedCalendarRoute(propertyid);
+  private async postExposedCalendar(params: GetCalendarDataParams) {
+    const payload = GetCalendarDataParamsSchema.parse(params);
+    const { route, isV4 } = this.getExposedCalendarRoute(payload.propertyid);
     const { data } = await axios.post(`/${route}`, {
-      propertyid,
-      from_date,
-      to_date,
+      ...payload,
       extras,
       include_sales_rate_plans: true,
     });
@@ -251,25 +223,26 @@ export class BookingService {
       throw new Error(data.ExceptionMsg);
     }
     const res = isV4 ? JSON.parse(data.My_Result) : data.My_Result;
-    return { route, data, months: res.months as MonthType[] };
+    return { payload, route, data, months: res.months as MonthType[] };
   }
 
   /** Raw calendar days for the range, without the booking mapping `getCalendarData` does. */
-  public async fetchExposedCalendarDays(propertyid: number, from_date: string, to_date: string): Promise<DayType[]> {
-    const { months } = await this.postExposedCalendar(propertyid, from_date, to_date);
+  public async fetchExposedCalendarDays(params: GetCalendarDataParams): Promise<DayType[]> {
+    const { months } = await this.postExposedCalendar(params);
     return (months ?? []).flatMap(month => month.days);
   }
 
-  public async getCalendarData(propertyid: number, from_date: string, to_date: string): Promise<{ [key: string]: any }> {
+  public async getCalendarData(params: GetCalendarDataParams): Promise<{ [key: string]: any }> {
     try {
-      const { route, data, months } = await this.postExposedCalendar(propertyid, from_date, to_date);
-      const customMonths: { daysCount: number; monthName: string }[] = [];
+      const { payload, route, data, months } = await this.postExposedCalendar(params);
+      const customMonths: { daysCount: number; monthName: string; firstDayValue?: string }[] = [];
       const myBooking = await getMyBookings(months);
       const days: DayData[] = months
         .map(month => {
           customMonths.push({
             daysCount: month.days.length,
             monthName: month.description,
+            firstDayValue: month.days[0]?.value,
           });
           return month.days.map(day => {
             return {
@@ -287,7 +260,7 @@ export class BookingService {
         ExceptionCode: null,
         ExceptionMsg: '',
         My_Params_Get_Rooming_Data: {
-          AC_ID: propertyid,
+          AC_ID: payload.propertyid,
           FROM: data[`My_Params_${route}`].from_date,
           TO: data[`My_Params_${route}`].to_date,
         },
@@ -480,31 +453,6 @@ export class BookingService {
       throw new Error(error);
     }
   }
-  public async getSetupEntriesByTableName(TBL_NAME: TableEntries): Promise<IEntries[]> {
-    const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME`, {
-      TBL_NAME,
-    });
-    if (data.ExceptionMsg !== '') {
-      throw new Error(data.ExceptionMsg);
-    }
-    const res: IEntries[] = data.My_Result ?? [];
-    return res;
-  }
-
-  public async fetchSetupEntries(): Promise<ISetupEntries> {
-    try {
-      const data = await this.getSetupEntriesByTableNameMulti(['_ARRIVAL_TIME', '_RATE_PRICING_MODE', '_BED_PREFERENCE_TYPE']);
-      const { arrival_time, rate_pricing_mode, bed_preference_type } = this.groupEntryTablesResult(data);
-      return {
-        arrivalTime: arrival_time,
-        ratePricingMode: rate_pricing_mode,
-        bedPreferenceType: bed_preference_type,
-      };
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
-    }
-  }
   public async doBookingExtraService({ booking_nbr, service, is_remove }: { service: ExtraService; booking_nbr: number | string; is_remove: boolean }) {
     const { data } = await axios.post(`/Do_Booking_Extra_Service`, { ...service, booking_nbr, is_remove });
     if (data.ExceptionMsg !== '') {
@@ -522,27 +470,6 @@ export class BookingService {
     return data.My_Result;
   }
 
-  public groupEntryTablesResult(entries: IEntries[]): GroupedTableEntries {
-    let result = {};
-    for (const entry of entries) {
-      const key = entry.TBL_NAME.substring(1, entry.TBL_NAME.length).toLowerCase();
-      if (!result[key]) {
-        result[key] = [];
-      }
-      result[key] = [...result[key], entry];
-    }
-    return result as GroupedTableEntries;
-  }
-  public async getSetupEntriesByTableNameMulti(entries: TableEntries[]): Promise<IEntries[]> {
-    const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME_MULTI`, { TBL_NAMES: entries });
-    if (data.ExceptionMsg !== '') {
-      throw new Error(data.ExceptionMsg);
-    }
-    return data.My_Result;
-  }
-  public async getBlockedInfo(): Promise<IEntries[]> {
-    return await this.getSetupEntriesByTableNameMulti(['_CALENDAR_BLOCKED_TILL']);
-  }
   public async getUserDefaultCountry() {
     try {
       let payload: any = { IP: '' };
@@ -620,7 +547,7 @@ export class BookingService {
     language,
     withExtras = true,
     include_dp_pricing,
-    is_calculate_totals=false,
+    is_calculate_totals = false,
     extras: _extras = extras,
   }: {
     is_calculate_totals?: boolean;
@@ -648,20 +575,12 @@ export class BookingService {
       console.error(error);
     }
   }
+  /** One entry per night from `from_date` up to (not including) `to_date`, both `YYYY-MM-DD`. */
   private generateDays(from_date: string, to_date: string, amount: number): Day[] {
-    const startDate = new Date(from_date);
-    const endDate = new Date(to_date);
     const days: Day[] = [];
-
-    while (startDate < endDate) {
-      days.push({
-        date: startDate.toISOString().split('T')[0],
-        amount: amount,
-        cost: null,
-      });
-      startDate.setDate(startDate.getDate() + 1);
+    for (let date = from_date; date < to_date; date = addDaysISO(date, 1)) {
+      days.push({ date, amount, cost: null });
     }
-
     return days;
   }
 
@@ -864,12 +783,12 @@ export class BookingService {
   /*Arrivals*/
   public async getRoomsToCheckIn(props: GetRoomsToCheckInProps): Promise<RoomsToProcessResult> {
     const payload = GetRoomsToCheckInPropsSchema.parse(props);
-    const { data } = await axios.post('https://gateway.igloorooms.com/IRBE/Get_Rooms_To_Check_In', payload);
+    const { data } = await axios.post('/Get_Rooms_To_Check_In', payload);
     return { bookings: data.My_Result, total_count: data.My_Params_Get_Rooms_To_Check_In?.total_count };
   }
   public async getRoomsToCheckout(props: GetRoomsToCheckOutProps): Promise<RoomsToProcessResult> {
     const payload = GetRoomsToCheckOutPropsSchema.parse(props);
-    const { data } = await axios.post('https://gateway.igloorooms.com/IRBE/Get_Rooms_To_Check_Out', payload);
+    const { data } = await axios.post('/Get_Rooms_To_Check_Out', payload);
     return { bookings: data.My_Result, total_count: data.My_Params_Get_Rooms_To_Check_Out?.total_count };
   }
   /*Departures */

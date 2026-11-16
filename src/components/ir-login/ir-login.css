@@ -32,8 +32,8 @@ form {
   gap: 1rem;
   width: 100%;
   max-width: 38rem;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
 }
 .separator-container {
   display: flex;
@@ -72,5 +72,5 @@ form {
   all: unset;
   position: absolute;
   top: 2px;
-  right: 1rem;
+  inset-inline-end: 1rem;
 }

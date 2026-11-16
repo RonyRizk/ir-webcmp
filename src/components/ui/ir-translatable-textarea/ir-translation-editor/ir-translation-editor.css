@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+.language {
+  max-inline-size: 18rem;
+}
+
+/* Reference | Translation side by side; stacked on narrow screens. */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--wa-space-m);
+}
+
+@media (min-width: 768px) {
+  .columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-xs);
+  min-inline-size: 0;
+}
+
+.column-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wa-space-s);
+}
+
+.column-title {
+  margin: 0;
+  color: var(--wa-color-text-normal);
+  font-size: var(--wa-font-size-s);
+  font-weight: var(--wa-font-weight-semibold, 600);
+}
+
+.column-language {
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-xs);
+}
+
+.reference {
+  flex: 1;
+  min-block-size: 8rem;
+  max-block-size: 24rem;
+  overflow-y: auto;
+  padding-block: var(--wa-form-control-padding-block, 0.5rem);
+  padding-inline: var(--wa-form-control-padding-inline, 0.75rem);
+  border-radius: var(--wa-form-control-border-radius);
+  background-color: var(--wa-color-surface-lowered);
+  color: var(--wa-color-text-normal);
+  font-size: var(--wa-font-size-s);
+  line-height: var(--wa-line-height-normal, 1.6);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.reference--empty {
+  color: var(--wa-color-text-quiet);
+  font-style: italic;
+}
+
+/* The column heading already names the textarea; keep its label for assistive tech only. */
+.textarea::part(label) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

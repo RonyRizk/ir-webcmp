@@ -14,7 +14,7 @@
 | `downloadFileName`  | `download-file-name`  | Suggested file name for downloaded previews.                                                                                                      | `string`                | `undefined` |
 | `downloadUrl`       | `download-url`        | URL used when the action is set to `download`. Can be overridden per invocation via {@link triggerAction}.                                        | `string`                | `undefined` |
 | `hideDefaultAction` | `hide-default-action` | When `true`, hides the default header action button so a custom implementation can be slotted.                                                    | `boolean`               | `false`     |
-| `label`             | `label`               | The dialog's label as displayed in the header. Required for accessibility and announced by assistive technologies.                                | `string`                | `'Preview'` |
+| `label`             | `label`               | The dialog's label as displayed in the header. Required for accessibility and announced by assistive technologies.                                | `string`                | `undefined` |
 | `open`              | `open`                | Indicates whether or not the preview dialog is open. Toggle this attribute or use {@link openDialog} / {@link closeDialog} to control visibility. | `boolean`               | `false`     |
 
 

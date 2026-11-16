@@ -7,14 +7,14 @@
 
 ## Properties
 
-| Property       | Attribute       | Description | Type                                               | Default           |
-| -------------- | --------------- | ----------- | -------------------------------------------------- | ----------------- |
-| `action`       | `action`        |             | `"convert-to-invoice" \| "delete-draft" \| "void"` | `null`            |
-| `amount`       | `amount`        |             | `number`                                           | `undefined`       |
-| `docNumber`    | `doc-number`    |             | `string`                                           | `'this document'` |
-| `fdType`       | `fd-type`       |             | `string`                                           | `undefined`       |
-| `isConfirming` | `is-confirming` |             | `boolean`                                          | `false`           |
-| `open`         | `open`          |             | `boolean`                                          | `false`           |
+| Property       | Attribute       | Description | Type                                               | Default                                                        |
+| -------------- | --------------- | ----------- | -------------------------------------------------- | -------------------------------------------------------------- |
+| `action`       | `action`        |             | `"convert-to-invoice" \| "delete-draft" \| "void"` | `null`                                                         |
+| `amount`       | `amount`        |             | `number`                                           | `undefined`                                                    |
+| `docNumber`    | `doc-number`    |             | `string`                                           | `t('Lcz_ThisDocumentFallback', { fallback: 'this document' })` |
+| `fdType`       | `fd-type`       |             | `string`                                           | `undefined`                                                    |
+| `isConfirming` | `is-confirming` |             | `boolean`                                          | `false`                                                        |
+| `open`         | `open`          |             | `boolean`                                          | `false`                                                        |
 
 
 ## Events

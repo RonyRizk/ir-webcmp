@@ -1,4 +1,3 @@
-import { IEntries } from '@/models/IBooking';
 import { RoomType, RatePlan, ExposedApplicablePolicy } from '@/models/booking.dto';
 import { IPayment, SharedPerson } from './../../models/booking.dto';
 //Sidebar
@@ -27,11 +26,7 @@ export type RoomGuestsPayload = {
   identifier: string;
   booking_nbr?: string | number;
 };
-export type PaymentEntries = {
-  types: IEntries[];
-  groups: IEntries[];
-  methods: IEntries[];
-};
+export type { PaymentEntries } from '@/services/setup/types';
 export type CancellationStatement = {
   roomType: RoomType;
   ratePlan: RatePlan;
@@ -44,6 +39,12 @@ export type Payment = Omit<IPayment, 'time_stamp'>;
 export type PrintScreenOptions =
   | {
       mode: 'printing' | 'invoice' | 'proforma' | 'creditnote';
+    }
+  | {
+      mode: 'registration-card';
+      payload: {
+        room_identifier: string;
+      };
     }
   | {
       mode: 'receipt';

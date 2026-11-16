@@ -1,28 +1,39 @@
 import { Component, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import { DayUseBookings } from '@/services/property/types';
-import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { RoomBookingDetails } from '@/models/IBooking';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { formatDate } from '@/utils/date';
+import { formatAmount, formatBookingNumber } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
 type DayUseStatus = 'scheduled' | 'upcoming' | 'in-progress';
 
-const STATUS_LABEL: Record<DayUseStatus, string> = {
-  'scheduled': 'Scheduled',
-  'upcoming': 'Upcoming',
-  'in-progress': 'In Progress',
-};
+function getStatusLabel(status: DayUseStatus): string {
+  switch (status) {
+    case 'scheduled':
+      return t('Lcz_Scheduled', { fallback: 'Scheduled' });
+    case 'upcoming':
+      return t('Lcz_Upcoming', { fallback: 'Upcoming' });
+    case 'in-progress':
+      return t('Lcz_InProgress', { fallback: 'In Progress' });
+  }
+}
 
 const GUEST_NAME_CROP_SIZE = 16;
 
 /** A stay checking out of (`departure`) or into (`arrival`) the day-use unit on the same date. Both at once is a turnover. */
 type StayMovementKind = 'departure' | 'arrival';
 
-const MOVEMENT_DISPLAY: Record<StayMovementKind, { icon: string; label: string }> = {
-  departure: { icon: 'plane-departure', label: 'Departure' },
-  arrival: { icon: 'plane-arrival', label: 'Arrival' },
+const MOVEMENT_ICON: Record<StayMovementKind, string> = {
+  departure: 'plane-departure',
+  arrival: 'plane-arrival',
 };
+
+function getMovementLabel(kind: StayMovementKind): string {
+  return kind === 'departure' ? t('Lcz_Departure', { fallback: 'Departure' }) : t('Lcz_Arrival', { fallback: 'Arrival' });
+}
 
 /** `_DEPARTURE_TIME` code meaning the guest never picked one — the property's standard check-out applies. */
 const UNSET_DEPARTURE_TIME_CODE = '000';
@@ -107,8 +118,7 @@ export class IglDayUseBookings {
   }
 
   private getPrice(amount: number): string {
-    const symbol = this.calendarData?.currency?.symbol ?? '';
-    return `${symbol}${Number(amount ?? 0).toFixed(2)}`;
+    return formatAmount(this.calendarData?.currency?.symbol ?? '', Number(amount ?? 0));
   }
 
   private getStatus(booking: DayUseBookings): DayUseStatus {
@@ -140,7 +150,7 @@ export class IglDayUseBookings {
       data: {
         BOOKING_NUMBER: booking.book_nbr,
         event_type: 'EDIT_BOOKING',
-        TITLE: `${locales.entries.Lcz_EditBookingFor ?? 'Edit Booking For'} ${this.getGuestName(booking)}`,
+        TITLE: `${t('Lcz_EditBookingFor', { fallback: 'Edit Booking For' })} ${this.getGuestName(booking)}`,
       },
     });
   }
@@ -227,13 +237,13 @@ export class IglDayUseBookings {
           {isTurnover && (
             <span class="dub-movement dub-movement--turnover">
               <wa-icon name="rotate" class="dub-movement__icon"></wa-icon>
-              Turnover
+              {t('Lcz_Turnover', { fallback: 'Turnover' })}
             </span>
           )}
           {movements.map(movement => (
             <span class={`dub-movement dub-movement--${movement.kind}`} key={`${movementsId}-${movement.kind}`}>
-              <wa-icon name={MOVEMENT_DISPLAY[movement.kind].icon} class="dub-movement__icon"></wa-icon>
-              {MOVEMENT_DISPLAY[movement.kind].label}
+              <wa-icon name={MOVEMENT_ICON[movement.kind]} class="dub-movement__icon"></wa-icon>
+              {getMovementLabel(movement.kind)}
               {movement.time && <span class="dub-movement__time">{movement.time}</span>}
             </span>
           ))}
@@ -242,15 +252,15 @@ export class IglDayUseBookings {
           <span class="dub-movement-tip">
             {movements.map(movement => (
               <span class="dub-movement-tip__line" key={`${movementsId}-tip-${movement.kind}`}>
-                <span class="dub-movement-tip__label">{MOVEMENT_DISPLAY[movement.kind].label}</span>
+                <span class="dub-movement-tip__label">{getMovementLabel(movement.kind)}</span>
                 <span>
-                  #{movement.bookingNumber}
+                  #{formatBookingNumber(movement.bookingNumber)}
                   {movement.guestName ? ` \u00b7 ${movement.guestName}` : ''}
                 </span>
                 {movement.time && (
                   <span class="dub-movement-tip__time">
                     {movement.time}
-                    {movement.isStandard ? ' (standard)' : ''}
+                    {movement.isStandard ? ` ${t('Lcz_StandardSuffix', { fallback: '(standard)' })}` : ''}
                   </span>
                 )}
               </span>
@@ -287,7 +297,7 @@ export class IglDayUseBookings {
               {guestName}
             </wa-tooltip>
           )}
-          <span class={`dub-status dub-status--${status}`}>{STATUS_LABEL[status]}</span>
+          <span class={`dub-status dub-status--${status}`}>{getStatusLabel(status)}</span>
         </div>
         {movements.length > 0 && this.renderStayMovements(booking, movements)}
       </button>
@@ -315,10 +325,10 @@ export class IglDayUseBookings {
           <div class="dub-panel__head">
             <header class="dub-panel__header">
               <h2 class="dub-panel__title" id="day-use-bookings-title">
-                Day Use Bookings
+                {t('Lcz_DayUseBookings', { fallback: 'Day Use Bookings' })}
               </h2>
               <ir-custom-button size="m" appearance="plain" variant="neutral" onClickHandler={() => this.handleOptionEvent('closeSideMenu')}>
-                <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
+                <wa-icon name="xmark" variant="solid" label={t('Lcz_Close', { fallback: 'Close' })} aria-label={t('Lcz_Close', { fallback: 'Close' })} role="img"></wa-icon>
               </ir-custom-button>
             </header>
 
@@ -326,13 +336,13 @@ export class IglDayUseBookings {
               <div class="dub-panel__toolbar">
                 <wa-select
                   size="s"
-                  aria-label="Date"
+                  aria-label={t('Lcz_DateLabel', { fallback: 'Date' })}
                   value={this.selectedDate}
                   defaultValue={this.selectedDate}
                   onchange={evt => (this.selectedDate = (evt.target as HTMLSelectElement).value)}
                 >
                   {this.orderedDates.map(date => (
-                    <wa-option value={date}>{moment(date, 'YYYY-MM-DD').format('ddd, DD MMM YYYY')}</wa-option>
+                    <wa-option value={date}>{formatDate(date, 'ddd, DD MMM YYYY')}</wa-option>
                   ))}
                 </wa-select>
               </div>
@@ -341,7 +351,7 @@ export class IglDayUseBookings {
 
           <div class="dub-panel__body">
             {isEmpty ? (
-              <ir-empty-state message="No day-use bookings for this date."></ir-empty-state>
+              <ir-empty-state message={t('Lcz_NoDayUseBookingsForDate', { fallback: 'No day-use bookings for this date.' })}></ir-empty-state>
             ) : (
               Array.from(grouped.entries()).map(([roomTypeId, roomTypeBookings]) => this.renderCategory(roomTypeId, roomTypeBookings))
             )}

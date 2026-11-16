@@ -16,3 +16,9 @@ td:last-child {
 .title {
   min-width: 230px !important;
 }
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-ps-1 {
+  padding-inline-start: 0.25rem;
+}

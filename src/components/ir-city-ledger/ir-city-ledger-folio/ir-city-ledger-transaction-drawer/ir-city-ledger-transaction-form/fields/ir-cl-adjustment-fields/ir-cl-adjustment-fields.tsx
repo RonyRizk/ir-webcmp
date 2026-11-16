@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Fragment, Prop, h } from '@stencil/core';
 import { entryTypeFieldSchema, type CityLedgerTransactionFormDraft, type EntryType, type LinkType, type LinkedOption } from '../../ir-city-ledger-transaction-form.schema';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-adjustment-fields',
@@ -28,7 +29,7 @@ export class IrClAdjustmentFields {
         <div class="field field--full-width">
           <ir-validator schema={entryTypeFieldSchema} value={this.entryType} valueEvent="change">
             <wa-radio-group
-              label="Entry Type"
+              label={t('Lcz_EntryType', { fallback: 'Entry Type' })}
               orientation="horizontal"
               size="s"
               value={this.entryType}
@@ -37,10 +38,10 @@ export class IrClAdjustmentFields {
               }}
             >
               <wa-radio value="CR" appearance="button" class="entry-type --credit">
-                Credit
+                {t('Lcz_Credit', { fallback: 'Credit' })}
               </wa-radio>
               <wa-radio value="DB" appearance="button" class="entry-type --debit">
-                Debit
+                {t('Lcz_Debit', { fallback: 'Debit' })}
               </wa-radio>
             </wa-radio-group>
           </ir-validator>
@@ -50,7 +51,7 @@ export class IrClAdjustmentFields {
         {/* <div class="field">
           <ir-validator schema={linkTypeFieldSchema} value={this.linkType} valueEvent="change">
             <wa-select
-              label="Link Type"
+              label={t('Lcz_LinkType', { fallback: 'Link Type' })}
               size="s"
               value={this.linkType}
               onchange={event => {
@@ -74,7 +75,7 @@ export class IrClAdjustmentFields {
         {/* {this.linkType !== 'NONE' && (
           <div class="field">
             <wa-select
-              label="Linked Record"
+              label={t('Lcz_LinkedRecord', { fallback: 'Linked Record' })}
               size="s"
               value={this.linkedId ?? ''}
               onchange={event => {

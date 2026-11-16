@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
 
 export const DateSchema = z
 
@@ -17,4 +18,10 @@ export const DateSchema = z
 export const PropertyIdSchema = z.number().int();
 
 export const BookingNumberSchema = z.string();
+export const LanguageSchema = z.object({
+  language: z
+    .string()
+    .optional()
+    .default(() => LocaleController.language),
+});
 export const TaxTypesSchema = z.array(z.enum(['VAT', 'CITY_TAX', 'SERVICE_CHARGE'])).optional();

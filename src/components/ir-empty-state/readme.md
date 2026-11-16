@@ -7,10 +7,10 @@
 
 ## Properties
 
-| Property   | Attribute   | Description | Type      | Default              |
-| ---------- | ----------- | ----------- | --------- | -------------------- |
-| `message`  | `message`   |             | `string`  | `'No records found'` |
-| `showIcon` | `show-icon` |             | `boolean` | `true`               |
+| Property   | Attribute   | Description | Type      | Default     |
+| ---------- | ----------- | ----------- | --------- | ----------- |
+| `message`  | `message`   |             | `string`  | `undefined` |
+| `showIcon` | `show-icon` |             | `boolean` | `true`      |
 
 
 ## Shadow Parts
@@ -26,7 +26,10 @@
 
  - [igl-day-use-bookings](../igloo-calendar/igl-day-use-bookings)
  - [igl-day-use-unit-list](../igloo-calendar/ir-booking-editor/igl-day-use-unit-list)
+ - [igl-hk-issues-dialog](../igloo-calendar/igl-cal-body/igl-hk-issues-dialog)
+ - [igl-split-booking-form](../igloo-calendar/igl-split-booking-drawer/igl-split-booking-form)
  - [igl-to-be-assigned](../igloo-calendar/igl-to-be-assigned)
+ - [ir-agent-contract](../ir-agents/ir-agent-editor-drawer/ir-agent-contract)
  - [ir-agents-table](../ir-agents/ir-agents-table)
  - [ir-arrivals-table](../ir-arrivals/ir-arrivals-table)
  - [ir-booking-city-ledger](../ir-booking-details/ir-booking-city-ledger)
@@ -65,7 +68,10 @@
 graph TD;
   igl-day-use-bookings --> ir-empty-state
   igl-day-use-unit-list --> ir-empty-state
+  igl-hk-issues-dialog --> ir-empty-state
+  igl-split-booking-form --> ir-empty-state
   igl-to-be-assigned --> ir-empty-state
+  ir-agent-contract --> ir-empty-state
   ir-agents-table --> ir-empty-state
   ir-arrivals-table --> ir-empty-state
   ir-booking-city-ledger --> ir-empty-state

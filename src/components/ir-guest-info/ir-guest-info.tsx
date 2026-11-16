@@ -2,12 +2,14 @@ import { Component, State, h, Prop, EventEmitter, Event, Watch, Fragment } from 
 import { Guest } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { ICountry } from '@/components';
-import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { showToast } from '@/utils/utils';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-guest-info',
   styleUrls: ['ir-guest-info.css', '../../common/sheet.css'],
@@ -31,14 +33,29 @@ export class GuestInfo {
   @Event({ bubbles: true }) resetBookingEvt: EventEmitter<null>;
 
   private bookingService = new BookingService();
-  private roomService = new RoomService();
-  private token: Token = new Token();
+  private ApiClient: ApiClient = new ApiClient();
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.guestInfo, () => this.init());
 
   async componentWillLoad() {
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
     }
-    if (!!this.token.getToken()) this.init();
+    if (!!this.ApiClient.getToken()) this.init();
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -46,25 +63,18 @@ export class GuestInfo {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.init();
   }
 
   async init() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.guestInfo });
       console.log('first');
       this.isLoading = true;
-      const [guest, countries, fetchedLocales] = await Promise.all([
-        this.bookingService.fetchGuest(this.email),
-        this.bookingService.getCountries(this.language),
-        !locales || !locales.entries || Object.keys(locales.entries).length === 0 ? this.roomService.fetchLanguage(this.language) : Promise.resolve(null), // Skip fetching if locales are already set
-      ]);
-
-      // Set the fetched locales if they were fetched
-      if (fetchedLocales) {
-        locales.entries = fetchedLocales.entries;
-        locales.direction = fetchedLocales.direction;
-      }
+      const [guest, countries] = await Promise.all([this.bookingService.fetchGuest(this.email), this.bookingService.getCountries(LocaleController.language), localeReady]);
 
       // Assign the fetched guest and countries
       this.countries = countries;
@@ -87,7 +97,7 @@ export class GuestInfo {
       showToast({
         type: 'success',
         description: '',
-        title: 'Saved Successfully',
+        title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
         position: 'top-right',
       });
       this.closeSideBar.emit(null);
@@ -114,12 +124,12 @@ export class GuestInfo {
         }}
       >
         {!this.isInSideBar && [<ir-toast></ir-toast>, <ir-interceptor></ir-interceptor>]}
-        {this.headerShown && <ir-title class="px-1 sheet-header" displayContext="sidebar" label={locales.entries.Lcz_GuestDetails}></ir-title>}
+        {this.headerShown && <ir-title class="px-1 sheet-header" displayContext="sidebar" label={t('Lcz_GuestDetails', { fallback: 'Guest Details' })}></ir-title>}
         <div class={this.isInSideBar ? 'sheet-body' : 'card-content collapse show '}>
           <div class={this.headerShown ? 'card-body px-1 pt-0' : 'pt-0'}>
             <ir-input-text
               autoValidate={this.autoValidate}
-              label={locales.entries?.Lcz_FirstName}
+              label={t('Lcz_FirstName', { fallback: 'First name' })}
               name="firstName"
               // submitted={this.submit}
               value={this.guest?.first_name}
@@ -128,7 +138,7 @@ export class GuestInfo {
             ></ir-input-text>
             <ir-input-text
               autoValidate={this.autoValidate}
-              label={locales.entries?.Lcz_LastName}
+              label={t('Lcz_LastName', { fallback: 'Last name' })}
               name="lastName"
               // submitted={this.submit}
               value={this.guest?.last_name}
@@ -136,7 +146,7 @@ export class GuestInfo {
               onTextChange={e => this.handleInputChange({ last_name: e.detail })}
             ></ir-input-text>
             <ir-input-text
-              label={locales.entries?.Lcz_Email}
+              label={t('Lcz_Email', { fallback: 'Email' })}
               name="email"
               // submitted={this.submit}
               value={this.guest?.email}
@@ -144,7 +154,7 @@ export class GuestInfo {
               onTextChange={e => this.handleInputChange({ email: e.detail })}
             ></ir-input-text>
             <ir-input-text
-              label={locales.entries?.Lcz_AlternativeEmail}
+              label={t('Lcz_AlternativeEmail', { fallback: 'Alternative email' })}
               name="altEmail"
               value={this.guest?.alternative_email}
               onTextChange={e => this.handleInputChange({ alternative_email: e.detail })}
@@ -155,7 +165,7 @@ export class GuestInfo {
               required
               name="country"
               submited={this.submit}
-              label={locales.entries.Lcz_Country}
+              label={t('Lcz_Country', { fallback: 'Country' })}
               selectedValue={this.guest?.country_id?.toString() ?? ''}
               data={this.countries?.map(item => {
                 return {
@@ -169,7 +179,7 @@ export class GuestInfo {
             <ir-country-picker
               // error={this.submit && !this.guest.country_id}
               country={this.countries.find(c => c.id === this.guest.country_id)}
-              label={locales.entries?.Lcz_Country}
+              label={t('Lcz_Country', { fallback: 'Country' })}
               onCountryChange={e => this.handleInputChange({ country_id: e.detail.id })}
               countries={this.countries}
             ></ir-country-picker>
@@ -187,7 +197,7 @@ export class GuestInfo {
               phone_prefix={this.guest.country_phone_prefix}
               value={this.guest.mobile}
               language={this.language}
-              label={locales.entries?.Lcz_MobilePhone}
+              label={t('Lcz_MobilePhone', { fallback: 'Mobile phone' })}
               countries={this.countries}
             />
             <div class="mb-2">
@@ -195,7 +205,7 @@ export class GuestInfo {
                 variant="prepend"
                 onTextChange={e => this.handleInputChange({ notes: e.detail })}
                 value={this.guest?.notes}
-                label={locales.entries?.Lcz_PrivateNote}
+                label={t('Lcz_PrivateNote', { fallback: 'Private note' })}
               ></ir-textarea>
             </div>
             <div class={'p-0 m-0'}>
@@ -208,14 +218,14 @@ export class GuestInfo {
                   onInput={e => this.handleInputChange({ subscribe_to_news_letter: (e.target as HTMLInputElement).checked })}
                 />
                 <span class="checkmark m-0 p-0"></span>
-                <span class={'m-0 p-0  check-label'}>{locales.entries.Lcz_Newsletter}</span>
+                <span class={'m-0 p-0  check-label'}>{t('Lcz_Newsletter', { fallback: 'Newsletter' })}</span>
               </label>
               {!this.isInSideBar && (
                 <Fragment>
                   <hr />
                   <ir-button
                     btn_styles="d-flex align-items-center justify-content-center"
-                    text={locales.entries.Lcz_Save}
+                    text={t('Lcz_Save', { fallback: 'Save' })}
                     onClickHandler={this.editGuest.bind(this)}
                     isLoading={isRequestPending('/Edit_Exposed_Guest')}
                     color="btn-primary"
@@ -233,7 +243,7 @@ export class GuestInfo {
               class="flex-fill m-0 p-0"
               btn_styles="w-100 m-0  justify-content-center align-items-center"
               btn_color="secondary"
-              text={locales.entries.Lcz_Cancel}
+              text={t('Lcz_Cancel', { fallback: 'Cancel' })}
             ></ir-button>
             <ir-button
               data-testid="save"
@@ -242,7 +252,7 @@ export class GuestInfo {
               class="flex-fill m-0"
               btn_type="submit"
               btn_styles="w-100 m-0  justify-content-center align-items-center"
-              text={locales.entries.Lcz_Save}
+              text={t('Lcz_Save', { fallback: 'Save' })}
             ></ir-button>
           </div>
         )}

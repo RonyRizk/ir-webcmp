@@ -1,6 +1,7 @@
 import { Component, Host, h } from '@stencil/core';
 import dp_report from '@/stores/dp_report.store';
-import { formatAmount } from '@/utils/utils';
+import { formatAmount, formatCount } from '@/utils/number';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-dp-report-summary',
@@ -25,11 +26,11 @@ export class IrDpReportSummary {
           <ir-metric-card
             class="dp-summary__metric"
             icon="sack-dollar"
-            label="Extra Profit Generated"
+            label={t('Lcz_ExtraProfitGenerated', { fallback: 'Extra Profit Generated' })}
             loading={loading}
             value={formatAmount(currencySymbol, summary.total_profit)}
             // trend={dpContributionPct}
-            caption={`from ${totalNbOfProfitableBooking} / ${totalBookings} booking${totalBookings === 1 ? '' : 's'}`}
+            caption={t('Lcz_FromNOfMBookings', { fallback: 'from %1 / %2 booking(s)', params: [formatCount(totalNbOfProfitableBooking), formatCount(totalBookings)] })}
           ></ir-metric-card>
           {/* <ir-metric-card
             class="dp-summary__metric"
@@ -42,19 +43,19 @@ export class IrDpReportSummary {
           <ir-metric-card
             class="dp-summary__metric --gain"
             icon="arrow-trend-up"
-            label="Avg Gain"
+            label={t('Lcz_AvgGain', { fallback: 'Avg Gain' })}
             loading={loading}
             value={formatAmount(currencySymbol, summary.avg_gain)}
             // caption={`from ${summary.bookings_above_base} booking${summary.bookings_above_base === 1 ? '' : 's'}`}
-            caption={`per booking`}
+            caption={t('Lcz_PerBooking', { fallback: 'per booking' })}
           ></ir-metric-card>
           <ir-metric-card
             class="dp-summary__metric --loss"
             icon="arrow-trend-down"
-            label="Extra Bookings from Applied Incentives"
+            label={t('Lcz_ExtraBookingsFromAppliedIncentives', { fallback: 'Extra Bookings from Applied Incentives' })}
             loading={loading}
             value={summary.bookings_below_base}
-            caption={`${formatAmount(currencySymbol, summary.avg_loss)}/booking${summary.bookings_below_base === 1 ? '' : 's'} average reduction`}
+            caption={t('Lcz_AmountPerBookingAverageReduction', { fallback: '%1/booking(s) average reduction', params: [formatAmount(currencySymbol, summary.avg_loss)] })}
           ></ir-metric-card>
         </div>
       </Host>

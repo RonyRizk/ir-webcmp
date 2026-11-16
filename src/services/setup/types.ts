@@ -1,33 +1,81 @@
-import { ZIEntrySchema } from '@/models/IBooking';
+import { SetupEntrySchema } from '@/models/IBooking';
+import type { SetupEntries } from '@/models/IBooking';
 import * as z from 'zod';
+import { LanguageSchema } from '../commonSchemas';
 
 // ---------------------------------------------------------------------------
 // Shared entry shape
 // ---------------------------------------------------------------------------
 
-export { ZIEntrySchema };
+export { SetupEntrySchema };
 /** A single labeled setup row (one translated string across all supported languages). */
-export type SetupEntry = z.infer<typeof ZIEntrySchema>;
+export type SetupEntry = z.infer<typeof SetupEntrySchema>;
 
 // ---------------------------------------------------------------------------
-// Get_Setup_Entries_By_TBL_NAME
+// Setup table identifiers
 // ---------------------------------------------------------------------------
 
-export const GetSetupEntriesByTblNameParamsSchema = z.object({
-  TBL_NAME: z.string().min(1),
-});
-/** Params for fetching every entry belonging to one setup table. */
-export type GetSetupEntriesByTblNameParams = z.infer<typeof GetSetupEntriesByTblNameParamsSchema>;
+/**
+ * Every setup `TBL_NAME` the app reads at runtime, as string literals, plus an
+ * open `(string & {})` member so ad-hoc names still type-check while keeping
+ * editor autocomplete for the known ones.
+ *
+ * Canonical definition — `@/services/booking-service/types` and
+ * `booking.service.ts` re-export this. Superset of the two historical unions.
+ * Keep in sync with `USED_SETUP_TABLES` in
+ * `src/components/ir-translations-manager/used-setup-tables.ts`.
+ */
+export type TableEntries =
+  | '_CALENDAR_BLOCKED_TILL'
+  | '_DEPARTURE_TIME'
+  | '_ARRIVAL_TIME'
+  | '_RATE_PRICING_MODE'
+  | '_BED_PREFERENCE_TYPE'
+  | '_PAY_TYPE'
+  | '_PAY_TYPE_GROUP'
+  | '_PAY_METHOD'
+  | '_AGENT_RATE_TYPE'
+  | '_AGENT_TYPE'
+  | '_TA_PAYMENT_METHOD'
+  | '_VAT_INCLUDED'
+  | '_CITY_TAX_INCLUDED'
+  | '_SERVICE_CHARGE_INCLUDED'
+  | '_TAXATION_STRATEGY'
+  | '_SVC_CATEGORY'
+  | '_CL_TX_TYPE'
+  | '_FD_TYPE'
+  | '_FD_STATUS'
+  | '_CL_POST_TIMING'
+  | '_GAP_RANGE'
+  | '_GAP_RULE'
+  | '_INVOICE_TARGET'
+  | '_ID_TYPE'
+  | '_USER_TYPE'
+  | '_HK_FREQUENCY'
+  | '_MEAL_TYPE'
+  | '_HB_PREFERENCE'
+  | (string & {});
 
-// ---------------------------------------------------------------------------
-// Get_Setup_Entries_By_TBL_NAME_Multi
-// ---------------------------------------------------------------------------
+/**
+ * Setup entries grouped by table: the key is the lower-cased `TBL_NAME` with its
+ * leading underscore stripped (`_PAY_TYPE` -> `pay_type`).
+ */
+export type GroupedTableEntries = {
+  [K in TableEntries as K extends `_${infer Rest}` ? Lowercase<Rest> : never]: SetupEntries[];
+};
 
-export const GetSetupEntriesByTblNameMultiParamsSchema = z.object({
-  TBL_NAMES: z.array(z.string().min(1)),
-});
-/** Params for fetching entries across several setup tables in one call. */
-export type GetSetupEntriesByTblNameMultiParams = z.infer<typeof GetSetupEntriesByTblNameMultiParamsSchema>;
+/**
+ * The `_PAY_TYPE` / `_PAY_TYPE_GROUP` / `_PAY_METHOD` setup tables, grouped for
+ * the payment folio. Produced by {@link SetupService.getPaymentEntries}.
+ */
+export type PaymentEntries = {
+  types: SetupEntries[];
+  groups: SetupEntries[];
+  methods: SetupEntries[];
+};
+
+/** Language codes that map to the `CODE_VALUE_*` columns on a setup entry. */
+export type EntryLanguage = 'en' | 'ar' | 'de' | 'el' | 'fr' | 'he' | 'pl' | 'ru' | 'ua';
 
 // ---------------------------------------------------------------------------
 // Get_Distinct_Setup_Tables
@@ -120,9 +168,7 @@ export type MoveSetupEntryParams = z.infer<typeof MoveSetupEntryParamsSchema>;
 /*                              Move Setup Entry                              */
 /* -------------------------------------------------------------------------- */
 
-export const MissingSetupEntriesParamsSchema = z.object({
-  language: z.string(),
-});
+export const MissingSetupEntriesParamsSchema = LanguageSchema;
 
 export type MissingSetupEntriesParams = z.infer<typeof MissingSetupEntriesParamsSchema>;
 

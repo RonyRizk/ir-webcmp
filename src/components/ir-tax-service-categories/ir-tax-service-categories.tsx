@@ -1,7 +1,7 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { Component, Prop, State, Watch, h } from '@stencil/core';
 import { ChargeRule, TaxAndChargeSetup, TaxationStrategy, TaxesSetupEntries } from './types';
-import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, groupEntryTablesResult, getSetupEntryLabel } from '@/services/setup';
 import { PropertyService } from '@/services/property.service';
 import type { HandleExposedPropertyTaxCategoriesParams, TaxCategory } from '@/services/property/types';
 import calendar_data from '@/stores/calendar-data';
@@ -9,6 +9,8 @@ import { showToast } from '@/utils/utils';
 import { extraServicesCategories } from '@/services/extra-services';
 import { toAccChargeRule, findAccTax } from '@/services/property/acc-tax.helpers';
 import { getTopLevelSvcCategories } from '@/utils/svc-category.utils';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-tax-service-categories',
@@ -27,13 +29,13 @@ export class IrTaxServiceCategories {
   @State() setupEntries: TaxesSetupEntries;
   @State() autoValidate: boolean;
 
-  private tokenService = new Token();
-  private bookingService = new BookingService();
+  private apiClientService = new ApiClient();
+  private setupService = new SetupService();
   private propertyService = new PropertyService();
 
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -55,7 +57,7 @@ export class IrTaxServiceCategories {
 
   /** Re-authenticates and re-fetches configuration when a watched prop changes. */
   private reinit() {
-    this.tokenService.setToken(this.ticket);
+    this.apiClientService.setApiClient(this.ticket);
     this.init();
   }
 
@@ -64,10 +66,10 @@ export class IrTaxServiceCategories {
     this.isLoading = true;
     try {
       const [, tableEntries] = await Promise.all([
-        this.propertyService.getExposedProperty({ id: this.propertyid, language: this.language }),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_VAT_INCLUDED', '_SVC_CATEGORY', '_CITY_TAX_INCLUDED', '_SERVICE_CHARGE_INCLUDED']),
+        this.propertyService.getExposedProperty({ id: this.propertyid, language: LocaleController.language }),
+        this.setupService.getSetupEntriesByTableNameMulti(['_VAT_INCLUDED', '_SVC_CATEGORY', '_CITY_TAX_INCLUDED', '_SERVICE_CHARGE_INCLUDED']),
       ]);
-      this.setupEntries = this.bookingService.groupEntryTablesResult(tableEntries);
+      this.setupEntries = groupEntryTablesResult(tableEntries);
       this.chargeCategoryRules = this.buildInitialRules();
     } catch (error) {
       console.error(error);
@@ -207,7 +209,7 @@ export class IrTaxServiceCategories {
       const payload = this.buildPayload();
       await this.propertyService.handleExposedPropertyTaxCategories(payload);
       showToast({
-        title: 'Saved Successfully',
+        title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
         type: 'success',
       });
     } catch (error) {
@@ -227,12 +229,12 @@ export class IrTaxServiceCategories {
 
     return (
       <ir-page
-        label="Tax & Service Categories"
-        description="Define taxes and service charges for room rates, cancellations, and on-property services."
+        label={t('Lcz_TaxAndServiceCategories', { fallback: 'Tax & Service Categories' })}
+        description={t('Lcz_TaxServiceCategoriesDescription', { fallback: 'Define taxes and service charges for room rates, cancellations, and on-property services.' })}
         data-testid="ir-tax-service-categories"
       >
         <ir-custom-button slot="page-header" loading={this.isSaving} type="submit" form="tax-service-categories__form" style={{ width: '100px' }} variant="brand">
-          Save
+          {t('Lcz_Save', { fallback: 'Save' })}
         </ir-custom-button>
         <form id="tax-service-categories__form" onSubmit={e => this.handleSubmit(e)}>
           <wa-card appearance="plain" class="tax-service-categories__card">
@@ -240,19 +242,19 @@ export class IrTaxServiceCategories {
               {/* Column headers — hidden on mobile, shown via display:contents on desktop */}
               <div class="tax-grid__header" aria-hidden="true">
                 <div></div>
-                <div class="tax-grid__col-label">VAT</div>
-                <div class="tax-grid__col-label">City Tax</div>
-                <div class="tax-grid__col-label">Service Charge</div>
-                <div class="tax-grid__col-label">Taxation Strategy</div>
+                <div class="tax-grid__col-label">{t('Lcz_Vat', { fallback: 'VAT' })}</div>
+                <div class="tax-grid__col-label">{t('Lcz_CityTaxColumn', { fallback: 'City Tax' })}</div>
+                <div class="tax-grid__col-label">{t('Lcz_ServiceCharge', { fallback: 'Service Charge' })}</div>
+                <div class="tax-grid__col-label">{t('Lcz_TaxationStrategy', { fallback: 'Taxation Strategy' })}</div>
               </div>
 
               {/* Accommodation row */}
               <div class="tax-grid__row">
                 <div class="tax-grid__name">
-                  <p class="tax-grid__title">Accommodation</p>
-                  <p class="tax-grid__hint">Room-related charges applied to reservations and cancellations</p>
+                  <p class="tax-grid__title">{t('Lcz_Accommodation', { fallback: 'Accommodation' })}</p>
+                  <p class="tax-grid__hint">{t('Lcz_RoomRelatedChargesHint', { fallback: 'Room-related charges applied to reservations and cancellations' })}</p>
                 </div>
-                <div class="tax-grid__cell" data-label="VAT">
+                <div class="tax-grid__cell" data-label={t('Lcz_Vat', { fallback: 'VAT' })}>
                   <ir-tax-input
                     autoValidate={this.autoValidate}
                     language={this.language}
@@ -261,7 +263,7 @@ export class IrTaxServiceCategories {
                     setupEntries={this.setupEntries?.vat_included ?? []}
                   ></ir-tax-input>
                 </div>
-                <div class="tax-grid__cell" data-label="City Tax">
+                <div class="tax-grid__cell" data-label={t('Lcz_CityTaxColumn', { fallback: 'City Tax' })}>
                   <ir-tax-input
                     autoValidate={this.autoValidate}
                     language={this.language}
@@ -270,7 +272,7 @@ export class IrTaxServiceCategories {
                     setupEntries={this.setupEntries?.city_tax_included ?? []}
                   ></ir-tax-input>
                 </div>
-                <div class="tax-grid__cell" data-label="Service Charge">
+                <div class="tax-grid__cell" data-label={t('Lcz_ServiceCharge', { fallback: 'Service Charge' })}>
                   <ir-tax-input
                     autoValidate={this.autoValidate}
                     language={this.language}
@@ -279,7 +281,7 @@ export class IrTaxServiceCategories {
                     setupEntries={this.setupEntries?.service_charge_included ?? []}
                   ></ir-tax-input>
                 </div>
-                <div class="tax-grid__cell" data-label="Taxation Strategy">
+                <div class="tax-grid__cell" data-label={t('Lcz_TaxationStrategy', { fallback: 'Taxation Strategy' })}>
                   <wa-radio-group
                     size="s"
                     orientation="horizontal"
@@ -287,10 +289,10 @@ export class IrTaxServiceCategories {
                     onwa-change={(e: CustomEvent<{ value: string }>) => this.handleTaxationStrategyChange(e.detail.value as TaxationStrategy)}
                   >
                     <wa-radio appearance="button" value={TaxationStrategy.Normal}>
-                      Normal
+                      {t('Lcz_Normal', { fallback: 'Normal' })}
                     </wa-radio>
                     <wa-radio appearance="button" value={TaxationStrategy.Cumulative}>
-                      Cumulative
+                      {t('Lcz_Cumulative', { fallback: 'Cumulative' })}
                     </wa-radio>
                   </wa-radio-group>
                 </div>
@@ -305,10 +307,10 @@ export class IrTaxServiceCategories {
                   </div>,
                   <div class="tax-grid__row">
                     <div class="tax-grid__name">
-                      <p class="tax-grid__title">{category.CODE_VALUE_EN}</p>
+                      <p class="tax-grid__title">{getSetupEntryLabel(category)}</p>
                       {category.NOTES && <p class="tax-grid__hint">{category.NOTES}</p>}
                     </div>
-                    <div class="tax-grid__cell" data-label="VAT">
+                    <div class="tax-grid__cell" data-label={t('Lcz_Vat', { fallback: 'VAT' })}>
                       <ir-tax-input
                         autoValidate={this.autoValidate}
                         language={this.language}

@@ -1,3 +1,4 @@
+import { t } from '@/services/locale/t';
 import { Component, Method, State, h } from '@stencil/core';
 import type { SyncAnswer, SyncPrompt } from '../sync-policy';
 
@@ -86,10 +87,10 @@ export class IrTranslationsSyncDialog {
     }
     return [
       <ir-custom-button size="m" appearance="outlined" variant="neutral" onClickHandler={() => this.dialogRef?.closeModal()}>
-        Cancel
+        {t('Lcz_Cancel', { fallback: 'Cancel' })}
       </ir-custom-button>,
       <ir-custom-button size="m" appearance="accent" variant="brand" onClickHandler={() => this.answer({ kind: 'tables', tables: this.checkedTables })}>
-        Save
+        {t('Lcz_Save', { fallback: 'Save' })}
       </ir-custom-button>,
     ];
   }

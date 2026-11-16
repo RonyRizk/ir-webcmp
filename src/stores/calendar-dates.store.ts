@@ -10,7 +10,7 @@ export interface ICalendarDates {
       reason: 'inventory' | 'stop_sale';
     }
   >;
-  months: { daysCount: number; monthName: string }[];
+  months: { daysCount: number; monthName: string; firstDayValue?: string }[];
   fromDate: string;
   toDate: string;
   cleaningTasks: Map<number, Map<string, Task>>;

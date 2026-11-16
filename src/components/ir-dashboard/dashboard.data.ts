@@ -1,6 +1,7 @@
 import type { Booking } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { DashboardService } from '@/services/dashboard';
+import { LocaleController } from '@/services/locale/locale.controller';
 import { arrivalsStore, initializeArrivalsStore, setArrivalsReferenceDate, setArrivalsTotal } from '@/stores/arrivals.store';
 import calendar_data from '@/stores/calendar-data';
 import { departuresStore, initializeDeparturesStore, setDepartureTotal, setDeparturesPage, setDeparturesReferenceDate } from '@/stores/departures.store';
@@ -41,10 +42,11 @@ async function fetchArrivals(propertyId: number, date: ISODate, ready?: Promise<
       check_in_date: date,
       page_index: arrivalsStore.pagination.currentPage,
       page_size: arrivalsStore.pagination.pageSize,
+      language: LocaleController.language,
     });
   }
   // The dashboard hides pagination, so the loaded page is the total.
-  const bookings = await dashboardService.getArrivals({ property_id: propertyId, date });
+  const bookings = await dashboardService.getArrivals({ property_id: propertyId, date, language: LocaleController.language });
   return { bookings, total_count: bookings.length };
 }
 
@@ -55,9 +57,10 @@ async function fetchDepartures(propertyId: number, date: ISODate, ready?: Promis
       check_out_date: date,
       page_index: departuresStore.pagination.currentPage,
       page_size: departuresStore.pagination.pageSize,
+      language: LocaleController.language,
     });
   }
-  const bookings = await dashboardService.getDepartures({ property_id: propertyId, date });
+  const bookings = await dashboardService.getDepartures({ property_id: propertyId, date, language: LocaleController.language });
   return { bookings, total_count: bookings.length };
 }
 

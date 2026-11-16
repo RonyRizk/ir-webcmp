@@ -81,22 +81,22 @@
   z-index: 10;
   color: var(--ir-floating-label-fg);
   background: white;
-  transition: transform 120ms ease, color 120ms ease, top 120ms ease, background-color 120ms ease, opacity 120ms ease;
+  transition:
+    transform 120ms ease,
+    color 120ms ease,
+    top 120ms ease,
+    background-color 120ms ease,
+    opacity 120ms ease;
   opacity: 0.95;
   line-height: 1;
   white-space: nowrap;
 }
 
 /* logical inline offsets */
-:host .ir-floating-label:dir(rtl),
-:host .floating-label:dir(rtl) {
+:host .ir-floating-label,
+:host .floating-label {
   /* alias */
-  right: var(--ir-floating-label-resting-offset-inline);
-}
-:host .ir-floating-label:dir(ltr),
-:host .floating-label:dir(ltr) {
-  /* alias */
-  left: var(--ir-floating-label-resting-offset-inline);
+  inset-inline-start: var(--ir-floating-label-resting-offset-inline);
 }
 
 /* Float up when focused OR has value */

@@ -1,6 +1,7 @@
 import { Booking } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-billing-drawer',
@@ -57,7 +58,7 @@ export class IrBillingDrawer {
           this.billingClose.emit();
         }}
         open={this.open}
-        label="Billing"
+        label={t('Lcz_Billing', { fallback: 'Billing' })}
       >
         {this.open && <ir-billing isAllServicesAgentOwned={this.isAllServicesAgentOwned} booking={this.booking} agent={this.agent}></ir-billing>}
       </ir-drawer>

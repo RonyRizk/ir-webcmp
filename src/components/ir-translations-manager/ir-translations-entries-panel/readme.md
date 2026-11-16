@@ -39,6 +39,7 @@ CRUD intents it emits.
 | `duplicateEntry`   |             | `CustomEvent<TranslationEntry>`   |
 | `editEntry`        |             | `CustomEvent<TranslationEntry>`   |
 | `entryChange`      |             | `CustomEvent<TranslationEntry>`   |
+| `moveEntry`        |             | `CustomEvent<TranslationEntry>`   |
 | `reorderEntries`   |             | `CustomEvent<TranslationEntry[]>` |
 | `saveOrder`        |             | `CustomEvent<void>`               |
 | `toggleVisibility` |             | `CustomEvent<TranslationEntry>`   |

@@ -108,7 +108,7 @@
 }
 
 .pms-search__option-status {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 .pms-search__option-icon {
   width: 1rem;

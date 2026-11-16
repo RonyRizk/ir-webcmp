@@ -14,6 +14,7 @@ import {
   sumOccupancy,
   sumUnits,
 } from '../dashboard.helpers';
+import { formatCount } from '@/utils/number';
 import { roomArrivalMinutes, roomDepartureMinutes, sortRoomsByTime } from '@/utils/room-movement-time';
 
 const booking = (rooms: Partial<Booking['rooms'][number]>[]) => ({ rooms }) as unknown as Booking;
@@ -70,10 +71,9 @@ describe('dashboard helpers', () => {
   });
 
   it('shows card counts in full up to 99,999 and compact beyond, never past six characters', () => {
-    const full = (value: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
-    expect(formatCardCount(5)).toBe('5');
-    expect(formatCardCount(99_999)).toBe(full(99_999));
-    expect(formatCardCount(100_000)).not.toBe(full(100_000));
+    expect(formatCardCount(5)).toBe(formatCount(5));
+    expect(formatCardCount(99_999)).toBe(formatCount(99_999));
+    expect(formatCardCount(100_000)).not.toBe(formatCount(100_000));
     for (const value of [100_000, 123_456, 999_999, 1_234_567, 123_456_789, 999_999_999]) {
       expect(formatCardCount(value).length).toBeLessThanOrEqual(6);
     }

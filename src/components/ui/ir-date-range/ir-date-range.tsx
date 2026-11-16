@@ -1,9 +1,11 @@
 import { ClickOutside } from '@/decorators/ClickOutside';
-import locales from '@/stores/locales.store';
 import { calculateDaysBetweenDates } from '@/utils/booking';
 import { Component, Element, Event, EventEmitter, Method, Prop, State, Watch, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
+import { formatDate } from '@/utils/date';
+import { formatCount } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
 export type DateRangeChangeEvent = { checkIn: Moment; checkOut: Moment };
 
 /**
@@ -214,8 +216,8 @@ export class IrDateRange {
   }
 
   private get formattedLabel(): string {
-    const from = moment(this.fromDate).format('MMM DD, YYYY');
-    const to = moment(this.toDate).format('MMM DD, YYYY');
+    const from = formatDate(this.fromDate, 'MMM DD, YYYY');
+    const to = formatDate(this.toDate, 'MMM DD, YYYY');
     return `${from} → ${to}`;
   }
 
@@ -233,7 +235,7 @@ export class IrDateRange {
             aria-expanded={this.isActive ? 'true' : 'false'}
             aria-controls={this.popupId}
             aria-disabled={this.disabled ? 'true' : 'false'}
-            aria-label="Select date range"
+            aria-label={t('Lcz_SelectDateRange', { fallback: 'Select date range' })}
             onClick={!this.disabled ? this.togglePicker.bind(this) : undefined}
             onKeyDown={!this.disabled ? this.handleKeyDown.bind(this) : undefined}
           >
@@ -250,14 +252,21 @@ export class IrDateRange {
               <wa-icon part="calendar-icon" slot="start" variant="regular" name="calendar"></wa-icon>
               {showNights && this.totalNights > 0 && (
                 <span part="nights-badge" slot="end" class="igl-date-range__nights">
-                  {this.totalNights} {this.totalNights > 1 ? locales.entries.Lcz_Nights : locales.entries.Lcz_Night}
+                  {formatCount(this.totalNights)} {this.totalNights > 1 ? t('Lcz_Nights', { fallback: 'nights' }) : t('Lcz_Night', { fallback: 'night' })}
                 </span>
               )}
             </ir-input>
           </div>
         </div>
 
-        <div part="body" id={this.popupId} class="igl-date-range__calendar" role="dialog" aria-modal="false" aria-label="Date range selection dialog">
+        <div
+          part="body"
+          id={this.popupId}
+          class="igl-date-range__calendar"
+          role="dialog"
+          aria-modal="false"
+          aria-label={t('Lcz_DateRangeSelectionDialog', { fallback: 'Date range selection dialog' })}
+        >
           <ir-custom-date-range
             part="calendar"
             exportparts="base: calendar-base, calendar, calendar-header, month-navigation, nav-prev, nav-next, month-label, weekday-row, weekday, days-grid, week-row, day-cell, day-button"

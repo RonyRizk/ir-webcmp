@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import { v4 } from 'uuid';
 import { ExtraServiceDefinition, ExtraServiceSection } from '@/services/extra-services/types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-extra-service-editor-drawer',
@@ -34,7 +35,14 @@ export class IrExtraServiceEditorDrawer {
         <ir-drawer
           class="extra-service__drawer"
           style={{ '--ir-drawer-width': '32rem' }}
-          label={isNewAddon ? 'New Add-On' : `Edit ${this.service?.name ?? 'Extra Service'}`}
+          label={
+            isNewAddon
+              ? t('Lcz_NewAddOn', { fallback: 'New Add-On' })
+              : t('Lcz_EditFieldAriaLabel', {
+                  fallback: `Edit ${this.service?.name ?? 'Extra Service'}`,
+                  params: [this.service?.name ?? t('Lcz_ExtraServiceFallback', { fallback: 'Extra Service' })],
+                })
+          }
           open={this.open}
           data-testid="extra-service-editor-drawer-container"
           onDrawerHide={e => this.handleDrawerClose(e)}
@@ -58,10 +66,10 @@ export class IrExtraServiceEditorDrawer {
           )}
           <div slot="footer" class="ir__drawer-footer" data-testid="extra-service-editor-drawer-footer">
             <ir-custom-button size="m" data-drawer="close" appearance="filled" variant="neutral" data-testid="extra-service-editor-cancel-button">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button loading={this.loading} type="submit" form={this.baseId} size="m" appearance="accent" variant="brand" data-testid="extra-service-editor-save-button">
-              Save
+              {t('Lcz_Save', { fallback: 'Save' })}
             </ir-custom-button>
           </div>
         </ir-drawer>

@@ -49,6 +49,26 @@ export function sortByDisplayOrder(entries: TranslationEntry[]): TranslationEntr
   return [...entries].sort((a, b) => (a.meta?.displayOrder ?? 0) - (b.meta?.displayOrder ?? 0));
 }
 
+/** What "Copy row" keeps: the key plus every translation, but none of the row's Setup bookkeeping. */
+export type CopiedEntry = Pick<TranslationEntry, 'key' | 'values'>;
+
+/**
+ * The last row copied from the entries table. Held in memory rather than on the
+ * system clipboard — that only gets the key, so it can be pasted straight into
+ * the Key field — and read back by the entry form, which fills the translations
+ * in when a new entry is given the same key. That is how a row travels from one
+ * setup table to another.
+ */
+let copiedEntry: CopiedEntry | null = null;
+
+export function setCopiedEntry(entry: TranslationEntry): void {
+  copiedEntry = { key: entry.key, values: { ...entry.values } };
+}
+
+export function getCopiedEntry(): CopiedEntry | null {
+  return copiedEntry;
+}
+
 /** The language codes whose value differs between two versions of a row, with the new values. */
 export function diffValues(before: Record<string, string> | undefined, after: Record<string, string>): Record<string, string> {
   const changed: Record<string, string> = {};

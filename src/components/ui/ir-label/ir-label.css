@@ -11,7 +11,7 @@
   display: none !important;
 }
 .icon {
-  margin-left: 3px;
+  margin-inline-start: 3px;
   padding: 0;
   margin-top: 0;
   display: flex;
@@ -70,4 +70,9 @@ svg {
   display: inline; /* Keeps the message inline */
   white-space: normal; /* Allows wrapping of the message text */
   word-break: break-word; /* Breaks long words/URLs to prevent overflow */
+}
+
+/* Opt-in for consumers whose label key is sentence case but should read Title Case. */
+:host(.label--capitalize) .label_title {
+  text-transform: capitalize;
 }

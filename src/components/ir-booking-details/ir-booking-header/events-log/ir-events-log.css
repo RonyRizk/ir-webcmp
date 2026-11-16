@@ -24,7 +24,7 @@
   margin: 0;
   padding: 0;
   font-size: 14px;
-  margin-left: 5px;
+  margin-inline-start: 5px;
   width: fit-content;
 }
 .list-item.green {
@@ -39,4 +39,13 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-ps-1 {
+  padding-inline-start: 0.25rem;
+}
+.ir-ps-3 {
+  padding-inline-start: 1rem;
 }

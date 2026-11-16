@@ -1,7 +1,5 @@
 # ir-revenue-summary
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -11,7 +9,7 @@
 | ----------------------------- | --------- | ----------- | ----------------------------------------------------------------------------------------- | ----------- |
 | `filters`                     | --        |             | `{ from_date?: string; to_date?: string; date?: string; users: string; source: string; }` | `undefined` |
 | `groupedPayments`             | --        |             | `Map<string, FolioPayment[]>`                                                             | `new Map()` |
-| `paymentEntries`              | --        |             | `{ types: IEntries[]; groups: IEntries[]; methods: IEntries[]; }`                         | `undefined` |
+| `paymentEntries`              | --        |             | `{ types: SetupEntries[]; groups: SetupEntries[]; methods: SetupEntries[]; }`             | `undefined` |
 | `previousDateGroupedPayments` | --        |             | `Map<string, FolioPayment[]>`                                                             | `new Map()` |
 
 

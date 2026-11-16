@@ -1,14 +1,17 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { User } from '@/models/Users';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, getEntryValue } from '@/services/setup';
 import { RoomService } from '@/services/room.service';
 import { UserService } from '@/services/user.service';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { AllowedUser } from './types';
 import { realtimeService, type RealtimeReason } from '@/services/realtime/realtime.service';
-import locales from '@/stores/locales.store';
-import { getEntryValue } from '@/utils/utils';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-user-management',
   styleUrl: 'ir-user-management.css',
@@ -33,24 +36,32 @@ export class IrUserManagement {
   @State() property_id: number;
   @State() allowedUsersTypes: AllowedUser[] = [];
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private roomService = new RoomService();
   private userService = new UserService();
   private bookingService = new BookingService();
+  private setupService = new SetupService();
 
   private userTypes: Map<number | string, string> = new Map();
   private unsubscribeRealtime: (() => void) | null = null;
 
   private superAdminId = '5';
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.userManagement, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
   }
 
   @Watch('ticket')
@@ -58,7 +69,7 @@ export class IrUserManagement {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -72,9 +83,12 @@ export class IrUserManagement {
   private async initializeApp() {
     try {
       if (this.baseUrl) {
-        this.token.setBaseUrl(this.baseUrl);
+        this.ApiClient.setBaseUrl(this.baseUrl);
       }
       this.isLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.userManagement });
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
@@ -85,7 +99,7 @@ export class IrUserManagement {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
           include_units_hk_status: true,
         });
@@ -93,12 +107,12 @@ export class IrUserManagement {
         propertyId = propertyData.My_Result.id;
       }
       this.property_id = propertyId;
-      const requests = [this.fetchUserTypes(), this.fetchUsers(), this.roomService.fetchLanguage(this.language, ['_USER_MGT'])];
+      const requests = [this.fetchUserTypes(), this.fetchUsers(), localeReady];
       if (this.propertyid) {
         requests.push(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
             include_units_hk_status: true,
           }),
@@ -106,6 +120,8 @@ export class IrUserManagement {
       }
 
       await Promise.all(requests);
+      // initializeApp re-runs on a language switch — don't stack subscriptions.
+      this.unsubscribeRealtime?.();
       this.unsubscribeRealtime = realtimeService.subscribe(this.property_id, async msg => {
         await this.handleSocketMessage(msg.reason, msg.payload);
       });
@@ -169,19 +185,30 @@ export class IrUserManagement {
     });
   }
   private async fetchUserTypes() {
-    const res = await Promise.all([this.bookingService.getSetupEntriesByTableName('_USER_TYPE'), this.bookingService.getLov()]);
+    const res = await Promise.all([this.setupService.getSetupEntriesByTableName('_USER_TYPE'), this.bookingService.getLov()]);
     const allowedUsers = res[1]?.My_Result?.allowed_user_types;
+    // Fresh collections on every run: this re-runs on a language switch, and the children only re-render on a new reference.
+    const allowedUsersTypes: AllowedUser[] = [];
+    const userTypes = new Map<number | string, string>();
     for (const e of res[0]) {
-      const value = getEntryValue({ entry: e, language: this.language });
+      const value = getEntryValue({ entry: e, language: LocaleController.language });
       if (allowedUsers.find(f => f.code === e.CODE_NAME)) {
-        this.allowedUsersTypes.push({ code: e.CODE_NAME, value });
+        allowedUsersTypes.push({ code: e.CODE_NAME, value });
       }
-      this.userTypes.set(e.CODE_NAME.toString(), value);
+      userTypes.set(e.CODE_NAME.toString(), value);
     }
+    this.allowedUsersTypes = allowedUsersTypes;
+    this.userTypes = userTypes;
   }
   disconnectedCallback() {
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
   render() {
     if (this.isLoading) {
@@ -199,9 +226,9 @@ export class IrUserManagement {
         <ir-interceptor suppressToastEndpoints={['/Change_User_Pwd', '/Handle_Exposed_User']}></ir-interceptor>
         <section class="p-2 d-flex flex-column" style={{ gap: '1rem' }}>
           {/* <div class="d-flex  pb-2 align-items-center justify-content-between">
-            <h3 class="mb-1 mb-md-0">{locales.entries.Lcz_ExtranetUsers}</h3>
+            <h3 class="mb-1 mb-md-0">{t('Lcz_ExtranetUsers', { fallback: 'Extranet Users' })}</h3>
           </div> */}
-          <h3 class="page-title">{locales.entries.Lcz_ExtranetUsers}</h3>
+          <h3 class="page-title">{t('Lcz_ExtranetUsers', { fallback: 'Extranet Users' })}</h3>
           <div class="" style={{ gap: '1rem' }}>
             <ir-user-management-table
               property_id={this.property_id}

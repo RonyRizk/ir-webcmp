@@ -3,6 +3,7 @@ import { Booking } from '@/models/booking.dto';
 import booking_listing from '@/stores/booking_listing.store';
 import { getPrivateNote } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-listing-mobile-card',
@@ -67,7 +68,7 @@ export class IrBookingListingMobileCard {
             display="inline"
             showContactIcons={this.booking.agent === null}
             class="mobile-card__text-center"
-            label="Booked by"
+            label={t('Lcz_BookedBy', { fallback: 'Booked by' })}
             clickableGuest
             showRepeatGuestBadge={this.booking.guest.nbr_confirmed_bookings > 1 && !this.booking.agent}
             guest={this.booking.guest}
@@ -86,20 +87,26 @@ export class IrBookingListingMobileCard {
             {this.booking.extra_services && this.extraServicesLabel && <p class="mobile-card__extra-services">{this.extraServicesLabel}</p>}
           </div>
 
-          <ir-booked-on-cell display="inline" label="Booked on" bookedOn={this.booking.booked_on}></ir-booked-on-cell>
+          <ir-booked-on-cell display="inline" label={t('Lcz_BookedOn', { fallback: 'Booked on' })} bookedOn={this.booking.booked_on}></ir-booked-on-cell>
 
           <div class="mobile-card__dates">
-            <ir-dates-cell display="inline" checkInLabel="Check-in" checkoutLabel="Check-out" checkIn={this.booking.from_date} checkOut={this.booking.to_date}></ir-dates-cell>
+            <ir-dates-cell
+              display="inline"
+              checkInLabel={t('Lcz_CheckInLabel', { fallback: 'Check-in' })}
+              checkoutLabel={t('Lcz_CheckOutLabel', { fallback: 'Check-out' })}
+              checkIn={this.booking.from_date}
+              checkOut={this.booking.to_date}
+            ></ir-dates-cell>
           </div>
 
           {booking_listing.userSelection?.filter_type === '2' && (
-            <ir-arrival-time-cell display="inline" arrival={this.booking.arrival} arrivalTimeLabel={'Arrival time'}></ir-arrival-time-cell>
+            <ir-arrival-time-cell display="inline" arrival={this.booking.arrival} arrivalTimeLabel={t('Lcz_ArrivalTime', { fallback: 'Arrival time' })}></ir-arrival-time-cell>
           )}
 
           <ir-balance-cell
             guestFinancial={this.booking.guest_financial}
             display="inline"
-            label="Amount"
+            label={t('Lcz_Amount', { fallback: 'Amount' })}
             bookingNumber={this.booking.booking_nbr}
             isDirect={this.booking.is_direct}
             statusCode={this.booking.status.code}
@@ -109,10 +116,10 @@ export class IrBookingListingMobileCard {
         </div>
         <div slot="footer" class="mobile-card__actions">
           <ir-custom-button class="mobile-card__action-button" onClickHandler={() => this.emitAction('edit')} appearance="outlined">
-            Edit
+            {t('Lcz_Edit', { fallback: 'Edit' })}
           </ir-custom-button>
           <ir-custom-button class="mobile-card__action-button" onClickHandler={() => this.emitAction('delete')} variant="danger">
-            Delete
+            {t('Lcz_Delete', { fallback: 'Delete' })}
           </ir-custom-button>
         </div>
       </wa-card>

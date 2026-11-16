@@ -11,7 +11,12 @@
   display: none;
 }
 .dropdown-toggle .caret-icon {
-  transition: transform 0.15s ease-in-out, color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+  transition:
+    transform 0.15s ease-in-out,
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out,
     -webkit-box-shadow 0.15s ease-in-out;
 }
 .btn:hover .caret-icon path {
@@ -96,4 +101,13 @@
   :host {
     --sidebar-width: 820px;
   }
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-me-1 {
+  margin-inline-end: 0.25rem;
+}
+.ir-text-start {
+  text-align: start;
 }

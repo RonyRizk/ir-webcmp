@@ -1,0 +1,164 @@
+/*
+ * RTL corrections for the vendored quill.snow.css, which is LTR-only. That file is left
+ * byte-identical (quill-shadow.ts already patches Quill for shadow DOM and the pair is
+ * fragile), so this sheet is listed *after* it in styleUrls and overrides what it gets wrong.
+ *
+ * Deliberately not touched: `.ql-align-right`, `.ql-direction-rtl` and the `.ql-video`
+ * alignment helpers. Those record an explicit choice the author made about a block, not
+ * the direction of the surrounding UI.
+ */
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+:dir(rtl) .ql-snow.ql-toolbar button,
+:dir(rtl) .ql-snow .ql-toolbar button,
+:dir(rtl) .ql-snow.ql-toolbar button svg,
+:dir(rtl) .ql-snow .ql-toolbar button svg,
+:dir(rtl) .ql-snow .ql-picker,
+:dir(rtl) .ql-snow .ql-color-picker .ql-picker-item {
+  float: right;
+}
+
+:dir(rtl) .ql-toolbar.ql-snow .ql-formats {
+  margin-right: 0;
+  margin-left: 15px;
+}
+
+:dir(rtl) .ql-snow .ql-picker-label {
+  padding-left: 2px;
+  padding-right: 8px;
+}
+
+:dir(rtl) .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {
+  right: auto;
+  left: 0;
+}
+
+:dir(rtl) .ql-snow .ql-color-picker .ql-picker-label svg,
+:dir(rtl) .ql-snow .ql-icon-picker .ql-picker-label svg {
+  right: auto;
+  left: 4px;
+}
+
+/* ── Editor body ─────────────────────────────────────────────────────────── */
+:dir(rtl) .ql-editor {
+  text-align: right;
+}
+
+:dir(rtl) .ql-editor ol,
+:dir(rtl) .ql-editor li {
+  padding-left: 0;
+  padding-right: 1.5em;
+}
+
+:dir(rtl) .ql-editor li > .ql-ui:before {
+  margin-left: 0.3em;
+  margin-right: -1.5em;
+  text-align: left;
+}
+
+:dir(rtl) .ql-snow .ql-editor blockquote {
+  border-left: none;
+  border-right: 4px solid #ccc;
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+:dir(rtl) .ql-code-block-container .ql-ui {
+  right: auto;
+  left: 5px;
+}
+
+/* Indent levels: Quill's own rules key off a per-block `.ql-direction-rtl` class that the
+   surrounding document direction never sets, so an RTL editor indents from the wrong edge. */
+:dir(rtl) .ql-editor .ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 3em;
+}
+:dir(rtl) .ql-editor li.ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 4.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 6em;
+}
+:dir(rtl) .ql-editor li.ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 7.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 9em;
+}
+:dir(rtl) .ql-editor li.ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 10.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 12em;
+}
+:dir(rtl) .ql-editor li.ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 13.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-5:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 15em;
+}
+:dir(rtl) .ql-editor li.ql-indent-5:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 16.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-6:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 18em;
+}
+:dir(rtl) .ql-editor li.ql-indent-6:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 19.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-7:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 21em;
+}
+:dir(rtl) .ql-editor li.ql-indent-7:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 22.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-8:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 24em;
+}
+:dir(rtl) .ql-editor li.ql-indent-8:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 25.5em;
+}
+:dir(rtl) .ql-editor .ql-indent-9:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 27em;
+}
+:dir(rtl) .ql-editor li.ql-indent-9:not(.ql-direction-rtl) {
+  padding-left: 0;
+  padding-right: 28.5em;
+}
+
+/* ── Link tooltip ────────────────────────────────────────────────────────── */
+:dir(rtl) .ql-snow .ql-tooltip::before {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+:dir(rtl) .ql-snow .ql-tooltip a.ql-action::after {
+  border-right: none;
+  border-left: 1px solid #ccc;
+  margin-left: 0;
+  margin-right: 16px;
+  padding-right: 0;
+  padding-left: 8px;
+}
+
+:dir(rtl) .ql-snow .ql-tooltip a.ql-remove::before {
+  margin-left: 0;
+  margin-right: 8px;
+}

@@ -1,8 +1,9 @@
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { DailyReportFilter, ReportDate } from '../types';
 import moment from 'moment';
-import locales from '@/stores/locales.store';
+import { formatDate } from '@/utils/date';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-monthly-bookings-report-filter',
   styleUrl: 'ir-monthly-bookings-report-filter.css',
@@ -51,7 +52,7 @@ export class IrMonthlyBookingsReportFilter {
 
     while (cursor.isSameOrBefore(firstOfThisMonth, 'month')) {
       dates.push({
-        description: cursor.format('MMMM YYYY'),
+        description: formatDate(cursor, 'MMMM YYYY'),
         firstOfMonth: cursor.format(format),
         lastOfMonth: cursor.clone().endOf('month').format(format),
       });
@@ -61,7 +62,7 @@ export class IrMonthlyBookingsReportFilter {
     const futureCursor = firstOfThisMonth.clone().add(1, 'month');
     for (let i = 0; i < 6; i++) {
       dates.push({
-        description: futureCursor.format('MMMM YYYY'),
+        description: formatDate(futureCursor, 'MMMM YYYY'),
         firstOfMonth: futureCursor.format(format),
         lastOfMonth: futureCursor.clone().endOf('month').format(format),
       });
@@ -75,7 +76,7 @@ export class IrMonthlyBookingsReportFilter {
     return (
       <ir-filter-card>
         <wa-select
-          label="For"
+          label={t('Lcz_For', { fallback: 'For' })}
           size="s"
           value={this.filters?.date?.description}
           defaultValue={this.filters?.date?.description}
@@ -97,15 +98,15 @@ export class IrMonthlyBookingsReportFilter {
             this.updateFilter({ include_previous_year: (e.target as HTMLInputElement).checked });
           }}
         >
-          Compare with previous year
+          {t('Lcz_CompareWithPreviousYear', { fallback: 'Compare with previous year' })}
         </wa-checkbox>
 
         <div slot="footer">
           <ir-custom-button variant="neutral" appearance="outlined" onClickHandler={e => this.resetFilters(e)}>
-            {locales.entries?.Lcz_Reset ?? 'Reset'}
+            {t('Lcz_Reset', { fallback: 'Reset' })}
           </ir-custom-button>
           <ir-custom-button variant="brand" loading={this.isLoading} onClickHandler={e => this.applyFiltersEvt(e)}>
-            {locales.entries?.Lcz_Apply ?? 'Apply'}
+            {t('Lcz_Apply', { fallback: 'Apply' })}
           </ir-custom-button>
         </div>
       </ir-filter-card>

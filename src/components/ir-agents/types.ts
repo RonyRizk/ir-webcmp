@@ -1,6 +1,6 @@
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 
-export type AgentSetupEntries = { agent_rate_type: IEntries[]; agent_type: IEntries[]; ta_payment_method: IEntries[]; cl_post_timing: IEntries[] };
+export type AgentSetupEntries = { agent_rate_type: SetupEntries[]; agent_type: SetupEntries[]; ta_payment_method: SetupEntries[]; cl_post_timing: SetupEntries[] };
 
 export const AgentsTypes = {
   TRAVEL_AGENT: '001',

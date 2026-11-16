@@ -1,0 +1,200 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s);
+  text-align: start;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-m);
+}
+
+/* Header: date range + rateplan context, split-date picker, search */
+.split-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-xs);
+  border-block-end: 1px solid var(--wa-color-surface-border);
+  padding: var(--spacing);
+}
+
+.split-header__summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--wa-space-2xs) var(--wa-space-xs);
+}
+
+.split-header__room {
+  font-weight: 600;
+  font-size: var(--wa-font-size-m);
+  color: var(--wa-color-text-normal);
+}
+
+.split-header__rateplan {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-2xs);
+  color: var(--wa-color-text-quiet, #4b5563);
+  font-size: var(--wa-font-size-s);
+}
+
+/* Date trigger (shadcn-style: an outline button styled like an input field,
+   opens the calendar popover) sits beside a normal, clearly separate primary
+   button — not merged into one control, since the two are distinct actions
+   ("pick a date" vs. "check availability") and only the button fetches. */
+.split-search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-xs);
+}
+.split-search__date {
+  cursor: pointer !important;
+  width: 200px;
+  min-width: 0;
+}
+
+.split-date-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-2xs);
+  width: 100%;
+  height: 2.5rem;
+  padding-inline: var(--wa-space-s);
+  border: 1px solid var(--wa-color-surface-border);
+  border-radius: var(--wa-border-radius-m, 0.375rem);
+  background: var(--wa-color-surface-default);
+  color: var(--wa-color-text-normal);
+  font: inherit;
+  font-size: var(--wa-font-size-s);
+  font-weight: 400;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 160ms ease-out;
+}
+.split-date-trigger:hover {
+  border-color: var(--wa-color-neutral-border-loud, var(--wa-color-surface-border));
+}
+.split-date-trigger:focus-visible {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+}
+.split-date-trigger wa-icon {
+  flex: 0 0 auto;
+  color: var(--wa-color-text-quiet);
+}
+.split-date-trigger span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.split-date-trigger--empty span {
+  color: var(--wa-color-text-quiet);
+}
+
+/* Primary action beside the date picker — hug its label, don't stretch. */
+.split-search__submit {
+  flex: 0 0 auto;
+}
+
+/* Centered empty / pre-search state and its retry action */
+.split-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wa-space-m);
+  width: 100%;
+  padding-block: var(--wa-space-2xl) var(--wa-space-xl);
+}
+
+.split-empty ir-empty-state {
+  width: 100%;
+}
+
+/* ir-custom-button's inner control is width:100% of its host; keep the host
+   shrink-wrapped so the button hugs its label instead of spanning the drawer. */
+.split-empty__action {
+  width: fit-content;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-2xs);
+  margin: 0;
+  color: var(--wa-color-danger-fill-loud, #c0392b);
+  font-size: var(--wa-font-size-s);
+}
+
+.split-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wa-space-xs);
+  padding-block: var(--wa-space-l);
+  color: var(--wa-color-text-quiet, #4b5563);
+  font-size: var(--wa-font-size-s);
+}
+
+/* Room type / unit selection list */
+@keyframes split-results-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.room-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-2xs);
+  padding-inline: var(--spacing);
+  padding-bottom: 2rem;
+  animation: split-results-in 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-type-list {
+    animation: none;
+  }
+}
+
+.room-type-row {
+  margin-block: var(--wa-space-xs) var(--wa-space-3xs);
+}
+.room-type-row:first-child {
+  margin-block-start: 0;
+}
+
+.room-type-name {
+  font-weight: 600;
+  font-size: var(--wa-font-size-s);
+  color: var(--wa-color-text-normal);
+  text-align: start;
+}
+
+.physical-room {
+  display: flex;
+  align-items: center;
+  padding: var(--wa-space-2xs) var(--wa-space-xs);
+  padding-inline-start: var(--wa-space-m);
+  border-radius: var(--wa-border-radius-m, 0.375rem);
+  transition: background-color 160ms ease-out;
+}
+.physical-room::part(label) {
+  display: flex;
+  align-items: center;
+}
+
+.physical-room wa-select {
+  margin-inline-start: var(--wa-space-m);
+  min-width: 220px;
+}

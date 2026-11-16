@@ -4,6 +4,7 @@ import calendar_data from '@/stores/calendar-data';
 import { formatAmount } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import moment from 'moment';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-balance-cell',
@@ -68,7 +69,7 @@ export class IrBalanceCell {
                   variant="danger"
                   appearance="outlined"
                 >
-                  <span>{this.financial.cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} </span>
+                  <span>{this.financial.cancelation_penality_as_if_today < 0 ? t('Lcz_Refund', { fallback: 'Refund' }) : t('Lcz_Charge', { fallback: 'Charge' })} </span>
                   <span class="amount">{formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}</span>
                 </ir-custom-button>
               )
@@ -113,7 +114,9 @@ export class IrBalanceCell {
                               variant="danger"
                               appearance="outlined"
                             >
-                              <span>{this.financial.cancelation_penality_as_if_today < 0 ? 'Refund' : 'Charge'} </span>
+                              <span>
+                                {this.financial.cancelation_penality_as_if_today < 0 ? t('Lcz_Refund', { fallback: 'Refund' }) : t('Lcz_Charge', { fallback: 'Charge' })}{' '}
+                              </span>
                               <span class="amount">{formatAmount(this.currencySymbol, Math.abs(this.financial.cancelation_penality_as_if_today))}</span>
                             </ir-custom-button>
                           )

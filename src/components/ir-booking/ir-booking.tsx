@@ -1,4 +1,4 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { checkUserAuthState, manageAnchorSession } from '@/utils/utils';
 import { Component, Host, Prop, State, h } from '@stencil/core';
 
@@ -12,21 +12,21 @@ export class IrBooking {
   @Prop() p: string;
   @Prop() bookingNumber: string;
   @State() isAuthenticated: boolean = false;
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   componentWillLoad() {
     const isAuthenticated = checkUserAuthState();
     if (isAuthenticated) {
       this.isAuthenticated = true;
-      this.token.setToken(isAuthenticated.token);
+      this.ApiClient.setApiClient(isAuthenticated.ApiClient);
     }
   }
 
   private handleAuthFinish(e: CustomEvent) {
-    const token = e.detail.token;
-    this.token.setToken(token);
+    const ApiClient = e.detail.ApiClient;
+    this.ApiClient.setApiClient(ApiClient);
     this.isAuthenticated = true;
-    manageAnchorSession({ login: { method: 'direct', isLoggedIn: true, token } });
+    manageAnchorSession({ login: { method: 'direct', isLoggedIn: true, ApiClient } });
   }
   render() {
     if (!this.isAuthenticated)
@@ -45,7 +45,7 @@ export class IrBooking {
           hasRoomEdit
           hasRoomDelete
           language="en"
-          ticket={this.token.getToken()}
+          ticket={this.ApiClient.getToken()}
           bookingNumber={this.bookingNumber}
         ></ir-booking-details>
       </Host>

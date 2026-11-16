@@ -2,6 +2,8 @@ import { Component, Prop, h, State } from '@stencil/core';
 import { MappedCountries, SalesRecord } from '../types';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
+import { formatCount, formatPercent } from '@/utils/number';
 
 @Component({
   tag: 'ir-sales-table',
@@ -24,7 +26,7 @@ export class IrSalesTable {
       return (
         <wa-card class="sales-table__card">
           <div class="sales-table__empty-wrapper">
-            <ir-empty-state message="No sales data found."></ir-empty-state>
+            <ir-empty-state message={t('Lcz_NoSalesDataFound', { fallback: 'No sales data found.' })}></ir-empty-state>
           </div>
         </wa-card>
       );
@@ -36,17 +38,19 @@ export class IrSalesTable {
           <table class="table data-table" data-testid="hk_tasks_table">
             <thead class="table-header">
               <tr>
-                <th class="cell--left">Country</th>
-                <th class="cell--center">Room nights</th>
-                <th class="cell--center">No of guests</th>
-                <th class="cell--right">Revenue</th>
+                <th class="cell--left">{t('Lcz_Country', { fallback: 'Country' })}</th>
+                <th class="cell--center">{t('Lcz_RoomNights', { fallback: 'Room nights' })}</th>
+                <th class="cell--center">{t('Lcz_NumberOfGuests', { fallback: 'Number of Guests' })}</th>
+                <th class="cell--right">{t('Lcz_Revenue', { fallback: 'Revenue' })}</th>
                 <th style={{ width: '35%' }}></th>
               </tr>
             </thead>
             <tbody>
               {visibleRecords.map(record => {
-                const mainPercentage = `${parseFloat(record.percentage.toString()).toFixed(2)}%`;
-                const secondaryPercentage = record.last_year ? `${parseFloat(record.last_year.percentage.toString()).toFixed(2)}%` : null;
+                const mainPercentage = formatPercent(parseFloat(record.percentage.toString()), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const secondaryPercentage = record.last_year
+                  ? formatPercent(parseFloat(record.last_year.percentage.toString()), { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : null;
                 const mappedCountry = this.mappedCountries.get(record.country_id);
 
                 return (
@@ -59,14 +63,14 @@ export class IrSalesTable {
                     </td>
                     <td class="cell--center">
                       <div class="cell-stack">
-                        <p class={record.last_year?.nights ? 'value--primary' : ''}>{record.nights}</p>
-                        {record.last_year?.nights && <p class="value--previous">{record.last_year.nights}</p>}
+                        <p class={record.last_year?.nights ? 'value--primary' : ''}>{formatCount(record.nights)}</p>
+                        {record.last_year?.nights && <p class="value--previous">{formatCount(record.last_year.nights)}</p>}
                       </div>
                     </td>
                     <td class="cell--center">
                       <div class="cell-stack">
-                        <p class={record.last_year?.number_of_guests ? 'value--primary' : ''}>{record.number_of_guests}</p>
-                        {record.last_year?.number_of_guests && <p class="value--previous">{record.last_year.number_of_guests}</p>}
+                        <p class={record.last_year?.number_of_guests ? 'value--primary' : ''}>{formatCount(record.number_of_guests)}</p>
+                        {record.last_year?.number_of_guests && <p class="value--previous">{formatCount(record.last_year.number_of_guests)}</p>}
                       </div>
                     </td>
                     <td class="cell--right">
@@ -100,11 +104,11 @@ export class IrSalesTable {
                   <div class="legend-row">
                     <div class="legend-item">
                       <div class="legend-dot legend-dot--current"></div>
-                      <p>Selected period</p>
+                      <p>{t('Lcz_SelectedPeriod', { fallback: 'Selected period' })}</p>
                     </div>
                     <div class="legend-item">
                       <div class="legend-dot legend-dot--previous"></div>
-                      <p>Previous year</p>
+                      <p>{t('Lcz_PreviousYear', { fallback: 'Previous year' })}</p>
                     </div>
                   </div>
                 </td>
@@ -114,7 +118,7 @@ export class IrSalesTable {
           {this.visibleCount < this.records.length && (
             <div class="sales-table__load-more">
               <ir-custom-button variant="neutral" appearance="outlined" size="s" onClickHandler={this.handleLoadMore}>
-                Load More
+                {t('Lcz_LoadMore', { fallback: 'Load more' })}
               </ir-custom-button>
             </div>
           )}

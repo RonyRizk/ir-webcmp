@@ -1,5 +1,8 @@
 import { Component, Prop, State, Event, EventEmitter, h, Watch, Host } from '@stencil/core';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 import moment, { Moment } from 'moment';
+import { formatNumber } from '@/utils/number';
 
 /** The current from/to selection, as Moments (null = unset side). */
 export interface DateRange {
@@ -60,13 +63,22 @@ const EXPORT_PARTS = {
 })
 export class IrDateRangeFilter {
   /** Configurable quick-date preset buttons shown alongside each calendar. */
-  @Prop() quickDates: QuickDatePreset[] = [
-    { label: 'Today', getDate: () => moment() },
-    { label: '30 Days Ago', getDate: () => moment().subtract(30, 'days') },
-    { label: '60 Days Ago', getDate: () => moment().subtract(60, 'days') },
-    { label: '90 Days Ago', getDate: () => moment().subtract(90, 'days') },
-    { label: '1 Year Ago', getDate: () => moment().subtract(1, 'year') },
-  ];
+  @Prop() quickDates?: QuickDatePreset[];
+
+  /** Default presets when the host doesn't pass its own; labels localise through `t()`. */
+  private defaultQuickDates(): QuickDatePreset[] {
+    const daysAgo = (n: number): QuickDatePreset => ({
+      label: t('Lcz_DaysAgo', { fallback: `${n} Days Ago`, params: [formatNumber(n)] }),
+      getDate: () => moment().subtract(n, 'days'),
+    });
+    return [
+      { label: t('Lcz_Today', { fallback: 'Today' }), getDate: () => moment() },
+      daysAgo(30),
+      daysAgo(60),
+      daysAgo(90),
+      { label: t('Lcz_YearAgo', { fallback: '1 Year Ago', params: [1] }), getDate: () => moment().subtract(1, 'year') },
+    ];
+  }
 
   /** Controlled start date in YYYY-MM-DD format. */
   @Prop() fromDate?: string;
@@ -223,9 +235,13 @@ export class IrDateRangeFilter {
     const from = this.dates.from?.format('YYYY-MM-DD') ?? null;
     const to = this.dates.to?.format('YYYY-MM-DD') ?? null;
     this.datesChanged.emit({ from, to });
-    const fromText = this.dates.from?.format('MMMM D, YYYY') ?? 'not set';
-    const toText = this.dates.to?.format('MMMM D, YYYY') ?? 'not set';
-    this.liveMessage = `Date range updated. From ${fromText} to ${toText}.`;
+    const notSet = t('Lcz_NotSet', { fallback: 'not set' });
+    const fromText = this.dates.from ? formatDate(this.dates.from, { style: 'long' }) : notSet;
+    const toText = this.dates.to ? formatDate(this.dates.to, { style: 'long' }) : notSet;
+    this.liveMessage = t('Lcz_DateRangeUpdatedAnnouncement', {
+      fallback: `Date range updated. From ${fromText} to ${toText}.`,
+      params: [fromText, toText],
+    });
   }
 
   /**
@@ -241,8 +257,11 @@ export class IrDateRangeFilter {
   render() {
     const fromLabel = this.dates.from?.format('YYYY-MM-DD') ?? null;
     const toLabel = this.dates.to?.format('YYYY-MM-DD') ?? null;
+    const fromDisplay = this.dates.from ? formatDate(this.dates.from, { style: 'medium' }) : null;
+    const toDisplay = this.dates.to ? formatDate(this.dates.to, { style: 'medium' }) : null;
     // const fromMaxDate = this.getFromMaxDate(toLabel);
     const toMinDate = this.getToMinDate(fromLabel);
+    const quickDates = this.quickDates ?? this.defaultQuickDates();
 
     return (
       <Host>
@@ -257,7 +276,7 @@ export class IrDateRangeFilter {
           {/* Fallback group name when no visible label is provided */}
           {!this.label && (
             <span id={`${this.groupId}-label`} class="sr-only">
-              Date range selector
+              {t('Lcz_DateRangeSelector', { fallback: 'Date range selector' })}
             </span>
           )}
 
@@ -270,13 +289,21 @@ export class IrDateRangeFilter {
               class={`drf-text-btn${!fromLabel ? ' drf-text-btn--placeholder' : ''}`}
               onClick={() => !this.readonly && this.fromDateSelectRef?.show()}
               aria-haspopup={this.readonly ? undefined : 'dialog'}
-              aria-label={fromLabel ? `Start date: ${fromLabel}` : 'Select start date'}
+              aria-label={
+                fromLabel ? t('Lcz_StartDatePrefix', { fallback: `Start date: ${fromLabel}`, params: [fromLabel] }) : t('Lcz_SelectStartDate', { fallback: 'Select start date' })
+              }
             >
-              {fromLabel ?? 'From'}
+              {fromDisplay ?? t('Lcz_From', { fallback: 'From' })}
             </button>
 
             {fromLabel && this.withClear && !this.readonly && (
-              <button type="button" part="clear-btn" class="drf-clear-btn" onClick={() => this.clearDate('from')} aria-label="Clear start date">
+              <button
+                type="button"
+                part="clear-btn"
+                class="drf-clear-btn"
+                onClick={() => this.clearDate('from')}
+                aria-label={t('Lcz_ClearStartDate', { fallback: 'Clear start date' })}
+              >
                 <wa-icon name="xmark" />
               </button>
             )}
@@ -285,7 +312,7 @@ export class IrDateRangeFilter {
               ref={el => (this.fromDateSelectRef = el)}
               exportparts={EXPORT_PARTS.from}
               date={this.dates.from?.format('YYYY-MM-DD') || null}
-              placeholder="From"
+              placeholder={t('Lcz_From', { fallback: 'From' })}
               minDate={this.minDate}
               maxDate={this.maxDate}
               emitEmptyDate
@@ -293,18 +320,18 @@ export class IrDateRangeFilter {
               class="drf-date-select"
               onDateChanged={evt => this.selectDate(evt.detail.start, 'from')}
             >
-              <button slot="trigger" type="button" part="cal-trigger" class="drf-cal-trigger" aria-label="Open start date calendar">
+              <button slot="trigger" type="button" part="cal-trigger" class="drf-cal-trigger" aria-label={t('Lcz_OpenStartDateCalendar', { fallback: 'Open start date calendar' })}>
                 <wa-icon name="calendar" variant="regular" />
               </button>
               {this.showQuickActions && (
-                <div part="quick-actions" class="drf-quick-actions" role="group" aria-label="Quick start date options">
-                  {this.quickDates.map(action => (
+                <div part="quick-actions" class="drf-quick-actions" role="group" aria-label={t('Lcz_QuickStartDateOptions', { fallback: 'Quick start date options' })}>
+                  {quickDates.map(action => (
                     <ir-custom-button
                       type="button"
                       variant="neutral"
                       appearance="outlined"
                       disabled={this.dates?.to?.isSameOrBefore(action.getDate(), 'date')}
-                      aria-label={`Set start date to ${action.label}`}
+                      aria-label={t('Lcz_SetStartDateToOption', { fallback: `Set start date to ${action.label}`, params: [action.label] })}
                       onClickHandler={() => {
                         this.selectDate(action.getDate(), 'from');
                         this.fromDateSelectRef?.hide();
@@ -328,13 +355,13 @@ export class IrDateRangeFilter {
               class={`drf-text-btn${!toLabel ? ' drf-text-btn--placeholder' : ''}`}
               onClick={() => !this.readonly && this.toDateSelectRef?.show()}
               aria-haspopup={this.readonly ? undefined : 'dialog'}
-              aria-label={toLabel ? `End date: ${toLabel}` : 'Select end date'}
+              aria-label={toLabel ? `${t('Lcz_EndDate', { fallback: 'End date' })}: ${toLabel}` : t('Lcz_SelectEndDate', { fallback: 'Select end date' })}
             >
-              {toLabel ?? 'To'}
+              {toDisplay ?? t('Lcz_To', { fallback: 'To' })}
             </button>
 
             {toLabel && this.withClear && !this.readonly && (
-              <button type="button" part="clear-btn" class="drf-clear-btn" onClick={() => this.clearDate('to')} aria-label="Clear end date">
+              <button type="button" part="clear-btn" class="drf-clear-btn" onClick={() => this.clearDate('to')} aria-label={t('Lcz_ClearEndDate', { fallback: 'Clear end date' })}>
                 <wa-icon name="xmark" />
               </button>
             )}
@@ -343,7 +370,7 @@ export class IrDateRangeFilter {
               ref={el => (this.toDateSelectRef = el)}
               exportparts={EXPORT_PARTS.to}
               date={this.dates.to?.format('YYYY-MM-DD') || null}
-              placeholder="To"
+              placeholder={t('Lcz_To', { fallback: 'To' })}
               minDate={toMinDate}
               maxDate={this.maxDate}
               emitEmptyDate
@@ -351,17 +378,17 @@ export class IrDateRangeFilter {
               class="drf-date-select"
               onDateChanged={evt => this.selectDate(evt.detail.start, 'to')}
             >
-              <button slot="trigger" type="button" part="cal-trigger" class="drf-cal-trigger" aria-label="Open end date calendar">
+              <button slot="trigger" type="button" part="cal-trigger" class="drf-cal-trigger" aria-label={t('Lcz_OpenEndDateCalendar', { fallback: 'Open end date calendar' })}>
                 <wa-icon name="calendar" variant="regular" />
               </button>
               {this.showQuickActions && (
-                <div part="quick-actions" class="drf-quick-actions" role="group" aria-label="Quick end date options">
-                  {this.quickDates.map(action => (
+                <div part="quick-actions" class="drf-quick-actions" role="group" aria-label={t('Lcz_QuickEndDateOptions', { fallback: 'Quick end date options' })}>
+                  {quickDates.map(action => (
                     <ir-custom-button
                       type="button"
                       variant="neutral"
                       appearance="outlined"
-                      aria-label={`Set end date to ${action.label}`}
+                      aria-label={t('Lcz_SetEndDateToOption', { fallback: `Set end date to ${action.label}`, params: [action.label] })}
                       disabled={this.quickDatesMode === 'range' ? false : this.dates?.from?.isSameOrAfter(action.getDate(), 'date')}
                       onClickHandler={() => {
                         if (this.quickDatesMode === 'range') {

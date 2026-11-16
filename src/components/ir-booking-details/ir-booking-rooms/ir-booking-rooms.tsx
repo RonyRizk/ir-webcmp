@@ -1,5 +1,5 @@
 import { Booking, Room, ROOM_IN_OUT } from '@/models/booking.dto';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { Agent } from '@/services/agents/type';
 import { buildSplitIndex, SplitIndex } from '@/utils/booking';
 // import calendar_data from '@/stores/calendar-data';
@@ -8,6 +8,7 @@ import { Component, Event, EventEmitter, Fragment, Prop, h } from '@stencil/core
 import { isAgentMode } from '../functions';
 import { canCheckIn, canCheckout } from '@/utils/utils';
 import type { ClTx } from '@/services/city-ledger';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-rooms',
@@ -26,19 +27,19 @@ export class IrBookingRooms {
    * Available bed preference options for the booking rooms.
    * Used to populate bed selection inside each room component.
    */
-  @Prop() bedPreference: IEntries[] = [];
+  @Prop() bedPreference: SetupEntries[] = [];
 
   /**
    * Available departure time options for the booking.
    * Passed down to each room when applicable.
    */
-  @Prop() departureTime: IEntries[] = [];
+  @Prop() departureTime: SetupEntries[] = [];
 
   /**
    * Available arrival time options for the booking.
    * Passed down to each room when applicable.
    */
-  @Prop() arrivalTime: IEntries[] = [];
+  @Prop() arrivalTime: SetupEntries[] = [];
 
   /**
    * Enables the ability to add a new room/unit to the booking.
@@ -84,7 +85,7 @@ export class IrBookingRooms {
   @Prop() clTransactions: ClTx[] = [];
 
   /** `_SVC_CATEGORY` setup entries, threaded down to each room's extra-services section for category labels. */
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
 
   /**
    * When set, the room whose identifier matches auto-opens its check-out dialog. Used to
@@ -240,7 +241,7 @@ export class IrBookingRooms {
 
   private renderRoomPool(rooms: Room[]) {
     if (!rooms.length) {
-      return <p class="room-group__empty">No rooms in this group</p>;
+      return <p class="room-group__empty">{t('Lcz_NoRoomsInGroup', { fallback: 'No rooms in this group' })}</p>;
     }
 
     const { groups, indexById, hasSplitGroups } = this.computeRoomGroups(rooms);
@@ -287,24 +288,28 @@ export class IrBookingRooms {
 
     const guestRooms = rooms.filter(r => r.agent === null || r.agent === undefined);
     const agentRooms = rooms.filter(r => r.agent !== null && r.agent !== undefined);
-    const agentName = this.booking.agent?.name ?? 'Agent';
+    const agentName = this.booking.agent?.name ?? t('Lcz_Agent', { fallback: 'Agent' });
 
     return (
       <Fragment>
         <p class="service-group__label --agent">
           {agentName}
-          <span>Folio</span>
+          <span>{t('Lcz_Folio', { fallback: 'Folio' })}</span>
         </p>
         <div class="service-group service-group--agent">
-          <div class="service-group__body">{agentRooms.length === 0 ? <p class="service-group__empty">No agent rooms</p> : this.renderRoomPool(agentRooms)}</div>
+          <div class="service-group__body">
+            {agentRooms.length === 0 ? <p class="service-group__empty">{t('Lcz_NoAgentRooms', { fallback: 'No agent rooms' })}</p> : this.renderRoomPool(agentRooms)}
+          </div>
         </div>
         <wa-divider></wa-divider>
         <p class="service-group__label">
-          Guest
-          <span>Folio</span>
+          {t('Lcz_Guest', { fallback: 'Guest' })}
+          <span>{t('Lcz_Folio', { fallback: 'Folio' })}</span>
         </p>
         <div class="service-group service-group--guest">
-          <div class="service-group__body">{guestRooms.length === 0 ? <p class="service-group__empty">No guest rooms</p> : this.renderRoomPool(guestRooms)}</div>
+          <div class="service-group__body">
+            {guestRooms.length === 0 ? <p class="service-group__empty">{t('Lcz_NoGuestRooms', { fallback: 'No guest rooms' })}</p> : this.renderRoomPool(guestRooms)}
+          </div>
         </div>
       </Fragment>
     );
@@ -320,9 +325,9 @@ export class IrBookingRooms {
         <ir-date-view class="booking-details__date-view-header" slot="header" from_date={this.booking.from_date} to_date={this.booking.to_date}></ir-date-view>
         {this.hasRoomAdd && this.booking.is_editable && (
           <Fragment>
-            <wa-tooltip for="room-add">Add unit</wa-tooltip>
+            <wa-tooltip for="room-add">{t('Lcz_AddUnit', { fallback: 'Add unit' })}</wa-tooltip>
             <ir-custom-button slot="header-actions" id="room-add" appearance={'plain'} size={'s'} variant={'neutral'}>
-              <wa-icon name="plus" style={{ fontSize: '1rem' }} label="Add unit"></wa-icon>
+              <wa-icon name="plus" style={{ fontSize: '1rem' }} label={t('Lcz_AddUnit', { fallback: 'Add unit' })}></wa-icon>
             </ir-custom-button>
           </Fragment>
         )}

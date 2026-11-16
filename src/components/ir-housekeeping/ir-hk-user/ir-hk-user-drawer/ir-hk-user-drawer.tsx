@@ -1,7 +1,7 @@
 import { THKUser } from '@/models/housekeeping';
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-hk-user-drawer',
   styleUrl: 'ir-hk-user-drawer.css',
@@ -23,7 +23,9 @@ export class IrHkUserDrawer {
         onDrawerHide={() => {
           this.closeSideBar.emit(null);
         }}
-        label={this.isEdit ? locales.entries.Lcz_EditHousekeeperProfile : locales.entries.Lcz_CreateHousekeeperProfile}
+        label={
+          this.isEdit ? t('Lcz_EditHousekeeperProfile', { fallback: 'Edit Housekeeper Profile' }) : t('Lcz_CreateHousekeeperProfile', { fallback: 'Create housekeeper profile' })
+        }
       >
         {this.open && (
           <ir-hk-user-drawer-form
@@ -39,10 +41,10 @@ export class IrHkUserDrawer {
         )}
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button data-drawer="close" variant="neutral" size="m" appearance="filled">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button loading={this.isLoading} variant="brand" type="submit" form={this.formId} appearance="accent" size="m">
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

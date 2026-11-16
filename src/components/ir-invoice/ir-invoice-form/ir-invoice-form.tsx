@@ -1,17 +1,21 @@
 import { Booking, ExtraService, Room } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, getEntryValue } from '@/services/setup';
 import { buildSplitIndex } from '@/utils/booking';
-import { formatAmount, getEntryValue } from '@/utils/utils';
+import { formatAmount } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { BookingInvoiceInfo, InvoiceableItem, ViewMode } from '../types';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { IssueInvoiceProps } from '@/services/booking-service/types';
 import calendar_data from '@/stores/calendar-data';
 import axios from 'axios';
 import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
 import { FdTypes, InOut } from '@/types/enums';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { formatDate } from '@/utils/date';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-invoice-form',
   styleUrl: 'ir-invoice-form.css',
@@ -108,11 +112,12 @@ export class IrInvoiceForm {
   private room: Booking['rooms'][0];
   private confirmButtonRef: HTMLIrCustomButtonElement;
   private bookingService = new BookingService();
-  private invoiceTarget: IEntries[];
+  private setupService = new SetupService();
+  private invoiceTarget: SetupEntries[];
   private apiDisabledItemKeys: Set<number> = new Set();
   private alreadyInvoicedItemKeys: Set<number> = new Set();
   private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2&mode=proforma';
-  private svcCategories: IEntries[] = [];
+  private svcCategories: SetupEntries[] = [];
 
   componentWillLoad() {
     this.init();
@@ -295,9 +300,9 @@ export class IrInvoiceForm {
         extras: url,
       });
     } else {
-      const { data } = await axios.post(`Get_ShortLiving_Token`);
+      const { data } = await axios.post(`Get_ShortLiving_ApiClient`);
       if (!data.ExceptionMsg) {
-        url += `&token=${encodeURIComponent(data.My_Result)}`;
+        url += `&ApiClient=${encodeURIComponent(data.My_Result)}`;
       }
 
       window.open(url, '_blank');
@@ -386,9 +391,9 @@ export class IrInvoiceForm {
       // let invoiceInfo = this.invoiceInfo;
       // if (!this.invoiceInfo) {
       const [booking, invoiceInfo, svcCategories] = await Promise.all([
-        this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: 'en', withExtras: true }),
-        this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
-        this.bookingService.getSetupEntriesByTableName('_SVC_CATEGORY'),
+        this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language, withExtras: true }),
+        this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language }),
+        this.setupService.getSetupEntriesByTableName('_SVC_CATEGORY'),
       ]);
 
       this.booking = { ...booking };
@@ -403,7 +408,7 @@ export class IrInvoiceForm {
           this.room = this.booking.rooms.find(r => r.identifier === this.roomIdentifier);
         }
       }
-      this.invoiceTarget = await this.bookingService.getSetupEntriesByTableName('_INVOICE_TARGET');
+      this.invoiceTarget = await this.setupService.getSetupEntriesByTableName('_INVOICE_TARGET');
     } catch (error) {
       console.error(error);
     } finally {
@@ -504,6 +509,7 @@ export class IrInvoiceForm {
       });
       const invoiceInfo = await this.bookingService.getBookingInvoiceInfo({
         booking_nbr: this.booking.booking_nbr,
+        language: LocaleController.language,
       });
       if (this.autoPrint) {
         try {
@@ -670,14 +676,14 @@ export class IrInvoiceForm {
     if (!fromDate) {
       return;
     }
-    const from_date = moment(fromDate, 'YYYY-MM-DD').format('MMM DD, YYYY');
+    const from_date = formatDate(fromDate, 'MMM DD, YYYY');
     if (!toDate) {
       return <span>{from_date}</span>;
     }
-    const to_date = moment(toDate, 'YYYY-MM-DD').format('MMM DD, YYYY');
+    const to_date = formatDate(toDate, 'MMM DD, YYYY');
     return (
       <span>
-        {from_date} <wa-icon name="arrow-right"></wa-icon> {to_date}
+        {from_date} <wa-icon class="ir-flip-rtl" name="arrow-right"></wa-icon> {to_date}
       </span>
     );
   }
@@ -826,11 +832,11 @@ export class IrInvoiceForm {
               checked={isSelected}
               class="ir-invoice__checkbox"
             >
-              <div class={'ir-invoice__room-checkbox-container align-items-center'}>
+              <div class={'ir-invoice__room-checkbox-container'}>
                 <div class="ir-invoice__room-info">
                   <span>
                     <b>{room.roomtype.name}</b>
-                    <span style={{ paddingLeft: '0.5rem' }}>{room.rateplan.short_name}</span>
+                    <span class="ir-invoice__rate-plan">{room.rateplan.short_name}</span>
                   </span>
                   {this.getDateView(room.from_date, room.to_date)}
                 </div>
@@ -870,12 +876,12 @@ export class IrInvoiceForm {
                   return null;
                 }
                 return (
-                  <div class="d-flex align-items-center" style={{ gap: '0.5rem' }}>
+                  <div class="ir-invoice__group-room" key={room.identifier}>
                     <div class="ir-invoice__room-info">
-                      <p>
+                      <span>
                         <b>{room.roomtype.name}</b>
-                        <span>{room.rateplan.short_name}</span>
-                      </p>
+                        <span class="ir-invoice__rate-plan">{room.rateplan.short_name}</span>
+                      </span>
                       {this.getDateView(room.from_date, room.to_date)}
                     </div>
                     {this.renderPriceColumn(room.gross_total, room.system_id)}
@@ -915,7 +921,7 @@ export class IrInvoiceForm {
         >
           <div class="ir-invoice__room-checkbox-container">
             <div class={'ir-invoice__room-info'}>
-              <span>Pickup</span>
+              <span>{t('Lcz_Pickup', { fallback: 'Pickup' })}</span>
               {this.getDateView(this.booking.pickup_info.date, null)}
             </div>
             {this.renderPriceColumn(this.booking.pickup_info.selected_option.amount, sysId)}
@@ -955,7 +961,7 @@ export class IrInvoiceForm {
         >
           <div class="ir-invoice__room-checkbox-container">
             <div class={'ir-invoice__room-info'}>
-              <span>Cancellation penalty</span>
+              <span>{t('Lcz_CancellationPenalty', { fallback: 'Cancellation penalty' })}</span>
               {this.getDateView(cancellationPenalty.date, null)}
             </div>
             {this.renderPriceColumn(item.amount, sysId)}
@@ -964,12 +970,12 @@ export class IrInvoiceForm {
       </div>
     );
   }
-  private category(service: ExtraService): IEntries | undefined {
+  private category(service: ExtraService): SetupEntries | undefined {
     return this.svcCategories?.find(c => c.CODE_NAME === service?.category?.code);
   }
   private categoryLabel(service: ExtraService): string | null {
     const category = this.category(service);
-    return category ? getEntryValue({ entry: category, language: 'en' }) : null;
+    return category ? getEntryValue({ entry: category, language: LocaleController.language }) : null;
   }
   private description(service: ExtraService) {
     const categoryLabel = this.categoryLabel(service);
@@ -1020,18 +1026,21 @@ export class IrInvoiceForm {
               this.invoiceDate = e.detail.start;
               this.setUpDisabledItems();
             }}
-            label="Date"
+            label={t('Lcz_DateLabel', { fallback: 'Date' })}
             date={this.invoiceDate.format('YYYY-MM-DD')}
             minDate={this.getMinDate()}
             maxDate={this.getMaxDate()}
           ></ir-date-select>
           <ir-booking-billing-recipient onRecipientChange={e => (this.selectedRecipient = e.detail)} booking={this.booking}></ir-booking-billing-recipient>
           {this.viewMode === 'invoice' && moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') ? (
-            <ir-empty-state message="Invoices cannot be issued before guest arrival"></ir-empty-state>
+            <ir-empty-state message={t('Lcz_InvoicesCannotBeIssuedBeforeGuestArrival', { fallback: 'Invoices cannot be issued before guest arrival' })}></ir-empty-state>
           ) : (
             <div class={'ir-invoice__services'}>
               <p class="ir-invoice__form-control-label">
-                Choose what to invoice <span style={{ color: 'var(--wa-color-gray-60)', paddingLeft: '0.5rem' }}> (Disabled services are not eligible to be invoiced yet)</span>
+                {t('Lcz_ChooseWhatToInvoice', { fallback: 'Choose what to invoice' })}{' '}
+                <span style={{ color: 'var(--wa-color-gray-60)', paddingInlineStart: '0.5rem' }}>
+                  {t('Lcz_DisabledServicesNotEligible', { fallback: '(Disabled services are not eligible to be invoiced yet)' })}
+                </span>
               </p>
 
               <div class="ir-invoice__services-container">
@@ -1069,7 +1078,7 @@ export class IrInvoiceForm {
                               )}
                             </span>
                             {extra_service.category?.code === 'DUZ' ? (
-                              <div>{moment(new Date(extra_service.start_date)).format('MMM DD, YYYY')} </div>
+                              <div>{formatDate(new Date(extra_service.start_date), 'MMM DD, YYYY')} </div>
                             ) : (
                               this.getDateView(extra_service.start_date, extra_service.end_date)
                             )}

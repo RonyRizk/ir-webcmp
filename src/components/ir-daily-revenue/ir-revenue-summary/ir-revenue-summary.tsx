@@ -3,6 +3,7 @@ import { DailyPaymentFilter, FolioPayment, GroupedFolioPayment } from '../types'
 import { calculateTrend, formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
 import { PaymentEntries } from '@/components/ir-booking-details/types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-revenue-summary',
@@ -64,30 +65,30 @@ export class IrRevenueSummary {
           <ir-metric-card
             class="revenue-summary__metric"
             icon="arrow-trend-up"
-            label="Payments"
+            label={t('Lcz_Payments', { fallback: 'Payments' })}
             value={formatAmount(calendar_data.currency.symbol, paymentsTotal)}
             trend={hasPrevious ? calculateTrend(paymentsTotal, previousDatePaymentsTotal) : undefined}
-            trendLabel="from previous day"
-            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : undefined}
+            trendLabel={t('Lcz_FromPreviousDay', { fallback: 'from previous day' })}
+            caption={hasPrevious ? `${t('Lcz_PreviousDay', { fallback: 'Previous day:' })} ${formatAmount(calendar_data.currency.symbol, previousDatePaymentsTotal)}` : undefined}
           ></ir-metric-card>
           <ir-metric-card
             class="revenue-summary__metric"
             icon="arrow-trend-down"
-            label="Refunds"
+            label={t('Lcz_Refunds', { fallback: 'Refunds' })}
             value={formatAmount(calendar_data.currency.symbol, refundAmount)}
             trend={hasPrevious ? calculateTrend(refundAmount, previousDateRefundAmount) : undefined}
-            trendLabel="from previous day"
+            trendLabel={t('Lcz_FromPreviousDay', { fallback: 'from previous day' })}
             invertTrend
-            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : undefined}
+            caption={hasPrevious ? `${t('Lcz_PreviousDay', { fallback: 'Previous day:' })} ${formatAmount(calendar_data.currency.symbol, previousDateRefundAmount)}` : undefined}
           ></ir-metric-card>
           <ir-metric-card
             class="revenue-summary__metric"
             icon={this.getTrendIcon(totalAmount, previousDateTotalAmount) ?? 'money-bill'}
-            label="Net Total"
+            label={t('Lcz_NetTotal', { fallback: 'Net Total' })}
             value={formatAmount(calendar_data.currency.symbol, totalAmount)}
             trend={hasPrevious ? calculateTrend(totalAmount, previousDateTotalAmount) : undefined}
-            trendLabel="from previous day"
-            caption={hasPrevious ? `Previous day: ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : undefined}
+            trendLabel={t('Lcz_FromPreviousDay', { fallback: 'from previous day' })}
+            caption={hasPrevious ? `${t('Lcz_PreviousDay', { fallback: 'Previous day:' })} ${formatAmount(calendar_data.currency.symbol, previousDateTotalAmount)}` : undefined}
           ></ir-metric-card>
         </div>
       </Host>

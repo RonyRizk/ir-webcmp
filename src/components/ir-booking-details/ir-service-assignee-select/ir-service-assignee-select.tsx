@@ -1,4 +1,5 @@
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-service-assignee-select',
@@ -19,7 +20,7 @@ export class IrServiceAssigneeSelect {
   /**
    * Label displayed above the assignment selector.
    */
-  @Prop() label: string = 'Assign to folio';
+  @Prop() label: string;
 
   /**
    * Emits when the service assignee changes.
@@ -34,14 +35,14 @@ export class IrServiceAssigneeSelect {
           defaultValue={this.assigneeType}
           value={this.assigneeType}
           size="s"
-          label={this.label}
+          label={this.label || t('Lcz_AssignToFolio', { fallback: 'Assign to folio' })}
           orientation="vertical"
         >
           <wa-radio value="agent" appearance="button">
-            Agent: {this.agent?.name}
+            {t('Lcz_Agent', { fallback: 'Agent' })}: {this.agent?.name}
           </wa-radio>
           <wa-radio value="guest" appearance="button">
-            Guest
+            {t('Lcz_Guest', { fallback: 'Guest' })}
           </wa-radio>
         </wa-radio-group>
       </Host>

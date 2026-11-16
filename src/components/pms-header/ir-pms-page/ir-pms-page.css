@@ -101,6 +101,8 @@ LARGE TABLETS (>= 768px)
     padding: 1rem 1.5rem;
   }
 
+  /* Physical: symmetric self-centring (left:50% + translateX(-50%)). `inset-inline-start`
+     would resolve to `right` under RTL while translateX stays physical. */
   .app-header__center {
     position: absolute;
     left: 50%;

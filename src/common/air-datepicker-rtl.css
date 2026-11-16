@@ -1,0 +1,19 @@
+/*
+ * RTL corrections for the vendored air-datepicker sheet (src/assets/air-datepicker.css),
+ * which is LTR-only and left untouched so it stays upgradable. Import this *after* it.
+ */
+
+/* Month/year navigation chevrons point the other way when time runs right-to-left. */
+:dir(rtl) .air-datepicker-nav--action svg {
+  scale: -1 1;
+}
+
+:dir(rtl) .air-datepicker-nav--title i {
+  margin-left: 0;
+  margin-right: 0.3em;
+}
+
+:dir(rtl) .air-datepicker-time--current-ampm {
+  margin-left: 0;
+  margin-right: 6px;
+}

@@ -9,7 +9,7 @@
 
 | Property     | Attribute     | Description                                     | Type      | Default     |
 | ------------ | ------------- | ----------------------------------------------- | --------- | ----------- |
-| `ariaLabel`  | `aria-label`  | Aria label for the tab list                     | `string`  | `'Tabs'`    |
+| `ariaLabel`  | `aria-label`  | Aria label for the tab list                     | `string`  | `undefined` |
 | `disabled`   | `disabled`    | Whether the tabs are disabled                   | `boolean` | `false`     |
 | `initialTab` | `initial-tab` | ID of the tab that should be selected initially | `string`  | `undefined` |
 | `tabs`       | --            | Array of tab objects containing id and label    | `Tab[]`   | `[]`        |

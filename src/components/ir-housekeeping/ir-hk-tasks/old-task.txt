@@ -1,5 +1,5 @@
 import { IPendingActions } from '@/models/housekeeping';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { HouseKeepingService } from '@/services/housekeeping.service';
 import { RoomService } from '@/services/room.service';
 import housekeeping_store, { updateHKStore } from '@/stores/housekeeping.store';
@@ -29,11 +29,11 @@ export class IrHkTasks {
   private modalOpenTimeOut: NodeJS.Timeout;
   private roomService = new RoomService();
   private houseKeepingService = new HouseKeepingService();
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   componentWillLoad() {
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
   }
@@ -65,7 +65,7 @@ export class IrHkTasks {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
   handleCheckChange(e: CustomEvent, action: IPendingActions) {
@@ -115,7 +115,7 @@ export class IrHkTasks {
         propertyId = propertyData.My_Result.id;
       }
       this.property_id = propertyId;
-      updateHKStore('default_properties', { token: this.ticket, property_id: propertyId, language: this.language });
+      updateHKStore('default_properties', { ApiClient: this.ticket, property_id: propertyId, language: this.language });
       const requests = [this.houseKeepingService.getExposedHKStatusCriteria(propertyId), this.roomService.fetchLanguage(this.language, ['_HK_FRONT'])];
 
       if (this.propertyid) {

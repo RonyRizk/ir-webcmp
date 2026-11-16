@@ -1,11 +1,15 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 import { PropertyService } from '@/services/property';
 import { RoomService } from '@/services/room.service';
+import { formatNumber } from '@/utils/number';
 import { showToast } from '@/utils/utils';
-import { Component, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import {
-  ADJUSTMENTS,
   Adjustment,
   CloneRatesErrors,
   CloneRatesFormState,
@@ -14,6 +18,7 @@ import {
   WEEKDAYS,
   buildCloneRatesPayload,
   buildReviewRows,
+  getAdjustments,
   isDecrease,
   isPercentage,
   parseSourceOption,
@@ -28,12 +33,14 @@ import {
   scoped: true,
 })
 export class IrCloneRates {
+  @Element() el: HTMLIrCloneRatesElement;
+
   @Prop() ticket: string;
   @Prop() p: string;
   @Prop() language: string = 'en';
   @Prop() propertyid: number;
   /** `drawer` drops the page shell and the inline Review button; the host drawer submits `#clone-rates-form` from its footer. */
-  @Prop() mode: 'page' | 'drawer' = 'page';
+  @Prop({ reflect: true }) mode: 'page' | 'drawer' = 'page';
 
   /** Fired after the rates were copied successfully. */
   @Event() ratesCloned: EventEmitter<void>;
@@ -55,24 +62,64 @@ export class IrCloneRates {
   @State() errors: CloneRatesErrors = {};
 
   private propertyId: number;
+  /** Set by a failed review; the next render scrolls the first error into view once it is in the DOM. */
+  private scrollToErrorPending = false;
+  /** Set when an adjustment is picked; the next render focuses the amount field once it is mounted. */
+  private focusAmountPending = false;
+  private amountInputRef: HTMLIrInputElement;
   private currentYear = moment().year();
   private years = [this.currentYear, this.currentYear - 1];
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
+
+  /** Re-runs init when the language changes so server-localized room type and rate plan names follow. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.cloneRates, () => this.init());
 
   componentWillLoad() {
     this.resetForm();
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  componentDidRender() {
+    if (this.focusAmountPending) {
+      this.focusAmountPending = false;
+      this.focusAmountInput();
+    }
+    if (!this.scrollToErrorPending) return;
+    this.scrollToErrorPending = false;
+    const firstError = this.el.querySelector('.clone-rates__error');
+    if (!firstError) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    firstError.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  /** `autofocus` only fires on page load, not when the field mounts later; wait for the inner input to render, then focus it. */
+  private async focusAmountInput() {
+    const input = await this.amountInputRef?.getNativeInput();
+    input?.focus();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.init();
     }
   }
@@ -90,14 +137,15 @@ export class IrCloneRates {
   private async init() {
     try {
       this.isLoading = true;
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.cloneRates });
       const [propertyRes] = await Promise.all([
         this.roomService.getExposedProperty({
           id: this.propertyid ?? 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         }),
-        this.roomService.fetchLanguage(this.language),
+        localeReady,
       ]);
       const property = propertyRes.My_Result;
       this.propertyId = property.id;
@@ -115,7 +163,7 @@ export class IrCloneRates {
     this.source = `full-${this.currentYear}`;
     this.fromDate = from;
     this.toDate = to;
-    this.weekdays = new Set(WEEKDAYS.map(w => w.value));
+    this.weekdays = new Set(WEEKDAYS);
     this.selectedRatePlans = new Set();
     this.adjustment = 'none';
     this.amount = '';
@@ -170,6 +218,8 @@ export class IrCloneRates {
     this.errors = validateCloneRates(this.formState);
     if (Object.keys(this.errors).length === 0) {
       this.isReviewOpen = true;
+    } else {
+      this.scrollToErrorPending = true;
     }
   }
 
@@ -177,13 +227,13 @@ export class IrCloneRates {
     try {
       this.isSaving = true;
       await this.propertyService.cloneRates(buildCloneRatesPayload(this.propertyId, this.formState));
-      showToast({ position: 'top-right', title: 'Rates copied successfully', description: '', type: 'success' });
+      showToast({ position: 'top-right', title: t('Lcz_RatesCopiedSuccessfully', { fallback: 'Rates copied successfully' }), description: '', type: 'success' });
       this.isReviewOpen = false;
       this.resetForm();
       this.ratesCloned.emit();
     } catch (err) {
       console.error(err);
-      showToast({ position: 'top-right', title: 'Failed to copy rates', description: String(err), type: 'error' });
+      showToast({ position: 'top-right', title: t('Lcz_FailedToCopyRates', { fallback: 'Failed to copy rates' }), description: String(err), type: 'error' });
     } finally {
       this.isSaving = false;
     }
@@ -213,7 +263,7 @@ export class IrCloneRates {
     const { from, to } = yearBounds(year);
     return (
       <wa-card appearance="plain" class="clone-rates__card">
-        <h4 class="clone-rates__question">Which dates do you want to copy rates from?</h4>
+        <h4 class="clone-rates__question">{t('Lcz_CopyRatesFromWhichDates', { fallback: 'Which dates do you want to copy rates from?' })}</h4>
         <wa-select
           size="s"
           class="clone-rates__source"
@@ -221,12 +271,15 @@ export class IrCloneRates {
           defaultValue={this.source}
           onchange={(e: CustomEvent) => this.handleSourceChange((e.target as HTMLSelectElement).value as SourceOption)}
         >
-          {this.years.map(y => (
-            <Fragment>
-              <wa-option value={`full-${y}`}>Full year {y}</wa-option>
-              <wa-option value={`custom-${y}`}>Custom date range in {y}</wa-option>
-            </Fragment>
-          ))}
+          {this.years.map(y => {
+            const yearLabel = formatNumber(y, { useGrouping: false });
+            return (
+              <Fragment>
+                <wa-option value={`full-${y}`}>{t('Lcz_FullYear', { fallback: 'Full year %1', params: [yearLabel] })}</wa-option>
+                <wa-option value={`custom-${y}`}>{t('Lcz_CustomDateRangeIn', { fallback: 'Custom date range in %1', params: [yearLabel] })}</wa-option>
+              </Fragment>
+            );
+          })}
         </wa-select>
         <div class="clone-rates__dates">
           <ir-date-range-filter
@@ -245,7 +298,7 @@ export class IrCloneRates {
           ></ir-date-range-filter>
         </div>
         {this.renderError('dates')}
-        {this.renderInfo(`Rates will be copied over to ${year + 1}`)}
+        {this.renderInfo(t('Lcz_RatesWillBeCopiedTo', { fallback: 'Rates will be copied over to %1', params: [formatNumber(year + 1, { useGrouping: false })] }))}
       </wa-card>
     );
   }
@@ -253,7 +306,7 @@ export class IrCloneRates {
   private renderWeekdaysSection() {
     return (
       <wa-card appearance="plain" class="clone-rates__card">
-        <h4 class="clone-rates__question">Which days of the week do you want to copy rates from?</h4>
+        <h4 class="clone-rates__question">{t('Lcz_CopyRatesWhichWeekdays', { fallback: 'Which days of the week do you want to copy rates from?' })}</h4>
         <ir-weekday-selector
           class="clone-rates__weekdays"
           required
@@ -273,17 +326,17 @@ export class IrCloneRates {
     const allSelected = selectedCount > 0 && selectedCount === this.allRatePlanIds.length;
     return (
       <wa-card appearance="plain" class="clone-rates__card">
-        <h4 class="clone-rates__question">Which room types and rate plans do you want to copy?</h4>
+        <h4 class="clone-rates__question">{t('Lcz_CopyRatesWhichRatePlans', { fallback: 'Which room types and rate plans do you want to copy?' })}</h4>
         <wa-checkbox
           checked={allSelected}
           indeterminate={selectedCount > 0 && !allSelected}
           onchange={(e: Event) => this.toggleAllRatePlans((e.target as HTMLInputElement).checked)}
         >
-          Select all rate plans for all room types
+          {t('Lcz_SelectAllRatePlans', { fallback: 'Select all rate plans for all room types' })}
         </wa-checkbox>
         <wa-divider class="clone-rates__divider"></wa-divider>
         {this.roomTypes.length === 0 ? (
-          <ir-empty-state message="No active rate plans found"></ir-empty-state>
+          <ir-empty-state message={t('Lcz_NoActiveRatePlans', { fallback: 'No active rate plans found' })}></ir-empty-state>
         ) : (
           <div class="clone-rates__room-types">
             {this.roomTypes.map(rt => (
@@ -297,6 +350,7 @@ export class IrCloneRates {
                       onchange={(e: Event) => this.toggleRatePlan(rp.id, (e.target as HTMLInputElement).checked)}
                     >
                       {rp.label}
+                      {rp.customText && <span class="clone-rates__rate-plan-custom-text"> ({rp.customText})</span>}
                     </wa-checkbox>
                   ))}
                 </div>
@@ -310,19 +364,26 @@ export class IrCloneRates {
   }
 
   private renderAmountInput() {
-    const verb = isDecrease(this.adjustment) ? 'decrease' : 'increase';
+    // const label = isDecrease(this.adjustment)
+    //   ? t('Lcz_AmountToDecreaseRatesBy', { fallback: 'Set the amount you want to decrease your rates by' })
+    //   : t('Lcz_AmountToIncreaseRatesBy', { fallback: 'Set the amount you want to increase your rates by' });
+    const _isPercentage = isPercentage(this.adjustment);
+    const symbol = isDecrease(this.adjustment) ? '-' : '+';
     return (
       <div class="clone-rates__amount">
         <ir-input
-          label={`Set the amount you want to ${verb} your rates by`}
-          mask="price"
+          class={{ 'clone-rates__amount-input--percentage': _isPercentage }}
+          // label={label}
+          ref={el => (this.amountInputRef = el)}
+          mask={_isPercentage ? 'percentage' : 'price'}
           value={this.amount}
           onText-change={(e: CustomEvent<string>) => {
             this.amount = e.detail;
             this.clearError('amount');
           }}
         >
-          <span slot="start">{isPercentage(this.adjustment) ? '%' : this.currencySymbol}</span>
+          {_isPercentage && <span slot="start">{symbol}</span>}
+          <span slot={_isPercentage ? 'end' : 'start'}>{_isPercentage ? '%' : symbol + ' ' + this.currencySymbol}</span>
         </ir-input>
         {this.renderError('amount')}
       </div>
@@ -332,7 +393,7 @@ export class IrCloneRates {
   private renderAdjustmentSection() {
     return (
       <wa-card appearance="plain" class="clone-rates__card">
-        <h4 class="clone-rates__question">Do you want to make changes to the rates?</h4>
+        <h4 class="clone-rates__question">{t('Lcz_CopyRatesMakeChanges', { fallback: 'Do you want to make changes to the rates?' })}</h4>
         <wa-select
           size="s"
           class="clone-rates__adjustment"
@@ -340,11 +401,12 @@ export class IrCloneRates {
           defaultValue={this.adjustment}
           onchange={(e: CustomEvent) => {
             this.adjustment = (e.target as HTMLSelectElement).value as Adjustment;
+            this.focusAmountPending = this.adjustment !== 'none';
             this.amount = '';
             this.clearError('amount');
           }}
         >
-          {ADJUSTMENTS.map(a => (
+          {getAdjustments().map(a => (
             <wa-option key={a.value} value={a.value}>
               {a.label}
             </wa-option>
@@ -358,9 +420,9 @@ export class IrCloneRates {
   private renderRestrictionsSection() {
     return (
       <wa-card appearance="plain" class="clone-rates__card">
-        <h4 class="clone-rates__question">Do you want to copy over the minimum stay restrictions for these dates?</h4>
+        <h4 class="clone-rates__question">{t('Lcz_CopyMinStayQuestion', { fallback: 'Do you want to copy over the minimum stay restrictions for these dates?' })}</h4>
         <wa-checkbox checked={this.copyMinStay} onchange={(e: Event) => (this.copyMinStay = (e.target as HTMLInputElement).checked)}>
-          Yes, copy my minimum stay restrictions for this date range
+          {t('Lcz_CopyMinStayConfirm', { fallback: 'Yes, copy my minimum stay restrictions for this date range' })}
         </wa-checkbox>
       </wa-card>
     );
@@ -385,7 +447,7 @@ export class IrCloneRates {
         {this.mode === 'page' && (
           <div class="clone-rates__actions">
             <ir-custom-button variant="brand" size="m" type="submit" form="clone-rates-form">
-              Review
+              {t('Lcz_Review', { fallback: 'Review' })}
             </ir-custom-button>
           </div>
         )}
@@ -426,7 +488,10 @@ export class IrCloneRates {
     }
     return (
       <Host>
-        <ir-page label="Copy rates to future dates" description="Here you can copy over your existing rate plans to the date range you want, easily and efficiently.">
+        <ir-page
+          label={t('Lcz_CopyRatesToFutureDates', { fallback: 'Copy rates to future dates' })}
+          description={t('Lcz_CopyRatesDescription', { fallback: 'Here you can copy over your existing rate plans to the date range you want, easily and efficiently.' })}
+        >
           {this.renderForm()}
           {this.renderReview()}
         </ir-page>

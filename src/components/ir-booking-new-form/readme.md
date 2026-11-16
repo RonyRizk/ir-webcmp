@@ -7,11 +7,11 @@
 
 ## Properties
 
-| Property     | Attribute    | Description | Type     | Default     |
-| ------------ | ------------ | ----------- | -------- | ----------- |
-| `language`   | `language`   |             | `string` | `undefined` |
-| `propertyid` | `propertyid` |             | `string` | `undefined` |
-| `ticket`     | `ticket`     |             | `string` | `undefined` |
+| Property     | Attribute    | Description                                                                                                                                                                       | Type     | Default     |
+| ------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| `language`   | `language`   | Language for the form and the editor it opens, independent of the page's. Reflected as `lang` on the host, which makes this subtree its own locale scope (see `locale-scope.ts`). | `string` | `undefined` |
+| `propertyid` | `propertyid` |                                                                                                                                                                                   | `string` | `undefined` |
+| `ticket`     | `ticket`     |                                                                                                                                                                                   | `string` | `undefined` |
 
 
 ## Dependencies

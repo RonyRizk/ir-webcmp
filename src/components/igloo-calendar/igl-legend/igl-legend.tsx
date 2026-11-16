@@ -2,8 +2,10 @@ import { BookingColor } from '@/models/booking.dto';
 import { PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
 import locales from '@/stores/locales.store';
+import { isRtlDirection } from '@/utils/calendar-grid';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 @Component({
@@ -121,13 +123,13 @@ export class IglLegend {
   render() {
     const legend = this.updateLegend();
     return (
-      <Host class="legendContainer text-left">
+      <Host class="legendContainer" dir={isRtlDirection(locales.direction) ? 'rtl' : 'ltr'}>
         <div class="fd-legend__header">
           <h2 class="fd-legend__title" id="legend-title">
-            {locales.entries.Lcz_Legend}
+            {t('Lcz_Legend')}
           </h2>
           <ir-custom-button size="m" onClickHandler={() => this.handleOptionEvent('closeSideMenu')} appearance="plain" variant="neutral">
-            <wa-icon name="xmark" variant="solid" label="Close" aria-label="Close" role="img"></wa-icon>
+            <wa-icon name="xmark" variant="solid" label={t('Lcz_Close', { fallback: 'Close' })} aria-label={t('Lcz_Close', { fallback: 'Close' })} role="img"></wa-icon>
           </ir-custom-button>
         </div>
         <section class="fd-legend__body">
@@ -170,20 +172,20 @@ export class IglLegend {
               <div class={'fd-legend__shape'}>
                 <wa-icon name="triangle-exclamation" style={{ color: 'var(--wa-color-danger-fill-loud)', fontSize: '1rem' }}></wa-icon>
               </div>
-              <p class="fd-legend__row-title">Housekeeping reported issue</p>
+              <p class="fd-legend__row-title">{t('Lcz_HousekeepingReportedIssue', { fallback: 'Housekeeping reported issue' })}</p>
             </div>
             <div class="fd-legend__row">
               <div class={'fd-legend__shape'}>
                 <div class={'legend_rectangle'} style={{ background: 'var(--wa-color-success-fill-loud)', opacity: '0.6' }}></div>
               </div>
               <p class="fd-legend__row-title --day-use">
-                <span>Day use</span>
+                <span>{t('Lcz_DayUse', { fallback: 'Day use' })}</span>
                 <div class={'legend_rectangle'} style={{ background: 'var(--wa-color-brand-fill-loud)', opacity: '0.6' }}></div>
                 <div class={'legend_rectangle'} style={{ background: 'rgb(160, 160, 160)', opacity: '0.6' }}></div>
               </p>
             </div>
             <wa-divider></wa-divider>
-            <h5 class="fd-legend__section-title">Use custom colors</h5>
+            <h5 class="fd-legend__section-title">{t('Lcz_UseCustomColors', { fallback: 'Use custom colors' })}</h5>
             {calendar_data.property.calendar_extra?.booking_colors.map((legendInfo, index) => {
               const previewClass = `legend_${legendInfo.design}`;
               return (
@@ -193,10 +195,10 @@ export class IglLegend {
                   </div>
                   <wa-input
                     autocomplete="off"
-                    class="legendTextarea border-0 m-0 p-0"
+                    class="legendTextarea"
                     value={legendInfo.name}
                     size="s"
-                    placeholder="Reason for this color"
+                    placeholder={t('Lcz_ReasonForThisColor', { fallback: 'Reason for this color' })}
                     onchange={event => {
                       this.handleNameInput(index, (event.target as HTMLInputElement).value);
                       this.handleBlur(index);
@@ -213,31 +215,31 @@ export class IglLegend {
           <wa-divider></wa-divider>
           <div>
             <div class="legendCalendar">
-              <div class="legendRow align-items-center">
+              <div class="legendRow">
                 <div class="legendCal br-t br-s br-bt">
-                  <strong>MAR 2022</strong>
+                  <strong>{t('Lcz_ExampleMonthYearLabel', { fallback: 'MAR 2022' })}</strong>
                 </div>
-                <div class="hyphenLegend">{locales.entries.Lcz_MonthAndYear}</div>
+                <div class="hyphenLegend">{t('Lcz_MonthAndYear')}</div>
               </div>
               <div class="legendRow">
-                <div class="legendCal headerCell align-items-center br-s">
+                <div class="legendCal headerCell br-s">
                   <wa-badge pill>3</wa-badge>
                 </div>
                 <div class="hyphenLegend">
-                  <div>{locales.entries.Lcz_UnassignedUnits}</div>
+                  <div>{t('Lcz_UnassignedUnits')}</div>
                 </div>
               </div>
               <div class="legendRow">
-                <div class="legendCal dayTitle br-s">Fri 18</div>
-                <div class="hyphenLegend">{locales.entries.Lcz_Date}</div>
+                <div class="legendCal dayTitle br-s">{t('Lcz_ExampleDayLabel', { fallback: 'Fri 18' })}</div>
+                <div class="hyphenLegend">{t('Lcz_DateLabel', { fallback: 'Date' })}</div>
               </div>
               <div class="legendRow">
                 <div class="legendCal br-s br-bt dayCapacityPercent">15%</div>
-                <div class="hyphenLegend">{locales.entries.Lcz_Occupancy}</div>
+                <div class="hyphenLegend">{t('Lcz_Occupancy')}</div>
               </div>
               <div class="legendRow">
-                <div class="legendCal br-s br-bt  font-weight-bold total-availability">20</div>
-                <div class="hyphenLegend">{locales.entries.Lcz_TotalAvailability}</div>
+                <div class="legendCal br-s br-bt total-availability">20</div>
+                <div class="hyphenLegend">{t('Lcz_TotalAvailability')}</div>
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { ICountry } from '@/models/IBooking';
+import { t } from '@/services/locale/t';
 import { Component, Element, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import { NativeWaInput } from '../ir-input/ir-input';
 
@@ -162,7 +163,7 @@ export class IrCountryPicker {
           {this.filteredCountries.map(country => (
             <ir-picker-item value={country.id?.toString()} label={country.name} key={country.id}>
               <img src={country.flag} alt={country.name} style={{ aspectRatio: '1', height: '15px', borderRadius: '4px' }} />
-              <p class="pl-1 m-0">{country.name}</p>
+              <p class="ir-ps-1 m-0">{country.name}</p>
             </ir-picker-item>
           ))}
         </ir-picker>
@@ -209,7 +210,7 @@ export class IrCountryPicker {
                 }}
               >
                 <img src={this.propertyCountry.flag} alt={this.propertyCountry.name} style={{ aspectRatio: '1', height: '15px', borderRadius: '4px' }} />
-                <p class="pl-1 m-0">{this.propertyCountry.name}</p>
+                <p class="ir-ps-1 m-0">{this.propertyCountry.name}</p>
               </button>
               <div class="dropdown-divider"></div>
             </Fragment>
@@ -224,10 +225,10 @@ export class IrCountryPicker {
               }}
             >
               <img src={c.flag} alt={c.name} style={{ aspectRatio: '1', height: '15px', borderRadius: '4px' }} />
-              <p class="pl-1 m-0">{c.name}</p>
+              <p class="ir-ps-1 m-0">{c.name}</p>
             </button>
           ))}
-          {this.filteredCountries?.length === 0 && <p class="dropdown-item-text">Invalid Country</p>}
+          {this.filteredCountries?.length === 0 && <p class="dropdown-item-text">{t('Lcz_InvalidCountry', { fallback: 'Invalid Country' })}</p>}
         </div>
       </form>
     );

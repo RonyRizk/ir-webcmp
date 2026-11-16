@@ -1,9 +1,11 @@
 import { Component, h, Prop, State, Event, EventEmitter, Fragment } from '@stencil/core';
 import { Booking, ExtraService, Room } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { ClTx } from '@/services/city-ledger/types';
 import { isAgentMode } from '../../functions';
+import { t } from '@/services/locale/t';
+import { formatCount, formatNumber } from '@/utils/number';
 
 /** Extra-service category codes that are never tucked inside the collapsible list — always shown for the room, e.g. Early Check-In / Late Check-Out fees. */
 const ALWAYS_VISIBLE_EXTRA_SERVICE_CODES = new Set(['ECI', 'LCO', 'BCT', 'EXB', 'HMP', 'ANP']);
@@ -20,7 +22,7 @@ export class IrRoomExtraServices {
   @Prop() agent: Agent;
   @Prop() currency: string = 'USD';
   @Prop() language: string = 'en';
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
   @Prop() clTransactions: ClTx[] = [];
 
   /** Which collapsible groups ('all' | 'agent' | 'guest') are expanded — keyed so agent/guest folios can be toggled independently. */
@@ -103,7 +105,7 @@ export class IrRoomExtraServices {
             }}
           >
             <span slot="summary" class="booking-room__extra-services-toggle-label">
-              {collapsible.length} more service{collapsible.length > 1 ? 's' : ''}
+              {t('Lcz_MoreServicesCount', { fallback: '%1 more service(s)', params: [formatCount(collapsible.length)] })}
             </span>
             <div class="booking-room__extra-services-list">
               {collapsible.map((service, idx) => (
@@ -126,45 +128,55 @@ export class IrRoomExtraServices {
     const inAgentMode = isAgentMode(this.agent);
     const guestServices = inAgentMode ? services.filter(s => s.agent === null || s.agent === undefined) : [];
     const agentServices = inAgentMode ? services.filter(s => s.agent !== null && s.agent !== undefined) : [];
-    const agentName = this.booking.agent?.name ?? 'Agent';
+    const agentName = this.booking.agent?.name ?? t('Lcz_Agent', { fallback: 'Agent' });
 
     return (
       <wa-card appearance="filled" class="booking-room__extra-services">
         <div slot="header" class="booking-room__extra-services-header">
           <span class="booking-room__extra-services-label">
-            <span class="booking-room__extra-services-title">{total > 0 ? '' : 'Add '}Extras</span>
-            {total > 0 && <span class="booking-room__extra-services-count">{total}</span>}
+            <span class="booking-room__extra-services-title">{total > 0 ? t('Lcz_Extras', { fallback: 'Extras' }) : t('Lcz_AddExtras', { fallback: 'Add Extras' })}</span>
+            {total > 0 && <span class="booking-room__extra-services-count">{formatNumber(total)}</span>}
           </span>
 
-          <wa-tooltip for={`add-extra-service-${this.room.identifier}`}>Add extra service</wa-tooltip>
-          <ir-custom-button
-            id={`add-extra-service-${this.room.identifier}`}
-            class="booking-room__extra-services-add"
-            iconBtn
-            size="s"
-            appearance="plain"
-            variant="brand"
-            onClickHandler={() => this.requestAddExtraService.emit()}
-          >
-            <wa-icon style={{ fontSize: '0.9rem' }} label="Add extra service" name="plus"></wa-icon>
-          </ir-custom-button>
+          <Fragment>
+            <wa-tooltip for={`add-extra-service-${this.room.identifier}`}>{t('Lcz_AddExtraService', { fallback: 'Add extra service' })}</wa-tooltip>
+            <ir-custom-button
+              id={`add-extra-service-${this.room.identifier}`}
+              class="booking-room__extra-services-add"
+              iconBtn
+              size="s"
+              appearance="plain"
+              variant="brand"
+              onClickHandler={() => this.requestAddExtraService.emit()}
+            >
+              <wa-icon style={{ fontSize: '0.9rem' }} label={t('Lcz_AddExtraService', { fallback: 'Add extra service' })} name="plus"></wa-icon>
+            </ir-custom-button>
+          </Fragment>
         </div>
         {inAgentMode ? (
           <Fragment>
             <div class="booking-room__extra-services-group booking-room__extra-services-group--agent">
               <p class="booking-room__extra-services-group-label booking-room__extra-services-group-label--agent">
                 {agentName}
-                <span>Folio</span>
+                <span>{t('Lcz_Folio', { fallback: 'Folio' })}</span>
               </p>
-              {agentServices.length === 0 ? <p class="booking-room__extra-services-empty">No agent services added</p> : this.renderServiceGroup('agent', agentServices)}
+              {agentServices.length === 0 ? (
+                <p class="booking-room__extra-services-empty">{t('Lcz_NoAgentServicesAdded', { fallback: 'No agent services added' })}</p>
+              ) : (
+                this.renderServiceGroup('agent', agentServices)
+              )}
             </div>
             <wa-divider></wa-divider>
             <div class="booking-room__extra-services-group booking-room__extra-services-group--guest">
               <p class="booking-room__extra-services-group-label">
-                Guest
-                <span>Folio</span>
+                {t('Lcz_Guest', { fallback: 'Guest' })}
+                <span>{t('Lcz_Folio', { fallback: 'Folio' })}</span>
               </p>
-              {guestServices.length === 0 ? <p class="booking-room__extra-services-empty">No guest services added</p> : this.renderServiceGroup('guest', guestServices)}
+              {guestServices.length === 0 ? (
+                <p class="booking-room__extra-services-empty">{t('Lcz_NoGuestServicesAdded', { fallback: 'No guest services added' })}</p>
+              ) : (
+                this.renderServiceGroup('guest', guestServices)
+              )}
             </div>
           </Fragment>
         ) : (

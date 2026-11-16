@@ -110,3 +110,20 @@
   height: 100%;
   overflow-y: auto;
 }
+
+/* Localized link-tooltip labels (quill.snow.css hardcodes them as English `content`). `:host` out-specifies the vendored rules. */
+:host .ql-snow .ql-tooltip::before {
+  content: var(--ir-ql-visit-url, 'Visit URL:');
+}
+:host .ql-snow .ql-tooltip[data-mode='link']::before {
+  content: var(--ir-ql-enter-link, 'Enter link:');
+}
+:host .ql-snow .ql-tooltip a.ql-action::after {
+  content: var(--ir-ql-edit, 'Edit');
+}
+:host .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
+  content: var(--ir-ql-save, 'Save');
+}
+:host .ql-snow .ql-tooltip a.ql-remove::before {
+  content: var(--ir-ql-remove, 'Remove');
+}

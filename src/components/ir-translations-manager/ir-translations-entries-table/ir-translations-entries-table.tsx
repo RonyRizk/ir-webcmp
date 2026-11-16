@@ -3,7 +3,10 @@ import { flexRender, useTable } from '@/utils/useTable';
 import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { type Cell, type Row, createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
 import { DuplicateInfo, TranslationEntry, TranslationLanguage } from '../types';
-import { hasValue } from '../utils';
+import { hasValue, setCopiedEntry } from '../utils';
+import { t } from '@/services/locale';
+import { inlineSign, isRtlLanguage } from '@/utils/direction';
+import { showToast } from '@/utils/utils';
 
 type Field = 'lang' | 'note';
 
@@ -79,6 +82,8 @@ export class IrTranslationsEntriesTable {
   @Event() entryChange: EventEmitter<TranslationEntry>;
   @Event() editEntry: EventEmitter<TranslationEntry>;
   @Event() duplicateEntry: EventEmitter<TranslationEntry>;
+  /** "Move to table…" — the parent opens the move dialog for this row. */
+  @Event() moveEntry: EventEmitter<TranslationEntry>;
   @Event() deleteEntry: EventEmitter<TranslationEntry>;
   @Event() clearFilters: EventEmitter<void>;
   @Event() reorderEntries: EventEmitter<TranslationEntry[]>;
@@ -572,14 +577,17 @@ export class IrTranslationsEntriesTable {
     }
     const lastRow = rows.length - 1;
     const lastCol = columns.length - 1;
+    // Arrow keys are physical; the grid can be laid out either way (RTL languages,
+    // RTL document), so the inline direction decides which one means "next column".
+    const sign = inlineSign();
     const jumpsToEdge = event.ctrlKey || event.metaKey;
 
     switch (event.key) {
       case 'ArrowRight':
-        this.focusCell(row, clamp(col + 1, 0, lastCol));
+        this.focusCell(row, clamp(col + sign, 0, lastCol));
         break;
       case 'ArrowLeft':
-        this.focusCell(row, clamp(col - 1, 0, lastCol));
+        this.focusCell(row, clamp(col - sign, 0, lastCol));
         break;
       case 'ArrowDown':
         this.focusCell(clamp(row + 1, 0, lastRow), col);
@@ -643,6 +651,16 @@ export class IrTranslationsEntriesTable {
         break;
       case 'copy':
         navigator.clipboard?.writeText(entry.key);
+        break;
+      case 'copy-row':
+        // The clipboard gets only the key so it pastes cleanly into the Key
+        // field; the translations wait in memory for the form to pick up.
+        setCopiedEntry(entry);
+        navigator.clipboard?.writeText(entry.key);
+        showToast({ type: 'success', title: 'Row copied — paste its key into a new entry to reuse its translations.' });
+        break;
+      case 'move':
+        this.moveEntry.emit(entry);
         break;
       case 'delete':
         this.deleteEntry.emit(entry);
@@ -773,6 +791,7 @@ export class IrTranslationsEntriesTable {
     const isEditing = !!session && session.key === `${entry.id}|${column.id}`;
     const ariaLabel = isNote ? `${entry.key} note` : `${language?.name} translation for ${entry.key || 'new entry'}`;
 
+    const dir = !isNote && isRtlLanguage(column.code) ? 'rtl' : 'ltr';
     if (entry.meta?.isUpdateable === false) {
       return (
         <span class="entries-table__cell-display --readonly">
@@ -797,6 +816,12 @@ export class IrTranslationsEntriesTable {
           label={ariaLabel}
           autocomplete="off"
           spellcheck={false}
+          ref={el => {
+            // Not a JSX `dir` prop: every wa-* element declares `dir` as a
+            // non-reflecting Lit property, so Stencil would assign the property
+            // and the attribute directionality reads from would never be set.
+            el?.setAttribute('dir', dir);
+          }}
           oninput={(e: Event) => (session.draft = (e.target as HTMLInputElement).value)}
           onKeyDown={(e: KeyboardEvent) => this.handleEditorKeyDown(e, session)}
           onblur={() => this.handleEditorBlur(session)}
@@ -898,13 +923,22 @@ export class IrTranslationsEntriesTable {
           <wa-icon slot="icon" name="clipboard"></wa-icon>
           Copy key
         </wa-dropdown-item>
+        <wa-dropdown-item value="copy-row">
+          <wa-icon slot="icon" name="clone"></wa-icon>
+          Copy row
+        </wa-dropdown-item>
+        <wa-dropdown-item value="move" disabled={entry.meta?.isUpdateable === false}>
+          <wa-icon slot="icon" name="arrow-right-arrow-left"></wa-icon>
+          Move to table…
+        </wa-dropdown-item>
         <wa-dropdown-item value="toggle-visibility">
           <wa-icon slot="icon" name={entry.meta?.isVisible === false ? 'eye' : 'eye-slash'}></wa-icon>
           {entry.meta?.isVisible === false ? 'Show in app' : 'Hide from app'}
         </wa-dropdown-item>
-        <wa-dropdown-item value="delete" variant="danger" disabled={entry.meta?.isDeleteable === false}>
+        {/* <wa-dropdown-item value="delete" variant="danger" disabled={entry.meta?.isDeleteable === false}> */}
+        <wa-dropdown-item value="delete" variant="danger">
           <wa-icon slot="icon" name="trash-can"></wa-icon>
-          Delete
+          {t('Lcz_Delete', { fallback: 'Delete' })}
         </wa-dropdown-item>
       </wa-dropdown>
     );
@@ -941,7 +975,7 @@ export class IrTranslationsEntriesTable {
       ),
       helper.display({
         id: 'actions',
-        header: () => <span class="entries-table__sr-only">Actions</span>,
+        header: () => <span class="entries-table__sr-only">{t('Lcz_Actions', { fallback: 'Actions' })}</span>,
         cell: info => this.renderActionsCell(info.row.original),
       }),
     ];

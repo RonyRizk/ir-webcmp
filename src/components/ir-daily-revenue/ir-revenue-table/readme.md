@@ -1,7 +1,5 @@
 # ir-revenue-table
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -10,7 +8,7 @@
 | Property         | Attribute | Description | Type                                                                                      | Default     |
 | ---------------- | --------- | ----------- | ----------------------------------------------------------------------------------------- | ----------- |
 | `filters`        | --        |             | `{ from_date?: string; to_date?: string; date?: string; users: string; source: string; }` | `undefined` |
-| `paymentEntries` | --        |             | `{ types: IEntries[]; groups: IEntries[]; methods: IEntries[]; }`                         | `undefined` |
+| `paymentEntries` | --        |             | `{ types: SetupEntries[]; groups: SetupEntries[]; methods: SetupEntries[]; }`             | `undefined` |
 | `payments`       | --        |             | `Map<string, FolioPayment[]>`                                                             | `new Map()` |
 
 

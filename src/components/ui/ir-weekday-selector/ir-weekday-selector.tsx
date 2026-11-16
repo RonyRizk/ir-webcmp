@@ -1,4 +1,5 @@
 import { Component, Event, EventEmitter, h, Host, Prop, State, Watch } from '@stencil/core';
+import { t } from '@/services/locale/t';
 export interface Weekday {
   value: number;
   label: string;
@@ -35,15 +36,19 @@ export class IrWeekdaySelector {
    */
   @Event() weekdayChange: EventEmitter<number[]>;
 
-  private _weekdays: Weekday[] = [
-    { value: 1, label: 'M' },
-    { value: 2, label: 'T' },
-    { value: 3, label: 'W' },
-    { value: 4, label: 'Th' },
-    { value: 5, label: 'Fr' },
-    { value: 6, label: 'Sa' },
-    { value: 0, label: 'Su' },
-  ];
+  /** Monday-first day values; labels come from `Lcz_WeekdayAbbreviations` so they localise. */
+  private static readonly WEEKDAY_VALUES = [1, 2, 3, 4, 5, 6, 0];
+  private static readonly WEEKDAY_FALLBACK = 'M, T, W, Th, Fr, Sa, Su';
+
+  private get _weekdays(): Weekday[] {
+    const labels = t('Lcz_WeekdayAbbreviations', { fallback: IrWeekdaySelector.WEEKDAY_FALLBACK })
+      .split(',')
+      .map(s => s.trim());
+    return IrWeekdaySelector.WEEKDAY_VALUES.map((value, i) => ({
+      value,
+      label: labels[i] ?? IrWeekdaySelector.WEEKDAY_FALLBACK.split(', ')[i],
+    }));
+  }
   componentWillLoad() {
     if (this.weekdays) {
       this.selectedWeekdays = new Set(this.weekdays);

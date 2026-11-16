@@ -18,6 +18,7 @@ export class IrCommon {
 
   componentDidLoad() {
     this.initializeStyles();
+    this.loadArabicFont();
   }
 
   @Watch('extraResources')
@@ -68,6 +69,21 @@ export class IrCommon {
         });
       }
     });
+  }
+
+  private loadArabicFont() {
+    this.appendTag('link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' });
+    this.appendTag('link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' });
+    this.appendTag('link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap' });
+
+    const styleId = 'ir-arabic-font';
+    if (document.getElementById(styleId)) {
+      return;
+    }
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `:lang(ar):not(i, [class^="la-"], [class*=" la-"], [class^="ft-"], [class*=" ft-"], [class^="fa-"], [class*=" fa-"]) { font-family: "Cairo", sans-serif !important; }`;
+    document.head.appendChild(style);
   }
 
   render() {

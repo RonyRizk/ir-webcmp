@@ -3,13 +3,14 @@ import { Booking, ExtraService, IUnit, Room, SharedPerson } from '@/models/booki
 import { Agent } from '@/services/agents/type';
 import { TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { formatName } from '@/utils/booking';
-import locales from '@/stores/locales.store';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { OpenSidebarEvent, RoomGuestsPayload } from '../types';
+import { OpenSidebarEvent, PrintScreenOptions, RoomGuestsPayload } from '../types';
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { ClTx } from '@/services/city-ledger/types';
 import { IrRoomHeaderAction } from './ir-room-header/ir-room-header';
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
 export type RoomModalReason = 'delete' | 'checkin' | 'checkout' | null;
 
 @Component({
@@ -34,9 +35,9 @@ export class IrRoom {
   @Prop() language: string = 'en';
   @Prop() legendData;
   @Prop() roomsInfo;
-  @Prop() bedPreferences: IEntries[];
-  @Prop() departureTime: IEntries[];
-  @Prop() arrivalTime: IEntries[];
+  @Prop() bedPreferences: SetupEntries[];
+  @Prop() departureTime: SetupEntries[];
+  @Prop() arrivalTime: SetupEntries[];
   // Booleans Conditions
   @Prop() hasRoomEdit: boolean = false;
   @Prop() hasRoomDelete: boolean = false;
@@ -54,7 +55,7 @@ export class IrRoom {
   @Prop() clTransactions: ClTx[] = [];
 
   /** `_SVC_CATEGORY` setup entries, used to label extra services in the room's extra-services section. */
-  @Prop() svcCategories: IEntries[] = [];
+  @Prop() svcCategories: SetupEntries[] = [];
 
   @State() collapsed: boolean = true;
   @State() isLoading: boolean = false;
@@ -77,6 +78,7 @@ export class IrRoom {
   @Event() resetBookingEvt: EventEmitter<Booking | null>;
   @Event() openSidebar: EventEmitter<OpenSidebarEvent<RoomGuestsPayload>>;
   @Event({ bubbles: true, composed: true }) addExtraServiceToUnit: EventEmitter<{ identifier: string }>;
+  @Event({ bubbles: true, composed: true }) openPrintScreen: EventEmitter<PrintScreenOptions>;
 
   private modal: HTMLIrDialogElement;
   private toggleDialogRef: HTMLIrAssignmentToggleDialogElement;
@@ -125,7 +127,7 @@ export class IrRoom {
     try {
       const booking = await this.bookingService.getExposedBooking({
         booking_nbr: this.booking.booking_nbr,
-        language: this.language,
+        language: LocaleController.languageFor(this.element),
         is_calculate_totals: true,
         include_dp_pricing: true,
       });
@@ -181,7 +183,7 @@ export class IrRoom {
       REFERENCE_TYPE: '',
       FROM_DATE: this.booking.from_date,
       TO_DATE: this.booking.to_date,
-      TITLE: `${locales.entries.Lcz_EditBookingFor} ${this.room?.roomtype?.name} ${(this.room?.unit as IUnit)?.name || ''}`,
+      TITLE: `${t('Lcz_EditBookingFor')} ${this.room?.roomtype?.name} ${(this.room?.unit as IUnit)?.name || ''}`,
       defaultDateRange: {
         dateDifference: this.room.days.length,
         fromDate: this.room.from_date,
@@ -334,14 +336,11 @@ export class IrRoom {
   private renderModalMessage() {
     switch (this.modalReason) {
       case 'delete':
-        return `${locales.entries['Lcz_AreYouSureDoYouWantToRemove ']} ${this.room.roomtype.name} ${this.room.unit ? (this.room.unit as IUnit).name : ''} ${
-          locales.entries.Lcz_FromThisBooking
-        }`;
+        return `${t('Lcz_AreYouSureDoYouWantToRemove')} ${this.room.roomtype.name} ${this.room.unit ? (this.room.unit as IUnit).name : ''} ${t('Lcz_FromThisBooking')}`;
       case 'checkin':
-        return `Are you sure you want to Check In this unit?
-`;
+        return t('Lcz_ConfirmCheckIn', { fallback: 'Are you sure you want to Check In this unit?' });
       case 'checkout':
-        return `Are you sure you want to Check Out this unit?`;
+        return t('Lcz_ConfirmCheckOut', { fallback: 'Are you sure you want to Check Out this unit?' });
       default:
         return '';
     }
@@ -394,6 +393,9 @@ export class IrRoom {
       case 'add-extra-service':
         this.handleAddExtraServiceToUnit();
         break;
+      case 'print-registration-card':
+        this.openPrintScreen.emit({ mode: 'registration-card', payload: { room_identifier: this.room.identifier } });
+        break;
     }
   }
 
@@ -402,7 +404,7 @@ export class IrRoom {
       <Host>
         <div class="booking-room__header-row">
           <button data-state={this.collapsed ? 'closed' : 'opened'} class="booking-room__collapse-btn" onClick={() => (this.collapsed = !this.collapsed)}>
-            <wa-icon name="chevron-right"></wa-icon>
+            <wa-icon class="ir-flip-rtl" name="chevron-right"></wa-icon>
           </button>
           <div style={{ width: '100%', cursor: 'default' }}>
             <div
@@ -455,12 +457,19 @@ export class IrRoom {
         ></ir-room-extra-services>
         <ir-assignment-toggle-dialog ref={el => (this.toggleDialogRef = el)} loading={this.isToggling} onConfirmToggle={() => this.toggleRoomAgent()}>
           <span slot="message">
-            Move {this.room.roomtype.name} {this.room.rateplan.short_name} {(this.room.unit as IUnit)?.name} to{' '}
-            <b>{this.room.agent ? 'guest' : (this.booking?.agent?.name ?? 'agent')} folio</b>.
+            {t('Lcz_MoveToFolio', {
+              fallback: 'Move %1 %2 %3 to %4 folio.',
+              params: [
+                this.room.roomtype.name,
+                this.room.rateplan.short_name,
+                (this.room.unit as IUnit)?.name ?? '',
+                this.room.agent ? t('Lcz_GuestLowercase', { fallback: 'guest' }) : (this.booking?.agent?.name ?? t('Lcz_AgentLowercase', { fallback: 'agent' })),
+              ],
+            })}
           </span>
         </ir-assignment-toggle-dialog>
         <ir-dialog
-          label={this.modalReason === 'delete' ? 'Alert' : locales.entries.Lcz_Confirmation}
+          label={this.modalReason === 'delete' ? t('Lcz_Alert', { fallback: 'Alert' }) : t('Lcz_Confirmation', { fallback: 'Confirmation' })}
           ref={el => (this.modal = el)}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
@@ -476,10 +485,10 @@ export class IrRoom {
           <p>{this.renderModalMessage()}</p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
-              {locales.entries.Lcz_Cancel}
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" loading={this.isLoading} onClickHandler={e => this.handleModalConfirmation(e)} variant={this.modalReason === 'delete' ? 'danger' : 'brand'}>
-              {this.modalReason === 'delete' ? locales.entries.Lcz_Delete : locales.entries.Lcz_Confirm}
+              {this.modalReason === 'delete' ? t('Lcz_Delete', { fallback: 'Delete' }) : t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

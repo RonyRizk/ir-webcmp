@@ -1,8 +1,9 @@
 import { Booking } from '@/models/booking.dto';
 import { CityLedgerService, type FiscalDocument } from '@/services/city-ledger';
 import calendar_data from '@/stores/calendar-data';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-agent-billing',
@@ -19,7 +20,7 @@ export class IrAgentBilling {
   private invoiceDialogRef: HTMLIrClInvoiceDialogElement;
 
   private cityLedgerService = new CityLedgerService();
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
 
   async componentWillLoad() {
     await this.fetchFiscalDocuments();
@@ -78,7 +79,7 @@ export class IrAgentBilling {
       <Host>
         <div class="billing__container">
           <div class="billing__section-title-row">
-            <h4 class="billing__section-title">Issued documents</h4>
+            <h4 class="billing__section-title">{t('Lcz_IssuedDocuments', { fallback: 'Issued documents' })}</h4>
             <ir-custom-button
               onClickHandler={e => {
                 e.stopImmediatePropagation();
@@ -90,7 +91,7 @@ export class IrAgentBilling {
               size="s"
               variant="brand"
             >
-              Issue Invoice
+              {t('Lcz_IssueInvoice', { fallback: 'Issue Invoice' })}
             </ir-custom-button>
             {/* {!canIssueInvoice && <wa-tooltip for={this._id}>Invoices cannot be issued before guest arrival</wa-tooltip>} */}
           </div>
@@ -105,7 +106,7 @@ export class IrAgentBilling {
             fromDate={this.booking?.from_date ?? null}
             toDate={this.booking?.to_date ?? null}
             hasDates={true}
-            ticket={this.tokenService.getToken()}
+            ticket={this.apiClientService.getToken()}
             propertyId={calendar_data.property?.id}
             onFetchRequested={() => this.fetchFiscalDocuments()}
           ></ir-city-ledger-fiscal-documents-table>

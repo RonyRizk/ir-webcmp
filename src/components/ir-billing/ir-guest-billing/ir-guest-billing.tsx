@@ -2,9 +2,10 @@ import { Booking } from '@/models/booking.dto';
 import { Component, Event, EventEmitter, Fragment, Listen, Prop, State, h } from '@stencil/core';
 import { BookingInvoiceInfo } from '../../ir-invoice/types';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, getEntryValue } from '@/services/setup';
 import { PropertyService } from '@/services/property.service';
-import { formatAmount, getEntryValue } from '@/utils/utils';
-import type { IEntries } from '@/models/property';
+import { formatAmount, formatBookingNumber } from '@/utils/number';
+import type { SetupEntries } from '@/models/property';
 import moment from 'moment';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { v4 } from 'uuid';
@@ -14,6 +15,9 @@ import { FdTypes, PayStatus, PayTypes } from '@/types/enums';
 import type { UnifiedFolioRecord, GetUnifiedFolioParams } from '@/services/property/types';
 import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { formatDate } from '@/utils/date';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-guest-billing',
@@ -27,7 +31,7 @@ export class IrGuestBilling {
   @State() isLoading: 'page' | null = 'page';
   @State() invoiceInfo: BookingInvoiceInfo;
   @State() rows: UnifiedFolioRecord[] = [];
-  @State() private fdTypes: IEntries[] = [];
+  @State() private fdTypes: SetupEntries[] = [];
   @State() voidedInvoices: Set<string> = new Set();
   @State() voidedReceipts: Set<string> = new Set();
 
@@ -37,6 +41,7 @@ export class IrGuestBilling {
   @Event({ bubbles: true, composed: true }) resetBookingEvt: EventEmitter<Booking | null>;
 
   private bookingService = new BookingService();
+  private setupService = new SetupService();
   private propertyService = new PropertyService();
   private _id = `issue_invoice__btn_${v4()}`;
   private voidDialogRef: HTMLIrVoidDocumentDialogElement;
@@ -77,7 +82,7 @@ export class IrGuestBilling {
   private async init() {
     try {
       this.isLoading = 'page';
-      const [, fdTypes] = await Promise.all([this.refreshInvoiceAndFolio(), this.bookingService.getSetupEntriesByTableName('_FD_TYPE')]);
+      const [, fdTypes] = await Promise.all([this.refreshInvoiceAndFolio(), this.setupService.getSetupEntriesByTableName('_FD_TYPE')]);
       this.fdTypes = fdTypes ?? [];
       let voidedReceipts: Set<string> = new Set();
       this.booking.financial.payments?.forEach(payment => {
@@ -95,7 +100,7 @@ export class IrGuestBilling {
 
   private async refreshInvoiceAndFolio() {
     const [invoiceInfo, { rows }] = await Promise.all([
-      this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
+      this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language }),
       this.propertyService.getUnifiedFolio(this.buildFolioParams()),
     ]);
     this.invoiceInfo = invoiceInfo;
@@ -120,7 +125,7 @@ export class IrGuestBilling {
       // Voiding a receipt changes booking.financial.payments, which this component doesn't own.
       // Pass the freshly fetched booking so ir-booking-details updates in place instead of
       // taking the resetBookingEvt(null) branch, which shows its full-page loading spinner.
-      const freshBooking = await this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: 'en' });
+      const freshBooking = await this.bookingService.getExposedBooking({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language });
       this.resetBookingEvt.emit(freshBooking);
     }
   }
@@ -128,7 +133,7 @@ export class IrGuestBilling {
   private get fdTypeLabels(): Record<string, string> {
     const map: Record<string, string> = {};
     for (const entry of this.fdTypes) {
-      map[entry.CODE_NAME] = getEntryValue({ entry, language: 'en' });
+      map[entry.CODE_NAME] = getEntryValue({ entry, language: LocaleController.language });
     }
     return map;
   }
@@ -170,7 +175,7 @@ export class IrGuestBilling {
         <div class="billing__container">
           <section>
             <div class="billing__section-title-row">
-              <h4 class="billing__section-title">Issued documents</h4>
+              <h4 class="billing__section-title">{t('Lcz_IssuedDocuments', { fallback: 'Issued documents' })}</h4>
               <ir-custom-button
                 variant="brand"
                 id={this._id}
@@ -180,19 +185,19 @@ export class IrGuestBilling {
                   this.isOpen = 'invoice';
                 }}
               >
-                Issue invoice
+                {t('Lcz_IssueInvoice')}
               </ir-custom-button>
             </div>
             <div class="table-container">
               <table class="table data-table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th class="billing__doc-number-col">Doc number</th>
-                    <th>Type</th>
-                    <th class="billing__price-col">Debit</th>
-                    <th class="billing__price-col">Credit</th>
-                    <th class={'text-center'}>Actions</th>
+                    <th>{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+                    <th class="billing__doc-number-col">{t('Lcz_DocNumber')}</th>
+                    <th>{t('Lcz_Type', { fallback: 'Type' })}</th>
+                    <th class="billing__price-col">{t('Lcz_Debit', { fallback: 'Debit' })}</th>
+                    <th class="billing__price-col">{t('Lcz_Credit', { fallback: 'Credit' })}</th>
+                    <th class={'text-center'}>{t('Lcz_Actions', { fallback: 'Actions' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -211,7 +216,7 @@ export class IrGuestBilling {
                         <td>
                           {row.DOC_DATE ? (
                             <div class="billing__date-cell">
-                              <p class="m-0 p-0">{moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY')}</p>
+                              <p class="m-0 p-0">{formatDate(row.DOC_DATE, 'MMM DD, YYYY')}</p>
                               {row.DOC_HOUR != null && row.DOC_MINUTE != null && <p class="billing__date-time">{_formatTime(String(row.DOC_HOUR), String(row.DOC_MINUTE))}</p>}
                             </div>
                           ) : (
@@ -220,7 +225,7 @@ export class IrGuestBilling {
                         </td>
                         <td class="billing__doc-number-col">
                           <wa-button onClick={() => this.printInvoice({ row })} variant="brand" appearance="plain" class="billing__invoice-nbr">
-                            {row.DOC_NUMBER}
+                            {formatBookingNumber(row.DOC_NUMBER)}
                           </wa-button>
                         </td>
                         <td>{(row.FD_TYPE_CODE && this.fdTypeLabels[row.FD_TYPE_CODE === 'RFND' ? FdTypes.CreditReceipt : row.FD_TYPE_CODE]) || row.FD_TYPE_CODE || '—'}</td>
@@ -260,17 +265,17 @@ export class IrGuestBilling {
                               }}
                             >
                               <wa-dropdown-item value="view-print">
-                                Open PDF
+                                {t('Lcz_OpenPdf', { fallback: 'Open PDF' })}
                                 {isRequestPending('/Print_Invoice') && <wa-spinner slot="details"></wa-spinner>}
                               </wa-dropdown-item>
                               {isInvoice && !this.voidedInvoices.has(row.DOC_NUMBER) && (
                                 <wa-dropdown-item variant="danger" value="void">
-                                  Void with credit note
+                                  {t('Lcz_VoidWithCreditNote', { fallback: 'Void with credit note' })}
                                 </wa-dropdown-item>
                               )}
                               {isReceipt && !this.voidedReceipts.has(row.DOC_NUMBER) && (
                                 <wa-dropdown-item variant="danger" value="void">
-                                  Void with credit receipt
+                                  {t('Lcz_VoidWithCreditReceipt', { fallback: 'Void with credit receipt' })}
                                 </wa-dropdown-item>
                               )}
                               <ir-custom-button slot="trigger" id={`pdf-${row.DOC_ID ?? row.DOC_NUMBER}`} variant="neutral" appearance="plain">
@@ -298,11 +303,11 @@ export class IrGuestBilling {
                     <div class="billing__card-header">
                       <div class="billing__card-header-info">
                         <p class="billing__card-number">
-                          {(row.FD_TYPE_CODE && this.fdTypeLabels[row.FD_TYPE_CODE]) || row.FD_TYPE_CODE || '—'}:{row.DOC_NUMBER}
+                          {(row.FD_TYPE_CODE && this.fdTypeLabels[row.FD_TYPE_CODE]) || row.FD_TYPE_CODE || '—'}:{formatBookingNumber(row.DOC_NUMBER)}
                         </p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                        <wa-tooltip for={`mobile-download-pdf-${row.DOC_ID ?? row.DOC_NUMBER}`}>Open PDF</wa-tooltip>
+                        <wa-tooltip for={`mobile-download-pdf-${row.DOC_ID ?? row.DOC_NUMBER}`}>{t('Lcz_OpenPdf', { fallback: 'Open PDF' })}</wa-tooltip>
                         <ir-custom-button
                           onClickHandler={() => this.printInvoice({ row })}
                           loading={isRequestPending('/Print_Invoice')}
@@ -318,15 +323,15 @@ export class IrGuestBilling {
 
                     <div class="billing__card-details">
                       <div class="billing__card-detail">
-                        <p class="billing__card-detail-label">Date</p>
+                        <p class="billing__card-detail-label">{t('Lcz_DateLabel', { fallback: 'Date' })}</p>
                         <div class="billing__date-cell">
-                          <p class="billing__card-detail-value">{row.DOC_DATE ? moment(row.DOC_DATE, 'YYYY-MM-DD').format('MMM DD, YYYY') : '—'}</p>
+                          <p class="billing__card-detail-value">{row.DOC_DATE ? formatDate(row.DOC_DATE, 'MMM DD, YYYY') : '—'}</p>
                           {row.DOC_HOUR != null && row.DOC_MINUTE != null && <p class="billing__date-time">{_formatTime(String(row.DOC_HOUR), String(row.DOC_MINUTE))}</p>}
                         </div>
                       </div>
 
                       <div class="billing__card-detail">
-                        <p class="billing__card-detail-label --amount">Amount</p>
+                        <p class="billing__card-detail-label --amount">{t('Lcz_Amount', { fallback: 'Amount' })}</p>
                         <p class="billing__card-detail-value">{formatAmount(currencySymbol, row.TOTAL_AMOUNT ?? 0)}</p>
                       </div>
                     </div>
@@ -341,7 +346,7 @@ export class IrGuestBilling {
                           appearance="outlined"
                           class="billing__card-void-btn"
                         >
-                          Void with credit note
+                          {t('Lcz_VoidWithCreditNote', { fallback: 'Void with credit note' })}
                         </ir-custom-button>
                       </div>
                     )}

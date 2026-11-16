@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-rectifier-drawer',
@@ -30,14 +31,14 @@ export class IrRectifierDrawer {
   render() {
     return (
       <Host>
-        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label="Rectify/Extend Availability" open={this.open} class="rectifier__drawer">
+        <ir-drawer onDrawerHide={this.handleDrawerClose.bind(this)} label={t('Lcz_RectifyExtendAvailability', { fallback: 'Rectify/Extend Availability' })} open={this.open} class="rectifier__drawer">
           {this.open && <ir-rectifier formId={this.formId} onCloseDrawer={this.handleDrawerClose.bind(this)} onLoadingChanged={this.handleLoadingChange.bind(this)}></ir-rectifier>}
           <div slot="footer" class="ir__drawer-footer">
             <ir-custom-button size="m" variant="neutral" appearance="filled" data-drawer="close">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button loading={this.isLoading} type="submit" form={this.formId} size="m" variant="brand">
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-drawer>

@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { Booking, IUnit, Room } from '@/models/booking.dto';
 import { ClTx } from '@/services/city-ledger/types';
 import { Agent } from '@/services/agents/type';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-pricing-drawer',
@@ -24,7 +25,7 @@ export class IrBookingPricingDrawer {
   @Event() pricingSaved: EventEmitter<void>;
 
   private get drawerLabel(): string {
-    if (!this.room) return 'Edit Nightly Rates';
+    if (!this.room) return t('Lcz_EditNightlyRates', { fallback: 'Edit Nightly Rates' });
     const parts = [this.room.roomtype?.name, this.room.rateplan?.short_name].filter(Boolean);
     const unitName = (this.room.unit as IUnit)?.name;
     if (unitName) parts.push(unitName);
@@ -84,10 +85,10 @@ export class IrBookingPricingDrawer {
 
         <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button appearance="filled" size="m" variant="neutral" onClickHandler={() => this.closeDrawer.emit()}>
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button form={this.formId} size="m" type="submit" variant="brand" loading={this.saveDisabled} disabled={this.allItemsDisabled}>
-            Confirm
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

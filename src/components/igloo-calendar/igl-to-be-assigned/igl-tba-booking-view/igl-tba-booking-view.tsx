@@ -2,7 +2,8 @@ import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } f
 import { UnassignedUnitsService } from '@/services/unassigned-units';
 import { CalendarAssignedEvent, CalendarEventContext, CalendarUnitPreviewEvent, UnassignedRoomEntry } from '@/services/unassigned-units/types';
 import { clampToLoadedRange, guestName, toCalendarAssignedEvent, toCalendarPreviewEvents } from '@/services/unassigned-units/utils';
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber } from '@/utils/number';
 import { CalendarSidebarState } from '@/components/igloo-calendar/igloo-calendar';
 import { canCheckIn } from '@/utils/utils';
 import { Booking, Occupancy } from '@/models/booking.dto';
@@ -11,9 +12,9 @@ type PendingAction = 'assign' | 'checkin';
 
 function formatOccupancy({ adult_nbr, children_nbr, infant_nbr }: Occupancy): string {
   const parts: [number, string][] = [
-    [adult_nbr, 'A'],
-    [children_nbr, 'C'],
-    [infant_nbr, 'I'],
+    [adult_nbr, t('Lcz_AdultAbbreviation', { fallback: 'A' })],
+    [children_nbr, t('Lcz_ChildAbbreviation', { fallback: 'C' })],
+    [infant_nbr, t('Lcz_InfantAbbreviation', { fallback: 'I' })],
   ];
   return parts
     .filter(([count]) => count > 0)
@@ -174,8 +175,8 @@ export class IglTbaBookingView {
     return (
       <Host>
         <wa-card appearance="filled" class={this.isHighlighted ? 'tba --active' : 'tba'} onClick={this.highlight}>
-          <div slot="header" class="tba__header" title={locales.entries.Lcz_AssignUnit}>
-            <p class="tba__booking-number">{booking_nbr}</p>
+          <div slot="header" class="tba__header" title={t('Lcz_ClickToAssignUnit', { fallback: 'Click to assign unit' })}>
+            <p class="tba__booking-number">{formatBookingNumber(booking_nbr)}</p>
             <span class="tba__separator">-</span>
             <p class="tba__guest-name">{guestName(this.room)}</p>
             {occupancyLabel && (
@@ -189,7 +190,7 @@ export class IglTbaBookingView {
 
           <div class="tba__actions">
             <wa-select class="tba__select" size="s" value={selectedValue} defaultValue={selectedValue} onchange={this.handleUnitChange}>
-              <wa-option value="">{locales.entries.Lcz_AssignUnit}</wa-option>
+              <wa-option value="">{t('Lcz_AssignUnit')}</wa-option>
               {(this.room.assignable_units ?? []).map(unit => (
                 <wa-option key={unit.pr_id} value={String(unit.pr_id)}>
                   {unit.name}
@@ -215,7 +216,7 @@ export class IglTbaBookingView {
               disabled={actionsDisabled}
               onClick={this.handleAssign}
             >
-              {locales.entries.Lcz_Assign}
+              {t('Lcz_Assign', { fallback: 'Assign' })}
             </wa-button>
             {canCheckInNow && (
               <wa-button
@@ -226,7 +227,7 @@ export class IglTbaBookingView {
                 disabled={actionsDisabled}
                 onClick={this.handleAssignAndCheckIn}
               >
-                {locales.entries.Lcz_AssignedAndChecIn}
+                {t('Lcz_AssignedAndChecIn')}
               </wa-button>
             )}
           </div>

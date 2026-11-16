@@ -1,0 +1,219 @@
+/*
+ * ir-auth has no style encapsulation (it must sit in the page's server form like the
+ * original markup), so this sheet is global: every rule is anchored on `ir-auth` and
+ * targets the component's own class names, never raw elements.
+ * Colors and spacing come from the Web Awesome theme tokens only.
+ */
+ir-auth {
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* Fills the screen on its own, whatever the host page sets; grows past it when the content is taller. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--wa-space-xl) var(--wa-space-3xl);
+  background: var(--wa-color-surface-default);
+  color: var(--wa-color-text-normal);
+  font-family: var(--font-body);
+}
+
+ir-auth .pms-auth__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+ir-auth .pms-auth__logo {
+  height: 20px;
+  object-fit: contain;
+}
+
+ir-auth .pms-auth__lang-trigger {
+  font-size: 0.85rem;
+}
+
+ir-auth .pms-auth__card {
+  width: 100%;
+  max-width: 380px;
+  margin: auto;
+  padding: var(--wa-space-3xl) 0;
+}
+
+ir-auth .pms-auth__title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  color: var(--wa-color-text-normal);
+  margin: 0 0 var(--wa-space-xl);
+  text-align: start;
+}
+
+ir-auth .pms-auth__subtitle {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--wa-color-text-quiet);
+  margin: 0 0 var(--wa-space-l);
+  text-align: start;
+}
+
+/* The views render an empty subtitle placeholder; it must not add a gap under the title. */
+ir-auth .pms-auth__subtitle:empty {
+  display: none;
+}
+
+ir-auth .pms-auth__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wa-space-s);
+  background: var(--wa-color-brand-fill-quiet);
+  border: 1px solid var(--wa-color-brand-border-quiet);
+  border-radius: var(--wa-border-radius-m);
+  padding: var(--wa-space-m);
+  margin: 0 0 var(--wa-space-l);
+  font-size: 0.85rem;
+  color: var(--wa-color-brand-on-quiet);
+  line-height: 1.4;
+}
+
+ir-auth .pms-auth__notice-icon {
+  color: var(--wa-color-brand-fill-loud);
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+ir-auth .pms-auth__notice-emphasis {
+  font-weight: 600;
+}
+
+ir-auth .pms-auth__field {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--wa-space-l);
+}
+
+ir-auth .pms-auth__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Sits right under the field above it: pulls back into the field's bottom margin, leaving a small gap. */
+  margin: calc(var(--wa-space-xs) - var(--wa-space-l)) 0 var(--wa-space-l);
+  font-size: var(--wa-font-size-s);
+}
+
+/* The checkbox label matches the "I Forgot" link beside it. */
+ir-auth .pms-auth__remember {
+  font-size: inherit;
+}
+
+ir-auth .pms-auth__row--end {
+  justify-content: flex-end;
+}
+
+/*
+ * Links follow Web Awesome's native link styles (assets/webawesome/native.css, not loaded on this page):
+ * dotted underline at rest, solid underline and a color-mix shift on hover, the focus ring on keyboard focus.
+ * The :hover selector carries the extra class so it outranks bootstrap's global `a:hover`.
+ */
+ir-auth .pms-auth__link {
+  --pms-auth-link-color: var(--wa-color-brand-fill-loud);
+
+  color: var(--pms-auth-link-color);
+  font-weight: 400;
+  text-decoration: var(--wa-link-decoration-default);
+  -webkit-text-decoration: var(--wa-link-decoration-default);
+  text-decoration-thickness: 0.09375em;
+  text-underline-offset: 0.125em;
+  transition: color var(--wa-transition-fast) var(--wa-transition-easing);
+}
+
+/* Links that read as actions (I Forgot, Back to sign in, the app icons) show no underline until hovered. */
+ir-auth .pms-auth__link--plain {
+  text-decoration: none;
+  -webkit-text-decoration: none;
+}
+
+@media (hover: hover) {
+  ir-auth .pms-auth__link:hover {
+    color: color-mix(in oklab, var(--pms-auth-link-color), var(--wa-color-mix-hover));
+    text-decoration: var(--wa-link-decoration-hover);
+    -webkit-text-decoration: var(--wa-link-decoration-hover);
+  }
+
+  /* An icon has no text to underline. */
+  ir-auth .pms-auth__app-link:hover {
+    text-decoration: none;
+    -webkit-text-decoration: none;
+  }
+}
+
+ir-auth .pms-auth__link:focus {
+  outline: none;
+}
+
+ir-auth .pms-auth__link:focus-visible {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+  border-radius: var(--wa-border-radius-s);
+}
+
+ir-auth .pms-auth__submit {
+  width: 100%;
+  margin-top: var(--wa-space-xs);
+}
+
+ir-auth .pms-auth__return {
+  margin: var(--wa-space-l) 0 0;
+  font-size: 0.9rem;
+}
+
+ir-auth .pms-auth__return-link {
+  font-weight: 500;
+}
+
+ir-auth .pms-auth__divider {
+  border: none;
+  border-top: 1px solid var(--wa-color-surface-border);
+  margin: var(--wa-space-xl) 0;
+}
+
+ir-auth .pms-auth__extras {
+  margin-top: var(--wa-space-xl);
+}
+
+ir-auth .pms-auth__apps {
+  display: flex;
+  gap: var(--wa-space-m);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--wa-space-m);
+}
+
+ir-auth .pms-auth__app-link {
+  display: inline-flex;
+}
+
+ir-auth .pms-auth__app-icon {
+  font-size: 2.5rem;
+}
+
+ir-auth .pms-auth__signup {
+  width: 100%;
+}
+
+ir-auth .pms-auth__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wa-space-2xs);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--wa-color-text-quiet);
+}
+
+ir-auth .pms-auth__legal,
+ir-auth .pms-auth__help {
+  margin: 0;
+}

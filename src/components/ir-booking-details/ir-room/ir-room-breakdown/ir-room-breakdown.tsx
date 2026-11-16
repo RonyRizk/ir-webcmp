@@ -1,13 +1,13 @@
 import { Component, h, Prop, Fragment } from '@stencil/core';
 import { _getDay } from '../../functions';
 import { Booking, Room } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
-import { formatAmount } from '@/utils/utils';
 import { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { SvcCategory } from '@/types/enums';
 
+import { t } from '@/services/locale/t';
+import { formatAmount } from '@/utils/number';
 @Component({
   tag: 'ir-room-breakdown',
   styleUrl: 'ir-room-breakdown.css',
@@ -67,7 +67,7 @@ export class IrRoomBreakdown {
                   });
                 })()}
               <tr class={''}>
-                <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right subtotal_row">{locales.entries.Lcz_SubTotal}</th>
+                <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right subtotal_row">{t('Lcz_SubTotal')}</th>
                 <th class="booking-room__cell booking-room__cell--right subtotal_row">{formatAmount(this.currency, this.room.total)}</th>
                 {this.room.gross_cost > 0 && this.room.gross_cost !== null && (
                   <th class="booking-room__cell booking-room__cell--right booking-room__cell--pad-left night-cost">{formatAmount(this.currency, this.room.cost)}</th>
@@ -88,7 +88,7 @@ export class IrRoomBreakdown {
                         <tr>
                           <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
                             <span class={'booking-room__cell-tax-name'}>
-                              {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name} ({d.pct}%)
+                              {d.is_exlusive ? t('Lcz_Excluding', { fallback: 'Excluding' }) : t('Lcz_Including', { fallback: 'Including' })} {d.name} ({d.pct}%)
                             </span>
                           </td>
                           <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, amount / 100)}</td>
@@ -105,7 +105,7 @@ export class IrRoomBreakdown {
                     <tr>
                       <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
                         <span class={'booking-room__cell-tax-name'}>
-                          {locales.entries.Lcz_Including} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
+                          {t('Lcz_Including', { fallback: 'Including' })} {d.TAX_NAME} ({d.TAX_PCT * 100}%)
                         </span>
                       </td>
                       <td class="booking-room__cell booking-room__cell--right">{formatAmount(this.currency, d.CALCULATED_VALUE)}</td>
@@ -121,13 +121,10 @@ export class IrRoomBreakdown {
                         <tr>
                           <td class="booking-room__cell booking-room__cell--right booking-room__cell--pad-right">
                             <span class={'booking-room__cell-tax-name'}>
-                              {d.is_exlusive ? locales.entries.Lcz_Excluding : locales.entries.Lcz_Including} {d.name}
+                              {d.is_exlusive ? t('Lcz_Excluding', { fallback: 'Excluding' }) : t('Lcz_Including', { fallback: 'Including' })} {d.name}
                             </span>
                           </td>
-                          <td class="booking-room__cell booking-room__cell--right">
-                            {d.currency.symbol}
-                            {d.amount}
-                          </td>
+                          <td class="booking-room__cell booking-room__cell--right">{formatAmount(d.currency.symbol, d.amount)}</td>
                         </tr>
                       );
                     });
@@ -137,21 +134,21 @@ export class IrRoomBreakdown {
             </table>
           </div>
         </div>
-        <ir-label labelText={`${locales.entries.Lcz_SmokingOptions}:`} display="inline" content={this.getSmokingLabel()}></ir-label>
+        <ir-label labelText={`${t('Lcz_SmokingOptions')}:`} display="inline" content={this.getSmokingLabel()}></ir-label>
         {this.booking.is_direct && (
           <Fragment>
             {this.room.rateplan.cancelation && (
-              <ir-label labelText={`${locales.entries.Lcz_Cancellation}:`} display="inline" content={this.room.rateplan.cancelation || ''} renderContentAsHtml></ir-label>
+              <ir-label labelText={`${t('Lcz_Cancellation')}:`} display="inline" content={this.room.rateplan.cancelation || ''} renderContentAsHtml></ir-label>
             )}
             {this.room.rateplan.guarantee && (
-              <ir-label labelText={`${locales.entries.Lcz_Guarantee}:`} display="inline" content={this.room.rateplan.guarantee || ''} renderContentAsHtml></ir-label>
+              <ir-label labelText={`${t('Lcz_Guarantee')}:`} display="inline" content={this.room.rateplan.guarantee || ''} renderContentAsHtml></ir-label>
             )}
           </Fragment>
         )}
         {this.room.ota_meta && (
           <div>
-            <ir-label labelText={`${locales.entries.Lcz_MealPlan}:`} display="inline" content={this.room.ota_meta.meal_plan}></ir-label>
-            <ir-label labelText={`${locales.entries.Lcz_Policies}:`} display="inline" content={this.room.ota_meta.policies}></ir-label>
+            <ir-label labelText={`${t('Lcz_MealPlan')}:`} display="inline" content={this.room.ota_meta.meal_plan}></ir-label>
+            <ir-label labelText={`${t('Lcz_Policies', { fallback: 'Policies' })}:`} display="inline" content={this.room.ota_meta.policies}></ir-label>
           </div>
         )}
       </div>

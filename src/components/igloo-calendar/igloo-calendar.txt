@@ -4,7 +4,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { addTwoMonthToDate, computeEndDate, convertDMYToISO, dateToFormattedString, formatLegendColors, getNextDay, isBlockUnit } from '@/utils/utils';
 import io, { Socket } from 'socket.io-client';
 import { EventsService } from '@/services/events.service';
-import { ICountry, IEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '@/models/IBooking';
+import { ICountry, SetupEntries, RoomBlockDetails, RoomBookingDetails, RoomDetail, bookingReasons } from '@/models/IBooking';
 import moment, { Moment } from 'moment';
 import { ToBeAssignedService } from '@/services/toBeAssigned.service';
 import { bookingStatus, calculateDaysBetweenDates, formatName, getPrivateNote, getRoomStatus, transformNewBLockedRooms, transformNewBooking } from '@/utils/booking';
@@ -14,7 +14,7 @@ import calendar_dates, { addCleaningTasks, addRoomForCleaning, cleanRoom } from 
 import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 import { addUnassignedDates, handleUnAssignedDatesChange, removeUnassignedDates } from '@/stores/unassigned_dates.store';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { RoomHkStatus } from '@/models/booking.dto';
 import { BatchingQueue } from '@/utils/Queue';
 import { HKSkipParams, HouseKeepingService } from '@/services/housekeeping.service';
@@ -91,7 +91,7 @@ export class IglooCalendar {
   @Prop() loadingMessage: string;
   /** The currency name or code used for display throughout the calendar. */
   @Prop() currencyName: string;
-  /** Authentication ticket/token passed to the API for authorized requests. */
+  /** Authentication ticket/ApiClient passed to the API for authorized requests. */
   @Prop() ticket: string = '';
   /** Property username or alias used to resolve the property when `propertyid` is not provided. */
   @Prop() p: string;
@@ -141,7 +141,7 @@ export class IglooCalendar {
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
     if (newValue === oldValue) return;
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -158,7 +158,7 @@ export class IglooCalendar {
   private today: string = '';
   private reachedEndOfCalendar = false;
   private socket: Socket;
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private calendarModalEl: HTMLIrModalElement;
 
   private salesQueue = new BatchingQueue<SalesBatchPayload[]>(this.processSalesBatch.bind(this), {
@@ -179,12 +179,12 @@ export class IglooCalendar {
   private tasksEndDate: string;
   private scrollViewDragPos = { top: 0, left: 0, x: 0, y: 0 };
   dialogEl: HTMLIrDialogElement;
-  private departureTimes: IEntries[];
+  private departureTimes: SetupEntries[];
 
   // ─── Lifecycle ─────────────────────────────────────────────────────────────
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     this.init();
   }
@@ -397,7 +397,7 @@ export class IglooCalendar {
   private handleSetDepartureTime(result: SetDepartureTimeProps) {
     this.mutateBookingEvents((e: any) => {
       if (e.IDENTIFIER !== result.room_identifier) return e;
-      const departure_time = this.departureTimes.find((d: IEntries) => d.CODE_NAME === result.code);
+      const departure_time = this.departureTimes.find((d: SetupEntries) => d.CODE_NAME === result.code);
       return { ...e, DEPARTURE_TIME: { code: result.code, description: departure_time.CODE_VALUE_EN } };
     });
   }
@@ -632,7 +632,7 @@ export class IglooCalendar {
   private init() {
     this.calDates = { from: this.from_date, to: this.to_date };
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
     this.calDates = { from: this.from_date, to: this.to_date };

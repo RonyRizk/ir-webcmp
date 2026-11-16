@@ -1,20 +1,18 @@
 # ir-booking-city-ledger
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property        | Attribute    | Description                                                     | Type         | Default     |
-| --------------- | ------------ | --------------------------------------------------------------- | ------------ | ----------- |
-| `booking`       | --           | Booking object; component is hidden when booking.agent is null. | `Booking`    | `undefined` |
-| `error`         | `error`      | Error message driven by the parent fetch.                       | `string`     | `null`      |
-| `folioRows`     | --           | Folio rows fetched by the parent.                               | `FolioRow[]` | `[]`        |
-| `isLoading`     | `is-loading` | Loading state driven by the parent fetch.                       | `boolean`    | `false`     |
-| `language`      | `language`   | Active language code.                                           | `string`     | `'en'`      |
-| `svcCategories` | --           | Service-category entries used to populate the transaction form. | `IEntries[]` | `[]`        |
+| Property        | Attribute    | Description                                                     | Type             | Default     |
+| --------------- | ------------ | --------------------------------------------------------------- | ---------------- | ----------- |
+| `booking`       | --           | Booking object; component is hidden when booking.agent is null. | `Booking`        | `undefined` |
+| `error`         | `error`      | Error message driven by the parent fetch.                       | `string`         | `null`      |
+| `folioRows`     | --           | Folio rows fetched by the parent.                               | `FolioRow[]`     | `[]`        |
+| `isLoading`     | `is-loading` | Loading state driven by the parent fetch.                       | `boolean`        | `false`     |
+| `language`      | `language`   | Active language code.                                           | `string`         | `'en'`      |
+| `svcCategories` | --           | Service-category entries used to populate the transaction form. | `SetupEntries[]` | `[]`        |
 
 
 ## Dependencies

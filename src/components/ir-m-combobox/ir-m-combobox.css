@@ -25,11 +25,11 @@
   white-space: nowrap;
 }
 .prefix-container {
-  left: 0.5rem;
+  inset-inline-start: 0.5rem;
 }
 
 .suffix-container {
-  right: 0.5rem;
+  inset-inline-end: 0.5rem;
 }
 
 /* Default sizing for slotted icons/elements */
@@ -42,16 +42,16 @@
 
 /* Adjust input paddings if prefix/suffix exist */
 :host(.has-prefix) input.form-control {
-  padding-left: calc(0.75rem + var(--ir-combobox-affix-size, 1rem));
+  padding-inline-start: calc(0.75rem + var(--ir-combobox-affix-size, 1rem));
 }
 
 :host(.has-suffix) input.form-control {
-  padding-right: calc(0.75rem + var(--ir-combobox-affix-size, 1rem));
+  padding-inline-end: calc(0.75rem + var(--ir-combobox-affix-size, 1rem));
 }
 .dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1000;
   width: 100%;
 }

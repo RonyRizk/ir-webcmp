@@ -19,16 +19,16 @@
 /* ── Agent/guest grouping ── */
 .service-group {
   padding: 0.125rem 0 0.25rem;
-  border-left: 3px solid transparent;
-  padding-left: 0.625rem;
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 0.625rem;
 }
 
 .service-group--guest {
-  border-left-color: var(--wa-color-neutral-300, #d4d4d8);
+  border-inline-start-color: var(--wa-color-neutral-300, #d4d4d8);
 }
 
 .service-group--agent {
-  border-left-color: var(--wa-color-primary-500, #3b82f6);
+  border-inline-start-color: var(--wa-color-primary-500, #3b82f6);
 }
 
 .service-group__label {

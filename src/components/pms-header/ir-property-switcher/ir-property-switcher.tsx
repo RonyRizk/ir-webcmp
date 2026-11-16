@@ -2,9 +2,10 @@ import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } 
 
 import type { FetchedProperty, LinkedProperty } from '@/services/property/types';
 import { GetACByACID } from './legacy.types';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import axios from 'axios';
 import WaDropdownItem from '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item';
+import { t } from '@/services/locale/t';
 
 type SwitcherMode = 'dropdown' | 'dialog' | 'read-only';
 
@@ -42,7 +43,7 @@ export class IrPropertySwitcher {
   };
   @State() displayMode: SwitcherMode = 'read-only';
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   /** Single unified event - emitted when dialog confirms selection OR dropdown selects linked property */
   @Event({ bubbles: true, composed: true })
@@ -59,9 +60,9 @@ export class IrPropertySwitcher {
   private isUpdating = false; // Prevent circular updates
 
   async componentWillLoad() {
-    if (this.baseUrl) this.token.setBaseUrl(this.baseUrl);
+    if (this.baseUrl) this.ApiClient.setBaseUrl(this.baseUrl);
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       await this.init();
     }
 
@@ -76,7 +77,7 @@ export class IrPropertySwitcher {
   @Watch('ticket')
   async handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
-      this.token.setToken(newValue);
+      this.ApiClient.setApiClient(newValue);
       await this.init();
     }
   }
@@ -323,7 +324,7 @@ export class IrPropertySwitcher {
   }
 
   private renderReadOnly() {
-    return <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? 'Property'}</p>;
+    return <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? t('Lcz_Property', { fallback: 'Property' })}</p>;
   }
 
   private trigger() {
@@ -341,7 +342,7 @@ export class IrPropertySwitcher {
           }
         }}
       >
-        <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? 'Select property'}</p>
+        <p class="property-switcher__trigger">{this.propertyState.selected?.PROPERTY_NAME ?? t('Lcz_SelectProperty', { fallback: 'Select property' })}</p>
       </wa-button>
     );
   }
@@ -388,7 +389,7 @@ export class IrPropertySwitcher {
             <ir-dialog
               // withoutHeader
               open={this.open}
-              label="Search"
+              label={t('Lcz_Search', { fallback: 'Search' })}
               class="property-switcher__dialog"
               style={{ '--ir-dialog-width': '40rem' }}
               onIrDialogAfterHide={e => {

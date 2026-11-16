@@ -3,8 +3,8 @@
 }
 
 /* .agent__drawer::part(body) {
-  padding-left: 0.01rem;
-  padding-right: 0.01rem;
+  padding-inline-start: 0.01rem;
+  padding-inline-end: 0.01rem;
   padding-top: 0;
 } */
 

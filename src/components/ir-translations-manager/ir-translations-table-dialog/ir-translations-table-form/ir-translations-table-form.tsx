@@ -3,6 +3,7 @@ import { showToast } from '@/utils/utils';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { buildEditSetupParams } from '../../setup-mapping';
 import { TranslationTable } from '../../types';
+import { t } from '@/services/locale/t';
 
 /**
  * Owns the table name draft and saves it directly — the dialog around this
@@ -119,7 +120,7 @@ export class IrTranslationsTableForm {
     return (
       <form id={this.formId} class="table-form__body" onSubmit={this.handleSubmit} novalidate>
         <ir-input
-          label="Name"
+          label={t('Lcz_Name', { fallback: 'Name' })}
           autocomplete="off"
           value={this.name}
           placeholder="e.g. Booking emails"

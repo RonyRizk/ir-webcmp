@@ -1,6 +1,6 @@
 import { Booking, Day, IUnit, Room } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
-import locales from '@/stores/locales.store';
+import { SetupService } from '@/services/setup';
 import { Component, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import { BookingInvoiceInfo } from '../ir-invoice/types';
 import { InvoiceableItemReason } from '@/types/enums';
@@ -12,7 +12,11 @@ import { CityLedgerService, ClTx } from '@/services/city-ledger';
 import { FolioEntryMode, Payment, PaymentEntries } from '../ir-booking-details/types';
 import calendar_data from '@/stores/calendar-data';
 import { isEarlyCheckout } from '@/utils/booking';
+import { formatDate } from '@/utils/date';
+import { formatAmount, formatCount } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
 export type CheckoutDialogCloseEvent = { reason: 'cancel' | 'checkout' | 'openInvoice'; isEarlyCheckout?: boolean };
 
 @Component({
@@ -41,6 +45,7 @@ export class IrCheckoutDialog {
   @Event({ composed: true, bubbles: true }) checkoutDialogClosed: EventEmitter<CheckoutDialogCloseEvent>;
 
   private bookingService = new BookingService();
+  private setupService = new SetupService();
   private agentService = new AgentsService();
   private cityLedgerService = new CityLedgerService();
   private initialPenaltyStr: string = '0.00';
@@ -56,7 +61,7 @@ export class IrCheckoutDialog {
   }
 
   private formatAmount(amount: number): string {
-    return `${this.currencySymbol}${amount.toFixed(2)}`;
+    return formatAmount(this.currencySymbol, amount);
   }
 
   private async checkoutRoom({ e, source }: { e: CustomEvent; source: 'checkout' | 'skipCheckout' | 'checkout&invoice' }) {
@@ -130,18 +135,17 @@ export class IrCheckoutDialog {
 
       const hasAgent = !!this.room?.agent;
       const hasDueAmount = (this.booking?.financial?.due_amount ?? 0) > 0;
-      const [invoiceInfo, agent, setupEntries] = await Promise.all([
-        this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr }),
+      const [invoiceInfo, agent, paymentEntries] = await Promise.all([
+        this.bookingService.getBookingInvoiceInfo({ booking_nbr: this.booking.booking_nbr, language: LocaleController.language }),
         hasAgent ? this.agentService.getExposedAgent({ id: this.booking.agent!.id }) : Promise.resolve(null),
-        hasDueAmount ? this.bookingService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']) : Promise.resolve(null),
+        hasDueAmount ? this.setupService.getPaymentEntries() : Promise.resolve(null),
       ]);
 
       this.invoiceInfo = invoiceInfo;
       this.setupButtons();
 
-      if (setupEntries) {
-        const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
-        this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
+      if (paymentEntries) {
+        this.paymentEntries = paymentEntries;
       }
 
       if (agent && isAgentMode(agent)) {
@@ -219,16 +223,16 @@ export class IrCheckoutDialog {
       <div class="early-checkout">
         <wa-callout class="ec-summary" size="s" appearance="filled" variant="neutral">
           <div class="ec-summary__row">
-            <span class="ec-summary__label">Unit</span>
+            <span class="ec-summary__label">{t('Lcz_Unit', { fallback: 'Unit' })}</span>
             <span class="ec-summary__value">{unitName}</span>
           </div>
           <div class="ec-summary__row">
-            <span class="ec-summary__label">Original check-out</span>
-            <span class="ec-summary__value">{moment(this.room.to_date, 'YYYY-MM-DD').format('ddd, MMM D, YYYY')}</span>
+            <span class="ec-summary__label">{t('Lcz_OriginalCheckOut', { fallback: 'Original check-out' })}</span>
+            <span class="ec-summary__value">{formatDate(this.room.to_date, 'ddd, MMM D, YYYY')}</span>
           </div>
           <div class="ec-summary__row">
-            <span class="ec-summary__label">Actual check-out</span>
-            <span class="ec-summary__value">{moment().format('ddd, MMM D, YYYY')}</span>
+            <span class="ec-summary__label">{t('Lcz_ActualCheckOut', { fallback: 'Actual check-out' })}</span>
+            <span class="ec-summary__value">{formatDate(moment(), 'ddd, MMM D, YYYY')}</span>
           </div>
           {/* <div class="ec-summary__row">
             <span class="ec-summary__label">Nights reclaimed</span>
@@ -240,17 +244,17 @@ export class IrCheckoutDialog {
 
         <div class="ec-section">
           <p class="ec-section__title">
-            Reclaimed Nights <wa-badge pill>{remainingCount}</wa-badge>
+            {t('Lcz_ReclaimedNights', { fallback: 'Reclaimed Nights' })} <wa-badge pill>{formatCount(remainingCount)}</wa-badge>
           </p>
           <div class="ec-nights">
             {this.remainingDays.map(day => (
               <div key={day.date} class="ec-nights__row">
-                <span class="ec-nights__date">{moment(day.date, 'YYYY-MM-DD').format('ddd, MMM D')}</span>
+                <span class="ec-nights__date">{formatDate(day.date, 'ddd, MMM D')}</span>
                 <span class="ec-nights__amount">{this.formatAmount(day.charges.total_amount)}</span>
               </div>
             ))}
             <div class="ec-nights__subtotal">
-              <span>Subtotal (Including taxes and fees)</span>
+              <span>{t('Lcz_SubtotalIncludingTaxesAndFees', { fallback: 'Subtotal (Including taxes and fees)' })}</span>
               <span>{this.formatAmount(total)}</span>
             </div>
           </div>
@@ -259,13 +263,13 @@ export class IrCheckoutDialog {
         <div class="ec-section">
           {this.penaltyMax > 0 ? (
             <ir-input
-              label="Apply the full cancellation penalty?"
+              label={t('Lcz_ApplyFullCancellationPenalty', { fallback: 'Apply the full cancellation penalty?' })}
               mask="price"
               value={this.initialPenaltyStr}
               defaultValue={this.initialPenaltyStr}
               min={0}
               max={this.penaltyMax}
-              hint="Pre-filled from reclaimed nights or due amount. Modify or waive entirely."
+              hint={t('Lcz_PrefilledFromReclaimedNightsOrDueAmountHint', { fallback: 'Pre-filled from reclaimed nights or due amount. Modify or waive entirely.' })}
               onText-change={(e: CustomEvent<string>) => {
                 const val = parseFloat(e.detail);
                 this.penaltyAmount = isNaN(val) ? 0 : val;
@@ -276,7 +280,7 @@ export class IrCheckoutDialog {
           ) : (
             <wa-callout size="s" variant="success">
               <wa-icon slot="icon" name="circle-check"></wa-icon>
-              This booking is fully paid — no cancellation penalty or outstanding balance is due.
+              {t('Lcz_BookingFullyPaidNoPenaltyDue', { fallback: 'This booking is fully paid — no cancellation penalty or outstanding balance is due.' })}
             </wa-callout>
           )}
         </div>
@@ -309,10 +313,12 @@ export class IrCheckoutDialog {
         <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="money-bill-wave"></wa-icon>
           <div class={'d-flex align-items-center justify-content-between'}>
-            <span>Outstanding guest balance: {amount}</span>
+            <span>
+              {t('Lcz_OutstandingGuestBalance', { fallback: 'Outstanding guest balance:' })} {amount}
+            </span>
             {canCollect && (
               <ir-custom-button variant="danger" appearance="outlined" size="xs" style={{ marginLeft: 'auto' }} onClick={() => this.paymentFolioRef?.openFolio()}>
-                Collect
+                {t('Lcz_Collect', { fallback: 'Collect' })}
               </ir-custom-button>
             )}
             {/* <wa-icon name="chevron-right" ></wa-icon> */}
@@ -327,7 +333,7 @@ export class IrCheckoutDialog {
       return (
         <wa-callout size="s" variant="danger">
           <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-          This {isSingleRoom ? 'booking' : 'room'} will be {isSingleRoom ? 'cancelled' : 'removed'}
+          {isSingleRoom ? t('Lcz_BookingWillBeCancelled', { fallback: 'This booking will be cancelled' }) : t('Lcz_RoomWillBeRemoved', { fallback: 'This room will be removed' })}
         </wa-callout>
       );
     }
@@ -342,7 +348,7 @@ export class IrCheckoutDialog {
       return (
         <wa-callout size="s" variant="success">
           <wa-icon slot="icon" name="circle-check"></wa-icon>
-          All charges posted to <b>{this.agent.name}</b> City Ledger
+          {t('Lcz_AllChargesPostedToCityLedger', { fallback: 'All charges posted to %1 City Ledger', params: [this.agent.name] })}
         </wa-callout>
       );
     }
@@ -350,7 +356,7 @@ export class IrCheckoutDialog {
     return (
       <wa-callout size="s" variant="warning">
         <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-        {summary.total} item{summary.total !== 1 ? 's' : ''} not posted to city ledger
+        {t('Lcz_ItemsNotPostedToCityLedger', { fallback: '%1 item(s) not posted to city ledger', params: [formatCount(summary.total)] })}
       </wa-callout>
     );
   }
@@ -362,7 +368,7 @@ export class IrCheckoutDialog {
       <Fragment>
         <ir-dialog
           open={this.open}
-          label={isEarly ? 'Early Check-Out' : 'Check-Out'}
+          label={isEarly ? t('Lcz_EarlyCheckOut', { fallback: 'Early Check-Out' }) : t('Lcz_CheckOutLabel', { fallback: 'Check-out' })}
           style={{ '--ir-dialog-width': isEarly ? 'min(36rem, calc(100vw - 2rem))' : 'fit-content' }}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
@@ -387,19 +393,21 @@ export class IrCheckoutDialog {
                   {this.isEarlyCheckout ? (
                     this.renderEarlyCheckoutContent()
                   ) : (
-                    <p style={{ width: 'calc(31rem - var(--spacing))' }}>Are you sure you want to check out unit {(this.room?.unit as IUnit)?.name}?</p>
+                    <p style={{ width: 'calc(31rem - var(--spacing))' }}>
+                      {t('Lcz_AreYouSureCheckOutUnit', { fallback: 'Are you sure you want to check out unit %1?', params: [(this.room?.unit as IUnit)?.name ?? ''] })}
+                    </p>
                   )}
                   {this.buttons.has('invoice_checkout') && (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                       <wa-checkbox
-                        style={{ marginTop: '1rem', color: 'var(--wa-color-text-quiet)', marginLeft: 'auto' }}
+                        style={{ marginTop: '1rem', color: 'var(--wa-color-text-quiet)', marginInlineStart: 'auto' }}
                         value={String(this.includeInvoice)}
                         defaultChecked={this.includeInvoice}
                         onchange={() => {
                           this.includeInvoice = !this.includeInvoice;
                         }}
                       >
-                        Prepare guest invoice after checkout
+                        {t('Lcz_PrepareGuestInvoiceAfterCheckout', { fallback: 'Prepare guest invoice after checkout' })}
                       </wa-checkbox>
                     </div>
                   )}
@@ -411,11 +419,11 @@ export class IrCheckoutDialog {
           <div slot="footer" class="ir-dialog__footer">
             <Fragment>
               <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
-                {locales?.entries?.Lcz_Cancel ?? 'Cancel'}
+                {t('Lcz_Cancel', { fallback: 'Cancel' })}
               </ir-custom-button>
               {/* {this.buttons.has('checkout') && ( */}
               <ir-custom-button size="m" onClickHandler={e => this.checkoutRoom({ e, source: 'checkout' })} variant={'brand'} loading={this.isLoading === 'checkout'}>
-                {isEarly ? 'Confirm early check-out' : 'Check out'}
+                {isEarly ? t('Lcz_ConfirmEarlyCheckOut', { fallback: 'Confirm early check-out' }) : t('Lcz_CheckOut', { fallback: 'Check out' })}
               </ir-custom-button>
               {/* )} */}
               {/* {this.buttons.has('checkout_without_invoice') && (

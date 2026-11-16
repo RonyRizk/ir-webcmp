@@ -103,7 +103,7 @@
 
 .ir-table-row td.entries-table__key {
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   /* Above sibling cells so they scroll underneath. */
   z-index: 4;
 }
@@ -120,7 +120,7 @@
    otherwise language headers scrolling past would paint over the pinned Key. */
 .entries-table__table thead th.entries-table__key-head {
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 5;
 }
 
@@ -142,7 +142,7 @@
   content: '';
   position: absolute;
   inset-block: 0;
-  right: 0;
+  inset-inline-end: 0;
   width: 1px;
   background: var(--wa-color-neutral-border-quiet, #e2e8f0);
 }
@@ -306,7 +306,7 @@
   display: block;
   width: 100%;
   padding: var(--ir-cell-padding);
-  text-align: left;
+  text-align: start;
   color: inherit;
   cursor: text;
 }
@@ -435,7 +435,7 @@
   -webkit-line-clamp: 3;
   line-clamp: 3;
   overflow: hidden;
-  /* The clamp needs a text-shaped box: `word-break` keeps an unbroken token
+  /* The clamp needs a text-shaped box: `word-break` keeps an unbroken ApiClient
      (a long key, a URL) from blowing the popup past its max-width instead. */
   overflow-wrap: anywhere;
 }

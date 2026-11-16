@@ -1,5 +1,6 @@
 import { Component, Element, Event, EventEmitter, Fragment, Method, Prop, h } from '@stencil/core';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 
 type PreviewAction = 'print' | 'download';
 
@@ -31,7 +32,7 @@ export class IrPreviewScreenDialog {
    * The dialog's label as displayed in the header.
    * Required for accessibility and announced by assistive technologies.
    */
-  @Prop({ reflect: true }) label: string = 'Preview';
+  @Prop({ reflect: true }) label: string;
 
   /**
    * Indicates whether or not the preview dialog is open.
@@ -165,7 +166,7 @@ export class IrPreviewScreenDialog {
       return this.actionButtonLabel;
     }
 
-    return this.action === 'print' ? 'Print preview' : 'Download preview';
+    return this.action === 'print' ? t('Lcz_PrintPreview', { fallback: 'Print preview' }) : t('Lcz_DownloadPreview', { fallback: 'Download preview' });
   }
 
   private shouldDisableActionButton(): boolean {
@@ -239,7 +240,7 @@ export class IrPreviewScreenDialog {
           e.stopPropagation();
           this.openChanged.emit(false);
         }}
-        label={this.label}
+        label={this.label || t('Lcz_Preview', { fallback: 'Preview' })}
         open={this.open}
         class="ir-fullscreen-dialog"
       >
@@ -247,7 +248,7 @@ export class IrPreviewScreenDialog {
           <slot name="header-actions"></slot>
           {!this.hideDefaultAction && (
             <Fragment>
-              <wa-tooltip for={this._id}>Print PDF</wa-tooltip>
+              <wa-tooltip for={this._id}>{t('Lcz_PrintPdf', { fallback: 'Print PDF' })}</wa-tooltip>
               <ir-custom-button
                 id={this._id}
                 size="m"

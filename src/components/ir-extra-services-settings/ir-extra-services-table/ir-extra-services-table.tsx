@@ -2,6 +2,8 @@ import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
 import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
 import { AccommodationExtraCode, createBlankAddon, ExtraServiceDefinition, ExtraServiceSection } from '@/services/extra-services/types';
 import { VatIncludedCodes } from '@/types/enums';
+import { t } from '@/services/locale/t';
+import { formatNumber } from '@/utils/number';
 
 @Component({
   tag: 'ir-extra-services-table',
@@ -21,7 +23,7 @@ export class IrExtraServicesTable {
   }
 
   private getVatLabel(service: ExtraServiceDefinition) {
-    return service.vat_mode === VatIncludedCodes.Inclusive ? 'Inclusive' : 'Exclusive';
+    return service.vat_mode === VatIncludedCodes.Inclusive ? t('Lcz_Inclusive', { fallback: 'Inclusive' }) : t('Lcz_Exclusive', { fallback: 'Exclusive' });
   }
 
   private getDetails(service: ExtraServiceDefinition) {
@@ -29,7 +31,10 @@ export class IrExtraServicesTable {
       return null;
     }
     const { block_night, default_start_time, default_end_time } = service.day_use_config;
-    return `Block Night: ${block_night ? 'Yes' : 'No'} (${default_start_time}–${default_end_time})`;
+    return t('Lcz_BlockNightDetailFormat', {
+      fallback: `Block Night: ${block_night ? 'Yes' : 'No'} (${default_start_time}–${default_end_time})`,
+      params: [block_night ? t('Lcz_YES', { fallback: 'Yes' }) : t('Lcz_NO', { fallback: 'No' }), default_start_time, default_end_time],
+    });
   }
 
   private createAddon = () => {
@@ -43,18 +48,18 @@ export class IrExtraServicesTable {
           <table class="table">
             <thead>
               <tr>
-                <th class="extra-services-table__header">Name</th>
-                <th class="extra-services-table__header">Default Price (USD)</th>
-                <th class="extra-services-table__header">VAT</th>
-                <th class="extra-services-table__header">Allow Override</th>
-                <th class="extra-services-table__header">Details</th>
-                <th class="extra-services-table__header">Active</th>
+                <th class="extra-services-table__header">{t('Lcz_Name', { fallback: 'Name' })}</th>
+                <th class="extra-services-table__header">{t('Lcz_DefaultPriceUsd', { fallback: 'Default Price (USD)' })}</th>
+                <th class="extra-services-table__header">{t('Lcz_Vat', { fallback: 'VAT' })}</th>
+                <th class="extra-services-table__header">{t('Lcz_AllowOverrideHeader', { fallback: 'Allow Override' })}</th>
+                <th class="extra-services-table__header">{t('Lcz_DetailsHeader', { fallback: 'Details' })}</th>
+                <th class="extra-services-table__header">{t('Lcz_Active', { fallback: 'Active' })}</th>
                 <th class="extra-services-table__header">
                   {this.isAddonSection() && (
                     <div class="extra-services-table__action">
-                      <wa-tooltip for="create-addon-button">New Add-On</wa-tooltip>
+                      <wa-tooltip for="create-addon-button">{t('Lcz_NewAddOn', { fallback: 'New Add-On' })}</wa-tooltip>
                       <ir-custom-button onClickHandler={this.createAddon} variant="neutral" appearance="plain" id="create-addon-button" data-testid="create-addon-button">
-                        <wa-icon name="plus" style={{ fontSize: '1.2rem' }} label="New Add-On"></wa-icon>
+                        <wa-icon name="plus" style={{ fontSize: '1.2rem' }} label={t('Lcz_NewAddOn', { fallback: 'New Add-On' })}></wa-icon>
                       </ir-custom-button>
                     </div>
                   )}
@@ -67,9 +72,9 @@ export class IrExtraServicesTable {
                 return (
                   <tr class="ir-table-row" key={service.code ?? service.id}>
                     <td>{service.name}</td>
-                    <td>{service.default_price.toFixed(2)}</td>
+                    <td>{formatNumber(service.default_price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>{this.getVatLabel(service)}</td>
-                    <td>{service.allow_price_override ? 'Yes' : 'No'}</td>
+                    <td>{service.allow_price_override ? t('Lcz_YES', { fallback: 'Yes' }) : t('Lcz_NO', { fallback: 'No' })}</td>
                     <td class="extra-services-table__muted">{details ?? '—'}</td>
                     <td>
                       <wa-switch
@@ -91,7 +96,7 @@ export class IrExtraServicesTable {
               {this.services?.length === 0 && (
                 <tr class="empty-row">
                   <td colSpan={7}>
-                    <ir-empty-state message="No add-ons yet"></ir-empty-state>
+                    <ir-empty-state message={t('Lcz_NoAddOnsYet', { fallback: 'No add-ons yet' })}></ir-empty-state>
                   </td>
                 </tr>
               )}

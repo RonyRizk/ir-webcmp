@@ -1,4 +1,5 @@
 import { Component, Element, Event, EventEmitter, h, Prop } from '@stencil/core';
+import { getLocalDirection } from '@/utils/direction';
 
 @Component({
   tag: 'ir-menu-group',
@@ -36,7 +37,15 @@ export class IrMenuGroup {
 
   render() {
     return (
-      <wa-details class="menu-group__details" open={this.open} appearance="plain" name={this.groupName} onwa-hide={this.handleHide} onwa-show={this.handleShow}>
+      <wa-details
+        dir={getLocalDirection(this.el)}
+        class="menu-group__details"
+        open={this.open}
+        appearance="plain"
+        name={this.groupName}
+        onwa-hide={this.handleHide}
+        onwa-show={this.handleShow}
+      >
         <slot slot="summary" name="summary"></slot>
         <slot></slot>
       </wa-details>

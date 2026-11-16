@@ -1,6 +1,7 @@
 import { Component, Host, Prop, h, Element } from '@stencil/core';
 import { FolioPayment } from '../../types';
-import { formatAmount } from '@/utils/utils';
+import { formatAmount, formatCount } from '@/utils/number';
+import { t } from '@/services/locale/t';
 import calendar_data from '@/stores/calendar-data';
 
 let accId = 0;
@@ -30,8 +31,8 @@ export class IrRevenueRow {
             <div class="ir-revenue-row__header-left">
               <p class="ir-revenue-row__group">
                 {this.groupName}{' '}
-                <wa-badge variant="brand" aria-label={`${this.payments.length} transactions`}>
-                  {this.payments.length}
+                <wa-badge variant="brand" aria-label={t('Lcz_TransactionsCountAriaLabel', { fallback: '%1 transactions', params: [formatCount(this.payments.length)] })}>
+                  {formatCount(this.payments.length)}
                 </wa-badge>
               </p>
             </div>

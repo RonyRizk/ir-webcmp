@@ -7,13 +7,13 @@
 
 ## Properties
 
-| Property       | Attribute       | Description                                                                                           | Type      | Default           |
-| -------------- | --------------- | ----------------------------------------------------------------------------------------------------- | --------- | ----------------- |
-| `cancelLabel`  | `cancel-label`  | Cancel button label                                                                                   | `string`  | `'Cancel'`        |
-| `confirmLabel` | `confirm-label` | Confirm button label                                                                                  | `string`  | `'Confirm'`       |
-| `label`        | `label`         | Dialog header title                                                                                   | `string`  | `'Are you sure?'` |
-| `loading`      | `loading`       | Controls the loading spinner on the confirm button — set by the parent while the async operation runs | `boolean` | `false`           |
-| `message`      | `message`       | Message shown inside the dialog                                                                       | `string`  | `undefined`       |
+| Property       | Attribute       | Description                                                                                           | Type      | Default                                              |
+| -------------- | --------------- | ----------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------- |
+| `cancelLabel`  | `cancel-label`  | Cancel button label                                                                                   | `string`  | `undefined`                                          |
+| `confirmLabel` | `confirm-label` | Confirm button label                                                                                  | `string`  | `undefined`                                          |
+| `label`        | `label`         | Dialog header title                                                                                   | `string`  | `t('Lcz_AreYouSure', { fallback: 'Are you sure?' })` |
+| `loading`      | `loading`       | Controls the loading spinner on the confirm button — set by the parent while the async operation runs | `boolean` | `false`                                              |
+| `message`      | `message`       | Message shown inside the dialog                                                                       | `string`  | `undefined`                                          |
 
 
 ## Events

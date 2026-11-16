@@ -1,9 +1,9 @@
 import { Booking } from '@/models/booking.dto';
-import { Component, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { BlockedDatePayload, BookedByGuestSchema, BookingEditorMode, BookingStep, DayUseHoursSchema, RoomsGuestsSchema } from './types';
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
-import locales from '@/stores/locales.store';
+import { SetupService } from '@/services/setup';
 import booking_store, {
   BookingDraft,
   fillMissingReservedGuestNames,
@@ -26,6 +26,11 @@ import moment from 'moment';
 import { IRBookingEditorService } from './ir-booking-editor.service';
 import { ExtraService } from '@/models/booking.dto';
 import { SvcCategory } from '@/types/enums';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
+import { getLocalLanguage } from '@/services/locale/locale-scope';
 
 /** bookingStatus['002'] in @/utils/booking — CONFIRMED. */
 const CONFIRMED_STATUS_CODE = '002';
@@ -36,6 +41,8 @@ const CONFIRMED_STATUS_CODE = '002';
   scoped: true,
 })
 export class IrBookingEditor {
+  @Element() el: HTMLElement;
+
   @Prop() propertyId: string | number;
   @Prop() language: string = 'en';
   @Prop() roomTypeIds: (string | number)[] = [];
@@ -68,6 +75,7 @@ export class IrBookingEditor {
 
   private roomService = new RoomService();
   private bookingService = new BookingService();
+  private setupService = new SetupService();
   private propertyService = new PropertyService();
   private bookingEditorService = new IRBookingEditorService(this.mode);
 
@@ -146,8 +154,15 @@ export class IrBookingEditor {
     return this.checkOut;
   }
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.bookingEditor, () => this.initializeApp());
+
   componentWillLoad() {
     this.initializeApp();
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
   }
 
   @Watch('mode')
@@ -174,22 +189,18 @@ export class IrBookingEditor {
     try {
       this.isLoading = true;
       this.bookingEditorService.setMode(this.mode);
-      const [languageTexts, countriesList] = await Promise.all([
-        this.roomService.fetchLanguage(this.language),
-        this.bookingService.getCountries(this.language),
+      const [, countriesList] = await Promise.all([
+        LocaleController.loadFor(this.el, { language: this.language, tables: SCREEN_TABLES.bookingEditor }),
+        this.bookingService.getCountries(LocaleController.languageFor(this.el)),
         this.roomService.getExposedProperty({
           id: Number(this.propertyId),
-          language: this.language,
+          language: LocaleController.languageFor(this.el),
           is_backend: true,
           include_units_hk_status: true,
           include_sales_rate_plans: true,
         }),
       ]);
       if (this.disconnected) return;
-      if (!locales.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
       await Promise.all([this.fetchSetupEntriesAndInitialize(), this.resolveDayUseNetPrice()]);
       if (this.disconnected) return;
       setBookingSelectOptions({
@@ -209,6 +220,17 @@ export class IrBookingEditor {
   disconnectedCallback() {
     this.disconnected = true;
     resetBookingStore(true);
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    // Inside a `lang` subtree the prop only re-targets that subtree's scope, never the whole app.
+    if (getLocalLanguage(this.el)) {
+      this.initializeApp();
+      return;
+    }
+    this.languageSync.propChanged(next, previous);
   }
 
   @Listen('checkAvailability')
@@ -296,7 +318,7 @@ export class IrBookingEditor {
             adult: occupancy.adults,
             child: occupancy.children,
           },
-          language: this.language,
+          language: LocaleController.languageFor(this.el),
           room_type_ids,
           currency: calendar_data.property.currency,
           agent_id: is_in_agent_mode ? source?.tag : null,
@@ -330,7 +352,12 @@ export class IrBookingEditor {
    */
   private async checkDayUseAvailability(date: string) {
     this.preventPageLoad.emit('/Get_Exposed_Calendar');
-    const results = await this.bookingService.getCalendarData(Number(calendar_data.property.id), date, date);
+    const results = await this.bookingService.getCalendarData({
+      propertyid: Number(calendar_data.property.id),
+      from_date: date,
+      to_date: date,
+      language: LocaleController.languageFor(this.el),
+    });
     const day = results?.days?.[0] as DayData | undefined;
     this.dayUseRoomTypes = day?.rate ?? [];
   }
@@ -453,13 +480,13 @@ export class IrBookingEditor {
         is_remove: false,
         booking_nbr: this.booking?.booking_nbr,
       });
-      showToast({ title: 'Day Use Booking Updated', type: 'success' });
+      showToast({ title: t('Lcz_DayUseBookingUpdated', { fallback: 'Day Use Booking Updated', language: LocaleController.languageFor(this.el) }), type: 'success' });
       this.resetBookingEvt.emit(null);
       return;
     }
 
     const payload: DoDayUseParams = {
-      language: this.language,
+      language: LocaleController.languageFor(this.el),
       is_to_block: block,
       booking: {
         property: { id: Number(this.propertyId) },
@@ -498,7 +525,7 @@ export class IrBookingEditor {
     };
 
     await this.bookingService.doDayUse(payload);
-    showToast({ title: 'Day Use Booking Created', type: 'success' });
+    showToast({ title: t('Lcz_DayUseBookingCreated', { fallback: 'Day Use Booking Created', language: LocaleController.languageFor(this.el) }), type: 'success' });
     this.resetBookingEvt.emit(null);
   }
 
@@ -582,7 +609,7 @@ export class IrBookingEditor {
   }
 
   private async fetchSetupEntries() {
-    return await this.bookingService.fetchSetupEntries();
+    return await this.setupService.fetchSetupEntries();
   }
 
   render() {

@@ -1,26 +1,28 @@
 import booking_listing from '@/stores/booking_listing.store';
 import { Component, EventEmitter, Listen, Method, Prop, State, h, Event } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
 import { PaymentService } from '@/services/payment.service';
 import moment from 'moment';
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { PaymentEntries } from '@/components/ir-booking-details/types';
+import { formatBookingNumber } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 @Component({
   tag: 'ir-listing-modal',
   styleUrl: 'ir-listing-modal.css',
   scoped: true,
 })
 export class IrListingModal {
-  @Prop() modalTitle: string = 'Modal Title';
+  @Prop() modalTitle: string;
   @Prop() editBooking: { booking: Booking; cause: 'edit' | 'payment' | 'delete' | 'guest' };
   @Prop() paymentEntries: PaymentEntries;
 
   @State() isOpen: boolean = false;
   @State() deletionStage = 2;
-  @State() selectedDesignation: IEntries;
+  @State() selectedDesignation: SetupEntries;
   @State() loadingBtn: 'confirm' | 'just_delete' | 'recover_and_delete' | null = null;
 
   private bookingListingsService = new BookingListingService();
@@ -85,7 +87,7 @@ export class IrListingModal {
         } else {
           if (this.deletionStage === 2) {
             // this.loadingBtn = 'recover_and_delete';
-            await this.bookingListingsService.removeExposedBooking(this.editBooking.booking.booking_nbr, true);
+            await this.bookingListingsService.removeExposedBooking({ booking_nbr: this.editBooking.booking.booking_nbr, is_to_revover: true });
             this.filterBookings();
           }
           // if (this.deletionStage === 1) {
@@ -96,7 +98,7 @@ export class IrListingModal {
       if (name === 'cancel') {
         // if (this.deletionStage === 2) {
         //   this.loadingBtn = 'just_delete';
-        //   await this.bookingListingsService.removeExposedBooking(this.editBooking.booking.booking_nbr, false);
+        //   await this.bookingListingsService.removeExposedBooking({ booking_nbr: this.editBooking.booking.booking_nbr, is_to_revover: false });
         //   this.filterBookings();
         // } else {
         //   this.closeModal();
@@ -115,26 +117,26 @@ export class IrListingModal {
 
   renderTitle() {
     if (this.editBooking.cause === 'payment') {
-      return locales.entries?.Lcz_MarkBookingAsPaid.replace('%1', this.editBooking.booking.booking_nbr);
+      return t('Lcz_MarkBookingAsPaid', { params: [this.editBooking.booking.booking_nbr] });
     } else {
       // if (this.deletionStage === 1) {
-      //   return locales.entries.Lcz_SureYouWantToDeleteBookingNbr + this.editBooking?.booking.booking_nbr;
+      //   return t('Lcz_SureYouWantToDeleteBookingNbr') + this.editBooking?.booking.booking_nbr;
       // }
-      // return locales.entries.Lcz_WantToRecoverAllotment;
-      return locales.entries.Lcz_SureYouWantToDeleteBookingNbr + this.editBooking?.booking.booking_nbr;
+      // return t('Lcz_WantToRecoverAllotment');
+      return t('Lcz_SureYouWantToDeleteBookingNbr') + formatBookingNumber(this.editBooking?.booking.booking_nbr);
     }
   }
   renderConfirmationTitle() {
     // if (this.deletionStage === 2) {
-    //   return locales.entries.Lcz_RecoverAndDelete;
+    //   return t('Lcz_RecoverAndDelete');
     // }
-    return locales.entries.Lcz_Confirm;
+    return t('Lcz_Confirm', { fallback: 'Confirm' });
   }
   renderCancellationTitle() {
     // if (this.deletionStage === 2) {
-    //   return locales.entries.Lcz_JustDelete;
+    //   return t('Lcz_JustDelete');
     // }
-    return locales.entries.Lcz_Cancel;
+    return t('Lcz_Cancel', { fallback: 'Cancel' });
   }
   private handleDropdownChange(e: CustomEvent<string | number>) {
     e.stopImmediatePropagation();
@@ -184,7 +186,7 @@ export class IrListingModal {
                 </svg>
               </ir-icon>
             </div>
-            <div class="modal-body text-left p-0 mb-2">
+            <div class="modal-body ir-text-start p-0 mb-2">
               {this.editBooking.cause === 'payment' ? (
                 <ir-select
                   selectedValue={this.selectedDesignation?.CODE_NAME}
@@ -192,7 +194,7 @@ export class IrListingModal {
                   showFirstOption={false}
                   data={this.paymentEntries.methods?.map(m => ({
                     value: m.CODE_NAME,
-                    text: m.CODE_VALUE_EN,
+                    text: getSetupEntryLabel(m),
                   }))}
                 ></ir-select>
               ) : null}

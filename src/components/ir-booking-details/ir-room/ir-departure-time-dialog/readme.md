@@ -1,7 +1,5 @@
 # ir-departure-time-dialog
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -22,17 +20,17 @@ Usage:
 
 ## Properties
 
-| Property         | Attribute         | Description                                                                           | Type         | Default     |
-| ---------------- | ----------------- | ------------------------------------------------------------------------------------- | ------------ | ----------- |
-| `booking`        | --                | Needed to look up whether this room already has a late-checkout extra service charge. | `Booking`    | `undefined` |
-| `booking_nbr`    | `booking_nbr`     | Needed to create a late-checkout extra service charge alongside the departure time.   | `string`     | `undefined` |
-| `currencySymbol` | `currency-symbol` |                                                                                       | `string`     | `undefined` |
-| `currency_id`    | `currency_id`     |                                                                                       | `number`     | `undefined` |
-| `departureTime`  | --                |                                                                                       | `IEntries[]` | `[]`        |
-| `language`       | `language`        |                                                                                       | `string`     | `'en'`      |
-| `open`           | `open`            | Controls dialog visibility.                                                           | `boolean`    | `undefined` |
-| `property_id`    | `property_id`     |                                                                                       | `number`     | `undefined` |
-| `room`           | --                | Room whose expected departure time is being changed.                                  | `Room`       | `undefined` |
+| Property         | Attribute         | Description                                                                           | Type             | Default     |
+| ---------------- | ----------------- | ------------------------------------------------------------------------------------- | ---------------- | ----------- |
+| `booking`        | --                | Needed to look up whether this room already has a late-checkout extra service charge. | `Booking`        | `undefined` |
+| `booking_nbr`    | `booking_nbr`     | Needed to create a late-checkout extra service charge alongside the departure time.   | `string`         | `undefined` |
+| `currencySymbol` | `currency-symbol` |                                                                                       | `string`         | `undefined` |
+| `currency_id`    | `currency_id`     |                                                                                       | `number`         | `undefined` |
+| `departureTime`  | --                |                                                                                       | `SetupEntries[]` | `[]`        |
+| `language`       | `language`        |                                                                                       | `string`         | `'en'`      |
+| `open`           | `open`            | Controls dialog visibility.                                                           | `boolean`        | `undefined` |
+| `property_id`    | `property_id`     |                                                                                       | `number`         | `undefined` |
+| `room`           | --                | Room whose expected departure time is being changed.                                  | `Room`           | `undefined` |
 
 
 ## Events

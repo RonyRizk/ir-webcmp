@@ -32,14 +32,14 @@
   white-space: nowrap;
 }
 .booking-room__cell--right {
-  text-align: right;
+  text-align: end;
 }
 .booking-room__cell--left {
-  text-align: left;
+  text-align: start;
 }
 .booking-room__cell--pad-right {
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 .booking-room__cell--pad-left {
-  padding-left: 0.5rem;
+  padding-inline-start: 0.5rem;
 }

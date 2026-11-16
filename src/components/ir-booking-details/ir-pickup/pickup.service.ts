@@ -5,6 +5,8 @@ import { z, ZodTypeAny } from 'zod';
 import { IBookingPickupInfo } from '@/components';
 import calendar_data from '@/stores/calendar-data';
 import { renderTime } from '@/utils/utils';
+import { t } from '@/services/locale/t';
+import { formatDate } from '@/utils/date';
 
 import { TDueParams, TPickupData } from './types';
 
@@ -76,15 +78,15 @@ export class PickupService {
 
     const arrivalDateSchema = z
       .string()
-      .min(1, { message: 'Arrival date is required.' })
-      .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Invalid date format, expected YYYY-MM-DD.' });
+      .min(1, { message: t('Lcz_ArrivalDateRequired', { fallback: 'Arrival date is required.' }) })
+      .regex(/^\d{4}-\d{2}-\d{2}$/, { message: t('Lcz_InvalidDateFormatYmd', { fallback: 'Invalid date format, expected YYYY-MM-DD.' }) });
 
     return z.object({
       location: z.preprocess(asNumber, z.number().int()).refine(value => (allowRemoval ? value === -1 || value > 0 : value > 0), {
-        message: 'Please select a pickup option.',
+        message: t('Lcz_PleaseSelectPickupOption', { fallback: 'Please select a pickup option.' }),
       }),
       arrival_date: z
-        .preprocess(value => (typeof value === 'string' ? value : value ?? ''), arrivalDateSchema)
+        .preprocess(value => (typeof value === 'string' ? value : (value ?? '')), arrivalDateSchema)
         .refine(
           dateStr => {
             const date = moment(dateStr, 'YYYY-MM-DD', true);
@@ -92,17 +94,22 @@ export class PickupService {
             const max = moment(maxDate, 'YYYY-MM-DD', true);
             return date.isValid() && min.isValid() && max.isValid() && date.isBetween(min, max, undefined, '[]');
           },
-          { message: `Arrival date must be between ${minDate} and ${maxDate}.` },
+          {
+            message: t('Lcz_ArrivalDateMustBeBetween', {
+              fallback: 'Arrival date must be between %1 and %2.',
+              params: [formatDate(minDate, 'MMM DD, YYYY'), formatDate(maxDate, 'MMM DD, YYYY')],
+            }),
+          },
         ),
       arrival_time: z
         .string()
-        .regex(/^\d{2}:\d{2}$/, { message: 'Invalid time format. Expected HH:MM' })
+        .regex(/^\d{2}:\d{2}$/, { message: t('Lcz_InvalidTimeFormatHhMm', { fallback: 'Invalid time format. Expected HH:MM' }) })
         .refine(
           time => {
             const [hours, minutes] = time.split(':').map(Number);
             return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
           },
-          { message: 'Time values are out of range' },
+          { message: t('Lcz_TimeValuesOutOfRange', { fallback: 'Time values are out of range' }) },
         ),
       // arrival_time: z
       //   .preprocess(value => (typeof value === 'string' ? value : value ?? ''), z.string().regex(/^\d{2}\d{2}$/, { message: 'Invalid time format. Expected HH:MM.' }))
@@ -120,9 +127,21 @@ export class PickupService {
       //     },
       //     { message: 'Time values are out of range.' },
       //   ),
-      flight_details: z.preprocess(value => (typeof value === 'string' ? value : ''), z.string().nonempty({ message: 'Flight details cannot be empty.' })),
-      vehicle_type_code: z.preprocess(value => (typeof value === 'string' ? value : ''), z.string().nonempty({ message: 'Vehicle type code cannot be empty.' })),
-      number_of_vehicles: z.preprocess(asNumber, z.number().int().min(1, { message: 'At least one vehicle is required.' })),
+      flight_details: z.preprocess(
+        value => (typeof value === 'string' ? value : ''),
+        z.string().nonempty({ message: t('Lcz_FlightDetailsRequired', { fallback: 'Flight details cannot be empty.' }) }),
+      ),
+      vehicle_type_code: z.preprocess(
+        value => (typeof value === 'string' ? value : ''),
+        z.string().nonempty({ message: t('Lcz_VehicleTypeRequired', { fallback: 'Vehicle type code cannot be empty.' }) }),
+      ),
+      number_of_vehicles: z.preprocess(
+        asNumber,
+        z
+          .number()
+          .int()
+          .min(1, { message: t('Lcz_AtLeastOneVehicleRequired', { fallback: 'At least one vehicle is required.' }) }),
+      ),
     });
   }
   public validateForm(params: TPickupData, schema: ZodTypeAny) {

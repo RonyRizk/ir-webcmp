@@ -1,11 +1,11 @@
 import { IHouseKeepers, IPropertyHousekeepingAssignment } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import calendar_data from '@/stores/calendar-data';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import WaOption from '@awesome.me/webawesome/dist/components/option/option';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-hk-unassigned-units-drawer-form',
   styleUrl: 'ir-hk-unassigned-units-drawer-form.css',
@@ -69,11 +69,11 @@ export class IrHkUnassignedUnitsDrawerForm {
         <tr key={unit.id}>
           <td class="">{unit.name}</td>
           <td class="sr-only"></td>
-          <td class="pl-1">
+          <td class="ir-ps-1">
             <wa-select
               size="s"
               style={{ textAlign: 'start' }}
-              placeholder="Select"
+              placeholder={t('Lcz_Select', { fallback: 'Select' })}
               onchange={e => {
                 let hk_id = (e.target as WaOption).value as any;
                 if (hk_id === '') {
@@ -144,9 +144,9 @@ export class IrHkUnassignedUnitsDrawerForm {
       >
         <table>
           <thead>
-            <th class="sr-only">{locales.entries.Lcz_RoomName}</th>
-            <th class="sr-only">{locales.entries.Lcz_HousekeeperName}</th>
-            <th class="sr-only">{locales.entries.Lcz_Actions}</th>
+            <th class="sr-only">{t('Lcz_RoomName', { fallback: 'room name' })}</th>
+            <th class="sr-only">{t('Lcz_HousekeeperName', { fallback: 'housekeeper name' })}</th>
+            <th class="sr-only">{t('Lcz_Actions', { fallback: 'Actions' })}</th>
           </thead>
           <tbody>{this.renderRooms()}</tbody>
         </table>

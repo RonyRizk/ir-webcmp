@@ -9,13 +9,14 @@ import { Agent } from '@/services/agents/type';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { ExposedGuests } from '@/services/booking-service/types';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { t } from '@/services/locale/t';
 
 const today = moment();
 type FdType = (typeof FdTypes)[keyof typeof FdTypes];
 
 /** Sentinel option in the agent autocomplete meaning "no specific agent" (the default). */
 const ALL_AGENTS_VALUE = 'all';
-const ALL_AGENTS_LABEL = 'All agents';
+const allAgentsLabel = () => t('Lcz_AllAgents', { fallback: 'All agents' });
 
 const DEFAULT_FILTERS: FiscalDocumentFilters = {
   fromDate: null,
@@ -74,19 +75,21 @@ export class IrFiscalDocumentsFilters {
   }
 
   private typeOptions: Array<{ label: string; value: FdType | 'all' }> = [
-    { label: 'All document types', value: 'all' },
-    { label: 'Invoices', value: FdTypes.Invoice },
-    { label: 'Receipts', value: FdTypes.Receipt },
-    { label: 'Credit Notes', value: FdTypes.CreditNote },
+    { label: t('Lcz_AllDocumentTypes', { fallback: 'All document types' }), value: 'all' },
+    { label: t('Lcz_Invoices', { fallback: 'Invoices' }), value: FdTypes.Invoice },
+    { label: t('Lcz_Receipts', { fallback: 'Receipts' }), value: FdTypes.Receipt },
+    { label: t('Lcz_CreditNotes', { fallback: 'Credit Notes' }), value: FdTypes.CreditNote },
     // { label: 'Debit Notes', value: FdTypes.DebitNote },
-    { label: 'Credit Receipt', value: FdTypes.CreditReceipt },
+    { label: t('Lcz_CreditReceipt', { fallback: 'Credit Receipt' }), value: FdTypes.CreditReceipt },
   ];
 
-  private folioOptions: Array<{ label: string; value: FiscalFolioType }> = [
-    { label: 'All folios', value: 'all' },
-    { label: 'Agent folio', value: 'agent' },
-    { label: 'Guest folio', value: 'guest' },
-  ];
+  private get folioOptions(): Array<{ label: string; value: FiscalFolioType }> {
+    return [
+      { label: t('Lcz_AllFolios', { fallback: 'All folios' }), value: 'all' },
+      { label: t('Lcz_AgentFolio', { fallback: 'Agent folio' }), value: 'agent' },
+      { label: t('Lcz_GuestFolio', { fallback: 'Guest folio' }), value: 'guest' },
+    ];
+  }
 
   private get filteredAgents(): Agent[] {
     const q = this.agentSearch.trim().toLowerCase();
@@ -95,7 +98,11 @@ export class IrFiscalDocumentsFilters {
   }
 
   private get searchPlaceholder(): string {
-    return this.draft.folioType === 'guest' ? `Search by ${this.draft?.searchBy === 'booking_nbr' ? 'booking number' : 'doc number'}` : 'Search by doc number';
+    return this.draft.folioType === 'guest'
+      ? this.draft?.searchBy === 'booking_nbr'
+        ? t('Lcz_SearchByBookingNumber', { fallback: 'Search by booking number' })
+        : t('Lcz_SearchByDocNumber', { fallback: 'Search by doc number' })
+      : t('Lcz_SearchByDocNumber', { fallback: 'Search by doc number' });
   }
 
   private async fetchAgents() {
@@ -173,7 +180,7 @@ export class IrFiscalDocumentsFilters {
                 defaultValue={this.draft.type}
                 onchange={e => this.updateDraft({ type: (e.target as WaOption).value as any })}
                 size="s"
-                placeholder="Document Type"
+                placeholder={t('Lcz_DocumentTypePlaceholder', { fallback: 'Document Type' })}
               >
                 {this.typeOptions.map(option => (
                   <wa-option value={option.value} key={option.value}>
@@ -187,7 +194,7 @@ export class IrFiscalDocumentsFilters {
                 defaultValue={this.draft.folioType}
                 onchange={e => this.handleFolioTypeChange((e.target as WaOption).value as FiscalFolioType)}
                 size="s"
-                placeholder="Folios"
+                placeholder={t('Lcz_FoliosPlaceholder', { fallback: 'Folios' })}
               >
                 {this.folioOptions.map(option => (
                   <wa-option value={option.value} key={option.value}>
@@ -212,9 +219,9 @@ export class IrFiscalDocumentsFilters {
               <ir-autocomplete
                 class="filters-bar__folio-select"
                 size="s"
-                placeholder="Select agent"
+                placeholder={t('Lcz_SelectAgentPlaceholder', { fallback: 'Select agent' })}
                 withExpandIcon
-                value={this.draft.agentId ? (this.agents.find(a => a.id === this.draft.agentId)?.name ?? '') : ALL_AGENTS_LABEL}
+                value={this.draft.agentId ? (this.agents.find(a => a.id === this.draft.agentId)?.name ?? '') : allAgentsLabel()}
                 onText-change={(e: CustomEvent<string>) => {
                   this.agentSearch = e.detail ?? '';
                 }}
@@ -224,8 +231,8 @@ export class IrFiscalDocumentsFilters {
                   this.updateDraft({ agentId: value && value !== ALL_AGENTS_VALUE ? Number(value) : null });
                 }}
               >
-                <ir-autocomplete-option label={ALL_AGENTS_LABEL} value={ALL_AGENTS_VALUE}>
-                  {ALL_AGENTS_LABEL}
+                <ir-autocomplete-option label={allAgentsLabel()} value={ALL_AGENTS_VALUE}>
+                  {allAgentsLabel()}
                 </ir-autocomplete-option>
                 {this.filteredAgents.map(agent => (
                   <ir-autocomplete-option key={agent.id} label={agent.name} value={String(agent.id)}>
@@ -240,7 +247,7 @@ export class IrFiscalDocumentsFilters {
               <ir-picker
                 class="filters-bar__folio-select"
                 size="s"
-                placeholder="Customer email or name"
+                placeholder={t('Lcz_CustomerEmailOrNamePlaceholder', { fallback: 'Customer email or name' })}
                 withClear
                 mode="select-async"
                 debounce={500}
@@ -291,13 +298,13 @@ export class IrFiscalDocumentsFilters {
                     defaultValue={this.draft.searchBy}
                     onchange={e => this.updateDraft({ searchBy: (e.target as HTMLSelectElement).value as 'doc_nbr' | 'booking_nbr' })}
                   >
-                    <wa-option value="doc_nbr">Document number</wa-option>
-                    <wa-option value="booking_nbr">Booking number</wa-option>
+                    <wa-option value="doc_nbr">{t('Lcz_DocumentNumberOption', { fallback: 'Document number' })}</wa-option>
+                    <wa-option value="booking_nbr">{t('Lcz_BookingNumber', { fallback: 'Booking number' })}</wa-option>
                   </wa-select>
                 )}
               </div>
 
-              <wa-tooltip for="search-btn">Search</wa-tooltip>
+              <wa-tooltip for="search-btn">{t('Lcz_Search', { fallback: 'Search' })}</wa-tooltip>
               <ir-custom-button
                 id="search-btn"
                 loading={this.loading === 'search'}
@@ -309,7 +316,7 @@ export class IrFiscalDocumentsFilters {
               >
                 <wa-icon name="magnifying-glass"></wa-icon>
               </ir-custom-button>
-              <wa-tooltip for="excel-btn">{'Export to excel'}</wa-tooltip>
+              <wa-tooltip for="excel-btn">{t('Lcz_ExportToExcel', { fallback: 'Export to excel' })}</wa-tooltip>
               <ir-custom-button
                 disabled={!(this.draft?.fromDate || this.draft?.toDate)}
                 id="excel-btn"

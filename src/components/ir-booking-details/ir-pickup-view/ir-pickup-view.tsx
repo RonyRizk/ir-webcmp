@@ -1,13 +1,14 @@
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { Agent } from '@/services/agents/type';
 import { Component, Fragment, Host, Prop, h } from '@stencil/core';
 import { _formatTime, isAgentMode } from '../functions';
-import moment from 'moment';
 import { Booking } from '@/models/booking.dto';
 import type { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
+import { formatDate } from '@/utils/date';
 
+import { t } from '@/services/locale/t';
+import { formatAmount } from '@/utils/number';
 @Component({
   tag: 'ir-pickup-view',
   styleUrl: 'ir-pickup-view.css',
@@ -40,9 +41,11 @@ export class IrPickupView {
       <Host>
         <wa-card appearance="plain" class="pickup-view__card">
           <p slot="header" class={'font-size-large p-0 m-0'}>
-            {locales.entries.Lcz_Pickup}
+            {t('Lcz_Pickup', { fallback: 'Pickup' })}
           </p>
-          <wa-tooltip for="pickup">{pickup_info ? 'Edit' : 'Add'} pickup</wa-tooltip>
+          <wa-tooltip for="pickup">
+            {t('Lcz_EditAddPickupTooltip', { fallback: '%1 pickup', params: [pickup_info ? t('Lcz_Edit', { fallback: 'Edit' }) : t('Lcz_Add', { fallback: 'Add' })] })}
+          </wa-tooltip>
           <ir-custom-button slot="header-actions" id="pickup" size="s" appearance="plain" variant="neutral">
             <wa-icon name="edit" style={{ fontSize: '1rem' }}></wa-icon>
           </ir-custom-button>
@@ -51,35 +54,32 @@ export class IrPickupView {
             <Fragment>
               {isAgent && (
                 <p class={`service-group__label${pickup_info.agent ? ' --agent' : ''}`}>
-                  {pickup_info.agent ? pickup_info.agent.name : 'Guest'}
-                  <span>Folio</span>
+                  {pickup_info.agent ? pickup_info.agent.name : t('Lcz_Guest', { fallback: 'Guest' })}
+                  <span>{t('Lcz_Folio', { fallback: 'Folio' })}</span>
                 </p>
               )}
 
               <div class={`pickup-body${isAgent ? (pickup_info.agent ? ' pickup-body--agent' : ' pickup-body--guest') : ''}`}>
                 <div class="pickup-row pickup-row--header">
                   <span class="pickup-datetime">
-                    {moment(pickup_info.date, 'YYYY-MM-DD').format('MMM DD, YYYY')}
+                    {formatDate(pickup_info.date, 'MMM DD, YYYY')}
                     {pickup_info.hour && pickup_info.minute && <span class="pickup-time"> · {_formatTime(pickup_info.hour.toString(), pickup_info.minute.toString())}</span>}
                     {statusTag}
                   </span>
-                  <strong class="pickup-price">
-                    {pickup_info.currency.symbol}
-                    {pickup_info.total}
-                  </strong>
+                  <strong class="pickup-price">{formatAmount(pickup_info.currency.symbol, pickup_info.total)}</strong>
                 </div>
 
                 <dl class="pickup-dl">
                   <div class="pickup-dl__row">
-                    <dt>{locales.entries.Lcz_FlightDetails}</dt>
+                    <dt>{t('Lcz_FlightDetails')}</dt>
                     <dd>{pickup_info.details}</dd>
                   </div>
                   <div class="pickup-dl__row">
-                    <dt>Vehicle</dt>
+                    <dt>{t('Lcz_Vehicle', { fallback: 'Vehicle' })}</dt>
                     <dd>{pickup_info.selected_option.vehicle.description}</dd>
                   </div>
                   <div class="pickup-dl__row">
-                    <dt>{locales.entries.Lcz_NbrOfVehicles}</dt>
+                    <dt>{t('Lcz_NbrOfVehicles')}</dt>
                     <dd>{pickup_info.nbr_of_units}</dd>
                   </div>
                 </dl>

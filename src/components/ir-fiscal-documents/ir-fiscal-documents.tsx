@@ -1,14 +1,18 @@
 import { Component, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import moment from 'moment';
 import { PropertyService } from '@/services/property';
 import { RoomService } from '@/services/room.service';
-import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { FdTypes } from '@/types/enums';
-import type { IEntries } from '@/models/property';
+import type { SetupEntries } from '@/models/property';
 import type { UnifiedFolioTargetType } from '@/services/property/types';
 import type { PaginationChangeEvent } from '../ir-pagination/ir-pagination';
 import { FiscalDocumentFilters, FiscalDocumentRow, FiscalFolioType } from './types';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 /** Selectable page sizes for the fiscal-documents list. */
 const PAGE_SIZES = [20, 50, 100];
@@ -42,7 +46,7 @@ export class IrFiscalDocuments {
   @State() private isPageLoading: boolean = true;
   @State() private property_id: number;
   /** `_FD_TYPE` setup entries — used to display the document type in the table. */
-  @State() private fdTypes: IEntries[] = [];
+  @State() private fdTypes: SetupEntries[] = [];
 
   @State() private rows: FiscalDocumentRow[] = [];
   @State() private isLoading: 'search' | 'export' = null;
@@ -56,28 +60,44 @@ export class IrFiscalDocuments {
   /** Booking number whose details drawer is currently open. */
   @State() private selectedBookingNumber: string | null = null;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private propertyService = new PropertyService();
   private roomService = new RoomService();
-  private bookingService = new BookingService();
+  private setupService = new SetupService();
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.fiscalDocuments, () => this.init());
 
   componentWillLoad() {
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
     }
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue === oldValue) return;
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
     }
-    this.tokenService.setToken(this.ticket);
+    this.apiClientService.setApiClient(this.ticket);
     this.init();
   }
 
@@ -89,6 +109,9 @@ export class IrFiscalDocuments {
   private async init() {
     this.isPageLoading = true;
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.fiscalDocuments });
       let propertyId = this.propertyid;
       if (!propertyId && !this.p) {
         throw new Error('Property ID or username (p) is required');
@@ -100,7 +123,7 @@ export class IrFiscalDocuments {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
         propertyId = propertyData.My_Result.id;
@@ -109,12 +132,12 @@ export class IrFiscalDocuments {
 
       // Remaining setup — all in parallel. The property is only fetched here
       // when we didn't already load it through the aname lookup above.
-      const requests: Promise<any>[] = [this.bookingService.getSetupEntriesByTableName('_FD_TYPE'), this.roomService.fetchLanguage(this.language)];
+      const requests: Promise<any>[] = [this.setupService.getSetupEntriesByTableName('_FD_TYPE'), localeReady];
       if (this.propertyid) {
         requests.push(
           this.roomService.getExposedProperty({
             id: propertyId,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
           }),
         );
@@ -201,7 +224,7 @@ export class IrFiscalDocuments {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <ir-page label="Fiscal Documents">
+      <ir-page label={t('Lcz_FiscalDocuments', { fallback: 'Fiscal Documents' })}>
         <ir-fiscal-documents-filters
           propertyId={this.property_id}
           loading={this.isLoading}

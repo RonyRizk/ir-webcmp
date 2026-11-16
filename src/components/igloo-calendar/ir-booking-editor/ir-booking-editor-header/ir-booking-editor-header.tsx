@@ -1,21 +1,26 @@
-import { Component, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
 import { BookedByGuestSchema, BookingEditorMode } from '../types';
 import { Booking } from '@/models/booking.dto';
 import moment from 'moment';
 import { BookingService } from '@/services/booking-service/booking.service';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import booking_store, { resetAvailability, setBookingDraft } from '@/stores/booking.store';
 import { z, ZodSchema } from 'zod';
 import { DateRangeChangeEvent } from '@/components';
 import { IRBookingEditorService } from '../ir-booking-editor.service';
+import { formatDate } from '@/utils/date';
+import { formatBookingNumber, formatCount } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-editor-header',
   styleUrl: 'ir-booking-editor-header.css',
   scoped: true,
 })
 export class IrBookingEditorHeader {
+  @Element() el: HTMLElement;
+
   /** Booking context used for edit, add-room, and split flows */
   @Prop() booking: Booking;
   @Prop() isLoading: boolean;
@@ -52,18 +57,23 @@ export class IrBookingEditorHeader {
         ctx.addIssue({
           path: ['firstName'],
           code: z.ZodIssueCode.custom,
-          message: locales.entries.Lcz_ChooseBookingNumber,
+          message: t('Lcz_ChooseBookingNumber', { fallback: 'Choose a booking number', language: this.lang }),
         });
       }
       // if (!data.lastName) {
       //   ctx.addIssue({
       //     path: ['lastName'],
       //     code: z.ZodIssueCode.custom,
-      //     message: locales.entries.Lcz_ChooseBookingNumber,
+      //     message: t('Lcz_ChooseBookingNumber', { fallback: 'Choose a booking number' }),
       //   });
       // }
     });
   private pickerRef: HTMLIrPickerElement;
+
+  /** Validators run outside `render()`, so they can't pick up a `lang` subtree on their own. */
+  private get lang() {
+    return LocaleController.languageFor(this.el);
+  }
 
   // =====================
   // Handlers
@@ -117,7 +127,7 @@ export class IrBookingEditorHeader {
           ctx.addIssue({
             path: ['checkIn'],
             code: z.ZodIssueCode.custom,
-            message: 'Check-in date is required',
+            message: t('Lcz_CheckInDateRequired', { fallback: 'Check-in date is required', language: this.lang }),
           });
         }
 
@@ -125,10 +135,7 @@ export class IrBookingEditorHeader {
           ctx.addIssue({
             path: ['checkIn'],
             code: z.ZodIssueCode.custom,
-            message: `${locales.entries.Lcz_CheckInDateShouldBeMAx.replace('%1', moment(this.booking.from_date, 'YYYY-MM-DD').format('ddd, DD MMM YYYY')).replace(
-              '%2',
-              moment(this.booking.to_date, 'YYYY-MM-DD').format('ddd, DD MMM YYYY'),
-            )}  `,
+            message: `${t('Lcz_CheckInDateShouldBeMAx', { fallback: 'The check-in or check-out must fall within %1 and %2.', params: [formatDate(this.booking.from_date, 'ddd, DD MMM YYYY', { locale: this.lang }), formatDate(this.booking.to_date, 'ddd, DD MMM YYYY', { locale: this.lang })], language: this.lang })}  `,
           });
         }
 
@@ -140,7 +147,7 @@ export class IrBookingEditorHeader {
           ctx.addIssue({
             path: ['checkOut'],
             code: z.ZodIssueCode.custom,
-            message: 'Check-out date is required',
+            message: t('Lcz_CheckOutDateRequired', { fallback: 'Check-out date is required', language: this.lang }),
           });
         }
       });
@@ -265,15 +272,15 @@ export class IrBookingEditorHeader {
 
   private get childrenSelectPlaceholder() {
     const { child_max_age } = calendar_data.property.adult_child_constraints;
-    const years = child_max_age === 1 ? locales.entries.Lcz_Year : locales.entries.Lcz_Years;
+    const years = child_max_age === 1 ? t('Lcz_Year', { fallback: 'year' }) : t('Lcz_Years', { fallback: 'years' });
 
-    return `${locales.entries.Lcz_ChildCaption} 0 - ${child_max_age} ${years}`;
+    return `${t('Lcz_ChildCaption', { fallback: 'Child.' })} ${formatCount(0)} - ${formatCount(child_max_age)} ${years}`;
   }
 
   private async selectGuest(e: CustomEvent) {
     this.stopEvent(e);
     const booking_nbr = e.detail?.item?.value;
-    const booking = await this.bookingService.getExposedBooking({ booking_nbr, language: 'en', withExtras: true });
+    const booking = await this.bookingService.getExposedBooking({ booking_nbr, language: LocaleController.languageFor(this.el), withExtras: true });
     this.guestSelected.emit(booking);
   }
 
@@ -294,10 +301,10 @@ export class IrBookingEditorHeader {
                 class="booking-editor-header__booking-picker"
                 debounce={300}
                 ref={el => (this.pickerRef = el)}
-                label={`${locales.entries.Lcz_Tobooking}#`}
+                label={`${t('Lcz_Tobooking', { fallback: 'To booking' })}#`}
                 // defaultValue={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
                 // value={Object.keys(this.bookedByInfoData).length > 1 ? this.bookedByInfoData.bookingNumber?.toString() : ''}
-                placeholder={locales.entries.Lcz_BookingNumber}
+                placeholder={t('Lcz_BookingNumber', { fallback: 'Booking number' })}
                 loading={this._isLoading}
                 onText-change={e => this.handleBookingSearch(e.detail)}
                 onCombobox-select={this.selectGuest.bind(this)}
@@ -306,7 +313,9 @@ export class IrBookingEditorHeader {
                   const label = `${b.booking_nbr} ${b.guest.first_name} ${b.guest.last_name}`;
                   return (
                     <ir-picker-item value={b.booking_nbr?.toString()} label={label}>
-                      {label}
+                      {/* `label` stays Latin — `ir-picker` filters on it, so a converted
+                          label would stop matching what the user types. */}
+                      {`${formatBookingNumber(b.booking_nbr)} ${b.guest.first_name} ${b.guest.last_name}`}
                     </ir-picker-item>
                   );
                 })}
@@ -318,7 +327,7 @@ export class IrBookingEditorHeader {
             {!this.bookingEditorService.isEventType(['EDIT_BOOKING', 'ADD_ROOM', 'SPLIT_BOOKING']) && !dayUse && (
               <wa-select
                 size="s"
-                placeholder={locales.entries.Lcz_Source}
+                placeholder={t('Lcz_Source', { fallback: 'Source' })}
                 value={booking_store.bookingDraft.source?.id?.toString()}
                 defaultValue={booking_store.bookingDraft.source?.id}
                 onwa-hide={this.stopEvent.bind(this)}
@@ -328,7 +337,12 @@ export class IrBookingEditorHeader {
               </wa-select>
             )}
             {dayUse ? (
-              <ir-validator class="booking-editor__date-validator" showErrorMessage value={checkIn?.format('YYYY-MM-DD')} schema={z.string().min(1, 'Date is required')}>
+              <ir-validator
+                class="booking-editor__date-validator"
+                showErrorMessage
+                value={checkIn?.format('YYYY-MM-DD')}
+                schema={z.string().min(1, t('Lcz_DateIsRequired', { fallback: 'Date is required' }))}
+              >
                 <ir-date-select
                   date={checkIn?.format('YYYY-MM-DD')}
                   minDate={moment().format('YYYY-MM-DD')}
@@ -366,14 +380,14 @@ export class IrBookingEditorHeader {
                   <wa-select
                     class="booking-editor-header__adults-select"
                     size="s"
-                    placeholder={locales.entries.Lcz_AdultsCaption}
+                    placeholder={t('Lcz_Adults', { fallback: 'adults' })}
                     value={adults?.toString()}
                     defaultValue={adults?.toString()}
                     // onwa-hide={this.stopEvent.bind(this)}
                     onchange={this.handleAdultsChange.bind(this)}
                   >
                     {Array.from({ length: calendar_data.property.adult_child_constraints.adult_max_nbr }, (_, i) => i + 1).map(option => (
-                      <wa-option value={option.toString()}>{option}</wa-option>
+                      <wa-option value={option.toString()}>{formatCount(option)}</wa-option>
                     ))}
                   </wa-select>
                 </ir-validator>
@@ -389,7 +403,7 @@ export class IrBookingEditorHeader {
                     onchange={this.handleChildrenChange.bind(this)}
                   >
                     {Array.from({ length: calendar_data.property.adult_child_constraints.child_max_nbr }, (_, i) => i + 1).map(option => (
-                      <wa-option value={option.toString()}>{option}</wa-option>
+                      <wa-option value={option.toString()}>{formatCount(option)}</wa-option>
                     ))}
                   </wa-select>
                 )}
@@ -397,7 +411,7 @@ export class IrBookingEditorHeader {
             )}
 
             <ir-custom-button loading={this.isLoading} type="submit" variant="brand">
-              Check
+              {t('Lcz_Check', { fallback: 'Check' })}
             </ir-custom-button>
           </div>
           {booking_store.roomTypes?.length > 0 && !this.isLoading && calendar_data.tax_statement && (

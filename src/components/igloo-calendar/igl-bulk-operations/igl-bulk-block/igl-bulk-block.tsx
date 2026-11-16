@@ -4,8 +4,8 @@ import { ReloadInterceptor } from '@/utils/ReloadInterceptor';
 import { Component, Event, EventEmitter, Fragment, h, Prop, State } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { z, ZodError } from 'zod';
+import { t } from '@/services/locale/t';
 // import calendar_dates from '@/stores/calendar-dates.store';
-import locales from '@/stores/locales.store';
 import { showToast } from '@/utils/utils';
 export type RoomStatus = 'open' | 'closed';
 export type SelectedRooms = {
@@ -105,7 +105,7 @@ export class IglBulkBlock {
       this.deactivate();
       showToast({
         type: 'success',
-        title: locales.entries.Lcz_RequestSubmittedSuccessfully,
+        title: t('Lcz_RequestSubmittedSuccessfully'),
         description: '',
       });
       this.loadingChanged.emit(false);
@@ -202,18 +202,16 @@ export class IglBulkBlock {
             }}
           ></ir-select>
         </div> */}
-        <wa-radio-group size="s" label="Block or unblock a unit" orientation="horizontal" name="action">
+        <wa-radio-group size="s" label={t('Lcz_BlockOrUnblockAUnit', { fallback: 'Block or unblock a unit' })} orientation="horizontal" name="action">
           <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="block">
-            Block
+            {t('Lcz_Block', { fallback: 'Block' })}
           </wa-radio>
           <wa-radio style={{ flex: '1 1 0%' }} appearance="button" value="unblock">
-            Unblock
+            {t('Lcz_Unblock', { fallback: 'Unblock' })}
           </wa-radio>
         </wa-radio-group>
         <div>
-          {this.errors === 'rooms' && (
-            <p class="igl-bulk-block__error">{calendar_data.is_vacation_rental ? locales.entries.Lcz_PlzSelectOneListing : locales.entries.Lcz_PlzSelectOneUnit}</p>
-          )}
+          {this.errors === 'rooms' && <p class="igl-bulk-block__error">{calendar_data.is_vacation_rental ? t('Lcz_PlzSelectOneListing') : t('Lcz_PlzSelectOneUnit')}</p>}
           <wa-radio-group
             name="unit"
             ref={el => (this.unitSections = el)}
@@ -254,8 +252,8 @@ export class IglBulkBlock {
         <table class="igl-bulk-block__dates-table" ref={el => (this.datesSections = el)}>
           <thead>
             <tr>
-              <td class="igl-bulk-block__dates-header">{locales.entries.Lcz_From}</td>
-              <td class="igl-bulk-block__dates-header">{locales.entries.Lcz_ToExclusive}</td>
+              <td class="igl-bulk-block__dates-header">{t('Lcz_From', { fallback: 'From' })}</td>
+              <td class="igl-bulk-block__dates-header">{t('Lcz_ToInclusive', { fallback: 'To (inclusive)' })}</td>
               <td>
                 {this.dates.length !== this.maxDatesLength && this.blockState === 'block' && (
                   <ir-custom-button
@@ -367,8 +365,8 @@ export class IglBulkBlock {
         </table>
 
         {/*  <div class={'sheet-footer'}>
-           <ir-button text={locales.entries.Lcz_Cancel} btn_color="secondary" class={'flex-fill'} onClickHandler={() => this.closeDrawer.emit(null)}></ir-button>
-          <ir-button isLoading={this.isLoading} text={locales.entries.Lcz_Confirm} btn_type="submit" class="flex-fill"></ir-button>
+           <ir-button text={t('Lcz_Cancel', { fallback: 'Cancel' })} btn_color="secondary" class={'flex-fill'} onClickHandler={() => this.closeDrawer.emit(null)}></ir-button>
+          <ir-button isLoading={this.isLoading} text={t('Lcz_Confirm', { fallback: 'Confirm' })} btn_type="submit" class="flex-fill"></ir-button>
         </div> */}
       </form>
     );

@@ -2,10 +2,10 @@ import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
 import { IPageTwoDataUpdateProps } from '@/models/models';
 import { IglBookPropertyPayloadEditBooking, TPropertyButtonsTypes } from '../../../../models/igl-book-property';
 import { formatAmount } from '@/utils/utils';
-import locales from '@/stores/locales.store';
 import { ICurrency } from '@/models/calendarData';
 import booking_store, { IRatePlanSelection } from '@/stores/booking.store';
 import { ICountry } from '@/models/IBooking';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'igl-booking-form',
   styleUrl: 'igl-booking-form.css',
@@ -148,10 +148,11 @@ export class IglBookingForm {
         }}
       >
         <div class="d-flex flex-wrap">
-          <ir-date-view class="mr-1 flex-fill font-weight-bold font-medium-1" from_date={this.dateRangeData.fromDate} to_date={this.dateRangeData.toDate}></ir-date-view>
+          <ir-date-view class="ir-me-1 flex-fill font-weight-bold font-medium-1" from_date={this.dateRangeData.fromDate} to_date={this.dateRangeData.toDate}></ir-date-view>
           {this.guestData.length > 1 && (
-            <div class="mt-1 mt-md-0 text-right">
-              {locales.entries.Lcz_TotalPrice} <span class="font-weight-bold font-medium-1">{formatAmount(this.currency.symbol, this.bookingData.TOTAL_PRICE || '0')}</span>
+            <div class="mt-1 mt-md-0 ir-text-end">
+              {t('Lcz_TotalPrice', { fallback: 'Total price' })}{' '}
+              <span class="font-weight-bold font-medium-1">{formatAmount(this.currency.symbol, this.bookingData.TOTAL_PRICE || '0')}</span>
             </div>
           )}
         </div>

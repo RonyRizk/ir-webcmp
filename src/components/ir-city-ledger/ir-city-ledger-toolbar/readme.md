@@ -7,10 +7,9 @@
 
 ## Properties
 
-| Property         | Attribute         | Description | Type     | Default |
-| ---------------- | ----------------- | ----------- | -------- | ------- |
-| `agentId`        | `agent-id`        |             | `number` | `null`  |
-| `currencySymbol` | `currency-symbol` |             | `string` | `'$'`   |
+| Property  | Attribute  | Description | Type     | Default |
+| --------- | ---------- | ----------- | -------- | ------- |
+| `agentId` | `agent-id` |             | `number` | `null`  |
 
 
 ## Events

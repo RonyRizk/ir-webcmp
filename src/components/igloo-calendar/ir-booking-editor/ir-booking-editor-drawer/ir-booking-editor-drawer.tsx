@@ -1,8 +1,8 @@
-import { Component, Event, EventEmitter, Fragment, h, Listen, Prop, State, Watch } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Fragment, h, Listen, Prop, State, Watch } from '@stencil/core';
 import { BlockedDatePayload, BookingEditorMode, BookingStep } from '../types';
 import { Booking, ExtraService } from '@/models/booking.dto';
 import { IBlockUnit } from '@/models/IBooking';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import booking_store, { hasAtLeastOneRoomSelected, resetAvailability, resetBookingStore, resetReserved, setBookingDraft, setDayUseSelection } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
@@ -10,6 +10,8 @@ import { getReleaseHoursString } from '@/utils/utils';
 import { getDayUseUnitAvailability } from '@/utils/booking';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { IRBookingEditorService } from '../ir-booking-editor.service';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-editor-drawer',
@@ -17,10 +19,12 @@ import { IRBookingEditorService } from '../ir-booking-editor.service';
   scoped: true,
 })
 export class IrBookingEditorDrawer {
+  @Element() el: HTMLElement;
+
   /** Controls drawer visibility (reflected to DOM). */
   @Prop({ reflect: true }) open: boolean;
 
-  /** Auth token used for API requests. */
+  /** Auth ApiClient used for API requests. */
   @Prop() ticket: string;
 
   /** Property identifier. */
@@ -68,7 +72,7 @@ export class IrBookingEditorDrawer {
   /** Emitted when the booking editor drawer is closed. */
   @Event() bookingEditorClosed: EventEmitter<void>;
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   private bookingService = new BookingService();
   private bookingEditorService = new IRBookingEditorService();
@@ -80,8 +84,8 @@ export class IrBookingEditorDrawer {
   private sessionKey = 0;
 
   componentWillLoad() {
-    if (this.token) {
-      this.token.setToken(this.ticket);
+    if (this.ApiClient) {
+      this.ApiClient.setApiClient(this.ticket);
     }
     this.initializeBlockedUnitState(this.blockedUnit);
     if (this.open) {
@@ -133,8 +137,8 @@ export class IrBookingEditorDrawer {
 
   @Watch('ticket')
   handleTicketChange() {
-    if (this.token) {
-      this.token.setToken(this.ticket);
+    if (this.ApiClient) {
+      this.ApiClient.setApiClient(this.ticket);
     }
   }
 
@@ -222,20 +226,20 @@ export class IrBookingEditorDrawer {
 
   private get drawerLabel() {
     if (booking_store.bookingDraft.dayUse && ['PLUS_BOOKING'].includes(this.mode)) {
-      return 'Day-Use Booking';
+      return t('Lcz_DayUseBookingTitle', { fallback: 'Day-Use Booking' });
     }
     if (this.label) {
       return this.label;
     }
     switch (this.mode) {
       case 'EDIT_DAY_USE':
-        return 'Edit Day Use Booking';
+        return t('Lcz_EditDayUseBookingTitle', { fallback: 'Edit Day Use Booking' });
       case 'SPLIT_BOOKING':
       case 'BAR_BOOKING':
       case 'ADD_ROOM':
       case 'EDIT_BOOKING':
       case 'PLUS_BOOKING':
-        return 'New Booking';
+        return t('Lcz_NewBooking', { fallback: 'New Booking' });
     }
   }
 
@@ -292,7 +296,7 @@ export class IrBookingEditorDrawer {
     return (
       <Fragment>
         <ir-custom-button onClickHandler={this.goToDetails} size="m" appearance="filled" variant="neutral">
-          Back
+          {t('Lcz_Back', { fallback: 'Back' })}
         </ir-custom-button>
         {showBookAndBlockTheNight && (
           <ir-custom-button
@@ -305,7 +309,7 @@ export class IrBookingEditorDrawer {
             appearance={'outlined'}
             variant="brand"
           >
-            Book and block the night
+            {t('Lcz_BookAndBlockTheNight', { fallback: 'Book and block the night' })}
           </ir-custom-button>
         )}
         <ir-custom-button
@@ -318,11 +322,11 @@ export class IrBookingEditorDrawer {
           appearance={showBookAndBlockTheNight ? 'accent' : hasCheckIn ? 'outlined' : 'accent'}
           variant="brand"
         >
-          Book
+          {t('Lcz_Book', { fallback: 'Book' })}
         </ir-custom-button>
         {hasCheckIn && !booking_store.bookingDraft.dayUse && (
           <ir-custom-button loading={this.isLoading === 'book-checkin'} value="book-checkin" form="new_booking_form" type="submit" size="m" appearance="accent" variant="brand">
-            Book and check-in
+            {t('Lcz_BookAndChekcIn', { fallback: 'Book & check In' })}
           </ir-custom-button>
         )}
       </Fragment>
@@ -334,13 +338,17 @@ export class IrBookingEditorDrawer {
     return (
       <Fragment>
         <ir-custom-button data-drawer="close" size="m" appearance="filled" variant="neutral">
-          Cancel
+          {t('Lcz_Cancel', { fallback: 'Cancel' })}
         </ir-custom-button>
         {!booking_store.bookingDraft.dayUse && ['PLUS_BOOKING', 'ADD_ROOM'].includes(this.mode) && (
           <Fragment>
-            {!haveRoomSelected && <wa-tooltip for="booking_editor__next-button">Please select at least one unit to continue.</wa-tooltip>}
+            {!haveRoomSelected && (
+              <wa-tooltip for="booking_editor__next-button">
+                {t('Lcz_PleaseSelectAtLeastOneUnitToContinue', { fallback: 'Please select at least one unit to continue.' })}
+              </wa-tooltip>
+            )}
             <ir-custom-button id="booking_editor__next-button" disabled={!haveRoomSelected} onClickHandler={this.goToConfirm} size="m" appearance="accent" variant="brand">
-              Next
+              {t('Lcz_Next', { fallback: 'Next' })}
             </ir-custom-button>
           </Fragment>
         )}
@@ -448,7 +456,7 @@ export class IrBookingEditorDrawer {
           adult: 2,
           child: 0,
         },
-        language: this.language,
+        language: LocaleController.languageFor(this.el),
         room_type_ids: roomTypeIds,
         currency: calendar_data.property?.currency,
       });
@@ -500,10 +508,10 @@ export class IrBookingEditorDrawer {
               onchange={e => this.handleDayUseToggle((e.target as HTMLInputElement).value)}
             >
               <wa-radio appearance="button" value="manual">
-                Stay
+                {t('Lcz_Stay', { fallback: 'Stay' })}
               </wa-radio>
               <wa-radio appearance="button" value="day-use">
-                Day-use
+                {t('Lcz_DayUseHyphen', { fallback: 'Day-use' })}
               </wa-radio>
             </wa-radio-group>
           </div>

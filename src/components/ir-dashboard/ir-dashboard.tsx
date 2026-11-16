@@ -1,18 +1,23 @@
 import type { Payment, PaymentEntries } from '@/components/ir-booking-details/types';
 import type { Booking } from '@/models/booking.dto';
 import type { ICountry } from '@/models/IBooking';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
 import { DashboardService, type DashboardPerformance, type DashboardUnits } from '@/services/dashboard';
 import { realtimeService, type RealtimeEventMap, type RealtimeMessage } from '@/services/realtime/realtime.service';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 import { RoomService } from '@/services/room.service';
+import { SetupService } from '@/services/setup';
 import { arrivalsStore, setArrivalsPageSize, setArrivalsSortByTime } from '@/stores/arrivals.store';
 import calendar_data from '@/stores/calendar-data';
 import { departuresStore, setDeparturesPageSize, setDeparturesSortByTime } from '@/stores/departures.store';
-import locales from '@/stores/locales.store';
 import { BatchingQueue } from '@/utils/Queue/batch-queue';
 import { todayISO, type ISODate } from '@/utils/calendar-dates';
+import { formatCount } from '@/utils/number';
 import { Component, Element, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import { Subject, debounceTime, filter, type Subscription } from 'rxjs';
@@ -26,7 +31,6 @@ import {
   countUnassignedArrivals,
   DATE_CHANGE_DEBOUNCE_MS,
   formatCardCount,
-  formatCount,
   isCancellationOn,
   sumOccupancy,
 } from './dashboard.helpers';
@@ -99,6 +103,7 @@ export class IrDashboard {
   @Prop() p: string;
   /** API base URL override. */
   @Prop() baseurl: string;
+  @Prop({ attribute: 'base-url' }) baseUrl: string;
 
   @State() isPageLoading = true;
   @State() isPerformanceLoading = false;
@@ -131,10 +136,11 @@ export class IrDashboard {
   @State() booking: Booking;
   @State() payment: Payment;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private bookingService = new BookingService();
   private bookingListingService = new BookingListingService();
+  private setupService = new SetupService();
   private dashboardService = new DashboardService();
 
   private paymentFolioRef: HTMLIrPaymentFolioElement;
@@ -154,6 +160,8 @@ export class IrDashboard {
   /** Set while a day change's debounced load is waiting; clearing it drops that load. */
   private isDayLoadPending = false;
   /** Collects realtime notifications so a burst triggers one refresh, at most every 3s. */
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.dashboard, () => this.init());
   private realtimeQueue = new BatchingQueue<RealtimeMessage>(messages => this.processRealtimeBatch(messages), {
     batchSize: 1000,
     flushInterval: 3000,
@@ -189,19 +197,23 @@ export class IrDashboard {
 
   componentWillLoad() {
     if (this.baseurl) {
-      this.tokenService.setBaseUrl(this.baseurl);
+      this.apiClientService.setBaseUrl(this.baseurl);
+    }
+    if (this.baseUrl) {
+      this.apiClientService.setBaseUrl(this.baseUrl);
     }
     setArrivalsPageSize(DASHBOARD_PAGE_SIZE);
     setDeparturesPageSize(DASHBOARD_PAGE_SIZE);
     setArrivalsSortByTime(true);
     setDeparturesSortByTime(true);
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
 
   componentDidLoad() {
+    this.languageSync.connect();
     // The density is read from the laid-out rail, so it can't be set in componentWillLoad; measuring on the next frame
     // keeps the state change out of componentDidLoad (which Stencil warns about as an extra re-render).
     this.scheduleFitToPage();
@@ -219,6 +231,7 @@ export class IrDashboard {
       cancelAnimationFrame(this.fitFrame);
       this.fitFrame = null;
     }
+    this.languageSync.disconnect();
     this.unsubscribeRealtime?.();
     this.unsubscribeRealtime = null;
     this.realtimeQueue.clear();
@@ -230,9 +243,14 @@ export class IrDashboard {
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue && newValue !== oldValue) {
-      this.tokenService.setToken(newValue);
+      this.apiClientService.setApiClient(newValue);
       this.init();
     }
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Listen('openBookingDetails')
@@ -373,28 +391,30 @@ export class IrDashboard {
   private async init() {
     try {
       this.isPageLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.dashboard });
       if (!this.propertyid && !this.p) {
         throw new Error('Missing credentials');
       }
       ++this.loadSeq;
       const propertyReady = calendar_data?.property
         ? Promise.resolve(null)
-        : this.roomService.getExposedProperty({ id: this.propertyid || 0, aname: this.p, language: this.language, is_backend: true });
+        : this.roomService.getExposedProperty({ id: this.propertyid || 0, aname: this.p, language: LocaleController.language, is_backend: true });
       this.propertyReady = propertyReady;
       // With a known id these go out alongside the property; with only an alias they need its id first.
       const withPropertyId = <T,>(fn: () => Promise<T>) => (this.propertyId ? fn() : propertyReady.then(fn));
-      const [, , criteria, countries, setupEntries] = await Promise.all([
+      const [, , criteria, countries, paymentEntries] = await Promise.all([
         propertyReady,
-        this.roomService.fetchLanguage(this.language),
-        withPropertyId(() => this.bookingListingService.getExposedBookingsCriteria(this.propertyId)),
-        this.bookingService.getCountries(this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
+        localeReady,
+        withPropertyId(() => this.bookingListingService.getExposedBookingsCriteria({ property_id: this.propertyId, language: LocaleController.language })),
+        this.bookingService.getCountries(LocaleController.language),
+        this.setupService.getPaymentEntries(),
         withPropertyId(() => this.loadTab('arrivals')),
       ]);
       this.hasPendingStatus = !!criteria?.statuses?.some(status => status.code === '001');
       this.countries = countries;
-      const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
-      this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
+      this.paymentEntries = paymentEntries;
       this.subscribeRealtime();
     } catch (error) {
       console.error(error);
@@ -488,7 +508,7 @@ export class IrDashboard {
   }
 
   private loadStats(): Promise<void>[] {
-    const params = { property_id: this.propertyId, date: this.selectedDate };
+    const params = { property_id: this.propertyId, date: this.selectedDate, language: LocaleController.language };
     const loads = [
       this.loadStat(
         () => this.dashboardService.getDayPerformance(params),
@@ -574,7 +594,7 @@ export class IrDashboard {
   }
 
   private async fetchTab(tab: DashboardTab, date: ISODate, seq: number) {
-    const params = { property_id: this.propertyId, date };
+    const params = { property_id: this.propertyId, date, language: LocaleController.language };
     switch (tab) {
       case 'arrivals':
         return loadArrivals(this.propertyId, date, this.propertyReady);
@@ -703,7 +723,9 @@ export class IrDashboard {
         </span>
         {/* Wraps instead of truncating, so a note's number always shows however narrow the card is. */}
         <span class="dashboard-tab__notes">
-          {loaded && unassigned > 0 && <span class="dashboard-tab__note dashboard-tab__note--unassigned">{`${formatCount(unassigned)} unassigned`}</span>}
+          {loaded && unassigned > 0 && (
+            <span class="dashboard-tab__note dashboard-tab__note--unassigned">{t('Lcz_UnassignedCount', { fallback: '%1 unassigned', params: [formatCount(unassigned)] })}</span>
+          )}
           {loaded && overdueNote && <span class="dashboard-tab__note dashboard-tab__note--overdue">{overdueNote}</span>}
           {loaded && guests && this.renderGuests(guests)}
         </span>
@@ -714,12 +736,12 @@ export class IrDashboard {
   /** In-house guests as three chips (adults, children, infants), each with its own icon and value. */
   private renderGuests({ adults, children, infants }: DashboardCounts['inHouseGuests']) {
     const kinds = [
-      { icon: 'user', value: adults, label: locales.entries?.Lcz_Adults ?? 'Adults' },
-      { icon: 'child', value: children, label: locales.entries?.Lcz_Children ?? 'Children' },
-      { icon: 'baby', value: infants, label: locales.entries?.Lcz_Infants ?? 'Infants' },
+      { icon: 'user', value: adults, label: t('Lcz_Adults', { fallback: 'Adults' }) },
+      { icon: 'child', value: children, label: t('Lcz_Children', { fallback: 'Children' }) },
+      { icon: 'baby', value: infants, label: t('Lcz_Infants', { fallback: 'Infants' }) },
     ];
     return (
-      <span class="dashboard-tab__guests" role="list" aria-label="Guests in-house">
+      <span class="dashboard-tab__guests" role="list" aria-label={t('Lcz_GuestsInHouse', { fallback: 'Guests in-house' })}>
         {kinds.map(({ icon, value, label }) => (
           <span class={{ 'dashboard-tab__guest': true, 'dashboard-tab__guest--none': value === 0 }} role="listitem" title={`${label}: ${formatCount(value)}`}>
             <wa-icon class="dashboard-tab__guest-icon" name={icon} aria-hidden="true"></wa-icon>
@@ -753,14 +775,20 @@ export class IrDashboard {
           ></ir-dashboard-departures>
         );
       case 'inHouse':
-        return <ir-dashboard-bookings-table variant="inHouse" bookings={this.inHouse} emptyMessage="No guests in-house."></ir-dashboard-bookings-table>;
+        return (
+          <ir-dashboard-bookings-table
+            variant="inHouse"
+            bookings={this.inHouse}
+            emptyMessage={t('Lcz_NoGuestsInHouse', { fallback: 'No guests in-house.' })}
+          ></ir-dashboard-bookings-table>
+        );
       case 'bookings':
         return (
           <ir-dashboard-bookings-table
             variant="newBookings"
             date={this.selectedDate}
             bookings={this.newBookings}
-            emptyMessage="No bookings made on this day."
+            emptyMessage={t('Lcz_NoBookingsMadeOnThisDay', { fallback: 'No bookings made on this day.' })}
           ></ir-dashboard-bookings-table>
         );
       case 'cancellations':
@@ -769,7 +797,7 @@ export class IrDashboard {
             variant="cancellations"
             date={this.selectedDate}
             bookings={this.cancellations}
-            emptyMessage="No cancellations on this day."
+            emptyMessage={t('Lcz_NoCancellationsOnThisDay', { fallback: 'No cancellations on this day.' })}
           ></ir-dashboard-bookings-table>
         );
     }
@@ -806,18 +834,24 @@ export class IrDashboard {
                 withoutScrollControls
                 onwa-tab-show={e => this.handleTabShow(e as CustomEvent<{ name: string }>)}
               >
-                {this.renderTab('arrivals', 'Arrivals', counts.arrivals, {
+                {this.renderTab('arrivals', t('Lcz_Arrivals', { fallback: 'Arrivals' }), counts.arrivals, {
                   // Without the front desk nothing is checked in, so nothing is overdue.
-                  overdueNote: isPms && counts.overdueArrivals > 0 ? `${formatCount(counts.overdueArrivals)} overdue check-ins` : undefined,
+                  overdueNote:
+                    isPms && counts.overdueArrivals > 0
+                      ? t('Lcz_OverdueCheckInsCount', { fallback: '%1 overdue check-ins', params: [formatCount(counts.overdueArrivals)] })
+                      : undefined,
                   // Units are assigned at check-in, so without the front desk "unassigned" means nothing.
                   unassigned: isPms ? counts.unassignedArrivals : undefined,
                 })}
-                {this.renderTab('departures', 'Departures', counts.departures, {
-                  overdueNote: isPms && counts.overdueDepartures > 0 ? `${formatCount(counts.overdueDepartures)} overdue check-outs` : undefined,
+                {this.renderTab('departures', t('Lcz_Departures', { fallback: 'Departures' }), counts.departures, {
+                  overdueNote:
+                    isPms && counts.overdueDepartures > 0
+                      ? t('Lcz_OverdueCheckOutsCount', { fallback: '%1 overdue check-outs', params: [formatCount(counts.overdueDepartures)] })
+                      : undefined,
                 })}
-                {isPms && this.renderTab('inHouse', 'In-house', counts.inHouse, { guests: counts.inHouseGuests })}
-                {this.renderTab('bookings', locales.entries?.Lcz_Bookings ?? 'Bookings', counts.bookings)}
-                {this.renderTab('cancellations', 'Cancellations', counts.cancellations)}
+                {isPms && this.renderTab('inHouse', t('Lcz_InHouse', { fallback: 'In-house' }), counts.inHouse, { guests: counts.inHouseGuests })}
+                {this.renderTab('bookings', t('Lcz_Bookings', { fallback: 'Bookings' }), counts.bookings)}
+                {this.renderTab('cancellations', t('Lcz_Cancellations', { fallback: 'Cancellations' }), counts.cancellations)}
                 {this.tabs.map(tab => (
                   <wa-tab-panel key={tab} name={tab} class="dashboard-tab-panel">
                     {this.renderPanel(tab)}

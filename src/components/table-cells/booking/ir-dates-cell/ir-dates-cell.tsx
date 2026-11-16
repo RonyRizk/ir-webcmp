@@ -1,5 +1,5 @@
 import { Component, Host, Prop, h } from '@stencil/core';
-import moment from 'moment';
+import { formatDate } from '@/utils/date';
 
 @Component({
   tag: 'ir-dates-cell',
@@ -19,7 +19,7 @@ export class IrDatesCell {
    */
   @Prop() showArrow: boolean = false;
   private formatDate(date: string) {
-    return moment(date, 'YYYY-MM-DD').format('DD MMM YYYY');
+    return formatDate(date, { style: 'medium' });
   }
   render() {
     return (
@@ -28,7 +28,7 @@ export class IrDatesCell {
           {this.checkInLabel && <span class="date-cell__label">{this.checkInLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckin ? 'bold' : 'auto' }}>{this.formatDate(this.checkIn)}</p>
         </div>
-        {this.showArrow && <wa-icon class="date-cell__arrow" name="arrow-right"></wa-icon>}
+        {this.showArrow && <wa-icon class="date-cell__arrow ir-flip-rtl" name="arrow-right"></wa-icon>}
         <div part="checkout-container" class="date-cell__container">
           {this.checkoutLabel && <span class="date-cell__label">{this.checkoutLabel}: </span>}
           <p style={{ fontWeight: this.overdueCheckout ? 'bold' : 'auto' }}>{this.formatDate(this.checkOut)}</p>

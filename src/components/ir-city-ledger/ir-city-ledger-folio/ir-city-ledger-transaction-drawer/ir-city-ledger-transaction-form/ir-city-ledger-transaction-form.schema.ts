@@ -2,6 +2,16 @@ import moment from 'moment';
 import { z } from 'zod';
 import { ClTxTypeCode } from '@/types/enums';
 import type { ClTx } from '@/services/city-ledger';
+import { t } from '@/services/locale/t';
+import type { LocaleKey } from '@/services/locale/types';
+
+/**
+ * Every schema here is built once at module load, before any locale is fetched, so
+ * messages must be resolved when the issue is raised, not when the schema is built.
+ * zod v3 only takes a fixed string on `.min()` / `.gt()`; an `errorMap` on the base
+ * type is the lazy equivalent (it then covers every issue on that field).
+ */
+const lazyMessage = (key: LocaleKey, fallback: string) => ({ errorMap: () => ({ message: t(key, { fallback }) }) });
 
 export type TransactionType = (typeof ClTxTypeCode)[keyof typeof ClTxTypeCode];
 
@@ -82,17 +92,23 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 
 const dateSchema = z
   .string()
-  .refine(value => moment(value, DATE_FORMAT, true).isValid(), 'Date must be in YYYY-MM-DD format.')
-  .refine(value => {
-    const valueDate = moment(value, DATE_FORMAT, true).startOf('day');
-    const minimumAllowedDate = moment().startOf('day').subtract(12, 'months');
-    return !valueDate.isBefore(minimumAllowedDate);
-  }, 'Date cannot be older than 12 months from today.');
+  .refine(
+    value => moment(value, DATE_FORMAT, true).isValid(),
+    () => ({ message: t('Lcz_DateMustBeYmdFormat', { fallback: 'Date must be in YYYY-MM-DD format.' }) }),
+  )
+  .refine(
+    value => {
+      const valueDate = moment(value, DATE_FORMAT, true).startOf('day');
+      const minimumAllowedDate = moment().startOf('day').subtract(12, 'months');
+      return !valueDate.isBefore(minimumAllowedDate);
+    },
+    () => ({ message: t('Lcz_DateNotOlderThan12Months', { fallback: 'Date cannot be older than 12 months from today.' }) }),
+  );
 
 const commonFieldsSchema = z.object({
   date: dateSchema,
-  amount: z.coerce.number().gt(0, 'Amount must be greater than 0.'),
-  taxId: z.string().min(1, 'Tax selection is required.'),
+  amount: z.coerce.number(lazyMessage('Lcz_AmountMustBeGreaterThanZero', 'Amount must be greater than 0.')).gt(0),
+  taxId: z.string(lazyMessage('Lcz_TaxSelectionRequired', 'Tax selection is required.')).min(1),
   reference: z.string().optional(),
   notes: z.string().max(500).optional(),
 });
@@ -148,7 +164,7 @@ const creditNoteSchema = commonFieldsSchema.extend({
 
 const debitNoteSchema = commonFieldsSchema.extend({
   transactionType: z.literal(ClTxTypeCode.DebitNote),
-  invoiceId: z.string().min(1, 'Invoice is required for debit note.'),
+  invoiceId: z.string(lazyMessage('Lcz_InvoiceRequiredForDebitNote', 'Invoice is required for debit note.')).min(1),
   generatesFiscalDocument: z.literal(true),
 });
 
@@ -176,21 +192,21 @@ export const cityLedgerTransactionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['invoiceId'],
-        message: 'Invoice must be empty when payment is marked as on account.',
+        message: t('Lcz_InvoiceMustBeEmptyForOnAccountPayment', { fallback: 'Invoice must be empty when payment is marked as on account.' }),
       });
     }
     if (data.transactionType === ClTxTypeCode.Adjustment && data.linkType === 'NONE' && data.linkedId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['linkedId'],
-        message: 'linkedId must be empty when link type is NONE.',
+        message: t('Lcz_LinkedRecordMustBeEmptyForNoneLinkType', { fallback: 'linkedId must be empty when link type is NONE.' }),
       });
     }
     if (data.transactionType === ClTxTypeCode.CreditNote && data.creditNoteMode === 'cancel-invoice' && !data.invoiceId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['invoiceId'],
-        message: 'Invoice is required when cancelling an invoice.',
+        message: t('Lcz_InvoiceRequiredWhenCancellingInvoice', { fallback: 'Invoice is required when cancelling an invoice.' }),
       });
     }
   });
@@ -332,13 +348,13 @@ export const validateCityLedgerTransaction = (draft: CityLedgerTransactionFormDr
 // ── Individual field schemas for ir-validator ────────────────────────────────
 export const transactionTypeFieldSchema = z.enum(Object.values(ClTxTypeCode) as [TransactionType, ...TransactionType[]]);
 export const dateFieldSchema = dateSchema;
-export const amountFieldSchema = z.coerce.number().gt(0, 'Amount must be greater than 0.');
-export const taxIdFieldSchema = z.string().min(1, 'Tax selection is required.');
+export const amountFieldSchema = z.coerce.number(lazyMessage('Lcz_AmountMustBeGreaterThanZero', 'Amount must be greater than 0.')).gt(0);
+export const taxIdFieldSchema = z.string(lazyMessage('Lcz_TaxSelectionRequired', 'Tax selection is required.')).min(1);
 export const entryTypeFieldSchema = z.enum(ENTRY_TYPES);
-export const paymentTypeCodeFieldSchema = z.string().min(1, 'Payment type is required.');
-export const paymentMethodCodeFieldSchema = z.string().min(1, 'Payment method is required.');
-export const invoiceIdRequiredFieldSchema = z.string().min(1, 'Invoice is required.');
-export const serviceCategoryFieldSchema = z.string().min(1, 'Service category is required.');
+export const paymentTypeCodeFieldSchema = z.string(lazyMessage('Lcz_PaymentTypeRequired', 'Payment type is required.')).min(1);
+export const paymentMethodCodeFieldSchema = z.string(lazyMessage('Lcz_PaymentMethodIsRequired', 'Payment method is required.')).min(1);
+export const invoiceIdRequiredFieldSchema = z.string(lazyMessage('Lcz_InvoiceRequired', 'Invoice is required.')).min(1);
+export const serviceCategoryFieldSchema = z.string(lazyMessage('Lcz_ServiceCategoryRequired', 'Service category is required.')).min(1);
 export const linkTypeFieldSchema = z.enum(LINK_TYPES);
 export const reasonFieldSchema = z.enum(ADJUSTMENT_REASONS);
 

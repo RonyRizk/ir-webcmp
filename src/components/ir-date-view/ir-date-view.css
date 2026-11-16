@@ -53,3 +53,9 @@
   white-space: nowrap;
   line-height: 1.6;
 } */
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
+}

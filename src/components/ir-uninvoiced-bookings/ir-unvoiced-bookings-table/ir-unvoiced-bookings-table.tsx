@@ -3,8 +3,9 @@ import { createColumnHelper, getCoreRowModel } from '@tanstack/table-core';
 import { flexRender, useTable } from '@/utils/useTable';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import uninvoiced_bookings, { setUninvoicedBookingsTablePage, setUninvoicedBookingsTablePageSize } from '@/stores/uninvoiced_bookings.store';
-import { formatAmount } from '@/utils/utils';
+import { formatAmount, formatCount } from '@/utils/number';
 import { UninvoicedBookingRow } from '../types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-unvoiced-bookings-table',
@@ -20,7 +21,7 @@ export class IrUnvoicedBookingsTable {
   private columns = [
     this.columnHelper.display({
       id: 'booking',
-      header: 'Booking#',
+      header: t('Lcz_BookingHash', { fallback: 'Booking#' }),
       cell: info => {
         const booking = info.row.original.raw;
         return (
@@ -36,7 +37,7 @@ export class IrUnvoicedBookingsTable {
     }),
     this.columnHelper.display({
       id: 'booked_by',
-      header: 'Booked by',
+      header: t('Lcz_BookedBy', { fallback: 'Booked by' }),
       cell: info => {
         const row = info.row.original;
         const booking = row.raw;
@@ -60,7 +61,7 @@ export class IrUnvoicedBookingsTable {
     }),
     this.columnHelper.display({
       id: 'dates',
-      header: 'End date',
+      header: t('Lcz_EndDate', { fallback: 'End date' }),
       cell: info => {
         const booking = info.row.original.raw;
         return <ir-dates-cell class="uninvoiced-bookings__dates-cell" checkIn={booking.from_date} checkOut={booking.to_date}></ir-dates-cell>;
@@ -68,7 +69,7 @@ export class IrUnvoicedBookingsTable {
     }),
     this.columnHelper.display({
       id: 'services',
-      header: 'Services',
+      header: t('Lcz_Services', { fallback: 'Services' }),
       cell: info => {
         const booking = info.row.original.raw;
         const invoicableUnits = booking.invoice_info?.invoiceable_items?.filter(item => item.is_invoiceable && item.type === 'BSA')?.length;
@@ -77,24 +78,18 @@ export class IrUnvoicedBookingsTable {
         // const roomsLength = row.raw.rooms?.length;
         return (
           <div>
-            {!!invoicableUnits && (
-              <p class="uninvoiced-bookings__services">
-                {invoicableUnits} unit{invoicableUnits > 1 ? 's' : ''}
-              </p>
-            )}
+            {!!invoicableUnits && <p class="uninvoiced-bookings__services">{t('Lcz_UnitCount', { fallback: '%1 unit(s)', params: [formatCount(invoicableUnits)] })}</p>}
             {!!invoicableServices && (
-              <p class="uninvoiced-bookings__services">
-                {invoicableServices} extra service{invoicableServices > 1 ? 's' : ''}
-              </p>
+              <p class="uninvoiced-bookings__services">{t('Lcz_ExtraServiceCount', { fallback: '%1 extra service(s)', params: [formatCount(invoicableServices)] })}</p>
             )}
-            {!!invoicableCancellation && <p class="uninvoiced-bookings__services">Cancellation fee</p>}
+            {!!invoicableCancellation && <p class="uninvoiced-bookings__services">{t('Lcz_CancellationFee', { fallback: 'Cancellation fee' })}</p>}
           </div>
         );
       },
     }),
     this.columnHelper.display({
       id: 'status',
-      header: 'Status',
+      header: t('Lcz_Status', { fallback: 'Status' }),
       cell: info => {
         const booking = info.row.original.raw;
         const lastManipulation = booking.ota_manipulations ? booking.ota_manipulations[booking.ota_manipulations.length - 1] : null;
@@ -117,7 +112,7 @@ export class IrUnvoicedBookingsTable {
     // }),
     this.columnHelper.accessor('uninvoicedGuestAmount', {
       id: 'uninvoicedGuestAmount',
-      header: 'Uninvoiced guest amount',
+      header: t('Lcz_UninvoicedGuestAmount', { fallback: 'Uninvoiced guest amount' }),
       cell: info => (
         <span>
           <b>{formatAmount(info.row.original.currencySymbol, info.getValue())} / </b>
@@ -191,7 +186,7 @@ export class IrUnvoicedBookingsTable {
               ) : table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={this.columns.length} class="empty-row">
-                    <ir-empty-state message="No uninvoiced guest-paid bookings for this date range."></ir-empty-state>
+                    <ir-empty-state message={t('Lcz_NoUninvoicedGuestPaidBookings', { fallback: 'No uninvoiced guest-paid bookings for this date range.' })}></ir-empty-state>
                   </td>
                 </tr>
               ) : (
@@ -226,7 +221,7 @@ export class IrUnvoicedBookingsTable {
           allowPageSizeChange={true}
           pageSizes={this.pageSizes}
           showing={{ from: total ? startIndex + 1 : 0, to: startIndex + pageRows.length }}
-          recordLabel="bookings"
+          recordLabel={t('Lcz_Bookings', { fallback: 'bookings' })}
           onPageChange={this.handlePageChange}
           onPageSizeChange={this.handlePageSizeChange}
         ></ir-pagination>

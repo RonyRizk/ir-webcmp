@@ -99,7 +99,7 @@ export class IrTooltip {
           onMouseLeave={() => this.toggleOpen(false)}
         >
           {/* <i
-            class="ml-1 ft-info"
+            class="ir-ms-1 ft-info"
             data-toggle="tooltip"
             data-placement="top"
             data-original-title="Info popup"

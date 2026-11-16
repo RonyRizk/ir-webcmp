@@ -98,13 +98,13 @@
    Prefixed with .meal-count__table to win over shared table.css padding. */
 .meal-count__table td.meal-count__cell--ad,
 .meal-count__table thead th.meal-count__subhead--ad {
-  text-align: right !important;
+  text-align: end !important;
   padding-inline: 0.4rem 0.2rem !important;
   font-weight: 600;
 }
 .meal-count__table td.meal-count__cell--ch,
 .meal-count__table thead th.meal-count__subhead--ch {
-  text-align: left !important;
+  text-align: start !important;
   padding-inline: 0.2rem 0.4rem !important;
 }
 /* Separator before each Ad column so every meal's Ad/Ch pair reads as a unit. */

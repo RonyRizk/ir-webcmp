@@ -10,6 +10,9 @@ import moment from 'moment';
 import calendar_data from '@/stores/calendar-data';
 import { Booking } from '@/models/booking.dto';
 import { _formatTime } from '@/components/ir-booking-details/functions';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber } from '@/utils/number';
+import { formatDate } from '@/utils/date';
 
 @Component({
   tag: 'ir-city-ledger-fiscal-documents-table',
@@ -167,23 +170,23 @@ export class IrCityLedgerFiscalDocumentsTable {
   private get columns() {
     const base = [
       this.columnHelper.accessor('FD_STATUS_CODE', {
-        header: 'Status',
+        header: t('Lcz_Status', { fallback: 'Status' }),
         cell: info => <ir-cl-status-tag transaction={info.row.original}></ir-cl-status-tag>,
       }),
       this.columnHelper.accessor('ISSUE_DATE_DISPLAY', {
-        header: 'Date',
+        header: t('Lcz_DateLabel', { fallback: 'Date' }),
         cell: info => {
           const row = info.row.original;
           return (
             <div class="fiscal-table__date-cell">
-              <p class="m-0 p-0">{info.getValue()}</p>
+              <p class="m-0 p-0">{formatDate(info.getValue())}</p>
               {row.ISSUE_HOUR != null && row.ISSUE_MINUTE != null && <p class="fd_ss">{_formatTime(String(row.ISSUE_HOUR), String(row.ISSUE_MINUTE))}</p>}
             </div>
           );
         },
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
-        header: 'Doc Number',
+        header: t('Lcz_DocNumber', { fallback: 'Doc Number' }),
         cell: info => (
           <wa-button
             onClick={() => {
@@ -204,20 +207,23 @@ export class IrCityLedgerFiscalDocumentsTable {
             appearance="plain"
             class="fiscal-table__doc-number"
           >
-            {info.getValue() ?? ''}
+            {formatBookingNumber(info.getValue())}
           </wa-button>
         ),
       }),
       this.columnHelper.accessor('FD_TYPE_NAME', {
         id: 'type',
-        header: 'Type',
+        header: t('Lcz_Type', { fallback: 'Type' }),
         cell: info => (
           <div>
             <p class="m-0 p-0">{info.getValue()}</p>
             {/* {[FdTypes.CreditNote, FdTypes.CreditReceipt].includes(info.row.original.FD_TYPE_CODE as any) && <p class="fd_ss">for {info.row.original.EXTERNAL_REF}</p>} */}
             {info.row.original.EXTERNAL_REF && (
               <p class="fd_ss">
-                {[FdTypes.CreditNote, FdTypes.CreditReceipt].includes(info.row.original.FD_TYPE_CODE as any) ? 'for' : 'voided by'} {info.row.original.EXTERNAL_REF}
+                {[FdTypes.CreditNote, FdTypes.CreditReceipt].includes(info.row.original.FD_TYPE_CODE as any)
+                  ? <span class="fd_ss__connector">{t('Lcz_For', { fallback: 'For' })}</span>
+                  : t('Lcz_VoidedByReference', { fallback: 'voided by' })}{' '}
+                {info.row.original.EXTERNAL_REF}
               </p>
             )}
           </div>
@@ -228,11 +234,11 @@ export class IrCityLedgerFiscalDocumentsTable {
     const amountCols = this.taxableOnly
       ? [
           this.columnHelper.accessor('NET_AMOUNT', {
-            header: 'Net Amount',
+            header: t('Lcz_NetAmount', { fallback: 'Net Amount' }),
             cell: info => this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID),
           }),
           this.columnHelper.accessor('TAX_AMOUNT', {
-            header: 'Taxes',
+            header: t('Lcz_Taxes', { fallback: 'Taxes' }),
             cell: info => this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID),
           }),
         ]
@@ -249,16 +255,16 @@ export class IrCityLedgerFiscalDocumentsTable {
       ...base,
       ...amountCols,
       this.columnHelper.accessor('DEBIT', {
-        header: 'Debit',
+        header: t('Lcz_Debit', { fallback: 'Debit' }),
         cell: info => (info.row.original.FD_TYPE_CODE === FdTypes.CreditReceipt ? '' : this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID)),
       }),
       this.columnHelper.accessor('CREDIT', {
-        header: 'Credit',
+        header: t('Lcz_Credit', { fallback: 'Credit' }),
         cell: info => this.renderMoney(this.getCredit(info), info.row.original.CURRENCY_ID),
       }),
       this.columnHelper.display({
         id: 'actions',
-        header: 'Actions',
+        header: t('Lcz_Actions', { fallback: 'Actions' }),
         cell: info => {
           const row = info.row.original;
           const isDraft = row.FD_TYPE_CODE === FdTypes.Draft;
@@ -281,16 +287,16 @@ export class IrCityLedgerFiscalDocumentsTable {
 
               {isDraft
                 ? [
-                    <wa-dropdown-item value="preview">Preview</wa-dropdown-item>,
-                    <wa-dropdown-item value="convert-to-invoice">Convert to invoice</wa-dropdown-item>,
+                    <wa-dropdown-item value="preview">{t('Lcz_Preview', { fallback: 'Preview' })}</wa-dropdown-item>,
+                    <wa-dropdown-item value="convert-to-invoice">{t('Lcz_ConvertToInvoice', { fallback: 'Convert to Invoice' })}</wa-dropdown-item>,
                     <wa-dropdown-item value="delete-draft" variant="danger">
-                      Delete
+                      {t('Lcz_Delete', { fallback: 'Delete' })}
                     </wa-dropdown-item>,
                   ]
                 : [
-                    <wa-dropdown-item value="view">View document</wa-dropdown-item>,
+                    <wa-dropdown-item value="view">{t('Lcz_ViewDocument', { fallback: 'View document' })}</wa-dropdown-item>,
 
-                    <wa-dropdown-item value="print">Print</wa-dropdown-item>,
+                    <wa-dropdown-item value="print">{t('Lcz_Print', { fallback: 'Print' })}</wa-dropdown-item>,
 
                     // <wa-dropdown-item value="download">Download PDF</wa-dropdown-item>,
 
@@ -306,12 +312,12 @@ export class IrCityLedgerFiscalDocumentsTable {
 
                     isInvoice && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
                       <wa-dropdown-item value="void">
-                        <span class="fiscal-table__action-danger">Issue credit note</span>
+                        <span class="fiscal-table__action-danger">{t('Lcz_IssueCreditNote', { fallback: 'Issue credit note' })}</span>
                       </wa-dropdown-item>
                     ),
                     isReceipt && info.row.original.FD_STATUS_CODE !== FdStatus.Voided && (
                       <wa-dropdown-item value="void">
-                        <span class="fiscal-table__action-danger">Void with credit receipt</span>
+                        <span class="fiscal-table__action-danger">{t('Lcz_VoidWithCreditReceipt', { fallback: 'Void with credit receipt' })}</span>
                       </wa-dropdown-item>
                     ),
                   ]}
@@ -342,12 +348,12 @@ export class IrCityLedgerFiscalDocumentsTable {
             <div class="fiscal-table__date-prompt-icon">
               <wa-icon name="calendar-days"></wa-icon>
             </div>
-            <p class="fiscal-table__date-prompt-title">Select a date range to get started</p>
+            <p class="fiscal-table__date-prompt-title">{t('Lcz_SelectDateRangeToGetStarted', { fallback: 'Select a date range to get started' })}</p>
             {hasDate && (
               <wa-animation iterations={1} play id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
                 <ir-custom-button size="s" variant="brand" onClickHandler={() => this.fetchRequested.emit()}>
                   <wa-icon slot="start" name="magnifying-glass"></wa-icon>
-                  Load Documents
+                  {t('Lcz_LoadDocuments', { fallback: 'Load Documents' })}
                 </ir-custom-button>
               </wa-animation>
             )}
@@ -406,7 +412,7 @@ export class IrCityLedgerFiscalDocumentsTable {
               {table.getRowModel().rows.length === 0 && (
                 <tr>
                   <td class="empty-row" colSpan={this.columns.length}>
-                    {this.isLoading ? <ir-spinner></ir-spinner> : 'No fiscal documents match the current filters.'}
+                    {this.isLoading ? <ir-spinner></ir-spinner> : t('Lcz_NoFiscalDocumentsMatchFilters', { fallback: 'No fiscal documents match the current filters.' })}
                   </td>
                 </tr>
               )}
@@ -418,7 +424,7 @@ export class IrCityLedgerFiscalDocumentsTable {
           fdType={this.pendingAction?.row?.FD_TYPE_CODE}
           open={this.pendingAction !== null}
           action={this.pendingAction?.action ?? null}
-          docNumber={this.pendingAction?.row.DOC_NUMBER ?? 'this document'}
+          docNumber={this.pendingAction?.row.DOC_NUMBER ?? t('Lcz_ThisDocumentFallback', { fallback: 'this document' })}
           isConfirming={this.isConfirming}
           onConfirmed={e => this.confirmPendingAction(e)}
           onCancelled={() => (this.pendingAction = null)}

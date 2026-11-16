@@ -2,6 +2,7 @@ import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } 
 import type { FetchedProperty, LinkedProperty } from '@/services/property/types';
 import axios from 'axios';
 import { Debounce } from '../../../decorators/debounce';
+import { t } from '@/services/locale/t';
 
 /**
  * Internal component responsible for rendering the searchable list of properties inside the switcher dialog.
@@ -180,7 +181,7 @@ export class IrPropertySwitcherDialogContent {
         <ir-input
           autofocus
           ref={el => (this.inputRef = el)}
-          placeholder="Property name or A number"
+          placeholder={t('Lcz_PropertyNameOrANumberPlaceholder', { fallback: 'Property name or A number' })}
           class="property-switcher__search-input"
           value={this.searchTerm}
           onText-change={this.handleSearchChange}
@@ -190,7 +191,7 @@ export class IrPropertySwitcherDialogContent {
         <div tabIndex={-1} class="property-switcher__results">
           {!this.searchTerm && this.properties?.length > 0 && (
             <div>
-              <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>Linked Properties</p>
+              <p style={{ padding: '1rem', margin: '0', paddingTop: '0' }}>{t('Lcz_LinkedProperties', { fallback: 'Linked Properties' })}</p>
               {this.properties.map(property => {
                 const label = `${property.name}`;
                 return (
@@ -209,7 +210,7 @@ export class IrPropertySwitcherDialogContent {
               })}
             </div>
           )}
-          {this.searchTerm && this.filteredProperties.length === 0 && this.renderStatus('No properties found')}
+          {this.searchTerm && this.filteredProperties.length === 0 && this.renderStatus(t('Lcz_NoPropertiesFound', { fallback: 'No properties found' }))}
           {this.filteredProperties.map((property, index) => {
             const label = `${property.COUNTRY_CODE}: ${property.PROPERTY_NAME} - ${property.A_NAME}`;
             return (

@@ -1,8 +1,10 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { PropertyService } from '@/services/property.service';
 import calendar_data from '@/stores/calendar-data';
 import { checkUserAuthState, manageAnchorSession } from '@/utils/utils';
+import { inlineSign } from '@/utils/direction';
 import { Component, Element, Fragment, Host, Prop, State, Watch, h } from '@stencil/core';
+import { LocaleController } from '@/services/locale/locale.controller';
 
 export type SecureScreens =
   | 'dashboard'
@@ -38,6 +40,7 @@ export class IrSecureTasks {
   @Element() el: HTMLElement;
 
   @Prop({ mutable: true }) propertyid: number;
+  @Prop() language: string;
   @Prop() p: string;
   @Prop() bookingNumber: string;
   @Prop() ticket: string;
@@ -45,11 +48,11 @@ export class IrSecureTasks {
   @State() isAuthenticated: boolean = false;
   @State() currentPage: SecureScreens = 'front';
   @State() inputValue: string;
-  @State() canScrollLeft: boolean = false;
-  @State() canScrollRight: boolean = true;
+  @State() canScrollTowardsStart: boolean = false;
+  @State() canScrollTowardsEnd: boolean = true;
   @State() isLoading = true;
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private dates: any = {};
   private tabsTrackRef: HTMLElement;
   private resizeObserver: ResizeObserver;
@@ -59,11 +62,11 @@ export class IrSecureTasks {
     this.generateDates();
     if (this.ticket) {
       this.isAuthenticated = true;
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
     }
     if (isAuthenticated) {
       this.isAuthenticated = true;
-      this.token.setToken(isAuthenticated.token);
+      this.ApiClient.setApiClient(isAuthenticated.ApiClient);
     }
     this.inputValue = this.p;
 
@@ -99,7 +102,7 @@ export class IrSecureTasks {
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.isAuthenticated = true;
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
     }
   }
 
@@ -115,12 +118,16 @@ export class IrSecureTasks {
   private updateScrollState() {
     if (!this.tabsTrackRef) return;
     const { scrollLeft, scrollWidth, clientWidth } = this.tabsTrackRef;
-    this.canScrollLeft = scrollLeft > 2;
-    this.canScrollRight = scrollLeft + clientWidth < scrollWidth - 2;
+    // An RTL scroller reports `scrollLeft` as <= 0, so normalise it to a distance travelled
+    // from the inline start; the two arrows are "earlier"/"later", not physical sides.
+    const inlineOffset = Math.abs(scrollLeft);
+    this.canScrollTowardsStart = inlineOffset > 2;
+    this.canScrollTowardsEnd = inlineOffset + clientWidth < scrollWidth - 2;
   }
 
-  private scrollTabs(dir: 'left' | 'right') {
-    this.tabsTrackRef?.scrollBy({ left: dir === 'left' ? -240 : 240, behavior: 'smooth' });
+  private scrollTabs(towards: 'start' | 'end') {
+    // `scrollBy` still takes a physical x delta, and the inline axis points the other way in RTL.
+    this.tabsTrackRef?.scrollBy({ left: 240 * inlineSign() * (towards === 'end' ? 1 : -1), behavior: 'smooth' });
   }
 
   private readonly validPages = new Set<SecureScreens>([
@@ -207,17 +214,17 @@ export class IrSecureTasks {
       this.isLoading = false;
     } else if (this.p) {
       const propertyService = new PropertyService();
-      await propertyService.getExposedProperty({ aname: this.p, id: 42, language: 'en' });
+      await propertyService.getExposedProperty({ aname: this.p, id: 42, language: LocaleController.language });
       this.propertyid = calendar_data?.property?.id;
       this.isLoading = false;
     }
   }
 
   private async handleAuthFinish(e: CustomEvent) {
-    const token = e.detail.token;
-    this.token.setToken(token);
+    const ApiClient = e.detail.ApiClient;
+    this.ApiClient.setApiClient(ApiClient);
     this.isAuthenticated = true;
-    manageAnchorSession({ login: { method: 'direct', isLoggedIn: true, token } });
+    manageAnchorSession({ login: { method: 'direct', isLoggedIn: true, ApiClient } });
     await this.resolvePropertyId();
   }
 
@@ -251,7 +258,7 @@ export class IrSecureTasks {
             <div class="secure-header__controls">
               {calendar_data?.property && (
                 <Fragment>
-                  <ir-booking-new-form ticket={this.token.getToken()} propertyid={calendar_data?.property?.id?.toString()} language="en">
+                  <ir-booking-new-form ticket={this.ApiClient.getToken()} propertyid={calendar_data?.property?.id?.toString()} language={this.language}>
                     <ir-custom-button slot="trigger" id="add-booking-btn" size="s" appearance="plain" variant="brand">
                       <wa-icon name="plus" style={{ fontSize: '1.2rem' }}></wa-icon>
                     </ir-custom-button>
@@ -283,7 +290,7 @@ export class IrSecureTasks {
                 >
                   <wa-icon slot="start" name="building" aria-hidden="true"></wa-icon>
                   <button slot="end" class="secure-header__aname-save" type="submit" aria-label="Save property">
-                    <wa-icon name="arrow-right"></wa-icon>
+                    <wa-icon class="ir-flip-rtl" name="arrow-right"></wa-icon>
                   </button>
                 </ir-input>
               </form>
@@ -302,16 +309,16 @@ export class IrSecureTasks {
           {/* ── Tab bar ── */}
           <nav class="secure-header__tabbar" aria-label="Secure screens navigation">
             <wa-button
-              class={`secure-header__scroll-btn${this.canScrollLeft ? '' : ' secure-header__scroll-btn--hidden'}`}
+              class={`secure-header__scroll-btn${this.canScrollTowardsStart ? '' : ' secure-header__scroll-btn--hidden'}`}
               size="s"
               appearance="plain"
               variant="neutral"
               pill
-              aria-label="Scroll tabs left"
+              aria-label="Scroll tabs to earlier items"
               tabIndex={-1}
-              onClick={() => this.scrollTabs('left')}
+              onClick={() => this.scrollTabs('start')}
             >
-              <wa-icon name="chevron-left"></wa-icon>
+              <wa-icon class="ir-flip-rtl" name="chevron-left"></wa-icon>
             </wa-button>
 
             <div
@@ -341,20 +348,21 @@ export class IrSecureTasks {
             </div>
 
             <wa-button
-              class={`secure-header__scroll-btn${this.canScrollRight ? '' : ' secure-header__scroll-btn--hidden'}`}
+              class={`secure-header__scroll-btn${this.canScrollTowardsEnd ? '' : ' secure-header__scroll-btn--hidden'}`}
               size="s"
               appearance="plain"
               variant="neutral"
               pill
-              aria-label="Scroll tabs right"
+              aria-label="Scroll tabs to later items"
               tabIndex={-1}
-              onClick={() => this.scrollTabs('right')}
+              onClick={() => this.scrollTabs('end')}
             >
-              <wa-icon name="chevron-right"></wa-icon>
+              <wa-icon class="ir-flip-rtl" name="chevron-right"></wa-icon>
             </wa-button>
           </nav>
         </header>
         <div class="ir-page__container" style={{ padding: '0' }}>
+          <ir-locale-switcher placement="bottom-end"></ir-locale-switcher>
           {this.renderPage()}
         </div>
       </div>
@@ -364,7 +372,7 @@ export class IrSecureTasks {
   renderPage() {
     switch (this.currentPage) {
       case 'dashboard':
-        return <ir-dashboard p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-dashboard>;
+        return <ir-dashboard p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-dashboard>;
       case 'front':
         return (
           <div style={{ flex: '1 1 0%', display: 'block' }}>
@@ -372,55 +380,55 @@ export class IrSecureTasks {
               currencyName="USD"
               propertyid={this.propertyid}
               p={this.p}
-              ticket={this.token.getToken()}
+              ticket={this.ApiClient.getToken()}
               from_date={this.dates.from_date}
               to_date={this.dates.to_date}
-              language="en"
+              language={this.language}
             ></igloo-calendar>
           </div>
         );
       case 'arrivals':
-        return <ir-arrivals p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-arrivals>;
+        return <ir-arrivals p={this.p} language={this.language} propertyid={this.propertyid} ticket={this.ApiClient.getToken()}></ir-arrivals>;
       case 'departures':
-        return <ir-departures p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-departures>;
+        return <ir-departures p={this.p} language={this.language} propertyid={this.propertyid} ticket={this.ApiClient.getToken()}></ir-departures>;
       case 'tasks':
-        return <ir-hk-tasks p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-hk-tasks>;
+        return <ir-hk-tasks p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-hk-tasks>;
       case 'hk':
-        return <ir-housekeeping p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-housekeeping>;
+        return <ir-housekeeping p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-housekeeping>;
       case 'daily-revenue':
-        return <ir-daily-revenue p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-daily-revenue>;
+        return <ir-daily-revenue p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-daily-revenue>;
       case 'daily-occupancy':
-        return <ir-monthly-bookings-report p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-monthly-bookings-report>;
+        return <ir-monthly-bookings-report p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-monthly-bookings-report>;
       case 'country-sales':
-        return <ir-sales-by-country p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-sales-by-country>;
+        return <ir-sales-by-country p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-sales-by-country>;
       case 'channel-sales':
-        return <ir-sales-by-channel mode="property" language="en" propertyid={this.propertyid.toString()} ticket={this.token.getToken()}></ir-sales-by-channel>;
+        return <ir-sales-by-channel mode="property" language={this.language} propertyid={this.propertyid.toString()} ticket={this.ApiClient.getToken()}></ir-sales-by-channel>;
       case 'booking-listing':
-        return <ir-booking-listing p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-booking-listing>;
+        return <ir-booking-listing p={this.p} language={this.language} propertyid={this.propertyid} ticket={this.ApiClient.getToken()}></ir-booking-listing>;
       case 'email-logs':
-        return <ir-booking-email-logs ticket={this.token.getToken()}></ir-booking-email-logs>;
+        return <ir-booking-email-logs ticket={this.ApiClient.getToken()}></ir-booking-email-logs>;
       case 'users':
-        return <ir-user-management userTypeCode={5} p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-user-management>;
+        return <ir-user-management userTypeCode={5} p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-user-management>;
       case 'agents':
-        return <ir-agents style={{ gap: '1.5rem' }} p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-agents>;
+        return <ir-agents style={{ gap: '1.5rem' }} p={this.p} language={this.language} propertyid={this.propertyid} ticket={this.ApiClient.getToken()}></ir-agents>;
       case 'city-ledger':
-        return <ir-city-ledger p={this.p} language="en" propertyid={this.propertyid} ticket={this.token.getToken()}></ir-city-ledger>;
+        return <ir-city-ledger p={this.p} language={this.language} propertyid={this.propertyid} ticket={this.ApiClient.getToken()}></ir-city-ledger>;
       case 'channels':
-        return <ir-channel p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-channel>;
+        return <ir-channel p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-channel>;
       case 'tax-services':
-        return <ir-tax-service-categories p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-tax-service-categories>;
+        return <ir-tax-service-categories p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-tax-service-categories>;
       case 'extra-services':
-        return <ir-extra-services-settings p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-extra-services-settings>;
+        return <ir-extra-services-settings p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-extra-services-settings>;
       case 'payment-options':
-        return <ir-payment-option p={this.p} propertyid={this.propertyid.toString()} language="en" ticket={this.token.getToken()}></ir-payment-option>;
+        return <ir-payment-option p={this.p} propertyid={this.propertyid.toString()} language={this.language} ticket={this.ApiClient.getToken()}></ir-payment-option>;
       case 'ghs':
-        return <ir-ghs-onboarding ticket={this.token.getToken()}></ir-ghs-onboarding>;
+        return <ir-ghs-onboarding ticket={this.ApiClient.getToken()}></ir-ghs-onboarding>;
       case 'meal-report':
-        return <ir-meal-report propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-meal-report>;
+        return <ir-meal-report propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-meal-report>;
       case 'fiscal-documents':
-        return <ir-fiscal-documents p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-fiscal-documents>;
+        return <ir-fiscal-documents p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-fiscal-documents>;
       case 'uninvoiced-bookings':
-        return <ir-uninvoiced-bookings p={this.p} propertyid={this.propertyid} language="en" ticket={this.token.getToken()}></ir-uninvoiced-bookings>;
+        return <ir-uninvoiced-bookings p={this.p} propertyid={this.propertyid} language={this.language} ticket={this.ApiClient.getToken()}></ir-uninvoiced-bookings>;
       default:
         return null;
     }

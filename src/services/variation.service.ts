@@ -1,6 +1,5 @@
 import { Variation } from '@/models/property';
-import locales from '@/stores/locales.store';
-
+import { t } from '@/services/locale/t';
 export default class VariationService {
   /**
    * Formats a variation based on the number of infants and returns a formatted string.
@@ -56,9 +55,9 @@ export default class VariationService {
   private formatVariation({ child_nbr, adult_nbr }: Variation, infant_nbr: number): string {
     const adultNumber = Number(adult_nbr) || 0;
     const infantNumber = Math.max(Number(infant_nbr) || 0, 0);
-    const adultLabel = adultNumber > 1 ? locales.entries.Lcz_Adults.toLowerCase() : locales.entries.Lcz_Adult.toLowerCase();
-    const childLabel = child_nbr > 1 ? locales.entries.Lcz_Children.toLowerCase() : locales.entries.Lcz_Child.toLowerCase();
-    const infantLabel = infantNumber > 1 ? (locales.entries['Lcz_Infants'] ?? 'infants')?.toLowerCase() : (locales?.entries['Lcz_Infant'] ?? 'infant')?.toLowerCase();
+    const adultLabel = adultNumber > 1 ? t('Lcz_Adults').toLowerCase() : t('Lcz_Adult').toLowerCase();
+    const childLabel = child_nbr > 1 ? t('Lcz_Children').toLowerCase() : t('Lcz_Child').toLowerCase();
+    const infantLabel = infantNumber > 1 ? t('Lcz_Infants', { fallback: 'infants' })?.toLowerCase() : t('Lcz_Infant', { fallback: 'infant' })?.toLowerCase();
     const parts = [`${adultNumber} ${adultLabel}`, child_nbr ? `${child_nbr} ${childLabel}` : '', infantNumber ? `${infantNumber} ${infantLabel}` : ''];
     return parts.filter(Boolean).join('&nbsp&nbsp&nbsp&nbsp');
   }

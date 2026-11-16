@@ -99,8 +99,8 @@ body {
 }
 .main-container {
   max-width: 56.25rem;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   /* background: white; */
 }
 .label-title {
@@ -110,7 +110,7 @@ body {
   font-weight: 700;
 }
 .label-value {
-  padding-left: 0.25rem;
+  padding-inline-start: 0.25rem;
   color: rgb(102, 102, 102);
   font-weight: 600;
 }
@@ -137,7 +137,7 @@ body {
 
 .roomtype-title td {
   padding-top: 1.56rem;
-  padding-right: 0.62rem;
+  padding-inline-end: 0.62rem;
 }
 .policies {
   font-size: 0.88rem;
@@ -163,7 +163,7 @@ body {
   /* width: 100%; */
   /* min-width: fit-content; */
   text-align: end;
-  padding-left: 0.62rem;
+  padding-inline-start: 0.62rem;
   padding-bottom: 0.94rem;
 }
 
@@ -220,7 +220,7 @@ body {
 }
 .billing_cell {
   /* padding: 0.62rem; */
-  text-align: left;
+  text-align: start;
 }
 .billing_table {
   padding: 0.62rem 0;
@@ -242,10 +242,10 @@ body {
 .car_name {
   color: #333;
   font-weight: bold;
-  padding-right: 0.62rem;
+  padding-inline-end: 0.62rem;
 }
 .pickup-details .label-title {
-  padding-right: 0.62rem;
+  padding-inline-end: 0.62rem;
 }
 .billing_reference {
   width: 2.5rem;
@@ -325,4 +325,13 @@ body {
   .room_amount_rate {
     display: block;
   }
+}
+
+/* `Lcz_GuestName` is sentence case; the print shows it as "Guest Name:". */
+.ir-print-room__label--capitalize::part(label) {
+  text-transform: capitalize;
+}
+/* `Lcz_Child` / `Lcz_Children` are capitalised; the occupancy line reads "2 adults  1 child". */
+.ir-print-room__label--lowercase::part(content) {
+  text-transform: lowercase;
 }

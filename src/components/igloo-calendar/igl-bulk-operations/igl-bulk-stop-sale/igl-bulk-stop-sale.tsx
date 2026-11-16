@@ -5,8 +5,8 @@ import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { z, ZodError } from 'zod';
 import calendar_dates from '@/stores/calendar-dates.store';
-import locales from '@/stores/locales.store';
 import { showToast } from '@/utils/utils';
+import { t } from '@/services/locale/t';
 export type SelectedRooms = { id: string | number; result: 'open' | 'closed' };
 
 @Component({
@@ -203,7 +203,7 @@ export class IglBulkStopSale {
       this.deactivate();
       showToast({
         type: 'success',
-        title: locales.entries.Lcz_RequestSubmittedSuccessfully,
+        title: t('Lcz_RequestSubmittedSuccessfully'),
         description: '',
       });
       this.loadingChanged.emit(false);
@@ -297,43 +297,41 @@ export class IglBulkStopSale {
               this.closeDrawer.emit(null);
             }}
             class="px-1 mb-0"
-            label={locales.entries.Lcz_BulkStopOpenSale}
+            label={t('Lcz_BulkStopOpenSale')}
             displayContext="sidebar"
           ></ir-title>
         </div> */}
-        <div class="sheet-body px-1">
-          <div class="text-muted text-left py-0 my-0">
+        <div class="sheet-body bulk-stop-sale__body">
+          <div class="bulk-stop-sale__intro">
             <p>
-              {/* {locales.entries.Lcz_SelectAffectedUnits} */}
-              Select the types to stop or open sales for all related rate plans
-              {/* <span class="text-warning">{locales.entries.Lcz_OperationRequiresSeveralMinutes}</span> */}
+              {/* {t('Lcz_SelectAffectedUnits')} */}
+              {t('Lcz_SelectTypesToStopOrOpenSale', { fallback: 'Select the types to stop or open sales for all related rate plans' })}
+              {/* <span class="text-warning">{t('Lcz_OperationRequiresSeveralMinutes')}</span> */}
             </p>
           </div>
           <div>
             {this.errors === 'rooms' && (
-              <p class={'text-danger text-left smaller p-0 '} style={{ 'margin-bottom': '0.5rem' }}>
-                {calendar_data.is_vacation_rental ? locales.entries.Lcz_PlzSelectOneListing : locales.entries.Lcz_PlzSelectOneUnit}
-              </p>
+              <p class="bulk-stop-sale__error bulk-stop-sale__error--spaced">{calendar_data.is_vacation_rental ? t('Lcz_PlzSelectOneListing') : t('Lcz_PlzSelectOneUnit')}</p>
             )}
             <table ref={el => (this.unitSections = el)}>
               <thead>
                 <tr>
-                  <th class="sr-only">choice</th>
-                  <th class="sr-only">room type</th>
+                  <th class="sr-only">{t('Lcz_Choice', { fallback: 'choice' })}</th>
+                  <th class="sr-only">{t('Lcz_RoomType', { fallback: 'room type' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {calendar_data.roomsInfo.map((roomType, i) => {
-                  const row_style = i === calendar_data.roomsInfo.length - 1 ? '' : 'pb-1';
+                  const isLastRoom = i === calendar_data.roomsInfo.length - 1;
                   return (
                     <tr key={roomType.id}>
-                      <td class={`choice-row ${row_style}`}>
-                        <div class={'d-flex justify-content-end'}>
+                      <td class={{ 'bulk-stop-sale__cell--spaced': !isLastRoom }}>
+                        <div class="bulk-stop-sale__choice-cell">
                           {/* <ir-select
-                            firstOption={`${locales.entries.Lcz_Select}...`}
+                            firstOption={`${t('Lcz_Select', { fallback: 'Select' })}...`}
                             data={[
-                              { value: 'open', text: locales.entries.Lcz_Open },
-                              { value: 'closed', text: locales.entries.Lcz_StopSale },
+                              { value: 'open', text: t('Lcz_Open') },
+                              { value: 'closed', text: t('Lcz_StopSale') },
                             ]}
                             onSelectChange={e => {
                               const choice = e.detail as 'open' | 'closed' | undefined;
@@ -359,22 +357,22 @@ export class IglBulkStopSale {
                               this.selectedRoomTypes = rest;
                             }}
                             size="s"
-                            placeholder={`${locales.entries.Lcz_Select}...`}
+                            placeholder={`${t('Lcz_Select', { fallback: 'Select' })}...`}
                           >
-                            <wa-option value="open">{locales.entries.Lcz_Open}</wa-option>
-                            <wa-option value="closed">{locales.entries.Lcz_StopSale}</wa-option>
+                            <wa-option value="open">{t('Lcz_Open')}</wa-option>
+                            <wa-option value="closed">{t('Lcz_StopSale')}</wa-option>
                           </wa-select>
                         </div>
                       </td>
-                      <td class={`pl-1 text-left ${row_style}`}>{roomType.name}</td>
+                      <td class={{ 'bulk-stop-sale__name-td': true, 'bulk-stop-sale__cell--spaced': !isLastRoom }}>{roomType.name}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-          <p class="text-left mt-2 text-muted">Included days</p>
-          {this.errors === 'weekdays' && <p class={'text-danger text-left smaller m-0 p-0'}>Please select at least one day</p>}
+          <p class="bulk-stop-sale__section-label">{t('Lcz_IncludedDays', { fallback: 'Included days' })}</p>
+          {this.errors === 'weekdays' && <p class="bulk-stop-sale__error">{t('Lcz_PleaseSelectAtLeastOneDay', { fallback: 'Please select at least one day' })}</p>}
           <ir-weekday-selector
             ref={el => (this.weekdaysSections = el)}
             weekdays={Array.from(this.selectedWeekdays)}
@@ -385,11 +383,11 @@ export class IglBulkStopSale {
             }}
           ></ir-weekday-selector>
           {/* Dates */}
-          <table class="mt-1" ref={el => (this.datesSections = el)}>
+          <table class="bulk-stop-sale__dates-table" ref={el => (this.datesSections = el)}>
             <thead>
               <tr>
-                <td class="text-left bulk-stop-sale__date-label">{locales.entries.Lcz_From}</td>
-                <td class="text-left bulk-stop-sale__date-label">{locales.entries.Lcz_ToExclusive}</td>
+                <td class="bulk-stop-sale__date-label">{t('Lcz_From', { fallback: 'From' })}</td>
+                <td class="bulk-stop-sale__date-label">{t('Lcz_ToInclusive')}</td>
                 <td>
                   {this.dates.length !== this.maxDatesLength && (
                     <ir-custom-button
@@ -415,7 +413,7 @@ export class IglBulkStopSale {
                 const toDateMinDate = this.dates[i].from ? this.dates[i]?.from.clone()?.format('YYYY-MM-DD') : this.minDate;
                 return (
                   <tr key={`date_${i}`}>
-                    <td class="pr-1 pb-1">
+                    <td class="bulk-stop-sale__date-cell">
                       <ir-date-select
                         ref={el => {
                           this.dateRefs[i].from = el;
@@ -449,7 +447,7 @@ export class IglBulkStopSale {
                         }}
                       ></ir-date-select>
                     </td>
-                    <td class="pr-1 pb-1">
+                    <td class="bulk-stop-sale__date-cell">
                       <ir-date-select
                         forceDestroyOnUpdate
                         disabled={!d.from}
@@ -482,7 +480,7 @@ export class IglBulkStopSale {
                       ></ir-date-select>
                     </td>
                     {i > 0 && (
-                      <td class="pb-1">
+                      <td class="bulk-stop-sale__date-action-cell">
                         <ir-custom-button
                           appearance="plain"
                           variant="neutral"

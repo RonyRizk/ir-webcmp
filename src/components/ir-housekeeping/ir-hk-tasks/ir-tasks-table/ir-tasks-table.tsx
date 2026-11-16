@@ -2,10 +2,11 @@ import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, Wat
 import { Task } from '@/models/housekeeping';
 import moment from 'moment';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import { IToast } from '@components/ui/ir-toast/toast';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 import {
   hkTasksStore,
   toggleTaskSelection,
@@ -138,9 +139,9 @@ export class IrTasksTable {
 
   private taskBadges(task: Task) {
     const config = [
-      { code: 'CLN', variant: 'danger', label: 'CL' },
-      { code: 'T1', variant: 'success', label: 'T1' },
-      { code: 'T2', variant: 'brand', label: 'T2' },
+      { code: 'CLN', variant: 'danger', label: t('Lcz_CleaningAbbreviation', { fallback: 'CL' }) },
+      { code: 'T1', variant: 'success', label: t('Lcz_TaskAbbreviation', { fallback: 'T%1', params: [formatCount(1)] }) },
+      { code: 'T2', variant: 'brand', label: t('Lcz_TaskAbbreviation', { fallback: 'T%1', params: [formatCount(2)] }) },
     ] as const;
     const presentCodes = new Set([task.task_type?.code, ...(task.extra_task?.map(et => et.task_type?.code) ?? [])]);
     return config.map(({ code, variant, label }) => (
@@ -152,9 +153,9 @@ export class IrTasksTable {
 
   private getHousekeeperName(hkmId: number): string {
     if (!hkmId) {
-      return locales.entries.Lcz_Unassigned;
+      return t('Lcz_Unassigned', { fallback: 'Unassigned' });
     }
-    return housekeeping_store?.hk_criteria?.housekeepers?.find(h => h.id === hkmId)?.name ?? locales.entries.Lcz_Unassigned;
+    return housekeeping_store?.hk_criteria?.housekeepers?.find(h => h.id === hkmId)?.name ?? t('Lcz_Unassigned', { fallback: 'Unassigned' });
   }
 
   private async confirmOwnershipChange() {
@@ -179,7 +180,7 @@ export class IrTasksTable {
       // Update the task locally in the store
       const updatedTasks = hkTasksStore.tasks.map(t => (t.id === task.id ? { ...t, hkm_id: hkmId, housekeeper: hkmId ? this.getHousekeeperName(hkmId) : null } : t));
       updateTasks(updatedTasks);
-      this.toast.emit({ position: 'top-right', title: 'Saved Successfully', description: '', type: 'success' });
+      this.toast.emit({ position: 'top-right', title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }), description: '', type: 'success' });
     } catch (error) {
       console.error(error);
     } finally {
@@ -200,7 +201,7 @@ export class IrTasksTable {
           <wa-card>
             <ir-tasks-header></ir-tasks-header>
           </wa-card>
-          {mobileTasks?.length === 0 && <p class="empty-msg">{locales.entries.Lcz_NoTasksFound}</p>}
+          {mobileTasks?.length === 0 && <p class="empty-msg">{t('Lcz_NoTasksFound', { fallback: 'No tasks found ;)' })}</p>}
           {(() => {
             const groups: { date: string; formattedDate: string; tasks: typeof mobileTasks }[] = [];
             for (const task of mobileTasks) {
@@ -242,14 +243,14 @@ export class IrTasksTable {
                       onchange={() => this.toggleSelectAll()}
                     ></wa-checkbox>
                   </th>
-                  <th class="">{locales.entries.Lcz_Period}</th>
+                  <th class="">{t('Lcz_Period', { fallback: 'Period' })}</th>
                   <th class="">
                     {this.tasks.length > 1 && this.tasks.length + ' '}
-                    {locales.entries.Lcz_Unit}
+                    {t('Lcz_Unit', { fallback: 'Unit' })}
                   </th>
                   <th class="sortable" onClick={() => this.handleSort('status')}>
                     <div class="th-sort-inner">
-                      <span>{locales.entries.Lcz_Status}</span>
+                      <span>{t('Lcz_Status', { fallback: 'Status' })}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
@@ -269,15 +270,15 @@ export class IrTasksTable {
                       </svg>
                     </div>
                   </th>
-                  <th class=" text-left">{locales.entries.Lcz_Hint}</th>
-                  <th class=" text-left">Tasks</th>
-                  <th class="text-left">{locales.entries.Lcz_A}d</th>
-                  <th class="text-left">{locales.entries.Lcz_C}h</th>
-                  <th class="text-left">{locales.entries.Lcz_I}n</th>
+                  <th class=" ir-text-start">{t('Lcz_Hint', { fallback: 'Hint' })}</th>
+                  <th class=" ir-text-start">{t('Lcz_Tasks', { fallback: 'Tasks' })}</th>
+                  <th class="ir-text-start">{t('Lcz_Ad', { fallback: 'Ad' })}</th>
+                  <th class="ir-text-start">{t('Lcz_Ch', { fallback: 'Ch' })}</th>
+                  <th class="ir-text-start">{t('Lcz_In', { fallback: 'In' })}</th>
                   {haveManyHousekeepers && (
                     <th class="sortable" onClick={() => this.handleSort('housekeeper')}>
                       <div class="th-sort-inner">
-                        <span>{locales.entries.Lcz_Housekeeper}</span>
+                        <span>{t('Lcz_Housekeeper', { fallback: 'Housekeeper' })}</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
@@ -307,7 +308,7 @@ export class IrTasksTable {
                   <tr class="ir-table-row">
                     <td colSpan={9}>
                       <div class="table-empty-state">
-                        <span>{locales.entries.Lcz_NoTasksFound}</span>
+                        <span>{t('Lcz_NoTasksFound', { fallback: 'No tasks found ;)' })}</span>
                       </div>
                     </td>
                   </tr>
@@ -354,14 +355,14 @@ export class IrTasksTable {
                       <td class="task-row ">
                         <span class={{ 'highlighted-unit': task.is_highlight }}>{task.unit.name}</span>
                       </td>
-                      <td class="task-row  text-left">{task?.status?.code === 'NC' ? (task?.base_status?.description ?? task.status.description) : task.status.description}</td>
-                      <td class="task-row  text-left">{task.hint}</td>
-                      <td class="task-row  text-left">
+                      <td class="task-row  ir-text-start">{task?.status?.code === 'NC' ? (task?.base_status?.description ?? task.status.description) : task.status.description}</td>
+                      <td class="task-row  ir-text-start">{task.hint}</td>
+                      <td class="task-row  ir-text-start">
                         <div class="th-sort-inner">{this.taskBadges(task)}</div>
                       </td>
-                      <td class="task-row text-left">{task.adult}</td>
-                      <td class="task-row text-left">{task.child}</td>
-                      <td class="task-row text-left">{task.infant}</td>
+                      <td class="task-row ir-text-start">{formatCount(task.adult)}</td>
+                      <td class="task-row ir-text-start">{formatCount(task.child)}</td>
+                      <td class="task-row ir-text-start">{formatCount(task.infant)}</td>
                       {haveManyHousekeepers && (
                         <td class="task-row " style={{ textAlign: 'start' }} onClick={(e: MouseEvent) => e.stopPropagation()}>
                           <wa-select
@@ -377,7 +378,7 @@ export class IrTasksTable {
                               this.dialog.openModal();
                             }}
                           >
-                            <wa-option value="0">{locales.entries.Lcz_Unassigned}</wa-option>
+                            <wa-option value="0">{t('Lcz_Unassigned', { fallback: 'Unassigned' })}</wa-option>
                             {housekeepers
                               .filter(housekeeper => housekeeper.is_active)
                               .map(housekeeper => (
@@ -400,7 +401,7 @@ export class IrTasksTable {
                               this.skipSelectedTask.emit(task);
                             }}
                           >
-                            Skip
+                            {t('Lcz_Skip', { fallback: 'Skip' })}
                           </ir-custom-button>
                         )}
                       </td>
@@ -415,9 +416,10 @@ export class IrTasksTable {
           </div>
         </wa-card>
 
-        <ir-dialog ref={el => (this.dialog = el)} label={locales.entries.Lcz_Confirmation} lightDismiss={false}>
+        <ir-dialog ref={el => (this.dialog = el)} label={t('Lcz_Confirmation', { fallback: 'Confirmation' })} lightDismiss={false}>
           <span>
-            {locales.entries.Lcz_Assign} <strong>{this.pendingChange?.task?.unit?.name}</strong> {'to'} <strong>{pendingHkName}</strong>?
+            {t('Lcz_Assign', { fallback: 'Assign' })} <strong>{this.pendingChange?.task?.unit?.name}</strong>{' '}
+            <span class="hk-dialog__connector">{t('Lcz_To', { fallback: 'To' })}</span> <strong>{pendingHkName}</strong>?
           </span>
           <div slot="footer" class="hk-dialog-footer">
             <ir-custom-button
@@ -430,7 +432,7 @@ export class IrTasksTable {
                 this.dialog.closeModal();
               }}
             >
-              {locales.entries.Lcz_Cancel}
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               size="m"
@@ -439,7 +441,7 @@ export class IrTasksTable {
               loading={isRequestPending('/Override_HK_Task_Ownership')}
               onClickHandler={() => this.confirmOwnershipChange()}
             >
-              {locales.entries.Lcz_Confirm}
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

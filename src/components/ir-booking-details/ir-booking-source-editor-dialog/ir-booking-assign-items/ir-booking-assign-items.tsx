@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import { AssignableItem } from '../types';
 import { formatAmount } from '@/utils/utils';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-assign-items',
@@ -43,10 +44,10 @@ export class IrBookingAssignItems {
             <span class="assign-item__label">{item.label}</span>
             {item.ratePlanShortName && <span class="assign-item__rateplan">{item.ratePlanShortName}</span>}
             {item.unitName && <ir-unit-tag unit={item.unitName}></ir-unit-tag>}
-            {item.isNonRefundable && <span class="assign-item__badge assign-item__badge--nr">Non-refundable</span>}
+            {item.isNonRefundable && <span class="assign-item__badge assign-item__badge--nr">{t('Lcz_NonRefundable', { fallback: 'Non-refundable' })}</span>}
           </div>
           {item.fromDate && item.toDate && (
-            <ir-date-view class="assign-item__date" format="ddd, MMM DD, YYYY" from_date={item.fromDate} to_date={item.toDate} showDateDifference={false}></ir-date-view>
+            <ir-date-view class="assign-item__date" format="weekday-medium" from_date={item.fromDate} to_date={item.toDate} showDateDifference={false}></ir-date-view>
           )}
         </div>
       </div>
@@ -98,7 +99,7 @@ export class IrBookingAssignItems {
             {item.price != null && item.price > 0 && <span class="assign-item__rateplan">{formatAmount(item.currencySymbol, item.price)}</span>}
           </div>
           {item.fromDate && (
-            <ir-date-view class="assign-item__date" format="ddd, MMM DD, YYYY" from_date={item.fromDate} to_date={item.toDate} showDateDifference={false}></ir-date-view>
+            <ir-date-view class="assign-item__date" format="weekday-medium" from_date={item.fromDate} to_date={item.toDate} showDateDifference={false}></ir-date-view>
           )}
         </div>
       </div>
@@ -113,25 +114,25 @@ export class IrBookingAssignItems {
     return (
       <Host size="s">
         <div class="assign-container">
-          <p class="assign-intro">Select services for the Agent folio; others remain on the Guest folio.</p>
+          <p class="assign-intro">{t('Lcz_AssignItemsIntro', { fallback: 'Select services for the Agent folio; others remain on the Guest folio.' })}</p>
 
           {rooms.length > 0 && (
             <div class="assign-section">
-              <p class="assign-section__label">Accommodation</p>
+              <p class="assign-section__label">{t('Lcz_Accommodation', { fallback: 'Accommodation' })}</p>
               {rooms.map(item => this.renderRoomItem(item))}
             </div>
           )}
 
           {pickups.length > 0 && (
             <div class="assign-section">
-              <p class="assign-section__label">Pickup</p>
+              <p class="assign-section__label">{t('Lcz_Pickup', { fallback: 'Pickup' })}</p>
               {pickups.map(item => this.renderCheckItem(item))}
             </div>
           )}
 
           {extras.length > 0 && (
             <div class="assign-section">
-              <p class="assign-section__label">Extra Services</p>
+              <p class="assign-section__label">{t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}</p>
               {extras.map(item => this.renderExtraItem(item))}
             </div>
           )}

@@ -1,18 +1,15 @@
 import { ICountry } from '@/models/IBooking';
 import { THKUser } from '@/models/housekeeping';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import { UserService } from '@/services/user.service';
 import calendar_data from '@/stores/calendar-data';
 import { getDefaultProperties } from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import { CONSTANTS } from '@/utils/constants';
 import { Component, Event, EventEmitter, Fragment, Prop, State, h } from '@stencil/core';
 import { z, type ZodTypeAny } from 'zod';
 
-const nameSchema = z.string().min(2, 'Name must be at least 2 characters.');
-const mobileSchema = z.string().min(1, 'Mobile is required.').max(14, 'Mobile must be at most 14 characters.');
-const usernameBaseSchema = z.string().min(3, 'Username must be at least 3 characters.');
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-hk-user-drawer-form',
@@ -50,6 +47,9 @@ export class IrHkUserDrawerForm {
   private bookingService = new BookingService();
 
   // Stable schema references — closures read current `this` state at validation time.
+  // Built in `buildSchemas()` rather than at module load so their messages resolve against the loaded locale.
+  private nameSchema: ZodTypeAny;
+  private mobileSchema: ZodTypeAny;
   private usernameSchema: ZodTypeAny;
   private passwordSchema: ZodTypeAny;
   private fullSchema: ZodTypeAny;
@@ -88,6 +88,12 @@ export class IrHkUserDrawerForm {
     }
   }
   private buildSchemas() {
+    this.nameSchema = z.string().min(2, t('Lcz_NameMinLength', { fallback: 'Name must be at least 2 characters.' }));
+    this.mobileSchema = z
+      .string()
+      .min(1, t('Lcz_MobileRequired', { fallback: 'Mobile is required.' }))
+      .max(14, t('Lcz_MobileMaxLength', { fallback: 'Mobile must be at most 14 characters.' }));
+    const usernameBaseSchema = z.string().min(3, t('Lcz_UsernameMinLength', { fallback: 'Username must be at least 3 characters.' }));
     this.usernameSchema = usernameBaseSchema.refine(
       async name => {
         if (this.user && this.user.username === name) return true;
@@ -96,7 +102,7 @@ export class IrHkUserDrawerForm {
         }
         return true;
       },
-      { message: locales.entries.Lcz_UsernameAlreadyExists ?? 'Username already exists.' },
+      { message: t('Lcz_UsernameAlreadyExists', { fallback: 'Username already exists.' }) },
     );
 
     this.passwordSchema = z
@@ -107,12 +113,12 @@ export class IrHkUserDrawerForm {
           if (this.user && !this.userInfo?.password) return true;
           return CONSTANTS.PASSWORD.test(password);
         },
-        { message: 'Password must be at least 8 characters long.' },
+        { message: t('Lcz_PasswordMinLength', { fallback: 'Password must be at least 8 characters long.' }) },
       );
 
     this.fullSchema = z.object({
-      name: nameSchema,
-      mobile: mobileSchema,
+      name: this.nameSchema,
+      mobile: this.mobileSchema,
       password: this.passwordSchema,
       username: this.usernameSchema,
     });
@@ -171,19 +177,19 @@ export class IrHkUserDrawerForm {
         }}
       >
         <ir-custom-button type="button" class="hk-user-form__back-btn" appearance="plain" variant="neutral" size="s" onClickHandler={() => this.cancelPasswordChange()}>
-          <wa-icon name="arrow-left" aria-hidden="true" style={{ fontSize: '1rem' }}></wa-icon>
+          <wa-icon class="ir-flip-rtl" name="arrow-left" aria-hidden="true" style={{ fontSize: '1rem' }}></wa-icon>
         </ir-custom-button>
 
         <div class="hk-user-form__password-fields">
           <div class="hk-user-form__password-header">
             <wa-icon name="lock" class="hk-user-form__password-icon"></wa-icon>
-            <h4 class="hk-user-form__password-title">Set New Password</h4>
-            <p class="hk-user-form__password-hint">Your new password must be different to previously used password</p>
+            <h4 class="hk-user-form__password-title">{t('Lcz_SetNewPassword', { fallback: 'Set new password' })}</h4>
+            <p class="hk-user-form__password-hint">{t('Lcz_NewPasswordMustBeDifferent', { fallback: 'Your new password must be different to previously used password' })}</p>
           </div>
 
           <ir-validator schema={this.passwordSchema} value={this.userInfo.password} valueEvent="text-change" showErrorMessage>
             <ir-input
-              placeholder="New password"
+              placeholder={t('Lcz_NewPassword', { fallback: 'New password' })}
               value={this.userInfo.password}
               type="password"
               maxlength={16}
@@ -196,13 +202,13 @@ export class IrHkUserDrawerForm {
           {this.showPasswordValidation && <ir-password-validator password={this.userInfo.password} />}
 
           <ir-validator
-            schema={z.string().refine(v => v === this.userInfo.password, { message: 'Passwords do not match.' })}
+            schema={z.string().refine(v => v === this.userInfo.password, { message: t('Lcz_PasswordsDoNotMatch', { fallback: 'Passwords do not match.' }) })}
             value={this.confirmPassword}
             valueEvent="text-change"
             showErrorMessage
           >
             <ir-input
-              placeholder="Confirm password"
+              placeholder={t('Lcz_ConfirmPassword', { fallback: 'Confirm password' })}
               value={this.confirmPassword}
               type="password"
               maxlength={16}
@@ -235,9 +241,9 @@ export class IrHkUserDrawerForm {
           this.addUser();
         }}
       >
-        <ir-validator schema={nameSchema} value={this.userInfo.name} valueEvent="text-change" showErrorMessage>
+        <ir-validator schema={this.nameSchema} value={this.userInfo.name} valueEvent="text-change" showErrorMessage>
           <ir-input
-            label={locales.entries.Lcz_Name}
+            label={t('Lcz_Name', { fallback: 'Name' })}
             value={this.userInfo.name}
             maxlength={40}
             onText-change={(e: CustomEvent<string>) => this.updateUserField('name', e.detail)}
@@ -245,9 +251,9 @@ export class IrHkUserDrawerForm {
           />
         </ir-validator>
 
-        <ir-validator schema={mobileSchema} value={this.userInfo.mobile} valueEvent="mobile-input-change" showErrorMessage>
+        <ir-validator schema={this.mobileSchema} value={this.userInfo.mobile} valueEvent="mobile-input-change" showErrorMessage>
           <ir-mobile-input
-            label={locales.entries.Lcz_Mobile}
+            label={t('Lcz_Mobile', { fallback: 'Mobile' })}
             value={this.userInfo.mobile}
             countryCode={this.countryCode}
             countries={this.countries}
@@ -262,21 +268,25 @@ export class IrHkUserDrawerForm {
           data-testid="note"
           maxlength={250}
           size="s"
-          label={locales.entries.Lcz_Note}
+          label={t('Lcz_Note', { fallback: 'Note' })}
           value={this.userInfo.note}
           defaultValue={this.userInfo.note}
           onchange={e => this.updateUserField('note', (e.target as HTMLTextAreaElement).value)}
         />
 
         <ir-validator schema={this.usernameSchema} value={this.userInfo.username} valueEvent="text-change" asyncValidation showErrorMessage>
-          <ir-input label={locales.entries.Lcz_Username} value={this.userInfo.username} onText-change={(e: CustomEvent<string>) => this.updateUserField('username', e.detail)} />
+          <ir-input
+            label={t('Lcz_Username', { fallback: 'Username' })}
+            value={this.userInfo.username}
+            onText-change={(e: CustomEvent<string>) => this.updateUserField('username', e.detail)}
+          />
         </ir-validator>
 
         {!this.user ? (
           <Fragment>
             <ir-validator schema={this.passwordSchema} value={this.userInfo.password} valueEvent="text-change" showErrorMessage>
               <ir-input
-                label={locales.entries.Lcz_Password}
+                label={t('Lcz_Password', { fallback: 'Password' })}
                 value={this.userInfo.password}
                 type="password"
                 maxlength={16}
@@ -289,7 +299,7 @@ export class IrHkUserDrawerForm {
           </Fragment>
         ) : (
           <wa-button size="s" appearance="plain" variant="brand" type="button" class="hk-user-form__change-password-btn" onClick={() => (this.isChangingPassword = true)}>
-            Change Password
+            {t('Lcz_ChangePassword', { fallback: 'Change Password' })}
           </wa-button>
         )}
       </form>

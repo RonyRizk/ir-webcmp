@@ -67,9 +67,8 @@ graph TD;
   ir-tasks-header --> ir-input
   ir-tasks-header --> ir-custom-button
   ir-tasks-card --> ir-custom-button
-  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-custom-button
   ir-tasks-table-pagination --> ir-pagination
-  ir-button --> ir-icons
   ir-pagination --> ir-custom-button
   ir-hk-archive-drawer --> ir-drawer
   ir-hk-archive-drawer --> ir-date-range-filter
@@ -231,6 +230,7 @@ graph TD;
   ir-payment-summary --> ir-payment-analytics
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
+  ir-button --> ir-icons
   ir-applicable-policies --> ir-custom-button
   ir-applicable-policies --> ir-icons
   ir-booking-city-ledger --> ir-empty-state

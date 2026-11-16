@@ -1,5 +1,6 @@
 import { Tab } from '@/components/ui/ir-tabs/ir-tabs';
 import { IrToast } from '@/components/ui/ir-toast/ir-toast';
+import { t } from '@/services/locale/t';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 
 @Component({
@@ -19,11 +20,11 @@ export class IglBulkOperations {
   private tabs = [
     {
       id: 'stop-sale',
-      label: 'Stop/Open Sale',
+      label: t('Lcz_StopOpenSale', { fallback: 'Stop/Open Sale' }),
     },
     {
       id: 'block',
-      label: 'Block Unit',
+      label: t('Lcz_BlockUnit', { fallback: 'Block Unit' }),
     },
   ];
 
@@ -49,8 +50,8 @@ export class IglBulkOperations {
               this.closeModal.emit(null);
             }}
             class="px-1 mb-0"
-            // label={locales.entries.Lcz_BulkStopOpenSale}
-            label={'Bulk Operations'}
+            // label={t('Lcz_BulkStopOpenSale')}
+            label={t('Lcz_BulkOperations', { fallback: 'Bulk Operations' })}
             displayContext="sidebar"
           ></ir-title>
         </div>

@@ -1,6 +1,8 @@
-import { Component, h } from '@stencil/core';
 import { Booking, Room } from '@/models/booking.dto';
-import { Event, EventEmitter, Prop } from '@stencil/core';
+import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
+import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-split-booking-drawer',
@@ -10,9 +12,11 @@ import { Event, EventEmitter, Prop } from '@stencil/core';
 export class IglSplitBookingDrawer {
   @Prop() booking: Booking;
   @Prop() identifier: Room['identifier'];
-  @Prop() open: boolean;
+  @Prop({ reflect: true }) open: boolean;
 
   @Event() closeModal: EventEmitter<null>;
+
+  private _id = `split-booking-form_${v4()}`;
 
   private get room() {
     return this.booking?.rooms?.find(r => r.identifier === this.identifier);
@@ -20,14 +24,23 @@ export class IglSplitBookingDrawer {
 
   render() {
     return (
-      <ir-drawer open={this.open} label={`Split unit ${this.room?.unit['name']}`}>
-        {this.open && <igl-split-booking-form booking={this.booking} identifier={this.identifier}></igl-split-booking-form>}
-        <div slot="footer">
+      <ir-drawer
+        open={this.open}
+        class={'split-booking__drawer'}
+        label={`${t('Lcz_SplitUnit', { fallback: 'Split unit' })} ${this.room?.unit?.['name'] ?? ''}`}
+        onDrawerHide={e => {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          this.closeModal.emit(null);
+        }}
+      >
+        {this.open && <igl-split-booking-form booking={this.booking} identifier={this.identifier} formId={this._id}></igl-split-booking-form>}
+        <div slot="footer" class="ir__drawer-footer">
           <ir-custom-button size="m" appearance="filled" variant="neutral" data-drawer="close">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
-          <ir-custom-button form="split-booking-form" type="submit" size="m" appearance="accent" variant="brand">
-            Confirm
+          <ir-custom-button form={this._id} type="submit" size="m" appearance="accent" variant="brand" loading={isRequestPending('/DoReservation')}>
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

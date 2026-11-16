@@ -3,6 +3,7 @@ import type { LinkedOption, ServiceCategoryOption, TransactionType } from './ir-
 import { Agent } from '@/services/agents/type';
 import { Booking } from '@/models/booking.dto';
 import type { ClTx } from '@/services/city-ledger';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-transaction-drawer',
@@ -12,7 +13,7 @@ import type { ClTx } from '@/services/city-ledger';
 export class IrCityLedgerTransactionDrawer {
   @Prop({ reflect: true }) open: boolean = false;
   @Prop() formId: string = 'city-ledger-transaction-form';
-  @Prop() drawerLabel: string = 'New Entry';
+  @Prop() drawerLabel: string = t('Lcz_NewEntryTitle', { fallback: 'New Entry' });
   @Prop() agent: Agent | null = null;
   @Prop() booking: Booking | null = null;
   @Prop() initialTransactionType: TransactionType = 'OB';
@@ -75,10 +76,10 @@ export class IrCityLedgerTransactionDrawer {
 
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button appearance="filled" size="m" variant="neutral" class="city-ledger-transaction-drawer__btn" onClickHandler={() => this.closeDrawer.emit()}>
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button form={this.formId} size="m" type="submit" variant="brand" class="city-ledger-transaction-drawer__btn" disabled={this.saveDisabled}>
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

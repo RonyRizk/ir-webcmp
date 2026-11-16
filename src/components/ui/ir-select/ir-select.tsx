@@ -1,6 +1,7 @@
 import { Component, Prop, h, Event, EventEmitter, State, Watch, Listen } from '@stencil/core';
 import { selectOption } from '@/common/models';
 import { v4 } from 'uuid';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-select',
@@ -33,7 +34,7 @@ export class IrSelect {
   @Prop() required: boolean;
 
   // Placeholder text for the first option
-  @Prop() firstOption: string = 'Select';
+  @Prop() firstOption: string;
 
   // Whether to show the first placeholder option
   @Prop() showFirstOption: boolean = true;
@@ -180,7 +181,7 @@ export class IrSelect {
             onInput={this.handleSelectChange.bind(this)}
             required={this.required}
           >
-            {this.showFirstOption && <option value={''}>{this.firstOption}</option>}
+            {this.showFirstOption && <option value={''}>{this.firstOption || t('Lcz_Select', { fallback: 'Select' })}</option>}
             {this.data.map(item => {
               return (
                 <option selected={this.selectedValue === item.value} value={item.value}>

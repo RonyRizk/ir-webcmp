@@ -1,4 +1,5 @@
 import { AttachInternals, Component, Element, Event, EventEmitter, Host, Method, Prop, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 /**
  * `ir-file-upload` — a form-associated file picker with a click/drag-and-drop
@@ -245,7 +246,11 @@ export class IrFileUpload {
     if (this.customValidityMessage) {
       this.internals?.setValidity?.({ customError: true }, this.customValidityMessage, this.inputRef);
     } else if (this.required && this.files.length === 0) {
-      this.internals?.setValidity?.({ valueMissing: true }, this.multiple ? 'Please select one or more files.' : 'Please select a file.', this.inputRef);
+      this.internals?.setValidity?.(
+        { valueMissing: true },
+        this.multiple ? t('Lcz_PleaseSelectOneOrMoreFiles', { fallback: 'Please select one or more files.' }) : t('Lcz_PleaseSelectAFile', { fallback: 'Please select a file.' }),
+        this.inputRef,
+      );
     } else {
       this.internals?.setValidity?.({});
     }
@@ -327,7 +332,9 @@ export class IrFileUpload {
             <slot name="dropzone">
               <wa-icon part="dropzone-icon" class="dropzone-icon" name="upload" aria-hidden="true"></wa-icon>
               <span part="dropzone-text" class="dropzone-text">
-                {this.multiple ? 'Drop files here or click to browse' : 'Drop file here or click to browse'}
+                {this.multiple
+                  ? t('Lcz_DropFilesHereOrClickToBrowse', { fallback: 'Drop files here or click to browse' })
+                  : t('Lcz_DropFileHereOrClickToBrowse', { fallback: 'Drop file here or click to browse' })}
               </span>
             </slot>
 
@@ -382,7 +389,7 @@ export class IrFileUpload {
                       disabled={this.disabled}
                       onClick={() => this.removeFile(index)}
                     >
-                      <wa-icon name="xmark" label={`Remove ${file.name}`}></wa-icon>
+                      <wa-icon name="xmark" label={t('Lcz_RemoveFile', { fallback: `Remove ${file.name}`, params: [file.name] })}></wa-icon>
                     </wa-button>
                   </li>
                 );

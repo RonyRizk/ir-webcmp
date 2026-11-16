@@ -1,8 +1,8 @@
 import { updateSearchField, hkTasksStore } from '@/stores/hk-tasks.store';
-import locales from '@/stores/locales.store';
 import { Component, Element, Event, EventEmitter, h, Host } from '@stencil/core';
 import WaAnimation from '@awesome.me/webawesome/dist/components/animation/animation';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-tasks-header',
   styleUrl: 'ir-tasks-header.css',
@@ -36,7 +36,12 @@ export class IrTasksHeader {
       <Host>
         {/* <h3 class="mb-1 mb-md-0">Housekeeping Tasks</h3> */}
         <div class="search-filter-container" style={{ gap: '1rem' }}>
-          <ir-input placeholder="Search unit" class="search-filter-input" value={hkTasksStore.searchField} onText-change={e => updateSearchField(e.detail)}>
+          <ir-input
+            placeholder={t('Lcz_SearchUnit', { fallback: 'Search unit' })}
+            class="search-filter-input"
+            value={hkTasksStore.searchField}
+            onText-change={e => updateSearchField(e.detail)}
+          >
             <wa-icon name="magnifying-glass" slot="start"></wa-icon>
           </ir-input>
         </div>
@@ -51,7 +56,7 @@ export class IrTasksHeader {
             }}
           >
             <wa-icon slot="start" name="download"></wa-icon>
-            {locales.entries.Lcz_Export}
+            {t('Lcz_Export', { fallback: 'Export' })}
           </ir-custom-button>
 
           <ir-custom-button
@@ -63,7 +68,7 @@ export class IrTasksHeader {
               this.headerButtonPress.emit({ name: 'archive' });
             }}
           >
-            {locales.entries.Lcz_Archives}
+            {t('Lcz_Archives', { fallback: 'Archives' })}
           </ir-custom-button>
           <wa-animation iterations={1} id="cleanInspectAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
             <ir-custom-button
@@ -76,7 +81,7 @@ export class IrTasksHeader {
               }}
               disabled={!(hkTasksStore.selectedTasks.length > 0)}
             >
-              Clean & Inspect
+              {t('Lcz_CleanAndInspect', { fallback: 'Clean & Inspect' })}
             </ir-custom-button>
           </wa-animation>
           <wa-animation iterations={1} id="cleanAnimation" class="clean-button" name="rubberBand" easing="ease-in-out" duration={800}>
@@ -89,7 +94,7 @@ export class IrTasksHeader {
               }}
               variant="brand"
             >
-              Cleaned
+              {t('Lcz_Cleaned', { fallback: 'Cleaned' })}
             </ir-custom-button>
           </wa-animation>
         </div>

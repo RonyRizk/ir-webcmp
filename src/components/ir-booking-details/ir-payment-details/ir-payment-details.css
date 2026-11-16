@@ -24,7 +24,7 @@
   background-color: var(--wa-color-surface-default);
 }
 .sm-margin-right {
-  margin-right: 5px !important;
+  margin-inline-end: 5px !important;
   background: #000;
 }
 .action_icons {

@@ -4,13 +4,14 @@ import { flexRender, useTable } from '@/utils/useTable';
 import { formatAmount } from '@/utils/utils';
 import type { ICurrency } from '@/models/property';
 import type { FiscalDocument } from '@/services/city-ledger';
-import moment from 'moment';
 import { ClFiscalDocumentPreviewRequest } from '../../ir-city-ledger-fiscal-documents/ir-cl-fiscal-document-preview/types';
 import { FdTypes } from '@/types/enums';
 import { debitFdTypeCode } from '@/services/city-ledger.service';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber } from '@/utils/number';
+import { formatDate } from '@/utils/date';
 
 const NUMERIC_COLS = new Set(['debit', 'credit', 'balance']);
-const DATE_INPUT_FORMAT = 'YYYY-MM-DD';
 const DATE_DISPLAY_FORMAT = 'MMM DD, YYYY';
 
 @Component({
@@ -35,8 +36,9 @@ export class IrCityLedgerStatementsTable {
 
   private formatDate(date: string | null | undefined): string {
     if (!date) return '';
-    const m = moment(date, [DATE_INPUT_FORMAT, moment.ISO_8601], true);
-    return m.isValid() ? m.format(DATE_DISPLAY_FORMAT) : date;
+    return formatDate(date, DATE_DISPLAY_FORMAT);
+    // const m = moment(date, [DATE_INPUT_FORMAT, moment.ISO_8601], true);
+    // return m.isValid() ? m.format(DATE_DISPLAY_FORMAT) : date;
   }
 
   private getSymbol(currencyId: number | null | undefined): string {
@@ -89,11 +91,11 @@ export class IrCityLedgerStatementsTable {
     return [
       this.columnHelper.accessor('ISSUE_DATE_DISPLAY', {
         id: 'date',
-        header: 'Date',
-        cell: info => info.getValue() || this.formatDate(info.row.original.ISSUE_DATE),
+        header: t('Lcz_DateLabel', { fallback: 'Date' }),
+        cell: info => this.formatDate(info.getValue() || info.row.original.ISSUE_DATE),
       }),
       this.columnHelper.accessor('DOC_NUMBER', {
-        header: 'Doc Number',
+        header: t('Lcz_DocNumber', { fallback: 'Doc Number' }),
         cell: info => (
           <wa-button
             onClick={() => {
@@ -114,28 +116,28 @@ export class IrCityLedgerStatementsTable {
             appearance="plain"
             class="stmt-table__doc-number"
           >
-            {info.getValue() ?? ''}
+            {formatBookingNumber(info.getValue())}
           </wa-button>
         ),
       }),
       this.columnHelper.accessor('FD_TYPE_NAME', {
         id: 'type',
-        header: 'Type',
+        header: t('Lcz_Type', { fallback: 'Type' }),
         cell: info => info.getValue() ?? '',
       }),
       this.columnHelper.accessor('DEBIT', {
         id: 'debit',
-        header: 'Debit',
+        header: t('Lcz_Debit', { fallback: 'Debit' }),
         cell: info => (info.row.original.FD_TYPE_CODE === FdTypes.CreditReceipt ? '' : this.renderMoney(info.getValue(), info.row.original.CURRENCY_ID)),
       }),
       this.columnHelper.accessor('CREDIT', {
         id: 'credit',
-        header: 'Credit',
+        header: t('Lcz_Credit', { fallback: 'Credit' }),
         cell: info => this.renderMoney(this.getCredit(info), info.row.original.CURRENCY_ID),
       }),
       this.columnHelper.display({
         id: 'balance',
-        header: 'Balance',
+        header: t('Lcz_Balance', { fallback: 'Balance' }),
         cell: info => this.renderMoney(balances[info.row.index], info.row.original.CURRENCY_ID),
       }),
     ];
@@ -148,8 +150,8 @@ export class IrCityLedgerStatementsTable {
         <td>{this.formatDate(this.fromDate)}</td>
         <td></td>
         <td class="balance-row__label">
-          <wa-icon name="scale-balanced" style={{ marginRight: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
-          Starting Balance
+          <wa-icon name="scale-balanced" style={{ marginInlineEnd: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
+          {t('Lcz_StartingBalance', { fallback: 'Starting Balance' })}
         </td>
         <td class="cell--align-end"></td>
         <td class="cell--align-end"></td>
@@ -165,8 +167,8 @@ export class IrCityLedgerStatementsTable {
         <td>{this.formatDate(this.toDate)}</td>
         <td></td>
         <td class="balance-row__label">
-          <wa-icon name="scale-balanced" style={{ marginRight: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
-          Ending Balance
+          <wa-icon name="scale-balanced" style={{ marginInlineEnd: '0.375rem', fontSize: '0.875rem' }}></wa-icon>
+          {t('Lcz_EndingBalance', { fallback: 'Ending Balance' })}
         </td>
         <td class="cell--align-end"></td>
         <td class="cell--align-end"></td>
@@ -183,7 +185,7 @@ export class IrCityLedgerStatementsTable {
             <div class="stmt-table__date-prompt-icon">
               <wa-icon name="calendar-days"></wa-icon>
             </div>
-            <p class="stmt-table__date-prompt-title">Select a date range and click "Create Statement"</p>
+            <p class="stmt-table__date-prompt-title">{t('Lcz_SelectDateRangeAndClickCreateStatement', { fallback: 'Select a date range and click "Create Statement"' })}</p>
           </div>
         </Host>
       );
@@ -230,7 +232,7 @@ export class IrCityLedgerStatementsTable {
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td class="empty-row" colSpan={colCount}>
-                    No fiscal documents in this period.
+                    {t('Lcz_NoFiscalDocumentsInPeriod', { fallback: 'No fiscal documents in this period.' })}
                   </td>
                 </tr>
               ) : (

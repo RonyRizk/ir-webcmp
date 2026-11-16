@@ -3,6 +3,7 @@ import { v4 } from 'uuid';
 import type { Agent } from '@/services/agents/type';
 import { ICountry } from '@/models/IBooking';
 import { AgentSetupEntries } from '../types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-agent-editor-drawer',
@@ -43,7 +44,7 @@ export class IrAgentEditorDrawer {
         <ir-drawer
           class="agent__drawer"
           style={{ '--ir-drawer-width': '60rem' }}
-          label={isEditMode ? 'Edit Agent' : 'New Agent'}
+          label={isEditMode ? t('Lcz_EditAgent', { fallback: 'Edit Agent' }) : t('Lcz_NewAgent', { fallback: 'New Agent' })}
           open={this.open}
           data-testid="agent-editor-drawer-container"
           onDrawerHide={e => this.handleDrawerClose(e)}
@@ -79,7 +80,7 @@ export class IrAgentEditorDrawer {
           )}
           <div slot="footer" class="ir__drawer-footer" data-testid="agent-editor-drawer-footer">
             <ir-custom-button size="m" data-drawer="close" appearance="filled" variant="neutral" data-testid="agent-editor-cancel-button">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               loading={this.loading === (this.agent?.id === -1 ? 'save&close' : 'save')}
@@ -91,7 +92,7 @@ export class IrAgentEditorDrawer {
               variant="brand"
               data-testid="agent-editor-save-button"
             >
-              Save
+              {t('Lcz_Save', { fallback: 'Save' })}
             </ir-custom-button>
             {this.agent?.id !== -1 && (
               <ir-custom-button
@@ -104,7 +105,7 @@ export class IrAgentEditorDrawer {
                 variant="brand"
                 data-testid="agent-editor-save-button"
               >
-                Save & Close
+                {t('Lcz_SaveAndClose', { fallback: 'Save & Close' })}
               </ir-custom-button>
             )}
           </div>

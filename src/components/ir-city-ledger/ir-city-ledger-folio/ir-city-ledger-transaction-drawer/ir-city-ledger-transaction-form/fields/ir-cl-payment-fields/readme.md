@@ -1,7 +1,5 @@
 # ir-cl-payment-fields
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -14,7 +12,7 @@
 | `language`             | `language`            |             | `string`         | `'en'`      |
 | `noInvoices`           | `no-invoices`         |             | `boolean`        | `false`     |
 | `paymentMethodCode`    | `payment-method-code` |             | `string`         | `''`        |
-| `paymentMethods`       | --                    |             | `IEntries[]`     | `[]`        |
+| `paymentMethods`       | --                    |             | `SetupEntries[]` | `[]`        |
 | `unpaidInvoiceOptions` | --                    |             | `LinkedOption[]` | `[]`        |
 
 

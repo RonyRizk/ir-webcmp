@@ -1,14 +1,19 @@
 import { Booking } from '@/models/booking.dto';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { departuresStore, initializeDeparturesStore, onDeparturesStoreChange, setDeparturesPage, setDeparturesPageSize, setDepartureTotal } from '@/stores/departures.store';
 import { Component, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { Payment, PaymentEntries } from '../ir-booking-details/types';
 import { RoomService } from '@/services/room.service';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { PaginationChangeEvent } from '../ir-pagination/ir-pagination';
 import { CheckoutDialogCloseEvent, CheckoutRoomEvent } from '@/components';
 import calendar_data from '@/stores/calendar-data';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 import { isEarlyCheckout } from '@/utils/booking';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-departures',
@@ -31,15 +36,19 @@ export class IrDepartures {
   /** Room identifier whose check-out dialog should auto-open inside the booking-details drawer (early check-out redirect). */
   @State() checkoutRoomIdentifier: string = null;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   private roomService = new RoomService();
   private bookingService = new BookingService();
+  private setupService = new SetupService();
 
   private paymentFolioRef: HTMLIrPaymentFolioElement;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.departures, () => this.init());
+
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
     onDeparturesStoreChange('today', _ => {
@@ -47,10 +56,23 @@ export class IrDepartures {
     });
   }
 
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
+  }
+
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -86,6 +108,9 @@ export class IrDepartures {
   private async init() {
     try {
       this.isPageLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.departures });
       if (!this.propertyid && !this.p) {
         throw new Error('Missing credentials');
       }
@@ -95,19 +120,18 @@ export class IrDepartures {
         await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
       }
-      const [_, __, setupEntries] = await Promise.all([
-        calendar_data?.property ? Promise.resolve(null) : this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
-        this.roomService.fetchLanguage(this.language),
-        this.bookingService.getSetupEntriesByTableNameMulti(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
+      const [_, __, paymentEntries] = await Promise.all([
+        calendar_data?.property ? Promise.resolve(null) : this.roomService.getExposedProperty({ id: this.propertyid || 0, language: LocaleController.language, aname: this.p }),
+        localeReady,
+        this.setupService.getPaymentEntries(),
+        this.getBookings(),
       ]);
 
-      const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries);
-
-      this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
+      this.paymentEntries = paymentEntries;
 
       // Fetch bookings only after the property/calendar data is loaded — the departures
       // pipeline (canCheckout) reads the calendar data store, which is empty until the
@@ -125,6 +149,7 @@ export class IrDepartures {
       check_out_date: departuresStore.today,
       page_index: departuresStore.pagination.currentPage,
       page_size: departuresStore.pagination.pageSize,
+      language: LocaleController.language,
     });
     setDepartureTotal(total_count ?? 0);
     initializeDeparturesStore(bookings);
@@ -198,7 +223,7 @@ export class IrDepartures {
         <ir-toast></ir-toast>
         <ir-interceptor handledEndpoints={['/Get_Rooms_To_Check_Out']}></ir-interceptor>
         <div class={'ir-page__container'}>
-          <h3 class="page-title">Check-outs</h3>
+          <h3 class="page-title">{t('Lcz_CheckOuts', { fallback: 'Check-outs' })}</h3>
           {/* <ir-departures-filter></ir-departures-filter> */}
           <ir-departures-table
             onCheckoutRoom={event => this.handleCheckoutRoom(event as CustomEvent<CheckoutRoomEvent>)}

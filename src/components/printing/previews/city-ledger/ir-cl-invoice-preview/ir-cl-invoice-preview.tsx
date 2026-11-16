@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/c
 import type { IProperty } from '@/models/property';
 import type { ClTx } from '@/services/city-ledger';
 import { ClFiscalDocumentService } from '../cl-fiscal-document.service';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-invoice-preview',
@@ -28,7 +29,7 @@ export class IrClInvoicePreview {
 
   componentWillLoad() {
     if (!this.ticket) {
-      this.error = 'Authentication ticket is required.';
+      this.error = t('Lcz_AuthTicketRequired', { fallback: 'Authentication ticket is required.' });
       return;
     }
     this.dataService.init(this.baseurl, this.ticket);
@@ -50,7 +51,7 @@ export class IrClInvoicePreview {
       this.property = property;
       this.transactions = transactions;
     } catch (e: any) {
-      this.error = e?.message ?? 'Failed to load invoice data.';
+      this.error = e?.message ?? t('Lcz_FailedToLoadInvoiceData', { fallback: 'Failed to load invoice data.' });
     } finally {
       this.isLoading = false;
     }
@@ -60,7 +61,7 @@ export class IrClInvoicePreview {
     if (!this.ticket) {
       return (
         <Host>
-          <div class="document-state document-state--error">Authentication ticket is required.</div>
+          <div class="document-state document-state--error">{t('Lcz_AuthTicketRequired', { fallback: 'Authentication ticket is required.' })}</div>
         </Host>
       );
     }

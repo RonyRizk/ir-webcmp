@@ -1,13 +1,14 @@
 import { ICountry } from '@/models/IBooking';
 import booking_store, { BookedByGuest, modifyBookingStore, syncFirstRoomGuestName, updateBookedByGuest } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { Component, Fragment, Host, h } from '@stencil/core';
 import { v4 } from 'uuid';
 import { AllowedPaymentMethod } from '@/models/booking.dto';
 import IMask from 'imask';
 import { BookedByGuestSchema } from '../types';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
 @Component({
   tag: 'ir-booking-editor-guest-form',
   styleUrl: 'ir-booking-editor-guest-form.css',
@@ -73,29 +74,29 @@ export class IrBookingEditorGuestForm {
       <Host>
         <section class="booking-editor__form-control">
           <ir-input
-            label="Email address"
+            label={t('Lcz_EmailAddress', { fallback: 'Email address' })}
             onText-change={e => updateBookedByGuest({ email: e.detail })}
             mask={'email'}
             value={bookedByGuest.email}
             defaultValue={bookedByGuest.email}
-            placeholder="Email (leave empty if not available)"
+            placeholder={t('Lcz_EmailLeaveEmptyIfNotAvailable', { fallback: 'Email (leave empty if not available)' })}
           ></ir-input>
           <div class="booking-editor__guest-name-group" id="booking-editor-guest-name-group">
             <ir-validator class="booking-editor__guest-input-validator" value={bookedByGuest.firstName} schema={BookedByGuestSchema.shape.firstName}>
               <ir-input
                 id="booking-editor-guest-first-name"
                 class="booking-editor__guest-input --first-name"
-                // label="Name"
+                // label={t('Lcz_Name', { fallback: 'Name' })}
                 value={bookedByGuest.firstName}
                 defaultValue={bookedByGuest.firstName}
-                placeholder="First name"
+                placeholder={t('Lcz_FirstName', { fallback: 'First name' })}
                 autocomplete="off"
                 onText-change={e => updateBookedByGuest({ firstName: e.detail })}
                 onChange={e => syncFirstRoomGuestName('first_name', (e.target as HTMLIrInputElement).value)}
               >
                 <p style={{ margin: '0' }} slot="label">
-                  <span class="booking-editor__guest-input-label --first-name-pc-label">Name</span>
-                  <span class="booking-editor__guest-input-label --first-name-mobile-label">First name</span>
+                  <span class="booking-editor__guest-input-label --first-name-pc-label">{t('Lcz_Name', { fallback: 'Name' })}</span>
+                  <span class="booking-editor__guest-input-label --first-name-mobile-label">{t('Lcz_FirstName', { fallback: 'First name' })}</span>
                 </p>
               </ir-input>
             </ir-validator>
@@ -103,19 +104,19 @@ export class IrBookingEditorGuestForm {
               <ir-input
                 id="booking-editor-guest-last-name"
                 class="booking-editor__guest-input --last-name"
-                label="Last name"
+                label={t('Lcz_LastName', { fallback: 'Last name' })}
                 onText-change={e => updateBookedByGuest({ lastName: e.detail })}
                 onChange={e => syncFirstRoomGuestName('last_name', (e.target as HTMLIrInputElement).value)}
                 value={bookedByGuest.lastName}
                 defaultValue={bookedByGuest.lastName}
-                placeholder="Last name"
+                placeholder={t('Lcz_LastName', { fallback: 'Last name' })}
                 autocomplete="off"
               ></ir-input>
             </ir-validator>
           </div>
           {booking_store.bookingDraft.agent ? (
             <ir-input
-              label="Booking code"
+              label={t('Lcz_BookingCode', { fallback: 'Booking code' })}
               placeholder=""
               value={bookedByGuest.agent_booking_nbr}
               defaultValue={bookedByGuest.agent_booking_nbr}
@@ -123,15 +124,15 @@ export class IrBookingEditorGuestForm {
             ></ir-input>
           ) : (
             <ir-input
-              label="Company name"
-              placeholder="Company name"
+              label={t('Lcz_CompanyName', { fallback: 'Company name' })}
+              placeholder={t('Lcz_CompanyName', { fallback: 'Company name' })}
               value={bookedByGuest.company}
               defaultValue={bookedByGuest.company}
               onText-change={e => updateBookedByGuest({ company: e.detail })}
             ></ir-input>
           )}
           <ir-country-picker
-            label={locales.entries.Lcz_Country}
+            label={t('Lcz_Country', { fallback: 'Country' })}
             variant="modern"
             testId="main_guest_country"
             class="flex-grow-1 m-0"
@@ -154,7 +155,7 @@ export class IrBookingEditorGuestForm {
           {!booking_store?.bookingDraft?.dayUse && (
             <wa-select
               size="s"
-              label={locales.entries.Lcz_YourArrivalTime}
+              label={t('Lcz_YourArrivalTime', { fallback: 'Your arrival time' })}
               data-testid="arrival_time"
               id={v4()}
               defaultValue={selects.arrivalTime[0].CODE_NAME}
@@ -163,7 +164,7 @@ export class IrBookingEditorGuestForm {
             >
               {selects.arrivalTime.map(time => (
                 <wa-option value={time.CODE_NAME} selected={bookedByGuest.selectedArrivalTime === time.CODE_NAME}>
-                  {time.CODE_VALUE_EN}
+                  {getSetupEntryLabel(time)}
                 </wa-option>
               ))}
             </wa-select>
@@ -173,14 +174,14 @@ export class IrBookingEditorGuestForm {
             size="s"
             value={bookedByGuest.note}
             defaultValue={bookedByGuest.note}
-            label={locales.entries.Lcz_AnyMessageForUs}
+            label={t('Lcz_AnyMessageForUs', { fallback: 'Any message for us' })}
             rows={3}
           ></wa-textarea>
           {(!agent || agent?.payment_mode?.code === '002') && (
             <Fragment>
               {this.paymentMethods.length > 1 && (
                 <wa-select
-                  label={'Payment Method'}
+                  label={t('Lcz_PaymentMethod', { fallback: 'Payment Method' })}
                   size="s"
                   defaultValue={booking_store?.selectedPaymentMethod?.code ?? this.paymentMethods[0].code}
                   value={booking_store?.selectedPaymentMethod?.code}
@@ -201,13 +202,13 @@ export class IrBookingEditorGuestForm {
                     value={bookedByGuest.cardNumber}
                     defaultValue={bookedByGuest.cardNumber}
                     onText-change={e => updateBookedByGuest({ cardNumber: e.detail.trim() })}
-                    label={locales.entries.Lcz_CardNumber}
+                    label={t('Lcz_CardNumber', { fallback: 'Card number' })}
                   ></ir-input>
                   <ir-input
                     value={bookedByGuest.cardHolderName}
                     defaultValue={bookedByGuest.cardHolderName}
                     onText-change={e => updateBookedByGuest({ cardHolderName: e.detail.trim() })}
-                    label={locales.entries.Lcz_CardHolderName}
+                    label={t('Lcz_CardHolderName', { fallback: 'Card holder name' })}
                   ></ir-input>
                   <ir-input
                     onText-change={e => {
@@ -219,7 +220,7 @@ export class IrBookingEditorGuestForm {
                     }}
                     value={this.expiryDate}
                     mask={this.expiryDateMask}
-                    label={locales.entries.Lcz_ExpiryDate}
+                    label={t('Lcz_ExpiryDate', { fallback: 'Expiry date' })}
                   ></ir-input>
                 </Fragment>
               )}
@@ -241,7 +242,7 @@ export class IrBookingEditorGuestForm {
                 checked={bookedByGuest.emailGuest}
                 onchange={event => updateBookedByGuest({ emailGuest: (event.target as HTMLInputElement).checked })}
               >
-                {locales.entries.Lcz_EmailTheGuest}
+                {t('Lcz_EmailTheGuest', { fallback: 'Email the guest' })}
               </wa-checkbox>
             </Fragment>
           )}

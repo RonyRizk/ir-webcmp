@@ -1,21 +1,18 @@
 # ir-meal-report-filters
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property       | Attribute     | Description | Type                                                    | Default        |
-| -------------- | ------------- | ----------- | ------------------------------------------------------- | -------------- |
-| `fromDate`     | `from-date`   |             | `string`                                                | `undefined`    |
-| `isLoading`    | `is-loading`  |             | `boolean`                                               | `false`        |
-| `lcz`          | `lcz`         |             | `any`                                                   | `{}`           |
-| `mealType`     | `meal-type`   |             | `string`                                                | `null`         |
-| `reportType`   | `report-type` |             | `"GUEST_LIST" \| "MEAL_COUNT"`                          | `'GUEST_LIST'` |
-| `setupEntries` | --            |             | `{ meal_type: IEntries[]; hb_preference: IEntries[]; }` | `undefined`    |
-| `toDate`       | `to-date`     |             | `string`                                                | `undefined`    |
+| Property       | Attribute     | Description | Type                                                            | Default        |
+| -------------- | ------------- | ----------- | --------------------------------------------------------------- | -------------- |
+| `fromDate`     | `from-date`   |             | `string`                                                        | `undefined`    |
+| `isLoading`    | `is-loading`  |             | `boolean`                                                       | `false`        |
+| `mealType`     | `meal-type`   |             | `string`                                                        | `null`         |
+| `reportType`   | `report-type` |             | `"GUEST_LIST" \| "MEAL_COUNT"`                                  | `'GUEST_LIST'` |
+| `setupEntries` | --            |             | `{ meal_type: SetupEntries[]; hb_preference: SetupEntries[]; }` | `undefined`    |
+| `toDate`       | `to-date`     |             | `string`                                                        | `undefined`    |
 
 
 ## Events

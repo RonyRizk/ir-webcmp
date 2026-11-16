@@ -167,3 +167,8 @@
     align-items: center;
   }
 }
+
+/* `Lcz_User` is lower case; the tooltip shows it as "User:". */
+.payment-item__tooltip-label {
+  text-transform: capitalize;
+}

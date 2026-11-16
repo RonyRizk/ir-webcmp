@@ -47,8 +47,7 @@
 - [igl-cal-body](igl-cal-body)
 - [igl-cal-footer](igl-cal-footer)
 - [ir-loading-screen](../ir-loading-screen)
-- [ir-sidebar](../ui/ir-sidebar)
-- [igl-split-booking](igl-split-booking)
+- [igl-split-booking-drawer](igl-split-booking-drawer)
 - [igl-rate-extender-drawer](igl-rate-extender-drawer)
 - [ir-booking-details-drawer](../ir-booking-details/ir-booking-details-drawer)
 - [ir-room-guests](../ir-booking-details/ir-room-guests)
@@ -74,8 +73,7 @@ graph TD;
   igloo-calendar --> igl-cal-body
   igloo-calendar --> igl-cal-footer
   igloo-calendar --> ir-loading-screen
-  igloo-calendar --> ir-sidebar
-  igloo-calendar --> igl-split-booking
+  igloo-calendar --> igl-split-booking-drawer
   igloo-calendar --> igl-rate-extender-drawer
   igloo-calendar --> ir-booking-details-drawer
   igloo-calendar --> ir-room-guests
@@ -118,28 +116,24 @@ graph TD;
   igl-cal-body --> igl-housekeeping-dialog
   igl-cal-body --> igl-hk-issues-dialog
   igl-booking-event --> igl-booking-event-hover
-  igl-booking-event-hover --> ir-dropdown
-  igl-booking-event-hover --> ir-icons
-  igl-booking-event-hover --> ir-dropdown-item
+  igl-booking-event --> ir-dialog
   igl-booking-event-hover --> ir-date-view
   igl-booking-event-hover --> ir-label
   igl-booking-event-hover --> ir-custom-button
   igl-booking-event-hover --> igl-block-dates-view
-  ir-dropdown --> ir-icons
   igl-block-dates-view --> ir-date-view
   igl-housekeeping-dialog --> ir-dialog
   igl-housekeeping-dialog --> ir-custom-button
+  igl-hk-issues-dialog --> ir-empty-state
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
-  ir-sidebar --> ir-icon
-  igl-split-booking --> ir-title
-  igl-split-booking --> ir-date-view
-  igl-split-booking --> ir-date-picker
-  igl-split-booking --> ir-button
-  igl-split-booking --> ir-radio
-  igl-split-booking --> ir-select
-  ir-title --> ir-icon
-  ir-button --> ir-icons
+  igl-split-booking-drawer --> ir-drawer
+  igl-split-booking-drawer --> igl-split-booking-form
+  igl-split-booking-drawer --> ir-custom-button
+  igl-split-booking-form --> ir-date-select
+  igl-split-booking-form --> ir-custom-button
+  igl-split-booking-form --> ir-empty-state
+  igl-split-booking-form --> ir-validator
   igl-rate-extender-drawer --> ir-drawer
   igl-rate-extender-drawer --> igl-rate-extender-form
   igl-rate-extender-drawer --> ir-custom-button
@@ -297,6 +291,7 @@ graph TD;
   ir-payment-summary --> ir-payment-analytics
   ir-booking-guarantee --> ir-label
   ir-booking-guarantee --> ir-button
+  ir-button --> ir-icons
   ir-applicable-policies --> ir-custom-button
   ir-applicable-policies --> ir-icons
   ir-booking-city-ledger --> ir-empty-state

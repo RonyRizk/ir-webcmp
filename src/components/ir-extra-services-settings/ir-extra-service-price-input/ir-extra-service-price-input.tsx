@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, Host, Prop, State, Watch, h } from '@st
 import { z } from 'zod';
 import { ChargeRule } from '@/components/ir-tax-service-categories/types';
 import calendar_data from '@/stores/calendar-data';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-extra-service-price-input',
@@ -49,7 +50,7 @@ export class IrExtraServicePriceInput {
           schema={z
             .number()
             .nullable()
-            .refine(value => value === null || value >= 0.01, { message: 'Price must be greater than 0' })}
+            .refine(value => value === null || value >= 0.01, { message: t('Lcz_PriceMustBeGreaterThanZero', { fallback: 'Price must be greater than 0' }) })}
         >
           <ir-input
             value={this.price?.value?.toString() ?? ''}

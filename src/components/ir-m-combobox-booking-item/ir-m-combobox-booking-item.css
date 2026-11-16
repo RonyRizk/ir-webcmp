@@ -5,7 +5,7 @@
   color: inherit;
 }
 .origin-icon {
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
   height: 24px;
   aspect-ratio: 1;
 }

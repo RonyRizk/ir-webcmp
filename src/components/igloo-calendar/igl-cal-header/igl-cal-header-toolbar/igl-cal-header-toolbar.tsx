@@ -1,6 +1,6 @@
 import { Component, Event, EventEmitter, Fragment, Host, Prop, h } from '@stencil/core';
-import locales from '@/stores/locales.store';
 import { RoomListItem } from '../types';
+import { t } from '@/services/locale/t';
 
 /**
  * The `.topLeftCell` sticky bar of `igl-cal-header`: unassigned-units / day-use-bookings buttons,
@@ -48,40 +48,34 @@ export class IglCalHeaderToolbar {
               {!this.isVacationRental && (
                 <Fragment>
                   <wa-tooltip trigger="hover" for="fd-unassigned-dates_btn">
-                    {locales.entries.Lcz_UnassignedUnitsTooltip}
+                    {t('Lcz_UnassignedUnitsTooltip')}
                   </wa-tooltip>
                   <ir-custom-button id="fd-unassigned-dates_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleAction('showAssigned')}>
-                    <wa-icon
-                      style={{ fontSize: '1.3rem' }}
-                      name="list-ol"
-                      label={locales.entries.Lcz_UnassignedUnitsTooltip}
-                      aria-label={locales.entries.Lcz_UnassignedUnitsTooltip}
-                    ></wa-icon>
+                    <wa-icon style={{ fontSize: '1.3rem' }} name="list-ol" label={t('Lcz_UnassignedUnitsTooltip')} aria-label={t('Lcz_UnassignedUnitsTooltip')}></wa-icon>
                   </ir-custom-button>
                 </Fragment>
               )}
               {this.showDayUseButton && (
                 <Fragment>
                   <wa-tooltip trigger="hover" for="fd-day-use-bookings_btn">
-                    {'Day use bookings'}
+                    {t('Lcz_DayUseBookings', { fallback: 'Day Use Bookings' })}
                   </wa-tooltip>
                   <ir-custom-button id="fd-day-use-bookings_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleAction('showDayUseBookings')}>
-                    <wa-icon style={{ fontSize: '1.3rem' }} name="sun" label={'Day use'} aria-label={'Day use'}></wa-icon>
+                    <wa-icon
+                      style={{ fontSize: '1.3rem' }}
+                      name="sun"
+                      label={t('Lcz_DayUse', { fallback: 'Day use' })}
+                      aria-label={t('Lcz_DayUse', { fallback: 'Day use' })}
+                    ></wa-icon>
                   </ir-custom-button>
                 </Fragment>
               )}
               <wa-tooltip trigger="hover" for="fd-dates-navigation_btn">
-                {locales.entries.Lcz_Navigate}
+                {t('Lcz_Navigate')}
               </wa-tooltip>
               <ir-date-select minDate={this.minDate} onDateChanged={evt => this.handleDateSelect(evt)} ref={el => (this.dateSelectRef = el)}>
                 <ir-custom-button slot="trigger" id="fd-dates-navigation_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleAction('calendar')}>
-                  <wa-icon
-                    style={{ fontSize: '1.3rem' }}
-                    name="calendar-days"
-                    variant="regular"
-                    label={locales.entries.Lcz_Navigate}
-                    aria-label={locales.entries.Lcz_Navigate}
-                  ></wa-icon>
+                  <wa-icon style={{ fontSize: '1.3rem' }} name="calendar-days" variant="regular" label={t('Lcz_Navigate')} aria-label={t('Lcz_Navigate')}></wa-icon>
                 </ir-custom-button>
                 <div class="fd-dates__actions">
                   <wa-divider></wa-divider>
@@ -93,30 +87,30 @@ export class IglCalHeaderToolbar {
                       this.dateSelectRef.hide();
                     }}
                   >
-                    Today
+                    {t('Lcz_Today', { fallback: 'Today' })}
                   </ir-custom-button>
                 </div>
               </ir-date-select>
 
               <wa-tooltip trigger="hover" for="fd-rectifier">
-                Rectify or open availability
+                {t('Lcz_RectifyOrOpenAvailability', { fallback: 'Rectify or open availability' })}
               </wa-tooltip>
               <ir-custom-button id="fd-rectifier" variant="neutral" appearance="plain" onClickHandler={() => this.handleAction('rectify')}>
                 <wa-icon
                   style={{ fontSize: '1.3rem' }}
                   name="circle-check"
                   variant="regular"
-                  label={'Rectify or open availability'}
-                  aria-label={'Rectify or open availability'}
+                  label={t('Lcz_RectifyOrOpenAvailability', { fallback: 'Rectify or open availability' })}
+                  aria-label={t('Lcz_RectifyOrOpenAvailability', { fallback: 'Rectify or open availability' })}
                 ></wa-icon>
               </ir-custom-button>
 
               <Fragment>
                 <wa-tooltip trigger="hover" for="fd-stop-open-sale_btn">
-                  {locales.entries.Lcz_StopOpenSale}
+                  {t('Lcz_StopOpenSale')}
                 </wa-tooltip>
                 <ir-custom-button id="fd-stop-open-sale_btn" variant="neutral" appearance="plain" onClickHandler={() => this.handleAction('bulk')}>
-                  <wa-icon style={{ fontSize: '1.3rem' }} name="xmarks-lines" label={locales.entries.Lcz_StopOpenSale} aria-label={locales.entries.Lcz_StopOpenSale}></wa-icon>
+                  <wa-icon style={{ fontSize: '1.3rem' }} name="xmarks-lines" label={t('Lcz_StopOpenSale')} aria-label={t('Lcz_StopOpenSale')}></wa-icon>
                 </ir-custom-button>
               </Fragment>
             </div>

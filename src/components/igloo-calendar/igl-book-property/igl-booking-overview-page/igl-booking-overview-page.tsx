@@ -62,8 +62,8 @@ export class IglBookingOverviewPage {
           splitBookings={this.getSplitBookings()}
           propertyId={this.propertyId}
         ></igl-book-property-header>
-        {/* {this.adultChildCount.adult === 0 && <p class={'col text-left'}>Please select the number of guests</p>} */}
-        <div class=" text-left">
+        {/* {this.adultChildCount.adult === 0 && <p class={'col ir-text-start'}>Please select the number of guests</p>} */}
+        <div class=" ir-text-start">
           {isRequestPending('/Check_Availability') && this.isEventType('EDIT_BOOKING') ? (
             <div class="loading-container">
               <div class="loader"></div>

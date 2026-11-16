@@ -1,10 +1,10 @@
 import { Component, h, Prop, State } from '@stencil/core';
 import { _formatTime } from '../../functions';
-import locales from '@/stores/locales.store';
 import { IPmsLog } from '@/models/booking.dto';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { BookingService } from '@/services/booking-service/booking.service';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-pms-logs',
   styleUrl: 'ir-pms-logs.css',
@@ -45,19 +45,19 @@ export class IrPmsLogs {
         ) : (
           <div class={'dialog-container-height'}>
             <div class="d-flex align-items-center " style={{ paddingBottom: '0.5rem' }}>
-              <p class="list-title p-0 m-0">{locales.entries.Lcz_SentAt}:</p>
+              <p class="list-title p-0 m-0">{t('Lcz_SentAt')}:</p>
               {this.pmsLogs?.sent_date ? (
                 <p class="list-item">
                   {this.pmsLogs?.sent_date} {_formatTime(this.pmsLogs?.sent_hour.toString(), this.pmsLogs?.sent_minute.toString())}
                 </p>
               ) : (
-                <p class={`list-item ${this.pmsLogs?.sent_date ? 'green' : 'red'}`}>{this.pmsLogs?.is_acknowledged ? locales.entries.Lcz_YES : locales.entries.Lcz_NO}</p>
+                <p class={`list-item ${this.pmsLogs?.sent_date ? 'green' : 'red'}`}>{this.pmsLogs?.is_acknowledged ? t('Lcz_YES') : t('Lcz_NO', { fallback: 'NO' })}</p>
               )}
             </div>
             <div class="d-flex align-items-center p-0 m-0">
-              <p class="list-title p-0 m-0">{locales.entries.Lcz_Acknowledged}</p>
+              <p class="list-title p-0 m-0">{t('Lcz_Acknowledged')}</p>
               <div class="d-flex align-items-center" style={{ gap: '1rem' }}>
-                <p class={`list-item  ${this.pmsLogs?.is_acknowledged ? 'green' : 'red'}`}>{this.pmsLogs?.is_acknowledged ? locales.entries.Lcz_YES : locales.entries.Lcz_NO}</p>
+                <p class={`list-item  ${this.pmsLogs?.is_acknowledged ? 'green' : 'red'}`}>{this.pmsLogs?.is_acknowledged ? t('Lcz_YES') : t('Lcz_NO', { fallback: 'NO' })}</p>
                 {!this.pmsLogs?.is_acknowledged && this.pmsLogs?.revision_id && this.userTypeCode === '1' && (
                   <ir-custom-button
                     variant="brand"
@@ -71,7 +71,7 @@ export class IrPmsLogs {
                       this.error = data.ExceptionMsg;
                     }}
                   >
-                    Acknowledge
+                    {t('Lcz_Acknowledge', { fallback: 'Acknowledge' })}
                   </ir-custom-button>
                 )}
               </div>

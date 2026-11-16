@@ -1,10 +1,10 @@
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
 import booking_listing, { initializeUserSelection, updateUserSelection } from '@/stores/booking_listing.store';
-import locales from '@/stores/locales.store';
 import { downloadFile, isPrivilegedUser } from '@/utils/utils';
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import moment from 'moment';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-listing-header',
   styleUrl: 'ir-listing-header.css',
@@ -131,7 +131,7 @@ export class IrListingHeader {
               size="s"
               defaultValue={booking_listing.userSelection.channel}
             >
-              <wa-option value="">All channels</wa-option>
+              <wa-option value="">{t('Lcz_AllChannels', { fallback: 'All channels' })}</wa-option>
               {booking_listing?.channels.map(b => (
                 <wa-option key={b.value} value={b.value}>
                   {b.name}
@@ -155,17 +155,17 @@ export class IrListingHeader {
             ))}
           </wa-select>
           <div class="d-flex flex-fill align-items-end m-0" style={{ gap: '10px' }}>
-            <wa-tooltip for="search-btn">{locales.entries?.Lcz_Search}</wa-tooltip>
+            <wa-tooltip for="search-btn">{t('Lcz_Search', { fallback: 'Search' })}</wa-tooltip>
             <ir-custom-button id="search-btn" loading={this.isLoading === 'search'} onClickHandler={() => this.handleSearchClicked(false)} variant="neutral" appearance="outlined">
               <wa-icon name="magnifying-glass"></wa-icon>
             </ir-custom-button>
 
-            <wa-tooltip for="clear-btn">{locales.entries?.Lcz_Erase}</wa-tooltip>
+            <wa-tooltip for="clear-btn">{t('Lcz_Clear', { fallback: 'Clear' })}</wa-tooltip>
             <ir-custom-button id="clear-btn" variant="neutral" appearance="outlined" onClickHandler={() => this.handleClearUserField()}>
               <wa-icon name="eraser"></wa-icon>
             </ir-custom-button>
 
-            <wa-tooltip for="excel-btn">{locales.entries?.Lcz_ExportToExcel}</wa-tooltip>
+            <wa-tooltip for="excel-btn">{t('Lcz_ExportToExcel', { fallback: 'Export to excel' })}</wa-tooltip>
             <ir-custom-button loading={this.isLoading === 'excel'} id="excel-btn" variant="neutral" appearance="outlined" onClickHandler={() => this.handleSearchClicked(true)}>
               <wa-icon name="file-excel" variant="regular"></wa-icon>
             </ir-custom-button>

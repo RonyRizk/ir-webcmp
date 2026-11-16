@@ -1,7 +1,5 @@
 # ir-tax-input
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -15,7 +13,7 @@
 | `label`         | `label`          | Label displayed above the percentage input.                                                                                                              | `string`                             | `undefined` |
 | `language`      | `language`       | Current language used to resolve translated setup entry labels. Defaults to English ("en").                                                              | `string`                             | `'en'`      |
 | `placeholder`   | `placeholder`    | Placeholder text shown in the percentage input.                                                                                                          | `string`                             | `undefined` |
-| `setupEntries`  | --               | List of setup entries used to populate the tax mode select.  Each entry represents a tax application option (e.g. Not Applicable, Inclusive, Exclusive). | `IEntries[]`                         | `[]`        |
+| `setupEntries`  | --               | List of setup entries used to populate the tax mode select.  Each entry represents a tax application option (e.g. Not Applicable, Inclusive, Exclusive). | `SetupEntries[]`                     | `[]`        |
 
 
 ## Events

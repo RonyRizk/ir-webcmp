@@ -117,15 +117,21 @@
 /* Desktop (PC): align from left */
 @media (min-width: 992px) {
   .ac-menu-dropdown .dropdown-menu {
-    left: 0 !important;
-    right: auto !important;
+    inset-inline-start: 0 !important;
+    inset-inline-end: auto !important;
   }
 }
 
 /* Tablet and below: align from right */
 @media (max-width: 991.98px) {
   .ac-menu-dropdown .dropdown-menu {
-    right: 0 !important;
-    left: auto !important;
+    inset-inline-end: 0 !important;
+    inset-inline-start: auto !important;
   }
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-me-auto {
+  margin-inline-end: auto;
 }

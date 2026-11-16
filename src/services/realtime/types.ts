@@ -1,4 +1,4 @@
-import type { HKSkipParams } from '@/services/housekeeping.service';
+import type { HKSkipParams } from '@/services/housekeeping';
 import type { ExposedRectifierParams, SetRoomCalendarExtraParams } from '@/services/property/types';
 import type { DoDayUseParams, SetDepartureTimeProps } from '@/services/booking-service/types';
 import type { ClTx } from '@/services/city-ledger';

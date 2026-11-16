@@ -1,7 +1,10 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
 import axios from 'axios';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-queue-manager',
@@ -12,10 +15,11 @@ export class IrQueueManager {
   @Element() el: HTMLElement;
 
   @Prop() ticket: string = '';
+  @Prop() language: string = 'en';
 
   @State() isLoading: boolean = true;
 
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
   @State() data: {
     pendingRequests: number[];
     properties: string[];
@@ -24,20 +28,20 @@ export class IrQueueManager {
   }[];
   componentWillLoad() {
     if (this.ticket) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
   @Watch('ticket')
   handleTicketChange(newValue: string, oldValue: string) {
     if (newValue !== oldValue && newValue) {
-      this.tokenService.setToken(this.ticket);
+      this.apiClientService.setApiClient(this.ticket);
       this.init();
     }
   }
 
   private async init() {
-    await this.fetchData();
+    await Promise.all([this.fetchData(), LocaleController.load({ language: this.language, tables: SCREEN_TABLES.queueManager })]);
     this.isLoading = false;
   }
   private async fetchData() {
@@ -99,7 +103,7 @@ export class IrQueueManager {
         <ir-toast></ir-toast>
         <div class="ir-page__container">
           <div class="queue-page__header">
-            <h3 class="page-title">Pending Queues</h3>
+            <h3 class="page-title">{t('Lcz_PendingQueues', { fallback: 'Pending Queues' })}</h3>
             <ir-custom-button
               onClickHandler={() => {
                 this.fetchData();
@@ -116,8 +120,8 @@ export class IrQueueManager {
           <div class="queue-grid">
             {this.data.map(d => (
               <wa-details open={false}>
-                <p slot="summary" style={{padding:"0","margin":"0"}}>
-                  {d.q_name} ({d.total_pending} total pending)
+                <p slot="header">
+                  {d.q_name} ({d.total_pending} {t('Lcz_TotalPending', { fallback: 'total pending' })})
                 </p>
 
                 {d.properties.map((property, index) => {

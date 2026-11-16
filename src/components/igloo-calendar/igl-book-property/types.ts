@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { t } from '@/services/locale/t';
 
 export const GuestCredentials = z.object({
   first_name: z.string().nonempty(),
@@ -13,7 +14,7 @@ export const RoomGuestSchema = z
     if (data.requires_bed_preference && !data.bed_preference) {
       ctx.addIssue({
         path: ['bed_preference'],
-        message: 'Bed preference is required',
+        message: t('Lcz_BedPreferenceRequired', { fallback: 'Bed preference is required' }),
         code: z.ZodIssueCode.custom,
       });
     }

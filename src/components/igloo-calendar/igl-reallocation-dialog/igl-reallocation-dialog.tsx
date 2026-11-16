@@ -3,6 +3,7 @@ import { Component, Element, Event, EventEmitter, Fragment, Prop, State, Watch, 
 import type { IReallocationPayload } from '@/models/property-types';
 import type { SelectOption } from '@/utils/utils';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-reallocation-dialog',
@@ -136,11 +137,11 @@ export class IglReallocationDialog {
     const hasRateplans = this.hasRateplanRequirement();
 
     return (
-      <ir-dialog label={'Alert'} ref={el => (this.dialogEl = el)} onIrDialogHide={this.handleDialogVisibilityChange}>
+      <ir-dialog label={t('Lcz_Alert', { fallback: 'Alert' })} ref={el => (this.dialogEl = el)} onIrDialogHide={this.handleDialogVisibilityChange}>
         {this.data && (
           <Fragment>
             <div class="dialog-body">
-              <p class="text-left dialog-body__description m-0 p-0">{this.data.description}</p>
+              <p class="ir-text-start dialog-body__description m-0 p-0">{this.data.description}</p>
               {hasRateplans && (
                 // <ir-select
                 //   ref={el => (this.rateplanSelectEl = el)}
@@ -164,7 +165,7 @@ export class IglReallocationDialog {
                   aria-invalid={String(this.showRateplanError)}
                   onchange={e => this.handleRateplanChange((e.target as any).value)}
                 >
-                  <wa-option value="">Select rate plan...</wa-option>
+                  <wa-option value="">{t('Lcz_SelectRatePlan', { fallback: 'Select rate plan...' })}</wa-option>
                   {this.rateplanOptions.map(option => (
                     <wa-option key={option.value} value={option.value}>
                       {option.text}
@@ -175,10 +176,10 @@ export class IglReallocationDialog {
             </div>
             <div class="dialog-footer" slot="footer">
               <ir-custom-button appearance="filled" variant="neutral" onClickHandler={this.handleCancelClick} size="m">
-                Cancel
+                {t('Lcz_Cancel', { fallback: 'Cancel' })}
               </ir-custom-button>
               <ir-custom-button variant="brand" onClickHandler={() => this.reallocateUnit()} size="m" loading={isRequestPending('/ReAllocate_Exposed_Room')}>
-                Confirm
+                {t('Lcz_Confirm', { fallback: 'Confirm' })}
               </ir-custom-button>
             </div>
           </Fragment>

@@ -1,0 +1,536 @@
+ir-login-aside-calendar {
+  display: block;
+  height: 100%;
+}
+
+  /* ---------- Right: promo panel (live operations feed) ---------- */
+        .pms-auth__promo {
+            position: relative;
+            box-sizing: border-box;
+            min-height: 100%;
+            overflow: hidden;
+            padding: 2.75rem 3rem 2.25rem;
+            display: flex;
+            flex-direction: column;
+            background: #1E293B;
+            color: black;
+        }
+
+        /* Soft ambient glow behind the feed */
+        .pms-auth__promo::before {
+            content: "";
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            width: 640px;
+            height: 640px;
+            transform: translate(-50%, -35%);
+            text-align: start;
+            background: radial-gradient(
+  circle,
+  rgba(0, 113, 236, 0.28) 0%,
+  rgba(0, 113, 236, 0) 65%
+);
+            pointer-events: none;
+        }
+
+        .pms-auth__promo > * { position: relative; }
+
+        .promo-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #c3d7f3;
+            margin: 0 0 0.7rem;
+        }
+
+        .promo-eyebrow .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: dot-pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes dot-pulse {
+            0%, 100% { transform: scale(0.85); opacity: 0.75; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .pms-auth__promo-title {
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1.65rem;
+            letter-spacing: -0.01em;
+            line-height: 1.22;
+            margin: 0 0 0.55rem;
+            color: #fff !important;
+            text-align: start;
+
+        }
+
+        .pms-auth__promo-copy {
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: #94A3B8;
+            margin: 0;
+            max-width: 60ch;
+            text-align: start;
+        }
+
+        /* ---------- Hero: the unified booking calendar ---------- */
+        /*
+         * A miniature of the property calendar (igloo-calendar), drawn at the calendar's real
+         * dimensions (calendar-grid.ts + igl-cal-*.css, 14px root font): 170px room column,
+         * 58×30 day cells, 40px room-type rows, 20px month band + 58px day header, 20px bars.
+         * Only the framing (card, bezel, shadows, toast) is extra polish for the marketing panel.
+         */
+        .cal-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+            padding: 2rem 0;
+            container-type: inline-size;
+            /* Own stacking context so the bezel (z-index: -1) sits above the promo background */
+            isolation: isolate;
+        }
+
+        .cal {
+            /*
+             * One calendar pixel. Real size (1px) whenever the panel has room for the 576px grid
+             * plus the bezel; below that everything shrinks in proportion instead of reflowing.
+             */
+            --u: min(1px, calc(100cqw / 600));
+
+            --cal-label: calc(170 * var(--u)); /* ROOM_HEADER_WIDTH */
+            --cal-cell: calc(58 * var(--u)); /* CELL_WIDTH */
+            --cal-row-h: calc(30 * var(--u)); /* CELL_HEIGHT */
+            --cal-category-h: calc(40 * var(--u)); /* CATEGORY_HEADER_HEIGHT */
+            --cal-em: calc(14 * var(--u)); /* 1em at the app's 14px root */
+            --cal-radius: calc(12 * var(--u));
+
+            /* Webawesome-equivalent tokens the real calendar uses */
+            --cal-brand: #0071ec;
+            --cal-current-day: #e9f2fe; /* --wa-color-brand-fill-quiet */
+            --cal-text: #1e293b; /* --wa-color-text-normal */
+            --cal-text-quiet: #64748b; /* --wa-color-text-quiet */
+            --cal-border: #e2e8f0; /* --wa-color-surface-border */
+            --cal-month: #f1f5f9;
+            --cal-month-alt: #e2e8f0;
+
+            position: relative;
+            width: calc(var(--cal-label) + 7 * var(--cal-cell));
+            flex: none;
+            background: #fff;
+            border-radius: var(--cal-radius);
+            font-size: var(--cal-em);
+            /* Layered shadow: hairline ring, contact, key light, long ambient */
+            box-shadow:
+                0 0 0 1px rgba(15, 23, 42, 0.04),
+                0 1px 2px rgba(4, 6, 16, 0.18),
+                0 calc(12 * var(--u)) calc(24 * var(--u)) calc(-8 * var(--u)) rgba(4, 6, 16, 0.35),
+                0 calc(40 * var(--u)) calc(80 * var(--u)) calc(-16 * var(--u)) rgba(4, 6, 16, 0.55);
+        }
+
+        /* Translucent bezel framing the card, like a product shot on a device */
+        .cal::before {
+            content: "";
+            position: absolute;
+            inset: calc(-7 * var(--u));
+            z-index: -1;
+            border-radius: calc(var(--cal-radius) + 7 * var(--u));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        /* ---- Grid ---- */
+        .cal__grid {
+            overflow: hidden;
+            border-radius: var(--cal-radius);
+        }
+
+        /* Room column + 7 days × 2 half-columns (bars start/end mid-day, like the real calendar) */
+        .cal__row {
+            display: grid;
+            grid-template-columns: var(--cal-label) repeat(14, calc(var(--cal-cell) / 2));
+            grid-template-rows: var(--cal-row-h);
+            align-items: center;
+        }
+
+        .cal__row > * { grid-row: 1; }
+
+        .cal__row + .cal__row { border-top: 1px solid var(--cal-border); }
+
+        /* .roomTitle / .categoryTitle */
+        .cal__label {
+            grid-column: 1;
+            align-self: stretch;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            padding-inline: calc(10 * var(--u)) calc(6 * var(--u));
+            border-inline-end: 1px solid var(--cal-border);
+            font-size: 0.9em;
+            color: var(--cal-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cal__label--unit {
+            padding-inline-start: calc(20 * var(--u));
+        }
+
+        /* .cellData */
+        .cal__cell {
+            align-self: stretch;
+            display: grid;
+            place-items: center;
+            border-inline-start: 1px solid var(--cal-border);
+        }
+
+        .cal__label + .cal__cell { border-inline-start: 0; }
+
+        /* .currentDay */
+        .cal__cell.is-today,
+        .cal__day.is-today {
+            background: var(--cal-current-day);
+        }
+
+        /* ---- Header (.topLeftCell + igl-cal-header-days: 20px month band, 58px day cells) ---- */
+        .cal__row--head {
+            grid-template-rows: calc(20 * var(--u)) calc(58 * var(--u));
+            align-items: stretch;
+        }
+
+        .cal__row--head .cal__corner {
+            grid-row: 1 / 3;
+            grid-column: 1;
+            display: flex;
+            align-items: center;
+            padding-inline: calc(10 * var(--u));
+            border-inline-end: 1px solid var(--cal-border);
+            border-bottom: 1px solid var(--cal-border);
+        }
+
+        /* Stand-in for the unit search picker */
+        .cal__search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: calc(6 * var(--u));
+            height: calc(28 * var(--u));
+            padding-inline: calc(8 * var(--u));
+            border-radius: calc(4 * var(--u));
+            border: 1px solid var(--cal-border);
+            font-size: 0.8em;
+            color: #94a3b8;
+        }
+
+        .cal__search wa-icon { font-size: 0.9em; }
+
+        /* .monthCell + .monthTitle */
+        .cal__row--head .cal__month {
+            grid-row: 1;
+            display: grid;
+            place-items: center;
+            background: var(--cal-month);
+            border-inline-start: 1px solid var(--cal-border);
+            font-size: 0.9em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--cal-text-quiet);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .cal__row--head .cal__month.is-alt { background: var(--cal-month-alt); }
+
+        /* .headerCell */
+        .cal__row--head .cal__day {
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: calc(2 * var(--u));
+            min-width: 0;
+            border-bottom: 1px solid var(--cal-border);
+            color: var(--cal-text-quiet);
+        }
+
+        /* .dayTitle */
+        .cal__day-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .cal__day.is-weekend .cal__day-title {
+            font-weight: 700;
+            color: var(--cal-text);
+        }
+
+        .cal__day.is-today .cal__day-title { font-weight: 700; }
+
+        /* .dayCapacityPercent */
+        .cal__day-occupancy {
+            font-size: 0.75em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---- Room-type rows (40px): bold name + available units per day (.categoryName) ---- */
+        .cal__row--category {
+            grid-template-rows: var(--cal-category-h);
+        }
+
+        .cal__row--category .cal__label,
+        .cal__row--category .cal__cell {
+            font-weight: 700;
+        }
+
+        .cal__row--category .cal__cell {
+            color: var(--cal-text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cal__row--category .cal__cell.is-zero { color: var(--cal-text-quiet); }
+
+        /* ---- Booking bars: igl-booking-event (20px tall, 8px event space, -22deg skewed base) ---- */
+        .cal__bar {
+            position: relative;
+            z-index: 1;
+            height: calc(20 * var(--u));
+            margin-inline: calc(4 * var(--u));
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            /* Bars grow out of their check-in day */
+            transform-origin: left center;
+            will-change: transform, opacity;
+        }
+
+        .cal__bar[hidden] { display: none; }
+
+        /* .bookingEventBase */
+        .cal__bar-base {
+            position: absolute;
+            inset: 0;
+            border-radius: calc(4 * var(--u));
+            background-color: var(--bar-color);
+            transform: skewX(-22deg);
+        }
+
+        /* Channel (non-direct) bookings: .border.border-dark.ota-booking-event */
+        .cal__bar.is-ota .cal__bar-base {
+            border: calc(2 * var(--u)) solid #343a40;
+        }
+
+        /* .skewedLeft / .skewedRight: a stay running past the visible week gets a square edge */
+        .cal__bar.is-cut-start .cal__bar-base::before,
+        .cal__bar.is-cut-end .cal__bar-base::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background-color: var(--bar-color);
+            transform: skewX(22deg);
+        }
+
+        .cal__bar.is-cut-start .cal__bar-base::before {
+            left: calc(-4 * var(--u));
+            transform-origin: right;
+            border-radius: 0 calc(4 * var(--u)) calc(4 * var(--u)) 0;
+        }
+
+        .cal__bar.is-cut-end .cal__bar-base::after {
+            right: calc(-4 * var(--u));
+            transform-origin: left;
+            border-radius: calc(4 * var(--u)) 0 0 calc(4 * var(--u));
+        }
+
+        .cal__bar.is-ota.is-cut-start .cal__bar-base::before,
+        .cal__bar.is-ota.is-cut-end .cal__bar-base::after {
+            top: calc(-2 * var(--u));
+            bottom: calc(-2 * var(--u));
+            border-block: calc(2 * var(--u)) solid #343a40;
+        }
+
+        /* .bookingEventTitle: unskewed, white, 0.8em, "Name - number" */
+        .cal__bar-title {
+            position: relative;
+            min-width: 0;
+            max-width: calc(100% - 10 * var(--u));
+            padding-inline-start: calc(5 * var(--u));
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.8em;
+            color: #fff;
+        }
+
+        /* ---- Toast: pops above the calendar, then its bar lands below. Animated from JS (WAAPI). ---- */
+        .cal__toast {
+            position: absolute;
+            top: calc(-24 * var(--u));
+            right: calc(-16 * var(--u));
+            display: flex;
+            align-items: center;
+            gap: calc(10 * var(--u));
+            background: rgba(17, 20, 38, 0.86);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            backdrop-filter: blur(14px) saturate(140%);
+            color: #fff;
+            border-radius: calc(12 * var(--u));
+            padding: calc(9 * var(--u)) calc(14 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
+            font-size: calc(13 * var(--u));
+            font-weight: 600;
+            letter-spacing: -0.005em;
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 calc(4 * var(--u)) calc(8 * var(--u)) rgba(4, 6, 16, 0.25),
+                0 calc(18 * var(--u)) calc(36 * var(--u)) calc(-6 * var(--u)) rgba(4, 6, 16, 0.5);
+            opacity: 0;
+            /* It's anchored to the calendar's top-right corner, so it grows from there */
+            transform-origin: top right;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .cal__toast-icon {
+            width: calc(32 * var(--u));
+            height: calc(32 * var(--u));
+            border-radius: calc(9 * var(--u));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transition: background-color 200ms ease;
+        }
+
+        .cal__toast-icon wa-icon { font-size: calc(14 * var(--u)); color: #fff; }
+
+        .cal__toast-sub {
+            display: block;
+            margin-top: calc(1 * var(--u));
+            font-size: calc(11 * var(--u));
+            font-weight: 500;
+            color: rgba(203, 213, 225, 0.75);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .promo-eyebrow .pulse-dot { animation: none; }
+        }
+
+        /* ---------- Stats row ---------- */
+        /* One panel split into columns: reads as a single summary, not three widgets */
+        .promo-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin: 0 0 1.4rem;
+            padding: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+        }
+
+        .promo-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 0;
+            padding: 1rem 1.15rem 1.05rem;
+        }
+
+        /* Hairline dividers, inset so they don't touch the panel edges */
+        .promo-stat + .promo-stat {
+            position: relative;
+        }
+
+        .promo-stat + .promo-stat::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            bottom: 1rem;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .promo-stat__label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0;
+            font-size: 0.7rem;
+            font-weight: 500;
+            line-height: 1.3;
+            color: #94A3B8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .promo-stat__label wa-icon {
+            flex: none;
+            font-size: 0.72rem;
+            color: #60a5fa;
+        }
+
+        .promo-stat__num {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: #fff;
+            /* Fixed-width digits so the live counter doesn't jitter as it ticks */
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Counter + transient "+1" badge share a row */
+        .promo-stat__value {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin: 0;
+        }
+
+        .promo-stat__delta {
+            padding: 0.15rem 0.4rem;
+            border-radius: 999px;
+            background: rgba(74, 222, 128, 0.14);
+            color: #4ade80;
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            /* Hidden at rest; only shown (via WAAPI) when a booking lands */
+            opacity: 0;
+            transform-origin: left center;
+            pointer-events: none;
+        }
+
+        .pms-auth__promo-link {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #c3d7f3;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .pms-auth__promo-link:hover { text-decoration: underline; }

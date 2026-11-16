@@ -68,8 +68,8 @@
 
 .issue__detail::part(header),
 .issue__detail::part(content) {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
 }
 
 .issue__detail::part(content) {
@@ -135,6 +135,9 @@
   display: block;
 }
 
+/* Physical: symmetric self-centring (left:50% + translateX(-50%)). `inset-inline-start`
+   would resolve to `right` under RTL while translateX stays physical, knocking the box a
+   full width off its anchor. */
 .period-chart__label {
   position: absolute;
   top: -1.5rem;
@@ -153,7 +156,7 @@
 .period-chart__fill {
   position: absolute;
   height: 100%;
-  left: 0;
+  inset-inline-start: 0;
   top: 0;
   background: var(--wa-color-brand-fill-loud);
   border-radius: 2px;
@@ -165,7 +168,9 @@
 
 .period-chart__fill,
 .period-chart__marker {
-  transition: width 0.3s ease, left 0.3s ease;
+  transition:
+    width 0.3s ease,
+    left 0.3s ease;
 }
 /* =========================================================
    Period Chart Legend

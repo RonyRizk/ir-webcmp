@@ -1,5 +1,6 @@
 import { Component, Element, Host, Prop, Watch, h } from '@stencil/core';
 import { Chart, registerables } from 'chart.js';
+import { t } from '@/services/locale/t';
 Chart.register(...registerables);
 @Component({
   tag: 'ir-queue-chart',
@@ -16,7 +17,7 @@ export class IrQueueChart {
   @Prop() values: number[] = [];
 
   /** Chart title */
-  @Prop() label: string = 'Queue Status';
+  @Prop() label: string = t('Lcz_QueueStatus', { fallback: 'Queue Status' });
 
   private chart?: Chart;
   canvas: HTMLCanvasElement;

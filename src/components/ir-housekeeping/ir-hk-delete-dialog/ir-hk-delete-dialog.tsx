@@ -1,9 +1,8 @@
 import { Component, Event, EventEmitter, Method, Prop, State, h } from '@stencil/core';
 import { IHouseKeepers } from '@/models/housekeeping';
-import { HouseKeepingService } from '@/services/housekeeping.service';
+import { HouseKeepingService } from '@/services/housekeeping';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
-
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-hk-delete-dialog',
   styleUrl: 'ir-hk-delete-dialog.css',
@@ -55,17 +54,17 @@ export class IrHkDeleteDialog {
   render() {
     if (!this.user) return;
     const hasAssignedUnits = this.user.assigned_units.length > 0;
-    const label = hasAssignedUnits ? locales.entries.Lcz_AssignUnitsTo : locales.entries.Lcz_ConfirmDeletion;
+    const label = hasAssignedUnits ? t('Lcz_AssignUnitsTo', { fallback: 'Assign units to' }) : t('Lcz_ConfirmDeletion', { fallback: 'Confirm deletion!' });
     return (
       <ir-dialog lightDismiss={false} label={label} open={this.isOpen} onIrDialogHide={() => this.closeModal()}>
         {!hasAssignedUnits && (
           <p class="delete-modal__description">
-            Are you sure you want to permanently delete <strong>{this.user.name}</strong>? This action cannot be undone.
+            {t('Lcz_ConfirmPermanentDeleteUser', { fallback: 'Are you sure you want to permanently delete' })} <strong>{this.user.name}</strong>? This action cannot be undone.
           </p>
         )}
         {hasAssignedUnits && (
           <wa-select size="s" defaultValue={this.selectedId} value={this.selectedId} onchange={e => (this.selectedId = (e.target as HTMLSelectElement).value)}>
-            <wa-option value="">{locales.entries.Lcz_nobody}</wa-option>
+            <wa-option value="">{t('Lcz_nobody', { fallback: 'nobody' })}</wa-option>
             {housekeeping_store.hk_criteria.housekeepers
               .filter(hk => hk.id !== this.user.id)
               .map(m => ({ value: m.id.toString(), text: m.name }))
@@ -80,10 +79,10 @@ export class IrHkDeleteDialog {
 
         <div slot="footer" class="delete-modal__footer">
           <ir-custom-button variant="neutral" appearance="filled" size="m" onClickHandler={() => this.closeModal()}>
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button variant="danger" appearance="accent" size="m" loading={this.isConfirming} onClickHandler={() => this.handleConfirm()}>
-            {locales.entries.Lcz_Confirm}
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

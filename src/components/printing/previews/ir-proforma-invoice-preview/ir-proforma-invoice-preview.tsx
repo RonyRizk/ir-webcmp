@@ -5,6 +5,9 @@ import { IssueInvoiceProps } from '@/services/booking-service/types';
 import moment from 'moment';
 import { calculateDaysBetweenDates } from '@/utils/booking';
 import { formatAmount } from '@/utils/utils';
+import { formatDate } from '@/utils/date';
+import { formatBookingNumber } from '@/utils/number';
+import { t } from '@/services/locale/t';
 
 type InvoicePayload = IssueInvoiceProps['invoice'];
 
@@ -64,9 +67,9 @@ export class IrProformaInvoicePreview {
 
   private get bookingNumber() {
     if (!this.booking.is_direct) {
-      return `${this.booking.booking_nbr} | ${this.booking.channel_booking_nbr}`;
+      return `${formatBookingNumber(this.booking.booking_nbr)} | ${formatBookingNumber(this.booking.channel_booking_nbr)}`;
     }
-    return this.booking.booking_nbr;
+    return formatBookingNumber(this.booking.booking_nbr);
   }
 
   private get CompanyLocation() {
@@ -110,7 +113,7 @@ export class IrProformaInvoicePreview {
     if (!parsedDate.isValid()) {
       return null;
     }
-    return parsedDate.format('MMMM DD, YYYY');
+    return formatDate(parsedDate, 'MMMM DD, YYYY');
   }
 
   private get issueDate() {
@@ -123,14 +126,18 @@ export class IrProformaInvoicePreview {
       return null;
     }
     return (
-      <div class="invoice-company" aria-label="Issuing company details">
+      <div class="invoice-company" aria-label={t('Lcz_IssuingCompanyDetailsAria', { fallback: 'Issuing company details' })}>
         {company.name && <p class="invoice-company__name">{company.name}</p>}
         {company.address && <p class="invoice-company__address">{company.address}</p>}
         {this.CompanyLocation}
         {company.phone && (
-          <ir-printing-label class="proforma-invoice__company-details" label={'Phone:'} content={`${company.country?.phone_prefix ?? ''} ${company.phone}`.trim()} />
+          <ir-printing-label
+            class="proforma-invoice__company-details"
+            label={`${t('Lcz_Phone', { fallback: 'Phone' })}:`}
+            content={`${company.country?.phone_prefix ?? ''} ${company.phone}`.trim()}
+          />
         )}
-        {company.tax_nbr && <ir-printing-label class="proforma-invoice__company-details" label={'Tax ID:'} content={company.tax_nbr} />}
+        {company.tax_nbr && <ir-printing-label class="proforma-invoice__company-details" label={`${t('Lcz_TaxId', { fallback: 'Tax ID' })}:`} content={company.tax_nbr} />}
       </div>
     );
   }
@@ -138,35 +145,35 @@ export class IrProformaInvoicePreview {
     const propertyLocation = [this.property?.city?.name ?? null, this.property?.country?.name ?? null].filter(f => f !== null).join(', ');
     const propertyLogo = this.property?.space_theme?.logo;
     return (
-      <section class="property-overview" aria-label="Property overview">
+      <section class="property-overview" aria-label={t('Lcz_PropertyOverviewAria', { fallback: 'Property overview' })}>
         <div class="property-overview__text">
           <p class="property-overview__name">{this.property.name}</p>
           <p class="property-overview__location">{propertyLocation}</p>
         </div>
-        {propertyLogo && <img src={propertyLogo} alt={`${this.property.name} logo`} class="property-logo" />}
+        {propertyLogo && <img src={propertyLogo} alt={t('Lcz_LogoAlt', { fallback: '%1 logo', params: [this.property.name] })} class="property-logo" />}
       </section>
     );
   }
   private formatBookingDates(date: string) {
-    return moment(date, 'YYYY-MM-DD').format('DD-MMM-YYYY');
+    return formatDate(date, 'DD-MMM-YYYY');
   }
   private renderBillToSection() {
     const { guest, company_name, company_tax_nbr } = this.booking;
     const { target, billed_to_name } = this.invoice;
     if (target?.code === '002') {
       return (
-        <div class="bill-to" aria-label="Bill to company">
+        <div class="bill-to" aria-label={t('Lcz_BillToCompanyAria', { fallback: 'Bill to company' })}>
           {company_name && <p class="bill-to__name">{company_name}</p>}
           {company_tax_nbr && <p class="bill-to__id">{company_tax_nbr}</p>}
         </div>
       );
     }
     return (
-      <div class="bill-to" aria-label="Bill to guest">
+      <div class="bill-to" aria-label={t('Lcz_BillToGuestAria', { fallback: 'Bill to guest' })}>
         {billed_to_name && <p>{billed_to_name}</p>}
         <p class="bill-to__name">
           {' '}
-          {billed_to_name && <b>for</b>} {[guest.first_name ?? '', guest.last_name ?? ''].join(' ').trim()}
+          {billed_to_name && <b class="bill-to__connector">{t('Lcz_For', { fallback: 'For' })}</b>} {[guest.first_name ?? '', guest.last_name ?? ''].join(' ').trim()}
         </p>
         {guest.email && <p class="bill-to__contact">{guest.email}</p>}
         {this.guestPhoneNumber && <p class="bill-to__contact">{this.guestPhoneNumber}</p>}
@@ -187,7 +194,7 @@ export class IrProformaInvoicePreview {
       <section class="proforma-payment__section">
         <div class="ir-proforma-invoice__service">
           <div class={'ir-proforma-invoice__cancellation-info'}>
-            <p>Cancellation penalty</p>
+            <p>{t('Lcz_CancellationPenalty', { fallback: 'Cancellation penalty' })}</p>
             <p class={'ir-proforma-invoice__cancellation-date'}>( {this.formatDisplayDate(cancellationPenalty.date)} )</p>
           </div>
           <span class="ir-proforma-invoice__checkbox-price">{formatAmount(this.booking.currency.symbol, cancellationPenalty.amount)}</span>
@@ -209,25 +216,25 @@ export class IrProformaInvoicePreview {
     const existInvocablePickup = this.invocableKeys?.has(this.booking.pickup_info?.['system_id']);
     return (
       <Host>
-        <article class="invoice" aria-label="Proforma invoice">
+        <article class="invoice" aria-label={t('Lcz_ProformaInvoice', { fallback: 'Proforma invoice' })}>
           <header class="invoice__header">
-            <h3 class="invoice__title">Proforma Invoice</h3>
-            <section class="invoice__layout" aria-label="Invoice summary">
+            <h3 class="invoice__title">{t('Lcz_ProformaInvoice', { fallback: 'Proforma Invoice' })}</h3>
+            <section class="invoice__layout" aria-label={t('Lcz_InvoiceSummaryAria', { fallback: 'Invoice summary' })}>
               <div class="invoice__column invoice__column--details">
                 <div class="invoice__details">
-                  <ir-printing-label label="Date of issue:" content={this.issueDate}></ir-printing-label>
-                  <ir-printing-label label="Booking no:" content={this.bookingNumber}></ir-printing-label>
+                  <ir-printing-label label={t('Lcz_DateOfIssueLabel', { fallback: 'Date of issue:' })} content={this.issueDate}></ir-printing-label>
+                  <ir-printing-label label={t('Lcz_BookingNoLabel', { fallback: 'Booking no:' })} content={this.bookingNumber}></ir-printing-label>
                 </div>
                 {billToContent && (
-                  <section class="bill-to-section" aria-label="Bill to">
-                    <h4 class="section-heading">Bill To</h4>
+                  <section class="bill-to-section" aria-label={t('Lcz_BillTo', { fallback: 'Bill to' })}>
+                    <h4 class="section-heading">{t('Lcz_BillTo', { fallback: 'Bill To' })}</h4>
                     {billToContent}
                   </section>
                 )}
               </div>
               <div class="invoice__column invoice__column--property">
                 {companyDetails && (
-                  <section class="issuer-section" aria-label="Issuer">
+                  <section class="issuer-section" aria-label={t('Lcz_IssuerAria', { fallback: 'Issuer' })}>
                     {companyDetails}
                   </section>
                 )}
@@ -239,11 +246,11 @@ export class IrProformaInvoicePreview {
             {existInvocableRoom && (
               <section style={{ marginTop: '2.5rem' }}>
                 <div class="proforma__accommodation-container">
-                  <p class="proforma__accommodation-title">ACCOMMODATION</p>
+                  <p class="proforma__accommodation-title">{t('Lcz_Accommodation', { fallback: 'Accommodation' })}</p>
                   <p class="booking-dates">{this.formatBookingDates(this.booking?.from_date)}</p>
                   <p class="booking-dates">{this.formatBookingDates(this.booking?.to_date)}</p>
                   <p class="number-of-nights">
-                    {totalNights} {totalNights === 1 ? 'night' : 'nights'}
+                    {totalNights} {totalNights === 1 ? t('Lcz_Night', { fallback: 'night' }) : t('Lcz_Nights', { fallback: 'nights' })}
                   </p>
                   <p class="vat-exclusion">
                     <i>{this.property?.tax_statement}</i>
@@ -277,9 +284,12 @@ export class IrProformaInvoicePreview {
             )}
             {this.renderCancellationPenalty()}
             <section class="proforma-payment__section">
-              <ir-printing-label label="Balance:" content={formatAmount(this.booking.currency.symbol, this.booking.financial.due_amount)}></ir-printing-label>
               <ir-printing-label
-                label="Collected (payments - refunds):"
+                label={t('Lcz_Balance', { fallback: 'Balance' }) + ':'}
+                content={formatAmount(this.booking.currency.symbol, this.booking.financial.due_amount)}
+              ></ir-printing-label>
+              <ir-printing-label
+                label={t('Lcz_CollectedLabel', { fallback: 'Collected (payments - refunds):' })}
                 content={formatAmount(this.booking.currency.symbol, this.booking.financial.collected + this.booking.financial.refunds)}
               ></ir-printing-label>
             </section>

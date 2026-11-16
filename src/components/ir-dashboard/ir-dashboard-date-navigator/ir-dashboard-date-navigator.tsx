@@ -1,12 +1,12 @@
 import { addDaysISO, todayISO, type ISODate } from '@/utils/calendar-dates';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
-import moment from 'moment';
-import locales from '@/stores/locales.store';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 import { MAX_DAY_OFFSET } from '../dashboard.helpers';
 
 /**
- * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days
- * from today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
+ * Day picker at the top of the dashboard's stats rail: a pill showing the selected day that opens a list of the days from
+ * today to `MAX_DAY_OFFSET` after it. Past days aren't offered.
  */
 @Component({
   tag: 'ir-dashboard-date-navigator',
@@ -32,12 +32,12 @@ export class IrDashboardDateNavigator {
     const today = todayISO();
     const days = Array.from({ length: MAX_DAY_OFFSET + 1 }, (_, index) => addDaysISO(today, index));
     // Locale- and calendar-aware (Gregorian or Hijri), like every other displayed date.
-    const label = (day: ISODate) => moment(day, 'YYYY-MM-DD').format('dddd, D MMMM');
+    const label = (day: ISODate) => formatDate(day, 'dddd, D MMMM');
 
     return (
       <Host>
         <wa-dropdown class="date-navigator" placement="bottom-start" onwa-select={e => this.handleSelect(e as CustomEvent<{ item: HTMLElement & { value: string } }>)}>
-          <button type="button" slot="trigger" class="date-navigator__trigger" aria-label="Select date">
+          <button type="button" slot="trigger" class="date-navigator__trigger" aria-label={t('Lcz_SelectDate', { fallback: 'Select date' })}>
             <wa-icon class="date-navigator__icon" name="calendar-days" aria-hidden="true"></wa-icon>
             <time class="date-navigator__date" dateTime={this.date}>
               {label(this.date)}
@@ -49,7 +49,7 @@ export class IrDashboardDateNavigator {
               {label(day)}
               {day === today && (
                 <span slot="details" class="date-navigator__today">
-                  {locales.entries?.Lcz_Today ?? 'Today'}
+                  {t('Lcz_Today', { fallback: 'Today' })}
                 </span>
               )}
             </wa-dropdown-item>

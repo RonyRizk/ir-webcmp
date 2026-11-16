@@ -1,6 +1,8 @@
 import { Component, Element, Event, EventEmitter, Listen, Method, State, Watch, h, Host, Prop } from '@stencil/core';
 import WaInput from '@awesome.me/webawesome/dist/components/input/input.js';
 import { NativeWaInput } from '../ir-input/ir-input';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 export interface IrComboboxOption {
   value: string;
@@ -575,7 +577,7 @@ export class IrPicker {
             pill={this.pill}
             onblur={() => this.inputPickerBlurred.emit()}
             autocomplete="nope"
-            placeholder={this.placeholder || 'Search'}
+            placeholder={this.placeholder || t('Lcz_Search', { fallback: 'Search' })}
             oninput={this.handleInput}
             onfocus={this.handleInputFocus}
             onwa-clear={() => {
@@ -591,7 +593,7 @@ export class IrPicker {
           </wa-input>
           <div class="menu" role="presentation">
             <p class="sr-only" id={this.listboxLabelId}>
-              Available search shortcuts
+              {t('Lcz_AvailableSearchShortcuts', { fallback: 'Available search shortcuts' })}
             </p>
             <ul
               class="results"
@@ -606,14 +608,14 @@ export class IrPicker {
               {this.loading && (
                 <li class="loading-state" role="presentation">
                   <wa-spinner></wa-spinner>
-                  <p>Loading suggestions…</p>
+                  <p>{t('Lcz_LoadingSuggestions', { fallback: 'Loading suggestions…' })}</p>
                 </li>
               )}
               <slot onSlotchange={this.handleSlotChange}></slot>
               {showEmptyState && (
                 <li class="empty-state" role="presentation" id={this.emptyStateId}>
                   <wa-icon name="circle-info" aria-hidden="true"></wa-icon>
-                  <p>No results found</p>
+                  <p>{t('Lcz_NoResultsFound', { fallback: 'No results found' })}</p>
                 </li>
               )}
             </ul>
@@ -628,11 +630,16 @@ export class IrPicker {
 
   private updateLiveRegion(resultCount: number, context?: string) {
     if (!resultCount) {
-      this.liveRegionMessage = context ? `No results for ${context}` : 'No results available';
+      this.liveRegionMessage = context
+        ? t('Lcz_NoResultsForContext', { fallback: `No results for ${context}`, params: [context] })
+        : t('Lcz_NoResultsAvailable', { fallback: 'No results available' });
       return;
     }
-    const plural = resultCount === 1 ? 'result' : 'results';
-    this.liveRegionMessage = context ? `${resultCount} ${plural} for ${context}` : `${resultCount} ${plural} available`;
+    const plural = resultCount === 1 ? t('Lcz_ResultSingular', { fallback: 'result' }) : t('Lcz_ResultPlural', { fallback: 'results' });
+    const count = formatCount(resultCount);
+    this.liveRegionMessage = context
+      ? t('Lcz_ResultsForContext', { fallback: '%1 %2 for %3', params: [count, plural, context] })
+      : t('Lcz_ResultsAvailable', { fallback: '%1 %2 available', params: [count, plural] });
   }
 
   private runAfterNextFrame(callback: () => void) {

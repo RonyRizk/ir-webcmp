@@ -1,18 +1,21 @@
 import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';
 import { Booking, ExtraService } from '@/models/booking.dto';
-import { formatAmount, getEntryValue } from '@/utils/utils';
-import locales from '@/stores/locales.store';
-import moment from 'moment';
+import { formatAmount } from '@/utils/utils';
+import { getEntryValue } from '@/services/setup';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { _formatTime, isAgentMode } from '../../functions';
 import calendar_data from '@/stores/calendar-data';
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { Agent } from '@/services/agents/type';
 import type { ClTx } from '@/services/city-ledger/types';
 import { mapClTxToFolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { SvcCategory } from '@/types/enums';
+import { formatDate } from '@/utils/date';
+import { formatCount } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-extra-service',
   styleUrl: 'ir-extra-service.css',
@@ -25,7 +28,7 @@ export class IrExtraService {
   @Prop() bookingNumber: string;
   @Prop() currencySymbol: string;
   @Prop() language: string = 'en';
-  @Prop() svcCategories: IEntries[];
+  @Prop() svcCategories: SetupEntries[];
   @Prop() clTransactions: ClTx[] = [];
 
   @Event() editExtraService: EventEmitter<ExtraService>;
@@ -68,13 +71,13 @@ export class IrExtraService {
     }
   }
 
-  private get category(): IEntries | undefined {
+  private get category(): SetupEntries | undefined {
     return this.svcCategories?.find(c => c.CODE_NAME === this.service?.category?.code);
   }
 
   private get categoryLabel(): string | null {
     const category = this.category;
-    return category ? getEntryValue({ entry: category, language: this.language }) : null;
+    return category ? getEntryValue({ entry: category, language: LocaleController.language }) : null;
   }
 
   private get description() {
@@ -142,7 +145,7 @@ export class IrExtraService {
                   (this.service.end_date && this.service?.category?.code !== SvcCategory.DayUse ? (
                     <ir-date-view class="es-meta-date" from_date={this.service.start_date} to_date={this.service.end_date} showDateDifference={false}></ir-date-view>
                   ) : (
-                    <span class="es-meta-date">{moment(new Date(this.service.start_date)).format('MMM DD, YYYY')} </span>
+                    <span class="es-meta-date">{formatDate(new Date(this.service.start_date), 'MMM DD, YYYY')} </span>
                   ))}
                 {unitName && <ir-unit-tag unit={unitName}></ir-unit-tag>}
                 {statusTag}
@@ -154,7 +157,9 @@ export class IrExtraService {
             {!!this.service.price && this.service.price > 0 && (
               <div class="es-pricing">
                 <p class="es-price">{formatAmount(this.currencySymbol, this.service.price)}</p>
-                {!!this.service.charges?.vat_percent && <p class="es-vat">incl. {this.service.charges.vat_percent}% VAT</p>}
+                {!!this.service.charges?.vat_percent && (
+                  <p class="es-vat">{t('Lcz_InclVat', { fallback: 'incl. %1% VAT', params: [formatCount(this.service.charges.vat_percent)] })}</p>
+                )}
               </div>
             )}
             <wa-dropdown
@@ -187,14 +192,21 @@ export class IrExtraService {
                 appearance="plain"
                 id={`extra-service-actions-${this.service.system_id}`}
                 variant="neutral"
-                aria-label="Service actions"
+                aria-label={t('Lcz_ServiceActions', { fallback: 'Service actions' })}
               >
                 <wa-icon class="es-action-trigger-icon" name="ellipsis-vertical"></wa-icon>
               </wa-button>
-              <wa-dropdown-item value="edit">Edit</wa-dropdown-item>
-              {agentMode && <wa-dropdown-item value="toggle">Re-assign to {this.service.agent ? 'guest' : 'agent'} folio</wa-dropdown-item>}
+              <wa-dropdown-item value="edit">{t('Lcz_Edit', { fallback: 'Edit' })}</wa-dropdown-item>
+              {agentMode && (
+                <wa-dropdown-item value="toggle">
+                  {t('Lcz_ReassignFolioDropdown', {
+                    fallback: 'Re-assign %1 folio',
+                    params: [this.service.agent ? t('Lcz_GuestLowercase', { fallback: 'guest' }) : t('Lcz_AgentLowercase', { fallback: 'agent' })],
+                  })}
+                </wa-dropdown-item>
+              )}
               <wa-dropdown-item value="delete" variant="danger">
-                Delete
+                {t('Lcz_Delete', { fallback: 'Delete' })}
               </wa-dropdown-item>
             </wa-dropdown>
           </div>
@@ -202,11 +214,24 @@ export class IrExtraService {
         <ir-assignment-toggle-dialog
           ref={el => (this.toggleDialogRef = el)}
           loading={this.isToggling}
-          message={`Switch "${this.service.description}" to ${this.service.agent ? 'guest' : (this.booking?.agent?.name ?? 'agent')}?`}
+          message={t('Lcz_SwitchFolioConfirm', {
+            fallback: 'Switch "%1" to %2?',
+            params: [
+              this.service.description,
+              this.service.agent ? t('Lcz_GuestLowercase', { fallback: 'guest' }) : (this.booking?.agent?.name ?? t('Lcz_AgentLowercase', { fallback: 'agent' })),
+            ],
+          })}
           onConfirmToggle={() => this.toggleServiceAgent()}
         >
           <span slot="message">
-            Re-assign {this.description} <br /> from {this.service.agent ? 'Agent' : 'Guest'} folio to <b>{this.service.agent ? 'Guest' : 'Agent'} folio</b>.
+            {t('Lcz_ReassignFolioMessage', {
+              fallback: 'Re-assign %1 from %2 folio to %3 folio.',
+              params: [
+                this.service.description ?? '',
+                this.service.agent ? t('Lcz_Agent', { fallback: 'Agent' }) : t('Lcz_Guest', { fallback: 'Guest' }),
+                this.service.agent ? t('Lcz_Guest', { fallback: 'Guest' }) : t('Lcz_Agent', { fallback: 'Agent' }),
+              ],
+            })}
           </span>
         </ir-assignment-toggle-dialog>
         <ir-dialog
@@ -214,17 +239,17 @@ export class IrExtraService {
             e.stopImmediatePropagation();
             e.stopPropagation();
           }}
-          label="Alert"
+          label={t('Lcz_Alert', { fallback: 'Alert' })}
           ref={el => (this.irModalRef = el)}
           lightDismiss={false}
         >
-          {`${locales.entries['Lcz_AreYouSureDoYouWantToRemove ']} ${locales.entries.Lcz_ThisService} ${locales.entries.Lcz_FromThisBooking}`}
+          {`${t('Lcz_AreYouSureDoYouWantToRemove ')} ${t('Lcz_ThisService')} ${t('Lcz_FromThisBooking')}`}
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button appearance="filled" variant="neutral" size="m" data-dialog="close">
-              {locales.entries.Lcz_Cancel}
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button onClickHandler={() => this.deleteService()} loading={isRequestPending('/Do_Booking_Extra_Service')} variant="danger" size="m">
-              {locales.entries.Lcz_Delete}
+              {t('Lcz_Delete', { fallback: 'Delete' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Host, Listen, Method, Prop, h } from '@stencil/core';
 import { ToastVariants } from '@components/ui/ir-toast-item/ir-toast-item';
+import { t } from '@/services/locale/t';
 
 export interface Toast {
   id?: string;
@@ -73,6 +74,7 @@ function findDialogIn(el: Element | null): HTMLDialogElement | null {
 })
 export class IrToastProvider {
   @Prop() position: 'top-start' | 'top-center' | 'top-end' | 'bottom-start' | 'bottom-center' | 'bottom-end' = 'top-end';
+  /** Pins the toast layer to RTL. Leave unset to inherit the document direction. */
   @Prop() rtl: boolean = false;
   @Prop() duration: number = 5000;
   /** Maximum number of toasts shown at once; when exceeded, the oldest are dismissed. */
@@ -116,7 +118,7 @@ export class IrToastProvider {
     const detail = event?.detail || {};
     // Legacy IToast emitters (ir-interceptor, booking details, …) often send an
     // empty description and put the message in `title`, or vice versa.
-    const title = detail.title || detail.description || 'Notification';
+    const title = detail.title || detail.description || t('Lcz_Notification', { fallback: 'Notification' });
     const payload: Toast = {
       ...detail,
       title,
@@ -188,7 +190,7 @@ export class IrToastProvider {
     this.showLayerIfNeeded();
     requestAnimationFrame(() => this.animatePositions());
 
-    this.announce(`${type}: ${toast.title}${toast.description ? '. ' + toast.description : ''}`, type === 'error' || type === 'danger');
+    this.announce(`${this.typeLabel(type)}: ${toast.title}${toast.description ? '. ' + toast.description : ''}`, type === 'error' || type === 'danger');
     return id;
   }
 
@@ -282,7 +284,14 @@ export class IrToastProvider {
     s.top = vertical === 'bottom' ? 'auto' : '0';
     s.bottom = vertical === 'bottom' ? '0' : 'auto';
     s.alignItems = horizontal === 'center' ? 'center' : horizontal === 'start' ? 'flex-start' : 'flex-end';
-    this.layer.setAttribute('dir', this.rtl ? 'rtl' : 'ltr');
+    // The layer lives in document.body (and is re-parented into modal dialogs), so it already
+    // inherits the document direction. Only an explicit `rtl` opt-in pins it; forcing 'ltr'
+    // otherwise would un-mirror every toast on an RTL page.
+    if (this.rtl) {
+      this.layer.setAttribute('dir', 'rtl');
+    } else {
+      this.layer.removeAttribute('dir');
+    }
   }
 
   /** Deep-scans the document (piercing shadow roots) for open modal dialogs. */
@@ -472,6 +481,22 @@ export class IrToastProvider {
         return type;
       default:
         return 'info';
+    }
+  }
+
+  /** Localized name of the toast type, spoken ahead of the message by the live region. */
+  private typeLabel(type: Toast['type']): string {
+    switch (type) {
+      case 'success':
+        return t('Lcz_Success', { fallback: 'Success' });
+      case 'warning':
+        return t('Lcz_Warning', { fallback: 'Warning' });
+      case 'error':
+        return t('Lcz_Error', { fallback: 'Error' });
+      case 'danger':
+        return t('Lcz_Danger', { fallback: 'Danger' });
+      default:
+        return t('Lcz_Info', { fallback: 'Info' });
     }
   }
 

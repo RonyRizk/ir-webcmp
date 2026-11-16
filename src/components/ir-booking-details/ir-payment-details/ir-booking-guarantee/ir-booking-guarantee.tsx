@@ -2,9 +2,9 @@ import { Component, h, Prop, State } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { toFloat } from '@/utils/utils';
-import locales from '@/stores/locales.store';
 import calendar_data from '@/stores/calendar-data';
 
+import { t } from '@/services/locale/t';
 @Component({
   styleUrl: 'ir-booking-guarantee.css',
   tag: 'ir-booking-guarantee',
@@ -55,10 +55,10 @@ export class IrBookingGuarantee {
     if (this.booking.agent) {
       const code = this.booking?.extras?.find(e => e.key === 'agent_payment_mode');
       if (code) {
-        paymentMethod = code.value === '001' ? locales.entries.Lcz_OnCredit : payment_code ? this.checkPaymentCode(payment_code.value) : null;
+        paymentMethod = code.value === '001' ? t('Lcz_OnCredit') : payment_code ? this.checkPaymentCode(payment_code.value) : null;
       }
     } else if (payment_code) {
-      paymentMethod = payment_code.value === '000' ? 'No card info required upon booking' : this.checkPaymentCode(payment_code.value);
+      paymentMethod = payment_code.value === '000' ? t('Lcz_NoCardInfoRequired', { fallback: 'No card info required upon booking' }) : this.checkPaymentCode(payment_code.value);
     }
 
     return paymentMethod;
@@ -86,16 +86,16 @@ export class IrBookingGuarantee {
 
     return [
       <div>
-        {cci && 'Card:'} <span>{cci.nbr || ''}</span>
-        {cci.expiry_month && ' Expiry: '}
+        {cci && t('Lcz_CardLabel', { fallback: 'Card:' })} <span>{cci.nbr || ''}</span>
+        {cci.expiry_month && t('Lcz_ExpiryLabel', { fallback: ' Expiry: ' })}
         <span>
           {cci.expiry_month || ''}
           {cci.expiry_year && '/' + cci.expiry_year}
         </span>
       </div>,
       <div>
-        {cci.holder_name && 'Name:'} <span>{cci.holder_name || ''}</span>
-        {cci.cvc && ' - CVC:'} <span>{cci.cvc || ''}</span>
+        {cci.holder_name && `${t('Lcz_Name', { fallback: 'Name' })}:`} <span>{cci.holder_name || ''}</span>
+        {cci.cvc && t('Lcz_CvcLabel', { fallback: ' - CVC:' })} <span>{cci.cvc || ''}</span>
       </div>,
     ];
   }
@@ -118,15 +118,18 @@ export class IrBookingGuarantee {
 
     return (
       <div>
-        <ir-label content={ota_guarante.card_type + `${ota_guarante.is_virtual ? ' (virtual)' : ''}`} labelText={`${locales.entries.Lcz_CardType}:`} />
-        <ir-label content={ota_guarante.cardholder_name} labelText={`${locales.entries.Lcz_CardHolderName}:`} />
-        <ir-label content={ota_guarante.card_number} labelText={`${locales.entries.Lcz_CardNumber}:`} />
+        <ir-label
+          content={ota_guarante.card_type + `${ota_guarante.is_virtual ? t('Lcz_VirtualCardSuffix', { fallback: ' (virtual)' }) : ''}`}
+          labelText={`${t('Lcz_CardType')}:`}
+        />
+        <ir-label content={ota_guarante.cardholder_name} labelText={`${t('Lcz_CardHolderName', { fallback: 'Card holder name' })}:`} />
+        <ir-label content={ota_guarante.card_number} labelText={`${t('Lcz_CardNumber', { fallback: 'Card number' })}:`} />
         <ir-label
           content={this.formatCurrency(
             toFloat(Number(ota_guarante.meta?.virtual_card_current_balance), Number(ota_guarante.meta?.virtual_card_decimal_places)),
             ota_guarante.meta?.virtual_card_currency_code,
           )}
-          labelText={`${locales.entries.Lcz_CardBalance}:`}
+          labelText={`${t('Lcz_CardBalance')}:`}
         />
       </div>
     );
@@ -142,8 +145,8 @@ export class IrBookingGuarantee {
     return (
       <div class="mb-1">
         <div class="d-flex align-items-center">
-          <span class="mr-1 font-medium">
-            {locales.entries.Lcz_BookingGuarantee}
+          <span class="ir-me-1 font-medium">
+            {t('Lcz_BookingGuarantee')}
             {paymentMethod && <span>: {paymentMethod}</span>}
           </span>
 

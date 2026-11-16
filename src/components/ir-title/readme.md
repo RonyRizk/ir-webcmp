@@ -27,7 +27,6 @@
 ### Used by
 
  - [igl-bulk-operations](../igloo-calendar/igl-bulk-operations)
- - [igl-split-booking](../igloo-calendar/igl-split-booking)
  - [ir-guest-info](../ir-guest-info)
  - [ir-hk-archive](../ir-housekeeping/ir-hk-tasks/ir-hk-archive)
  - [ir-hk-unassigned-units](../ir-housekeeping/ir-hk-unassigned-units)
@@ -46,7 +45,6 @@
 graph TD;
   ir-title --> ir-icon
   igl-bulk-operations --> ir-title
-  igl-split-booking --> ir-title
   ir-guest-info --> ir-title
   ir-hk-archive --> ir-title
   ir-hk-unassigned-units --> ir-title

@@ -60,6 +60,7 @@
  - [igl-rate-plan](../../igloo-calendar/igl-book-property/igl-booking-overview-page/igl-room-type/igl-rate-plan)
  - [igl-reallocation-dialog](../../igloo-calendar/igl-reallocation-dialog)
  - [igl-split-booking-drawer](../../igloo-calendar/igl-split-booking-drawer)
+ - [igl-split-booking-form](../../igloo-calendar/igl-split-booking-drawer/igl-split-booking-form)
  - [igl-to-be-assigned](../../igloo-calendar/igl-to-be-assigned)
  - [ir-actions-cell](../../table-cells/booking/ir-actions-cell)
  - [ir-agent-billing](../../ir-billing/ir-agent-billing)
@@ -70,6 +71,7 @@
  - [ir-arrival-time-dialog](../../ir-booking-details/ir-arrival-time-dialog/ir-arrival-time-dialog)
  - [ir-arrivals-table](../../ir-arrivals/ir-arrivals-table)
  - [ir-assignment-toggle-dialog](../../ir-booking-details/ir-assignment-toggle-dialog)
+ - [ir-auth](../../ir-auth)
  - [ir-balance-cell](../../table-cells/booking/ir-balance-cell)
  - [ir-booking-city-ledger](../../ir-booking-details/ir-booking-city-ledger)
  - [ir-booking-company-dialog](../../ir-booking-company-dialog)
@@ -174,6 +176,7 @@
  - [ir-tasks-filters](../../ir-housekeeping/ir-hk-tasks/ir-tasks-filters)
  - [ir-tasks-header](../../ir-housekeeping/ir-hk-tasks/ir-tasks-header)
  - [ir-tasks-table](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table)
+ - [ir-tasks-table-pagination](../../ir-housekeeping/ir-hk-tasks/ir-tasks-table/ir-tasks-table-pagination)
  - [ir-tax-service-categories](../../ir-tax-service-categories)
  - [ir-test2-cmp](../../ir-test-cmp)
  - [ir-translations-entries-panel](../../ir-translations-manager/ir-translations-entries-panel)
@@ -182,6 +185,7 @@
  - [ir-translations-entry-form](../../ir-translations-manager/ir-translations-entry-drawer/ir-translations-entry-form)
  - [ir-translations-language-dialog](../../ir-translations-manager/ir-translations-language-dialog)
  - [ir-translations-manager](../../ir-translations-manager)
+ - [ir-translations-move-dialog](../../ir-translations-manager/ir-translations-move-dialog)
  - [ir-translations-settings-dialog](../../ir-translations-manager/ir-translations-settings-dialog)
  - [ir-translations-sync-dialog](../../ir-translations-manager/ir-translations-sync-dialog)
  - [ir-translations-table-dialog](../../ir-translations-manager/ir-translations-table-dialog)
@@ -212,6 +216,7 @@ graph TD;
   igl-rate-plan --> ir-custom-button
   igl-reallocation-dialog --> ir-custom-button
   igl-split-booking-drawer --> ir-custom-button
+  igl-split-booking-form --> ir-custom-button
   igl-to-be-assigned --> ir-custom-button
   ir-actions-cell --> ir-custom-button
   ir-agent-billing --> ir-custom-button
@@ -222,6 +227,7 @@ graph TD;
   ir-arrival-time-dialog --> ir-custom-button
   ir-arrivals-table --> ir-custom-button
   ir-assignment-toggle-dialog --> ir-custom-button
+  ir-auth --> ir-custom-button
   ir-balance-cell --> ir-custom-button
   ir-booking-city-ledger --> ir-custom-button
   ir-booking-company-dialog --> ir-custom-button
@@ -326,6 +332,7 @@ graph TD;
   ir-tasks-filters --> ir-custom-button
   ir-tasks-header --> ir-custom-button
   ir-tasks-table --> ir-custom-button
+  ir-tasks-table-pagination --> ir-custom-button
   ir-tax-service-categories --> ir-custom-button
   ir-test2-cmp --> ir-custom-button
   ir-translations-entries-panel --> ir-custom-button
@@ -334,6 +341,7 @@ graph TD;
   ir-translations-entry-form --> ir-custom-button
   ir-translations-language-dialog --> ir-custom-button
   ir-translations-manager --> ir-custom-button
+  ir-translations-move-dialog --> ir-custom-button
   ir-translations-settings-dialog --> ir-custom-button
   ir-translations-sync-dialog --> ir-custom-button
   ir-translations-table-dialog --> ir-custom-button

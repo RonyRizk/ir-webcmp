@@ -1,6 +1,7 @@
 import { Booking } from '@/models/booking.dto';
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
 import { RoomService } from '@/services/room.service';
+import { t } from '@/services/locale/t';
 import booking_listing, {
   updateUserSelection,
   onBookingListingChange,
@@ -12,15 +13,17 @@ import booking_listing, {
 } from '@/stores/booking_listing.store';
 import { isPrivilegedUser } from '@/utils/utils';
 import { Component, Prop, State, Watch, h, Element, Listen } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { getAllParams } from '@/utils/browserHistory';
-import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService } from '@/services/setup';
 import { Payment, PaymentEntries } from '../ir-booking-details/types';
 import { PropertyService } from '@/services/property.service';
 import type { AllowedProperties } from '@/services/property/types';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { GuestChangedEvent } from '@/components';
-import locales from '@/stores/locales.store';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
 @Component({
   tag: 'ir-booking-listing',
@@ -46,10 +49,10 @@ export class IrBookingListing {
   @State() booking: Booking;
 
   private bookingListingService = new BookingListingService();
-  private bookingService = new BookingService();
+  private setupService = new SetupService();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
-  private token = new Token();
+  private ApiClient = new ApiClient();
 
   private listingModal: HTMLIrListingModalElement;
   private listingModalTimeout: NodeJS.Timeout;
@@ -57,16 +60,19 @@ export class IrBookingListing {
   private havePrivilege: boolean;
   private paymentFolioRef: HTMLIrPaymentFolioElement;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.bookingListing, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.baseUrl) {
-      this.token.setBaseUrl(this.baseUrl);
+      this.ApiClient.setBaseUrl(this.baseUrl);
     }
     updateUserSelection('end_row', this.rowCount);
     booking_listing.rowCount = this.rowCount;
     setPaginationPageSize(this.rowCount);
     if (this.ticket !== '') {
-      booking_listing.token = this.ticket;
-      this.token.setToken(this.ticket);
+      booking_listing.ApiClient = this.ticket;
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
     onBookingListingChange('userSelection', newValue => {
@@ -76,13 +82,17 @@ export class IrBookingListing {
       this.showCost = newValue.some(booking => booking.financial.gross_cost !== null && booking.financial.gross_cost > 0);
     });
   }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
   @Watch('ticket')
   ticketChanged(newValue: string, oldValue: string) {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
-    booking_listing.token = this.ticket;
+    this.ApiClient.setApiClient(this.ticket);
+    booking_listing.ApiClient = this.ticket;
     this.initializeApp();
   }
 
@@ -90,12 +100,16 @@ export class IrBookingListing {
     await this.bookingListingService.getExposedBookings({
       ...booking_listing.userSelection,
       is_to_export: false,
+      language: LocaleController.language,
     });
   }
 
   private async initializeApp() {
     try {
       this.isLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.bookingListing });
       this.havePrivilege = isPrivilegedUser(this.userType);
 
       let propertyId = this.propertyid;
@@ -108,7 +122,7 @@ export class IrBookingListing {
           const propertyData = await this.roomService.getExposedProperty({
             id: 0,
             aname: this.p,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
           });
           propertyId = propertyData.My_Result.id;
@@ -116,9 +130,9 @@ export class IrBookingListing {
       }
 
       const parallelRequests: Promise<unknown>[] = [
-        this.bookingService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']),
-        this.bookingListingService.getExposedBookingsCriteria(this.havePrivilege ? null : propertyId),
-        this.roomService.fetchLanguage(this.language, ['_BOOKING_LIST_FRONT', '_PMS_FRONT']),
+        this.setupService.getPaymentEntries(),
+        this.bookingListingService.getExposedBookingsCriteria({ property_id: this.havePrivilege ? null : propertyId, language: LocaleController.language }),
+        localeReady,
       ];
 
       // let propertyDataIndex: number | null = null;
@@ -129,7 +143,7 @@ export class IrBookingListing {
         parallelRequests.push(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
           }),
         );
@@ -142,14 +156,8 @@ export class IrBookingListing {
 
       const results = await Promise.all(parallelRequests);
 
-      const [setupEntries] = results;
-      const { pay_type, pay_type_group, pay_method } = this.bookingService.groupEntryTablesResult(setupEntries as any);
-
-      this.paymentEntries = {
-        groups: pay_type_group,
-        methods: pay_method,
-        types: pay_type,
-      };
+      const [paymentEntries] = results;
+      this.paymentEntries = paymentEntries as PaymentEntries;
 
       this.allowedProperties = allowedPropertiesIndex !== null ? (results[allowedPropertiesIndex] as AllowedProperties)?.map(p => p.id) : null;
 
@@ -210,6 +218,12 @@ export class IrBookingListing {
   }
   disconnectedCallback() {
     clearTimeout(this.listingModalTimeout);
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Listen('requestPageChange')
@@ -328,7 +342,7 @@ export class IrBookingListing {
       return <ir-loading-screen></ir-loading-screen>;
     }
     return (
-      <ir-page label={locales?.entries?.Lcz_Bookings}>
+      <ir-page label={t('Lcz_Bookings', { fallback: 'Bookings' })}>
         <div class="main-container">
           <ir-listing-header propertyId={this.propertyid} p={this.p} language={this.language}></ir-listing-header>
           <section class="mt-2">

@@ -1,9 +1,9 @@
 import { Component, Event, EventEmitter, Fragment, Prop, State, Watch, h } from '@stencil/core';
 import moment from 'moment';
 import type { ZodIssue } from 'zod';
-import type { IEntries } from '@/models/IBooking';
+import type { SetupEntries } from '@/models/IBooking';
 import type { PaymentEntries } from '@/components/ir-booking-details/types';
-import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, groupEntryTablesResult, getSetupEntryLabel } from '@/services/setup';
 import { buildPaymentTypes } from '@/services/booking-service/utils';
 import { CityLedgerService } from '@/services/city-ledger';
 import type { FiscalDocuments } from '@/services/city-ledger/types';
@@ -31,6 +31,7 @@ import { ClTxTypeCode, FdStatus, FdTypes, VatIncludedCodes } from '@/types/enums
 import { Agent } from '@/services/agents/type';
 import { Booking } from '@/models/booking.dto';
 import type { ClTx } from '@/services/city-ledger';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-transaction-form',
@@ -54,7 +55,7 @@ export class IrCityLedgerTransactionForm {
     groups: [],
     methods: [],
   };
-  @State() paymentTypeGroups: Record<string, IEntries[]> = {};
+  @State() paymentTypeGroups: Record<string, SetupEntries[]> = {};
   @State() isLoading: boolean = true;
   @State() isSubmitting: boolean = false;
   @State() fiscalDocuments: FiscalDocuments = [];
@@ -65,9 +66,9 @@ export class IrCityLedgerTransactionForm {
   @Event() clFiscalDocumentPreview: EventEmitter<ClFiscalDocumentPreviewRequest>;
 
   private taxOptions: TaxOption[] = [];
-  private bookingService = new BookingService();
+  private setupService = new SetupService();
   private cityLedgerService = new CityLedgerService();
-  private clTxTypes: IEntries[];
+  private clTxTypes: SetupEntries[];
 
   private get resolvedInitialType(): TransactionType {
     return ClTxTypeCode.Payment;
@@ -149,8 +150,8 @@ export class IrCityLedgerTransactionForm {
   private async fetchPaymentEntries() {
     try {
       this.isLoading = true;
-      const setupEntries = await this.bookingService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD', '_CL_TX_TYPE']);
-      const { pay_type, pay_type_group, pay_method, cl_tx_type } = this.bookingService.groupEntryTablesResult(setupEntries);
+      const setupEntries = await this.setupService.getSetupEntriesByTableNameMulti(['_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD', '_CL_TX_TYPE']);
+      const { pay_type, pay_type_group, pay_method, cl_tx_type } = groupEntryTablesResult(setupEntries);
       this.paymentEntries = {
         types: pay_type ?? [],
         groups: pay_type_group ?? [],
@@ -258,7 +259,7 @@ export class IrCityLedgerTransactionForm {
       <div class="transaction-form__field">
         <ir-validator schema={transactionTypeFieldSchema} value={this.formData.transactionType} valueEvent="change">
           <wa-select
-            label="Transaction Type"
+            label={t('Lcz_TransactionType', { fallback: 'Transaction Type' })}
             size="s"
             defaultValue={this.formData.transactionType}
             value={this.formData.transactionType}
@@ -271,7 +272,7 @@ export class IrCityLedgerTransactionForm {
           >
             {this.clTxTypes.map(type => {
               const rate = TRANSACTION_TYPE_RATES[type.CODE_NAME];
-              const label = type.CODE_VALUE_EN;
+              const label = getSetupEntryLabel(type);
               if (
                 ClTxTypeCode.DebitNote === type.CODE_NAME ||
                 ClTxTypeCode.AdjustmentCredit === type.CODE_NAME ||
@@ -291,8 +292,8 @@ export class IrCityLedgerTransactionForm {
                   <div class="tx-option">
                     <span class="tx-option__label">{label}</span>
                     <span class="tx-option__badges">
-                      {(rate === 'CR' || rate === 'CR|DB') && <wa-badge variant="success">Credit</wa-badge>}
-                      {(rate === 'DB' || rate === 'CR|DB') && <wa-badge variant="danger">Debit</wa-badge>}
+                      {(rate === 'CR' || rate === 'CR|DB') && <wa-badge variant="success">{t('Lcz_Credit', { fallback: 'Credit' })}</wa-badge>}
+                      {(rate === 'DB' || rate === 'CR|DB') && <wa-badge variant="danger">{t('Lcz_Debit', { fallback: 'Debit' })}</wa-badge>}
                     </span>
                   </div>
                 </wa-option>
@@ -314,7 +315,7 @@ export class IrCityLedgerTransactionForm {
         <div class="transaction-form__field">
           <ir-validator schema={dateFieldSchema} value={this.formData.date} valueEvent="DateChanged">
             <ir-date-select
-              label="Date"
+              label={t('Lcz_DateLabel', { fallback: 'Date' })}
               date={this.formData.date}
               minDate={minAllowedDate}
               maxDate={moment().format('YYYY-MM-DD')}
@@ -331,11 +332,11 @@ export class IrCityLedgerTransactionForm {
           <Fragment>
             {withTaxes ? (
               <div class="amount-tax-group">
-                <span class="amount-tax-group__label">Amount (including taxes)</span>
+                <span class="amount-tax-group__label">{t('Lcz_AmountIncludingTaxes', { fallback: 'Amount (including taxes)' })}</span>
                 <div class="amount-tax-group__row">
                   <ir-validator class="amount-tax-group__amount" schema={amountFieldSchema} value={this.formData.amount} valueEvent="text-change input-change">
                     <ir-input
-                      label="Amount (including taxes)"
+                      label={t('Lcz_AmountIncludingTaxes', { fallback: 'Amount (including taxes)' })}
                       mask="price"
                       value={this.formData.amount}
                       onText-change={(event: CustomEvent<string>) => {
@@ -348,7 +349,7 @@ export class IrCityLedgerTransactionForm {
                   <ir-validator schema={taxIdFieldSchema} value={this.formData.taxId} valueEvent="change">
                     <wa-select
                       size="s"
-                      placeholder="Tax"
+                      placeholder={t('Lcz_TaxPlaceholder', { fallback: 'Tax' })}
                       value={this.formData.taxId}
                       defaultValue={this.formData.taxId}
                       onchange={event => {
@@ -362,8 +363,8 @@ export class IrCityLedgerTransactionForm {
                             {tax.label}
                           </wa-option>
                         ))}
-                      <wa-option value="N/A" label="Not Applicable">
-                        Not Applicable
+                      <wa-option value="N/A" label={t('Lcz_NotApplicable', { fallback: 'Not Applicable' })}>
+                        {t('Lcz_NotApplicable', { fallback: 'Not Applicable' })}
                       </wa-option>
                     </wa-select>
                   </ir-validator>
@@ -373,7 +374,7 @@ export class IrCityLedgerTransactionForm {
               <div class="transaction-form__field">
                 <ir-validator schema={amountFieldSchema} value={this.formData.amount} valueEvent="text-change input-change">
                   <ir-input
-                    label="Amount"
+                    label={t('Lcz_Amount', { fallback: 'Amount' })}
                     mask="price"
                     value={this.formData.amount}
                     required
@@ -470,7 +471,7 @@ export class IrCityLedgerTransactionForm {
         {this.renderTypeFields()}
         {this.formData.transactionType !== ClTxTypeCode.CreditNote && (
           <ir-input
-            label="Reference"
+            label={t('Lcz_Reference', { fallback: 'Reference' })}
             value={this.formData.reference}
             defaultValue={this.formData.reference}
             onText-change={(event: CustomEvent<string>) => {

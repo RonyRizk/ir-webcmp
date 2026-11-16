@@ -5,7 +5,7 @@
 }
 
 .rate-form__body {
-  text-align: left;
+  text-align: start;
   padding-inline: 0.25rem;
   padding-top: 0;
   display: grid;
@@ -48,6 +48,10 @@
   color: var(--wa-color-text-quiet);
   margin: 0;
   margin-top: 0.375rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wa-space-2xs) var(--wa-space-xs);
 }
 
 /* No-availability callout — strong break from the header block */
@@ -94,7 +98,7 @@
 
 .rate-form__input-wrapper {
   flex: 0 0 25%;
-  margin-left: 0.25rem;
+  margin-inline-start: 0.25rem;
   position: relative;
   margin-top: 0;
   margin-bottom: 0;
@@ -103,19 +107,32 @@
 
 .rate-form__readonly-value {
   flex: 0 0 75%;
-  margin-left: 0.25rem;
+  margin-inline-start: 0.25rem;
   margin-top: 0;
   margin-bottom: 0;
   padding: 0;
 }
-.rate-extender-input {
+/* One grid shared by every night: the date column is as wide as the longest date, so each price
+   sits right beside it and the prices still line up. Rows and inputs inherit it through subgrid. */
+.rate-extender-nights {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--wa-space-l);
+  grid-template-columns: max-content minmax(0, 160px);
+  gap: 1rem var(--wa-space-s);
+  justify-content: start;
+  align-items: center;
+}
+.rate-extender-night {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+}
+.rate-extender-input {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   align-items: center;
 }
 .rate-extender-input::part(label) {
-  width: 80px;
   margin: 0;
 }
 .rate-extender-input:disabled::part(label) {
@@ -126,22 +143,18 @@
   grid-row-end: span 2;
   display: grid;
   grid-template-columns: subgrid;
-  gap: 0 var(--wa-space-s);
+  row-gap: 0;
   align-items: center;
 }
-/* Arrow connector — centered under the input field, offset past the label + gap */
+/* Arrow connector — centered under the price column */
 .rate-extender-arrow {
   display: block;
-  margin-left: calc(40px + var(--wa-space-l));
-  width: calc(100% - 40px - var(--wa-space-l));
-  text-align: center;
+  grid-column: 2;
+  justify-self: center;
 }
-/*sm*/
-@media (min-width: 640px) {
-  .rate-extender-input::part(base) {
-    max-width: 180px;
-  }
-  .rate-extender-arrow {
-    width: 180px;
-  }
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

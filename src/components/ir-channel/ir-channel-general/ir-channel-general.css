@@ -4,7 +4,7 @@
 .label-style {
   width: 6.25rem;
   text-align: end;
-  padding-right: 0.625rem !important;
+  padding-inline-end: 0.625rem !important;
 }
 .connection-status {
   display: flex;
@@ -16,7 +16,7 @@
   border-bottom: 1px solid #e4e5ec;
 }
 .ml-18 {
-  margin-left: 18% !important;
+  margin-inline-start: 18% !important;
 }
 .status-message {
   display: flex;
@@ -25,4 +25,10 @@
   font-size: 0.81rem;
   margin: 0;
   padding: 0;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
 }

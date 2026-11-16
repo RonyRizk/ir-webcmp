@@ -11,6 +11,11 @@
   max-inline-size: 48rem;
 }
 
+/* The drawer already bounds the width; capping it again would leave an empty strip beside the form. */
+:host([mode='drawer']) .clone-rates__sections {
+  max-inline-size: none;
+}
+
 .clone-rates__card {
   margin-bottom: var(--wa-space-s);
 }
@@ -64,16 +69,30 @@ ir-weekday-selector.clone-rates__weekdays {
 /* Indented to line up with the "Select all" checkbox label, nesting plans under their room type. */
 .clone-rates__rate-plans {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
   gap: var(--wa-space-m) var(--wa-space-l);
   /* checkbox box + its gap to the label */
   padding-inline-start: calc(var(--wa-form-control-toggle-size) + 0.5em);
+}
+
+.clone-rates__rate-plan-custom-text {
+  color: var(--wa-color-text-quiet);
+}
+
+/* A room type with a single rate plan lets it span the full row instead of one narrow column. */
+.clone-rates__rate-plans > :only-child {
+  grid-column: 1 / -1;
 }
 
 .clone-rates__amount {
   display: flex;
   flex-direction: column;
   gap: var(--wa-space-xs);
+}
+
+/* A percentage is at most a few digits, so a full-width field would be mostly empty. */
+.clone-rates__amount-input--percentage {
+  max-inline-size: 8rem;
 }
 
 /* Conditionally mounted content eases in instead of popping. */

@@ -19,14 +19,14 @@
 /* Align header horizontal padding with the tightened body cells. */
 
 .meal-guest-list__cell--ad {
-  text-align: right !important;
+  text-align: end !important;
   padding-inline: 0.4rem 0.2rem !important;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .meal-guest-list__cell--ch {
-  text-align: left !important;
+  text-align: start !important;
   padding-inline: 0.4rem 0.2rem !important;
   color: var(--wa-color-text-quiet);
   text-transform: uppercase;

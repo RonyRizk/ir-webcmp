@@ -6,7 +6,7 @@
   height: 100%;
   color: var(--wa-color-text-normal);
   font-size: var(--wa-font-size-s);
-  text-align: left;
+  text-align: start;
   background-color: var(--wa-color-surface-default);
   border-inline-end: 2px solid var(--wa-color-surface-border);
 }

@@ -44,6 +44,8 @@ export interface DashboardOccupancy {
 export interface DashboardDayParams {
   property_id: number;
   date: ISODate;
+  /** Language for server-localized data (room types, sources, statuses). */
+  language?: string;
 }
 
 export type DashboardBookingList = Booking[];

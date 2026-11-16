@@ -1,13 +1,14 @@
 import { IrActionButton } from '@/components/table-cells/booking/ir-actions-cell/ir-actions-cell';
 import { Booking, Occupancy } from '@/models/booking.dto';
 import booking_listing from '@/stores/booking_listing.store';
-import locales from '@/stores/locales.store';
 import { getPrivateNote } from '@/utils/booking';
 import type { PaginationChangeEvent } from '@/components/ir-pagination/ir-pagination';
 import { Component, Event, EventEmitter, Host, State, h } from '@stencil/core';
-import { BookingListingService } from '@/services/booking_listing.service';
+import { BookingListingService } from '@/services/booking-listing';
 import { isBookingModified, isPrivilegedUser } from '@/utils/utils';
+import { formatBookingNumber } from '@/utils/number';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-listing-table',
   styleUrls: ['ir-booking-listing-table.css', '../../../common/table.css'],
@@ -30,7 +31,7 @@ export class IrBookingListingTable {
     }
     try {
       this.isLoading = true;
-      await this.bookingListingsService.removeExposedBooking(this.booking_nbr, true);
+      await this.bookingListingsService.removeExposedBooking({ booking_nbr: this.booking_nbr, is_to_revover: true });
       booking_listing.bookings = [...booking_listing.bookings.filter(b => b.booking_nbr?.toString() !== this.booking_nbr)];
       this.booking_nbr = null;
     } catch (error) {
@@ -146,7 +147,7 @@ export class IrBookingListingTable {
             {booking.rooms.map(room => (
               <ir-unit-cell showDeparture={booking_listing?.userSelection?.filter_type === '3'} key={room.identifier} room={room}></ir-unit-cell>
             ))}
-            {booking.extra_services && <p style={{ fontSize: '0.93rem' }}>{locales.entries.Lcz_ExtraServices}</p>}
+            {booking.extra_services && <p style={{ fontSize: '0.93rem' }}>{t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}</p>}
           </div>
         </td>
         <td class="text-center">
@@ -194,23 +195,23 @@ export class IrBookingListingTable {
           <table class="table data-table">
             <thead>
               <tr>
-                {isPrivilegedUser(booking_listing.userSelection.userTypeCode) && <th class="text-left">Property</th>}
+                {isPrivilegedUser(booking_listing.userSelection.userTypeCode) && <th class="ir-text-start">{t('Lcz_Property', { fallback: 'Property' })}</th>}
                 <th>
-                  <span class={'arrivals-table__departure__cell'}>Booking#</span>
+                  <span class={'arrivals-table__departure__cell'}>{t('Lcz_BookingHash', { fallback: 'Booking#' })}</span>
                 </th>
-                <th>Booked on</th>
+                <th>{t('Lcz_BookedOn', { fallback: 'Booked on' })}</th>
                 <th>
                   <div>
-                    <p>Booked by</p>
+                    <p>{t('Lcz_BookedBy', { fallback: 'Booked by' })}</p>
                   </div>
                 </th>
-                <th>Dates</th>
-                {booking_listing.userSelection?.filter_type === '2' && <th>Arrival time</th>}
-                <th>Services</th>
+                <th>{t('Lcz_Dates', { fallback: 'Dates' })}</th>
+                {booking_listing.userSelection?.filter_type === '2' && <th>{t('Lcz_ArrivalTime', { fallback: 'Arrival time' })}</th>}
+                <th>{t('Lcz_Services', { fallback: 'Services' })}</th>
                 <th class="text-center">
-                  <p>Amount </p>
-                  <wa-tooltip for="balance-info">Booking balance click to settle.</wa-tooltip>
-                  <div style={{ width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
+                  <p>{t('Lcz_Amount', { fallback: 'Amount' })} </p>
+                  <wa-tooltip for="balance-info">{t('Lcz_BookingBalanceClickToSettle', { fallback: 'Booking balance click to settle.' })}</wa-tooltip>
+                  <div style={{ width: 'fit-content', marginInline: 'auto' }}>
                     <ir-custom-button
                       id="balance-info"
                       style={{ '--ir-c-btn-height': 'fit-content', '--ir-c-btn-padding': '0.25rem', '--ir-c-btn-font-size': '0.725rem' }}
@@ -218,11 +219,11 @@ export class IrBookingListingTable {
                       variant="danger"
                       appearance="outlined"
                     >
-                      Guest Balance
+                      {t('Lcz_GuestBalance', { fallback: 'Guest Balance' })}
                     </ir-custom-button>
                   </div>
                 </th>
-                <th class="text-center">Status</th>
+                <th class="text-center">{t('Lcz_Status', { fallback: 'Status' })}</th>
                 <th></th>
               </tr>
             </thead>
@@ -230,7 +231,7 @@ export class IrBookingListingTable {
               {booking_listing.bookings.length === 0 && (
                 <tr>
                   <td colSpan={isPrivilegedUser(booking_listing.userSelection.userTypeCode) ? 9 : 8} class="empty-row">
-                    No bookings found
+                    {t('Lcz_NoBookingsFound', { fallback: 'No bookings found' })}
                   </td>
                 </tr>
               )}
@@ -249,7 +250,7 @@ export class IrBookingListingTable {
                 booking={booking}
                 totalPersons={totalPersons}
                 lastManipulation={lastManipulation}
-                extraServicesLabel={locales.entries.Lcz_ExtraServices}
+                extraServicesLabel={t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}
                 onIrBookingCardAction={event => {
                   event.stopImmediatePropagation();
                   event.stopPropagation();
@@ -269,7 +270,7 @@ export class IrBookingListingTable {
             currentPage={pagination.currentPage}
             allowPageSizeChange={false}
             pageSizes={[pagination.pageSize]}
-            recordLabel={locales.entries?.Lcz_Bookings ?? 'bookings'}
+            recordLabel={t('Lcz_Bookings', { fallback: 'bookings' })}
             onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
             onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
           ></ir-pagination>
@@ -287,11 +288,11 @@ export class IrBookingListingTable {
               this.loadMoreBookings();
             }}
           >
-            Load more
+            {t('Lcz_LoadMore', { fallback: 'Load more' })}
           </ir-custom-button>
         )}
         <ir-dialog
-          label="Delete"
+          label={t('Lcz_Delete', { fallback: 'Delete' })}
           open={!!this.booking_nbr}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
@@ -304,10 +305,10 @@ export class IrBookingListingTable {
           }}
           lightDismiss={false}
         >
-          <span>{locales.entries.Lcz_SureYouWantToDeleteBookingNbr + this.booking_nbr}</span>
+          <span>{t('Lcz_SureYouWantToDeleteBookingNbr') + formatBookingNumber(this.booking_nbr)}</span>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               onClickHandler={e => {
@@ -319,7 +320,7 @@ export class IrBookingListingTable {
               size="m"
               variant="danger"
             >
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

@@ -1,6 +1,7 @@
 import { Component, Event, EventEmitter, Host, Method, Prop, State, h } from '@stencil/core';
 import { CityLedgerService } from '@/services/city-ledger';
 import type { FolioRow } from '../../types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-hold-transaction-dialog',
@@ -47,27 +48,26 @@ export class IrHoldTransactionDialog {
   }
 
   render() {
-    const isHeld = this.row?.status?.label === 'Held';
+    const isHeld = this.row?.status?.id === 'held';
     return (
       <Host>
-        <ir-dialog label={isHeld ? 'Revert Transaction' : 'Hold Transaction'} ref={el => (this.dialogRef = el)}>
+        <ir-dialog
+          label={isHeld ? t('Lcz_RevertTransactionTitle', { fallback: 'Revert Transaction' }) : t('Lcz_HoldTransactionTitle', { fallback: 'Hold Transaction' })}
+          ref={el => (this.dialogRef = el)}
+        >
           <div class="hold-dialog__body">
             {isHeld ? (
-              <p>
-                Revert this transaction back to <strong>Unbilled</strong> status? It will re-enter the billing queue.
-              </p>
+              <p>{t('Lcz_RevertToUnbilledConfirmMessage', { fallback: 'Revert this transaction back to Unbilled status? It will re-enter the billing queue.' })}</p>
             ) : (
-              <p>
-                Place this transaction on <strong>Hold</strong>? It will be excluded from invoicing until released.
-              </p>
+              <p>{t('Lcz_HoldConfirmMessage', { fallback: 'Place this transaction on Hold? It will be excluded from invoicing until released.' })}</p>
             )}
           </div>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close">
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" loading={this.isLoading} onClickHandler={() => this.handleConfirm()} appearance="accent" variant="brand">
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

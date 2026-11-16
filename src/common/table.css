@@ -201,8 +201,8 @@
 
 .sticky-column {
   position: sticky !important;
-  right: 0;
-  background-color: white;
+  inset-inline-end: 0;
+  background-color: var(--wa-color-surface-default, white);
 }
 
 /* #endregion */

@@ -3,7 +3,7 @@ import { Booking } from '@/models/booking.dto';
 import { departuresStore } from '@/stores/departures.store';
 import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
-import locales from '@/stores/locales.store';
+import { t } from '@/services/locale/t';
 export type CheckoutRoomEvent = {
   booking: Booking;
   identifier: string;
@@ -83,7 +83,7 @@ export class IrDeparturesTable {
         <td>
           <ir-dates-cell overdueCheckout={isOverdueCheckout} checkIn={room.from_date} checkOut={room.to_date}></ir-dates-cell>
         </td>
-        <td class="text-right">
+        <td class="ir-text-end">
           <ir-balance-cell
             guestFinancial={booking.guest_financial}
             bookingNumber={booking.booking_nbr}
@@ -113,7 +113,7 @@ export class IrDeparturesTable {
               ) : isFuture ? (
                 ''
               ) : (
-                'In-house'
+                t('Lcz_InHouse', { fallback: 'In-house' })
               )}
             </div>
           </td>
@@ -173,19 +173,19 @@ export class IrDeparturesTable {
             <thead>
               <tr>
                 <th>
-                  <span class={'departures-table__departure__cell'}>Booking#</span>
+                  <span class={'departures-table__departure__cell'}>{t('Lcz_BookingHash', { fallback: 'Booking#' })}</span>
                 </th>
                 <th>
                   <div>
-                    <p>Booked by /</p>
-                    <p>Guest name</p>
+                    <p>{t('Lcz_BookedBySlash', { fallback: 'Booked by /' })}</p>
+                    <p>{t('Lcz_GuestName', { fallback: 'Guest name' })}</p>
                   </div>
                 </th>
                 {/* <th></th> */}
-                <th>Unit</th>
-                <th>Dates</th>
+                <th>{t('Lcz_Unit', { fallback: 'Unit' })}</th>
+                <th>{t('Lcz_Dates', { fallback: 'Dates' })}</th>
                 <th class="text-center">
-                  Balance
+                  {t('Lcz_Balance', { fallback: 'Balance' })}
                   {/* <wa-tooltip for="balance-info">Booking balance click to settle.</wa-tooltip> */}
                   <div style={{ width: 'fit-content', marginInline: 'auto' }}>
                     <ir-custom-button
@@ -195,7 +195,7 @@ export class IrDeparturesTable {
                       variant="danger"
                       appearance="outlined"
                     >
-                      Click to collect
+                      {t('Lcz_ClickToCollect', { fallback: 'Click to collect' })}
                     </ir-custom-button>
                   </div>
                 </th>
@@ -215,7 +215,7 @@ export class IrDeparturesTable {
             currentPage={pagination.currentPage}
             allowPageSizeChange={false}
             pageSizes={[pagination.pageSize]}
-            recordLabel={locales.entries?.Lcz_Bookings ?? 'Bookings'}
+            recordLabel={t('Lcz_Bookings', { fallback: 'Bookings' })}
             onPageChange={event => this.handlePageChange(event as CustomEvent<PaginationChangeEvent>)}
             onPageSizeChange={event => this.handlePageSizeChange(event as CustomEvent<PaginationChangeEvent>)}
           ></ir-pagination>

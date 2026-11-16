@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Occupancy } from '@/models/booking.dto';
 import { RoomDetail } from '@/models/IBooking';
 import { IFormattedLegendData } from '@/models/calendarData';
-import { DateSchema, PropertyIdSchema, BookingNumberSchema } from '../commonSchemas';
+import { DateSchema, PropertyIdSchema, BookingNumberSchema, LanguageSchema } from '../commonSchemas';
 
 export const AssignUnitParamsSchema = z.object({
   booking_nbr: BookingNumberSchema,
@@ -12,11 +12,10 @@ export const AssignUnitParamsSchema = z.object({
 });
 export type AssignUnitParams = z.infer<typeof AssignUnitParamsSchema>;
 
-export const GetAggregatedUnAssignedRoomsByDateRangeParamsSchema = z.object({
+export const GetAggregatedUnAssignedRoomsByDateRangeParamsSchema = LanguageSchema.extend({
   propertyid: PropertyIdSchema,
   from_date: DateSchema,
   to_date: DateSchema,
-  language: z.string().optional().default('en'),
 });
 export type GetAggregatedUnAssignedRoomsByDateRangeParams = z.infer<typeof GetAggregatedUnAssignedRoomsByDateRangeParamsSchema>;
 

@@ -3,13 +3,12 @@ import { Booking, IPayment } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { PaymentService, IPaymentAction } from '@/services/payment.service';
-import locales from '@/stores/locales.store';
 import { IToast } from '@/components/ui/ir-toast/toast';
 import { Payment, PaymentEntries, PaymentSidebarEvent, PrintScreenOptions } from '../types';
 import moment from 'moment';
 import { formatAmount } from '@/utils/utils';
 import calendar_data from '@/stores/calendar-data';
-import { IEntries } from '@/models/property';
+import { SetupEntries } from '@/models/property';
 import { isAgentMode } from '../functions';
 import { FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
 import { ClTx } from '@/services/city-ledger/types';
@@ -17,6 +16,7 @@ import { FdTypes, PayTypes } from '@/types/enums';
 import type { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
 import type { VoidDocumentRequest } from '@/components/ir-booking-details/ir-void-document-dialog/ir-void-document-dialog';
 
+import { t } from '@/services/locale/t';
 @Component({
   styleUrl: 'ir-payment-details.css',
   tag: 'ir-payment-details',
@@ -28,7 +28,7 @@ export class IrPaymentDetails {
   @Prop() propertyId: number;
   @Prop() paymentEntries: PaymentEntries;
   @Prop() language: string = 'en';
-  @Prop() svcCategories: IEntries[];
+  @Prop() svcCategories: SetupEntries[];
   @Prop() isAllServicesAgentOwned: boolean = false;
   @Prop() agent: Agent;
   @Prop() folioRows: FolioRow[] = [];
@@ -197,8 +197,8 @@ export class IrPaymentDetails {
       console.error('Error canceling payment:', error);
       this.toast.emit({
         type: 'error',
-        title: 'Error',
-        description: 'Failed to cancel payment. Please try again.',
+        title: t('Lcz_Error', { fallback: 'Error' }),
+        description: t('Lcz_FailedToCancelPayment', { fallback: 'Failed to cancel payment. Please try again.' }),
         position: 'top-right',
       });
     } finally {
@@ -296,7 +296,7 @@ export class IrPaymentDetails {
                 this.handleAddPayment({ type: 'refund', amount: Math.abs(this.booking.financial.cancelation_penality_as_if_today) });
               }}
             >
-              {`Refund ${formatAmount(currency.symbol, Math.abs(this.booking.financial.cancelation_penality_as_if_today))}`}
+              {t('Lcz_RefundAmount', { fallback: 'Refund %1', params: [formatAmount(currency.symbol, Math.abs(this.booking.financial.cancelation_penality_as_if_today))] })}
             </ir-custom-button>
           </div>
         )}
@@ -309,7 +309,10 @@ export class IrPaymentDetails {
                 this.handleAddPayment({ type: 'cancellation-penalty', amount: Math.abs(this.booking.financial.cancelation_penality_as_if_today) });
               }}
             >
-              {`Charge cancellation penalty ${formatAmount(currency.symbol, this.booking.financial.cancelation_penality_as_if_today)}`}
+              {t('Lcz_ChargeCancellationPenalty', {
+                fallback: 'Charge cancellation penalty %1',
+                params: [formatAmount(currency.symbol, this.booking.financial.cancelation_penality_as_if_today)],
+              })}
             </ir-custom-button>
           </div>
         )}
@@ -344,16 +347,16 @@ export class IrPaymentDetails {
           this.handleCancelModal(e);
         }}
         ref={el => (this.dialogRef = el)}
-        label="Alert"
+        label={t('Lcz_Alert', { fallback: 'Alert' })}
         lightDismiss={this.modalMode !== 'delete'}
       >
-        <p>{this.modalMode === 'delete' ? locales.entries.Lcz_IfDeletedPermantlyLost : locales.entries.Lcz_EnteringAmountGreaterThanDue}</p>
+        <p>{this.modalMode === 'delete' ? t('Lcz_IfDeletedPermantlyLost') : t('Lcz_EnteringAmountGreaterThanDue')}</p>
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" data-dialog="close" variant="neutral" appearance="filled">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button loading={this.isLoading} size="m" onClickHandler={e => this.handleConfirmModal(e)} variant={this.modalMode === 'delete' ? 'danger' : 'brand'}>
-            {this.modalMode === 'delete' ? locales.entries.Lcz_Delete : locales.entries.Lcz_Confirm}
+            {this.modalMode === 'delete' ? t('Lcz_Delete', { fallback: 'Delete' }) : t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-dialog>,

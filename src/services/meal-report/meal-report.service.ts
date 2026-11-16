@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { ParamsGetMealReport, ParamsGetMealReportSchema, ParamsSetHBPreference, ParamsSetHBPreferenceSchema, GetMealReportResult } from './types';
-import { TableEntries } from '../booking-service/types';
-import { IEntries } from '@/models/IBooking';
 
 export class MealReportService {
   public async getMealReport(props: ParamsGetMealReport): Promise<GetMealReportResult> {
@@ -19,13 +17,5 @@ export class MealReportService {
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
     }
-  }
-
-  public async getSetupEntriesByTableNameMulti(entries: TableEntries[]): Promise<IEntries[]> {
-    const { data } = await axios.post(`/Get_Setup_Entries_By_TBL_NAME_MULTI`, { TBL_NAMES: entries });
-    if (data.ExceptionMsg !== '') {
-      throw new Error(data.ExceptionMsg);
-    }
-    return data.My_Result;
   }
 }

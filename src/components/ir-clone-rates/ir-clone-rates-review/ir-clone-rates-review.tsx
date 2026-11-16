@@ -1,5 +1,6 @@
 import { Component, Event, EventEmitter, Prop, Watch, h } from '@stencil/core';
 import { ReviewRow } from '../clone-rates.utils';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-clone-rates-review',
@@ -34,7 +35,12 @@ export class IrCloneRatesReview {
 
   render() {
     return (
-      <ir-dialog label="Review your selections" lightDismiss={false} ref={el => (this.dialogRef = el)} onIrDialogHide={() => this.goBack.emit()}>
+      <ir-dialog
+        label={t('Lcz_ReviewYourSelections', { fallback: 'Review your selections' })}
+        lightDismiss={false}
+        ref={el => (this.dialogRef = el)}
+        onIrDialogHide={() => this.goBack.emit()}
+      >
         <dl class="clone-rates-review__summary">
           {this.rows.map(row => (
             <div class="clone-rates-review__row" key={row.label}>
@@ -45,10 +51,10 @@ export class IrCloneRatesReview {
         </dl>
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" appearance="outlined" variant="neutral" disabled={this.loading} onClickHandler={() => this.goBack.emit()}>
-            Go back
+            {t('Lcz_GoBack', { fallback: 'Go back' })}
           </ir-custom-button>
           <ir-custom-button size="m" variant="brand" loading={this.loading} onClickHandler={() => this.confirmClone.emit()}>
-            Confirm
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

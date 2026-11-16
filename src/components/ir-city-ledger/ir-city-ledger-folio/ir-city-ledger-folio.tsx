@@ -8,6 +8,7 @@ import type { ICurrency } from '@/models/property';
 import { CityLedgerService, type ClTx } from '@/services/city-ledger';
 import calendar_data from '@/stores/calendar-data';
 import { Agent } from '@/services/agents/type';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-folio',
@@ -302,7 +303,7 @@ export class IrCityLedgerFolio {
         const mapped = mapClTxToFolioRow(tx);
         totalDebits += tx.DEBIT || 0;
         totalCredits += tx.CREDIT || 0;
-        if (mapped.status.label === 'Unbilled') unbilledCount++;
+        if (mapped.status.id === 'unbilled') unbilledCount++;
         return { ...mapped, _rowId: v4() };
       });
 
@@ -385,7 +386,7 @@ export class IrCityLedgerFolio {
         ></ir-city-ledger-folio-table>
 
         <ir-dialog
-          label="Delete Entry"
+          label={t('Lcz_DeleteEntry', { fallback: 'Delete Entry' })}
           open={!!this.deleteTarget}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
@@ -393,13 +394,13 @@ export class IrCityLedgerFolio {
             if (!this.isDeleting) this.deleteTarget = null;
           }}
         >
-          <p>Are you sure you want to delete this entry? This action cannot be undone.</p>
+          <p>{t('Lcz_ConfirmDeleteFolioEntry', { fallback: 'Are you sure you want to delete this entry? This action cannot be undone.' })}</p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="filled" variant="neutral" onClickHandler={() => (this.deleteTarget = null)}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" variant="danger" loading={this.isDeleting} onClickHandler={() => this.handleDelete()}>
-              Delete
+              {t('Lcz_Delete', { fallback: 'Delete' })}
             </ir-custom-button>
           </div>
         </ir-dialog>
@@ -409,7 +410,7 @@ export class IrCityLedgerFolio {
           serviceCategoryOptions={this.serviceCategoryOptions}
           agent={this.agent}
           transaction={this.editingTransaction}
-          drawerLabel={this.editingTransaction ? 'Edit Entry' : 'New Entry'}
+          drawerLabel={this.editingTransaction ? t('Lcz_EditEntryTitle', { fallback: 'Edit Entry' }) : t('Lcz_NewEntryTitle', { fallback: 'New Entry' })}
           onTransactionSaved={() => {
             this.fetchFolioData();
           }}

@@ -13,10 +13,10 @@
 .text-center {
   text-align: center;
 }
-.text-right {
-  text-align: right;
+/* `Lcz_Adults` is lower case; the column header shows it as "Adults". */
+.text-capitalize {
+  text-transform: capitalize;
 }
-
 /* Future-date rows */
 .future-report td {
   background-color: var(--wa-color-neutral-fill-quiet) !important;
@@ -101,4 +101,10 @@
 
 .legend-dot--previous {
   background: var(--wa-color-brand-fill-normal);
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-end {
+  text-align: end;
 }

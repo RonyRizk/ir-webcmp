@@ -2,6 +2,9 @@ import { Component, Host, Prop, State, h } from '@stencil/core';
 import type { AllowedProperties, FetchUnBookableRoomsResult } from '@/services/property/types';
 import { Debounce } from '@/decorators/debounce';
 import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
+import { formatBookingNumber, formatCount } from '@/utils/number';
 
 type UnbookableRoomsMode = 'default' | 'mpo';
 type UnbookableRoomsFilters = { period_to_check: number; consecutive_period: number; country: string };
@@ -22,14 +25,13 @@ export class IrUnbookableRoomsData {
 
   @State() propertyNameFilter = '';
 
-  private todayFormatted = moment().format('MMM DD');
-
   private getPropertyName(propertyId: number) {
+    const fallbackName = t('Lcz_PropertyWithId', { fallback: 'Property %1', params: [formatBookingNumber(String(propertyId))] });
     if (!this.allowedProperties?.length) {
-      return `Property ${propertyId}`;
+      return fallbackName;
     }
     const match = this.allowedProperties.find(property => property.id === propertyId);
-    return match?.name ?? `Property ${propertyId}`;
+    return match?.name ?? fallbackName;
   }
 
   private getPeriodOffset(firstNight: string): number {
@@ -53,7 +55,7 @@ export class IrUnbookableRoomsData {
   }
 
   private getEndDateFormatted(): string {
-    return moment().add(this.progressFilters.period_to_check, 'months').format('MMM DD');
+    return formatDate(moment().add(this.progressFilters.period_to_check, 'months'), 'MMM DD');
   }
 
   @Debounce(300)
@@ -79,13 +81,18 @@ export class IrUnbookableRoomsData {
     const sortedEntries = groupedEntries.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.propertyId - b.propertyId);
     const filteredEntries =
       this.mode === 'mpo' && this.propertyNameFilter ? sortedEntries.filter(item => item.name.toLowerCase().includes(this.propertyNameFilter)) : sortedEntries;
-    console.log(filteredEntries);
+    const todayFormatted = formatDate(moment(), 'MMM DD');
     return (
       <Host>
+        {!this.isLoading && this.errorMessage && (
+          <wa-callout size="s" appearance="filled-outlined" variant="danger">
+            {this.errorMessage}
+          </wa-callout>
+        )}
         {!this.isLoading && !this.errorMessage && totalIssues === 0 && (
           <wa-card class="unbookable-rooms__empty-state">
             <wa-icon name="check-circle" class="unbookable-rooms__empty-state--icon"></wa-icon>
-            <p>Hooray! Nothing to report.</p>
+            <p>{t('Lcz_NothingToReport', { fallback: 'Hooray! Nothing to report.' })}</p>
           </wa-card>
         )}
         {totalIssues > 0 && (
@@ -96,7 +103,7 @@ export class IrUnbookableRoomsData {
                 class="mb-2"
                 onText-change={e => this.filterProperties(e.detail)}
                 style={{ maxWidth: '400px' }}
-                placeholder="Search properties"
+                placeholder={t('Lcz_SearchProperties', { fallback: 'Search properties' })}
                 appearance="filled"
               >
                 <wa-icon slot="start" name="magnifying-glass"></wa-icon>
@@ -123,7 +130,7 @@ export class IrUnbookableRoomsData {
                       <span>{this.getPropertyName(propertyId)}</span>
 
                       <b>
-                        ({entries.length}/{entries[0].total_room_types_nbr})
+                        ({formatCount(entries.length)}/{formatCount(entries[0].total_room_types_nbr)})
                       </b>
                     </header>
                   )}
@@ -134,11 +141,11 @@ export class IrUnbookableRoomsData {
                           <span class="issue__room">{entry.room_type_name}</span>
                         </div>
                         <div class="period-chart">
-                          <span class="period-chart__start">{this.todayFormatted}</span>
+                          <span class="period-chart__start">{todayFormatted}</span>
 
                           <div class="period-chart__track">
                             <div
-                              title="available"
+                              title={t('Lcz_BookablePeriod', { fallback: 'Bookable period' })}
                               class="period-chart__fill"
                               style={{
                                 width: `${this.getPeriodOffset(entry.first_night_not_bookable)}%`,
@@ -151,7 +158,7 @@ export class IrUnbookableRoomsData {
                                 left: `${this.getPeriodOffset(entry.first_night_not_bookable)}%`,
                               }}
                             >
-                              <span class="period-chart__label">{moment(entry.first_night_not_bookable, 'YYYY-MM-DD').format('MMM DD')}</span>
+                              <span class="period-chart__label">{formatDate(entry.first_night_not_bookable, 'MMM DD')}</span>
                             </div>
                           </div>
 
@@ -163,12 +170,12 @@ export class IrUnbookableRoomsData {
                   <section class="period-chart__legend">
                     <div class="period-chart__legend-item">
                       <span class="period-chart__legend-swatch period-chart__legend-swatch--bookable"></span>
-                      <span>Bookable period</span>
+                      <span>{t('Lcz_BookablePeriod', { fallback: 'Bookable period' })}</span>
                     </div>
 
                     <div class="period-chart__legend-item">
                       <span class="period-chart__legend-swatch period-chart__legend-swatch--blocked"></span>
-                      <span>Not bookable period</span>
+                      <span>{t('Lcz_NotBookablePeriod', { fallback: 'Not bookable period' })}</span>
                     </div>
                   </section>
                 </wa-details>

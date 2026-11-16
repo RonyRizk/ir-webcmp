@@ -6,10 +6,14 @@ div {
 }
 :host {
   --rd-viewport-padding: 25px;
+  /* Which way the toast slides in from: it enters from the edge it is docked to, and both
+     the dock and the physical x-axis flip under RTL. `position` names the logical side
+     (`*-left` = inline-start), so the sign is the dock side crossed with the direction. */
+  --rd-slide-sign: 1;
   --rd-success: #2b9a66;
   position: fixed;
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
   display: flex;
   flex-direction: column;
   padding: var(--rd-viewport-padding);
@@ -43,21 +47,33 @@ h6 {
   color: hsl(222.2, 84%, 4.9%);
   font-size: 15px;
 }
+:host(:dir(rtl)) {
+  --rd-slide-sign: -1;
+}
+:host([position='top-left']),
+:host([position='bottom-left']) {
+  --rd-slide-sign: -1;
+}
+:host([position='top-left']:dir(rtl)),
+:host([position='bottom-left']:dir(rtl)) {
+  --rd-slide-sign: 1;
+}
+
 :host([position='top-left']) {
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
 }
 :host([position='top-right']) {
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
 }
 :host([position='bottom-left']) {
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
 }
 :host([position='bottom-right']) {
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
 }
 .icon-container {
   height: 25px;
@@ -87,7 +103,9 @@ h6 {
 .ToastRoot {
   background-color: hsl(0, 0%, 100%);
   border-radius: 0.5rem;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   padding: 15px;
   display: grid;
   grid-template-areas: 'title action' 'description action';
@@ -110,7 +128,7 @@ h6 {
 
 @-webkit-keyframes slideIn {
   from {
-    transform: translateX(var(--rd-offset-width));
+    transform: translateX(calc(var(--rd-offset-width, 100%) * var(--rd-slide-sign)));
   }
   to {
     transform: translateX(0);
@@ -118,7 +136,7 @@ h6 {
 }
 @keyframes slideIn {
   from {
-    transform: translateX(var(--rd-offset-width));
+    transform: translateX(calc(var(--rd-offset-width, 100%) * var(--rd-slide-sign)));
   }
   to {
     transform: translateX(0);

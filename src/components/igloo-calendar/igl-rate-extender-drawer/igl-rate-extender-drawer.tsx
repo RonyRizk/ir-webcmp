@@ -1,5 +1,6 @@
 import { IRoomNightsDataEventPayload } from '@/models/property-types';
 import { Component, Event, EventEmitter, h, Prop, State } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'igl-rate-extender-drawer',
@@ -24,7 +25,7 @@ export class IglRateExtenderDrawer {
   @Event() closeRoomNightsDialog: EventEmitter<IRoomNightsDataEventPayload>;
 
   private get label(): string {
-    return `Adding Room Nights`;
+    return t('Lcz_AddingRoomNights', { fallback: 'Adding Room Nights' });
   }
 
   private handleDrawerHide = (e: CustomEvent) => {
@@ -66,10 +67,10 @@ export class IglRateExtenderDrawer {
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button size="m" appearance="filled" variant="neutral" data-drawer="close">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button loading={this.isLoading} disabled={!this.hasInventory} size="m" type="submit" form="rate-extender-form" appearance="accent" variant="brand">
-            Confirm
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

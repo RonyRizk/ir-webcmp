@@ -29,12 +29,14 @@
 
 ### Depends on
 
+- [ir-empty-state](../../../ir-empty-state)
 - [ir-dialog](../../../ui/ir-dialog)
 - [ir-custom-button](../../../ui/ir-custom-button)
 
 ### Graph
 ```mermaid
 graph TD;
+  igl-hk-issues-dialog --> ir-empty-state
   igl-hk-issues-dialog --> ir-dialog
   igl-hk-issues-dialog --> ir-custom-button
   igl-cal-body --> igl-hk-issues-dialog

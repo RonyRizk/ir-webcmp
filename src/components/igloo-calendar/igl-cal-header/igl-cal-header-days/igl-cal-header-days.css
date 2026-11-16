@@ -34,7 +34,7 @@
   display: inline-grid;
   height: 20px;
   background-color: var(--wa-color-overlay-inline);
-  border-right: 1px solid var(--wa-color-surface-border);
+  border-inline-end: 1px solid var(--wa-color-surface-border);
   color: var(--wa-color-neutral-on-quiet);
   vertical-align: top;
 }

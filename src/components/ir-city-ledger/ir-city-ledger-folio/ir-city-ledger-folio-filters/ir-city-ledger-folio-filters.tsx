@@ -4,6 +4,7 @@ import type { FolioFilters } from '../types';
 import WaSelect from '@awesome.me/webawesome/dist/components/select/select';
 import { Debounce } from '@/decorators/debounce';
 import { z } from 'zod';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-city-ledger-folio-filters',
@@ -30,11 +31,11 @@ export class IrCityLedgerFolioFilters {
   }
 
   private statuses = [
-    { value: 'all', label: 'All entries' },
-    { value: 'billed', label: 'Billed' },
-    { value: 'held', label: 'Held' },
-    { value: 'unbilled', label: 'Unbilled' },
-    { value: 'unbilled&checkedOut', label: 'Unbilled checkouts' },
+    { value: 'all', label: t('Lcz_AllEntries', { fallback: 'All entries' }) },
+    { value: 'billed', label: t('Lcz_Billed', { fallback: 'Billed' }) },
+    { value: 'held', label: t('Lcz_Held', { fallback: 'Held' }) },
+    { value: 'unbilled', label: t('Lcz_Unbilled', { fallback: 'Unbilled' }) },
+    { value: 'unbilled&checkedOut', label: t('Lcz_UnbilledCheckouts', { fallback: 'Unbilled checkouts' }) },
   ];
 
   private emitFilters() {
@@ -96,7 +97,7 @@ export class IrCityLedgerFolioFilters {
                 this.statusFilter = 'all';
                 this.emitFilters();
               }}
-              placeholder="Status"
+              placeholder={t('Lcz_Status', { fallback: 'Status' })}
               size="s"
               withClear
             >
@@ -135,7 +136,7 @@ export class IrCityLedgerFolioFilters {
                 })
               }
               value={this.searchQuery}
-              placeholder="Booking# or doc number"
+              placeholder={t('Lcz_BookingOrDocNumberPlaceholder', { fallback: 'Booking# or doc number' })}
               withClear
             >
               <wa-icon name="magnifying-glass" slot="start" class="filters-bar__search-icon"></wa-icon>
@@ -150,7 +151,7 @@ export class IrCityLedgerFolioFilters {
           <div class="filters-bar__actions">
             <ir-custom-button loading={this.isExporting} appearance="outlined" disabled={!this.dates.from && !this.dates.to} onClickHandler={() => this.exportFolio.emit()}>
               <wa-icon name="download" slot="start"></wa-icon>
-              <span>Export</span>
+              <span>{t('Lcz_Export', { fallback: 'Export' })}</span>
             </ir-custom-button>
             {/* <wa-dropdown>
               <wa-dropdown-item value="csv">
@@ -169,7 +170,7 @@ export class IrCityLedgerFolioFilters {
             </wa-dropdown> */}
 
             <ir-custom-button variant="brand" appearance="outlined" onClickHandler={() => this.addEntry.emit()}>
-              Add Entry
+              {t('Lcz_AddEntry', { fallback: 'Add Entry' })}
             </ir-custom-button>
           </div>
         </div>

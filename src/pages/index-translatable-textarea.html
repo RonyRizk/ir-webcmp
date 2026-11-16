@@ -1,0 +1,140 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Translatable Textarea</title>
+    <script type="module" src="/build/ir-webcmp.esm.js"></script>
+    <script nomodule src="/build/ir-webcmp.js"></script>
+    <link rel="stylesheet" href="/build/ir-webcmp.css" />
+    <style>
+      body {
+        overflow-x: hidden;
+        margin: 0;
+        font-family: var(--wa-font-family-body, system-ui, sans-serif);
+        background: var(--wa-color-surface-lowered, #f6f7f9);
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-inline-size: 44rem;
+        margin-inline: auto;
+        padding: 1.5rem 1rem 4rem;
+      }
+
+      section {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        background: var(--wa-color-surface-default, #fff);
+        border: 1px solid var(--wa-color-surface-border, #e3e5e8);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      pre {
+        margin: 0;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        background: var(--wa-color-surface-lowered, #f6f7f9);
+        font-size: 0.75rem;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h2>Empty</h2>
+        <ir-translatable-textarea
+          id="empty"
+          label="Room description"
+          hint="Shown to guests on the booking engine."
+          placeholder="Describe the room…"
+          with-count
+          maxlength="500"
+        ></ir-translatable-textarea>
+        <pre data-output="empty">{}</pre>
+      </section>
+
+      <section>
+        <h2>Prefilled (en + fr)</h2>
+        <ir-translatable-textarea id="prefilled" label="Cancellation policy"></ir-translatable-textarea>
+        <pre data-output="prefilled"></pre>
+      </section>
+
+      <section>
+        <h2>Disabled</h2>
+        <ir-translatable-textarea id="disabled" label="Read-only terms" disabled></ir-translatable-textarea>
+      </section>
+
+      <section>
+        <h2>Inside a form</h2>
+        <form id="demo-form">
+          <ir-translatable-textarea id="in-form" name="description" label="Description" rows="3"></ir-translatable-textarea>
+          <div class="actions" style="margin-block-start: 0.75rem">
+            <wa-button type="submit" variant="brand" size="s">Submit</wa-button>
+            <wa-button type="reset" appearance="outlined" size="s">Reset</wa-button>
+          </div>
+        </form>
+        <pre data-output="in-form">Submit to see FormData</pre>
+      </section>
+    </main>
+
+    <script>
+      const LANGUAGES = [
+        { code: 'en' },
+        { code: 'fr' },
+        { code: 'es' },
+        { code: 'de' },
+        { code: 'it' },
+        { code: 'ar' },
+        { code: 'he' },
+        { code: 'el' },
+        { code: 'ru' },
+        { code: 'zh-CN', label: 'Chinese (Simplified)' },
+        { code: 'ja' },
+        { code: 'pt-BR' },
+      ];
+
+      const print = (id, value) => {
+        const out = document.querySelector(`[data-output="${id}"]`);
+        if (out) out.textContent = JSON.stringify(value, null, 2);
+      };
+
+      customElements.whenDefined('ir-translatable-textarea').then(() => {
+        document.querySelectorAll('ir-translatable-textarea').forEach(el => {
+          el.languages = LANGUAGES;
+          el.addEventListener('valueChange', e => print(el.id, e.detail.value));
+        });
+
+        const prefilled = document.getElementById('prefilled');
+        prefilled.value = {
+          en: 'Free cancellation up to 48 hours before arrival.\nAfter that, the first night is charged.',
+          fr: "Annulation gratuite jusqu'à 48 heures avant l'arrivée.",
+        };
+        print('prefilled', prefilled.value);
+
+        document.getElementById('disabled').value = { en: 'All rates include VAT.', de: 'Alle Preise inkl. MwSt.' };
+
+        document.getElementById('demo-form').addEventListener('submit', e => {
+          e.preventDefault();
+          const data = Object.fromEntries(new FormData(e.target).entries());
+          print('in-form', { ...data, description: JSON.parse(data.description ?? '{}') });
+        });
+      });
+    </script>
+  </body>
+</html>

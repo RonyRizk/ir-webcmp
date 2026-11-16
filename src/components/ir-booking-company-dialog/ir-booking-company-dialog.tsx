@@ -2,6 +2,7 @@ import { Component, Event, EventEmitter, h, Method, Prop, State } from '@stencil
 import { Booking } from '@/models/booking.dto';
 import { v4 } from 'uuid';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-company-dialog',
   styleUrl: 'ir-booking-company-dialog.css',
@@ -35,7 +36,7 @@ export class IrBookingCompanyDialog {
           e.stopImmediatePropagation();
           this.closeCompanyForm();
         }}
-        label="Company"
+        label={t('Lcz_Company', { fallback: 'Company' })}
         id="dialog-overview"
       >
         {this.open && (
@@ -53,10 +54,10 @@ export class IrBookingCompanyDialog {
         )}
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button type="submit" form={formId} loading={isRequestPending('/DoReservation')} size="m" variant="brand">
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

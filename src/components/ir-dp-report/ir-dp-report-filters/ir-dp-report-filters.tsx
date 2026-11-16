@@ -2,6 +2,8 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import moment from 'moment';
 import dp_report, { updateDpReportFilters } from '@/stores/dp_report.store';
 import { QuickDatePreset } from '@/components/ui/ir-date-range-filter/ir-date-range-filter';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-dp-report-filters',
@@ -27,12 +29,12 @@ export class IrDpReportFilters {
    * (see `quickDatesMode="range"` on ir-date-range-filter); picked from the to-side it sets
    * from-date to this anchor *and* to-date to today, producing a complete last-N-days range.
    */
-  private quickDates: QuickDatePreset[] = [
-    { label: '7 Days Ago', getDate: () => moment().subtract(7, 'days') },
-    { label: '14 Days Ago', getDate: () => moment().subtract(14, 'days') },
-    { label: '30 Days Ago', getDate: () => moment().subtract(30, 'days') },
-    { label: '90 Days Ago', getDate: () => moment().subtract(90, 'days') },
-  ];
+  private get quickDates(): QuickDatePreset[] {
+    return [7, 14, 30, 90].map(days => ({
+      label: t('Lcz_DaysAgo', { fallback: '%1 Days Ago', params: [formatCount(days)] }),
+      getDate: () => moment().subtract(days, 'days'),
+    }));
+  }
 
   private handleDatesChanged = (e: CustomEvent<{ from: string | null; to: string | null }>) => {
     e.stopImmediatePropagation();
@@ -64,7 +66,7 @@ export class IrDpReportFilters {
           selectionMode="auto"
           onDatesChanged={this.handleDatesChanged}
         ></ir-date-range-filter>
-        <wa-tooltip for="search-btn">Search</wa-tooltip>
+        <wa-tooltip for="search-btn">{t('Lcz_Search', { fallback: 'Search' })}</wa-tooltip>
         <ir-custom-button id="search-btn" loading={dp_report.isLoading} disabled={dp_report.isLoading} onClickHandler={this.handleSearch} variant="neutral" appearance="outlined">
           <wa-icon name="magnifying-glass"></wa-icon>
         </ir-custom-button>

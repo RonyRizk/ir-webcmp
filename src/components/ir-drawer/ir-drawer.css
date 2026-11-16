@@ -1,5 +1,5 @@
 .ir__drawer {
-  text-align: left !important;
+  text-align: start !important;
 }
 
 .ir__drawer::part(header) {
@@ -14,8 +14,8 @@
 .ir__drawer::part(body) {
   background-color: var(--ir-drawer-background-color, var(--wa-color-surface-default));
   padding: 0;
-  padding-left: var(--ir-drawer-padding-left, var(--spacing));
-  padding-right: var(--ir-drawer-padding-right, var(--spacing));
+  padding-inline-start: var(--ir-drawer-padding-inline-start, var(--ir-drawer-padding-left, var(--spacing)));
+  padding-inline-end: var(--ir-drawer-padding-inline-end, var(--ir-drawer-padding-right, var(--spacing)));
   padding-top: var(--ir-drawer-padding-top, var(--spacing));
   padding-bottom: var(--ir-drawer-padding-bottom, var(--spacing));
 }

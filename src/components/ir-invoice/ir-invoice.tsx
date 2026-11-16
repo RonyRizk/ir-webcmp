@@ -5,7 +5,10 @@ import { BookingInvoiceInfo, ViewMode } from './types';
 import { IssueInvoiceProps } from '@/components';
 import calendar_data from '@/stores/calendar-data';
 import moment from 'moment';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
+import { t } from '@/services/locale/t';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
 @Component({
   tag: 'ir-invoice',
@@ -111,15 +114,35 @@ export class IrInvoice {
   @State() isLoading: boolean;
 
   private _id = `invoice-form__${v4()}`;
-  private tokenService = new Token();
+  private apiClientService = new ApiClient();
 
   componentWillLoad() {
+    if (this.open) {
+      this.loadLocaleTables();
+    }
     if (this.booking) {
       if (moment().isBefore(moment(this.booking.from_date, 'YYYY-MM-DD'), 'dates') && this.viewMode === 'invoice') {
         this.viewMode = 'proforma';
       }
     }
   }
+  @Watch('open')
+  handleOpenChange(open: boolean) {
+    if (open) {
+      this.loadLocaleTables();
+    }
+  }
+
+  /**
+   * Self-loading leaf: the fiscal-document previews and confirm dialogs under this
+   * drawer speak `_FINANCIALS`, which hosts like the calendar and departures never load.
+   * Deferred until the drawer opens — hosts mount it closed at first render, before
+   * they have a ticket, so an eager load in `componentWillLoad` would go out unauthenticated.
+   */
+  private loadLocaleTables() {
+    void LocaleController.load({ tables: SCREEN_TABLES.invoice });
+  }
+
   @Watch('booking')
   handleBookingChange() {
     if (!this.booking) {
@@ -141,7 +164,7 @@ export class IrInvoice {
             '--ir-drawer-padding-top': 'var(--spacing)',
             '--ir-drawer-padding-bottom': 'var(--spacing)',
           }}
-          label="Issue Invoice"
+          label={t('Lcz_IssueInvoice', { fallback: 'Issue Invoice' })}
           open={this.open}
           onDrawerHide={e => {
             e.stopImmediatePropagation();
@@ -161,7 +184,7 @@ export class IrInvoice {
                 }
               }}
             >
-              Proforma
+              {t('Lcz_Proforma', { fallback: 'Proforma' })}
             </wa-switch>
           </div>
 
@@ -188,7 +211,7 @@ export class IrInvoice {
                 this.closeDrawer();
               }}
             >
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             {/* <ir-custom-button value="pro_forma" type="submit" size="m" class="w-100 flex-fill" appearance="outlined" variant="neutral" form={this._id}>
               Proforma invoice
@@ -204,7 +227,7 @@ export class IrInvoice {
               variant="brand"
               id={`confirm-btn_${this._id}`}
             >
-              Confirm
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
           {/* <ir-preview-screen-dialog
@@ -220,7 +243,7 @@ export class IrInvoice {
             <ir-proforma-invoice-preview invoice={this.invoice} property={calendar_data.property as any} booking={this.booking}></ir-proforma-invoice-preview>
           </ir-preview-screen-dialog> */}
         </ir-drawer>
-        <ir-fiscal-document-preview mode="all" ticket={this.tokenService.getToken()} propertyId={calendar_data?.property?.id}></ir-fiscal-document-preview>
+        <ir-fiscal-document-preview mode="all" ticket={this.apiClientService.getToken()} propertyId={calendar_data?.property?.id}></ir-fiscal-document-preview>
       </Host>
     );
   }

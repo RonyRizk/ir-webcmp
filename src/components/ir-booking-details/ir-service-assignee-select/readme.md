@@ -7,11 +7,11 @@
 
 ## Properties
 
-| Property       | Attribute       | Description                                    | Type                                          | Default             |
-| -------------- | --------------- | ---------------------------------------------- | --------------------------------------------- | ------------------- |
-| `agent`        | --              | The agent to assign the service to.            | `{ id: number; name: string; code: string; }` | `undefined`         |
-| `assigneeType` | `assignee-type` | Currently selected service assignee type.      | `"agent" \| "guest"`                          | `'agent'`           |
-| `label`        | `label`         | Label displayed above the assignment selector. | `string`                                      | `'Assign to folio'` |
+| Property       | Attribute       | Description                                    | Type                                          | Default     |
+| -------------- | --------------- | ---------------------------------------------- | --------------------------------------------- | ----------- |
+| `agent`        | --              | The agent to assign the service to.            | `{ id: number; name: string; code: string; }` | `undefined` |
+| `assigneeType` | `assignee-type` | Currently selected service assignee type.      | `"agent" \| "guest"`                          | `'agent'`   |
+| `label`        | `label`         | Label displayed above the assignment selector. | `string`                                      | `undefined` |
 
 
 ## Events

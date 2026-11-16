@@ -1,15 +1,13 @@
 # ir-hk-operations-card
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property      | Attribute | Description | Type         | Default |
-| ------------- | --------- | ----------- | ------------ | ------- |
-| `frequencies` | --        |             | `IEntries[]` | `[]`    |
+| Property      | Attribute | Description | Type             | Default |
+| ------------- | --------- | ----------- | ---------------- | ------- |
+| `frequencies` | --        |             | `SetupEntries[]` | `[]`    |
 
 
 ## Dependencies

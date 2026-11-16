@@ -24,6 +24,7 @@ booking whose stay covers the selected day reloads the stats plus cancellations.
 
 | Property     | Attribute    | Description                                                    | Type     | Default     |
 | ------------ | ------------ | -------------------------------------------------------------- | -------- | ----------- |
+| `baseUrl`    | `base-url`   |                                                                | `string` | `undefined` |
 | `baseurl`    | `baseurl`    | API base URL override.                                         | `string` | `undefined` |
 | `language`   | `language`   | Two-letter language code used for translations and API locale. | `string` | `'en'`      |
 | `p`          | `p`          | Property alias (aname), used when `propertyid` is missing.     | `string` | `undefined` |

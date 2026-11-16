@@ -1,5 +1,6 @@
 import { Booking } from '@/models/booking.dto';
 import { Component, Event, EventEmitter, Method, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-booking-source-editor-dialog',
@@ -27,7 +28,7 @@ export class IrBookingSourceEditorDialog {
   render() {
     return (
       <ir-dialog
-        label="Change Booking Source"
+        label={t('Lcz_ChangeBookingSource', { fallback: 'Change Booking Source' })}
         onIrDialogHide={e => {
           e.stopImmediatePropagation();
           e.stopPropagation();
@@ -48,10 +49,10 @@ export class IrBookingSourceEditorDialog {
 
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button size="m" data-dialog="close" appearance="filled" variant="neutral">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button type="submit" form={`change-source-form-${this.booking?.booking_nbr}`} size="m" appearance="accent" variant="brand" loading={this.isLoading}>
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

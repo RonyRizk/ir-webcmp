@@ -11,6 +11,10 @@
 .message-label {
   font-size: 80%;
 }
+/* `Lcz_Adults` is lower case; the placeholder shows it as "Adults". */
+.fd-book-property__adults-select::part(display-input) {
+  text-transform: capitalize;
+}
 .fd-book-property__constraints-container,
 .fd-book-property__header-container {
   display: flex;
@@ -43,4 +47,10 @@
 
 /*2xl*/
 @media (min-width: 1536px) {
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-end {
+  text-align: end;
 }

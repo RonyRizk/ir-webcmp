@@ -9,6 +9,7 @@
 
 | Property     | Attribute    | Description | Type     | Default     |
 | ------------ | ------------ | ----------- | -------- | ----------- |
+| `language`   | `language`   |             | `string` | `'en'`      |
 | `propertyid` | `propertyid` |             | `string` | `undefined` |
 | `ticket`     | `ticket`     |             | `string` | `undefined` |
 

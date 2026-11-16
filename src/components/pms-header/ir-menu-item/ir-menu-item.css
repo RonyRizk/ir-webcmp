@@ -48,6 +48,6 @@
   color: var(--wa-color-primary-600, var(--wa-color-primary-text, #2563eb));
 }
 .menu-item__link--clickable {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-inline-start: 1rem;
+  padding-inline-end: 1rem;
 }

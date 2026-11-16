@@ -6,6 +6,8 @@ import { getUnassignedUnitsCountForDate, isUnassignedUnitsDateLoading } from '@/
 import { DayUseBookings } from '@/components';
 import { RoomListItem } from './types';
 
+import { t } from '@/services/locale/t';
+import { isRtlDirection } from '@/utils/direction';
 @Component({
   tag: 'igl-cal-header',
   styleUrl: 'igl-cal-header.css',
@@ -83,7 +85,7 @@ export class IglCalHeader {
       FROM_DATE: from_date,
       TO_DATE: to_date,
       roomsInfo: this.calendarData.roomsInfo,
-      TITLE: locales.entries.Lcz_NewBooking,
+      TITLE: t('Lcz_NewBooking', { fallback: 'New Booking' }),
       event_type: 'PLUS_BOOKING',
       legendData: this.calendarData.formattedLegendData,
       defaultDateRange: {
@@ -125,7 +127,7 @@ export class IglCalHeader {
 
   render() {
     return (
-      <Host>
+      <Host dir={isRtlDirection(locales.direction) ? 'rtl' : 'ltr'}>
         <igl-cal-header-toolbar
           isVacationRental={this.calendarData.is_vacation_rental}
           showDayUseButton={!this.calendarData.is_vacation_rental && this.dayUseBookings?.length > 0}

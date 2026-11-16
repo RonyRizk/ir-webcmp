@@ -1,4 +1,6 @@
 import { Component, Prop, Event, EventEmitter, Watch, h, Fragment } from '@stencil/core';
+import { t } from '@/services/locale/t';
+import { formatNumber } from '@/utils/number';
 
 /**
  * Interface for pagination range display
@@ -148,7 +150,7 @@ export class IrPagination {
     const from = Math.max(this.showing.from, 1);
     const to = Math.min(this.showing.to, this.total);
 
-    return `${'View'} ${from} - ${to} ${'of'} ${this.total} ${this.recordLabel}`;
+    return `${t('Lcz_View', { fallback: 'View' })} ${formatNumber(from)} - ${formatNumber(to)} ${t('Lcz_Of', { fallback: 'of' })} ${formatNumber(this.total)} ${this.recordLabel}`;
   }
 
   /**
@@ -225,7 +227,7 @@ export class IrPagination {
           'pagination-container--disabled': this.disabled,
         }}
         role="navigation"
-        aria-label="Pagination Navigation"
+        aria-label={t('Lcz_PaginationNavigation', { fallback: 'Pagination Navigation' })}
       >
         {this.showTotalRecords && (
           <p class="pagination-info" aria-live="polite">
@@ -238,14 +240,14 @@ export class IrPagination {
               value={String(this.pageSize)}
               class="pagination__current-page-select"
               onchange={e => this.handlePageSizeChange(+(e.target as any).value)}
-              aria-label={`Current page ${this.currentPage} of ${this.pages}`}
+              aria-label={t('Lcz_CurrentPageOfPages', { fallback: `Current page ${this.currentPage} of ${this.pages}`, params: [this.currentPage, this.pages] })}
               disabled={this.disabled}
               size="s"
               defaultValue={String(this.pageSize)}
             >
               {this.pageSizes.map(size => (
                 <wa-option value={size.toString()} key={`page-size-${this.recordLabel}-${size}`}>
-                  {size}
+                  {formatNumber(size)}
                 </wa-option>
               ))}
             </wa-select>
@@ -266,33 +268,33 @@ export class IrPagination {
                 variant="neutral"
                 appearance="plain"
                 disabled={isFirstPage || this.disabled}
-                aria-label="Go to previous page"
+                aria-label={t('Lcz_GoToPreviousPage', { fallback: 'Go to previous page' })}
               >
-                <wa-icon name="angle-left" label="Go to previous page"></wa-icon>
+                <wa-icon class="ir-flip-rtl" name="angle-left" label={t('Lcz_GoToPreviousPage', { fallback: 'Go to previous page' })}></wa-icon>
               </ir-custom-button>
               <wa-select
                 value={this.currentPage?.toString()}
                 class="pagination__current-page-select"
                 onchange={e => this.handlePageChange(+(e.target as any).value, 'direct')}
-                aria-label={`Current page ${this.currentPage} of ${this.pages}`}
+                aria-label={t('Lcz_CurrentPageOfPages', { fallback: `Current page ${this.currentPage} of ${this.pages}`, params: [this.currentPage, this.pages] })}
                 disabled={this.disabled}
                 size="s"
                 defaultValue={this.currentPage ? this.currentPage?.toString() : '1'}
               >
                 {Array.from(Array(this.pages), (_, i) => i + 1).map(i => (
                   <wa-option value={i.toString()} key={`${this.recordLabel}-${i}`}>
-                    {i}
+                    {formatNumber(i)}
                   </wa-option>
                 ))}
               </wa-select>
               <ir-custom-button
-                aria-label="Go to next page"
+                aria-label={t('Lcz_GoToNextPage', { fallback: 'Go to next page' })}
                 onClickHandler={() => this.handlePageChange(this.currentPage + 1, 'next')}
                 disabled={isLastPage || this.disabled}
                 variant="neutral"
                 appearance="plain"
               >
-                <wa-icon name="angle-right" label="Go to next page"></wa-icon>
+                <wa-icon class="ir-flip-rtl" name="angle-right" label={t('Lcz_GoToNextPage', { fallback: 'Go to next page' })}></wa-icon>
               </ir-custom-button>
               {/* <ir-custom-button
                 onClickHandler={() => this.handlePageChange(this.pages, 'last')}

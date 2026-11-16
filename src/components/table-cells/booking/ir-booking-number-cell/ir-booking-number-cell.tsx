@@ -1,5 +1,6 @@
 import { Booking } from '@/models/booking.dto';
 import { Component, Event, EventEmitter, Host, Prop, h } from '@stencil/core';
+import { formatBookingNumber } from '@/utils/number';
 
 @Component({
   tag: 'ir-booking-number-cell',
@@ -32,11 +33,11 @@ export class IrBookingNumberCell {
               {this.bookingNumber}
             </ir-custom-button> */}
             <button class="booking-nbr-cell__button" onClick={() => this.openBookingDetails.emit(this.bookingNumber)}>
-              {this.bookingNumber}
+              {formatBookingNumber(this.bookingNumber)}
             </button>
           </div>
           <p part="booking-reference" class="booking-nbr-cell__channel_nbr">
-            {this.channelBookingNumber ? this.channelBookingNumber : this.origin.Label}
+            {this.channelBookingNumber ? formatBookingNumber(this.channelBookingNumber) : this.origin.Label}
           </p>
         </div>
       </Host>

@@ -12,12 +12,12 @@
 
 /* #region head */
 .fiscal-table__heading:last-child {
-  border-right: 0;
+  border-inline-end: 0;
 }
 
 .fiscal-table__heading--numeric,
 .fiscal-table__cell--numeric {
-  text-align: right !important;
+  text-align: end !important;
 }
 .ir-table-row.--is-draft > td {
   background-color: var(--wa-color-warning-fill-quiet) !important;

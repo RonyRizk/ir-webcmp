@@ -1,7 +1,8 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 import { IDateModifiers, IDateModifierOptions } from './ir-custom-date-range.types';
-import moment, { Moment } from 'moment/min/moment-with-locales';
-import { getAbbreviatedWeekdays } from './utils';
+import moment, { Moment } from 'moment';
+import { formatDate, getMonthLabel, getWeekdayLabels } from '@/utils/date';
 
 /**
  * @component ir-custom-date-range
@@ -49,15 +50,15 @@ export class IrCustomDateRange {
   @Prop() showPrice = false;
 
   /**
-   * BCP-47 locale tag used to localise day names and month formatting.
+   * BCP-47 locale tag used to localise day names and month formatting. Leave unset to follow the
+   * nearest `lang` ancestor (see `locale-scope.ts`), then the app's language.
    * @reflect
    */
-  @Prop({ reflect: true }) locale: string = 'en';
+  @Prop({ reflect: true }) locale?: string;
 
   @State() private selectedDates: { start: Moment | null; end: Moment | null } = { start: moment(), end: moment() };
   @State() private displayedDaysArr: { month: Moment; days: Moment[] }[] = [];
   @State() private hoveredDate: Moment | null = null;
-  @State() private weekdays: string[] = [];
 
   /**
    * Emits the selected start and end dates as native `Date` objects.
@@ -66,21 +67,11 @@ export class IrCustomDateRange {
   @Event({ bubbles: true, composed: true }) dateChange: EventEmitter<{ start: Date | null; end: Date | null }>;
 
   componentWillLoad() {
-    this.weekdays = getAbbreviatedWeekdays(this.locale);
     this.resetHours();
     this.selectedDates = { start: this.fromDate, end: this.toDate };
     const currentMonth = this.fromDate ? this.fromDate.clone() : moment();
     const nextMonth = currentMonth.clone().add(1, 'month');
     this.displayedDaysArr = [this.getMonthDays(currentMonth), this.getMonthDays(nextMonth)];
-  }
-
-  /** Re-localises weekday names when the locale changes. */
-  @Watch('locale')
-  handleLocale(newValue: string, oldLocale: string) {
-    if (newValue !== oldLocale) {
-      moment.locale(newValue);
-      this.weekdays = getAbbreviatedWeekdays(newValue);
-    }
   }
 
   /** Syncs the internal selection start when `fromDate` prop changes. */
@@ -258,7 +249,7 @@ export class IrCustomDateRange {
                   <div part="month-navigation" class="month-navigation">
                     {index === 0 && this.displayedDaysArr[0].month.clone().startOf('month').isAfter(this.minDate) && (
                       <button part="nav-prev" name="previous month" class="navigation-buttons previous-month" type="button" onClick={this.goToPreviousMonth.bind(this)}>
-                        <p class="sr-only">previous month</p>
+                        <p class="sr-only">{t('Lcz_PreviousMonth', { fallback: 'previous month' })}</p>
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="25.6" viewBox="0 0 320 512">
                           <path
                             fill="currentColor"
@@ -268,11 +259,11 @@ export class IrCustomDateRange {
                       </button>
                     )}
                     <span part="month-label" class="month-year-label">
-                      {month.month.locale(this.locale ?? 'en').format('MMMM YYYY')}
+                      {getMonthLabel(month.month.toDate(), { style: 'long', locale: this.locale })}
                     </span>
                     {index === 0 && (
                       <button part="nav-next" name="next month" class="navigation-buttons button-next" type="button" onClick={this.goToNextMonth.bind(this)}>
-                        <p class="sr-only">next month</p>
+                        <p class="sr-only">{t('Lcz_NextMonth', { fallback: 'next month' })}</p>
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="25.6" viewBox="0 0 320 512">
                           <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z" />
                         </svg>
@@ -280,7 +271,7 @@ export class IrCustomDateRange {
                     )}
                     {index === 1 && this.displayedDaysArr[1].month.clone().endOf('month').isBefore(this.maxDate) && (
                       <button part="nav-next" name="next month" class="navigation-buttons button-next-main" type="button" onClick={this.goToNextMonth.bind(this)}>
-                        <p class="sr-only">next month</p>
+                        <p class="sr-only">{t('Lcz_NextMonth', { fallback: 'next month' })}</p>
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="25.6" viewBox="0 0 320 512">
                           <path
                             fill="currentColor"
@@ -293,7 +284,7 @@ export class IrCustomDateRange {
                 </th>
               </tr>
               <tr part="weekday-row" class="weekday-header" role="row">
-                {this.weekdays.map(weekday => (
+                {getWeekdayLabels({ locale: this.locale }).map(weekday => (
                   <th part="weekday" class="weekday-name" key={weekday}>
                     {weekday.replace('.', '')}
                   </th>
@@ -333,9 +324,11 @@ export class IrCustomDateRange {
                                 this.selectDay(day);
                               }}
                               style={checkedDate?.disabled && this.selectedDates.start && { cursor: 'pointer' }}
-                              title={checkedDate?.disabled ? 'No availability' : ''}
+                              title={checkedDate?.disabled ? t('Lcz_NoAvailability', { fallback: 'No availability' }) : ''}
                               aria-unavailable={checkedDate?.disabled ? 'true' : 'false'}
-                              aria-label={`${day.format('dddd, MMMM Do YYYY')} ${isDayBeforeMinDate || isDayAfterMaxDate ? 'Not available' : ''}`}
+                              aria-label={`${formatDate(day.toDate(), { style: 'weekday-medium', locale: this.locale })} ${
+                                isDayBeforeMinDate || isDayAfterMaxDate ? t('Lcz_NotAvailableStatus', { fallback: 'Not available' }) : ''
+                              }`}
                               aria-disabled={isDayBeforeMinDate || isDayAfterMaxDate || checkedDate?.disabled ? 'true' : 'false'}
                               aria-selected={(this.selectedDates.start && isDaySameStart) || isDaySelected || (this.selectedDates.end && isDaySameEnd)}
                               class={{
@@ -345,7 +338,7 @@ export class IrCustomDateRange {
                                 'highlight': isDaySelected && !isDaySameStart,
                               }}
                             >
-                              <p class={`day ${day.isSame(moment(), 'day') ? 'current-date' : ''}`}>{day.locale(this.locale).format('D')}</p>
+                              <p class={`day ${day.isSame(moment(), 'day') ? 'current-date' : ''}`}>{formatDate(day.toDate(), { style: 'day-only', locale: this.locale })}</p>
                               {this.showPrice && <p class="price">{checkedDate?.withPrice.price ? '_' : checkedDate.withPrice.price}</p>}
                             </button>
                           )}

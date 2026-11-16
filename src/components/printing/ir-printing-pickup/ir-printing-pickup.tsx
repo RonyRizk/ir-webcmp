@@ -2,7 +2,8 @@ import { _formatTime } from '@/components/ir-booking-details/functions';
 import { Booking } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
 import { Component, Prop, h } from '@stencil/core';
-import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-printing-pickup',
@@ -20,16 +21,16 @@ export class IrPrintingPickup {
 
     return (
       <section class="ir-print-pickup">
-        <p class="ir-print-pickup__title">Yes, from {this.pickup.selected_option.location.description}</p>
+        <p class="ir-print-pickup__title">{t('Lcz_PickupConfirmedFrom', { fallback: 'Yes, from %1', params: [this.pickup.selected_option.location.description] })}</p>
 
         <div class="ir-print-pickup__content">
           {/* Arrival info */}
           <div class="ir-print-pickup__row">
-            <ir-printing-label label="Arrival date:" content={moment(this.pickup.date).format('dddd, DD MMM YYYY')} />
+            <ir-printing-label label={t('Lcz_ArrivalDateLabel', { fallback: 'Arrival date:' })} content={formatDate(this.pickup.date, 'dddd, DD MMM YYYY')} />
 
-            <ir-printing-label label="Arrival time:" content={_formatTime(this.pickup.hour.toString(), this.pickup.minute.toString())} />
+            <ir-printing-label label={`${t('Lcz_ArrivalTime', { fallback: 'Arrival time' })}:`} content={_formatTime(this.pickup.hour.toString(), this.pickup.minute.toString())} />
 
-            <ir-printing-label label="Flight details:" content={this.pickup.details} />
+            <ir-printing-label label={t('Lcz_FlightDetailsLabel', { fallback: 'Flight details:' })} content={this.pickup.details} />
           </div>
 
           {/* Vehicle & pricing */}
@@ -40,9 +41,9 @@ export class IrPrintingPickup {
               {formatAmount(this.pickup.selected_option.currency.symbol, this.pickup.selected_option.amount)}
             </p>
 
-            <ir-printing-label label="Number of vehicles:" content={this.pickup.nbr_of_units?.toString()} />
+            <ir-printing-label label={t('Lcz_NumberOfVehiclesLabel', { fallback: 'Number of vehicles:' })} content={this.pickup.nbr_of_units?.toString()} />
 
-            <ir-printing-label label="Due upon booking:" content={formatAmount(this.pickup.currency.symbol, this.pickup.total)} />
+            <ir-printing-label label={t('Lcz_DueUponBookingLabel', { fallback: 'Due upon booking:' })} content={formatAmount(this.pickup.currency.symbol, this.pickup.total)} />
           </div>
         </div>
       </section>

@@ -20,7 +20,7 @@
 }
 .booking-roomtype-title {
   font-size: 1.25rem;
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
   margin: 0;
   padding: 0;
 }
@@ -48,7 +48,7 @@
 }
 
 .booking-tooltip {
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
   margin: 0;
   padding: 0;
 }

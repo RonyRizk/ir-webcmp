@@ -2,6 +2,8 @@ import { Booking, IUnit, Property } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
 import { Component, Fragment, Prop, h } from '@stencil/core';
 import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-print-room',
@@ -43,8 +45,8 @@ export class IrPrintRoom {
   private formatDate(date: string | Date) {
     const m = moment(date, 'YYYY-MM-DD');
 
-    const dayMonth = m.format('DD/MM');
-    let dayOfWeekAbbr = m.format('ddd'); // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    const dayMonth = formatDate(m, 'DD/MM');
+    let dayOfWeekAbbr = formatDate(m, 'ddd'); // Mon, Tue, Wed, Thu, Fri, Sat, Sun
 
     if (['Thu', 'Sun', 'Sat'].includes(dayOfWeekAbbr)) {
       dayOfWeekAbbr = dayOfWeekAbbr.slice(0, 2);
@@ -67,9 +69,9 @@ export class IrPrintRoom {
     const infantCount = infant_nbr > 0 ? infant_nbr : 0;
 
     // Define labels based on singular/plural rules
-    const adultLabel = adultCount > 1 ? 'adults' : 'adult';
-    const childLabel = childCount > 1 ? 'children' : 'child';
-    const infantLabel = infantCount > 1 ? 'infants' : 'infant';
+    const adultLabel = adultCount > 1 ? t('Lcz_Adults', { fallback: 'adults' }) : t('Lcz_Adult', { fallback: 'adult' });
+    const childLabel = childCount > 1 ? t('Lcz_Children', { fallback: 'Children' }) : t('Lcz_Child', { fallback: 'Child' });
+    const infantLabel = infantCount > 1 ? t('Lcz_InfantsLabel', { fallback: 'infants' }) : t('Lcz_InfantSingular', { fallback: 'infant' });
 
     // Construct parts with the updated child number
     const parts = [];
@@ -85,7 +87,7 @@ export class IrPrintRoom {
     return parts.join('&nbsp&nbsp&nbsp&nbsp');
   }
   private formatBookingDates(date: string) {
-    return moment(date, 'YYYY-MM-DD').format('DD-MMM-YYYY');
+    return formatDate(date, 'DD-MMM-YYYY');
   }
   private renderTaxSection() {
     // OTA booking taxes
@@ -95,7 +97,7 @@ export class IrPrintRoom {
       return filteredData.map((d, index) => (
         <div key={`room_${d.name}_${index}`} class="ir-print-room__tax-row">
           <p class="ir-print-room__tax-label">
-            {d.is_exlusive ? 'Excluding' : 'Including'} {d.name}
+            {d.is_exlusive ? t('Lcz_Excluding', { fallback: 'Excluding' }) : t('Lcz_Including', { fallback: 'Including' })} {d.name}
           </p>
           <p class="ir-print-room__tax-amount">
             {d.currency.symbol}
@@ -116,7 +118,7 @@ export class IrPrintRoom {
           return (
             <div key={`direct_room_${d.name}_${index}`} class="ir-print-room__tax-row">
               <p class="ir-print-room__tax-label">
-                {d.is_exlusive ? 'Excluding' : 'Including'} {d.name}
+                {d.is_exlusive ? t('Lcz_Excluding', { fallback: 'Excluding' }) : t('Lcz_Including', { fallback: 'Including' })} {d.name}
               </p>
               <p class="ir-print-room__tax-amount">
                 {d.pct}%: {formatAmount(this.currency, amount)}
@@ -126,7 +128,9 @@ export class IrPrintRoom {
         })}
         {this.room.inclusive_taxes?.CALCULATED_INCLUSIVE_TAXES?.map((d, index) => (
           <div key={`direct_room_${d.TAX_NAME}_${index}`} class="ir-print-room__tax-row">
-            <p class="ir-print-room__tax-label">Including {d.TAX_NAME}</p>
+            <p class="ir-print-room__tax-label">
+              {t('Lcz_Including', { fallback: 'Including' })} {d.TAX_NAME}
+            </p>
             <p class="ir-print-room__tax-amount">
               {d.TAX_PCT * 100}%: {formatAmount(this.currency, d.CALCULATED_VALUE)}
             </p>
@@ -146,7 +150,7 @@ export class IrPrintRoom {
         <header class="ir-print-room__header">
           <p class="ir-print-room__room-type">{room?.roomtype?.name}</p>
 
-          {haveMultipleRooms && room?.unit && <p class="ir-print-room__unit">(unit {(room.unit as IUnit).name})</p>}
+          {haveMultipleRooms && room?.unit && <p class="ir-print-room__unit">{t('Lcz_UnitLabel', { fallback: '(unit %1)', params: [(room.unit as IUnit).name] })}</p>}
 
           <p class="ir-print-room__rate-plan">{room?.rateplan?.short_name || room?.rateplan?.name}</p>
         </header>
@@ -155,8 +159,12 @@ export class IrPrintRoom {
         <div class="ir-print-room__body">
           <div class="ir-print-room__details">
             <div class="ir-print-room__row">
-              <ir-printing-label label="Guest Name:" content={this.formatGuestName(room?.sharing_persons?.find(p => p.is_main) ?? room?.guest)} />
-              <ir-printing-label as-html content={this.formatGuestAvailability(room?.occupancy)} />
+              <ir-printing-label
+                class="ir-print-room__label--capitalize"
+                label={`${t('Lcz_GuestName', { fallback: 'Guest name' })}:`}
+                content={this.formatGuestName(room?.sharing_persons?.find(p => p.is_main) ?? room?.guest)}
+              />
+              <ir-printing-label class="ir-print-room__label--lowercase" as-html content={this.formatGuestAvailability(room?.occupancy)} />
             </div>
 
             <div class="ir-print-room__row">
@@ -166,22 +174,26 @@ export class IrPrintRoom {
                 {this.formatBookingDates(room?.to_date)}
               </div>
 
-              {room?.departure_time?.description && <p class="ir-print-room__departure-time">(Expected departure time: {room.departure_time.description})</p>}
+              {room?.departure_time?.description && (
+                <p class="ir-print-room__departure-time">
+                  ({t('Lcz_ExpectedDepartureTimeDialogTitle', { fallback: 'Expected Departure Time' })}: {room.departure_time.description})
+                </p>
+              )}
             </div>
 
-            <ir-printing-label label="Smoking options:" display="inline" content={this.getSmokingLabel()} />
+            <ir-printing-label label={t('Lcz_SmokingOptionsLabel', { fallback: 'Smoking options:' })} display="inline" content={this.getSmokingLabel()} />
 
             {booking?.is_direct && (
               <div class="ir-print-room__policies">
                 <ir-printing-label
-                  label="Cancellation:"
+                  label={t('Lcz_CancellationLabel', { fallback: 'Cancellation:' })}
                   display="inline"
                   asHtml
                   content={room?.rateplan?.cancelation?.replace('<u>', '')?.replace('</u>', '')?.replace('<b>', '<b style="font-weight:bold">')}
                 />
 
                 <ir-printing-label
-                  label="Guarantee:"
+                  label={t('Lcz_GuaranteeLabel', { fallback: 'Guarantee:' })}
                   display="inline"
                   asHtml
                   content={(room?.rateplan?.guarantee ?? '')?.replace('<u>', '')?.replace('</u>', '')?.replace('<b>', '<b style="font-weight:bold">')}
@@ -192,13 +204,15 @@ export class IrPrintRoom {
 
           {/* Totals */}
           <aside class="ir-print-room__totals">
-            <ir-printing-label label="Total:" content={formatAmount(currency, room?.total)} />
+            <ir-printing-label label={`${t('Lcz_Total', { fallback: 'Total' })}:`} content={formatAmount(currency, room?.total)} />
 
             {this.renderTaxSection()}
 
-            <ir-printing-label label="Grand total:" content={formatAmount(currency, room?.gross_total)} />
+            <ir-printing-label label={t('Lcz_GrandTotalLabel', { fallback: 'Grand total:' })} content={formatAmount(currency, room?.gross_total)} />
 
-            {booking?.is_direct && <ir-printing-label label="Due upon booking:" content={formatAmount(currency, Number(room?.gross_guarantee))} />}
+            {booking?.is_direct && (
+              <ir-printing-label label={t('Lcz_DueUponBookingLabel', { fallback: 'Due upon booking:' })} content={formatAmount(currency, Number(room?.gross_guarantee))} />
+            )}
           </aside>
         </div>
 
@@ -212,7 +226,7 @@ export class IrPrintRoom {
           {room?.days?.map(d => (
             <div class="room_amount_container" key={d.date}>
               <p class="room_amount date">{this.formatDate(d.date)}</p>
-              <p class="room_amount amount" style={{ paddingRight: '0.375rem' }}>
+              <p class="room_amount amount" style={{ paddingInlineEnd: '0.375rem' }}>
                 {formatAmount(currency, d.amount)}
               </p>
             </div>

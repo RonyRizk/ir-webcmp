@@ -1,14 +1,17 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { PropertyService } from '@/services/property.service';
 import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { BaseSalesRecord, CountrySalesFilter, MappedCountries, SalesRecord } from './types';
 import moment from 'moment';
 import { v4 } from 'uuid';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { ICountry } from '@/models/IBooking';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-sales-by-country',
   styleUrl: 'ir-sales-by-country.css',
@@ -27,7 +30,7 @@ export class IrSalesByCountry {
   @State() salesFilters: CountrySalesFilter;
   @State() countries: MappedCountries = new Map();
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private roomService = new RoomService();
   private propertyService = new PropertyService();
   private bookingService = new BookingService();
@@ -40,12 +43,28 @@ export class IrSalesByCountry {
     include_previous_year: false,
   };
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.salesByCountry, () => this.initializeApp());
+
   componentWillLoad() {
     this.salesFilters = this.baseFilters;
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -53,12 +72,15 @@ export class IrSalesByCountry {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
   private async initializeApp() {
     try {
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.salesByCountry });
       let propertyId = this.propertyid;
       if (!this.propertyid && !this.p) {
         throw new Error('Property ID or username is required');
@@ -67,19 +89,19 @@ export class IrSalesByCountry {
         const propertyData = await this.roomService.getExposedProperty({
           id: 0,
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
           include_units_hk_status: true,
         });
         propertyId = propertyData.My_Result.id;
       }
       this.property_id = propertyId;
-      const requests = [this.bookingService.getCountries(this.language), this.roomService.fetchLanguage(this.language), this.getCountrySales()];
+      const requests = [this.bookingService.getCountries(LocaleController.language), localeReady, this.getCountrySales()];
       if (this.propertyid) {
         requests.push(
           this.roomService.getExposedProperty({
             id: this.propertyid,
-            language: this.language,
+            language: LocaleController.language,
             is_backend: true,
             include_units_hk_status: true,
           }),
@@ -166,7 +188,7 @@ export class IrSalesByCountry {
     }
     return (
       <Host>
-        <ir-page label="Sales by Country">
+        <ir-page label={t('Lcz_SalesByCountry', { fallback: 'Sales by Country' })}>
           <ir-custom-button
             slot="page-header"
             variant="neutral"
@@ -179,7 +201,7 @@ export class IrSalesByCountry {
             }}
           >
             <wa-icon name="download" slot="start"></wa-icon>
-            {locales.entries?.Lcz_Export}
+            {t('Lcz_Export', { fallback: 'Export' })}
           </ir-custom-button>
           <ir-sales-by-country-summary salesReports={this.salesData}></ir-sales-by-country-summary>
           <div class="sales-content-row">

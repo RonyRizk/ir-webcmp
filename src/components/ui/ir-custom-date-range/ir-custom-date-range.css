@@ -64,8 +64,8 @@ td {
 }
 .month-navigation span {
   padding: 0;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   line-height: 0;
   color: var(--wa-color-text-normal, #1d2939);
   font-size: 16px;
@@ -74,8 +74,8 @@ td {
   font-size: 16px;
   font-weight: 600;
   color: var(--wa-color-text-normal, #1d2939);
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
 }
 
 .navigation-buttons {
@@ -113,32 +113,22 @@ td {
 .button-next-main {
   display: none;
 }
-.button-next-main:dir(ltr),
-.button-next:dir(ltr) {
-  right: 0;
+.button-next-main,
+.button-next {
+  inset-inline-end: 0;
 }
-.button-next-main:dir(rtl),
-.button-next:dir(rtl) {
-  left: 0;
-}
-.previous-month:dir(ltr) {
-  left: 0;
-}
-.previous-month:dir(rtl) {
-  right: 0;
+.previous-month {
+  inset-inline-start: 0;
 }
 
 .margin-right {
-  margin-right: 0;
+  margin-inline-end: 0;
 }
 .margin-left {
-  margin-left: 0;
+  margin-inline-start: 0;
 }
-.margin-horizontal:dir(ltr) {
-  margin-left: var(--cal-button-size, 30px);
-}
-.margin-horizontal:dir(rtl) {
-  margin-right: var(--cal-button-size, 30px);
+.margin-horizontal {
+  margin-inline-start: var(--cal-button-size, 30px);
 }
 /* #endregion */
 
@@ -234,25 +224,17 @@ td {
   background-color: color-mix(in oklab, var(--wa-color-fill-loud, var(--wa-color-brand-fill-loud)), var(--wa-color-mix-hover));
 }
 
-.day-range-start:dir(ltr)::after,
-.day-button:hover.day-range-start:dir(ltr)::after {
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
+/* The range's first day squares the corners facing into the range, the last day the
+   corners facing back — chronological, so the pair mirrors with the calendar. */
+.day-range-start::after,
+.day-button:hover.day-range-start::after {
+  border-start-end-radius: 0px;
+  border-end-end-radius: 0px;
 }
-.day-range-end:dir(ltr)::after,
-.day-button:hover.day-range-end:dir(ltr)::after {
-  border-top-left-radius: 0px;
-  border-bottom-left-radius: 0px;
-}
-.day-range-start:dir(rtl)::after,
-.day-button:hover.day-range-start:dir(rtl)::after {
-  border-top-left-radius: 0px;
-  border-bottom-left-radius: 0px;
-}
-.day-range-end:dir(rtl)::after,
-.day-button:hover.day-range-end:dir(rtl)::after {
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
+.day-range-end::after,
+.day-button:hover.day-range-end::after {
+  border-start-start-radius: 0px;
+  border-end-start-radius: 0px;
 }
 
 .highlight::after {
@@ -316,23 +298,14 @@ td {
     width: var(--cal-button-size, 38px);
     height: var(--cal-button-size, 38px);
   }
-  .margin-horizontal:dir(ltr) {
-    margin-left: var(--cal-button-size, 38px);
+  .margin-horizontal {
+    margin-inline-start: var(--cal-button-size, 38px);
   }
-  .margin-horizontal:dir(rtl) {
-    margin-right: var(--cal-button-size, 38px);
+  .margin-right {
+    margin-inline-end: var(--cal-button-size, 38px);
   }
-  .margin-right:dir(rtl) {
-    margin-left: var(--cal-button-size, 38px);
-  }
-  .margin-right:dir(ltr) {
-    margin-right: var(--cal-button-size, 38px);
-  }
-  .margin-left:dir(ltr) {
-    margin-left: var(--cal-button-size, 38px);
-  }
-  .margin-left:dir(rtl) {
-    margin-right: var(--cal-button-size, 38px);
+  .margin-left {
+    margin-inline-start: var(--cal-button-size, 38px);
   }
 }
 
@@ -343,23 +316,14 @@ td {
     width: var(--cal-button-size, 45px);
     height: var(--cal-button-size, 45px);
   }
-  .margin-horizontal:dir(ltr) {
-    margin-left: var(--cal-button-size, 45px);
+  .margin-horizontal {
+    margin-inline-start: var(--cal-button-size, 45px);
   }
-  .margin-horizontal:dir(rtl) {
-    margin-right: var(--cal-button-size, 45px);
+  .margin-right {
+    margin-inline-end: var(--cal-button-size, 45px);
   }
-  .margin-right:dir(rtl) {
-    margin-left: var(--cal-button-size, 45px);
-  }
-  .margin-right:dir(ltr) {
-    margin-right: var(--cal-button-size, 45px);
-  }
-  .margin-left:dir(ltr) {
-    margin-left: var(--cal-button-size, 45px);
-  }
-  .margin-left:dir(rtl) {
-    margin-right: var(--cal-button-size, 45px);
+  .margin-left {
+    margin-inline-start: var(--cal-button-size, 45px);
   }
 }
 /* #endregion */

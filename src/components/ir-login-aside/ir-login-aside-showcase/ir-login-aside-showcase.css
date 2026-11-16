@@ -1,0 +1,167 @@
+ir-login-aside-showcase {
+  display: block;
+  height: 100%;
+}
+
+.aside-showcase {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: #1e293b;
+}
+
+/* ---------- Slides ---------- */
+.aside-showcase__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+}
+
+/* Sharing one cell lets the two slides overlap during a switch */
+.aside-showcase__slide {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.aside-showcase__slide.is-active {
+  z-index: 1;
+}
+
+.aside-showcase__slide.is-entering {
+  animation: aside-showcase-in 420ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes aside-showcase-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Controls ---------- */
+.aside-showcase__controls {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 0.75rem;
+  inset-inline: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Bars are thin but the button around each is not, so they stay easy to hit */
+.aside-showcase__segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.aside-showcase__track {
+  display: block;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color 160ms ease;
+}
+
+.aside-showcase__fill {
+  display: block;
+  height: 100%;
+  background: #fff;
+  transform-origin: left center;
+  animation: aside-showcase-fill linear forwards;
+}
+
+[dir='rtl'] .aside-showcase__fill {
+  transform-origin: right center;
+}
+
+@keyframes aside-showcase-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Reading or using the panel holds the timer, so nothing moves on from under the viewer */
+.aside-showcase:has(:focus-visible) .aside-showcase__fill {
+  animation-play-state: paused;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .aside-showcase:hover .aside-showcase__fill {
+    animation-play-state: paused;
+  }
+
+  .aside-showcase__segment:hover .aside-showcase__track {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .aside-showcase__loop:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+}
+
+.aside-showcase__loop {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #c3d7f3;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.aside-showcase__loop:active {
+  transform: scale(0.94);
+}
+
+.aside-showcase__loop-icon {
+  transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.aside-showcase__segment:focus-visible,
+.aside-showcase__loop:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* No animation means no timer: the viewer stays on a slide and moves on with the controls */
+@media (prefers-reduced-motion: reduce) {
+  .aside-showcase__slide.is-entering {
+    animation: none;
+  }
+
+  .aside-showcase__fill {
+    animation: none;
+  }
+
+  .aside-showcase__loop-icon {
+    transition: none;
+  }
+}

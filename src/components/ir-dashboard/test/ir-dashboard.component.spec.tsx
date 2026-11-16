@@ -8,10 +8,20 @@ import { newSpecPage, type SpecPage } from '@stencil/core/testing';
 import type { Booking, Room } from '@/models/booking.dto';
 
 // Every service reaches axios (ESM), which this jest setup can't parse, so each one is replaced by a shared mock.
-const mockToken = { setBaseUrl: jest.fn(), setToken: jest.fn() };
-const mockRoomService = { getExposedProperty: jest.fn(), fetchLanguage: jest.fn() };
-const mockBookingService = { getCountries: jest.fn(), getSetupEntriesByTableNameMulti: jest.fn(), groupEntryTablesResult: jest.fn() };
+const mockApiClient = { setBaseUrl: jest.fn(), setApiClient: jest.fn() };
+const mockRoomService = { getExposedProperty: jest.fn() };
+const mockBookingService = { getCountries: jest.fn() };
+const mockSetupService = { getPaymentEntries: jest.fn() };
 const mockListingService = { getExposedBookingsCriteria: jest.fn() };
+/** Like the real controller, `load` seeds the selected language synchronously from the host's `language` prop. */
+const mockLocaleController = {
+  language: 'en',
+  load: jest.fn(({ language }: { language?: string }) => {
+    if (language) mockLocaleController.language = language.toLowerCase();
+    return Promise.resolve();
+  }),
+  subscribe: jest.fn(() => () => {}),
+};
 const mockDashboardService = {
   getDayPerformance: jest.fn(),
   getUnitsSummary: jest.fn(),
@@ -25,10 +35,12 @@ const mockRealtime: { subscribe: jest.Mock; unsubscribe: jest.Mock; handler: (ms
 /** Stand-ins for each BatchingQueue the component creates; tests flush them by hand instead of waiting 3s. */
 const mockQueues: { processor: (items: unknown[]) => Promise<void>; options: Record<string, unknown>; items: unknown[]; clear: jest.Mock }[] = [];
 
-jest.mock('../../../models/Token', () => ({ __esModule: true, default: jest.fn(() => mockToken) }));
+jest.mock('../../../models/ApiClient', () => ({ __esModule: true, default: jest.fn(() => mockApiClient) }));
+jest.mock('../../../services/locale/locale.controller', () => ({ LocaleController: mockLocaleController }));
 jest.mock('../../../services/room.service', () => ({ RoomService: jest.fn(() => mockRoomService) }));
 jest.mock('../../../services/booking-service/booking.service', () => ({ BookingService: jest.fn(() => mockBookingService) }));
-jest.mock('../../../services/booking_listing.service', () => ({ BookingListingService: jest.fn(() => mockListingService) }));
+jest.mock('../../../services/booking-listing', () => ({ BookingListingService: jest.fn(() => mockListingService) }));
+jest.mock('../../../services/setup', () => ({ SetupService: jest.fn(() => mockSetupService) }));
 jest.mock('../../../services/dashboard', () => ({ DashboardService: jest.fn(() => mockDashboardService) }));
 jest.mock('../../../services/realtime/realtime.service', () => ({ realtimeService: { subscribe: (...args: unknown[]) => mockRealtime.subscribe(...args) } }));
 jest.mock('../../../utils/Queue/batch-queue', () => ({
@@ -69,7 +81,6 @@ const booking = (booking_nbr: string, rooms: Partial<Room>[] = [{}]) => ({ booki
 /** Enough of a property for the arrivals / departures store pipelines (canCheckIn reads these flags). */
 const property = (id: number) => ({ id, is_automatic_check_in_out: false, is_frontdesk_enabled: true }) as any;
 
-const SETUP_ENTRIES = [{ TBL_NAME: '_PAY_TYPE' }];
 const PAY_TYPES = [{ CODE_NAME: 'PT1', CODE_VALUE_EN: 'Cash', NOTES: 'CR' }];
 const PAY_GROUPS = [{ CODE_NAME: 'G1' }];
 const PAY_METHODS = [{ CODE_NAME: 'M1' }];
@@ -199,7 +210,8 @@ describe('ir-dashboard', () => {
     // The departures store logs every pipeline run.
     consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.clearAllMocks();
-    Object.values({ ...mockRoomService, ...mockBookingService, ...mockListingService, ...mockDashboardService, ...mockLoaders }).forEach(fn => fn.mockReset());
+    Object.values({ ...mockRoomService, ...mockBookingService, ...mockSetupService, ...mockListingService, ...mockDashboardService, ...mockLoaders }).forEach(fn => fn.mockReset());
+    mockLocaleController.language = 'en';
 
     // Empty the stores first: their setters re-run pipelines that read the property.
     initializeArrivalsStore([]);
@@ -227,9 +239,7 @@ describe('ir-dashboard', () => {
     });
     mockListingService.getExposedBookingsCriteria.mockResolvedValue({ statuses: [{ code: '001' }, { code: '002' }] });
     mockBookingService.getCountries.mockResolvedValue(COUNTRIES);
-    mockRoomService.fetchLanguage.mockResolvedValue(undefined);
-    mockBookingService.getSetupEntriesByTableNameMulti.mockResolvedValue(SETUP_ENTRIES);
-    mockBookingService.groupEntryTablesResult.mockReturnValue({ pay_type: PAY_TYPES, pay_type_group: PAY_GROUPS, pay_method: PAY_METHODS });
+    mockSetupService.getPaymentEntries.mockResolvedValue({ types: PAY_TYPES, groups: PAY_GROUPS, methods: PAY_METHODS });
 
     mockDashboardService.getDayPerformance.mockResolvedValue(PERFORMANCE);
     mockDashboardService.getUnitsSummary.mockResolvedValue(UNITS);
@@ -263,10 +273,10 @@ describe('ir-dashboard', () => {
     it('configures the API and page sizes but loads nothing until it has a ticket', async () => {
       const { page } = await mount({ propertyid: 1, baseurl: 'https://api.test' }, null);
 
-      expect(mockToken.setBaseUrl).toHaveBeenCalledWith('https://api.test');
+      expect(mockApiClient.setBaseUrl).toHaveBeenCalledWith('https://api.test');
       expect(arrivalsStore.pagination.pageSize).toBe(100);
       expect(departuresStore.pagination.pageSize).toBe(100);
-      expect(mockToken.setToken).not.toHaveBeenCalled();
+      expect(mockApiClient.setApiClient).not.toHaveBeenCalled();
       expect(mockRoomService.getExposedProperty).not.toHaveBeenCalled();
       expect(mockLoaders.loadArrivals).not.toHaveBeenCalled();
       expect($(page, '.dashboard-main').getAttribute('aria-busy')).toBe('true');
@@ -278,22 +288,22 @@ describe('ir-dashboard', () => {
       mockLoaders.loadArrivals.mockReturnValue(new Promise(() => {}));
       await newSpecPage({ components: [IrDashboard], html: `<ir-dashboard ticket="abc" propertyid="1"></ir-dashboard>` });
 
-      expect(mockToken.setToken).toHaveBeenCalledWith('abc');
+      expect(mockApiClient.setApiClient).toHaveBeenCalledWith('abc');
       expect(mockRoomService.getExposedProperty).toHaveBeenCalled();
     });
 
     it('reloads when the ticket changes, but not when it is set to the same value', async () => {
       const { page, root } = await mount();
-      mockRoomService.fetchLanguage.mockClear();
+      mockLocaleController.load.mockClear();
 
       root.ticket = 'ticket';
       await flush(page);
-      expect(mockRoomService.fetchLanguage).not.toHaveBeenCalled();
+      expect(mockLocaleController.load).not.toHaveBeenCalled();
 
       root.ticket = 'renewed';
       await flush(page);
-      expect(mockToken.setToken).toHaveBeenLastCalledWith('renewed');
-      expect(mockRoomService.fetchLanguage).toHaveBeenCalledTimes(1);
+      expect(mockApiClient.setApiClient).toHaveBeenLastCalledWith('renewed');
+      expect(mockLocaleController.load).toHaveBeenCalledTimes(1);
     });
 
     it('stops without requesting anything when neither a property id nor an alias is given', async () => {
@@ -313,10 +323,10 @@ describe('ir-dashboard', () => {
       await mount({ propertyid: 1, language: 'fr' });
 
       expect(mockRoomService.getExposedProperty).toHaveBeenCalledWith({ id: 1, aname: undefined, language: 'fr', is_backend: true });
-      expect(mockRoomService.fetchLanguage).toHaveBeenCalledWith('fr');
+      expect(mockLocaleController.load).toHaveBeenCalledWith({ language: 'fr', tables: expect.arrayContaining(['_FRONTDESK', '_BOOKING']) });
       expect(mockBookingService.getCountries).toHaveBeenCalledWith('fr');
-      expect(mockBookingService.getSetupEntriesByTableNameMulti).toHaveBeenCalledWith(['_BED_PREFERENCE_TYPE', '_DEPARTURE_TIME', '_PAY_TYPE', '_PAY_TYPE_GROUP', '_PAY_METHOD']);
-      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith(1);
+      expect(mockSetupService.getPaymentEntries).toHaveBeenCalled();
+      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith({ property_id: 1, language: 'fr' });
       // The arrivals store waits on the property before storing (its initialisers read it).
       expect(mockLoaders.loadArrivals).toHaveBeenCalledWith(1, TODAY, propertyLoad.promise);
     });
@@ -334,9 +344,9 @@ describe('ir-dashboard', () => {
       propertyLoad.resolve();
       await flush(page);
 
-      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith(42);
+      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith({ property_id: 42, language: 'en' });
       expect(mockLoaders.loadArrivals).toHaveBeenCalledWith(42, TODAY, propertyLoad.promise);
-      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledWith({ property_id: 42, date: TODAY });
+      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledWith({ property_id: 42, date: TODAY, language: 'en' });
     });
 
     it('reuses an already loaded property instead of fetching it again', async () => {
@@ -344,9 +354,9 @@ describe('ir-dashboard', () => {
       await mount({ propertyid: 1 });
 
       expect(mockRoomService.getExposedProperty).not.toHaveBeenCalled();
-      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith(7);
+      expect(mockListingService.getExposedBookingsCriteria).toHaveBeenCalledWith({ property_id: 7, language: 'en' });
       expect(mockLoaders.loadArrivals).toHaveBeenCalledWith(7, TODAY, expect.any(Promise));
-      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledWith({ property_id: 7, date: TODAY });
+      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledWith({ property_id: 7, date: TODAY, language: 'en' });
     });
 
     it('shows skeletons and disabled tabs until startup lands, then opens the arrivals tab', async () => {
@@ -400,7 +410,7 @@ describe('ir-dashboard', () => {
       const { page } = await mount();
       const stats = $(page, 'ir-dashboard-stats');
 
-      const params = { property_id: 1, date: TODAY };
+      const params = { property_id: 1, date: TODAY, language: 'en' };
       expect(mockDashboardService.getDayPerformance).toHaveBeenCalledWith(params);
       expect(mockDashboardService.getUnitsSummary).toHaveBeenCalledWith(params);
       expect(mockDashboardService.getPendingUnits).toHaveBeenCalledWith(params);
@@ -632,7 +642,7 @@ describe('ir-dashboard', () => {
       await new Promise(resolve => setTimeout(resolve, DATE_CHANGE_DEBOUNCE_MS));
       await flush(page);
 
-      const params = { property_id: 1, date: inTwoDays };
+      const params = { property_id: 1, date: inTwoDays, language: 'en' };
       expect(mockDashboardService.getDayPerformance.mock.calls).toEqual([[params]]);
       expect(mockDashboardService.getInHouse.mock.calls).toEqual([[params]]);
       expect(mockLoaders.loadArrivals.mock.calls).toEqual([[1, inTwoDays, expect.any(Promise)]]);
@@ -651,7 +661,7 @@ describe('ir-dashboard', () => {
       // The previous day's data is stale: the visible panel and its count go back to skeletons.
       expect(isPanelSkeleton(page, 'inHouse')).toBe(true);
       expect(tabCount(page, 'inHouse')).toBeNull();
-      const params = { property_id: 1, date: TOMORROW };
+      const params = { property_id: 1, date: TOMORROW, language: 'en' };
       expect(mockDashboardService.getInHouse).toHaveBeenLastCalledWith(params);
       expect(mockDashboardService.getDayPerformance).toHaveBeenLastCalledWith(params);
       expect(mockDashboardService.getUnitsSummary).toHaveBeenLastCalledWith(params);
@@ -721,7 +731,7 @@ describe('ir-dashboard', () => {
       yesterday.resolve(PERFORMANCE);
       await flush(page);
 
-      expect(mockDashboardService.getInHouse.mock.calls).toEqual([[{ property_id: 1, date: YESTERDAY }]]);
+      expect(mockDashboardService.getInHouse.mock.calls).toEqual([[{ property_id: 1, date: YESTERDAY, language: 'en' }]]);
     });
 
     it('loads the picked day instead of today when the day changes during startup', async () => {
@@ -737,8 +747,8 @@ describe('ir-dashboard', () => {
 
       expect(mockLoaders.loadArrivals).toHaveBeenCalledTimes(2);
       expect(mockLoaders.loadArrivals).toHaveBeenLastCalledWith(1, TOMORROW, expect.any(Promise));
-      expect(mockDashboardService.getDayPerformance.mock.calls).toEqual([[{ property_id: 1, date: TOMORROW }]]);
-      expect(mockDashboardService.getInHouse.mock.calls).toEqual([[{ property_id: 1, date: TOMORROW }]]);
+      expect(mockDashboardService.getDayPerformance.mock.calls).toEqual([[{ property_id: 1, date: TOMORROW, language: 'en' }]]);
+      expect(mockDashboardService.getInHouse.mock.calls).toEqual([[{ property_id: 1, date: TOMORROW, language: 'en' }]]);
       expect(tabCount(page, 'arrivals')).toBe('5');
     });
   });

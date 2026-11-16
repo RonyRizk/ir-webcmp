@@ -19,6 +19,9 @@
 
 .bodyContainer {
   position: relative;
+  /* Keeps every z-index in the grid inside the grid, so the sticky header and footer stay on top
+     of it however high a layer in here goes. */
+  isolation: isolate;
 }
 
 .roomRow {
@@ -33,6 +36,9 @@
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
+}
+.categoryTitle {
+  text-align: start !important;
 }
 .hk_issue_btn::part(base) {
   height: auto;
@@ -50,8 +56,8 @@
   position: absolute;
   bottom: 0;
   height: 100%;
-  left: 30%;
-  right: 30%;
+  inset-inline-start: 30%;
+  inset-inline-end: 30%;
   background-color: #d4d0be !important;
 }
 
@@ -69,6 +75,7 @@
 }
 .roomRow .room {
   cursor: pointer;
+  text-align: start !important;
   transition:
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
@@ -87,13 +94,13 @@
   height: 30px;
   display: inline-grid;
   border-top: 1px solid var(--wa-color-surface-border);
-  border-left: 1px solid var(--wa-color-surface-border);
+  border-inline-start: 1px solid var(--wa-color-surface-border);
   vertical-align: top;
 }
 .triangle-button {
   --size: 10px;
   position: absolute;
-  right: -6px;
+  inset-inline-end: -6px;
   top: -1px;
 
   width: 0;
@@ -108,24 +115,30 @@
   border-right: var(--size) solid transparent;
   border-bottom: var(--size) solid var(--wa-color-surface-border);
 
+  /* The transparent left/right pair draws an upward triangle; the rotation tips it towards
+     the cell's outer corner, which is the opposite physical corner under RTL. */
   transform: rotate(45deg);
 }
+.triangle-button:dir(rtl) {
+  transform: rotate(-45deg);
+}
 .cellData:nth-child(2) {
-  border-left: 0px;
+  border-inline-start: 0px;
 }
 
 .cellData:last-child {
-  border-right: 1px solid var(--wa-color-surface-border);
+  border-inline-end: 1px solid var(--wa-color-surface-border);
 }
 
 .roomHeaderCell {
   position: -webkit-sticky;
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   background: var(--wa-color-surface-default);
   border-inline-end: 1px solid var(--wa-color-surface-border);
   width: 170px;
-  z-index: 1;
+  /* Above everything else in the grid: .dayUseBadge (100) and a dragged booking bar. */
+  z-index: 101;
   border-inline-start: 0px;
 }
 
@@ -181,8 +194,8 @@
   --day-use-color: var(--day-use-color-past);
 }
 
-/* Centered on the cell's top-right corner point — sits at the edge, half outside the cell's own
-   box. That overlaps the neighboring cell to the right (same row, a later DOM sibling with its
+/* Centered on the cell's top inline-end corner point — sits at the edge, half outside the
+   cell's own box. That overlaps the neighbouring cell (same row, a later DOM sibling with its
    own opaque background), so a high z-index is required to keep painting on top of it. */
 .dayUseBadge {
   position: absolute;
@@ -313,7 +326,7 @@
 
 .categoryTitle {
   grid-template-columns: 1fr 20px;
-  padding-left: 10px;
+  padding-inline-start: 10px;
   cursor: pointer;
   height: 40px;
   font-size: 0.9em;
@@ -325,7 +338,7 @@
 }
 
 .roomTitle {
-  padding-left: 20px;
+  padding-inline-start: 20px;
   font-size: 0.9em;
   -webkit-user-select: none;
   user-select: none;
@@ -339,7 +352,7 @@
 }
 
 .roomTitle.pl10 {
-  padding-left: 10px;
+  padding-inline-start: 10px;
 }
 
 .categoryPriceColumn {
@@ -351,6 +364,9 @@
 }
 
 /* BOOKING EVENT */
+/* Physical left, not inset-inline-start: this is the containing block for igl-booking-event's
+   manually direction-mirrored absolute positions (see toPhysicalLeft in calendar-grid.ts),
+   which are computed relative to a stable physical-left origin regardless of direction. */
 .bookingEventsContainer {
   position: absolute;
   top: 0;
@@ -360,4 +376,16 @@
   --ir-interactive-hk-bg: var(--wa-color-brand-fill-quiet);
   color: var(--wa-color-brand-on-quiet);
   background-color: var(--wa-color-brand-fill-quiet) !important;
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-text-start {
+  text-align: start;
+}
+
+/* Directional icon: a chevron, nav arrow or date-range separator points the other way
+   under RTL. Mirroring in CSS keeps it correct without a re-render on direction change. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

@@ -3,13 +3,15 @@
   flex-direction: column;
   flex: 1 1 0%;
   height: 100%;
+  text-align: start;
+  padding-inline: var(--spacing);
 }
 .bulk-sheet-container {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 1rem;
+  gap: var(--wa-space-m);
 }
 .animated-container {
   transition: all 0.5s ease;
@@ -22,4 +24,64 @@
   color: var(--wa-form-control-label-color);
   font-weight: var(--wa-form-control-label-font-weight);
   line-height: var(--wa-form-control-label-line-height);
+}
+
+.bulk-stop-sale__intro {
+  color: var(--wa-color-neutral-60);
+  padding-block: 0;
+  margin-block: 0;
+}
+
+.bulk-stop-sale__error {
+  color: var(--wa-color-danger-60, #d64545);
+  font-size: 0.85rem;
+  padding: 0;
+  margin: 0;
+}
+
+.bulk-stop-sale__error--spaced {
+  margin-block-end: var(--wa-space-xs);
+}
+
+.bulk-stop-sale__choice-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bulk-stop-sale__name-td {
+  padding-inline-start: var(--wa-space-m);
+}
+
+.bulk-stop-sale__cell--spaced {
+  padding-block-end: var(--wa-space-2xs);
+}
+
+.bulk-stop-sale__section-label {
+  margin-block-start: var(--wa-space-xs);
+  color: var(--wa-color-neutral-60);
+}
+
+.bulk-stop-sale__dates-table {
+  margin-block-start: var(--wa-space-2xs);
+}
+
+.bulk-stop-sale__date-cell {
+  padding-inline-end: var(--wa-space-m);
+  padding-block-end: var(--wa-space-xs);
+}
+
+.bulk-stop-sale__date-action-cell {
+  padding-block-end: var(--wa-space-2xs);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
 }

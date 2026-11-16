@@ -2,9 +2,10 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { IPayment } from '@/models/booking.dto';
 import { formatAmount } from '@/utils/utils';
 import { PAYMENT_TYPES_WITH_METHOD } from '../global.variables';
-import moment from 'moment';
 import { v4 } from 'uuid';
 import { PayStatus, PayTypes } from '@/types/enums';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-payment-item',
@@ -36,7 +37,7 @@ export class IrPaymentItem {
       <div class="payment-item__payment-item">
         <div class="payment-item__payment-body" part="payment-body">
           <div class="payment-item__payment-fields" part="payment-fields">
-            <p class="payment-item__payment-date">{moment(this.payment.date, 'YYYY-MM-DD').format('MMM DD, YYYY')}</p>
+            <p class="payment-item__payment-date">{formatDate(this.payment.date, 'MMM DD, YYYY')}</p>
             <p class={`payment-item__payment-amount ${isCredit ? 'is-credit' : 'is-debit'}`}>{formatAmount(this.payment.currency.symbol, this.payment.amount)}</p>
             <p class="payment-item__payment-description">{paymentDescription}</p>
           </div>
@@ -48,7 +49,10 @@ export class IrPaymentItem {
 
           <div class="payment-item__payment-actions">
             <div class="d-flex align-items-center">
-              <wa-tooltip for={this._id}>User: {this.payment.time_stamp.user}</wa-tooltip>
+              <wa-tooltip for={this._id}>
+                <span class="payment-item__tooltip-label">{t('Lcz_User', { fallback: 'user' })}</span>{': '}
+                {this.payment.time_stamp.user}
+              </wa-tooltip>
               <wa-icon name="user" id={this._id}></wa-icon>
               <wa-dropdown
                 onwa-hide={e => {
@@ -79,26 +83,26 @@ export class IrPaymentItem {
                 {canEditOrDelete && (
                   <wa-dropdown-item value="edit">
                     {/* <wa-icon slot="icon" name="edit"></wa-icon> */}
-                    Edit
+                    {t('Lcz_Edit', { fallback: 'Edit' })}
                   </wa-dropdown-item>
                 )}
                 {canPrint && (
                   <wa-dropdown-item value="receipt">
                     {/* <wa-icon name="receipt" slot="icon"></wa-icon> */}
-                    Print
+                    {t('Lcz_Print', { fallback: 'Print' })}
                   </wa-dropdown-item>
                 )}
 
                 {canEditOrDelete && <wa-divider></wa-divider>}
                 {this.payment?.payment_type?.code === PayTypes.Payment && this.payment.payment_status?.code === PayStatus.Normal && (
                   <wa-dropdown-item variant="danger" value="void-receipt">
-                    Void with credit receipt
+                    {t('Lcz_VoidWithCreditReceipt', { fallback: 'Void with credit receipt' })}
                   </wa-dropdown-item>
                 )}
                 {canEditOrDelete && (
                   <wa-dropdown-item value="delete" variant="danger">
                     {/* <wa-icon slot="icon" name="trash"></wa-icon> */}
-                    Delete
+                    {t('Lcz_Delete', { fallback: 'Delete' })}
                   </wa-dropdown-item>
                 )}
               </wa-dropdown>

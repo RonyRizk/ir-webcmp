@@ -1,8 +1,8 @@
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Method, Prop, State, h } from '@stencil/core';
 import { Booking } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { getPrivateNote } from '@/utils/booking';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-extra-note',
   styleUrls: ['ir-booking-extra-note.css'],
@@ -73,7 +73,7 @@ export class IrBookingExtraNote {
   render() {
     return (
       <ir-dialog
-        label="Private Note"
+        label={t('Lcz_PrivateNote', { fallback: 'Private Note' })}
         open={this.open}
         onIrDialogHide={() => {
           this.open = false;
@@ -81,18 +81,18 @@ export class IrBookingExtraNote {
       >
         <wa-textarea
           size="s"
-          placeholder={locales.entries.Lcz_PrivateNote_MaxChar}
+          placeholder={t('Lcz_PrivateNote_MaxChar')}
           defaultValue={this.note}
           onchange={e => this.setNote((e.target as any).value)}
           value={this.note}
         ></wa-textarea>
         <div slot="footer" class="ir-dialog__footer">
           <ir-custom-button data-dialog="close" size="m" variant="neutral" appearance="filled" onClickHandler={() => this.closeModal.emit(null)} class={`flex-fill'}`}>
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
 
           <ir-custom-button size="m" onClickHandler={() => this.savePrivateNote()} variant="brand" loading={this.isLoading}>
-            {locales.entries.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

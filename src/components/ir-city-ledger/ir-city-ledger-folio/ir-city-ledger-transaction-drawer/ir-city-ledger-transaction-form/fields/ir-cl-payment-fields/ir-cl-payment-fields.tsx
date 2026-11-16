@@ -1,7 +1,8 @@
 import { Component, Event, EventEmitter, Fragment, Prop, h } from '@stencil/core';
-import type { IEntries } from '@/models/IBooking';
-import { getEntryValue } from '@/utils/utils';
+import type { SetupEntries } from '@/models/IBooking';
+import { getSetupEntryLabel } from '@/services/setup';
 import { paymentMethodCodeFieldSchema, type CityLedgerTransactionFormDraft, type LinkedOption, type PaymentMethodOption } from '../../ir-city-ledger-transaction-form.schema';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-payment-fields',
@@ -12,7 +13,7 @@ export class IrClPaymentFields {
   @Prop() paymentMethodCode: string = '';
   @Prop() isOnAccount: boolean = false;
   @Prop() invoiceId: string | undefined;
-  @Prop() paymentMethods: IEntries[] = [];
+  @Prop() paymentMethods: SetupEntries[] = [];
   @Prop() unpaidInvoiceOptions: LinkedOption[] = [];
   @Prop() noInvoices: boolean = false;
   @Prop() language: string = 'en';
@@ -46,8 +47,8 @@ export class IrClPaymentFields {
             <ir-validator schema={paymentMethodCodeFieldSchema} value={this.paymentMethodCode} valueEvent="change">
               <wa-select
                 size="s"
-                label="Payment method"
-                placeholder="Select method…"
+                label={t('Lcz_PaymentMethod', { fallback: 'Payment Method' })}
+                placeholder={t('Lcz_SelectMethodPlaceholder', { fallback: 'Select method…' })}
                 value={this.paymentMethodCode}
                 onwa-show={e => this.stopPropagation(e)}
                 onwa-hide={e => this.stopPropagation(e)}
@@ -56,10 +57,10 @@ export class IrClPaymentFields {
                   this.handlePaymentMethodChange((e.target as HTMLSelectElement).value);
                 }}
               >
-                <wa-option value="">Select method…</wa-option>
+                <wa-option value="">{t('Lcz_SelectMethodPlaceholder', { fallback: 'Select method…' })}</wa-option>
                 {this.paymentMethods.map(method => (
-                  <wa-option key={method.CODE_NAME} label={method.CODE_VALUE_EN} value={method.CODE_NAME}>
-                    {getEntryValue({ entry: method, language: this.language })}
+                  <wa-option key={method.CODE_NAME} label={getSetupEntryLabel(method)} value={method.CODE_NAME}>
+                    {getSetupEntryLabel(method)}
                   </wa-option>
                 ))}
               </wa-select>
@@ -70,7 +71,7 @@ export class IrClPaymentFields {
         {/* ── Payment Application ─────────────────────── */}
         {/* <div class="payment-section">
           <wa-radio-group
-            label="Apply to"
+            label={t('Lcz_ApplyTo', { fallback: 'Apply to' })}
             size="s"
             orientation="horizontal"
             value={this.isOnAccount ? 'on-account' : 'apply-to-invoice'}
@@ -93,9 +94,9 @@ export class IrClPaymentFields {
           {!this.isOnAccount && (
             <div class="field invoice-select">
               <wa-select
-                label="Outstanding Invoices"
+                label={t('Lcz_OutstandingInvoices', { fallback: 'Outstanding Invoices' })}
                 size="s"
-                placeholder="Search invoices…"
+                placeholder={t('Lcz_SearchInvoicesPlaceholder', { fallback: 'Search invoices...' })}
                 value={this.invoiceId ?? ''}
                 onwa-show={e => this.stopPropagation(e)}
                 onwa-hide={e => this.stopPropagation(e)}

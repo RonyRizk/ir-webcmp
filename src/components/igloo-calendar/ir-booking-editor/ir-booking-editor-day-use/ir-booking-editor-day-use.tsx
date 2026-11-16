@@ -6,6 +6,8 @@ import { DAY_USE_STATUS_ICON, formatDayUseStatusText, getDayUseUnitAvailability 
 import { createTimeToMask } from '@/components/ui/ir-input/masks';
 import { DayUseHoursSchema } from '../types';
 import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 /**
  * Owns the day-use-only parts of the booking editor form: the selected unit's summary
@@ -53,13 +55,13 @@ export class IrBookingEditorDayUse {
     return (
       <Fragment>
         <div class="booking-editor__header">
-          <span class="booking-editor__dates">{dates.checkIn.format('DD MMM YYYY')}</span>
+          <span class="booking-editor__dates">{formatDate(dates.checkIn, 'DD MMM YYYY')}</span>
           <div class="booking-editor__total">
             <span class="booking-editor__total-label">
               {dayUseSelection?.roomType?.name} <ir-unit-tag unit={dayUseSelection?.unit?.name}></ir-unit-tag>
             </span>{' '}
             <span class="booking-editor__total-amount">{formatAmount(calendar_data.property.currency.symbol, dayUseSelection?.price ?? 0)}</span>
-            <span style={{ marginInlineStart: '0.5rem', padding: '0', fontSize: '0.75rem' }}>Including taxes and fees</span>
+            <span style={{ marginInlineStart: '0.5rem', padding: '0', fontSize: '0.75rem' }}>{t('Lcz_IncludingTaxesAndFees', { fallback: 'Including taxes and fees' })}</span>
           </div>
           {dayStatus && dayStatusIcon && (
             <span class="booking-editor__day-use-status">
@@ -72,14 +74,14 @@ export class IrBookingEditorDayUse {
           <div class="booking-editor__day-use-hours-row">
             <ir-validator value={dayUseHours.from} schema={DayUseHoursSchema.shape.from}>
               <ir-input
-                label="Time period"
+                label={t('Lcz_TimePeriod', { fallback: 'Time period' })}
                 mask="time"
                 placeholder="11:30"
                 value={dayUseHours.from}
                 onText-change={e => this.handleDayUseFromChange(e.detail, dayUseHours)}
               ></ir-input>
             </ir-validator>
-            <wa-icon class="booking-editor__day-use-hours-connector" name="arrow-right"></wa-icon>
+            <wa-icon class="booking-editor__day-use-hours-connector ir-flip-rtl" name="arrow-right"></wa-icon>
             <ir-validator value={dayUseHours.to} schema={DayUseHoursSchema.shape.to}>
               <ir-input
                 disabled={!this.isValidDayUseTime(dayUseHours.from)}
@@ -90,7 +92,9 @@ export class IrBookingEditorDayUse {
               ></ir-input>
             </ir-validator>
             {this.getDayUseDuration(dayUseHours) && (
-              <span class="booking-editor__day-use-duration booking-editor__day-use-hours-connector">Duration: {this.getDayUseDuration(dayUseHours)}</span>
+              <span class="booking-editor__day-use-duration booking-editor__day-use-hours-connector">
+                {t('Lcz_DurationColon', { fallback: 'Duration:' })} {this.getDayUseDuration(dayUseHours)}
+              </span>
             )}
           </div>
         </section>

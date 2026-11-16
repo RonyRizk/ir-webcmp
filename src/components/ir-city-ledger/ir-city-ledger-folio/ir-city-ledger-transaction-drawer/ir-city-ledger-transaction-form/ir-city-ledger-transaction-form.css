@@ -66,15 +66,10 @@
   display: none;
 }
 
-.amount-tax-group ir-input:dir(rtl)::part(base) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
-.amount-tax-group ir-input:dir(ltr)::part(base) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
+.amount-tax-group ir-input::part(base) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  border-inline-end: none;
 }
 
 .amount-tax-group wa-select {
@@ -82,13 +77,9 @@
   min-width: 8.5rem;
 }
 
-.amount-tax-group wa-select:dir(ltr)::part(combobox) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.amount-tax-group wa-select:dir(rtl)::part(combobox) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+.amount-tax-group wa-select::part(combobox) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
 /* ── Transaction type option row ─────────────── */

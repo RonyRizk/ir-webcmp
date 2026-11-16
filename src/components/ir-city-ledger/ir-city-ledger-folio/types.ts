@@ -1,5 +1,6 @@
 import type { ClTx } from '@/services/city-ledger';
 import { ClTxTypeCode } from '@/types/enums';
+import { t } from '@/services/locale/t';
 
 export interface FolioRow {
   _rowId: string;
@@ -22,10 +23,15 @@ export interface FolioRow {
 const lockedStatus = new Set([ClTxTypeCode.Payment, ClTxTypeCode.CreditNote, ClTxTypeCode.DebitNote]);
 export function mapClTxToFolioRow(tx: ClTx): Omit<FolioRow, '_rowId'> {
   const status = tx.IS_LOCKED
-    ? { id: 'billed', label: lockedStatus.has(tx.CL_TX_TYPE_CODE as any) ? 'Locked' : 'Billed', variant: 'success', description: '' }
+    ? {
+        id: 'billed',
+        label: lockedStatus.has(tx.CL_TX_TYPE_CODE as any) ? t('Lcz_Locked', { fallback: 'Locked' }) : t('Lcz_Billed', { fallback: 'Billed' }),
+        variant: 'success',
+        description: '',
+      }
     : tx.IS_HOLD
-      ? { id: 'held', label: 'Held', variant: 'warning', description: '' }
-      : { id: 'unbilled', label: 'Unbilled', variant: 'neutral', description: '' };
+      ? { id: 'held', label: t('Lcz_Held', { fallback: 'Held' }), variant: 'warning', description: '' }
+      : { id: 'unbilled', label: t('Lcz_Unbilled', { fallback: 'Unbilled' }), variant: 'neutral', description: '' };
 
   return {
     _raw: tx,

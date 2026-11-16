@@ -1,11 +1,11 @@
 import { Booking } from '@/models/booking.dto';
 import { Agent } from '@/services/agents/type';
 import { Currency } from '@/models/property';
-import locales from '@/stores/locales.store';
 import { formatAmount } from '@/utils/utils';
 import { Component, Host, Prop, h } from '@stencil/core';
 import { isAgentMode } from '../../functions';
 import { ClTx } from '@/services/city-ledger/types';
+import { t } from '@/services/locale/t';
 // import { ClTxTypeCode } from '@/types/enums';
 
 @Component({
@@ -69,29 +69,29 @@ export class IrPaymentSummary {
             {!this.isAllServicesAgentOwned && (
               <div class="ps-col ">
                 <div class="ps-stacked">
-                  <span class="ps-stacked__label">Guest Balance:</span>
+                  <span class="ps-stacked__label">{t('Lcz_GuestBalance', { fallback: 'Guest Balance' })}:</span>
                   <span class="ps-stacked__value ps-stacked__value--danger">{formatAmount(this.currency.symbol, this.booking?.guest_financial?.due_amount)}</span>
                 </div>
                 <div class="ps-stacked ">
-                  <span class="ps-stacked__label">Guest Collected:</span>
+                  <span class="ps-stacked__label">{t('Lcz_GuestCollected', { fallback: 'Guest Collected:' })}</span>
                   <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.booking.guest_financial?.collected)}</span>
                 </div>
               </div>
             )}
             <div class="ps-col">
               <div class="ps-stacked --stacked-right">
-                <span class="ps-stacked__label ps-stacked__value">Booking Total:</span>
+                <span class="ps-stacked__label ps-stacked__value">{t('Lcz_BookingTotal', { fallback: 'Booking Total:' })}</span>
                 <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.bookingTotal ?? 0)}</span>
               </div>
               <div class="ps-stacked --stacked-right">
-                <span class="ps-stacked__label">Agent Total:</span>
+                <span class="ps-stacked__label">{t('Lcz_AgentTotal', { fallback: 'Agent Total:' })}</span>
                 <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.agentTotal)}</span>
               </div>
             </div>
           </div>
 
           {/* <div class="ps-grand-total">
-            <span class="ps-grand-total__label">Grand Total</span>
+            <span class="ps-grand-total__label">{t('Lcz_GrandTotalLabel', { fallback: 'Grand Total' })}</span>
             <span class="ps-grand-total__value">{formatAmount(this.currency.symbol, this.booking.financial?.gross_total ?? 0)}</span>
           </div> */}
         </div>
@@ -105,11 +105,11 @@ export class IrPaymentSummary {
           <div class="ps-cols">
             <div class="ps-col ">
               <div class="ps-stacked ">
-                <span class="ps-stacked__label">{locales.entries.Lcz_Balance}:</span>
+                <span class="ps-stacked__label">{t('Lcz_Balance')}:</span>
                 <span class="ps-stacked__value ps-stacked__value--danger">{formatAmount(this.currency.symbol, this.balance)}</span>
               </div>
               <div class="ps-stacked">
-                <span class="ps-stacked__label">{locales.entries.Lcz_Collected}:</span>
+                <span class="ps-stacked__label">{t('Lcz_Collected')}:</span>
                 <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.collected)}</span>
               </div>
             </div>
@@ -117,12 +117,12 @@ export class IrPaymentSummary {
             <div class="ps-col">
               {this.shouldShowTotalCost() && (
                 <div class="ps-stacked --stacked-right">
-                  <span class="ps-stacked__label ps-stacked__value">{locales.entries.Lcz_TotalCost}</span>
+                  <span class="ps-stacked__label ps-stacked__value">{t('Lcz_TotalCost')}</span>
                   <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.totalCost)}</span>
                 </div>
               )}
               <div class="ps-stacked --stacked-right">
-                <span class="ps-stacked__label ps-stacked__value">Grand Total:</span>
+                <span class="ps-stacked__label ps-stacked__value">{t('Lcz_GrandTotalLabel', { fallback: 'Grand Total:' })}</span>
                 <span class="ps-stacked__value">{formatAmount(this.currency.symbol, this.bookingTotal)}</span>
               </div>
               <div class="ps-stacked --stacked-right"></div>

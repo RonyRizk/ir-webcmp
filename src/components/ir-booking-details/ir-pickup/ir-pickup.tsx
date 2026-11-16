@@ -1,9 +1,9 @@
-import locales from '@/stores/locales.store';
 import { Agent } from '@/services/agents/type';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { Booking, IBookingPickupInfo } from '@/models/booking.dto';
 import { v4 } from 'uuid';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-pickup',
   styleUrls: ['ir-pickup.css'],
@@ -66,7 +66,7 @@ export class IrPickup {
           '--ir-drawer-padding-top': 'var(--spacing)',
           '--ir-drawer-padding-bottom': 'var(--spacing)',
         }}
-        label={locales.entries.Lcz_Pickup}
+        label={t('Lcz_Pickup', { fallback: 'Pickup' })}
         open={this.open}
         onDrawerHide={e => {
           e.stopImmediatePropagation();
@@ -99,12 +99,12 @@ export class IrPickup {
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button class={`flex-fill`} size="m" appearance="filled" variant="neutral" data-drawer="close">
-            {locales.entries.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
 
           {this.canSubmitPickup && (
             <ir-custom-button type="submit" loading={this.isLoading} form={this._id} size="m" class={`flex-fill`} variant="brand">
-              {locales.entries.Lcz_Save}
+              {t('Lcz_Save', { fallback: 'Save' })}
             </ir-custom-button>
           )}
         </div>

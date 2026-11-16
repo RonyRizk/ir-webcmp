@@ -11,7 +11,7 @@ export type FetchedProperty = {
   PROPERTY_ID: number;
   PROPERTY_NAME: string;
 };
-export type LinkedProperty = { name: string; property_id: number; token: string };
+export type LinkedProperty = { name: string; property_id: number; ApiClient: string };
 export type CountrySalesParams = {
   AC_ID: number;
   WINDOW: number;

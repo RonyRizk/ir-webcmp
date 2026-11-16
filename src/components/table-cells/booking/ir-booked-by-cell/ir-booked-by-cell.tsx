@@ -1,6 +1,6 @@
-import locales from '@/stores/locales.store';
 import { Component, Event, EventEmitter, Fragment, Host, Prop, h } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
 export interface BookedByCellGuest {
   id: number;
   first_name: string;
@@ -107,14 +107,14 @@ export class IrBookedByCell {
           )}
           {this.showRepeatGuestBadge && (
             <Fragment>
-              <wa-tooltip for={repeatGuestBadgeId}>{`${locales.entries.Lcz_BookingsNbr}`.replace('%1', this.guest.nbr_confirmed_bookings.toString())}</wa-tooltip>
+              <wa-tooltip for={repeatGuestBadgeId}>{`${t('Lcz_BookingsNbr', { fallback: '%1 bookings' })}`.replace('%1', this.guest.nbr_confirmed_bookings.toString())}</wa-tooltip>
               <wa-icon name="heart" style={{ color: '#FB0AAD' }} id={repeatGuestBadgeId}></wa-icon>
             </Fragment>
           )}
           {this.showPersons && (
             <p>
               {this.totalPersons}
-              {locales.entries.Lcz_P ?? 'P'}
+              {t('Lcz_P', { fallback: 'P' })}
             </p>
           )}
           {this.showPrivateNoteDot && <span class="booked-by-source__private-note"></span>}
@@ -137,14 +137,14 @@ export class IrBookedByCell {
         <div part="loyalty" class="booked-by-source__container">
           {this.showLoyaltyIcon && (
             <Fragment>
-              <wa-tooltip for={loyaltyBadgeId}>{locales.entries.Lcz_LoyaltyDiscountApplied}</wa-tooltip>
+              <wa-tooltip for={loyaltyBadgeId}>{t('Lcz_LoyaltyDiscountApplied', { fallback: 'Coupon: %1' })}</wa-tooltip>
               <wa-icon name="heart" variant="regular" style={{ color: '#fc6c85' }} id={loyaltyBadgeId}></wa-icon>
             </Fragment>
           )}
           {this.showPromoIcon && (
             <Fragment>
               <wa-tooltip for={couponBadgeId}>
-                {locales.entries.Lcz_Coupon}: {this.promoKey}
+                {t('Lcz_Coupon', { fallback: 'Coupon' })}: {this.promoKey}
               </wa-tooltip>
               <wa-icon id={couponBadgeId} name="ticket"></wa-icon>
             </Fragment>

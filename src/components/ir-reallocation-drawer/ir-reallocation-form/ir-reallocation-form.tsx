@@ -1,17 +1,18 @@
-import { SelectedUnit, SelectedUnitSchema } from '@/components/igloo-calendar/igl-split-booking/types';
+import { SelectedUnit, SelectedUnitSchema } from '@/models/room-selection';
 import { Booking, IUnit, Room } from '@/models/booking.dto';
 import { PropertyRoomType } from '@/models/IBooking';
 import { BookingService } from '@/services/booking-service/booking.service';
 import { EventsService } from '@/services/events.service';
 import { resetBookingStore } from '@/stores/booking.store';
 import calendar_data from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { calculateDaysBetweenDates } from '@/utils/booking';
-import { checkMealPlan, SelectOption } from '@/utils/utils';
+import { checkMealPlan, rateplanOptionLabel, SelectOption } from '@/utils/utils';
 import { Component, Event, EventEmitter, Fragment, Prop, State, h } from '@stencil/core';
 import moment, { Moment } from 'moment';
 import { ZodError } from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-reallocation-form',
   styleUrl: 'ir-reallocation-form.css',
@@ -70,7 +71,7 @@ export class IrReallocationForm {
           adult: 1,
           child: 0,
         },
-        language: 'en',
+        language: LocaleController.language,
         room_type_ids: [],
         currency: this.booking.currency,
         agent_id: is_in_agent_mode ? this.booking.agent.id : null,
@@ -78,9 +79,10 @@ export class IrReallocationForm {
         room_type_ids_to_update: [],
       });
       this.roomTypes = (data as any as PropertyRoomType[]).filter(r => r.is_available_to_book);
-      this.isLoading = false;
     } catch (error) {
       console.error('Error initializing booking availability:', error);
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -181,7 +183,7 @@ export class IrReallocationForm {
             <p style={{ padding: '0', margin: '0' }}>
               {/* <span>From: </span> */}
               <span class="rateplan-details">
-                {this.room.roomtype.name} {this.room.rateplan.short_name} {this.room.rateplan.is_non_refundable ? locales.entries.Lcz_NonRefundable : ''}{' '}
+                {this.room.roomtype.name} {this.room.rateplan.short_name} {this.room.rateplan.is_non_refundable ? t('Lcz_NonRefundable', { fallback: 'Non-refundable' }) : ''}{' '}
                 <span class="rateplan-details-unit">{(this.room.unit as IUnit).name}</span>
               </span>
             </p>
@@ -203,7 +205,7 @@ export class IrReallocationForm {
             Check available units
           </ir-custom-button>
         </div> */}
-          {this.errors?.roomtype_id && <p class="error-message">Please select a room</p>}
+          {this.errors?.roomtype_id && <p class="error-message">{t('Lcz_PleaseSelectARoom', { fallback: 'Please select a room' })}</p>}
           {this.roomTypes.length === 0 ? (
             <ir-empty-state style={{ marginTop: '20vh' }}></ir-empty-state>
           ) : (
@@ -261,7 +263,7 @@ export class IrReallocationForm {
                                 <ir-validator value={this.selectedUnit?.rateplan_id} schema={SelectedUnitSchema.shape.rateplan_id}>
                                   <wa-select
                                     size="s"
-                                    placeholder="Select a new rateplan..."
+                                    placeholder={t('Lcz_SelectANewRateplan', { fallback: 'Select a new rateplan...' })}
                                     value={this.selectedUnit?.rateplan_id?.toString()}
                                     onchange={e => {
                                       e.stopImmediatePropagation();
@@ -272,7 +274,7 @@ export class IrReallocationForm {
                                     }}
                                   >
                                     {this.mealPlanOptions.map(option => {
-                                      return <wa-option value={option.value?.toString()}>{option.text + `${option.custom_text ? ' | ' : ''}${option.custom_text}`}</wa-option>;
+                                      return <wa-option value={option.value?.toString()}>{rateplanOptionLabel(option)}</wa-option>;
                                     })}
                                   </wa-select>
                                 </ir-validator>

@@ -1,7 +1,5 @@
 # ir-arrival-time-dialog
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -22,17 +20,17 @@ Usage:
 
 ## Properties
 
-| Property         | Attribute         | Description                                                                             | Type         | Default     |
-| ---------------- | ----------------- | --------------------------------------------------------------------------------------- | ------------ | ----------- |
-| `arrivalTime`    | --                |                                                                                         | `IEntries[]` | `[]`        |
-| `booking`        | --                | Needed to look up whether this room already has an early-check-in extra service charge. | `Booking`    | `undefined` |
-| `booking_nbr`    | `booking_nbr`     | Needed to create an early-check-in extra service charge alongside the arrival time.     | `string`     | `undefined` |
-| `currencySymbol` | `currency-symbol` |                                                                                         | `string`     | `undefined` |
-| `currency_id`    | `currency_id`     |                                                                                         | `number`     | `undefined` |
-| `language`       | `language`        |                                                                                         | `string`     | `'en'`      |
-| `open`           | `open`            | Controls dialog visibility.                                                             | `boolean`    | `undefined` |
-| `property_id`    | `property_id`     |                                                                                         | `number`     | `undefined` |
-| `room`           | --                | Room whose expected arrival time is being changed.                                      | `Room`       | `undefined` |
+| Property         | Attribute         | Description                                                                             | Type             | Default     |
+| ---------------- | ----------------- | --------------------------------------------------------------------------------------- | ---------------- | ----------- |
+| `arrivalTime`    | --                |                                                                                         | `SetupEntries[]` | `[]`        |
+| `booking`        | --                | Needed to look up whether this room already has an early-check-in extra service charge. | `Booking`        | `undefined` |
+| `booking_nbr`    | `booking_nbr`     | Needed to create an early-check-in extra service charge alongside the arrival time.     | `string`         | `undefined` |
+| `currencySymbol` | `currency-symbol` |                                                                                         | `string`         | `undefined` |
+| `currency_id`    | `currency_id`     |                                                                                         | `number`         | `undefined` |
+| `language`       | `language`        |                                                                                         | `string`         | `'en'`      |
+| `open`           | `open`            | Controls dialog visibility.                                                             | `boolean`        | `undefined` |
+| `property_id`    | `property_id`     |                                                                                         | `number`         | `undefined` |
+| `room`           | --                | Room whose expected arrival time is being changed.                                      | `Room`           | `undefined` |
 
 
 ## Events

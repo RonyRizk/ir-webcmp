@@ -23,15 +23,16 @@
 
 ## Events
 
-| Event              | Description | Type                              |
-| ------------------ | ----------- | --------------------------------- |
-| `clearFilters`     |             | `CustomEvent<void>`               |
-| `deleteEntry`      |             | `CustomEvent<TranslationEntry>`   |
-| `duplicateEntry`   |             | `CustomEvent<TranslationEntry>`   |
-| `editEntry`        |             | `CustomEvent<TranslationEntry>`   |
-| `entryChange`      |             | `CustomEvent<TranslationEntry>`   |
-| `reorderEntries`   |             | `CustomEvent<TranslationEntry[]>` |
-| `toggleVisibility` |             | `CustomEvent<TranslationEntry>`   |
+| Event              | Description                                                       | Type                              |
+| ------------------ | ----------------------------------------------------------------- | --------------------------------- |
+| `clearFilters`     |                                                                   | `CustomEvent<void>`               |
+| `deleteEntry`      |                                                                   | `CustomEvent<TranslationEntry>`   |
+| `duplicateEntry`   |                                                                   | `CustomEvent<TranslationEntry>`   |
+| `editEntry`        |                                                                   | `CustomEvent<TranslationEntry>`   |
+| `entryChange`      |                                                                   | `CustomEvent<TranslationEntry>`   |
+| `moveEntry`        | "Move to table…" — the parent opens the move dialog for this row. | `CustomEvent<TranslationEntry>`   |
+| `reorderEntries`   |                                                                   | `CustomEvent<TranslationEntry[]>` |
+| `toggleVisibility` |                                                                   | `CustomEvent<TranslationEntry>`   |
 
 
 ## Dependencies

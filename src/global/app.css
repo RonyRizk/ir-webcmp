@@ -2,6 +2,7 @@
 /* @import url('../assets/webawesome/themes/webawesome.css'); */
 @import url('../assets/webawesome/themes/default.css');
 @import url('../common/error.css');
+@import url('../common/rtl-vendor.css');
 @import url('../components/ui/ir-dialog/ir-dialog.css');
 @import url('../components/ir-drawer/ir-drawer.css');
 
@@ -13,6 +14,7 @@
 html:dir(rtl),
 body:dir(rtl) {
   direction: rtl !important;
+  text-align: start;
 }
 /* body {
   background-color: var(--wa-color-surface-default) !important;
@@ -26,6 +28,7 @@ body:dir(rtl) {
 .wa-dark {
   --ir-color-loader: rgba(0, 0, 0, 0.2);
   --ir-color-muted-background: #12141a;
+  --ir-color-muted-background: #07090d;
 }
 body {
   background-color: var(--ir-color-muted-background) !important;
@@ -64,7 +67,7 @@ html {
   font-family: inherit;
   font-size: 1rem;
   font-weight: 800;
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
   color: var(--wa-color-text-normal);
   margin: 0;
@@ -117,13 +120,15 @@ wa-card::part(base) {
     gap: 0 var(--wa-space-l);
     align-items: center;
   }
+  /* Puts the label before the control. `row-reverse` reverses along the inline axis,
+     so it follows the writing mode — unlike the `direction: rtl` hack it replaces,
+     which was a no-op in an RTL document and forced its children back to LTR text. */
   .label-on-left wa-switch::part(base) {
-    direction: rtl;
+    flex-direction: row-reverse;
   }
   .label-on-left wa-switch::part(base) > * {
     justify-self: flex-start;
     justify-content: flex-start;
-    direction: ltr; /* fix text direction */
   }
   /* Label alignment */
   .label-on-left ::part(label) {
@@ -183,12 +188,13 @@ wa-card::part(base) {
   width: 100%;
 }
 
-:dir(rtl) .ir__field-group > :first-child::part(base),
-:dir(rtl) .ir__field-group > :first-child::part(combobox),
-:dir(ltr) .ir__field-group > :last-child::part(combobox),
-:dir(ltr) .ir__field-group > :last-child::part(base) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+/* The first control keeps its inline-start corners and squares off the inline-end ones;
+   the last control does the reverse and drops its inline-start border so the seam is a
+   single line. Logical corner radii mean one rule per role instead of a :dir() pair. */
+.ir__field-group > :first-child::part(base),
+.ir__field-group > :first-child::part(combobox) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .ir__field-group > :first-child {
@@ -199,28 +205,17 @@ wa-card::part(base) {
   flex: 1 1 0%;
 }
 
-:dir(rtl) .ir__field-group > :last-child::part(combobox),
-:dir(rtl) .ir__field-group > :last-child::part(base),
-:dir(ltr) .ir__field-group > :first-child::part(base),
-:dir(ltr) .ir__field-group > :first-child::part(combobox) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-:dir(rtl) .ir__field-group > :last-child::part(combobox),
-:dir(rtl) .ir__field-group > :last-child::part(base) {
-  border-right-width: 0;
+.ir__field-group > :last-child::part(base),
+.ir__field-group > :last-child::part(combobox) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-inline-start-width: 0;
 }
 
 .ir__field-group > :not(:first-child):not(:last-child)::part(combobox),
 .ir__field-group > :not(:first-child):not(:last-child)::part(base) {
   border-radius: 0;
   border-inline-start: 0;
-}
-
-:dir(ltr) .ir__field-group > :last-child::part(combobox),
-:dir(ltr) .ir__field-group > :last-child::part(base) {
-  border-left-width: 0;
 }
 
 .ir__field-group > :not(:first-child):not(:last-child)[open],
@@ -230,4 +225,10 @@ wa-card::part(base) {
 .ir__field-group > :last-child:focus-visible,
 .ir__field-group > :last-child:focus-within {
   z-index: 2;
+}
+
+/* Mirrors a directional icon (chevrons, nav arrows, date-range separators) under RTL.
+   CSS-only, so direction changes need no re-render, and it works on a `wa-icon` host. */
+.ir-flip-rtl:dir(rtl) {
+  scale: -1 1;
 }

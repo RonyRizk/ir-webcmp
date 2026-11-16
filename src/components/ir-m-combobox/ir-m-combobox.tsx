@@ -1,6 +1,7 @@
 import { Component, Host, h, Element, State, Listen, Prop, Event, EventEmitter, Watch, Method } from '@stencil/core';
 import { v4 } from 'uuid';
 import { ComboboxOption, DataMode } from './types';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-m-combobox',
@@ -449,7 +450,7 @@ export class IrMCombobox {
             data-reference="parent"
             aria-haspopup="listbox"
             aria-activedescendant={this.focusedIndex >= 0 ? `${this.dropdownId}-option-${this.focusedIndex}` : null}
-            aria-label="Combobox"
+            aria-label={t('Lcz_Combobox', { fallback: 'Combobox' })}
             aria-required={true}
             onKeyDown={this.handleKeyDown}
             onInput={this.handleInput}
@@ -466,8 +467,8 @@ export class IrMCombobox {
               <slot name="dropdown-content"></slot>
             ) : (
               [
-                this.loading && <div class="dropdown-item loading">Loading...</div>,
-                !this.loading && this.filteredOptions.length === 0 && <div class="dropdown-item no-results">No results found</div>,
+                this.loading && <div class="dropdown-item loading">{t('Lcz_Loading', { fallback: 'Loading...' })}</div>,
+                !this.loading && this.filteredOptions.length === 0 && <div class="dropdown-item no-results">{t('Lcz_NoResultsFound', { fallback: 'No results found' })}</div>,
                 !this.loading &&
                   this.filteredOptions.map((option, index) => (
                     <button

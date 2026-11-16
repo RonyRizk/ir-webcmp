@@ -2,6 +2,8 @@ import moment from 'moment';
 
 import { Booking, ExposedApplicablePolicy, Room } from '@/models/booking.dto';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 export type ApplicablePoliciesByType = Partial<Record<ExposedApplicablePolicy['type'], ExposedApplicablePolicy[]>>;
 
@@ -278,7 +280,7 @@ export class ApplicablePoliciesService {
       due_on_formatted: '',
       gross_amount: room.gross_total,
       gross_amount_formatted: '',
-      statement: '100% of total price',
+      statement: t('Lcz_PercentOfTotalPrice', { fallback: '%1% of total price', params: [formatCount(100)] }),
     };
   }
 

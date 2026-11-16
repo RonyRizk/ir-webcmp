@@ -24,6 +24,7 @@
 - [ir-empty-state](../ir-empty-state)
 - [ir-translations-entries-panel](ir-translations-entries-panel)
 - [ir-translations-entry-drawer](ir-translations-entry-drawer)
+- [ir-translations-move-dialog](ir-translations-move-dialog)
 - [ir-translations-settings-dialog](ir-translations-settings-dialog)
 - [ir-translations-table-dialog](ir-translations-table-dialog)
 - [ir-dialog](../ui/ir-dialog)
@@ -40,6 +41,7 @@ graph TD;
   ir-translations-manager --> ir-empty-state
   ir-translations-manager --> ir-translations-entries-panel
   ir-translations-manager --> ir-translations-entry-drawer
+  ir-translations-manager --> ir-translations-move-dialog
   ir-translations-manager --> ir-translations-settings-dialog
   ir-translations-manager --> ir-translations-table-dialog
   ir-translations-manager --> ir-dialog
@@ -68,6 +70,8 @@ graph TD;
   ir-translations-entry-form --> ir-translations-sync-dialog
   ir-translations-sync-dialog --> ir-custom-button
   ir-translations-sync-dialog --> ir-dialog
+  ir-translations-move-dialog --> ir-dialog
+  ir-translations-move-dialog --> ir-custom-button
   ir-translations-settings-dialog --> ir-dialog
   ir-translations-settings-dialog --> ir-custom-button
   ir-translations-table-dialog --> ir-dialog

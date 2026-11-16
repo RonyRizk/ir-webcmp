@@ -1,6 +1,7 @@
 import { arrivalsStore, setArrivalsReferenceDate, setArrivalsSearchTerm } from '@/stores/arrivals.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 import { Component, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-arrivals-filters',
@@ -19,7 +20,13 @@ export class IrArrivalsFilters {
           <wa-icon name="calendar" slot="start"></wa-icon>
           {isRequestPending('/Get_Rooms_To_Check_in') && <wa-spinner slot="end"></wa-spinner>}
         </ir-date-select>
-        <ir-input withClear class="arrivals-filters__search-bar" placeholder="Search guests or bookings" value={arrivalsStore.searchTerm} onText-change={this.handleSearchChange}>
+        <ir-input
+          withClear
+          class="arrivals-filters__search-bar"
+          placeholder={t('Lcz_SearchGuestsOrBookings', { fallback: 'Search guests or bookings' })}
+          value={arrivalsStore.searchTerm}
+          onText-change={this.handleSearchChange}
+        >
           <wa-icon name="magnifying-glass" slot="start"></wa-icon>
         </ir-input>
       </div>

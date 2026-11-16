@@ -1,6 +1,7 @@
 import { Component, h, Prop, Event, EventEmitter } from '@stencil/core';
 import { Booking, IPayment } from '@/models/booking.dto';
 import { HelpDocButton } from '@/components/HelpButton';
+import { t } from '@/services/locale/t';
 
 @Component({
   styleUrl: 'ir-payments-folio.css',
@@ -82,10 +83,10 @@ export class IrPaymentsFolio {
     return (
       <wa-card appearance="plain" class=" payments-container">
         <div slot="header" class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
-          <p class="font-size-large p-0 m-0">Guest Folio</p>
-          <HelpDocButton message="Help" href="https://help.igloorooms.com/extranet/booking-details/guest-folio" />
+          <p class="font-size-large p-0 m-0">{t('Lcz_GuestFolio', { fallback: 'Guest Folio' })}</p>
+          <HelpDocButton message={t('Lcz_HelpTooltip', { fallback: 'Help' })} href="https://help.igloorooms.com/extranet/booking-details/guest-folio" />
         </div>
-        {!this.isAddPaymentDisabled && <wa-tooltip for="create-payment">Add folio entry</wa-tooltip>}
+        {!this.isAddPaymentDisabled && <wa-tooltip for="create-payment">{t('Lcz_AddFolioEntry', { fallback: 'Add folio entry' })}</wa-tooltip>}
         <ir-custom-button
           disabled={this.isAddPaymentDisabled}
           slot="header-actions"

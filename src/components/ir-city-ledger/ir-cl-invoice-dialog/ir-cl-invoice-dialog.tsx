@@ -6,6 +6,8 @@ import { ClFiscalDocumentPreviewRequest } from '../ir-city-ledger-fiscal-documen
 import WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch';
 import { Booking, IUnit } from '@/models/booking.dto';
 import moment from 'moment';
+import { formatBookingNumber } from '@/utils/number';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-cl-invoice-dialog',
@@ -24,6 +26,7 @@ export class IrClInvoiceDialog {
   @State() error: string | null = null;
   @State() noResults: boolean = false;
   @State() isProforma: boolean = false;
+  @State() isCompact: boolean = false;
 
   /**
    * Determines whether a final (non-proforma) invoice can be issued, based on
@@ -66,6 +69,7 @@ export class IrClInvoiceDialog {
     this.error = null;
     this.noResults = false;
     this.isProforma = !this.allRoomsCheckedOut;
+    this.isCompact = false;
     this.dialogRef.openModal();
   }
 
@@ -92,6 +96,7 @@ export class IrClInvoiceDialog {
           END_DATE: this.endDate,
           BOOKING_NBR: this.booking?.booking_nbr,
           FD_TYPE_CODE: FdTypes.Draft,
+          IS_COMPACT: this.isCompact,
         });
         const doc = result;
         this.clFiscalDocumentPreview.emit({
@@ -112,7 +117,7 @@ export class IrClInvoiceDialog {
           return;
         }
 
-        const { fromDate, toDate, is_checked_out_only } = await this.formRef.getValues();
+        const { fromDate, toDate, is_checked_out_only, is_compact } = await this.formRef.getValues();
 
         const clResult = await this.cityLedgerService.fetchCL({
           AGENCY_ID: this.agentId,
@@ -150,6 +155,7 @@ export class IrClInvoiceDialog {
           END_DATE: toDate,
           LIST_CL_TX_ID: listClTxIds,
           FD_TYPE_CODE: FdTypes.Draft,
+          IS_COMPACT: is_compact,
         });
         const doc = result;
         this.clFiscalDocumentPreview.emit({
@@ -165,7 +171,7 @@ export class IrClInvoiceDialog {
         this.dialogRef.closeModal();
       }
     } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to issue invoice.';
+      this.error = err instanceof Error ? err.message : t('Lcz_FailedToIssueInvoice', { fallback: 'Failed to issue invoice.' });
     } finally {
       this.isLoading = false;
     }
@@ -176,6 +182,7 @@ export class IrClInvoiceDialog {
       let fromDate: string;
       let toDate: string;
       let bookingNbr: string | null = null;
+      let isCompact = this.isCompact;
 
       if (this.mode === 'booking') {
         fromDate = this.startDate;
@@ -190,6 +197,7 @@ export class IrClInvoiceDialog {
         const values = await this.formRef.getValues();
         fromDate = values.fromDate;
         toDate = values.toDate;
+        isCompact = values.is_compact;
       }
 
       const url = await this.cityLedgerService.printClProforma({
@@ -197,6 +205,7 @@ export class IrClInvoiceDialog {
         from_date: fromDate,
         to_date: toDate,
         booking_nbr: bookingNbr,
+        is_compact: isCompact,
       });
       this.fiscalDocumentIssued.emit();
       if (url) {
@@ -211,7 +220,7 @@ export class IrClInvoiceDialog {
       }
       this.dialogRef.closeModal();
     } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to generate proforma.';
+      this.error = err instanceof Error ? err.message : t('Lcz_FailedToGenerateProforma', { fallback: 'Failed to generate proforma.' });
     } finally {
       this.isLoading = false;
     }
@@ -221,7 +230,7 @@ export class IrClInvoiceDialog {
     const units = this.booking ? this.booking?.rooms.filter(r => r.agent && r.in_out?.code !== InOut.CheckedOut).map(r => (r.unit as IUnit).name) : null;
     return (
       <Host>
-        <ir-dialog label="Create Invoice" ref={el => (this.dialogRef = el)}>
+        <ir-dialog label={t('Lcz_CreateInvoice', { fallback: 'Create Invoice' })} ref={el => (this.dialogRef = el)}>
           {this.booking && (
             <div slot="header-actions" class={'cl-invoice-dialog__header-actions'}>
               <wa-switch
@@ -229,32 +238,48 @@ export class IrClInvoiceDialog {
                 disabled={this.mode === 'booking' && !this.allRoomsCheckedOut}
                 onchange={e => (this.isProforma = (e.target as WaSwitch).checked)}
               >
-                Proforma
+                {t('Lcz_Proforma', { fallback: 'Proforma' })}
               </wa-switch>
             </div>
           )}
           <div class="create-invoice-dialog__body">
             {this.mode === 'booking' ? (
-              !this.allRoomsCheckedOut ? (
-                <wa-callout size="s" variant="warning">
-                  <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-                  Only a proforma invoice can be generated at this time because {units?.length > 1 ? 'units' : 'unit'} <b>{units?.join(', ')}</b>.{' '}
-                  {units?.length > 1 ? 'are' : 'is'} still in-house.
-                </wa-callout>
-              ) : (
-                <p class="create-invoice-dialog__message">
-                  {this.isProforma
-                    ? `Generate a proforma for Booking #${this.booking?.booking_nbr}?`
-                    : `Issue a draft invoice for Booking #${this.booking?.booking_nbr} to the agent?`}
-                </p>
-              )
+              [
+                !this.allRoomsCheckedOut ? (
+                  <wa-callout size="s" variant="warning">
+                    <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
+                    {t('Lcz_ProformaOnlyInHouseWarning', {
+                      fallback: 'Only a proforma invoice can be generated at this time because %1 is/are still in-house.',
+                      params: [`${units?.length > 1 ? t('Lcz_UnitsLowercase', { fallback: 'units' }) : t('Lcz_UnitLowercase', { fallback: 'unit' })} ${units?.join(', ')}`],
+                    })}
+                  </wa-callout>
+                ) : (
+                  <p class="create-invoice-dialog__message">
+                    {this.isProforma
+                      ? t('Lcz_GenerateProformaConfirm', { fallback: 'Generate a proforma for Booking #%1?', params: [formatBookingNumber(this.booking?.booking_nbr)] })
+                      : t('Lcz_IssueDraftInvoiceConfirm', {
+                          fallback: 'Issue a draft invoice for Booking #%1 to the agent?',
+                          params: [formatBookingNumber(this.booking?.booking_nbr)],
+                        })}
+                  </p>
+                ),
+                <wa-checkbox
+                  checked={this.isCompact}
+                  defaultChecked={this.isCompact}
+                  onchange={e => {
+                    this.isCompact = (e.target as HTMLInputElement).checked;
+                  }}
+                >
+                  {t('Lcz_CompactVersion', { fallback: 'Compact version' })}
+                </wa-checkbox>,
+              ]
             ) : (
               <ir-cl-invoice-form ref={el => (this.formRef = el)}></ir-cl-invoice-form>
             )}
             {this.noResults && (
               <wa-callout variant="warning" class="create-invoice-dialog__no-results">
                 <wa-icon slot="icon" name="triangle-exclamation"></wa-icon>
-                No transactions found for the selected period and filters.
+                {t('Lcz_NoTransactionsFoundForPeriod', { fallback: 'No transactions found for the selected period and filters.' })}
               </wa-callout>
             )}
             {this.error && <p class="create-invoice-dialog__error">{this.error}</p>}
@@ -262,10 +287,10 @@ export class IrClInvoiceDialog {
 
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button size="m" appearance="filled" variant="neutral" data-dialog="close" disabled={this.isLoading}>
-              Cancel
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button size="m" appearance="accent" variant="brand" loading={this.isLoading} onClickHandler={() => this.handleSubmit()}>
-              {this.isProforma ? 'Confirm' : 'Show draft'}
+              {this.isProforma ? t('Lcz_Confirm', { fallback: 'Confirm' }) : t('Lcz_ShowDraft', { fallback: 'Show draft' })}
             </ir-custom-button>
           </div>
         </ir-dialog>

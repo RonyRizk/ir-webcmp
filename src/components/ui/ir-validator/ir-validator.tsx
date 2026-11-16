@@ -117,7 +117,7 @@ export class IrValidator {
     if (!spec) return [];
     return spec
       .split(/[\s,]+/)
-      .map(token => token.trim())
+      .map(ApiClient => ApiClient.trim())
       .filter(Boolean);
   }
 

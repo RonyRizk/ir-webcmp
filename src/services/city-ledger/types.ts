@@ -1,6 +1,7 @@
 import { ClTxTypeCode, FdStatus, FdTypes } from '@/types/enums';
 import moment from 'moment';
 import * as z from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
 
 // ---------------------------------------------------------------------------
 // Shared / Base types
@@ -189,38 +190,40 @@ export const ToggleCLTxHoldParamsSchema = z.object({
 /** Payload for toggling a transaction hold status. */
 export type ToggleCLTxHoldParams = z.infer<typeof ToggleCLTxHoldParamsSchema>;
 
-export const IssueManualCLTxParamsSchema = z.object({
-  CL_TX_ID: z.number().optional().default(-1),
-  AGENCY_ID: z.number(),
-  SERVICE_DATE: z.string(),
-  // CATEGORY: z.string(),
-  CL_TX_TYPE_CODE: z.string(),
-  DESCRIPTION: z.string(),
-  DEBIT: z.number(),
-  CREDIT: z.number(),
-  CURRENCY_ID: z.number(),
-  PAY_METHOD_CODE: z.string().optional().default(''),
-  EXTERNAL_REF: z.string(),
-  // VAT handling for the transaction
-  // 001 = VAT included in amount
-  // 002 = VAT not applicable
-  VAT_INCLUDED_CODE: z.enum(['001', '002', '']).default(''),
+export const IssueManualCLTxParamsSchema = z
+  .object({
+    CL_TX_ID: z.number().optional().default(-1),
+    AGENCY_ID: z.number(),
+    SERVICE_DATE: z.string(),
+    // CATEGORY: z.string(),
+    CL_TX_TYPE_CODE: z.string(),
+    DESCRIPTION: z.string(),
+    DEBIT: z.number(),
+    CREDIT: z.number(),
+    CURRENCY_ID: z.number(),
+    PAY_METHOD_CODE: z.string().optional().default(''),
+    EXTERNAL_REF: z.string(),
+    // VAT handling for the transaction
+    // 001 = VAT included in amount
+    // 002 = VAT not applicable
+    VAT_INCLUDED_CODE: z.enum(['001', '002', '']).default(''),
 
-  // VAT percentage (used only when VAT is included)
-  VAT_PCT: z.number().optional().nullable().default(null),
-  //Booking number system id.
-  BH_ID: z.number().optional().nullable().default(null),
+    // VAT percentage (used only when VAT is included)
+    VAT_PCT: z.number().optional().nullable().default(null),
+    //Booking number system id.
+    BH_ID: z.number().optional().nullable().default(null),
 
-  IS_DELETE: z.boolean().optional().default(false),
-}).superRefine((data, ctx) => {
-  if (data.CL_TX_TYPE_CODE === ClTxTypeCode.Payment && !data.PAY_METHOD_CODE) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['PAY_METHOD_CODE'],
-      message: 'PAY_METHOD_CODE is required for payment transactions',
-    });
-  }
-});
+    IS_DELETE: z.boolean().optional().default(false),
+  })
+  .superRefine((data, ctx) => {
+    if (data.CL_TX_TYPE_CODE === ClTxTypeCode.Payment && !data.PAY_METHOD_CODE) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PAY_METHOD_CODE'],
+        message: 'PAY_METHOD_CODE is required for payment transactions',
+      });
+    }
+  });
 /** Payload for issuing a manual city-ledger transaction. */
 export type IssueManualCLTxParams = z.infer<typeof IssueManualCLTxParamsSchema>;
 
@@ -314,6 +317,7 @@ export const IssueFiscalDocumentParamsSchema = CLAgencyContextSchema.extend({
   BOOKING_NBR: z.string().optional().nullable().default(null),
   FD_TYPE_CODE: z.string(),
   FD_STATUS_CODE: z.string().optional().default(FdStatus.Issued),
+  IS_COMPACT: z.boolean().optional().default(false),
 });
 /** Params for issuing fiscal documents from city-ledger entries. */
 export type IssueFiscalDocumentParams = z.infer<typeof IssueFiscalDocumentParamsSchema>;
@@ -356,7 +360,10 @@ export type FdType = (typeof FdTypes)[keyof typeof FdTypes];
 
 export const PrintClFiscalDocumentParamsSchema = z.object({
   doc_number: z.string(),
-  lang: z.string().optional().default('en'),
+  lang: z
+    .string()
+    .optional()
+    .default(() => LocaleController.language),
 });
 export type PrintClFiscalDocumentParams = z.infer<typeof PrintClFiscalDocumentParamsSchema>;
 
@@ -364,7 +371,10 @@ export const PrintClStatementParamsSchema = z.object({
   agency_id: z.string(),
   from_date: z.string(),
   to_date: z.string(),
-  lang: z.string().optional().default('en'),
+  lang: z
+    .string()
+    .optional()
+    .default(() => LocaleController.language),
 });
 export type PrintClStatementParams = z.infer<typeof PrintClStatementParamsSchema>;
 
@@ -372,8 +382,12 @@ export const PrintClProformaParamsSchema = z.object({
   agency_id: z.string(),
   from_date: z.string(),
   to_date: z.string(),
-  lang: z.string().optional().default('en'),
+  lang: z
+    .string()
+    .optional()
+    .default(() => LocaleController.language),
   booking_nbr: z.string().optional().nullable().default(null),
+  is_compact: z.boolean().optional().default(false),
 });
 export type PrintClProformaParams = z.infer<typeof PrintClProformaParamsSchema>;
 

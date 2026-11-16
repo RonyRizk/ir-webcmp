@@ -5,7 +5,11 @@ import { type DuplicateSyncPlan, planDuplicateSync } from '../../duplicate-sync'
 import { buildEditSetupParams } from '../../setup-mapping';
 import { getSyncPrompt, narrowSyncPlan } from '../../sync-policy';
 import { DuplicateSibling, EntrySavedDetail, TranslationEntry, TranslationLanguage } from '../../types';
-import { diffValues, getSourceLanguage, hasValue } from '../../utils';
+import { diffValues, getCopiedEntry, getSourceLanguage, hasValue } from '../../utils';
+import { t } from '@/services/locale/t';
+
+/** Every key the form creates starts with this — the Key field's mask prepends it. */
+const KEY_PREFIX = 'Lcz_';
 
 /** Pulls a `{ "code": "translation" }` object out of an AI reply, tolerating markdown fences and surrounding prose. */
 function extractTranslationObject(text: string): Record<string, unknown> | null {
@@ -64,6 +68,8 @@ export class IrTranslationsEntryForm {
   private keyInputRef?: HTMLIrInputElement;
   private syncDialogRef?: HTMLIrTranslationsSyncDialogElement;
   private setupService = new SetupService();
+  /** Key the copied row was last applied for — so backspacing and retyping it doesn't re-fill and re-toast. */
+  private filledFromCopiedKey: string | null = null;
 
   componentWillLoad() {
     this.key = this.entry?.key ?? '';
@@ -196,6 +202,38 @@ export class IrTranslationsEntryForm {
   private handleKeyChange(value: string) {
     this.key = value ?? '';
     this.submitDisabledChange.emit(!this.isValid);
+    this.fillFromCopiedEntry();
+  }
+
+  /**
+   * The other half of the table's "Copy row": a new entry given the copied row's
+   * key inherits its translations. Only blanks are filled, so anything already
+   * typed into a language field stays.
+   */
+  private fillFromCopiedEntry() {
+    const copied = getCopiedEntry();
+    const key = this.trimmedKey;
+    // The mask prepends KEY_PREFIX to whatever is pasted, so a row copied from a
+    // table whose keys lack it ("001") arrives here as "Lcz_001" — still a match.
+    const matches = !!copied && (key === copied.key || key === KEY_PREFIX + copied.key);
+    if (this.isEditing || !key || !matches || this.filledFromCopiedKey === key) {
+      return;
+    }
+    const next = { ...this.values };
+    let filled = 0;
+    for (const language of this.languages) {
+      const value = copied.values[language.code];
+      if (hasValue(value) && !hasValue(next[language.code])) {
+        next[language.code] = value;
+        filled++;
+      }
+    }
+    this.filledFromCopiedKey = key;
+    if (filled === 0) {
+      return;
+    }
+    this.values = next;
+    showToast({ type: 'success', title: `Filled ${filled} translation${filled === 1 ? '' : 's'} from the copied row.` });
   }
 
   private handleSubmit = async (event: Event) => {
@@ -302,7 +340,7 @@ export class IrTranslationsEntryForm {
           readonly={this.isEditing}
           autocomplete="off"
           mask={{
-            mask: '{Lcz_}TEXT',
+            mask: `{${KEY_PREFIX}}TEXT`,
             eager: true,
             blocks: {
               TEXT: {
@@ -367,7 +405,7 @@ export class IrTranslationsEntryForm {
                     <span slot="label" class="entry-form__field-label">
                       {language.name}
                       <span class="entry-form__field-code">{language.code.toUpperCase()}</span>
-                      {language.isSource && <span class="entry-form__field-source">Source</span>}
+                      {language.isSource && <span class="entry-form__field-source">{t('Lcz_Source', { fallback: 'Source' })}</span>}
                     </span>
                   </wa-textarea>
                   <wa-copy-button class="entry-form__value-copy" value={this.values[language.code] ?? ''}></wa-copy-button>

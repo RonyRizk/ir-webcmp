@@ -1,8 +1,9 @@
 import { IHouseKeepers, THousekeepingTrigger } from '@/models/housekeeping';
 import housekeeping_store from '@/stores/housekeeping.store';
-import locales from '@/stores/locales.store';
 import { Component, Listen, State, h, Element, Fragment } from '@stencil/core';
 
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'ir-hk-team',
   styleUrls: ['ir-hk-team.css', '../../../common/table.css'],
@@ -25,14 +26,14 @@ export class IrHkTeam {
             class="hk-team-header__unassigned-btn"
             onClick={() => (this.currentTrigger = { type: 'unassigned_units', user: hk })}
           >
-            {locales.entries.Lcz_Assign}
+            {t('Lcz_Assign', { fallback: 'Assign' })}
           </wa-button>
         </span>
       );
     }
     return (
       <span>
-        {hk.assigned_units.length} -{' '}
+        {formatCount(hk.assigned_units.length)} -{' '}
         <wa-button
           class="hk-team-header__unassigned-btn"
           size="s"
@@ -40,7 +41,7 @@ export class IrHkTeam {
           appearance="outlined"
           onClick={() => (this.currentTrigger = { type: 'unassigned_units', user: hk })}
         >
-          {'Edit'}
+          {t('Lcz_Edit', { fallback: 'Edit' })}
         </wa-button>
       </span>
     );
@@ -83,13 +84,13 @@ export class IrHkTeam {
       <wa-card appearance="plain" class="hk-team__card">
         <section slot="header" class="hk-team-header">
           <div class="hk-team-header__top">
-            <p class="hk-team-header__title">{locales.entries.Lcz_HousekeepingTeam}</p>
+            <p class="hk-team-header__title">{t('Lcz_HousekeepingTeam', { fallback: 'Housekeeping team' })}</p>
             <div class="hk-team-header__stats">
               <p class="hk-team-header__stat hk-team-header__stat--bold">
-                {total} {locales.entries.Lcz_TotalUnits}
+                {formatCount(total)} {t('Lcz_TotalUnits', { fallback: 'Total units' })}
               </p>
               <p class="hk-team-header__stat">
-                {assigned} <span>{locales.entries.Lcz_Assigned}</span>
+                {assigned} <span>{t('Lcz_Assigned', { fallback: 'Assigned' })}</span>
               </p>
               {un_assigned > 0 && (
                 <wa-button
@@ -99,23 +100,25 @@ export class IrHkTeam {
                   variant="brand"
                   appearance="outlined"
                 >
-                  {un_assigned} {locales.entries.Lcz_Unassigned}
+                  {un_assigned} {t('Lcz_Unassigned', { fallback: 'Unassigned' })}
                 </wa-button>
               )}
             </div>
           </div>
-          <p class="hk-team-header__hint">{locales.entries.Lcz_AsAnOption}</p>
+          <p class="hk-team-header__hint">
+            {t('Lcz_AsAnOption', { fallback: 'As an option, create housekeepers (as individuals or teams) and assign units to them to notify them separately.' })}
+          </p>
         </section>
         <section class="table-responsive">
           <table class="table data-table">
             <thead>
               <tr>
-                <th class="text-left">{locales.entries.Lcz_Name}</th>
-                <th>{locales.entries.Lcz_Mobile}</th>
-                <th>{locales.entries.Lcz_Username}</th>
-                {/* <th>{locales.entries.Lcz_Note}</th> */}
-                <th>{locales.entries.Lcz_UnitsAssigned}</th>
-                <th class={'text-left'}>
+                <th class="ir-text-start">{t('Lcz_Name', { fallback: 'Name' })}</th>
+                <th>{t('Lcz_Mobile', { fallback: 'Mobile' })}</th>
+                <th>{t('Lcz_Username', { fallback: 'Username' })}</th>
+                {/* <th>{t('Lcz_Note', { fallback: 'Note' })}</th> */}
+                <th>{t('Lcz_UnitsAssigned', { fallback: 'Units assigned' })}</th>
+                <th class={'ir-text-start'}>
                   <div class="d-flex justify-content-center">
                     <ir-custom-button
                       onClickHandler={() => {
@@ -137,7 +140,7 @@ export class IrHkTeam {
             <tbody>
               {housekeeping_store.hk_criteria.housekeepers.map(hk => (
                 <tr key={hk.id} class="ir-table-row">
-                  <td class="text-left">
+                  <td class="ir-text-start">
                     <div class={'d-flex align-items-center'} style={{ gap: '0.5rem' }}>
                       {hk.name?.length > 25 ? (
                         <Fragment>
@@ -149,7 +152,7 @@ export class IrHkTeam {
                       )}
                       {hk.note && (
                         // <ir-popover content={hk.note}>
-                        //   <ir-button variant="icon" icon_name="note" data-toggle="tooltip" data-placement="bottom" title="Click to view note"></ir-button>
+                        //   <ir-button variant="icon" icon_name="note" data-toggle="tooltip" data-placement="bottom" title={t('Lcz_ClickToViewNote', { fallback: 'Click to view note' })}></ir-button>
                         // </ir-popover>
                         <Fragment>
                           <wa-tooltip for={hk.id + '_note'}>{hk.note}</wa-tooltip>

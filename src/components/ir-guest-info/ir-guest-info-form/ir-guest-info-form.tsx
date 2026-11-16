@@ -1,13 +1,15 @@
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { Guest } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
 import { ICountry } from '@/models/IBooking';
 import { guestInfoFormSchema } from './types';
 import { IToast } from '@/components/ui/ir-toast/toast';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { BookingService } from '@/services/booking-service/booking.service';
-import { RoomService } from '@/services/room.service';
 import { z } from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 export type GuestChangedEvent = Partial<Guest>;
 @Component({
   tag: 'ir-guest-info-form',
@@ -32,16 +34,31 @@ export class IrGuestInfoForm {
   @Event({ bubbles: true, composed: true }) guestChanged: EventEmitter<GuestChangedEvent>;
 
   private bookingService = new BookingService();
-  private roomService = new RoomService();
-  private token: Token = new Token();
+  private ApiClient: ApiClient = new ApiClient();
+
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.guestInfo, () => this.init());
 
   componentWillLoad() {
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
     }
-    if (!!this.token.getToken()) {
+    if (!!this.ApiClient.getToken()) {
       this.init();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -49,7 +66,7 @@ export class IrGuestInfoForm {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
   }
 
   private handleInputChange(params: Partial<Guest>) {
@@ -59,16 +76,10 @@ export class IrGuestInfoForm {
   private async init() {
     try {
       this.isLoading = true;
-      const [guest, countries, fetchedLocales] = await Promise.all([
-        this.bookingService.fetchGuest(this.email),
-        this.bookingService.getCountries(this.language),
-        !locales || !locales.entries || Object.keys(locales.entries).length === 0 ? this.roomService.fetchLanguage(this.language) : Promise.resolve(null),
-      ]);
-
-      if (fetchedLocales) {
-        locales.entries = fetchedLocales.entries;
-        locales.direction = fetchedLocales.direction;
-      }
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.guestInfo });
+      const [guest, countries] = await Promise.all([this.bookingService.fetchGuest(this.email), this.bookingService.getCountries(LocaleController.language), localeReady]);
 
       this.countries = countries;
       let _g = {
@@ -105,7 +116,7 @@ export class IrGuestInfoForm {
       this.toast.emit({
         type: 'success',
         description: '',
-        title: 'Saved Successfully',
+        title: t('Lcz_SavedSuccessfully', { fallback: 'Saved Successfully' }),
         position: 'top-right',
       });
       this.resetBookingEvt.emit(null);
@@ -146,7 +157,7 @@ export class IrGuestInfoForm {
             defaultValue={this.guest?.first_name}
             required
             onText-change={e => this.handleInputChange({ first_name: e.detail.trim() })}
-            label={locales.entries?.Lcz_FirstName}
+            label={t('Lcz_FirstName', { fallback: 'First name' })}
           ></ir-input>
         </ir-validator>
         <ir-validator
@@ -162,7 +173,7 @@ export class IrGuestInfoForm {
             defaultValue={this.guest?.last_name}
             id="lastName"
             onText-change={e => this.handleInputChange({ last_name: e.detail.trim() })}
-            label={locales.entries?.Lcz_LastName}
+            label={t('Lcz_LastName', { fallback: 'Last name' })}
           ></ir-input>
         </ir-validator>
         <ir-validator
@@ -173,7 +184,7 @@ export class IrGuestInfoForm {
           blurEvent="input-blur blur"
         >
           <ir-input
-            label={locales.entries?.Lcz_Email}
+            label={t('Lcz_Email', { fallback: 'Email' })}
             id="email"
             defaultValue={this.guest?.email}
             value={this.guest?.email}
@@ -192,7 +203,7 @@ export class IrGuestInfoForm {
           blurEvent="input-blur blur"
         >
           <ir-input
-            label={locales.entries?.Lcz_AlternativeEmail}
+            label={t('Lcz_AlternativeEmail', { fallback: 'Alternative email' })}
             id="altEmail"
             value={this.guest?.alternative_email}
             mask="email"
@@ -207,7 +218,7 @@ export class IrGuestInfoForm {
             size="s"
             variant="modern"
             country={this.countries.find(c => c.id === this.guest?.country_id)}
-            label={locales.entries?.Lcz_Country}
+            label={t('Lcz_Country', { fallback: 'Country' })}
             onCountryChange={e => {
               const country = e.detail;
               let params: any = { country_id: country.id };
@@ -250,7 +261,7 @@ export class IrGuestInfoForm {
             size="s"
             onchange={e => this.handleInputChange({ notes: (e.target as any).value })}
             value={this.guest?.notes ?? ''}
-            label={locales.entries?.Lcz_PrivateNote}
+            label={t('Lcz_PrivateNote', { fallback: 'Private note' })}
           ></wa-textarea>
         </ir-validator>
       </form>

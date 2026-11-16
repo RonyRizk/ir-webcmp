@@ -1,9 +1,9 @@
 import { User } from '@/models/Users';
 import { Component, Event, EventEmitter, h, Prop } from '@stencil/core';
 import { AllowedUser } from '../../types';
-import locales from '@/stores/locales.store';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-user-form-panel-drawer',
   styleUrl: 'ir-user-form-panel-drawer.css',
@@ -36,7 +36,7 @@ export class IrUserFormPanelDrawer {
           }
           this.closeSideBar.emit(null);
         }}
-        label={this.isEdit ? this.user.username : 'Create New User'}
+        label={this.isEdit ? this.user.username : t('Lcz_CreateNewUser', { fallback: 'Create New User' })}
         open={this.open}
       >
         {this.open && (
@@ -56,10 +56,10 @@ export class IrUserFormPanelDrawer {
         )}
         <div slot="footer" class={'ir__drawer-footer'}>
           <ir-custom-button data-testid="cancel" onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
-            {locales?.entries?.Lcz_Cancel}
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button form={formId} loading={isRequestPending('/Handle_Exposed_User')} data-testid="save" size="m" class="flex-fill" type="submit" variant="brand">
-            {locales?.entries?.Lcz_Save}
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         </div>
       </ir-drawer>

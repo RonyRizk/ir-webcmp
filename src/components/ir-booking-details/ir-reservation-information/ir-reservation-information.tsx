@@ -1,11 +1,11 @@
 import { Booking } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
 import { getPrivateNote } from '@/utils/booking';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
 import { ICountry } from '@/models/IBooking';
 import { _formatDate, _formatTime } from '../functions';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent } from '../types';
 
+import { t } from '@/services/locale/t';
 // Hover over WaButtonJsxProps: you should see an `onClick?` property.
 // If you don't, the global .d.ts file isn't being loaded.
 @Component({
@@ -101,24 +101,24 @@ export class IrReservationInformation {
         <div class="reservation-information" ref={el => (this.reservationInformationEl = el as HTMLDivElement)}>
           <p class="reservation-information__property-name">{this.booking.property.name || ''}</p>
           {/* <ir-label
-            labelText={`${locales.entries.Lcz_Source}:`}
+            labelText={`${t('Lcz_Source', { fallback: 'Source' })}:`}
             content={this.booking.origin.Label}
             image={{ src: this.booking.origin.Icon, alt: this.booking.origin.Label }}
           ></ir-label> */}
           <ir-label
             renderContentAsHtml
-            labelText={`${locales.entries.Lcz_BookedOn}:`}
+            labelText={`${t('Lcz_BookedOn', { fallback: 'Booked on' })}:`}
             content={`${_formatDate(this.booking.booked_on.date)}&nbsp&nbsp&nbsp&nbsp${_formatTime(
               this.booking.booked_on.hour.toString(),
               this.booking.booked_on.minute.toString(),
             )}`}
           ></ir-label>
           <div class="reservation-information__row">
-            <ir-label labelText={`${locales.entries.Lcz_BookedBy}:`} content={`${this.booking.guest.first_name} ${this.booking.guest.last_name}`}>
+            <ir-label labelText={`${t('Lcz_BookedBy', { fallback: 'Booked by' })}:`} content={`${this.booking.guest.first_name} ${this.booking.guest.last_name}`}>
               {this.booking.guest?.nbr_confirmed_bookings > 1 && !this.booking.agent && (
                 <div class={'m-0 p-0 '} slot="prefix">
                   <wa-tooltip for="guests_nbr_confirmed_bookings">
-                    {`${locales.entries.Lcz_BookingsNbr}`.replace('%1', this.booking.guest.nbr_confirmed_bookings.toString())}
+                    {`${t('Lcz_BookingsNbr', { fallback: '%1 bookings' })}`.replace('%1', this.booking.guest.nbr_confirmed_bookings.toString())}
                   </wa-tooltip>
                   <div style={{ color: '#FB0AAD' }} id="guests_nbr_confirmed_bookings">
                     <span> {this.booking.guest.nbr_confirmed_bookings}</span>
@@ -127,22 +127,22 @@ export class IrReservationInformation {
                 </div>
               )}
             </ir-label>
-            <wa-tooltip for={`edit_guest-details`}>Edit guest details</wa-tooltip>
+            <wa-tooltip for={`edit_guest-details`}>{t('Lcz_EditGuestDetails', { fallback: 'Edit guest details' })}</wa-tooltip>
             <ir-custom-button iconBtn id={`edit_guest-details`} onClickHandler={e => this.handleEditClick(e, 'guest')} appearance={'plain'} variant={'neutral'}>
-              <wa-icon name="edit" label="Edit guest details" style={{ fontSize: '1rem' }}></wa-icon>
+              <wa-icon name="edit" label={t('Lcz_EditGuestDetails', { fallback: 'Edit guest details' })} style={{ fontSize: '1rem' }}></wa-icon>
             </ir-custom-button>
           </div>
           {!this.booking.agent && (
             <div class="reservation-information__row">
               <ir-label
-                labelText={`Company:`}
-                placeholder={'No company name provided'}
+                labelText={`${t('Lcz_Company', { fallback: 'Company' })}:`}
+                placeholder={t('Lcz_NoCompanyNameProvided', { fallback: 'No company name provided' })}
                 content={`${this.booking.company_name ?? ''}${this.booking.company_tax_nbr ? ` - ${this.booking.company_tax_nbr}` : ''}`}
                 display={'flex'}
                 // ignore_content
               ></ir-label>
 
-              <wa-tooltip for={`edit_create-company-info`}>Add company info</wa-tooltip>
+              <wa-tooltip for={`edit_create-company-info`}>{t('Lcz_AddCompanyInfo', { fallback: 'Add company info' })}</wa-tooltip>
               <ir-custom-button
                 iconBtn
                 id={`edit_create-company-info`}
@@ -154,28 +154,30 @@ export class IrReservationInformation {
                 appearance={'plain'}
                 variant={'neutral'}
               >
-                <wa-icon name="edit" label="Add or modify company info" style={{ fontSize: '1rem' }}></wa-icon>
+                <wa-icon name="edit" label={t('Lcz_AddOrModifyCompanyInfo', { fallback: 'Add or modify company info' })} style={{ fontSize: '1rem' }}></wa-icon>
               </ir-custom-button>
             </div>
           )}
           <div class={'reservation__info-guest-origins'}>
             {this.userCountry && (
               <ir-label
-                labelText={`${locales.entries.Lcz_Country}:`}
+                labelText={`${t('Lcz_Country', { fallback: 'Country' })}:`}
                 isCountryImage
                 content={this.userCountry.name}
                 image={{ src: this.userCountry.flag, alt: this.userCountry.name }}
               ></ir-label>
             )}
-            {this.booking.guest.mobile && <ir-label labelText={`${locales.entries.Lcz_Phone}:`} content={this.renderPhoneNumber()}></ir-label>}
+            {this.booking.guest.mobile && <ir-label labelText={`${t('Lcz_Phone', { fallback: 'Phone' })}:`} content={this.renderPhoneNumber()}></ir-label>}
           </div>
-          {!this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_Email}:`} content={this.booking.guest.email}></ir-label>}
-          {this.booking.guest.alternative_email && <ir-label labelText={`${locales.entries.Lcz_AlternativeEmail}:`} content={this.booking.guest.alternative_email}></ir-label>}
-          {this.booking?.guest?.address && <ir-label labelText={`${locales.entries.Lcz_Address}:`} content={this.booking.guest.address}></ir-label>}
+          {!this.booking.agent && <ir-label labelText={`${t('Lcz_Email', { fallback: 'Email' })}:`} content={this.booking.guest.email}></ir-label>}
+          {this.booking.guest.alternative_email && (
+            <ir-label labelText={`${t('Lcz_AlternativeEmail', { fallback: 'Alternative email' })}:`} content={this.booking.guest.alternative_email}></ir-label>
+          )}
+          {this.booking?.guest?.address && <ir-label labelText={`${t('Lcz_Address')}:`} content={this.booking.guest.address}></ir-label>}
 
-          {this.booking.guest?.notes && <ir-label display="inline" labelText={`${locales.entries.Lcz_GuestPrivateNote}:`} content={this.booking.guest?.notes}></ir-label>}
-          {this.booking.promo_key && <ir-label labelText={`${locales.entries.Lcz_Coupon}:`} content={this.booking.promo_key}></ir-label>}
-          {/* {this.booking.agent && <ir-label labelText={`${locales.entries.Lcz_AgentCode?.split(':')[0]}:`} content={this.booking.agent.name}></ir-label>} */}
+          {this.booking.guest?.notes && <ir-label display="inline" labelText={`${t('Lcz_GuestPrivateNote')}:`} content={this.booking.guest?.notes}></ir-label>}
+          {this.booking.promo_key && <ir-label labelText={`${t('Lcz_Coupon', { fallback: 'Coupon' })}:`} content={this.booking.promo_key}></ir-label>}
+          {/* {this.booking.agent && <ir-label labelText={`${t('Lcz_AgentCode')?.split(':')[0]}:`} content={this.booking.agent.name}></ir-label>} */}
           {this.booking.is_in_loyalty_mode && !this.booking.promo_key && (
             <div class="d-flex align-items-center">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={18} width={18}>
@@ -184,15 +186,15 @@ export class IrReservationInformation {
                   d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"
                 />
               </svg>
-              <p class="m-0 p-0 ml-1">{locales.entries.Lcz_LoyaltyDiscountApplied}</p>
+              <p class="m-0 p-0 ir-ms-1">{t('Lcz_LoyaltyDiscountApplied', { fallback: 'Coupon: %1' })}</p>
             </div>
           )}
           {this.booking.is_direct ? (
-            <ir-label labelText={`${locales.entries.Lcz_GuestRemark}:`} display="inline" content={this.booking.remark}></ir-label>
+            <ir-label labelText={`${t('Lcz_GuestRemark')}:`} display="inline" content={this.booking.remark}></ir-label>
           ) : (
             <ota-label
               class={'m-0 p-0 reservation-information__channel-notes'}
-              label={`${locales.entries.Lcz_ChannelNotes || 'Channel notes'}:`}
+              label={`${t('Lcz_ChannelNotes', { fallback: 'Channel notes' })}:`}
               remarks={this.booking.ota_notes}
               maxVisibleItems={this.booking.ota_notes?.length}
             ></ota-label>
@@ -200,13 +202,18 @@ export class IrReservationInformation {
 
           <div class="reservation-information__row">
             <ir-label
-              labelText={`${locales.entries.Lcz_BookingPrivateNote}:`}
-              placeholder={locales.entries.Lcz_VisibleToHotelOnly}
+              labelText={`${t('Lcz_BookingPrivateNote')}:`}
+              placeholder={t('Lcz_VisibleToHotelOnly')}
               content={privateNote}
               display={privateNote ? 'inline' : 'flex'}
               // ignore_content
             ></ir-label>
-            <wa-tooltip for={`edit_create-extra-note`}>{privateNote ? 'Edit' : 'Create'} private note</wa-tooltip>
+            <wa-tooltip for={`edit_create-extra-note`}>
+              {t('Lcz_EditCreatePrivateNoteTooltip', {
+                fallback: '%1 private note',
+                params: [privateNote ? t('Lcz_Edit', { fallback: 'Edit' }) : t('Lcz_Create', { fallback: 'Create' })],
+              })}
+            </wa-tooltip>
             <ir-custom-button
               iconBtn
               id={`edit_create-extra-note`}
@@ -216,7 +223,7 @@ export class IrReservationInformation {
               appearance={'plain'}
               variant={'neutral'}
             >
-              <wa-icon style={{ fontSize: '1rem' }} name="edit" label="Edit or create private note"></wa-icon>
+              <wa-icon style={{ fontSize: '1rem' }} name="edit" label={t('Lcz_EditOrCreatePrivateNote', { fallback: 'Edit or create private note' })}></wa-icon>
             </ir-custom-button>
           </div>
         </div>

@@ -13,15 +13,14 @@
 
 ### Depends on
 
-- [ir-button](../../../../ui/ir-button)
+- [ir-custom-button](../../../../ui/ir-custom-button)
 - [ir-pagination](../../../../ir-pagination)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-tasks-table-pagination --> ir-button
+  ir-tasks-table-pagination --> ir-custom-button
   ir-tasks-table-pagination --> ir-pagination
-  ir-button --> ir-icons
   ir-pagination --> ir-custom-button
   ir-tasks-table --> ir-tasks-table-pagination
   style ir-tasks-table-pagination fill:#f9f,stroke:#333,stroke-width:4px

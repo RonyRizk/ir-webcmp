@@ -3,6 +3,7 @@ import { BookingService } from '@/services/booking-service/booking.service';
 import { HbPreference } from '@/types/enums';
 import calendar_data from '@/stores/calendar-data';
 import { Component, Event, EventEmitter, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 /**
  * Dialog that lets staff set or change the half-board meal preference (lunch / dinner)
@@ -63,7 +64,7 @@ export class IrHbPreferenceDialog {
     return (
       <ir-dialog
         open={this.open}
-        label="Half-board 2nd Meal Preference"
+        label={t('Lcz_HalfBoard2ndMealPreference', { fallback: 'Half-board 2nd Meal Preference' })}
         ref={el => (this.dialogRef = el)}
         onIrDialogHide={e => {
           e.preventDefault();
@@ -78,15 +79,15 @@ export class IrHbPreferenceDialog {
         }}
       >
         <wa-radio-group value={this.selectedValue ?? ''} onchange={e => (this.selectedValue = (e.target as any).value)}>
-          <wa-radio value={HbPreference.Lunch}>Lunch</wa-radio>
-          <wa-radio value={HbPreference.Dinner}>Dinner</wa-radio>
+          <wa-radio value={HbPreference.Lunch}>{t('Lcz_Lunch', { fallback: 'Lunch' })}</wa-radio>
+          <wa-radio value={HbPreference.Dinner}>{t('Lcz_Dinner', { fallback: 'Dinner' })}</wa-radio>
         </wa-radio-group>
         <div slot="footer" class={'ir-dialog__footer'}>
           <ir-custom-button size="m" variant="neutral" appearance="filled" data-dialog="close">
-            Cancel
+            {t('Lcz_Cancel', { fallback: 'Cancel' })}
           </ir-custom-button>
           <ir-custom-button size="m" variant="brand" loading={this.isLoading} disabled={!this.selectedValue} onClickHandler={e => this.handleConfirm(e)} appearance="accent">
-            Confirm
+            {t('Lcz_Confirm', { fallback: 'Confirm' })}
           </ir-custom-button>
         </div>
       </ir-dialog>

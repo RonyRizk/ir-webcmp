@@ -19,7 +19,7 @@
 
 .cl-th {
   padding: 0.5rem 0.75rem;
-  text-align: left;
+  text-align: start;
   font-size: 0.75rem;
   font-weight: 600;
   /* letter-spacing: 0.06em; */
@@ -31,7 +31,7 @@
 }
 
 .cl-th--num {
-  text-align: right;
+  text-align: end;
 }
 
 /* ── Body cell ───────────────────────────────────────────────────────────── */
@@ -44,7 +44,7 @@
 }
 
 .cl-td--num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

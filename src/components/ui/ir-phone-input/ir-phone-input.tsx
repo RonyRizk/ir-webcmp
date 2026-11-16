@@ -1,8 +1,10 @@
 import { ICountry } from '@/components';
 import { BookingService } from '@/services/booking-service/booking.service';
-import locales from '@/stores/locales.store';
 import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, Watch, h } from '@stencil/core';
+import { LocaleController } from '@/services/locale/locale.controller';
 
+import { t } from '@/services/locale/t';
+import { normalizeNumericInput } from '@/utils/number';
 @Component({
   tag: 'ir-phone-input',
   styleUrl: 'ir-phone-input.css',
@@ -32,9 +34,9 @@ export class IrPhoneInput {
   @Prop() error: boolean = false;
 
   /**
-   * Auth token used by the booking service (if needed).
+   * Auth ApiClient used by the booking service (if needed).
    */
-  @Prop() token: string;
+  @Prop() ApiClient: string;
 
   /**
    * Two-letter language code used for country fetching.
@@ -123,7 +125,7 @@ export class IrPhoneInput {
 
   async componentWillLoad() {
     if (this.countries.length === 0) {
-      const countries = await this.bookingService.getCountries(this.language);
+      const countries = await this.bookingService.getCountries(LocaleController.language);
       this.countries = countries;
     }
     if (this.phone_prefix) {
@@ -156,13 +158,13 @@ export class IrPhoneInput {
   }
   /**
    * Handles user input:
-   * - Removes all characters except numbers and "+"
+   * - Converts Arabic-Indic digits to Latin, then removes all characters except numbers and "+"
    * - Updates state and emits new phone number
    */
   private handleInputChange(e: InputEvent) {
     let inputElement = e.target as HTMLInputElement;
     let inputValue = inputElement.value;
-    inputValue = inputValue.replace(/[^+\d]+/g, '');
+    inputValue = normalizeNumericInput(inputValue).replace(/[^+\d]+/g, '');
     inputElement.value = inputValue;
     this.inputValue = inputValue;
     this.textChange.emit({ phone_prefix: this.currentCountry?.phone_prefix, mobile: this.inputValue });
@@ -204,7 +206,7 @@ export class IrPhoneInput {
           <div class="phone-input__container">
             <wa-input class="phone-input__prefix" label={this.label} readonly>
               <button slot="start" type="button" onClick={() => (this.isDropdownVisible = !this.isDropdownVisible)} class="dropdown-trigger">
-                {this.currentCountry ? <img src={this.currentCountry?.flag} class="flag" /> : <p class="p-0 m-0 ">{locales.entries.Lcz_Select}</p>}
+                {this.currentCountry ? <img src={this.currentCountry?.flag} class="flag" /> : <p class="p-0 m-0 ">{t('Lcz_Select', { fallback: 'Select' })}</p>}
                 {this.currentCountry && <span>{this.currentCountry.phone_prefix}</span>}
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
                   <path d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
@@ -222,7 +224,7 @@ export class IrPhoneInput {
                 }}
                 class="bg-white"
                 autoFocus
-                placeholder="Search country"
+                placeholder={t('Lcz_SearchCountry', { fallback: 'Search country' })}
                 data={this.countries.map(c => ({
                   id: c.id.toString(),
                   name: `${c.name} (${c.phone_prefix})`,
@@ -236,7 +238,7 @@ export class IrPhoneInput {
     }
     return (
       <Host>
-        <div class="form-group mr-0">
+        <div class="form-group ir-me-0">
           {/* <p class="mb-0">Phone</p> */}
           <div class="input-group row m-0 p-0 position-relative">
             {showSideLabel && (
@@ -246,7 +248,7 @@ export class IrPhoneInput {
             )}
             <div class={'form-control  input-container  flex-fill' + (this.error ? ' is-invalid' : '')}>
               <button type="button" onClick={() => (this.isDropdownVisible = !this.isDropdownVisible)} class="dropdown-trigger">
-                {this.currentCountry ? <img src={this.currentCountry?.flag} class="flag" /> : <p class="p-0 m-0 ">{locales.entries.Lcz_Select}</p>}
+                {this.currentCountry ? <img src={this.currentCountry?.flag} class="flag" /> : <p class="p-0 m-0 ">{t('Lcz_Select', { fallback: 'Select' })}</p>}
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="12.25" viewBox="0 0 448 512">
                   <path d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
                 </svg>
@@ -284,7 +286,7 @@ export class IrPhoneInput {
                   }}
                   class="bg-white"
                   autoFocus
-                  placeholder="Search country"
+                  placeholder={t('Lcz_SearchCountry', { fallback: 'Search country' })}
                   data={this.countries.map(c => ({
                     id: c.id.toString(),
                     name: `${c.name} (${c.phone_prefix})`,

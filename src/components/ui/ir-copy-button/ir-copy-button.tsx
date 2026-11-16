@@ -1,4 +1,5 @@
 import { Component, Prop, State, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-copy-button',
@@ -19,13 +20,13 @@ export class IrCopyButton {
   private get tooltipMessage(): string {
     switch (this.currentState) {
       case 'loading':
-        return 'Copying...';
+        return t('Lcz_Copying', { fallback: 'Copying...' });
       case 'success':
-        return 'Copied to clipboard';
+        return t('Lcz_CopiedToClipboard', { fallback: 'Copied to clipboard' });
       case 'failed':
-        return 'Copy failed';
+        return t('Lcz_CopyFailed', { fallback: 'Copy failed' });
       default:
-        return 'Copy to clipboard';
+        return t('Lcz_CopyToClipboard', { fallback: 'Copy to clipboard' });
     }
   }
 

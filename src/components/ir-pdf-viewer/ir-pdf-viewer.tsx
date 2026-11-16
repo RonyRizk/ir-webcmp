@@ -1,6 +1,7 @@
 import { Component, Element, Host, Prop, State, Watch, h } from '@stencil/core';
 import { getDocument, GlobalWorkerOptions, RenderingCancelledException } from 'pdfjs-dist/build/pdf.mjs';
 import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from 'pdfjs-dist/types/src/pdf';
+import { t } from '@/services/locale/t';
 
 const RENDER_QUALITY = 2;
 const PDF_WORKER_URL = 'https://unpkg.com/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs';
@@ -23,7 +24,7 @@ export class IrPdfViewer {
   private loadingTask: PDFDocumentLoadingTask | null = null;
   private pdf: PDFDocumentProxy | null = null;
   private renderTask: RenderTask | null = null;
-  private loadToken = 0;
+  private loadApiClient = 0;
   private resizeObserver?: ResizeObserver;
   private resizeTimer?: number;
 
@@ -58,7 +59,7 @@ export class IrPdfViewer {
   }
 
   disconnectedCallback() {
-    this.loadToken++;
+    this.loadApiClient++;
     this.renderTask?.cancel();
     this.renderTask = null;
     this.pdf = null;
@@ -73,7 +74,7 @@ export class IrPdfViewer {
   }
 
   private async loadPdf(url: string) {
-    const token = ++this.loadToken;
+    const ApiClient = ++this.loadApiClient;
     this.isLoading = true;
     this.error = null;
     this.totalPages = 0;
@@ -88,24 +89,24 @@ export class IrPdfViewer {
       const task = getDocument({ url });
       this.loadingTask = task;
       const pdf = await task.promise;
-      if (token !== this.loadToken) {
+      if (ApiClient !== this.loadApiClient) {
         await task.destroy();
         return;
       }
 
       this.pdf = pdf;
       this.totalPages = pdf.numPages;
-      await this.renderPage(this.currentPage, token);
+      await this.renderPage(this.currentPage, ApiClient);
     } catch (err: unknown) {
-      if (token !== this.loadToken || isCancelled(err)) return;
+      if (ApiClient !== this.loadApiClient || isCancelled(err)) return;
       const msg = err instanceof Error ? err.message : String(err);
-      this.error = `Could not load PDF: ${msg}`;
+      this.error = `${t('Lcz_CouldNotLoadPdf', { fallback: 'Could not load PDF:' })} ${msg}`;
     } finally {
-      if (token === this.loadToken) this.isLoading = false;
+      if (ApiClient === this.loadApiClient) this.isLoading = false;
     }
   }
 
-  private async renderPage(pageNumber: number, token: number) {
+  private async renderPage(pageNumber: number, ApiClient: number) {
     const pdf = this.pdf;
     const canvas = this.canvasEl;
     if (!pdf || !canvas) return;
@@ -114,7 +115,7 @@ export class IrPdfViewer {
     this.renderTask = null;
 
     const page = await pdf.getPage(pageNumber);
-    if (token !== this.loadToken) return;
+    if (ApiClient !== this.loadApiClient) return;
 
     const hostW = this.el.clientWidth;
     if (hostW === 0) return;
@@ -147,23 +148,23 @@ export class IrPdfViewer {
     if (this.resizeTimer) window.clearTimeout(this.resizeTimer);
     this.resizeTimer = window.setTimeout(() => {
       this.resizeTimer = undefined;
-      this.renderPage(this.currentPage, this.loadToken);
+      this.renderPage(this.currentPage, this.loadApiClient);
     }, 120);
   }
 
   private async goTo(page: number) {
     if (!this.pdf || page < 1 || page > this.totalPages || this.isLoading) return;
-    const token = this.loadToken;
+    const ApiClient = this.loadApiClient;
     this.currentPage = page;
     this.isLoading = true;
     try {
-      await this.renderPage(page, token);
+      await this.renderPage(page, ApiClient);
     } catch (err: unknown) {
-      if (token !== this.loadToken || isCancelled(err)) return;
+      if (ApiClient !== this.loadApiClient || isCancelled(err)) return;
       const msg = err instanceof Error ? err.message : String(err);
-      this.error = `Could not render page: ${msg}`;
+      this.error = `${t('Lcz_CouldNotRenderPage', { fallback: 'Could not render page:' })} ${msg}`;
     } finally {
-      if (token === this.loadToken) this.isLoading = false;
+      if (ApiClient === this.loadApiClient) this.isLoading = false;
     }
   }
 
@@ -180,7 +181,10 @@ export class IrPdfViewer {
 
     return (
       <Host>
-        <canvas ref={this.setCanvasRef} class={{ hidden: !!error }}></canvas>
+        {/* The 2D context's `direction` defaults to `inherit`, so under an RTL page pdf.js's fillText
+            calls would right-align and bidi-reorder every glyph run. A PDF is a fixed physical layout:
+            pin the canvas to LTR. */}
+        <canvas dir="ltr" ref={this.setCanvasRef} class={{ hidden: !!error }}></canvas>
 
         {isLoading && (
           <div class="overlay">
@@ -197,14 +201,14 @@ export class IrPdfViewer {
 
         {totalPages > 1 && (
           <div class="pagination">
-            <button type="button" class="page-btn" aria-label="Previous page" disabled={atFirstPage} onClick={this.goToPrev}>
-              <wa-icon name="chevron-left"></wa-icon>
+            <button type="button" class="page-btn" aria-label={t('Lcz_PreviousPage', { fallback: 'Previous page' })} disabled={atFirstPage} onClick={this.goToPrev}>
+              <wa-icon class="ir-flip-rtl" name="chevron-left"></wa-icon>
             </button>
             <span class="page-label" aria-live="polite">
               {currentPage} / {totalPages}
             </span>
-            <button type="button" class="page-btn" aria-label="Next page" disabled={atLastPage} onClick={this.goToNext}>
-              <wa-icon name="chevron-right"></wa-icon>
+            <button type="button" class="page-btn" aria-label={t('Lcz_NextPage', { fallback: 'Next page' })} disabled={atLastPage} onClick={this.goToNext}>
+              <wa-icon class="ir-flip-rtl" name="chevron-right"></wa-icon>
             </button>
           </div>
         )}

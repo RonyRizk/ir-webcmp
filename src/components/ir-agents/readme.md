@@ -1,7 +1,5 @@
 # ir-agents
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -12,7 +10,7 @@
 | `language`   | `language`   | Two-letter language code (ISO) used for translations and API locale. Defaults to `'en'`.                                              | `string` | `'en'`      |
 | `p`          | `p`          | Property alias or short identifier used by backend endpoints (aname). Passed to `getExposedProperty` when initializing the component. | `string` | `undefined` |
 | `propertyid` | `propertyid` | ID of the property (hotel) for which arrivals should be displayed. Used in API calls related to rooms, bookings, and check-ins.       | `number` | `undefined` |
-| `ticket`     | `ticket`     | Authentication token issued by the PMS backend. Required for initializing the component and making API calls.                         | `string` | `undefined` |
+| `ticket`     | `ticket`     | Authentication ApiClient issued by the PMS backend. Required for initializing the component and making API calls.                     | `string` | `undefined` |
 
 
 ## Dependencies
@@ -61,8 +59,9 @@ graph TD;
   ir-country-picker --> ir-picker
   ir-country-picker --> ir-picker-item
   ir-country-picker --> ir-input-text
-  ir-agent-contract --> ir-validator
   ir-agent-contract --> ir-input
+  ir-agent-contract --> ir-empty-state
+  ir-agent-contract --> ir-validator
   ir-secure-tasks --> ir-agents
   style ir-agents fill:#f9f,stroke:#333,stroke-width:4px
 ```

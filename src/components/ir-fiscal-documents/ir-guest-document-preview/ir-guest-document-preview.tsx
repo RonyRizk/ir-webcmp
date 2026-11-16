@@ -2,6 +2,7 @@ import { Component, Host, Listen, Prop, State, h } from '@stencil/core';
 import { FdTypes } from '@/types/enums';
 import type { GuestDocumentPreviewRequest } from './types';
 import { PropertyService } from '@/services/property';
+import { t } from '@/services/locale/t';
 
 /**
  * Guest Fiscal Document Preview
@@ -82,7 +83,7 @@ export class IrGuestDocumentPreview {
   }
 
   private getDialogLabel(): string {
-    if (!this.request) return 'Preview';
+    if (!this.request) return t('Lcz_Preview', { fallback: 'Preview' });
     const typeLabel = this.getTypeLabel(this.request.fdTypeCode);
     return this.request.documentNumber ? `${typeLabel} #${this.request.creditNoteDocNumber ?? this.request.documentNumber}` : typeLabel;
   }
@@ -90,21 +91,21 @@ export class IrGuestDocumentPreview {
   private getTypeLabel(fdTypeCode: string): string {
     switch (fdTypeCode) {
       case FdTypes.Invoice:
-        return 'Invoice';
+        return t('Lcz_DocumentTypeInvoice', { fallback: 'Invoice' });
       case FdTypes.Draft:
-        return 'Draft Invoice';
+        return t('Lcz_DraftInvoice', { fallback: 'Draft Invoice' });
       case FdTypes.CreditNote:
-        return 'Credit Note';
+        return t('Lcz_DocumentTypeCreditNote', { fallback: 'Credit Note' });
       case FdTypes.DebitNote:
-        return 'Debit Note';
+        return t('Lcz_DocumentTypeDebitNote', { fallback: 'Debit Note' });
       case FdTypes.Receipt:
-        return 'Receipt';
+        return t('Lcz_DocumentTypeReceipt', { fallback: 'Receipt' });
       case FdTypes.Refund:
-        return 'Refund';
+        return t('Lcz_Refund', { fallback: 'Refund' });
       case FdTypes.Proforma:
-        return 'Proforma Invoice';
+        return t('Lcz_ProformaInvoice', { fallback: 'Proforma Invoice' });
       default:
-        return 'Document';
+        return t('Lcz_Document', { fallback: 'Document' });
     }
   }
 
@@ -140,7 +141,7 @@ export class IrGuestDocumentPreview {
         >
           {this.pdfUrl && (
             <ir-custom-button slot="header-actions" size="m" variant="neutral" appearance="plain" onClickHandler={() => this.handleDownload()}>
-              <wa-icon name="download" style={{ fontSize: '1.2rem' }} label="Download PDF"></wa-icon>
+              <wa-icon name="download" style={{ fontSize: '1.2rem' }} label={t('Lcz_DownloadPdfTooltip', { fallback: 'Download PDF' })}></wa-icon>
             </ir-custom-button>
           )}
           {this.renderBody()}

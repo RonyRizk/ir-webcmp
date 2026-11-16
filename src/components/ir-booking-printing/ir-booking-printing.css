@@ -17,8 +17,8 @@ span {
 .main-container {
   padding: 30px 15px;
   max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   /* background: white; */
 }
 .label-title {
@@ -27,8 +27,11 @@ span {
   color: rgb(51, 51, 51);
   font-weight: 700;
 }
+.label-title__text--capitalize {
+  text-transform: capitalize;
+}
 .label-value {
-  padding-left: 4px;
+  padding-inline-start: 4px;
   color: rgb(102, 102, 102);
   font-weight: 600;
 }
@@ -55,7 +58,7 @@ span {
 
 .roomtype-title td {
   padding-top: 25px;
-  padding-right: 10px;
+  padding-inline-end: 10px;
 }
 .policies {
   font-size: 14px;
@@ -80,7 +83,7 @@ span {
 .pricing-summary {
   width: 100%;
   text-align: end;
-  padding-left: 10px;
+  padding-inline-start: 10px;
   padding-bottom: 15px;
 }
 
@@ -137,7 +140,7 @@ span {
 }
 .billing_cell {
   /* padding: 10px; */
-  text-align: left;
+  text-align: start;
 }
 .billing_table {
   padding: 10px 0;
@@ -158,10 +161,10 @@ span {
 .car_name {
   color: #333;
   font-weight: bold;
-  padding-right: 10px;
+  padding-inline-end: 10px;
 }
 .pickup-details .label-title {
-  padding-right: 10px;
+  padding-inline-end: 10px;
 }
 .billing_reference {
   width: 40px;
@@ -210,4 +213,8 @@ span {
   .room_amount_rate {
     display: block;
   }
+}
+
+.accommodation-title {
+  text-transform: uppercase;
 }

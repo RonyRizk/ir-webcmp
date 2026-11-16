@@ -1,12 +1,13 @@
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { AuthService } from '@/services/authenticate.service';
-import { RoomService } from '@/services/room.service';
 import { SystemService } from '@/services/system.service';
-import locales from '@/stores/locales.store';
 import { CONSTANTS } from '@/utils/constants';
 import { Component, Element, Event, EventEmitter, Fragment, Listen, Prop, State, Watch, h } from '@stencil/core';
 import { z, ZodError } from 'zod';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-reset-password',
   styleUrls: ['ir-reset-password.css', '../../common/sheet.css'],
@@ -32,15 +33,14 @@ export class IrResetPassword {
 
   @Event() closeSideBar: EventEmitter<null>;
 
-  private token = new Token();
+  private ApiClient = new ApiClient();
   private authService = new AuthService();
   private systemService = new SystemService();
-  private roomService = new RoomService();
   private initialized = false;
 
   componentWillLoad() {
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
     }
   }
 
@@ -51,7 +51,7 @@ export class IrResetPassword {
   @Watch('ticket')
   handleTicketChange(oldValue: string, newValue: string) {
     if (oldValue !== newValue) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.init();
     }
   }
@@ -60,14 +60,12 @@ export class IrResetPassword {
     if (!this.ticket || this.initialized) {
       return;
     }
-    const [localized_words] = await Promise.all([
-      this.roomService.fetchLanguage(this.language, ['_USER_MGT']),
+    await Promise.all([
+      LocaleController.load({ language: this.language, tables: SCREEN_TABLES.resetPassword }),
       this.systemService.checkOTPNecessity({
         METHOD_NAME: 'Change_User_Pwd',
       }),
     ]);
-    locales.entries = localized_words.entries;
-    locales.direction = localized_words.direction;
     this.initialized = false;
   }
 
@@ -83,7 +81,7 @@ export class IrResetPassword {
           }
           return password === this.password;
         },
-        { message: 'Password must be at least 8 characters long.' },
+        { message: t('Lcz_PasswordMinLength', { fallback: 'Password must be at least 8 characters long.' }) },
       ),
   });
 
@@ -152,7 +150,7 @@ export class IrResetPassword {
             </Fragment>
           )}
           <form onSubmit={this.handleChangePassword.bind(this)} class={{ 'sheet-container': insideSidebar }}>
-            {insideSidebar && <ir-title class="px-1 sheet-header" displayContext="sidebar" label={'Change Password'}></ir-title>}
+            {insideSidebar && <ir-title class="px-1 sheet-header" displayContext="sidebar" label={t('Lcz_ChangePassword', { fallback: 'Change Password' })}></ir-title>}
             <div class={{ 'form-container': true, 'sheet-body px-1': insideSidebar, 'px-2': !insideSidebar }}>
               <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height={24} width={24}>
                 <path
@@ -161,11 +159,11 @@ export class IrResetPassword {
                 />
               </svg>
               <div class="text-center mb-2">
-                <h4 class="mb-1">{locales?.entries?.Lcz_SetNewPassword}</h4>
+                <h4 class="mb-1">{t('Lcz_SetNewPassword')}</h4>
                 {this.submitted ? (
-                  <p>An email has been sent to your address. Please check your inbox to confirm the password change.</p>
+                  <p>{t('Lcz_EmailSentConfirmPasswordChange', { fallback: 'An email has been sent to your address. Please check your inbox to confirm the password change.' })}</p>
                 ) : (
-                  <p>Your new password must be different to previously used password</p>
+                  <p>{t('Lcz_NewPasswordMustBeDifferent', { fallback: 'Your new password must be different to previously used password' })}</p>
                 )}
               </div>
               {!this.submitted && (
@@ -179,7 +177,7 @@ export class IrResetPassword {
                             passwordToggle
                             onText-change={e => (this.password = e.detail)}
                             onInputFocus={() => (this.showValidator = true)}
-                            placeholder={locales.entries?.Lcz_NewPassword}
+                            placeholder={t('Lcz_NewPassword', { fallback: 'New password' })}
                             value={this.password}
                           ></ir-input>
                         </ir-validator>
@@ -192,7 +190,7 @@ export class IrResetPassword {
                           type="password"
                           passwordToggle
                           onText-change={e => (this.confirmPassword = e.detail)}
-                          placeholder={locales.entries?.Lcz_ConfirmPassword}
+                          placeholder={t('Lcz_ConfirmPassword', { fallback: 'Confirm password' })}
                           value={this.confirmPassword}
                         ></ir-input>
                       </ir-validator>
@@ -205,12 +203,12 @@ export class IrResetPassword {
                         // btn_styles={'flex-fill'}
                         onClickHandler={() => window.history.back()}
                         class="flex-fill"
-                        // text={locales.entries?.Lcz_Cancel}
+                        // text={t('Lcz_Cancel', { fallback: 'Cancel' })}
                         size="m"
                         appearance="filled"
                         variant="neutral"
                       >
-                        {locales.entries?.Lcz_Cancel}
+                        {t('Lcz_Cancel', { fallback: 'Cancel' })}
                       </ir-custom-button>
                       <ir-custom-button
                         // btn_styles={'flex-fill'}
@@ -220,7 +218,7 @@ export class IrResetPassword {
                         size="m"
                         variant="brand"
                       >
-                        {locales.entries?.Lcz_ChangePassword}
+                        {t('Lcz_ChangePassword', { fallback: 'Change Password' })}
                       </ir-custom-button>
                     </div>
                   )}
@@ -230,10 +228,10 @@ export class IrResetPassword {
             {insideSidebar && (
               <div class={'sheet-footer w-full'}>
                 <ir-custom-button onClickHandler={() => this.closeSideBar.emit(null)} class="flex-fill" appearance="filled" variant="neutral" size="m">
-                  {locales.entries.Lcz_Cancel}
+                  {t('Lcz_Cancel', { fallback: 'Cancel' })}
                 </ir-custom-button>
                 <ir-custom-button variant="brand" loading={this.isLoading} class="flex-fill" type="submit" size="m">
-                  {locales.entries.Lcz_ChangePassword}
+                  {t('Lcz_ChangePassword', { fallback: 'Change Password' })}
                 </ir-custom-button>
               </div>
             )}

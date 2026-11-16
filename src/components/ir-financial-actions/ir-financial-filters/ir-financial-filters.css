@@ -5,7 +5,7 @@
 .financial-filter__date-picker-icon {
   position: absolute;
   inset: 0;
-  left: 0.75rem;
+  inset-inline-start: 0.75rem;
   display: flex;
   align-items: center;
   width: fit-content;
@@ -25,4 +25,13 @@
   #financialFilterCollapse.collapse:not(.show) {
     display: block;
   }
+}
+
+/* Logical replacements for the Bootstrap 4 directional utilities this
+   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
+.ir-me-1 {
+  margin-inline-end: 0.25rem;
+}
+.ir-text-start {
+  text-align: start;
 }

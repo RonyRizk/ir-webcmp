@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-2xs);
+}
+
+/* Header: label at the start, Translate action at the end. */
+.field__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wa-space-s);
+  min-block-size: 1.75rem;
+}
+
+.field__label {
+  color: var(--wa-form-control-label-color);
+  font-weight: var(--wa-form-control-label-font-weight);
+  line-height: var(--wa-form-control-label-line-height);
+  font-size: var(--wa-font-size-s);
+}
+
+.field__required {
+  color: var(--wa-form-control-required-content-color);
+  margin-inline-start: var(--wa-form-control-required-content-offset, 0.1em);
+}
+
+.translate-trigger::part(base) {
+  padding-inline: var(--wa-space-xs);
+}
+
+/* The header label above already names the inline control; keep the textarea label for assistive tech only. */
+.textarea--source::part(label) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.textarea--invalid {
+  --wa-form-control-border-color: var(--wa-color-danger-border-loud);
+}
+
+.textarea--invalid::part(hint) {
+  color: var(--wa-color-danger-on-quiet);
+}
+
+/* Translation editor dialog: wide enough for the side-by-side columns. */
+.editor {
+  --ir-dialog-width: min(64rem, 100vw - 2rem);
+}

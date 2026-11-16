@@ -2,6 +2,7 @@ import { Component, Element, Event, EventEmitter, Prop, h } from '@stencil/core'
 import { v4 } from 'uuid';
 import { ZodType } from 'zod';
 import IMask, { InputMask } from 'imask';
+import { withLatinDigits } from '../ir-input/masks';
 @Component({
   tag: 'ir-price-input',
   styleUrl: 'ir-price-input.css',
@@ -126,7 +127,7 @@ export class IrPriceInput {
       maskOpts['max'] = this.maxValue;
     }
 
-    this.mask = IMask(this.inputRef, maskOpts);
+    this.mask = IMask(this.inputRef, withLatinDigits(maskOpts));
 
     // Set initial value if provided
     if (this.value) {

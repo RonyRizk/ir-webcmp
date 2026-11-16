@@ -23,7 +23,7 @@ export interface CalendarDataDetails {
   is_frontdesk_enabled: boolean;
   id: number;
   name: string;
-  token: string;
+  ApiClient: string;
   tax_statement: string;
   country: ICountry;
   is_pms_enabled: boolean;

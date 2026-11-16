@@ -14,22 +14,22 @@
 
 .ir-bl-lbl-none,
 .ir-bl-input-none {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
 }
 .rate-input:read-only {
   background: white !important;
 }
 .ir-br-lbl-none,
 .ir-br-input-none {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
 }
 .ir-br-none {
-  border-right: none;
+  border-inline-end: none;
 }
 .ir-bl-none {
-  border-left: none;
+  border-inline-start: none;
 }
 
 .rate-input-container {
@@ -49,10 +49,10 @@
   padding: 0;
   height: 0;
   box-sizing: border-box;
-  border-left: 0;
-  padding-left: 0px !important;
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
+  border-inline-start: 0;
+  padding-inline-start: 0px !important;
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
 }
 
 .currency-label.with-label {
@@ -66,11 +66,13 @@
   font-size: 0.875rem;
   height: 2rem;
   background: white;
-  border-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-inline-end: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
   pointer-events: none;
-  transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  transition:
+    border-color 0.15s ease-in-out,
+    -webkit-box-shadow 0.15s ease-in-out;
 }
 .currency-label.disabled,
 .rate-input:disabled {
@@ -81,7 +83,7 @@
 .price-input-group:focus-within .currency-label {
   border-top: 1px solid #1e9ff2;
   border-bottom: 1px solid #1e9ff2;
-  border-left: 1px solid #1e9ff2;
+  border-inline-start: 1px solid #1e9ff2;
 }
 :host([data-state='error']) .currency-label,
 :host([data-state='error']) .rate-input,
@@ -89,7 +91,7 @@
   border-color: var(--red, #ff4961) !important;
 }
 .price-input:focus {
-  border-right-width: 1px !important;
+  border-inline-end-width: 1px !important;
 }
 
 .is-invalid {

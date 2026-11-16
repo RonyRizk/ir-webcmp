@@ -1,11 +1,13 @@
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { PropertyService } from '@/services/property.service';
 import type { AllowedProperties } from '@/services/property/types';
-import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
 import moment from 'moment';
 import { ChannelReport, ChannelReportResult, ChannelSaleFilter, SalesByChannelMode } from './types';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-sales-by-channel',
   styleUrl: 'ir-sales-by-channel.css',
@@ -26,8 +28,7 @@ export class IrSalesByChannel {
   @State() allowedProperties: AllowedProperties = [];
   @State() propertyID: number;
 
-  private token = new Token();
-  private roomService = new RoomService();
+  private ApiClient = new ApiClient();
   private propertyService = new PropertyService();
 
   private baseFilters: ChannelSaleFilter = {
@@ -39,12 +40,28 @@ export class IrSalesByChannel {
     is_export_to_excel: false,
   };
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.salesByChannel, () => this.initializeApp());
+
   componentWillLoad() {
     this.channelSalesFilters = this.baseFilters;
     if (this.ticket) {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
+  }
+
+  disconnectedCallback() {
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Watch('ticket')
@@ -52,13 +69,16 @@ export class IrSalesByChannel {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
   private async initializeApp() {
     try {
       this.isPageLoading = true;
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.salesByChannel });
       if (!this.mode) {
         throw new Error("Missing required 'mode'. Please set it to either 'property' or 'mpo'.");
       }
@@ -69,12 +89,12 @@ export class IrSalesByChannel {
         const property = await this.propertyService.getExposedProperty({
           id: Number(this.propertyid ?? 0),
           aname: this.p,
-          language: this.language,
+          language: LocaleController.language,
           is_backend: true,
         });
         this.propertyID = property.My_Result.id;
       }
-      const requests: Promise<unknown>[] = [, this.roomService.fetchLanguage(this.language)];
+      const requests: Promise<unknown>[] = [localeReady];
       if (this.mode === 'mpo') {
         requests.unshift(this.propertyService.getExposedAllowedProperties());
         const [properties] = await Promise.all(requests);
@@ -227,7 +247,7 @@ export class IrSalesByChannel {
     }
     return (
       <Host>
-        <ir-page label="Sales by Source">
+        <ir-page label={t('Lcz_SalesBySource', { fallback: 'Sales by Source' })}>
           <ir-custom-button
             slot="page-header"
             variant="neutral"
@@ -240,7 +260,7 @@ export class IrSalesByChannel {
             }}
           >
             <wa-icon name="download" slot="start"></wa-icon>
-            {locales.entries?.Lcz_Export}
+            {t('Lcz_Export', { fallback: 'Export' })}
           </ir-custom-button>
           <ir-sales-by-channel-summary filters={this.channelSalesFilters} records={this.salesData}></ir-sales-by-channel-summary>
           <div class="channel-content-row">

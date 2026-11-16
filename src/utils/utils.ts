@@ -1,65 +1,24 @@
 import moment, { MomentFormatSpecification } from 'moment';
-import IBooking, { ICountry, IEntries, PhysicalRoomType, PropertyRoomType } from '../models/IBooking';
+import IBooking, { ICountry, PhysicalRoomType, PropertyRoomType } from '../models/IBooking';
 import { z } from 'zod';
 import calendarData, { calendar_data } from '@/stores/calendar-data';
-import locales from '@/stores/locales.store';
 import { Booking, ROOM_IN_OUT } from '@/models/booking.dto';
-import { GroupedTableEntries } from '@/services/booking-service/types';
 import { Toast } from '@/components/ir-toast-provider/ir-toast-provider';
 import { TPositions } from '@/components/ui/ir-toast/toast';
+import { formatDate } from '@/utils/date';
 import { nightsBetween } from './calendar-dates';
 
-/** Supported language codes that map to `CODE_VALUE_*` fields on {@link IEntries}. */
-export type EntryLanguage = 'en' | 'ar' | 'de' | 'el' | 'fr' | 'he' | 'pl' | 'ru' | 'ua';
-
-const LANGUAGE_KEY_MAP: Record<EntryLanguage, keyof IEntries> = {
-  en: 'CODE_VALUE_EN',
-  ar: 'CODE_VALUE_AR',
-  de: 'CODE_VALUE_DE',
-  el: 'CODE_VALUE_EL',
-  fr: 'CODE_VALUE_FR',
-  he: 'CODE_VALUE_HE',
-  pl: 'CODE_VALUE_PL',
-  ru: 'CODE_VALUE_RU',
-  ua: 'CODE_VALUE_UA',
-};
-
-/**
- * Returns the localised display string for an {@link IEntries} entry.
- *
- * Resolution order:
- * 1. `CODE_VALUE_<language>` — if present and non-empty.
- * 2. `CODE_VALUE_EN` — English fallback.
- * 3. `CODE_NAME` — last-resort fallback when both the requested language
- *    and English values are absent.
- *
- * @param entry - The `IEntries` object to translate.
- * @param language - BCP-47-style language code (e.g. `"fr"`, `"ar"`).
- *   Defaults to `"en"`.
- * @returns The best available display string for the requested language.
- *
- * @example
- * ```ts
- * const label = getEntryValue({ entry: someEntry, language: 'fr' });
- * // → "Petit-déjeuner" (falls back to "Breakfast" if French is null)
- * ```
- */
-export function getEntryValue({ entry, language = 'en' }: { entry: IEntries; language?: string }): string {
-  const key = LANGUAGE_KEY_MAP[language] ?? 'CODE_VALUE_EN';
-  const localised = entry[key] as string | null;
-
-  if (localised) return localised;
-
-  const english = entry['CODE_VALUE_EN'] as string | null;
-  if (english) return english;
-
-  return entry.CODE_NAME;
-}
+import { t } from '@/services/locale/t';
 
 export interface SelectOption {
   text: string;
   value: string;
   custom_text: string | null;
+}
+
+/** Display label for a rate plan option; `custom_text` is appended only when it has a value. */
+export function rateplanOptionLabel({ text, custom_text }: SelectOption): string {
+  return custom_text ? `${text} | ${custom_text}` : text;
 }
 
 interface CheckMealPlanParams {
@@ -144,7 +103,7 @@ export function checkMealPlan({ rateplan_id, roomTypes, roomTypeId }: CheckMealP
       value: rp.id.toString(),
     };
   }
-  const nonRefundableLabel = locales?.entries?.Lcz_NonRefundable ?? 'Non-Refundable';
+  const nonRefundableLabel = t('Lcz_NonRefundable', { fallback: 'Non-Refundable' });
   const seen = new Set<number>();
   const options: SelectOption[] = [];
   for (const rp of roomtype.rateplans) {
@@ -287,18 +246,14 @@ export function getReleaseHoursString(releaseDate: number) {
   };
 }
 
-export function formatDate(dateString, option = 'DD MMM YYYY') {
-  const formattedDate = moment(dateString, option).format('ddd, DD MMM YYYY');
-  return formattedDate;
-}
-
+/** Row label for the per-night price breakdown — display only. */
 export function convertDatePrice(date: string) {
-  return moment(date, 'YYYY-MM-DD').format('DD/MM ddd');
+  return formatDate(date, 'DD/MM ddd');
 }
 export function getDaysArray(date1: string, date2: string) {
   let dates = [];
-  let start = moment.min(moment(date1).add(1, 'days'), moment(date2));
-  let end = moment.max(moment(date1), moment(date2));
+  let start = moment.min(moment(date1, 'YYYY-MM-DD').add(1, 'days'), moment(date2, 'YYYY-MM-DD'));
+  let end = moment.max(moment(date1, 'YYYY-MM-DD'), moment(date2, 'YYYY-MM-DD'));
   while (start < end) {
     dates.push(start.format('YYYY-MM-DD'));
     start = start.clone().add(1, 'days');
@@ -333,9 +288,15 @@ export function validateEmail(email: string) {
   const parsedEmailResults = z.string().email().safeParse(email);
   return !parsedEmailResults.success;
 }
-export function formatAmount(currency: string, amount: number = 0) {
-  return `${amount < 0 ? '- ' : ''}${currency} ${Math.abs(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+/**
+ * Re-exported from `@/utils/number` so the ~135 existing call sites pick up locale- and
+ * digit-script-aware formatting without changing. Previously this used `toLocaleString(undefined,
+ * …)`, i.e. the *browser's* locale rather than the app's — so a French browser rendered
+ * `1 234,50` inside an English UI. It now follows the app's active language.
+ */
+// NB: relative, not `@/utils/number` — Stencil's transpiler rewrites tsconfig path
+// aliases on `import` statements but not on re-exports, so the alias fails under jest.
+export { formatAmount } from './number';
 /**
  * Determines whether the given user has privileged (global or elevated) access.
  *
@@ -545,6 +506,9 @@ export function handleBodyOverflow(open: boolean) {
     }
   }
 }
+export function isAlpha() {
+  return typeof window !== 'undefined' && (window as Window & { environment?: string }).environment === 'alpha';
+}
 export function generatePassword(length = 16): string {
   const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789' + '!@#$%^&*()-_=+[]{}|;:,.<>?';
 
@@ -603,17 +567,4 @@ export function isWeekend(date: string, format: MomentFormatSpecification = 'YYY
 export function getFormSubmitter(e: Event): string {
   const submitter = (e as SubmitEvent).submitter as any | null;
   return submitter.value;
-}
-export function groupEntryTablesResult(entries: IEntries[]): GroupedTableEntries {
-  let result: any = {};
-  for (const entry of entries) {
-    if (!entry.TBL_NAME) continue;
-    const key = entry.TBL_NAME.startsWith('_') ? entry.TBL_NAME.substring(1).toLowerCase() : entry.TBL_NAME.toLowerCase();
-
-    if (!result[key]) {
-      result[key] = [];
-    }
-    result[key] = [...result[key], entry];
-  }
-  return result as GroupedTableEntries;
 }

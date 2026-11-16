@@ -6,9 +6,9 @@
      sits at 0,0,0 specificity — any utility class or element rule the author
      applies inside the container takes precedence without weight tricks. */
   :where(.wa-prose) {
-    /* #region Tokens ~~~~~~~~~~~~ */
+    /* #region ApiClients ~~~~~~~~~~~~ */
 
-    /* Em-based rhythm scale: each token resolves at the use site, so margins
+    /* Em-based rhythm scale: each ApiClient resolves at the use site, so margins
        scale with the element's own font-size. `--wa-prose-rhythm-scale` is a
        single knob to tighten or loosen everything at once. */
     --wa-prose-rhythm-scale: 1;

@@ -2,6 +2,8 @@ import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { IPaymentAction } from '@/services/payment.service';
 import { formatAmount } from '@/utils/utils';
 import moment from 'moment';
+import { formatDate } from '@/utils/date';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-payment-action',
@@ -38,19 +40,21 @@ export class IrPaymentAction {
                   d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"
                 />
               </svg>
-              <span class="alert-message">{moment(new Date(this.paymentAction.due_on)).isSame(new Date()) ? 'Today' : 'Future'}</span>
+              <span class="alert-message">
+                {moment(new Date(this.paymentAction.due_on)).isSame(new Date()) ? t('Lcz_Today', { fallback: 'Today' }) : t('Lcz_FutureLabel', { fallback: 'Future' })}
+              </span>
             </div>
           )}
           <div class="meta-grid">
             <div class="payment-meta">
               <p class="amount_action">{formatAmount(this.paymentAction.currency.symbol, this.paymentAction.amount)}</p>
-              <p class="date_action">{moment(new Date(this.paymentAction.due_on)).format('ddd, MMM DD YYYY')}</p>
+              <p class="date_action">{formatDate(new Date(this.paymentAction.due_on), 'ddd, MMM DD YYYY')}</p>
             </div>
             {/* <p class="payment-reason">{this.paymentAction.reason.trim()}</p> */}
           </div>
         </div>
         <div style={{ width: 'fit-content' }}>
-          <ir-button btn_color="dark" text={'Pay'} size="sm" onClickHandler={() => this.generatePayment.emit(this.paymentAction)}></ir-button>
+          <ir-button btn_color="dark" text={t('Lcz_Pay', { fallback: 'Pay' })} size="sm" onClickHandler={() => this.generatePayment.emit(this.paymentAction)}></ir-button>
         </div>
       </div>
     );

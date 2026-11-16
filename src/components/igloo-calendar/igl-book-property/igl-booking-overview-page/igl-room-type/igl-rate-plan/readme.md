@@ -7,17 +7,17 @@
 
 ## Properties
 
-| Property                        | Attribute            | Description | Type                                              | Default          |
-| ------------------------------- | -------------------- | ----------- | ------------------------------------------------- | ---------------- |
-| `bookingType`                   | `booking-type`       |             | `string`                                          | `'PLUS_BOOKING'` |
-| `currency` _(required)_         | --                   |             | `{ symbol: string; }`                             | `undefined`      |
-| `isBookDisabled`                | `is-book-disabled`   |             | `boolean`                                         | `false`          |
-| `ratePlan`                      | --                   |             | `RatePlan`                                        | `undefined`      |
-| `ratePricingMode`               | --                   |             | `{ CODE_NAME: string; CODE_VALUE_EN: string; }[]` | `[]`             |
-| `roomTypeId`                    | `room-type-id`       |             | `number`                                          | `undefined`      |
-| `shouldBeDisabled` _(required)_ | `should-be-disabled` |             | `boolean`                                         | `undefined`      |
-| `unavailableRatePlanIds`        | --                   |             | `Set<number>`                                     | `new Set()`      |
-| `visibleInventory` _(required)_ | --                   |             | `IRatePlanSelection`                              | `undefined`      |
+| Property                        | Attribute            | Description | Type                  | Default          |
+| ------------------------------- | -------------------- | ----------- | --------------------- | ---------------- |
+| `bookingType`                   | `booking-type`       |             | `string`              | `'PLUS_BOOKING'` |
+| `currency` _(required)_         | --                   |             | `{ symbol: string; }` | `undefined`      |
+| `isBookDisabled`                | `is-book-disabled`   |             | `boolean`             | `false`          |
+| `ratePlan`                      | --                   |             | `RatePlan`            | `undefined`      |
+| `ratePricingMode`               | --                   |             | `SetupEntries[]`      | `[]`             |
+| `roomTypeId`                    | `room-type-id`       |             | `number`              | `undefined`      |
+| `shouldBeDisabled` _(required)_ | `should-be-disabled` |             | `boolean`             | `undefined`      |
+| `unavailableRatePlanIds`        | --                   |             | `Set<number>`         | `new Set()`      |
+| `visibleInventory` _(required)_ | --                   |             | `IRatePlanSelection`  | `undefined`      |
 
 
 ## Events

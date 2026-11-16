@@ -1,9 +1,11 @@
 import { Component, h, Prop, Event, EventEmitter, Fragment } from '@stencil/core';
 import { Booking, IUnit, Occupancy, Room, SharedPerson } from '@/models/booking.dto';
-import locales from '@/stores/locales.store';
 import calendar_data, { isSingleUnit } from '@/stores/calendar-data';
-import { IEntries } from '@/models/IBooking';
+import { SetupEntries } from '@/models/IBooking';
 
+import { t } from '@/services/locale/t';
+import { getSetupEntryLabel } from '@/services/setup';
+import { formatCount } from '@/utils/number';
 @Component({
   tag: 'ir-room-details',
   styleUrl: 'ir-room-details.css',
@@ -13,7 +15,7 @@ export class IrRoomDetails {
   @Prop() room: Room;
   @Prop() booking: Booking;
   @Prop() mainGuest: SharedPerson;
-  @Prop() bedPreferences: IEntries[];
+  @Prop() bedPreferences: SetupEntries[];
   @Prop() language: string = 'en';
   @Prop() includeDepartureTime: boolean;
   @Prop() hasCheckIn: boolean = false;
@@ -30,19 +32,19 @@ export class IrRoomDetails {
     const childCount = children_nbr > 0 ? children_nbr : 0;
     const infantCount = infant_nbr > 0 ? infant_nbr : 0;
 
-    const adultLabel = adultCount > 1 ? locales.entries.Lcz_Adults.toLowerCase() : locales.entries.Lcz_Adult.toLowerCase();
-    const childLabel = childCount > 1 ? locales.entries.Lcz_Children.toLowerCase() : locales.entries.Lcz_Child.toLowerCase();
-    const infantLabel = infantCount > 1 ? locales.entries.Lcz_Infants.toLowerCase() : locales.entries.Lcz_Infant.toLowerCase();
+    const adultLabel = adultCount > 1 ? t('Lcz_Adults', { fallback: 'adults' }).toLowerCase() : t('Lcz_Adult', { fallback: 'adult' }).toLowerCase();
+    const childLabel = childCount > 1 ? t('Lcz_Children', { fallback: 'Children' }).toLowerCase() : t('Lcz_Child', { fallback: 'Child' }).toLowerCase();
+    const infantLabel = infantCount > 1 ? t('Lcz_Infants').toLowerCase() : t('Lcz_Infant').toLowerCase();
 
     const parts = [];
     if (adultCount > 0) {
-      parts.push(`${adultCount} ${adultLabel}`);
+      parts.push(`${formatCount(adultCount)} ${adultLabel}`);
     }
     if (childCount > 0) {
-      parts.push(`${childCount} ${childLabel}`);
+      parts.push(`${formatCount(childCount)} ${childLabel}`);
     }
     if (infantCount > 0) {
-      parts.push(`${infantCount} ${infantLabel}`);
+      parts.push(`${formatCount(infantCount)} ${infantLabel}`);
     }
 
     return parts.join('&nbsp&nbsp&nbsp&nbsp');
@@ -54,7 +56,7 @@ export class IrRoomDetails {
       if (!bed) {
         return;
       }
-      return bed[`CODE_VALUE_${this.language}`] ?? bed.CODE_VALUE_EN;
+      return getSetupEntryLabel(bed, this.language);
     }
     return this.room.ota_meta?.bed_preferences;
   }
@@ -65,7 +67,7 @@ export class IrRoomDetails {
       <Fragment>
         <div class="booking-room__dates-row">
           <ir-date-view
-            format={'ddd, MMM DD, YYYY'}
+            format={'weekday-medium'}
             class="booking-room__date-view"
             from_date={this.room.from_date}
             to_date={this.room.to_date}
@@ -74,12 +76,12 @@ export class IrRoomDetails {
           {!isSingleUnit(this.room.roomtype.id) && calendar_data.is_frontdesk_enabled && this.room.unit && <ir-unit-tag unit={(this.room.unit as IUnit).name}></ir-unit-tag>}
           {this.hasCheckIn && (
             <ir-custom-button onClickHandler={() => this.checkIn.emit()} id="checkin" appearance="outlined" variant="brand">
-              {locales.entries.Lcz_CheckIn}
+              {t('Lcz_CheckIn', { fallback: 'Check in' })}
             </ir-custom-button>
           )}
           {this.hasCheckOut && (
             <ir-custom-button appearance="outlined" variant="brand" onClickHandler={() => this.checkOut.emit()} id="checkout">
-              {locales.entries.Lcz_CheckOut}
+              {t('Lcz_CheckOut', { fallback: 'Check out' })}
             </ir-custom-button>
           )}
         </div>
@@ -87,7 +89,7 @@ export class IrRoomDetails {
           <p class="booking-room__text-reset booking-room__guest-name">{`${this.mainGuest.first_name || ''} ${this.mainGuest.last_name || ''}`}</p>
           {this.room.rateplan.selected_variation.adult_nbr > 0 && (
             <Fragment>
-              <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>View guests</wa-tooltip>
+              <wa-tooltip for={`view-guest-btn-${this.room.identifier}`}>{t('Lcz_ViewGuests', { fallback: 'View guests' })}</wa-tooltip>
               <ir-custom-button link onClickHandler={() => this.viewGuests.emit()} id={`view-guest-btn-${this.room.identifier}`} variant="brand" appearance="plain">
                 <span innerHTML={this.formatVariation(this.room.occupancy)}></span>
               </ir-custom-button>
@@ -99,17 +101,17 @@ export class IrRoomDetails {
           <div class="booking-room__departure-row">
             {/* {this.booking.is_direct && ( */}
             <div class="booking-room__time-item">
-              <span class="booking-room__departure-label">Expected arrival time:</span>
+              <span class="booking-room__departure-label">{t('Lcz_ExpectedArrivalTime', { fallback: 'Expected Arrival Time' })}:</span>
               <ir-custom-button link appearance="plain" variant="brand" onClickHandler={() => this.openArrivalDialog.emit()}>
-                {this.room.arrival_time?.description || 'Not provided'}
+                {this.room.arrival_time?.description || t('Lcz_NotProvided', { fallback: 'Not provided' })}
               </ir-custom-button>
             </div>
             {/* )} */}
             {this.includeDepartureTime && (
               <div class="booking-room__time-item">
-                <span class="booking-room__departure-label">Departure time:</span>
+                <span class="booking-room__departure-label">{t('Lcz_DepartureTime', { fallback: 'Departure time:' })}</span>
                 <ir-custom-button link appearance="plain" variant="brand" onClickHandler={() => this.openDepartureDialog.emit()}>
-                  {this.room.departure_time?.description || 'Not provided'}
+                  {this.room.departure_time?.description || t('Lcz_NotProvided', { fallback: 'Not provided' })}
                 </ir-custom-button>
               </div>
             )}

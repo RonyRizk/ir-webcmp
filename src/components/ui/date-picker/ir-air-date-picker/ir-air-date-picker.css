@@ -1,4 +1,5 @@
 @import url('../../../../assets/air-datepicker.css');
+@import url('../../../../common/air-datepicker-rtl.css');
 :host {
   display: block;
 }

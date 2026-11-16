@@ -100,7 +100,7 @@ export interface ICountry {
   flag: string;
   code?: string;
 }
-export const ZIEntrySchema = z
+export const SetupEntrySchema = z
   .object({
     CODE_NAME: z.string(),
     CODE_VALUE_AR: z.string().nullable(),
@@ -127,7 +127,7 @@ export const ZIEntrySchema = z
   })
   .passthrough();
 
-export type IEntries = {
+export type SetupEntries = {
   CODE_NAME: string;
   CODE_VALUE_AR: string;
   CODE_VALUE_DE: string;
@@ -152,9 +152,9 @@ export type IEntries = {
   TBL_NAME: string;
 };
 export interface ISetupEntries {
-  arrivalTime: IEntries[];
-  ratePricingMode: IEntries[];
-  bedPreferenceType: IEntries[];
+  arrivalTime: SetupEntries[];
+  ratePricingMode: SetupEntries[];
+  bedPreferenceType: SetupEntries[];
 }
 
 export interface CalendarData {

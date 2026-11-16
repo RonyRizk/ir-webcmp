@@ -1,4 +1,5 @@
 import { Component, Host, Prop, h } from '@stencil/core';
+import { t } from '@/services/locale/t';
 
 @Component({
   tag: 'ir-empty-state',
@@ -6,7 +7,7 @@ import { Component, Host, Prop, h } from '@stencil/core';
   shadow: true,
 })
 export class IrEmptyState {
-  @Prop() message: string = 'No records found';
+  @Prop() message: string;
   @Prop() showIcon: boolean = true;
   render() {
     return (
@@ -19,7 +20,7 @@ export class IrEmptyState {
           )}
         </slot>
         <p part="message" class={`message ${this.showIcon ? '' : '--secondary'}`}>
-          {this.message}
+          {this.message || t('Lcz_NoRecordsFound', { fallback: 'No records found' })}
         </p>
         <slot></slot>
       </Host>

@@ -1,6 +1,8 @@
 import { Component, Prop, h } from '@stencil/core';
 import { ChannelReport, ChannelReportResult, ChannelSaleFilter } from '../types';
 import { calculateTrend, formatAmount } from '@/utils/utils';
+import { t } from '@/services/locale/t';
+import { formatCount } from '@/utils/number';
 
 @Component({
   tag: 'ir-sales-by-channel-summary',
@@ -31,22 +33,22 @@ export class IrSalesByChannelSummary {
         <ir-metric-card
           class="summary-metric"
           icon="moon"
-          label="Total Room Nights"
-          value={totalNights.toString()}
+          label={t('Lcz_TotalRoomNights', { fallback: 'Total Room Nights' })}
+          value={formatCount(totalNights)}
           trend={hasLastYear ? calculateTrend(totalNights, lastYearNights) : undefined}
-          trendLabel="vs last year"
-          caption={hasLastYear ? `Last year: ${lastYearNights}` : undefined}
+          trendLabel={t('Lcz_VsLastYear', { fallback: 'vs last year' })}
+          caption={hasLastYear ? `${t('Lcz_LastYear', { fallback: 'Last year:' })} ${formatCount(lastYearNights)}` : undefined}
         ></ir-metric-card>
         <ir-metric-card
           class="summary-metric"
           icon="money-bill"
-          label="Total Revenue"
+          label={t('Lcz_TotalRevenue', { fallback: 'Total Revenue' })}
           value={formatAmount(currency, totalRevenue)}
           trend={hasLastYear ? calculateTrend(totalRevenue, lastYearRevenue) : undefined}
-          trendLabel="vs last year"
-          caption={hasLastYear ? `Last year: ${formatAmount(currency, lastYearRevenue)}` : undefined}
+          trendLabel={t('Lcz_VsLastYear', { fallback: 'vs last year' })}
+          caption={hasLastYear ? `${t('Lcz_LastYear', { fallback: 'Last year:' })} ${formatAmount(currency, lastYearRevenue)}` : undefined}
         ></ir-metric-card>
-        <ir-metric-card class="summary-metric" icon="chart-bar" label="Sources" value={(this.records?.length ?? 0).toString()}></ir-metric-card>
+        <ir-metric-card class="summary-metric" icon="chart-bar" label={t('Lcz_Sources', { fallback: 'Sources' })} value={formatCount(this.records?.length ?? 0)}></ir-metric-card>
       </div>
     );
   }

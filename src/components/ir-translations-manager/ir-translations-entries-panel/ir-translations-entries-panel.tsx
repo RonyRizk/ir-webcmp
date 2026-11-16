@@ -2,6 +2,7 @@ import type WaInput from '@awesome.me/webawesome/dist/components/input/input';
 import { Component, Event, EventEmitter, Prop, State, Watch, h } from '@stencil/core';
 import { DuplicateInfo, EntryStatusFilter, TranslationEntry, TranslationLanguage } from '../types';
 import { countMissing } from '../utils';
+import { t } from '@/services/locale/t';
 
 /**
  * Owns the entries table plus its client-side search/status filtering — the
@@ -40,6 +41,7 @@ export class IrTranslationsEntriesPanel {
   @Event() createEntry: EventEmitter<void>;
   @Event() editEntry: EventEmitter<TranslationEntry>;
   @Event() duplicateEntry: EventEmitter<TranslationEntry>;
+  @Event() moveEntry: EventEmitter<TranslationEntry>;
   @Event() deleteEntry: EventEmitter<TranslationEntry>;
   @Event() entryChange: EventEmitter<TranslationEntry>;
   @Event() reorderEntries: EventEmitter<TranslationEntry[]>;
@@ -173,7 +175,7 @@ export class IrTranslationsEntriesPanel {
         <wa-select
           class="entries-panel__status"
           size="s"
-          label="Status"
+          label={t('Lcz_Status', { fallback: 'Status' })}
           value={this.statusFilter}
           onchange={(e: Event) => (this.statusFilter = (e.target as HTMLSelectElement).value as EntryStatusFilter)}
         >
@@ -221,17 +223,23 @@ export class IrTranslationsEntriesPanel {
           </wa-select>
         )}
         {this.hasPendingOrder && (
-          <ir-custom-button style={{ marginLeft: 'auto' }} variant="neutral" appearance="outlined" disabled={this.disableActions} onClickHandler={() => this.discardOrder.emit()}>
+          <ir-custom-button
+            style={{ marginInlineStart: 'auto' }}
+            variant="neutral"
+            appearance="outlined"
+            disabled={this.disableActions}
+            onClickHandler={() => this.discardOrder.emit()}
+          >
             Discard
           </ir-custom-button>
         )}
         {this.hasPendingOrder && (
           <ir-custom-button variant="brand" appearance="accent" disabled={this.disableActions} loading={this.disableActions} onClickHandler={() => this.saveOrder.emit()}>
-            Save
+            {t('Lcz_Save', { fallback: 'Save' })}
           </ir-custom-button>
         )}
         <ir-custom-button
-          style={{ marginLeft: this.hasPendingOrder ? null : 'auto' }}
+          style={{ marginInlineStart: this.hasPendingOrder ? null : 'auto' }}
           variant="brand"
           appearance="filled"
           disabled={this.disableActions || this.isLoading || this.disableCreate}
@@ -303,6 +311,10 @@ export class IrTranslationsEntriesPanel {
             onDuplicateEntry={(e: CustomEvent<TranslationEntry>) => {
               this.stopPropagation(e);
               this.duplicateEntry.emit(e.detail);
+            }}
+            onMoveEntry={(e: CustomEvent<TranslationEntry>) => {
+              this.stopPropagation(e);
+              this.moveEntry.emit(e.detail);
             }}
             onDeleteEntry={(e: CustomEvent<TranslationEntry>) => {
               this.stopPropagation(e);

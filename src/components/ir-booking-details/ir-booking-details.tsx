@@ -2,12 +2,12 @@ import { Component, Listen, h, Prop, Watch, State, Event, EventEmitter, Element,
 import { Booking, ExtraService, Guest, IPmsLog, SharedPerson } from '@/models/booking.dto';
 import axios from 'axios';
 import { BookingService } from '@/services/booking-service/booking.service';
+import { SetupService, groupEntryTablesResult } from '@/services/setup';
 import { IglBookPropertyPayloadAddRoom, TIglBookPropertyPayload } from '@/models/igl-book-property';
 import { RoomService } from '@/services/room.service';
-import locales from '@/stores/locales.store';
-import { ICountry, IEntries } from '@/models/IBooking';
+import { ICountry, SetupEntries } from '@/models/IBooking';
 import { IPaymentAction, PaymentService } from '@/services/payment.service';
-import Token from '@/models/Token';
+import ApiClient from '@/models/ApiClient';
 import { BookingDetailsSidebarEvents, OpenSidebarEvent, PaymentEntries, PrintScreenOptions } from './types';
 import calendar_data from '@/stores/calendar-data';
 import { isRequestPending } from '@/stores/ir-interceptor.store';
@@ -16,12 +16,17 @@ import { AgentsService } from '@/services/agents/agents.service';
 import { Agent } from '@/services/agents/type';
 import { CityLedgerService, type ClTx } from '@/services/city-ledger';
 import { mapClTxToFolioRow, FolioRow } from '@/components/ir-city-ledger/ir-city-ledger-folio/types';
-import { isAgentMode } from './functions';
+import { getPrintingBaseUrl, getRegistrationCardUrl, isAgentMode } from './functions';
 import { realtimeService, type RealtimeMessage } from '@/services/realtime/realtime.service';
-import { extras } from '@/utils/utils';
+import { extras, isAlpha } from '@/utils/utils';
 import moment from 'moment';
 import { SvcCategory } from '@/types/enums';
+import { formatBookingNumber } from '@/utils/number';
+import { LocaleController } from '@/services/locale/locale.controller';
+import { LanguageSync } from '@/services/locale/language-sync';
+import { SCREEN_TABLES } from '@/services/locale/screen-tables';
 
+import { t } from '@/services/locale/t';
 @Component({
   tag: 'ir-booking-details',
   styleUrls: ['ir-booking-details.css'],
@@ -29,6 +34,7 @@ import { SvcCategory } from '@/types/enums';
 })
 export class IrBookingDetails {
   private bookingService = new BookingService();
+  private setupService = new SetupService();
   private roomService = new RoomService();
   private paymentService = new PaymentService();
   private agentService = new AgentsService();
@@ -37,23 +43,24 @@ export class IrBookingDetails {
   private clLockingPending = new Map<number, boolean>();
   private clLockingTimer: ReturnType<typeof setTimeout> | null = null;
 
-  private token = new Token();
-  private arrivalTime: IEntries[];
-  private svcCategories: IEntries[];
+  private ApiClient = new ApiClient();
+  private arrivalTime: SetupEntries[];
+  private svcCategories: SetupEntries[];
 
-  private printingBaseUrl = 'https://gateway.igloorooms.com/PrintBooking/%1/printing/fd?id=%2';
+  private printingBaseUrl: string;
+  private aname: string;
   // private printingBaseUrl = 'http://localhost:5863/%1/printing?id=%2';
   private modalRef: HTMLIrDialogElement;
   private paymentFolioRef: HTMLIrPaymentFolioElement;
 
   @Element() element: HTMLElement;
 
-  @State() bedPreference: IEntries[];
+  @State() bedPreference: SetupEntries[];
   @State() booking: Booking;
   @State() bookingItem: TIglBookPropertyPayload | null = null;
   @State() calendarData: any = {};
   @State() countries: ICountry[];
-  @State() departureTime: IEntries[];
+  @State() departureTime: SetupEntries[];
   @State() guestData: Guest = null;
   @State() isPMSLogLoading: boolean = false;
   @State() isUpdateClicked = false;
@@ -159,7 +166,7 @@ export class IrBookingDetails {
   @Prop() propertyid: number;
 
   /**
-   * Authentication token used to initialize the component.
+   * Authentication ApiClient used to initialize the component.
    * Triggers re-initialization when changed.
    */
   @Prop() ticket: string = '';
@@ -169,7 +176,7 @@ export class IrBookingDetails {
     if (newValue === oldValue) {
       return;
     }
-    this.token.setToken(this.ticket);
+    this.ApiClient.setApiClient(this.ticket);
     this.initializeApp();
   }
 
@@ -185,11 +192,18 @@ export class IrBookingDetails {
    */
   @Event() closeSidebar: EventEmitter<null>;
 
+  /** Re-runs init when the language changes so server-localized data follows. */
+  private languageSync = new LanguageSync(SCREEN_TABLES.bookingDetails, () => this.initializeApp());
+
   componentWillLoad() {
     if (this.ticket !== '') {
-      this.token.setToken(this.ticket);
+      this.ApiClient.setApiClient(this.ticket);
       this.initializeApp();
     }
+  }
+
+  componentDidLoad() {
+    this.languageSync.connect();
   }
 
   disconnectedCallback() {
@@ -199,6 +213,12 @@ export class IrBookingDetails {
       clearTimeout(this.clLockingTimer);
       this.clLockingTimer = null;
     }
+    this.languageSync.disconnect();
+  }
+
+  @Watch('language')
+  languageChanged(next: string, previous: string) {
+    this.languageSync.propChanged(next, previous);
   }
 
   @Listen('openSidebar')
@@ -223,7 +243,7 @@ export class IrBookingDetails {
       case 'email':
         this.modalState = {
           type: 'email',
-          message: locales.entries.Lcz_EmailBookingto.replace('%1', this.booking.guest.email),
+          message: t('Lcz_EmailBookingto', { params: [this.booking.guest.email] }),
           loading: isRequestPending('/Send_Booking_Confirmation_Email'),
         };
         this.modalRef.openModal();
@@ -251,7 +271,7 @@ export class IrBookingDetails {
           FROM_DATE: this.booking.from_date,
           ARRIVAL: this.booking.arrival,
           TO_DATE: this.booking.is_room_less ? moment(this.booking.to_date, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') : this.booking.to_date,
-          TITLE: `${locales.entries.Lcz_AddingUnitToBooking}# ${this.booking.booking_nbr}`,
+          TITLE: `${t('Lcz_AddingUnitToBooking')}# ${formatBookingNumber(this.booking.booking_nbr)}`,
           defaultDateRange: {
             fromDate: this.booking.from_date,
             toDate: this.booking.to_date,
@@ -329,7 +349,7 @@ export class IrBookingDetails {
       e.stopPropagation();
       this.bookingItem = {
         event_type: 'EDIT_DAY_USE',
-        TITLE: `Edit Day-Use`.trim(),
+        TITLE: t('Lcz_EditDayUse', { fallback: 'Edit Day-Use' }).trim(),
         FROM_DATE: service.start_date,
         TO_DATE: service.start_date,
         dayUse: true,
@@ -375,7 +395,7 @@ export class IrBookingDetails {
       this.rawTransactions = result.My_Cl_tx;
     } catch (err) {
       console.error('[ir-booking-details] fetchCL failed:', err);
-      this.clError = 'Failed to load city ledger.';
+      this.clError = t('Lcz_FailedToLoadCityLedger', { fallback: 'Failed to load city ledger.' });
     } finally {
       this.clLoading = false;
     }
@@ -459,14 +479,16 @@ export class IrBookingDetails {
   private async initializeApp() {
     try {
       this.isLoading = true;
-      const [roomResponse, languageTexts, countriesList, bookingDetails, setupEntries, agents] = await Promise.all([
-        this.roomService.getExposedProperty({ id: this.propertyid || 0, language: this.language, aname: this.p }),
-        this.roomService.fetchLanguage(this.language),
-        this.bookingService.getCountries(this.language),
+      // Started first: it seeds `LocaleController.language` from the host prop synchronously,
+      // so the requests below are built with the right language on first mount.
+      const localeReady = LocaleController.load({ language: this.language, tables: SCREEN_TABLES.bookingDetails });
+      const [roomResponse, , countriesList, bookingDetails, setupEntries, agents] = await Promise.all([
+        this.roomService.getExposedProperty({ id: this.propertyid || 0, language: LocaleController.language, aname: this.p }),
+        localeReady,
+        this.bookingService.getCountries(LocaleController.language),
         this.bookingService.getExposedBooking({
           booking_nbr: this.bookingNumber,
-          language: this.language,
-          is_calculate_totals: true,
+          language: LocaleController.language,
           include_dp_pricing: true,
           withExtras: true,
           extras: [
@@ -477,7 +499,7 @@ export class IrBookingDetails {
             },
           ],
         }),
-        this.bookingService.getSetupEntriesByTableNameMulti([
+        this.setupService.getSetupEntriesByTableNameMulti([
           '_BED_PREFERENCE_TYPE',
           '_DEPARTURE_TIME',
           '_PAY_TYPE',
@@ -492,21 +514,18 @@ export class IrBookingDetails {
       const resolvedPropertyId = roomResponse?.My_Result?.id;
       await this.loadAgentAndFolio(bookingDetails, resolvedPropertyId);
       this.property_id = resolvedPropertyId;
-      const { bed_preference_type, svc_category, departure_time, pay_type, pay_type_group, pay_method, arrival_time } = this.bookingService.groupEntryTablesResult(setupEntries);
+      const { bed_preference_type, svc_category, departure_time, pay_type, pay_type_group, pay_method, arrival_time } = groupEntryTablesResult(setupEntries);
       this.bedPreference = bed_preference_type;
       this.svcCategories = svc_category;
       this.departureTime = departure_time;
       this.paymentEntries = { types: pay_type, groups: pay_type_group, methods: pay_method };
       this.arrivalTime = arrival_time;
-      if (!locales?.entries) {
-        locales.entries = languageTexts.entries;
-        locales.direction = languageTexts.direction;
-      }
       this.countries = countriesList;
       const myResult = roomResponse?.My_Result;
       if (myResult) {
         const { allowed_payment_methods: paymentMethods, currency, allowed_booking_sources, adult_child_constraints, calendar_legends, aname } = myResult;
-        this.printingBaseUrl = this.printingBaseUrl.replace('%1', aname).replace('%2', this.bookingNumber);
+        this.aname = aname;
+        this.printingBaseUrl = getPrintingBaseUrl(aname, this.bookingNumber);
         this.calendarData = {
           currency,
           allowed_booking_sources,
@@ -531,8 +550,19 @@ export class IrBookingDetails {
     }
   }
 
+  /** Short-living token the printing app authenticates with; null when it couldn't be issued. */
+  private async fetchPrintingToken(): Promise<string | null> {
+    const { data } = await axios.post(`/Get_ShortLiving_Token`);
+    return data.ExceptionMsg ? null : data.My_Result;
+  }
+
   private async openPrintingScreen(options: PrintScreenOptions, version: 'old' | 'new' = 'new') {
     const { mode } = options;
+
+    if (options.mode === 'registration-card') {
+      const token = await this.fetchPrintingToken();
+      return window.open(getRegistrationCardUrl({ aname: this.aname, bookingNumber: this.booking.booking_nbr, roomIdentifier: options.payload.room_identifier, token }));
+    }
 
     if (version === 'old') {
       if (mode === 'invoice') {
@@ -562,10 +592,13 @@ export class IrBookingDetails {
       url += `&${safeParams}`;
     }
 
-    // Add token safely
-    const { data } = await axios.post(`Get_ShortLiving_Token`);
-    if (!data.ExceptionMsg) {
-      url += `&token=${encodeURIComponent(data.My_Result)}`;
+    if (isAlpha()) {
+      url += '&environment=alpha';
+    }
+    // Add ApiClient safely
+    const token = await this.fetchPrintingToken();
+    if (token) {
+      url += `&token=${encodeURIComponent(token)}`;
     }
 
     // Final: fully safe URL
@@ -584,12 +617,7 @@ export class IrBookingDetails {
   private async resetBooking() {
     try {
       this.isLoading = true;
-      const booking = await this.bookingService.getExposedBooking({
-        booking_nbr: this.bookingNumber,
-        language: this.language,
-        is_calculate_totals: true,
-        include_dp_pricing: true,
-      });
+      const booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: LocaleController.language, include_dp_pricing: true });
       this.splitIndex = buildSplitIndex(booking.rooms);
       await this.loadAgentAndFolio(booking);
       this.booking = { ...booking };
@@ -700,7 +728,7 @@ export class IrBookingDetails {
           ></ir-payment-details>
         </div>
         <ir-dialog
-          label="Send Email"
+          label={t('Lcz_SendEmail', { fallback: 'Send Email' })}
           onIrDialogHide={e => {
             e.stopImmediatePropagation();
             e.stopPropagation();
@@ -712,7 +740,7 @@ export class IrBookingDetails {
           <p>{this.modalState?.message}</p>
           <div slot="footer" class="ir-dialog__footer">
             <ir-custom-button data-dialog="close" size="m" appearance="filled" variant="neutral">
-              {locales.entries.Lcz_Cancel}
+              {t('Lcz_Cancel', { fallback: 'Cancel' })}
             </ir-custom-button>
             <ir-custom-button
               loading={isRequestPending('/Send_Booking_Confirmation_Email')}
@@ -724,7 +752,7 @@ export class IrBookingDetails {
               size="m"
               variant="brand"
             >
-              {locales.entries.Lcz_Confirm}
+              {t('Lcz_Confirm', { fallback: 'Confirm' })}
             </ir-custom-button>
           </div>
         </ir-dialog>
