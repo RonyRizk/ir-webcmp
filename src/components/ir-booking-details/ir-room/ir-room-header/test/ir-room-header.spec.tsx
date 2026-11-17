@@ -2,6 +2,7 @@ import { newSpecPage } from '@stencil/core/testing';
 import { h } from '@stencil/core';
 import { IrRoomHeader } from '../ir-room-header';
 import { Room } from '@/models/booking.dto';
+import calendar_data from '@/stores/calendar-data';
 
 const room = (in_out: Room['in_out'], unit: Room['unit'] = { id: 7, name: '101' } as any): Room =>
   ({
@@ -20,7 +21,12 @@ const render = (r: Room, { isEditable = true } = {}) =>
 
 const printItem = (page: Awaited<ReturnType<typeof render>>) => page.root.querySelector('wa-dropdown-item[value="print-registration-card"]');
 
+const setFrontdesk = (is_frontdesk_enabled: boolean) => (calendar_data.property = { is_frontdesk_enabled } as any);
+
 describe('ir-room-header — print registration card', () => {
+  beforeEach(() => setFrontdesk(true));
+  afterEach(() => (calendar_data.property = null));
+
   it('is offered once the room is checked in', async () => {
     const page = await render(room({ code: '001', description: 'Check-in' }));
     expect(printItem(page)).not.toBeNull();
@@ -39,6 +45,12 @@ describe('ir-room-header — print registration card', () => {
   it('is offered even when the booking is not editable', async () => {
     const page = await render(room({ code: '002', description: 'Check-out' }), { isEditable: false });
     expect(printItem(page)).not.toBeNull();
+  });
+
+  it('is not offered when the front desk is disabled for the property', async () => {
+    setFrontdesk(false);
+    expect(printItem(await render(room({ code: '001', description: 'Check-in' })))).toBeNull();
+    expect(printItem(await render(room({ code: '002', description: 'Check-out' })))).toBeNull();
   });
 
   it('asks the parent to print the registration card when chosen', async () => {

@@ -1,8 +1,8 @@
 import { Component, Prop, State, h } from '@stencil/core';
 import { formatDate } from '@/utils/date';
 import { formatNumber, formatPercent } from '@/utils/number';
-import { interpolate } from '@/services/locale/t';
 import type { TLocaleEntries } from '@/stores/locales.store';
+import { createLoginAsideTranslate, type LoginAsideTranslate as Translate } from '../login-aside-text';
 
 const CYCLE_MS = 5200;
 const TOAST_MS = 3200;
@@ -18,12 +18,7 @@ const TOAST_IN_OUT: Keyframe[] = [
   { opacity: 0, transform: 'translateY(-4px) scale(0.98)' },
 ];
 
-const TOAST_FADE: Keyframe[] = [
-  { opacity: 0 },
-  { opacity: 1, offset: 0.1 },
-  { opacity: 1, offset: 0.92 },
-  { opacity: 0 },
-];
+const TOAST_FADE: Keyframe[] = [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.92 }, { opacity: 0 }];
 
 // The bar wrapper itself is unskewed (only its base is), so these compose cleanly
 const BAR_OUT: Keyframe[] = [
@@ -128,9 +123,6 @@ function stayPlacement(stay: Stay, todayIndex: number): { column: string; cutSta
   return { column: `${cutStart ? 2 : 3 + 2 * start} / ${cutEnd ? 16 : 3 + 2 * end}`, cutStart, cutEnd };
 }
 
-/** Looks a label up in the server-provided entries, falling back to the English text. */
-type Translate = (key: string, fallback: string, params?: ReadonlyArray<string | number>) => string;
-
 /** The guest's name, or "Walk-in" for front-desk stays that don't have one yet. */
 function guestName(stay: Stay, tr: Translate): string {
   return stay.guest ?? tr('Lcz_LoginPromoWalkIn', 'Walk-in');
@@ -169,8 +161,8 @@ function toastCopy(booking: Booking, tr: Translate): { title: string; detail: st
 })
 export class IrLoginAsideCalendar {
   /**
-   * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole
-   * object, until it arrives) falls back to the built-in English text.
+   * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a
+   * key; a key missing from both (or the whole object, until it arrives) falls back to English.
    */
   @Prop() localeEntries: TLocaleEntries | null = null;
 
@@ -205,7 +197,7 @@ export class IrLoginAsideCalendar {
     { slot: 2, offset: 1, nights: 2, status: 'confirmed', channel: null, guest: null, number: '58214102' },
   ];
 
-  private tr: Translate = (key, fallback, params) => interpolate(this.localeEntries?.[key] || fallback, params);
+  private tr: Translate = createLoginAsideTranslate(() => this.localeEntries);
 
   componentDidLoad() {
     this.reduceMotion = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

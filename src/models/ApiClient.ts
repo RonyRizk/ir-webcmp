@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Auth from './Auth';
+import { requestLanguage } from './language-injector';
 
 class ApiClient extends Auth {
   private baseUrl = 'https://gateway.igloorooms.com/IR';
@@ -7,6 +8,11 @@ class ApiClient extends Auth {
   private static modifiedBaseUrl: boolean = false;
   private static isInterceptorAdded = false;
   private static isBaseUrlRouterAdded = false;
+  private static isLanguageHeaderAdded = false;
+  /**
+   * Header carrying the language the request is sent in. `Accept-Language` is left to the browser.
+   */
+  public static readonly LANGUAGE_HEADER = 'Content-Language';
   private static readonly IRBE_BASE_URL = 'https://gateway.igloorooms.com/IRBE';
   /** Base URL used for every request when `window.environment === 'alpha'`. */
   private static readonly ALPHA_BASE_URL = 'https://gateway.igloorooms.com/IRALPHA';
@@ -21,6 +27,7 @@ class ApiClient extends Auth {
   constructor() {
     super();
     this.addBaseUrlRouter();
+    ApiClient.addLanguageHeader();
     if (ApiClient.modifiedBaseUrl) {
       return;
     }
@@ -42,6 +49,24 @@ class ApiClient extends Auth {
       return config;
     });
     ApiClient.isBaseUrlRouterAdded = true;
+  }
+  /**
+   * Sends the request's language as `Content-Language` on every request, so the header always
+   * agrees with the `language`/`lang` in the body (or query string on GET/HEAD): an explicit one
+   * from a `lang` subtree, else the selected app language the injector fills in. Read per
+   * request, so it follows a language switch. It only sets this header: the payload and
+   * `Accept-Language` are untouched. Needs no ticket, so it is installed with the base URL
+   * router rather than in {@link initialize}.
+   */
+  private static addLanguageHeader() {
+    if (ApiClient.isLanguageHeaderAdded) {
+      return;
+    }
+    axios.interceptors.request.use(config => {
+      config.headers[ApiClient.LANGUAGE_HEADER] = requestLanguage(config);
+      return config;
+    });
+    ApiClient.isLanguageHeaderAdded = true;
   }
   /** Read per request so a host page can set `window.environment` after this module loads. */
   private static isAlpha() {

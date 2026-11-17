@@ -7,9 +7,9 @@
 
 ## Properties
 
-| Property        | Attribute | Description                                                         | Type                       | Default |
-| --------------- | --------- | ------------------------------------------------------------------- | -------------------------- | ------- |
-| `localeEntries` | --        | Server-provided `Lcz_*` translations, passed through to the slides. | `{ [x: string]: string; }` | `null`  |
+| Property        | Attribute | Description                                                                                                   | Type                       | Default |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------- | -------------------------- | ------- |
+| `localeEntries` | --        | Host-provided `Lcz_*` translations, passed through to the slides. The `locales` store wins when it has a key. | `{ [x: string]: string; }` | `null`  |
 
 
 ## Dependencies

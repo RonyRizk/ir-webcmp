@@ -6,7 +6,7 @@
 
 (function applyUrlDirection() {
     try {
-        window.environment = 'alpha'
+        window.environment = 'production'
         const params = new URLSearchParams(window.location.search);
         const dir = (params.get('dir') || '').toLowerCase();
         const lang = params.get('lang');

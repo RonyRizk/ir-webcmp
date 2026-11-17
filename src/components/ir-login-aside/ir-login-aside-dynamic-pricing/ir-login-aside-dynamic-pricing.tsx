@@ -2,6 +2,7 @@ import { Component, Element, Prop, State, h } from '@stencil/core';
 import { formatDate } from '@/utils/date';
 import { formatCount, formatPercent } from '@/utils/number';
 import type { TLocaleEntries } from '@/stores/locales.store';
+import { createLoginAsideTranslate } from '../login-aside-text';
 import {
   BASE_RATE,
   BEATS,
@@ -41,8 +42,8 @@ export class IrLoginAsideDynamicPricing {
   @Element() el: HTMLElement;
 
   /**
-   * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole
-   * object, until it arrives) falls back to the built-in English text.
+   * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a
+   * key; a key missing from both (or the whole object, until it arrives) falls back to English.
    */
   @Prop() localeEntries: TLocaleEntries | null = null;
 
@@ -54,7 +55,7 @@ export class IrLoginAsideDynamicPricing {
   private countFrame?: number;
   private readonly week = upcomingWeek(new Date());
 
-  private tr = (key: string, fallback: string) => this.localeEntries?.[key] || fallback;
+  private tr = createLoginAsideTranslate(() => this.localeEntries);
 
   connectedCallback() {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {

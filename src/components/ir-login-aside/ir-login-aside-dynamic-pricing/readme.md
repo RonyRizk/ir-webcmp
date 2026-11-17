@@ -7,9 +7,9 @@
 
 ## Properties
 
-| Property        | Attribute | Description                                                                                                                                                  | Type                       | Default |
-| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ------- |
-| `localeEntries` | --        | Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text. | `{ [x: string]: string; }` | `null`  |
+| Property        | Attribute | Description                                                                                                                                                                           | Type                       | Default |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------- |
+| `localeEntries` | --        | Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a key; a key missing from both (or the whole object, until it arrives) falls back to English. | `{ [x: string]: string; }` | `null`  |
 
 
 ## Dependencies

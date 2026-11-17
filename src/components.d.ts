@@ -5017,7 +5017,7 @@ export namespace Components {
          */
         "imageSrc": string;
         /**
-          * Server-provided `Lcz_*` translations, passed through to every view that shows copy.
+          * Host-provided `Lcz_*` translations, passed through to every view that shows copy. Each label comes from the `locales` store when it has the key, then from these entries, then English.
           * @default null
          */
         "localeEntries": TLocaleEntries | null;
@@ -5029,14 +5029,14 @@ export namespace Components {
     }
     interface IrLoginAsideCalendar {
         /**
-          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a key; a key missing from both (or the whole object, until it arrives) falls back to English.
           * @default null
          */
         "localeEntries": TLocaleEntries | null;
     }
     interface IrLoginAsideDynamicPricing {
         /**
-          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a key; a key missing from both (or the whole object, until it arrives) falls back to English.
           * @default null
          */
         "localeEntries": TLocaleEntries | null;
@@ -5054,7 +5054,7 @@ export namespace Components {
     }
     interface IrLoginAsideShowcase {
         /**
-          * Server-provided `Lcz_*` translations, passed through to the slides.
+          * Host-provided `Lcz_*` translations, passed through to the slides. The `locales` store wins when it has a key.
           * @default null
          */
         "localeEntries": TLocaleEntries | null;
@@ -20514,7 +20514,7 @@ declare namespace LocalJSX {
          */
         "imageSrc"?: string;
         /**
-          * Server-provided `Lcz_*` translations, passed through to every view that shows copy.
+          * Host-provided `Lcz_*` translations, passed through to every view that shows copy. Each label comes from the `locales` store when it has the key, then from these entries, then English.
           * @default null
          */
         "localeEntries"?: TLocaleEntries | null;
@@ -20526,14 +20526,14 @@ declare namespace LocalJSX {
     }
     interface IrLoginAsideCalendar {
         /**
-          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a key; a key missing from both (or the whole object, until it arrives) falls back to English.
           * @default null
          */
         "localeEntries"?: TLocaleEntries | null;
     }
     interface IrLoginAsideDynamicPricing {
         /**
-          * Translated labels from the server, keyed by `Lcz_*`. Any key that's missing (or the whole object, until it arrives) falls back to the built-in English text.
+          * Translated labels from the host, keyed by `Lcz_*`. The `locales` store wins when it has a key; a key missing from both (or the whole object, until it arrives) falls back to English.
           * @default null
          */
         "localeEntries"?: TLocaleEntries | null;
@@ -20551,7 +20551,7 @@ declare namespace LocalJSX {
     }
     interface IrLoginAsideShowcase {
         /**
-          * Server-provided `Lcz_*` translations, passed through to the slides.
+          * Host-provided `Lcz_*` translations, passed through to the slides. The `locales` store wins when it has a key.
           * @default null
          */
         "localeEntries"?: TLocaleEntries | null;

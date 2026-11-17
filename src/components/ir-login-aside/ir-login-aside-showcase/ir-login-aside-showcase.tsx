@@ -1,5 +1,6 @@
 import { Component, Prop, State, h } from '@stencil/core';
 import type { TLocaleEntries } from '@/stores/locales.store';
+import { createLoginAsideTranslate } from '../login-aside-text';
 import { STORY_MS } from '../ir-login-aside-dynamic-pricing/dynamic-pricing-story';
 
 /** Keep in step with `aside-showcase-in` in the stylesheet. */
@@ -22,7 +23,7 @@ const SLIDES: Slide[] = [
   shadow: false,
 })
 export class IrLoginAsideShowcase {
-  /** Server-provided `Lcz_*` translations, passed through to the slides. */
+  /** Host-provided `Lcz_*` translations, passed through to the slides. The `locales` store wins when it has a key. */
   @Prop() localeEntries: TLocaleEntries | null = null;
 
   /** Index into `SLIDES` of the slide on show. */
@@ -39,7 +40,7 @@ export class IrLoginAsideShowcase {
 
   private crossfadeTimeout?: number;
 
-  private tr = (key: string, fallback: string) => this.localeEntries?.[key] || fallback;
+  private tr = createLoginAsideTranslate(() => this.localeEntries);
 
   disconnectedCallback() {
     window.clearTimeout(this.crossfadeTimeout);

@@ -38,7 +38,7 @@ export class IrRoomHeader {
   /** Registration card exists once the guest checked in — and stays printable after check-out. */
   private get canPrintRegistrationCard() {
     const code = this.room?.in_out?.code;
-    return code === ROOM_IN_OUT.CHECKIN || code === ROOM_IN_OUT.CHECKOUT;
+    return (code === ROOM_IN_OUT.CHECKIN || code === ROOM_IN_OUT.CHECKOUT) && calendar_data.property.is_frontdesk_enabled;
   }
 
   render() {

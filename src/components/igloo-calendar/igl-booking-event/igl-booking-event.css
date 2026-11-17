@@ -337,6 +337,17 @@
   --arrow-size: 8px;
   --popup-border-width: var(--wa-panel-border-width, 1px);
 }
+/* The bubble is a DOM child of the bar, so it would inherit the bar's hand cursor. Inside it only its
+   own buttons and links point; `auto` (not `default`) keeps the text cursor over its inputs. */
+.bookingEventPopup,
+.bookingEventDialog {
+  cursor: auto;
+}
+
+/* The bubble shrinks to its content but never grows past this, however long a note or name runs. */
+.bookingEventPopup::part(popup) {
+  max-width: 450px;
+}
 .bookingEventPopup::part(arrow) {
   border-bottom: var(--wa-panel-border-width, 1px) solid var(--wa-color-neutral-border-normal, #cbd5e1);
   border-right: var(--wa-panel-border-width, 1px) solid var(--wa-color-neutral-border-normal, #cbd5e1);

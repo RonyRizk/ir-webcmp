@@ -7,12 +7,12 @@
 
 ## Properties
 
-| Property        | Attribute   | Description                                                                         | Type                                                       | Default      |
-| --------------- | ----------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------ |
-| `imageAlt`      | `image-alt` | Alternative text for the image. Empty means decorative.                             | `string`                                                   | `''`         |
-| `imageSrc`      | `image-src` | Image URL, used when `view` is `image`.                                             | `string`                                                   | `undefined`  |
-| `localeEntries` | --          | Server-provided `Lcz_*` translations, passed through to every view that shows copy. | `{ [x: string]: string; }`                                 | `null`       |
-| `view`          | `view`      | Which aside content to render.                                                      | `"calendar" \| "dynamic-pricing" \| "image" \| "showcase"` | `'calendar'` |
+| Property        | Attribute   | Description                                                                                                                                                                             | Type                                                       | Default      |
+| --------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------ |
+| `imageAlt`      | `image-alt` | Alternative text for the image. Empty means decorative.                                                                                                                                 | `string`                                                   | `''`         |
+| `imageSrc`      | `image-src` | Image URL, used when `view` is `image`.                                                                                                                                                 | `string`                                                   | `undefined`  |
+| `localeEntries` | --          | Host-provided `Lcz_*` translations, passed through to every view that shows copy. Each label comes from the `locales` store when it has the key, then from these entries, then English. | `{ [x: string]: string; }`                                 | `null`       |
+| `view`          | `view`      | Which aside content to render.                                                                                                                                                          | `"calendar" \| "dynamic-pricing" \| "image" \| "showcase"` | `'calendar'` |
 
 
 ## Dependencies

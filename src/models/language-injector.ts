@@ -40,6 +40,22 @@ function parseJsonObject(body: string): Record<string, unknown> | null {
   }
 }
 
+/**
+ * The language `config` is sent in: the one its payload names, else the selected app language
+ * (the one {@link injectLanguage} fills in). Independent of interceptor order.
+ */
+export function requestLanguage(config: InternalAxiosRequestConfig): string {
+  // The payload injectLanguage writes to: the query string on GET/HEAD, the body otherwise.
+  const payload: unknown = BODYLESS_METHODS.has(config.method?.toLowerCase() ?? 'get') ? config.params : config.data;
+  let value: unknown;
+  if (isPlainObject(payload)) {
+    value = payload[LANGUAGE_KEYS.find(k => k in payload) ?? 'language'];
+  } else if (payload instanceof URLSearchParams) {
+    value = payload.get(LANGUAGE_KEYS.find(k => payload.has(k)) ?? 'language');
+  }
+  return isMissing(value) ? getLanguage() : String(value);
+}
+
 export function injectLanguage(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
   const language = getLanguage();
 

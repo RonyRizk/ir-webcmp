@@ -18,7 +18,10 @@ export class IrLoginAside {
   /** Alternative text for the image. Empty means decorative. */
   @Prop({ attribute: 'image-alt' }) imageAlt: string = '';
 
-  /** Server-provided `Lcz_*` translations, passed through to every view that shows copy. */
+  /**
+   * Host-provided `Lcz_*` translations, passed through to every view that shows copy. Each label
+   * comes from the `locales` store when it has the key, then from these entries, then English.
+   */
   @Prop() localeEntries: TLocaleEntries | null = null;
 
   render() {
