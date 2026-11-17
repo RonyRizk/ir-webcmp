@@ -312,8 +312,10 @@ export class IrAuth {
 
   private toastError(error: unknown) {
     console.error('[ir-auth]', error);
-    // `ir-interceptor` has already shown the API's message.
-    if (error instanceof InterceptorError) {
+    // `ir-interceptor` (rendered below) has already toasted every axios failure: the API's
+    // `ExceptionMsg` as an `InterceptorError`, and HTTP/network errors as an `AxiosError`.
+    // (`isAxiosError` is the flag `axios.isAxiosError()` reads; importing axios here breaks the spec runner.)
+    if (error instanceof InterceptorError || (error as { isAxiosError?: boolean })?.isAxiosError === true) {
       return;
     }
     const message = error instanceof Error ? error.message : String(error);

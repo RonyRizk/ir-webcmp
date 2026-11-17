@@ -17,14 +17,14 @@ import { IrAuth } from '../ir-auth';
 import { IrValidator } from '../../ui/ir-validator/ir-validator';
 import { LocaleController } from '../../../services/locale/locale.controller';
 import { LegacyAuthService } from '../../../services/auth/legacy-auth.service';
+import { InterceptorError } from '../../ir-interceptor/InterceptorError';
+import { showToast } from '../../../utils/utils';
 
 /** Mounts ir-auth the way Default.aspx does: inside the server form, next to the redirect button. */
 async function render(attributes = '', { beforeMount }: { beforeMount?: (win: Window) => void } = {}) {
   const page = await newSpecPage({ components: [IrAuth, IrValidator], html: '' });
   beforeMount?.(page.win as unknown as Window);
-  await page.setContent(
-    `<form id="frm_login"><ir-auth ${attributes}></ir-auth><input type="submit" id="btn_RedirectFromLogin" name="btn_RedirectFromLogin" value="ddd" /></form>`,
-  );
+  await page.setContent(`<form id="frm_login"><ir-auth ${attributes}></ir-auth><input type="submit" id="btn_RedirectFromLogin" name="btn_RedirectFromLogin" value="ddd" /></form>`);
   const form = page.body.querySelector('#frm_login') as HTMLFormElement;
   const auth = page.body.querySelector('ir-auth') as HTMLElement;
   return { page, form, auth };
@@ -177,6 +177,55 @@ describe('ir-auth', () => {
     await submit(rendered);
     await flush();
     expect(mockAuthService.isAuthenticated).toHaveBeenCalledTimes(1);
+  });
+
+  describe('failed sign-in', () => {
+    /** Signs in with a login call that rejects with `error`. */
+    async function failSignIn(error: unknown) {
+      mockAuthService.isAuthenticated.mockRejectedValue(error);
+      const rendered = await render();
+      await type(rendered, 'txt_username', 'jdoe');
+      await type(rendered, 'txt_password', 'wrong');
+      await submit(rendered);
+      await flush();
+      await rendered.page.waitForChanges();
+      return rendered;
+    }
+
+    beforeEach(() => jest.spyOn(console, 'error').mockImplementation(() => undefined));
+    afterEach(() => (console.error as jest.Mock).mockRestore());
+
+    // ir-auth renders an ir-interceptor, which toasts every failed axios request itself.
+    it.each([
+      ['an API ExceptionMsg (InterceptorError)', new InterceptorError('Invalid username or password', 'ERR')],
+      ['an HTTP or network failure (AxiosError)', Object.assign(new Error('Request failed with status code 404'), { isAxiosError: true })],
+    ])('leaves %s to the interceptor instead of toasting it a second time', async (_, error) => {
+      await failSignIn(error);
+      expect(mockAuthService.isAuthenticated).toHaveBeenCalledTimes(1);
+      expect(showToast).not.toHaveBeenCalled();
+    });
+
+    it('toasts an error that did not go through the interceptor, once', async () => {
+      await failSignIn(new Error('Unexpected failure'));
+      expect(showToast).toHaveBeenCalledTimes(1);
+      expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ type: 'error', title: 'Unexpected failure' }));
+    });
+
+    it('re-enables the submit button so the user can try again', async () => {
+      let reject: (error: unknown) => void;
+      mockAuthService.isAuthenticated.mockReturnValue(new Promise((_, r) => (reject = r)));
+      const rendered = await render();
+      const button = () => rendered.auth.querySelector('.pms-auth__submit');
+      await type(rendered, 'txt_username', 'jdoe');
+      await type(rendered, 'txt_password', 'wrong');
+      await submit(rendered);
+      expect(button().hasAttribute('loading')).toBe(true);
+
+      reject(new InterceptorError('Invalid username or password', 'ERR'));
+      await flush();
+      await rendered.page.waitForChanges();
+      expect(button().hasAttribute('loading')).toBe(false);
+    });
   });
 
   it('switches to the forgot username view and validates the email', async () => {
