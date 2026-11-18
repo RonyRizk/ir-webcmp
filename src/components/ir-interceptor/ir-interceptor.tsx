@@ -7,6 +7,13 @@ import { t } from '@/services/locale/t';
 import { LocaleController } from '@/services/locale/locale.controller';
 import { installLanguageInjector } from '@/models/language-injector';
 
+/**
+ * Errors some interceptor has already handled. Every `ir-interceptor` on the page registers
+ * on the shared axios instance, so one failure passes through each instance's reject handler
+ * in turn; this keeps it to a single toast however many instances are mounted.
+ */
+const handledErrors = new WeakSet<object>();
+
 @Component({
   tag: 'ir-interceptor',
   styleUrl: 'ir-interceptor.css',
@@ -166,7 +173,9 @@ export class IrInterceptor {
    */
   private handleResponseExceptions({ response, extractedUrl }: { response: AxiosResponse; extractedUrl: string }) {
     this.handleError(response.data.ExceptionMsg, extractedUrl, response.data.ExceptionCode);
-    throw new InterceptorError(response.data.ExceptionMsg, response.data.ExceptionCode);
+    const error = new InterceptorError(response.data.ExceptionMsg, response.data.ExceptionCode);
+    handledErrors.add(error);
+    throw error;
   }
   /**
    * Handles OTP-required API responses:
@@ -210,7 +219,14 @@ export class IrInterceptor {
    * API's (already localized) `ExceptionMsg` — those get a generic localized title instead of
    * their English `toString()`.
    */
-  private handleError(error: string, url: string, code: string) {
+  private handleError(error: unknown, url?: string, code?: string) {
+    // Already toasted (or deliberately suppressed) by another ir-interceptor's handler.
+    if (typeof error === 'object' && error !== null) {
+      if (handledErrors.has(error)) {
+        return Promise.reject(error);
+      }
+      handledErrors.add(error);
+    }
     const shouldSuppressToast = this.suppressToastEndpoints.includes(url);
     if (!shouldSuppressToast || (shouldSuppressToast && !code)) {
       this.toast.emit({

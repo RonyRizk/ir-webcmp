@@ -1,44 +1,81 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html dir="ltr" lang="en">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <title>Stencil Component Starter</title>
+  <title>Auth</title>
   <script type="module" src="/build/ir-webcmp.esm.js"></script>
   <script nomodule src="/build/ir-webcmp.js"></script>
-  <script src="/scripts/index.js"></script>
   <style>
+    html,
     body {
-      overflow-x: hidden;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #0b0f19;
+    }
+
+    .pms-auth {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
     }
   </style>
 </head>
 
 <body>
   <ir-common></ir-common>
-  <igloo-calendar currency-name="USD" propertyid="42" language="ar"
-    baseurl="https://gateway.igloorooms.com/IR"></igloo-calendar>
 
+  <div class="pms-auth">
+    <!-- Stands in for Default.aspx's <form runat="server">: ir-auth renders its fields into it. -->
+    <form style="display: contents;">
+      <ir-auth api-url="https://gateway.igloorooms.com/IR"
+        logo-url="https://x.igloorooms.com/app-assets/images/logo/logo-dark.png"
+        languages='[{"code":"en","label":"English"},{"code":"ar","label":"العربية"},{"code":"fr","label":"Français"}]'>
+      </ir-auth>
+    </form>
+    <ir-login-aside view="calendar"></ir-login-aside>
+  </div>
 
   <script>
-    //backend-cmp-injector
-    //aname - username -password
-    var today = new Date();
-    today.setDate(today.getDate() - 1);
-    var _FROM_DATE = today.toISOString().substring(0, 10)
-    today.setDate(today.getDate() + 60);
-    var _TO_DATE = today.toISOString().substring(0, 10)
-    const calendar = document.querySelector("igloo-calendar");
-    calendar.from_date = _FROM_DATE;
-    calendar.to_date = _TO_DATE;
-    setTimeout(async () => {
-      const ticket = await getToken();
-      calendar.propertyid = getId();
-      calendar.ticket = ticket;
-    }, 300)
-  </script>
+    const RTL_LANGUAGES = ['ar', 'he'];
+    const auth = document.querySelector('ir-auth');
 
+    // Preview another aside: ?aside=dynamic-pricing
+    const asideView = new URLSearchParams(location.search).get('aside');
+    if (asideView) {
+      document.querySelector('ir-login-aside').view = asideView;
+    }
+
+    // Stands in for the server's CurrentLanguage / CurrentDirection: ?lang=ar
+    function applyLanguage(code) {
+      document.documentElement.lang = code;
+      document.documentElement.dir = RTL_LANGUAGES.includes(code.split('-')[0]) ? 'rtl' : 'ltr';
+      auth.language = code;
+    }
+
+    applyLanguage(new URLSearchParams(location.search).get('lang') || 'en');
+
+    // Default.aspx reloads through SetLanguage.ashx; here the prop is updated in place.
+    auth.addEventListener('authLanguageChange', event => {
+      const { code } = event.detail;
+      const url = new URL(location.href);
+      url.searchParams.set('lang', code);
+      history.replaceState(null, '', url);
+      applyLanguage(code);
+    });
+
+    // No server postback here: take over navigation from ir-auth.
+    auth.addEventListener('authFinish', event => {
+      event.preventDefault();
+      console.log('authFinish', event.detail);
+    });
+  </script>
 </body>
 
 </html>
