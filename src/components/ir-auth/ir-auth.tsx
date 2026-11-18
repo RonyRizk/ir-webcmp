@@ -1,6 +1,5 @@
 import { Component, Element, Event, EventEmitter, Host, Prop, State, Watch, h } from '@stencil/core';
 import { z } from 'zod';
-import { InterceptorError } from '@components/ir-interceptor/InterceptorError';
 import { LegacyAuthService, type LegacyUserInfo } from '@/services/auth/legacy-auth.service';
 import { LanguageSync } from '@/services/locale/language-sync';
 import { LocaleController } from '@/services/locale/locale.controller';
@@ -248,7 +247,7 @@ export class IrAuth {
         this.redirect(requiresOtp);
       }
     } catch (error) {
-      this.toastError(error);
+      this.logError(error);
     } finally {
       if (!this.redirecting) {
         this.isLoading = false;
@@ -283,7 +282,7 @@ export class IrAuth {
       this.toastSuccess(t('Lcz_EmailBeingSentWithPassword', { fallback: 'An email is being sent to %1@...... containing your password', params: [recipient] }));
       this.switchView('login');
     } catch (error) {
-      this.toastError(error);
+      this.logError(error);
     } finally {
       this.isLoading = false;
     }
@@ -300,7 +299,7 @@ export class IrAuth {
       this.toastSuccess(t('Lcz_EmailBeingSentWithUsername', { fallback: 'An email is being sent to %1@...... containing your username', params: [recipient] }));
       this.switchView('login');
     } catch (error) {
-      this.toastError(error);
+      this.logError(error);
     } finally {
       this.isLoading = false;
     }
@@ -310,16 +309,9 @@ export class IrAuth {
     showToast({ type: 'success', title, description: '', position: 'top-right' });
   }
 
-  private toastError(error: unknown) {
+  /** Error toasts belong to `ir-interceptor` (rendered below); ir-auth only logs. */
+  private logError(error: unknown) {
     console.error('[ir-auth]', error);
-    // `ir-interceptor` (rendered below) has already toasted every axios failure: the API's
-    // `ExceptionMsg` as an `InterceptorError`, and HTTP/network errors as an `AxiosError`.
-    // (`isAxiosError` is the flag `axios.isAxiosError()` reads; importing axios here breaks the spec runner.)
-    if (error instanceof InterceptorError || (error as { isAxiosError?: boolean })?.isAxiosError === true) {
-      return;
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    showToast({ type: 'error', title: message, description: '', position: 'top-right' });
   }
 
   /* Storage can throw in private windows or with site data blocked; the form must still work. */

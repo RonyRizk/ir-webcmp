@@ -195,20 +195,15 @@ describe('ir-auth', () => {
     beforeEach(() => jest.spyOn(console, 'error').mockImplementation(() => undefined));
     afterEach(() => (console.error as jest.Mock).mockRestore());
 
-    // ir-auth renders an ir-interceptor, which toasts every failed axios request itself.
+    // ir-auth renders an ir-interceptor, which owns error toasts; ir-auth never shows one itself.
     it.each([
       ['an API ExceptionMsg (InterceptorError)', new InterceptorError('Invalid username or password', 'ERR')],
       ['an HTTP or network failure (AxiosError)', Object.assign(new Error('Request failed with status code 404'), { isAxiosError: true })],
-    ])('leaves %s to the interceptor instead of toasting it a second time', async (_, error) => {
+      ['any other error', new Error('Unexpected failure')],
+    ])('leaves %s to the interceptor instead of toasting it', async (_, error) => {
       await failSignIn(error);
       expect(mockAuthService.isAuthenticated).toHaveBeenCalledTimes(1);
       expect(showToast).not.toHaveBeenCalled();
-    });
-
-    it('toasts an error that did not go through the interceptor, once', async () => {
-      await failSignIn(new Error('Unexpected failure'));
-      expect(showToast).toHaveBeenCalledTimes(1);
-      expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ type: 'error', title: 'Unexpected failure' }));
     });
 
     it('re-enables the submit button so the user can try again', async () => {
@@ -225,6 +220,29 @@ describe('ir-auth', () => {
       await flush();
       await rendered.page.waitForChanges();
       expect(button().hasAttribute('loading')).toBe(false);
+    });
+  });
+
+  describe('failed recovery request', () => {
+    beforeEach(() => jest.spyOn(console, 'error').mockImplementation(() => undefined));
+    afterEach(() => (console.error as jest.Mock).mockRestore());
+
+    it.each([
+      ['forgot password', 'Lnk_ForgotPassword', 'txt_username1', 'jdoe', 'forgotPassword', 'Get your password'],
+      ['forgot username', 'Lnk_ForgotUsername', 'txt_email', 'jdoe@example.com', 'forgotUsername', 'Get your username'],
+    ] as const)('%s: leaves the error to the interceptor and stays on the view', async (_, link, field, value, method, title) => {
+      mockAuthService[method].mockRejectedValue(new Error('Unexpected failure'));
+      const rendered = await render();
+      (rendered.auth.querySelector(`#${link}`) as HTMLAnchorElement).click();
+      await rendered.page.waitForChanges();
+      await type(rendered, field, value);
+      await submit(rendered);
+      await flush();
+      await rendered.page.waitForChanges();
+
+      expect(mockAuthService[method]).toHaveBeenCalledTimes(1);
+      expect(showToast).not.toHaveBeenCalled();
+      expect(rendered.auth.querySelector('.pms-auth__title').textContent).toBe(title);
     });
   });
 

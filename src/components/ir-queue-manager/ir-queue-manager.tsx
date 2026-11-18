@@ -120,7 +120,7 @@ export class IrQueueManager {
           <div class="queue-grid">
             {this.data.map(d => (
               <wa-details open={false}>
-                <p slot="header">
+                <p slot="summary">
                   {d.q_name} ({d.total_pending} {t('Lcz_TotalPending', { fallback: 'total pending' })})
                 </p>
 

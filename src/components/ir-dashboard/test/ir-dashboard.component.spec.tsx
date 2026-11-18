@@ -754,7 +754,7 @@ describe('ir-dashboard', () => {
   });
 
   describe('same-day refresh', () => {
-    it('refreshes the day when the booking drawer closes, keeping the current tab and its panel on screen', async () => {
+    it('refreshes the day when the booking drawer closes after a change, keeping the current tab and its panel on screen', async () => {
       const { page, tabGroup } = await mount();
       await showTab(page, 'inHouse');
       tabGroup.updateActiveTab.mockClear();
@@ -765,6 +765,8 @@ describe('ir-dashboard', () => {
       expect(drawer.hasAttribute('open')).toBe(true);
       expect(prop(drawer, 'bookingNumber')).toBe('123');
       expect(prop(drawer, 'ticket')).toBe('ticket');
+      emit(drawer, 'resetBookingEvt', null);
+      await flush(page);
 
       const inHouse = deferred<Booking[]>();
       mockDashboardService.getInHouse.mockReturnValueOnce(inHouse.promise);
@@ -787,6 +789,25 @@ describe('ir-dashboard', () => {
       expect(prop(panelContent(page, 'inHouse'), 'bookings')).toEqual(refreshed);
       expect(tabCount(page, 'inHouse')).toBe('1');
       expect(tabGroup.updateActiveTab).not.toHaveBeenCalled();
+    });
+
+    it('holds a guest change made in the booking drawer until the drawer closes, then refreshes the day once', async () => {
+      const { page } = await mount();
+      emit(panelContent(page, 'arrivals'), 'openBookingDetails', 123);
+      await flush(page);
+      const drawer = $(page, 'ir-booking-details-drawer');
+
+      emit(drawer, 'updateRoomGuests', { identifier: 'R-1', guests: [] });
+      await flush(page);
+
+      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledTimes(1);
+      expect(mockLoaders.loadArrivals).toHaveBeenCalledTimes(1);
+
+      emit(drawer, 'bookingDetailsDrawerClosed');
+      await flush(page);
+
+      expect(mockDashboardService.getDayPerformance).toHaveBeenCalledTimes(2);
+      expect(mockLoaders.loadArrivals).toHaveBeenCalledTimes(2);
     });
 
     it.each(['resetExposedCancellationDueAmount', 'updateRoomGuests'])('refreshes the day on %s and stops it there', async eventName => {

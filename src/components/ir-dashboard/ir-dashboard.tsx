@@ -144,6 +144,9 @@ export class IrDashboard {
   private dashboardService = new DashboardService();
 
   private paymentFolioRef: HTMLIrPaymentFolioElement;
+  private drawerRef: HTMLIrBookingDetailsDrawerElement;
+  /** Set when the booking open in the drawer was changed; closing the drawer then reloads the day. */
+  private isBookingChanged = false;
   /** Guards against out-of-order responses when the day changes quickly. */
   private loadSeq = 0;
   /** `loadSeq` each tab was last fetched under, so a tab is fetched at most once per load (background prefetch or show). */
@@ -286,10 +289,37 @@ export class IrDashboard {
     this.reloadAfterChange(e);
   }
 
+  @Listen('resetBookingEvt')
+  handleResetBooking(e: CustomEvent) {
+    // Booking details refreshes itself on this; the dashboard only notes the change for when the drawer closes.
+    if (this.isFromDrawer(e)) {
+      this.isBookingChanged = true;
+    }
+  }
+
   private reloadAfterChange(e: CustomEvent) {
     e.stopImmediatePropagation();
     e.stopPropagation();
+    // A change made in the booking drawer waits for it to close, so the day reloads once rather than under the user.
+    if (this.isFromDrawer(e)) {
+      this.isBookingChanged = true;
+      return;
+    }
     this.loadDay();
+  }
+
+  private isFromDrawer(e: Event) {
+    return !!this.drawerRef && e.composedPath().includes(this.drawerRef);
+  }
+
+  private handleDrawerClosed() {
+    this.bookingNumber = null;
+    this.checkoutRoomIdentifier = null;
+    // Only a booking changed while the drawer was open can have moved the day's figures.
+    if (this.isBookingChanged) {
+      this.isBookingChanged = false;
+      this.loadDay();
+    }
   }
 
   private scheduleFitToPage = () => {
@@ -870,11 +900,8 @@ export class IrDashboard {
             checkoutRoomIdentifier={this.checkoutRoomIdentifier}
             ticket={this.ticket}
             language={this.language}
-            onBookingDetailsDrawerClosed={() => {
-              this.bookingNumber = null;
-              this.checkoutRoomIdentifier = null;
-              this.loadDay();
-            }}
+            ref={el => (this.drawerRef = el)}
+            onBookingDetailsDrawerClosed={() => this.handleDrawerClosed()}
           ></ir-booking-details-drawer>,
           <ir-payment-folio
             style={{ height: 'auto' }}

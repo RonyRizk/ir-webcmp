@@ -348,10 +348,10 @@ export class IglCalBody {
           this.cancelSelectionWithConflictToast(t('Lcz_BlockedDatesBetweenSelectedDates', { fallback: 'Selection cancelled. These dates are blocked.' }));
           return;
         }
-        if (this.hasUnavailableCellBetween(roomId, startValue, endValue)) {
-          this.cancelSelectionWithConflictToast(t('Lcz_UnavailableDatesBetweenSelectedDates', { fallback: 'Selection cancelled. These dates are not available.' }));
-          return;
-        }
+        // if (this.hasUnavailableCellBetween(roomId, startValue, endValue)) {
+        //   this.cancelSelectionWithConflictToast(t('Lcz_UnavailableDatesBetweenSelectedDates', { fallback: 'Selection cancelled. These dates are not available.' }));
+        //   return;
+        // }
         if (this.hasDayUseBookingBetween(roomId, startValue, endValue)) {
           this.cancelSelectionWithConflictToast(
             t('Lcz_DayUseBookingBetweenSelectedDates', { fallback: 'Selection cancelled. A day-use booking already exists within the selected dates.' }),
@@ -897,19 +897,19 @@ export class IglCalBody {
    * shape as `hasDayUseBookingBetween`; reuses the existing `isCellDisabled` cache so no new
    * per-day data structure is needed.
    */
-  private hasUnavailableCellBetween(roomId: number, startValue: string, endValue: string): boolean {
-    const start = moment(startValue, 'YYYY-MM-DD');
-    const end = moment(endValue, 'YYYY-MM-DD');
-    const [rangeStart, rangeEnd] = start.isBefore(end) ? [start, end] : [end, start];
-    const cursor = rangeStart.clone().add(1, 'days');
-    while (cursor.isBefore(rangeEnd, 'day')) {
-      if (this.isCellDisabled(roomId, cursor.format('YYYY-MM-DD'))) {
-        return true;
-      }
-      cursor.add(1, 'days');
-    }
-    return false;
-  }
+  // private hasUnavailableCellBetween(roomId: number, startValue: string, endValue: string): boolean {
+  //   const start = moment(startValue, 'YYYY-MM-DD');
+  //   const end = moment(endValue, 'YYYY-MM-DD');
+  //   const [rangeStart, rangeEnd] = start.isBefore(end) ? [start, end] : [end, start];
+  //   const cursor = rangeStart.clone().add(1, 'days');
+  //   while (cursor.isBefore(rangeEnd, 'day')) {
+  //     if (this.isCellDisabled(roomId, cursor.format('YYYY-MM-DD'))) {
+  //       return true;
+  //     }
+  //     cursor.add(1, 'days');
+  //   }
+  //   return false;
+  // }
   render() {
     const roomTopOffsets = this.getRoomTopOffsets();
     this.lastRenderedRoomTops = roomTopOffsets;
