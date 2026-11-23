@@ -177,7 +177,7 @@ export class IrAgents {
   }
   private async handleToggleAgentStatus(agent: Agent) {
     try {
-      await this.agentsService.handleExposedAgent({ agent });
+      await this.agentsService.handleExposedAgent({ agent }, { skipValidation: true });
       this.upsertAgent();
       showToast({
         type: 'success',

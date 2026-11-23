@@ -11,11 +11,15 @@ import { IssueInvoiceProps } from '@/services/booking-service/types';
 import calendar_data from '@/stores/calendar-data';
 import axios from 'axios';
 import { GuestDocumentPreviewRequest } from '@/components/ir-fiscal-documents/ir-guest-document-preview/types';
-import { FdTypes, InOut } from '@/types/enums';
+import { FdTypes, InOut, PayTypes } from '@/types/enums';
 import { _formatTime } from '@/components/ir-booking-details/functions';
 import { formatDate } from '@/utils/date';
 import { LocaleController } from '@/services/locale/locale.controller';
 import { t } from '@/services/locale/t';
+
+/** Booking payments that are invoiced as their own line. Each needs a label in `paymentLabel`. */
+const INVOICED_PAYMENT_TYPES = new Set<string>([PayTypes.CancellationPenalty, PayTypes.Discount, PayTypes.CancellationAdjustment]);
+
 @Component({
   tag: 'ir-invoice-form',
   styleUrl: 'ir-invoice-form.css',
@@ -453,7 +457,26 @@ export class IrInvoiceForm {
       this.viewMode === 'proforma'
         ? items.filter(item => !this.alreadyInvoicedItemKeys.has(this.getSelectableKey(item))).map(item => this.getSelectableKey(item))
         : items.filter(item => item.is_invoiceable && item.reason?.code !== '001').map(item => this.getSelectableKey(item));
-    this.syncSelectedItems(new Set(keysToSelect));
+    // Never pre-select an item the user can't see: it would be invoiced with no way to untick it.
+    const displayedKeys = this.getDisplayedKeys();
+    this.syncSelectedItems(new Set(keysToSelect.filter(key => displayedKeys.has(key))));
+  }
+
+  /**
+   * The keys of every booking entity the form renders a checkbox for. Mirrors the lookups in
+   * `renderRooms`, `renderPickup`, the extra-services list and `renderPaymentItems`.
+   */
+  private getDisplayedKeys() {
+    const keys = new Set<number>();
+    (this.booking?.rooms ?? []).forEach(room => keys.add(room.system_id));
+    keys.add(this.booking?.pickup_info?.['system_id']);
+    (this.booking?.extra_services ?? []).forEach(extra => keys.add(extra.system_id));
+    (this.booking?.financial?.payments ?? []).forEach(payment => {
+      if (INVOICED_PAYMENT_TYPES.has(payment.payment_type?.code)) {
+        keys.add(payment.system_id);
+      }
+    });
+    return keys;
   }
 
   /**
@@ -932,22 +955,44 @@ export class IrInvoiceForm {
   }
 
   /**
-   * Renders the cancellation penalty checkbox when the booking contains one.
+   * Payment types that are invoiced as their own line, with the label each row shows.
    */
-  private renderCancellationPenalty() {
-    const cancellationPenalty = this.booking.financial.payments?.find(p => p.payment_type?.code === '013');
-    if (!cancellationPenalty) {
-      return null;
+  private paymentLabel(code: string): string | null {
+    switch (code) {
+      case PayTypes.CancellationPenalty:
+        return t('Lcz_CancellationPenalty', { fallback: 'Cancellation penalty' });
+      case PayTypes.Discount:
+        return t('Lcz_Discount', { fallback: 'Discount' });
+      case PayTypes.CancellationAdjustment:
+        return t('Lcz_CancellationAdjustment', { fallback: 'Cancellation adjustment' });
+      default:
+        return null;
     }
-    const sysId = cancellationPenalty?.system_id;
-    if (!this.invoicableKey.has(sysId)) {
-      return null;
-    }
-    const item = this.invoicableKey.get(sysId);
+  }
+
+  /**
+   * Renders a checkbox for every invoiceable booking payment (cancellation penalty, discount, …).
+   * Credits (`operation === 'CR'`) are shown as negative because they reduce the invoice total;
+   * the API returns them as positive amounts.
+   */
+  private renderPaymentItems() {
+    return (this.booking.financial?.payments ?? []).map(payment => {
+      const sysId = payment.system_id;
+      if (!INVOICED_PAYMENT_TYPES.has(payment.payment_type?.code) || !this.invoicableKey.has(sysId)) {
+        return null;
+      }
+      const label = this.paymentLabel(payment.payment_type.code);
+      const item = this.invoicableKey.get(sysId);
+      const amount = payment.payment_type?.operation === 'CR' ? -Math.abs(item.amount) : item.amount;
+      return this.renderPaymentItem({ sysId, label, date: payment.date, amount });
+    });
+  }
+
+  private renderPaymentItem({ sysId, label, date, amount }: { sysId: number; label: string; date: string; amount: number }) {
     const isSelected = this.isSelected([sysId]);
     const isDisabled = this.isDisabled([sysId]);
     return (
-      <div class="ir-invoice__service">
+      <div class="ir-invoice__service" key={sysId}>
         <wa-checkbox
           disabled={isDisabled}
           size="s"
@@ -961,10 +1006,10 @@ export class IrInvoiceForm {
         >
           <div class="ir-invoice__room-checkbox-container">
             <div class={'ir-invoice__room-info'}>
-              <span>{t('Lcz_CancellationPenalty', { fallback: 'Cancellation penalty' })}</span>
-              {this.getDateView(cancellationPenalty.date, null)}
+              <span>{label}</span>
+              {this.getDateView(date, null)}
             </div>
-            {this.renderPriceColumn(item.amount, sysId)}
+            {this.renderPriceColumn(amount, sysId)}
           </div>
         </wa-checkbox>
       </div>
@@ -1089,7 +1134,7 @@ export class IrInvoiceForm {
                     </div>
                   );
                 })}
-                {this.renderCancellationPenalty()}
+                {this.renderPaymentItems()}
               </div>
             </div>
           )}

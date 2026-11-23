@@ -27,8 +27,13 @@ export class AgentsService {
     }
     return data.My_Result;
   }
-  public async handleExposedAgent(props: HandleExposedAgentProps) {
-    const payload = HandleExposedAgentPropsSchema.parse(props);
+  /**
+   * Creates or updates an agent.
+   * Pass `skipValidation` for partial updates of an already-persisted agent (e.g. toggling `is_active`
+   * from the table), where the stored record may not satisfy the editor form's schema.
+   */
+  public async handleExposedAgent(props: HandleExposedAgentProps, { skipValidation = false }: { skipValidation?: boolean } = {}) {
+    const payload = skipValidation ? props : HandleExposedAgentPropsSchema.parse(props);
     const { data } = await axios.post('/Handle_Exposed_Agent', payload);
     if (data.ExceptionMsg !== '') {
       throw new Error(data.ExceptionMsg);
