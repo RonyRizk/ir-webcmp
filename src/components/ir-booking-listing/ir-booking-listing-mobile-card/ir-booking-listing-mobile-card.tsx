@@ -2,6 +2,7 @@ import { IrActionButton } from '@/components/table-cells/booking/ir-actions-cell
 import { Booking } from '@/models/booking.dto';
 import booking_listing from '@/stores/booking_listing.store';
 import { getPrivateNote } from '@/utils/booking';
+import { isBookingModified } from '@/utils/utils';
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { t } from '@/services/locale/t';
 
@@ -13,7 +14,6 @@ import { t } from '@/services/locale/t';
 export class IrBookingListingMobileCard {
   @Prop() booking: Booking;
   @Prop() totalPersons?: number;
-  @Prop() lastManipulation?: Booking['ota_manipulations'] extends Array<infer T> ? T : never;
   @Prop() extraServicesLabel?: string;
 
   @Event() irBookingCardAction: EventEmitter<{ action: IrActionButton; booking: Booking }>;
@@ -44,6 +44,7 @@ export class IrBookingListingMobileCard {
     }
 
     const identifier = `${this.booking.booking_nbr}`;
+    const { modified, lastManipulation } = isBookingModified(this.booking);
 
     return (
       <wa-card>
@@ -55,9 +56,8 @@ export class IrBookingListingMobileCard {
             bookingNumber={this.booking.booking_nbr}
           ></ir-booking-number-cell>
           <ir-status-activity-cell
-            lastManipulation={this.lastManipulation}
-            showManipulationBadge={!!this.lastManipulation}
-            showModifiedBadge={!this.lastManipulation && this.booking.events?.length > 0 && this.booking.events[0].type.toLowerCase() === 'modified'}
+            lastManipulation={lastManipulation}
+            showModifiedBadge={modified}
             status={this.booking.status}
             isRequestToCancel={this.booking.is_requested_to_cancel}
             bookingNumber={this.booking.booking_nbr}

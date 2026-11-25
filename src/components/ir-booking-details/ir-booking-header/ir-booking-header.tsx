@@ -30,6 +30,7 @@ export class IrBookingHeader {
 
   @State() bookingStatus: string | null = null;
   @State() currentDialogStatus: BookingDetailsDialogEvents;
+  @State() isEventsLogOpen: boolean = false;
 
   @Prop() booking: Booking;
   @Prop() hasReceipt: boolean;
@@ -95,8 +96,6 @@ export class IrBookingHeader {
     switch (this.currentDialogStatus) {
       case 'pms':
         return <ir-pms-logs bookingNumber={this.booking.booking_nbr}></ir-pms-logs>;
-      case 'events-log':
-        return <ir-events-log booking={this.booking} bookingNumber={this.booking.booking_nbr}></ir-events-log>;
     }
   }
   private get initials() {
@@ -293,7 +292,7 @@ export class IrBookingHeader {
               onClickHandler={e => {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
-                this.openDialog({ type: 'events-log' });
+                this.isEventsLogOpen = true;
               }}
               appearance={'outlined'}
               class="booking-header__stretched-btn"
@@ -371,8 +370,7 @@ export class IrBookingHeader {
           onIrDialogHide={_ => {
             this.currentDialogStatus = null;
           }}
-          label={this.currentDialogStatus === 'pms' ? t('Lcz_PMS_Logs') : t('Lcz_EventsLog')}
-          style={this.currentDialogStatus === 'events-log' && { '--ir-dialog-max-width': 'max-content' }}
+          label={t('Lcz_PMS_Logs')}
           ref={el => (this.dialogRef = el)}
         >
           {this.renderDialogBody()}
@@ -413,6 +411,15 @@ export class IrBookingHeader {
             </ir-custom-button>
           </div>
         </ir-dialog>
+        <ir-events-log-drawer
+          open={this.isEventsLogOpen}
+          events={this.booking.events}
+          onEventsLogDrawerClosed={e => {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.isEventsLogOpen = false;
+          }}
+        ></ir-events-log-drawer>
         <ir-booking-source-editor-dialog booking={this.booking} ref={el => (this.bookingSourceEditor = el)}></ir-booking-source-editor-dialog>
       </div>
     );

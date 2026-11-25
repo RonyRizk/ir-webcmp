@@ -247,13 +247,10 @@ export class IrBookingEditorHeader {
         return moment(this.booking.from_date, 'YYYY-MM-DD').add(-2, 'weeks').format('YYYY-MM-DD');
       case 'ADD_ROOM':
         return this.booking?.from_date;
-      case 'PLUS_BOOKING':
-        if (this.checkIn && this.isBlockConversion) return this.checkIn;
-        return today.add(-1, 'months').format('YYYY-MM-DD');
       case 'SPLIT_BOOKING':
       default:
         if (this.checkIn && this.isBlockConversion) return this.checkIn;
-        return today.add(-1, 'days').format('YYYY-MM-DD');
+        return today.add(-1, 'month').format('YYYY-MM-DD');
     }
   }
 

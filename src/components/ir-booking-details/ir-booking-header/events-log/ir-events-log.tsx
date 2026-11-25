@@ -1,9 +1,10 @@
-import { isRequestPending } from '@/stores/ir-interceptor.store';
-import { Component, Fragment, Prop, State, h } from '@stencil/core';
-import { Booking, ExposedBookingEvent } from '@/models/booking.dto';
+import { Component, Prop, h } from '@stencil/core';
+import { ExposedBookingEvent } from '@/models/booking.dto';
 import { t } from '@/services/locale/t';
 import { formatDate } from '@/utils/date';
 import { formatNumber } from '@/utils/number';
+
+const pad = (n: number) => formatNumber(n, { minimumIntegerDigits: 2, useGrouping: false });
 
 @Component({
   tag: 'ir-events-log',
@@ -11,58 +12,40 @@ import { formatNumber } from '@/utils/number';
   scoped: true,
 })
 export class IrEventsLog {
-  @Prop() bookingNumber: string;
-  @Prop() booking: Booking;
-
-  @State() bookingEvents: ExposedBookingEvent[];
-
-  componentWillLoad() {
-    this.init();
-  }
-
-  private async init() {
-    try {
-      this.bookingEvents = this.booking.events;
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  /** Booking events, rendered in the order received. */
+  @Prop() events: ExposedBookingEvent[] = [];
 
   render() {
+    if (!this.events?.length) {
+      return <ir-empty-state class="events-log__empty"></ir-empty-state>;
+    }
     return (
-      <div class="">
-        {isRequestPending('/Get_Exposed_Booking_Events') ? (
-          <div class={'d-flex align-items-center justify-content-center dialog-container-height'}>
-            <ir-spinner></ir-spinner>
-          </div>
-        ) : (
-          <Fragment>
-            <table class=" dialog-container-height">
-              <thead class="sr-only">
-                <tr>
-                  <th>{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
-                  <th>{t('Lcz_User', { fallback: 'user' })}</th>
-                  <th>{t('Lcz_Status', { fallback: 'Status' })}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.bookingEvents?.map(e => (
-                  <tr key={e.id} class="pb-1">
-                    <td class="event-row dates-row">
-                      <span>{formatDate(e.date, 'MMM DD, YYYY')}</span>
-                      <span>
-                        {formatNumber(e.hour, { minimumIntegerDigits: 2, useGrouping: false })}:{formatNumber(e.minute, { minimumIntegerDigits: 2, useGrouping: false })}:
-                        {formatNumber(e.second, { minimumIntegerDigits: 2, useGrouping: false })}
-                      </span>
-                    </td>
-                    <td class="ir-ps-3 event-row ">{e.type}</td>
-                    <td class="ir-ps-1 event-row ">{e.user}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Fragment>
-        )}
+      <div class="events-log">
+        <table class="events-log__table">
+          <thead class="sr-only">
+            <tr>
+              <th scope="col">{t('Lcz_DateLabel', { fallback: 'Date' })}</th>
+              <th scope="col">{t('Lcz_Status', { fallback: 'Status' })}</th>
+              <th scope="col">{t('Lcz_User', { fallback: 'User' })}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.events.map(e => (
+              <tr key={e.id} class="events-log__row" data-testid="events-log-entry">
+                <td class="events-log__cell events-log__cell--when">
+                  <span class="events-log__date">{formatDate(e.date, 'MMM DD, YYYY')}</span>
+                  <span class="events-log__time">
+                    {pad(e.hour)}:{pad(e.minute)}:{pad(e.second)}
+                  </span>
+                </td>
+                <td class="events-log__cell events-log__cell--event">
+                  <span class="events-log__event">{e.type}</span>
+                </td>
+                <td class="events-log__cell events-log__cell--user">{e.user}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }

@@ -8,6 +8,8 @@ import {
   GetSetupEntryByCodeParamsSchema,
   SetupEntrySchema,
   ZExposedLanguagesSchema,
+  ExportSetupEntriesToCSVParamsSchema,
+  type ExportSetupEntriesToCSVParams,
   type EditSetupParams,
   type EditSetupManyParams,
   type GetSetupEntryByCodeParams,
@@ -177,5 +179,9 @@ export class SetupService {
    */
   public getDuplicatedSetupEntriesAcrossTables(): Promise<DuplicatedSetupEntriesAcrossTables[]> {
     return this.request('/Get_Duplicated_Setup_Entries_Across_Tables');
+  }
+  public exportSetupEntriesToCSV(params: ExportSetupEntriesToCSVParams): Promise<string> {
+    const payload = ExportSetupEntriesToCSVParamsSchema.parse(params);
+    return this.request<string>('/Export_Setup_Entries_To_CSV', payload);
   }
 }

@@ -5,8 +5,5 @@
 }
 .status-activity__modified {
   color: var(--wa-color-danger-fill-loud) !important;
-}
-.status-activity__modified,
-.status-activity__manipulation {
   font-size: 0.875rem;
 }

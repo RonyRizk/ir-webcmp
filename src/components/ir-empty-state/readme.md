@@ -40,6 +40,7 @@
  - [ir-departures-table](../ir-departures/ir-departures-table)
  - [ir-dp-report-chart](../ir-dp-report/ir-dp-report-chart)
  - [ir-dp-report-table](../ir-dp-report/ir-dp-report-table)
+ - [ir-events-log](../ir-booking-details/ir-booking-header/events-log)
  - [ir-extra-services](../ir-booking-details/ir-extra-services)
  - [ir-extra-services-settings](../ir-extra-services-settings)
  - [ir-extra-services-table](../ir-extra-services-settings/ir-extra-services-table)
@@ -82,6 +83,7 @@ graph TD;
   ir-departures-table --> ir-empty-state
   ir-dp-report-chart --> ir-empty-state
   ir-dp-report-table --> ir-empty-state
+  ir-events-log --> ir-empty-state
   ir-extra-services --> ir-empty-state
   ir-extra-services-settings --> ir-empty-state
   ir-extra-services-table --> ir-empty-state

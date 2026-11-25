@@ -7,14 +7,13 @@
 
 ## Properties
 
-| Property                | Attribute                 | Description | Type                                                            | Default     |
-| ----------------------- | ------------------------- | ----------- | --------------------------------------------------------------- | ----------- |
-| `bookingNumber`         | `booking-number`          |             | `string`                                                        | `undefined` |
-| `isRequestToCancel`     | `is-request-to-cancel`    |             | `boolean`                                                       | `undefined` |
-| `lastManipulation`      | --                        |             | `{ user: string; date: string; hour: string; minute: string; }` | `undefined` |
-| `showManipulationBadge` | `show-manipulation-badge` |             | `boolean`                                                       | `undefined` |
-| `showModifiedBadge`     | `show-modified-badge`     |             | `boolean`                                                       | `undefined` |
-| `status`                | --                        |             | `Status`                                                        | `undefined` |
+| Property            | Attribute              | Description                                                                             | Type                                                            | Default     |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------- |
+| `bookingNumber`     | `booking-number`       |                                                                                         | `string`                                                        | `undefined` |
+| `isRequestToCancel` | `is-request-to-cancel` |                                                                                         | `boolean`                                                       | `undefined` |
+| `lastManipulation`  | --                     | Pass `lastManipulation` from `isBookingModified()`; only used for the badge's tooltip.  | `{ user: string; date: string; hour: string; minute: string; }` | `undefined` |
+| `showModifiedBadge` | `show-modified-badge`  | Pass `modified` from `isBookingModified()` — the single source of truth for this badge. | `boolean`                                                       | `undefined` |
+| `status`            | --                     |                                                                                         | `Status`                                                        | `undefined` |
 
 
 ## Dependencies

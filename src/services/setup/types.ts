@@ -196,3 +196,8 @@ export const ZDuplicatedSetupEntriesAcrossTablesSchema = z.object({
 export type Entry = z.infer<typeof ZEntrySchema>;
 
 export type DuplicatedSetupEntriesAcrossTables = z.infer<typeof ZDuplicatedSetupEntriesAcrossTablesSchema>;
+
+export const ExportSetupEntriesToCSVParamsSchema = z.object({
+  language: z.string(),
+});
+export type ExportSetupEntriesToCSVParams = z.infer<typeof ExportSetupEntriesToCSVParamsSchema>;

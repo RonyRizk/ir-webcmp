@@ -487,6 +487,7 @@ export class IrBookingDetails {
         localeReady,
         this.bookingService.getCountries(LocaleController.language),
         this.bookingService.getExposedBooking({
+          is_calculate_totals: true,
           booking_nbr: this.bookingNumber,
           language: LocaleController.language,
           include_dp_pricing: true,
@@ -617,7 +618,12 @@ export class IrBookingDetails {
   private async resetBooking() {
     try {
       this.isLoading = true;
-      const booking = await this.bookingService.getExposedBooking({ booking_nbr: this.bookingNumber, language: LocaleController.language, include_dp_pricing: true });
+      const booking = await this.bookingService.getExposedBooking({
+        is_calculate_totals: true,
+        booking_nbr: this.bookingNumber,
+        language: LocaleController.language,
+        include_dp_pricing: true,
+      });
       this.splitIndex = buildSplitIndex(booking.rooms);
       await this.loadAgentAndFolio(booking);
       this.booking = { ...booking };

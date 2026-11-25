@@ -7,7 +7,7 @@ export type OpenSidebarEvent<T> = {
   payload?: T;
 };
 //Dialog
-export type BookingDetailsDialogEvents = 'pms' | 'events-log';
+export type BookingDetailsDialogEvents = 'pms';
 export type OpenDialogEvent = {
   type: BookingDetailsDialogEvents;
   payload?: unknown;

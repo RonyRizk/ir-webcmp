@@ -164,7 +164,6 @@ export class IrBookingListingTable {
         <td class="text-center">
           <ir-status-activity-cell
             lastManipulation={lastManipulation}
-            showManipulationBadge={!!lastManipulation}
             showModifiedBadge={modified}
             status={booking.status}
             isRequestToCancel={booking.is_requested_to_cancel}
@@ -243,13 +242,11 @@ export class IrBookingListingTable {
           {booking_listing.bookings.map(booking => {
             const rowKey = `mobile--${booking.booking_nbr}`;
             const totalPersons = this.calculateTotalPersons(booking);
-            const lastManipulation = booking.ota_manipulations ? booking.ota_manipulations[booking.ota_manipulations.length - 1] : null;
             return (
               <ir-booking-listing-mobile-card
                 key={rowKey}
                 booking={booking}
                 totalPersons={totalPersons}
-                lastManipulation={lastManipulation}
                 extraServicesLabel={t('Lcz_ExtraServicesTitle', { fallback: 'Extra Services' })}
                 onIrBookingCardAction={event => {
                   event.stopImmediatePropagation();

@@ -42,7 +42,6 @@
  - [ir-clone-rates](../../ir-clone-rates)
  - [ir-dp-report-chart](../../ir-dp-report/ir-dp-report-chart)
  - [ir-dp-report-table](../../ir-dp-report/ir-dp-report-table)
- - [ir-events-log](../../ir-booking-details/ir-booking-header/events-log)
  - [ir-fiscal-documents-table](../../ir-fiscal-documents/ir-fiscal-documents-table)
  - [ir-ghs-candidate-table](../../ir-ghs-onboarding)
  - [ir-guest-billing](../../ir-billing/ir-guest-billing)
@@ -86,7 +85,6 @@ graph TD;
   ir-clone-rates --> ir-spinner
   ir-dp-report-chart --> ir-spinner
   ir-dp-report-table --> ir-spinner
-  ir-events-log --> ir-spinner
   ir-fiscal-documents-table --> ir-spinner
   ir-ghs-candidate-table --> ir-spinner
   ir-guest-billing --> ir-spinner

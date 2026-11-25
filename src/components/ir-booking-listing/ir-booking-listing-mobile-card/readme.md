@@ -7,12 +7,11 @@
 
 ## Properties
 
-| Property             | Attribute              | Description | Type                                                            | Default     |
-| -------------------- | ---------------------- | ----------- | --------------------------------------------------------------- | ----------- |
-| `booking`            | --                     |             | `Booking`                                                       | `undefined` |
-| `extraServicesLabel` | `extra-services-label` |             | `string`                                                        | `undefined` |
-| `lastManipulation`   | --                     |             | `{ user: string; date: string; hour: string; minute: string; }` | `undefined` |
-| `totalPersons`       | `total-persons`        |             | `number`                                                        | `undefined` |
+| Property             | Attribute              | Description | Type      | Default     |
+| -------------------- | ---------------------- | ----------- | --------- | ----------- |
+| `booking`            | --                     |             | `Booking` | `undefined` |
+| `extraServicesLabel` | `extra-services-label` |             | `string`  | `undefined` |
+| `totalPersons`       | `total-persons`        |             | `number`  | `undefined` |
 
 
 ## Events

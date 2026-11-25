@@ -21,7 +21,7 @@ import { DayUseBookings as DayUseBookings1, FolioPayment as FolioPayment1, Guest
 import { DayInfo, MonthInfo, RoomListItem } from "./components/igloo-calendar/igl-cal-header/types";
 import { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components/igloo-calendar/ir-booking-editor/types";
 import { Currency, ICurrency as ICurrency1, IProperty, PhysicalRoom, RatePlan, RoomType, SetupEntries as SetupEntries1 } from "./models/property";
-import { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
+import { Booking, ExposedBookingEvent, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 import { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 import { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
 import { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
@@ -142,7 +142,7 @@ export { DayUseBookings as DayUseBookings1, FolioPayment as FolioPayment1, Guest
 export { DayInfo, MonthInfo, RoomListItem } from "./components/igloo-calendar/igl-cal-header/types";
 export { BlockedDatePayload, BookingEditorMode, BookingStep } from "./components/igloo-calendar/ir-booking-editor/types";
 export { Currency, ICurrency as ICurrency1, IProperty, PhysicalRoom, RatePlan, RoomType, SetupEntries as SetupEntries1 } from "./models/property";
-export { Booking, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
+export { Booking, ExposedBookingEvent, ExtraService, Guest, IBookingPickupInfo, IOtaNotes, IPayment, OTAManipulations, OtaService, PhysicalRoom as PhysicalRoom1, Property, Room, SharedPerson } from "./models/booking.dto";
 export { CleanTaskEvent, HKIssue, IHouseKeepers, Task, THKUser } from "./models/housekeeping";
 export { CalendarAssignedEvent, CalendarUnitPreviewEvent, UnassignedCategory, UnassignedRoomEntry } from "./services/unassigned-units/types";
 export { CalendarSidebarState as CalendarSidebarState1 } from "./components/igloo-calendar/igloo-calendar";
@@ -1805,7 +1805,6 @@ export namespace Components {
     interface IrBookingListingMobileCard {
         "booking": Booking;
         "extraServicesLabel"?: string;
-        "lastManipulation"?: Booking['ota_manipulations'] extends Array<infer T> ? T : never;
         "totalPersons"?: number;
     }
     interface IrBookingListingTable {
@@ -3704,8 +3703,25 @@ export namespace Components {
         "showIcon": boolean;
     }
     interface IrEventsLog {
-        "booking": Booking;
-        "bookingNumber": string;
+        /**
+          * Booking events, rendered in the order received.
+          * @default []
+         */
+        "events": ExposedBookingEvent[];
+    }
+    /**
+     * Side drawer showing a booking's events log (who did what, and when).
+     */
+    interface IrEventsLogDrawer {
+        /**
+          * Booking events, rendered in the order received.
+          * @default []
+         */
+        "events": ExposedBookingEvent[];
+        /**
+          * Controls whether the drawer is open.
+         */
+        "open": boolean;
     }
     interface IrExtraService {
         "agent": Agent;
@@ -6774,8 +6790,13 @@ export namespace Components {
     interface IrStatusActivityCell {
         "bookingNumber": string;
         "isRequestToCancel": boolean;
+        /**
+          * Pass `lastManipulation` from `isBookingModified()`; only used for the badge's tooltip.
+         */
         "lastManipulation": OTAManipulations;
-        "showManipulationBadge": boolean;
+        /**
+          * Pass `modified` from `isBookingModified()` — the single source of truth for this badge.
+         */
         "showModifiedBadge": boolean;
         "status": Booking['status'];
     }
@@ -8480,6 +8501,10 @@ export interface IrDropdownCustomEvent<T> extends CustomEvent<T> {
 export interface IrDropdownItemCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLIrDropdownItemElement;
+}
+export interface IrEventsLogDrawerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLIrEventsLogDrawerElement;
 }
 export interface IrExtraServiceCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -11826,6 +11851,26 @@ declare global {
         prototype: HTMLIrEventsLogElement;
         new (): HTMLIrEventsLogElement;
     };
+    interface HTMLIrEventsLogDrawerElementEventMap {
+        "eventsLogDrawerClosed": { source: Element };
+    }
+    /**
+     * Side drawer showing a booking's events log (who did what, and when).
+     */
+    interface HTMLIrEventsLogDrawerElement extends Components.IrEventsLogDrawer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLIrEventsLogDrawerElementEventMap>(type: K, listener: (this: HTMLIrEventsLogDrawerElement, ev: IrEventsLogDrawerCustomEvent<HTMLIrEventsLogDrawerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLIrEventsLogDrawerElementEventMap>(type: K, listener: (this: HTMLIrEventsLogDrawerElement, ev: IrEventsLogDrawerCustomEvent<HTMLIrEventsLogDrawerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLIrEventsLogDrawerElement: {
+        prototype: HTMLIrEventsLogDrawerElement;
+        new (): HTMLIrEventsLogDrawerElement;
+    };
     interface HTMLIrExtraServiceElementEventMap {
         "editExtraService": ExtraService;
         "resetBookingEvt": null;
@@ -15063,6 +15108,7 @@ declare global {
         "ir-dropdown-item": HTMLIrDropdownItemElement;
         "ir-empty-state": HTMLIrEmptyStateElement;
         "ir-events-log": HTMLIrEventsLogElement;
+        "ir-events-log-drawer": HTMLIrEventsLogDrawerElement;
         "ir-extra-service": HTMLIrExtraServiceElement;
         "ir-extra-service-config": HTMLIrExtraServiceConfigElement;
         "ir-extra-service-config-form": HTMLIrExtraServiceConfigFormElement;
@@ -17024,7 +17070,6 @@ declare namespace LocalJSX {
     interface IrBookingListingMobileCard {
         "booking"?: Booking;
         "extraServicesLabel"?: string;
-        "lastManipulation"?: Booking['ota_manipulations'] extends Array<infer T> ? T : never;
         "onIrBookingCardAction"?: (event: IrBookingListingMobileCardCustomEvent<{ action: IrActionButton; booking: Booking }>) => void;
         "totalPersons"?: number;
     }
@@ -19101,8 +19146,29 @@ declare namespace LocalJSX {
         "showIcon"?: boolean;
     }
     interface IrEventsLog {
-        "booking"?: Booking;
-        "bookingNumber"?: string;
+        /**
+          * Booking events, rendered in the order received.
+          * @default []
+         */
+        "events"?: ExposedBookingEvent[];
+    }
+    /**
+     * Side drawer showing a booking's events log (who did what, and when).
+     */
+    interface IrEventsLogDrawer {
+        /**
+          * Booking events, rendered in the order received.
+          * @default []
+         */
+        "events"?: ExposedBookingEvent[];
+        /**
+          * Emitted when the drawer is dismissed (close button, Escape or light dismiss).
+         */
+        "onEventsLogDrawerClosed"?: (event: IrEventsLogDrawerCustomEvent<{ source: Element }>) => void;
+        /**
+          * Controls whether the drawer is open.
+         */
+        "open"?: boolean;
     }
     interface IrExtraService {
         "agent"?: Agent;
@@ -22441,8 +22507,13 @@ declare namespace LocalJSX {
     interface IrStatusActivityCell {
         "bookingNumber"?: string;
         "isRequestToCancel"?: boolean;
+        /**
+          * Pass `lastManipulation` from `isBookingModified()`; only used for the badge's tooltip.
+         */
         "lastManipulation"?: OTAManipulations;
-        "showManipulationBadge"?: boolean;
+        /**
+          * Pass `modified` from `isBookingModified()` — the single source of truth for this badge.
+         */
         "showModifiedBadge"?: boolean;
         "status"?: Booking['status'];
     }
@@ -24783,8 +24854,8 @@ declare namespace LocalJSX {
         "message": string;
         "showIcon": boolean;
     }
-    interface IrEventsLogAttributes {
-        "bookingNumber": string;
+    interface IrEventsLogDrawerAttributes {
+        "open": boolean;
     }
     interface IrExtraServiceAttributes {
         "bookingNumber": string;
@@ -25681,7 +25752,6 @@ declare namespace LocalJSX {
     interface IrStatusActivityCellAttributes {
         "isRequestToCancel": boolean;
         "showModifiedBadge": boolean;
-        "showManipulationBadge": boolean;
         "bookingNumber": string;
     }
     interface IrSuccessLoaderAttributes {
@@ -26163,7 +26233,8 @@ declare namespace LocalJSX {
         "ir-dropdown": Omit<IrDropdown, keyof IrDropdownAttributes> & { [K in keyof IrDropdown & keyof IrDropdownAttributes]?: IrDropdown[K] } & { [K in keyof IrDropdown & keyof IrDropdownAttributes as `attr:${K}`]?: IrDropdownAttributes[K] } & { [K in keyof IrDropdown & keyof IrDropdownAttributes as `prop:${K}`]?: IrDropdown[K] };
         "ir-dropdown-item": Omit<IrDropdownItem, keyof IrDropdownItemAttributes> & { [K in keyof IrDropdownItem & keyof IrDropdownItemAttributes]?: IrDropdownItem[K] } & { [K in keyof IrDropdownItem & keyof IrDropdownItemAttributes as `attr:${K}`]?: IrDropdownItemAttributes[K] } & { [K in keyof IrDropdownItem & keyof IrDropdownItemAttributes as `prop:${K}`]?: IrDropdownItem[K] } & OneOf<"value", IrDropdownItem["value"], IrDropdownItemAttributes["value"]>;
         "ir-empty-state": Omit<IrEmptyState, keyof IrEmptyStateAttributes> & { [K in keyof IrEmptyState & keyof IrEmptyStateAttributes]?: IrEmptyState[K] } & { [K in keyof IrEmptyState & keyof IrEmptyStateAttributes as `attr:${K}`]?: IrEmptyStateAttributes[K] } & { [K in keyof IrEmptyState & keyof IrEmptyStateAttributes as `prop:${K}`]?: IrEmptyState[K] };
-        "ir-events-log": Omit<IrEventsLog, keyof IrEventsLogAttributes> & { [K in keyof IrEventsLog & keyof IrEventsLogAttributes]?: IrEventsLog[K] } & { [K in keyof IrEventsLog & keyof IrEventsLogAttributes as `attr:${K}`]?: IrEventsLogAttributes[K] } & { [K in keyof IrEventsLog & keyof IrEventsLogAttributes as `prop:${K}`]?: IrEventsLog[K] };
+        "ir-events-log": IrEventsLog;
+        "ir-events-log-drawer": Omit<IrEventsLogDrawer, keyof IrEventsLogDrawerAttributes> & { [K in keyof IrEventsLogDrawer & keyof IrEventsLogDrawerAttributes]?: IrEventsLogDrawer[K] } & { [K in keyof IrEventsLogDrawer & keyof IrEventsLogDrawerAttributes as `attr:${K}`]?: IrEventsLogDrawerAttributes[K] } & { [K in keyof IrEventsLogDrawer & keyof IrEventsLogDrawerAttributes as `prop:${K}`]?: IrEventsLogDrawer[K] };
         "ir-extra-service": Omit<IrExtraService, keyof IrExtraServiceAttributes> & { [K in keyof IrExtraService & keyof IrExtraServiceAttributes]?: IrExtraService[K] } & { [K in keyof IrExtraService & keyof IrExtraServiceAttributes as `attr:${K}`]?: IrExtraServiceAttributes[K] } & { [K in keyof IrExtraService & keyof IrExtraServiceAttributes as `prop:${K}`]?: IrExtraService[K] };
         "ir-extra-service-config": Omit<IrExtraServiceConfig, keyof IrExtraServiceConfigAttributes> & { [K in keyof IrExtraServiceConfig & keyof IrExtraServiceConfigAttributes]?: IrExtraServiceConfig[K] } & { [K in keyof IrExtraServiceConfig & keyof IrExtraServiceConfigAttributes as `attr:${K}`]?: IrExtraServiceConfigAttributes[K] } & { [K in keyof IrExtraServiceConfig & keyof IrExtraServiceConfigAttributes as `prop:${K}`]?: IrExtraServiceConfig[K] };
         "ir-extra-service-config-form": Omit<IrExtraServiceConfigForm, keyof IrExtraServiceConfigFormAttributes> & { [K in keyof IrExtraServiceConfigForm & keyof IrExtraServiceConfigFormAttributes]?: IrExtraServiceConfigForm[K] } & { [K in keyof IrExtraServiceConfigForm & keyof IrExtraServiceConfigFormAttributes as `attr:${K}`]?: IrExtraServiceConfigFormAttributes[K] } & { [K in keyof IrExtraServiceConfigForm & keyof IrExtraServiceConfigFormAttributes as `prop:${K}`]?: IrExtraServiceConfigForm[K] };
@@ -26735,6 +26806,10 @@ declare module "@stencil/core" {
             "ir-dropdown-item": LocalJSX.IntrinsicElements["ir-dropdown-item"] & JSXBase.HTMLAttributes<HTMLIrDropdownItemElement>;
             "ir-empty-state": LocalJSX.IntrinsicElements["ir-empty-state"] & JSXBase.HTMLAttributes<HTMLIrEmptyStateElement>;
             "ir-events-log": LocalJSX.IntrinsicElements["ir-events-log"] & JSXBase.HTMLAttributes<HTMLIrEventsLogElement>;
+            /**
+             * Side drawer showing a booking's events log (who did what, and when).
+             */
+            "ir-events-log-drawer": LocalJSX.IntrinsicElements["ir-events-log-drawer"] & JSXBase.HTMLAttributes<HTMLIrEventsLogDrawerElement>;
             "ir-extra-service": LocalJSX.IntrinsicElements["ir-extra-service"] & JSXBase.HTMLAttributes<HTMLIrExtraServiceElement>;
             "ir-extra-service-config": LocalJSX.IntrinsicElements["ir-extra-service-config"] & JSXBase.HTMLAttributes<HTMLIrExtraServiceConfigElement>;
             "ir-extra-service-config-form": LocalJSX.IntrinsicElements["ir-extra-service-config-form"] & JSXBase.HTMLAttributes<HTMLIrExtraServiceConfigFormElement>;

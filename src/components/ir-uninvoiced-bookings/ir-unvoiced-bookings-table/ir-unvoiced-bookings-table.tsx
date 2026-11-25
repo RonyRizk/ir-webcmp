@@ -6,6 +6,7 @@ import uninvoiced_bookings, { setUninvoicedBookingsTablePage, setUninvoicedBooki
 import { formatAmount, formatCount } from '@/utils/number';
 import { UninvoicedBookingRow } from '../types';
 import { t } from '@/services/locale/t';
+import { isBookingModified } from '@/utils/utils';
 
 @Component({
   tag: 'ir-unvoiced-bookings-table',
@@ -92,12 +93,11 @@ export class IrUnvoicedBookingsTable {
       header: t('Lcz_Status', { fallback: 'Status' }),
       cell: info => {
         const booking = info.row.original.raw;
-        const lastManipulation = booking.ota_manipulations ? booking.ota_manipulations[booking.ota_manipulations.length - 1] : null;
+        const { modified, lastManipulation } = isBookingModified(booking);
         return (
           <ir-status-activity-cell
             lastManipulation={lastManipulation}
-            showManipulationBadge={!!lastManipulation}
-            showModifiedBadge={!lastManipulation && booking.events?.length > 0 && booking.events[0].type.toLowerCase() === 'modified'}
+            showModifiedBadge={modified}
             status={booking.status}
             isRequestToCancel={booking.is_requested_to_cancel}
             bookingNumber={booking.booking_nbr}

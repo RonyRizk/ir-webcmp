@@ -163,14 +163,16 @@ graph TD;
   ir-booking-details --> ir-booking-editor-drawer
   ir-booking-details --> ir-fiscal-document-preview
   ir-booking-header --> ir-pms-logs
-  ir-booking-header --> ir-events-log
   ir-booking-header --> ir-custom-button
   ir-booking-header --> ir-booking-status-tag
   ir-booking-header --> ir-dialog
+  ir-booking-header --> ir-events-log-drawer
   ir-booking-header --> ir-booking-source-editor-dialog
   ir-pms-logs --> ir-spinner
   ir-pms-logs --> ir-custom-button
-  ir-events-log --> ir-spinner
+  ir-events-log-drawer --> ir-drawer
+  ir-events-log-drawer --> ir-events-log
+  ir-events-log --> ir-empty-state
   ir-booking-source-editor-dialog --> ir-dialog
   ir-booking-source-editor-dialog --> ir-booking-source-editor-form
   ir-booking-source-editor-dialog --> ir-custom-button

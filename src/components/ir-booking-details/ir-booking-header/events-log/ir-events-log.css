@@ -2,50 +2,90 @@
   display: block;
 }
 
-.beta {
-  background: var(--red);
-  color: white;
-  padding: 0.2rem 0.3rem;
-  font-size: 12px;
-  border-radius: 4px;
-  margin: 0;
-}
-.event-row {
-  padding-bottom: 0.5rem;
-}
-.list-title {
-  margin: 0;
-  padding: 0;
-  font-size: 14px;
-  font-weight: bold;
-  width: fit-content;
-}
-.list-item {
-  margin: 0;
-  padding: 0;
-  font-size: 14px;
-  margin-inline-start: 5px;
-  width: fit-content;
-}
-.list-item.green {
-  color: #629a4c;
-  font-weight: 600;
-}
-.list-item.red {
-  color: #ff4961;
-  font-weight: 600;
-}
-.dates-row {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
+.events-log {
+  width: 100%;
+  /* Safety net for unusually long user names; never triggers with typical data. */
+  overflow-x: auto;
 }
 
-/* Logical replacements for the Bootstrap 4 directional utilities this
-   component used; the injected Bootstrap sheet is LTR-only and cannot mirror. */
-.ir-ps-1 {
-  padding-inline-start: 0.25rem;
+.events-log__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--wa-font-size-s);
+  line-height: var(--wa-line-height-condensed);
+  color: var(--wa-color-text-normal);
 }
-.ir-ps-3 {
-  padding-inline-start: 1rem;
+
+.events-log__cell {
+  padding-block: var(--wa-space-s);
+  padding-inline: var(--wa-space-s);
+  border-block-end: var(--wa-panel-border-width, 1px) solid var(--wa-color-surface-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.events-log__row:last-child .events-log__cell {
+  border-block-end: none;
+}
+
+.events-log__row:hover .events-log__cell {
+  background-color: var(--wa-color-neutral-fill-quiet);
+}
+
+.events-log__cell--when {
+  white-space: nowrap;
+}
+
+.events-log__date {
+  color: var(--wa-color-text-normal);
+}
+
+.events-log__time {
+  margin-inline-start: var(--wa-space-xs);
+  color: var(--wa-color-text-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+.events-log__cell--event {
+  font-weight: var(--wa-font-weight-semibold);
+}
+
+/* Sizes the event column to its longest entry (capped, so long OTA messages wrap).
+   Without this the user column's width: 100% would squeeze it to its narrowest word. */
+.events-log__event {
+  display: block;
+  width: max-content;
+  max-width: var(--events-log-event-max-width, 22rem);
+  overflow-wrap: anywhere;
+}
+
+/* Last column absorbs the spare width, so the user sits right after the event
+   while the table still spans the whole drawer. */
+.events-log__cell--user {
+  width: 100%;
+  color: var(--wa-color-text-quiet);
+  white-space: nowrap;
+}
+
+.events-log__empty {
+  padding-block: var(--wa-space-xl);
+}
+
+/* Small screens: keep the table, compact it, and stack the time under the date to free width. */
+@media (max-width: 575.98px) {
+  .events-log__table {
+    font-size: var(--wa-font-size-xs);
+  }
+  .events-log__cell {
+    padding-block: var(--wa-space-xs);
+    padding-inline: var(--wa-space-2xs);
+  }
+  .events-log__time {
+    display: block;
+    margin-inline-start: 0;
+  }
+  .events-log__event {
+    --events-log-event-max-width: 11rem;
+  }
 }

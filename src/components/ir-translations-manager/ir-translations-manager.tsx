@@ -1,9 +1,11 @@
 import ApiClient from '@/models/ApiClient';
 import { SetupService, type SetupEntry } from '@/services/setup';
-import { showToast } from '@/utils/utils';
+import { downloadFile, showToast } from '@/utils/utils';
+import { InterceptorError } from '@/components/ir-interceptor/InterceptorError';
 import { Component, Host, Prop, State, Watch, h } from '@stencil/core';
 import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, from, map, merge, of, switchMap, tap } from 'rxjs';
 import { type DuplicateSyncPlan, planDuplicateSync } from './duplicate-sync';
+import { exportSetupEntriesCsv } from './export-csv';
 import { getSyncPrompt, narrowSyncPlan } from './sync-policy';
 import { buildEditSetupParams, exposedLanguagesToTranslationLanguages, setupEntryToTranslationEntry } from './setup-mapping';
 import { DuplicateInfo, EntrySavedDetail, TranslationEntry, TranslationLanguage, TranslationTable } from './types';
@@ -60,6 +62,8 @@ export class IrTranslationsManager {
   @State() isLoadingEntries: boolean = false;
   /** True while any write is in flight — guards against overlapping edits. */
   @State() isMutating: boolean = false;
+  /** True while Setup is building a CSV export. */
+  @State() isExporting: boolean = false;
   /** True once a drag reorder is applied locally but not yet persisted. */
   @State() orderDirty: boolean = false;
   /** Table the user picked while an order was still unsaved — held until they resolve the prompt. */
@@ -870,6 +874,21 @@ export class IrTranslationsManager {
     this.search$.next(query);
   }
 
+  /** Exports every setup entry in the picked language. The interceptor already toasts API exceptions, so only other failures are reported here. */
+  private async handleExportCsv(languageCode: string) {
+    this.isExporting = true;
+    try {
+      await exportSetupEntriesCsv(this.setupService, languageCode, downloadFile);
+    } catch (error) {
+      console.error(error);
+      if (!(error instanceof InterceptorError)) {
+        showToast({ type: 'error', title: 'Unable to export CSV' });
+      }
+    } finally {
+      this.isExporting = false;
+    }
+  }
+
   /** The settings dialog only ever reports its state on Save — apply the used-tables filter, pins, and notes visibility together. */
   private handleSaveSettings(payload: { usedTablesOnly: boolean; pinnedCodes: string[]; showNotes: boolean }) {
     this.usedTablesOnly = payload.usedTablesOnly;
@@ -988,6 +1007,18 @@ export class IrTranslationsManager {
             </wa-option>
           ))}
         </wa-select>
+
+        <wa-dropdown onwa-select={(e: CustomEvent<any>) => this.handleExportCsv(e.detail.item.value)}>
+          <ir-custom-button slot="trigger" size="s" appearance="outlined" variant="neutral" withCaret loading={this.isExporting} disabled={this.languages.length === 0}>
+            <wa-icon name="file-csv" slot="start"></wa-icon>
+            Export CSV
+          </ir-custom-button>
+          {this.orderedLanguages.map(language => (
+            <wa-dropdown-item key={language.code} value={language.code}>
+              {language.name}
+            </wa-dropdown-item>
+          ))}
+        </wa-dropdown>
 
         <ir-custom-button class="tm__icon-btn" appearance="outlined" variant="neutral" onClickHandler={() => (this.settingsDialogOpen = true)}>
           <wa-icon name="gear" label="Table settings"></wa-icon>

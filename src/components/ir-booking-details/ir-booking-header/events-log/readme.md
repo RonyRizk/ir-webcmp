@@ -1,33 +1,30 @@
 # ir-events-log
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property        | Attribute        | Description | Type      | Default     |
-| --------------- | ---------------- | ----------- | --------- | ----------- |
-| `booking`       | --               |             | `Booking` | `undefined` |
-| `bookingNumber` | `booking-number` |             | `string`  | `undefined` |
+| Property | Attribute | Description                                     | Type                    | Default |
+| -------- | --------- | ----------------------------------------------- | ----------------------- | ------- |
+| `events` | --        | Booking events, rendered in the order received. | `ExposedBookingEvent[]` | `[]`    |
 
 
 ## Dependencies
 
 ### Used by
 
- - [ir-booking-header](..)
+ - [ir-events-log-drawer](ir-events-log-drawer)
 
 ### Depends on
 
-- [ir-spinner](../../../ui/ir-spinner)
+- [ir-empty-state](../../../ir-empty-state)
 
 ### Graph
 ```mermaid
 graph TD;
-  ir-events-log --> ir-spinner
-  ir-booking-header --> ir-events-log
+  ir-events-log --> ir-empty-state
+  ir-events-log-drawer --> ir-events-log
   style ir-events-log fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
